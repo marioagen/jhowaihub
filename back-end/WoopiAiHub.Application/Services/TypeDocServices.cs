@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -101,7 +101,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public TypeDocPagedResultDto FindAllPaged(TypeDocPagedDataDto typeDocPagedDataDto)
         {
-
             if (typeDocPagedDataDto.Page > 0)
             {
                 var totalList = _typeDocRepository.FindAllPaged(typeDocPagedDataDto);
