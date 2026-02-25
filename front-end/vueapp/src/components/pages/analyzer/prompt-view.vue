@@ -1,15 +1,24 @@
 ﻿<template>
     <!-- Component ModalQuestion -->
-    <modal-question v-if="showModalQuestion" :dataQuiz="quizSelected" @close="closeModal" />
+    <modal-question
+        v-if="showModalQuestion"
+        :dataQuiz="quizSelected"
+        @close="closeModal"
+    />
 </template>
-
 <script>
     import ModalQuestion from "@/components/pages/analyzer/modal-question";
     import api from "@/services/api";
 
     export default {
         name: "PromptView",
-        emits: ["showHistory", "unshiftHistoryList", "pushHistoryList", "showAlertToast", "clearMyInterval"],
+        emits: [
+            "showHistory",
+            "unshiftHistoryList",
+            "pushHistoryList",
+            "showAlertToast",
+            "clearMyInterval",
+        ],
         props: {
             hashDocument: {
                 required: true,
@@ -64,12 +73,15 @@
                     idQuestionnaire: this.quizSelected.id,
                 };
                 let self = this;
-                api.post("/Document/inputQuestionnaire", paramsReq)
+                api.post("/DocumentQuestionnarire/InputQuestionnaire", paramsReq)
                     .then(function (response) {
                         // Handle success
                         self.loadingApplying = false;
                         self.clearMyInterval();
-                        self.alertToast(self.$t("quizzes.questionnaireAppliedSuccessfully"), "toast-success");
+                        self.alertToast(
+                            self.$t("quizzes.questionnaireAppliedSuccessfully"),
+                            "toast-success"
+                        );
                         setTimeout(() => self.$emit("showHistory"), 3000);
                     })
                     .catch(function (e) {
@@ -78,14 +90,26 @@
                         self.loadingApplying = false;
                         self.clearMyInterval();
                         if (e.response && e.response.data === "No Credits to send a Question") {
-                            self.alertToast(self.$t("questions.numberOfQuestionsHasBeenExceeded"), "toast-danger");
+                            self.alertToast(
+                                self.$t("questions.numberOfQuestionsHasBeenExceeded"),
+                                "toast-danger"
+                            );
                         } else if (e.response.status === 404) {
-                            self.alertToast(self.$t("documents.anInconsistencyWasIdentifiedInTheDocument"), "toast-danger");
+                            self.alertToast(
+                                self.$t("documents.anInconsistencyWasIdentifiedInTheDocument"),
+                                "toast-danger"
+                            );
                         } else if (e.response.status === 402) {
-                            self.alertToast(self.$t("quizzes.thereIsNotEnoughCredit"), "toast-warning");
+                            self.alertToast(
+                                self.$t("quizzes.thereIsNotEnoughCredit"),
+                                "toast-warning"
+                            );
                             setTimeout(() => self.$emit("showHistory"), 3000);
                         } else {
-                            self.alertToast(self.$t("quizzes.failedToApplyQuestionnaire"), "toast-danger");
+                            self.alertToast(
+                                self.$t("quizzes.failedToApplyQuestionnaire"),
+                                "toast-danger"
+                            );
                         }
                     })
                     .finally(function () {
@@ -102,7 +126,7 @@
                 };
                 this.input = "";
                 let self = this;
-                api.post("/Document/input/", paramsReq)
+                api.post("/DocumentQuestionnarire/Input/", paramsReq)
                     .then(function (response) {
                         // Handle success
                         if (typeof response.data === "object") {
@@ -111,9 +135,15 @@
                             self.output = response.data;
                         }
                         if (self.historyListOrder == "desc") {
-                            self.$emit("unshiftHistoryList", { input: paramsReq.input, output: self.output });
+                            self.$emit("unshiftHistoryList", {
+                                input: paramsReq.input,
+                                output: self.output,
+                            });
                         } else {
-                            self.$emit("pushHistoryList", { input: paramsReq.input, output: self.output });
+                            self.$emit("pushHistoryList", {
+                                input: paramsReq.input,
+                                output: self.output,
+                            });
                         }
                         self.loadingOutput = false;
                     })
@@ -124,9 +154,14 @@
                         if (e.response.data === "No Credits to send a Question") {
                             self.output = "";
                             self.clearMyInterval();
-                            self.alertToast(self.$t("questions.numberOfQuestionsHasBeenExceeded"), "toast-danger");
+                            self.alertToast(
+                                self.$t("questions.numberOfQuestionsHasBeenExceeded"),
+                                "toast-danger"
+                            );
                         } else if (e.response.status === 404) {
-                            self.output = self.$t("documents.anInconsistencyWasIdentifiedInTheDocument");
+                            self.output = self.$t(
+                                "documents.anInconsistencyWasIdentifiedInTheDocument"
+                            );
                         } else {
                             self.output = self.$t("analyze.failedNoResponse");
                         }
@@ -167,7 +202,6 @@
         unmounted() {},
     };
 </script>
-
 <style scoped>
     .fas,
     .far {

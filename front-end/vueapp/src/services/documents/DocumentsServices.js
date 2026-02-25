@@ -110,7 +110,7 @@ export default {
     },
     async inputDocument(params) {
         return await api
-            .post("/Document/Input/", params)
+            .post("/DocumentQuestionnarire/Input/", params)
             .then((response) => {
                 return response;
             })
@@ -134,7 +134,7 @@ export default {
     },
     async applyQuestionnaire(params) {
         return await api
-            .post("/Document/InputQuestionnaire", params)
+            .post("/DocumentQuestionnarire/InputQuestionnaire", params)
             .then((response) => {
                 return response;
             })
