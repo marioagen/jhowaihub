@@ -121,6 +121,7 @@
 </template>
 <script>
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
+    import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices.js";
     import ModalReprocess from "@/components/pages/analyzer/modal-reprocess";
     import ModalAlert from "@/components/pages/analyzer/modal-alert";
     import LogService from "@/services/log/logService";
@@ -194,7 +195,7 @@
                 this.viewMode = VIEW_MODE_TEXT;
                 if (this.textContent == "") {
                     this.loadingText = true;
-                    DocumentsServices.getOcrText(this.idAnalyzer)
+                    DocumentMetadataServices.getOcrText(this.idAnalyzer)
                         .then((response) => {
                             if (response.error !== undefined) {
                                 this.modalAlertShow = true;
@@ -215,7 +216,7 @@
                 }
             },
             checkOcrAvailability() {
-                DocumentsServices.getOcrText(this.idAnalyzer)
+                DocumentMetadataServices.getOcrText(this.idAnalyzer)
                     .then((response) => {
                         if (response && response.hasOcr) {
                             this.hasOcrText = true;
@@ -253,7 +254,7 @@
                     Embeddings_model_name: "",
                 };
                 this.loadingNormalize = true;
-                DocumentsServices.normalizeDocument(paramsReq)
+                DocumentMetadataServices.normalizeDocument(paramsReq)
                     .then((response) => {
                         if (response.error !== undefined) {
                             window.onbeforeunload = null;
