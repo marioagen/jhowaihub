@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Application.Messaging;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Services.Automation;
@@ -20,6 +20,8 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddSingleton<IServiceCollection, ServiceCollection>();
             services.AddScoped<IDocumentServices, DocumentServices>();
             services.AddScoped<IDocumentHistoryServices, DocumentHistoryServices>();
+            services.AddScoped<IDocumentMetadataServices, DocumentMetadataServices>();
+            services.AddScoped<IDocumentQuestionnaireServices, DocumentQuestionnaireServices>();
             services.AddScoped<IDocumentNormalizedServices, DocumentNormalizedServices>();
             services.AddScoped<IAccountServices, AccountServices>();
             services.AddScoped<ITenantServices, TenantServices>();
