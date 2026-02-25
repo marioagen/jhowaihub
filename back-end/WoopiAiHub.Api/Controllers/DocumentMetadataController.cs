@@ -14,7 +14,6 @@ namespace WoopiAiHub.Api.Controllers
     [ApiController]
     public class DocumentMetadataController : ControllerBase
     {
-        private const string PdfContentType = "application/pdf";
         private readonly IDocumentMetadataServices _documentMetadataServices;
         private readonly IDocumentNormalizedServices _documentNormalizedServices;
         private readonly IDocumentServices _documentServices;

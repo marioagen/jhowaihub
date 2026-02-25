@@ -18,21 +18,15 @@ namespace WoopiAiHub.Api.Controllers
     public class DocumentController : ControllerBase
     {
         private readonly IDocumentServices _documentServices;
-        private readonly IDocumentHistoryServices _documentHistoryServices;
         private readonly ILogger<DocumentController> _logger;
-        private readonly IDocumentNormalizedServices _documentNormalizedServices;
         private const string PdfContentType = "application/pdf";
 
 
         public DocumentController(IDocumentServices documentServices,
-                                  IDocumentHistoryServices documentHistoryServices,
-                                  ILogger<DocumentController> logger,
-                                  IDocumentNormalizedServices documentNormalizedServices)
+                                  ILogger<DocumentController> logger)
         {
             _documentServices = documentServices;
-            _documentHistoryServices = documentHistoryServices;
             _logger = logger;
-            _documentNormalizedServices = documentNormalizedServices;
         }
 
         /// <summary>

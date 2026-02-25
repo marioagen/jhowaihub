@@ -13,17 +13,13 @@ namespace WoopiAiHub.Api.Controllers
     [ApiController]
     public class DocumentQuestionnarireController : ControllerBase
     {
-        private const string PdfContentType = "application/pdf";
-        private readonly IDocumentQuestionnaireServices _documentQuestionnaireServices;
         private readonly IDocumentServices _documentServices;
         private readonly ILogger<DocumentQuestionnarireController> _logger;
 
         public DocumentQuestionnarireController(
-            IDocumentQuestionnaireServices documentQuestionnaireServices,
             IDocumentServices documentServices,
             ILogger<DocumentQuestionnarireController> logger)
         {
-            _documentQuestionnaireServices = documentQuestionnaireServices;
             _documentServices = documentServices;
             _logger = logger;
         }

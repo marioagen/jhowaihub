@@ -14,7 +14,6 @@ namespace WoopiAiHub.Api.Controllers
     [ApiController]
     public class DocumentHistoryController : ControllerBase
     {
-        private const string PdfContentType = "application/pdf";
         private readonly IDocumentHistoryServices _documentHistoryServices;
         private readonly ILogger<DocumentHistoryController> _logger;
 
@@ -25,7 +24,6 @@ namespace WoopiAiHub.Api.Controllers
             _documentHistoryServices = documentHistoryServices;
             _logger = logger;
         }
-
         
         /// <summary>
         /// Receive a id and return the Document history.
