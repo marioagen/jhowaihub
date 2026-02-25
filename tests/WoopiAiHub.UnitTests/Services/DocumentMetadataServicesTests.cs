@@ -56,13 +56,13 @@ namespace WoopiAiHub.UnitTests.Services
         public void FindByIdAnalyze_Fail()
         {
             // Arrange
+            var documentId = DocumentFixture.FindValidDocument().Id;
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns((Document?)null);
-            var document = DocumentFixture.FindValidDocument();
+            documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns((Document)(object)null!);
             var headers = DocumentFixture.FindValidHeadersDto();
 
             // Act / Assert
-            Assert.Throws<ArgumentException>(() => _documentMetadataServices.FindByIdAnalyze(document.Id, headers));
+            Assert.Throws<ArgumentException>(() => _documentMetadataServices.FindByIdAnalyze(documentId, headers));
             documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
         }
 
