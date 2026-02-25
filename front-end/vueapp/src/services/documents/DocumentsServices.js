@@ -48,7 +48,7 @@ export default {
     },
     getDocumentAnalyze(docId) {
         return api
-            .get(`/Document/Analyze/${docId}`)
+            .get(`/DocumentMetadata/Analyze/${docId}`)
             .then((result) => {
                 return result.data;
             })
@@ -74,7 +74,7 @@ export default {
     },
     normalizeDocument(params) {
         return api
-            .post("/Document/Analyze/", params)
+            .post("/DocumentMetadata/Analyze/", params)
             .then((response) => {
                 return response;
             })
@@ -86,7 +86,7 @@ export default {
     },
     getNormalizedDocument(docId) {
         return api
-            .get(`/Document/Normalized/${docId}`)
+            .get(`/DocumentMetadata/Normalized/${docId}`)
             .then((result) => {
                 return result.data;
             })
@@ -98,7 +98,7 @@ export default {
     },
     getOcrText(docId) {
         return api
-            .get(`/Document/OcrText/${docId}`)
+            .get(`/DocumentMetadata/OcrText/${docId}`)
             .then((result) => {
                 return result.data;
             })
@@ -122,7 +122,7 @@ export default {
     },
     async findByIdAnalyze(id) {
         return await api
-            .get(`/Document/Analyze/${id}`)
+            .get(`/DocumentMetadata/Analyze/${id}`)
             .then((response) => {
                 return response;
             })

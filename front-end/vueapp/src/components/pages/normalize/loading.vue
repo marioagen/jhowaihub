@@ -1,12 +1,21 @@
 ﻿<template>
     <main class="flex-shrink-0 overlay">
         <div class="container mb-5">
-            <div class="row justify-content-md-center" style="height: 100%">
+            <div
+                class="row justify-content-md-center"
+                style="height: 100%"
+            >
                 <div class="col-md-auto">
                     <div class="div-center">
                         <div v-if="loading">
-                            <div class="mb-3" style="width: 100%; float: left">
-                                <h5 class="h5-custom-modal" v-html="message"></h5>
+                            <div
+                                class="mb-3"
+                                style="width: 100%; float: left"
+                            >
+                                <h5
+                                    class="h5-custom-modal"
+                                    v-html="message"
+                                ></h5>
                             </div>
                             <div style="text-align: center">
                                 <img
@@ -81,9 +90,10 @@
                                 self.message = self.$t("documents.normalizingTheDocument");
                                 self.normalizeDoc();
                             } else {
-                                self.message = self.$t("documents.documentHasAlreadyBeenStandardizedPreviously", [
-                                    response.data.name,
-                                ]);
+                                self.message = self.$t(
+                                    "documents.documentHasAlreadyBeenStandardizedPreviously",
+                                    [response.data.name]
+                                );
                                 self.redirectToDocument();
                             }
                         }
@@ -107,7 +117,7 @@
                     Embeddings_model_name: this.docData.Embeddings_model_name,
                 };
                 this.loading = true;
-                api.post("/Document/Analyze/", paramsReq)
+                api.post("/DocumentMetadata/Analyze/", paramsReq)
                     .then(function (response) {
                         // Handle success
                         window.onbeforeunload = null;
@@ -165,7 +175,6 @@
         unmounted() {},
     };
 </script>
-
 <style scoped>
     .div-center {
         position: relative;
