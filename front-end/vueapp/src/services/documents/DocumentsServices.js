@@ -146,7 +146,7 @@ export default {
     },
     async getDocumentHistory(id) {
         return await api
-            .get(`/Document/History/${id}`)
+            .get(`/DocumentHistory/${id}`)
             .then((response) => {
                 return response;
             })
@@ -158,7 +158,7 @@ export default {
     },
     async getDocumentQuestionsHistory(id, filters) {
         return await api
-            .get(`/Document/History/${id}/batch`, {
+            .get(`/DocumentHistory/${id}/batch`, {
                 params: filters,
             })
             .then((response) => {

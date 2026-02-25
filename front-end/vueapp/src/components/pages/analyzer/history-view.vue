@@ -1,6 +1,9 @@
 ﻿<template>
     <div class="div-row background-white shadow">
-        <div class="row" style="margin-top: 35px !important">
+        <div
+            class="row"
+            style="margin-top: 35px !important"
+        >
             <div class="col mt-2">
                 <h6 class="mt-0 text-primary">
                     <i
@@ -18,8 +21,15 @@
                         style="margin-left: 4%; cursor: pointer"
                     ></i>
                     {{ $t("documents.historic") }}
-                    <a style="margin-left: 1%" @click="expandSort">
-                        <i class="fas fa-sort" style="color: #0073e6; cursor: pointer" :title="$t('common.order')"></i>
+                    <a
+                        style="margin-left: 1%"
+                        @click="expandSort"
+                    >
+                        <i
+                            class="fas fa-sort"
+                            style="color: #0073e6; cursor: pointer"
+                            :title="$t('common.order')"
+                        ></i>
                     </a>
                     <container class="flex-shrink">
                         <span
@@ -39,11 +49,21 @@
                             @click="confirmationDialog(idAnalyzer)"
                             v-if="historyList.length > 0"
                         >
-                            <i class="fas fa-trash" style="font-size: 0.9em"></i>
+                            <i
+                                class="fas fa-trash"
+                                style="font-size: 0.9em"
+                            ></i>
                         </span>
                     </container>
-                    <span class="dropdown-menu" v-show="isExpandedSort" style="display: block">
-                        <a class="dropdown-item" @click="sortHistoryListAsc">
+                    <span
+                        class="dropdown-menu"
+                        v-show="isExpandedSort"
+                        style="display: block"
+                    >
+                        <a
+                            class="dropdown-item"
+                            @click="sortHistoryListAsc"
+                        >
                             <i
                                 class="fas fa-check"
                                 style="color: #0073e6"
@@ -58,7 +78,10 @@
                             ></i>
                             &nbsp;{{ $t("documents.mostRecent") }}
                         </a>
-                        <a class="dropdown-item" @click="sortHistoryListDesc">
+                        <a
+                            class="dropdown-item"
+                            @click="sortHistoryListDesc"
+                        >
                             <i
                                 class="fas fa-check"
                                 style="color: #0073e6"
@@ -77,23 +100,41 @@
                 </h6>
             </div>
         </div>
-        <div :class="historyList.length == 0 ? 'row mb-2' : 'row'" v-if="loadingHistory">
+        <div
+            :class="historyList.length == 0 ? 'row mb-2' : 'row'"
+            v-if="loadingHistory"
+        >
             <span>
                 &nbsp;&nbsp;&nbsp;
                 <i class="fas fa-sync-alt fa-spin"></i>
                 &nbsp;{{ $t("common.loading") }}..
             </span>
         </div>
-        <div class="row mb-2" v-if="!loadingHistory && historyList.length == 0">
+        <div
+            class="row mb-2"
+            v-if="!loadingHistory && historyList.length == 0"
+        >
             <span>&nbsp;&nbsp;&nbsp;{{ $t("documents.queryWithoutHistory") }}.</span>
         </div>
-        <div class="div-row-overflow" ref="historyDiv">
-            <div class="row" v-for="(history, index) in historyList" :key="index">
+        <div
+            class="div-row-overflow"
+            ref="historyDiv"
+        >
+            <div
+                class="row"
+                v-for="(history, index) in historyList"
+                :key="index"
+            >
                 <div class="col-md-12">
                     <div class="div-card">
                         <div class="card shadow">
                             <div class="card-body">
-                                <h5 class="card-title" style="margin-bottom: 8px">{{ history.input }}</h5>
+                                <h5
+                                    class="card-title"
+                                    style="margin-bottom: 8px"
+                                >
+                                    {{ history.input }}
+                                </h5>
                                 <div class="card-subtitle mb-1 text-primary">
                                     <div style="float: right; margin-left: 2%">
                                         <a @click="copyToClipboard(history.output)">
@@ -141,10 +182,16 @@
                                         </a>
                                     </div>
                                 </div>
-                                <div v-if="history.isEdited == true" class="text-primary edited">
+                                <div
+                                    v-if="history.isEdited == true"
+                                    class="text-primary edited"
+                                >
                                     {{ $t("common.edited") }}
                                 </div>
-                                <div v-if="history.isEditedFail == true" class="text-danger fail">
+                                <div
+                                    v-if="history.isEditedFail == true"
+                                    class="text-danger fail"
+                                >
                                     {{ $t("common.editedFail") }}
                                 </div>
                             </div>
@@ -167,7 +214,6 @@
         @close="closeModal"
     />
 </template>
-
 <script>
     import date from "@/helpers/date";
     import api from "@/services/api";
@@ -246,7 +292,7 @@
             showHistory: function () {
                 this.loadingHistory = true;
                 let self = this;
-                api.get("/Document/History/" + this.idAnalyzer)
+                api.get("/DocumentHistory/" + this.idAnalyzer)
                     .then(function (response) {
                         // Handle success
                         setTimeout(function () {
@@ -289,7 +335,10 @@
                         fileLink.href = fileURL;
                         fileLink.setAttribute(
                             "download",
-                            this.$t("documents.historic") + " - " + this.dateFormat(Date.now()) + ".csv"
+                            this.$t("documents.historic") +
+                                " - " +
+                                this.dateFormat(Date.now()) +
+                                ".csv"
                         );
                         document.body.appendChild(fileLink);
                         fileLink.click();
@@ -306,7 +355,7 @@
             },
             deleteHistory: function (id) {
                 let self = this;
-                api.delete("/Document/History/" + id)
+                api.delete("/DocumentHistory/" + id)
                     .then(function (response) {
                         // Handle success
                         self.closeModal();
@@ -337,10 +386,10 @@
 
                 this.$nextTick(() => {
                     if (this.$refs.historyDiv) {
-                    this.$refs.historyDiv.scrollTo({
-                        top: 0,
-                        behavior: "smooth",
-                    });
+                        this.$refs.historyDiv.scrollTo({
+                            top: 0,
+                            behavior: "smooth",
+                        });
                     }
                 });
             },
@@ -358,10 +407,10 @@
                 this.$nextTick(() => {
                     const el = this.$refs.historyDiv;
                     if (el) {
-                    el.scrollTo({
-                        top: el.scrollHeight,
-                        behavior: "smooth",
-                    });
+                        el.scrollTo({
+                            top: el.scrollHeight,
+                            behavior: "smooth",
+                        });
                     }
                 });
             },
@@ -456,7 +505,6 @@
         unmounted() {},
     };
 </script>
-
 <style scoped>
     .fas,
     .far {
