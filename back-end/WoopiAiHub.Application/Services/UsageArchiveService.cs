@@ -167,14 +167,6 @@ namespace WoopiAiHub.Application.Services
             }
 
             var usageByTenant = await usageMonthRepository.FindTotalUsageAsync(lastPeriod.PeriodStart, lastPeriod.PeriodEnd);
-
-            if (usageByTenant <= 0)
-            {
-                _logger.LogInformation("No usage to charge for tenant {TenantName}", tenant.Name);
-                await subcriptionPeriodService.UpdateToProcessedAsync(lastPeriod.Id);
-                return;
-            }
-
             var tenantConsumption = new TenantConsumptionDto
             {
                 Tenant = tenant.Name,
