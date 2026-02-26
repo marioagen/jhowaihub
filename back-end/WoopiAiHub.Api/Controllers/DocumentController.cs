@@ -19,16 +19,19 @@ namespace WoopiAiHub.Api.Controllers
     {
         private readonly IDocumentServices _documentServices;
         private readonly IDocumentUploadServices _documentUploadServices;
+        private readonly IDocumentDeletionServices _documentDeletionServices;
         private readonly ILogger<DocumentController> _logger;
         private const string PdfContentType = "application/pdf";
 
 
         public DocumentController(IDocumentServices documentServices,
                                   IDocumentUploadServices documentUploadServices,
+                                  IDocumentDeletionServices documentDeletionServices,
                                   ILogger<DocumentController> logger)
         {
             _documentServices = documentServices;
             _documentUploadServices = documentUploadServices;
+            _documentDeletionServices = documentDeletionServices;
             _logger = logger;
         }
 
@@ -101,8 +104,8 @@ namespace WoopiAiHub.Api.Controllers
         {
             try
             {
-                var result = await _documentServices.Delete(ids,
-                                                            headersDto);
+                var result = await _documentDeletionServices.Delete(ids,
+                                                                     headersDto);
 
                 if (result)
                     return Ok();

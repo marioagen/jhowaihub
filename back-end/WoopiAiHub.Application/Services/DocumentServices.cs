@@ -30,14 +30,11 @@ namespace WoopiAiHub.Application.Services
 {
     public class DocumentServices : IDocumentServices
     {
-        private readonly ICardRepository _cardRepository;
         private readonly IDocumentRepository _documentRepository;
         private readonly ILogger<DocumentServices> _logger;
-        private readonly IEmbeddingsApi _embbedingsApi;
         private readonly IMarketPlaceApi _marketPlaceApi;
         private readonly IConfiguration _config;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
-        private readonly IFileRepositoryApi _fileRepositoryApi;
         private readonly IFunctionFileRetriever _functionFileRetriever;
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly MessageQueues _messageQueues;
@@ -51,30 +48,24 @@ namespace WoopiAiHub.Application.Services
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
         public DocumentServices(IDocumentRepository documentRepository,
             ILogger<DocumentServices> logger,
-            IEmbeddingsApi embbedingsApi,
             IMarketPlaceApi marketPlaceApi,
             IConfiguration config,
-            IFileRepositoryApi fileRepositoryApi,
             IFunctionFileRetriever functionFileRetriever,
             IStepToolExecutionRepository stepToolExecutionRepository,
             ITenantCacheServices tenantCacheServices,
             IOptions<MessageQueues> messageQueues,
             IHubNotifier documentNotifier,
             IUnitOfWork unitOfWork,
-            ICardRepository cardRepository,
             IWorkflowRepository workflowRepository,
             IStepToolOutputRepository stepToolOutputRepository,
             IStepToolRepository stepToolRepository,
             IUsageDailyServices usageDailyServices)
         {
             _unitOfWork = unitOfWork;
-            _cardRepository = cardRepository;
             _documentRepository = documentRepository;
             _logger = logger;
-            _embbedingsApi = embbedingsApi;
             _marketPlaceApi = marketPlaceApi;
             _config = config;
-            _fileRepositoryApi = fileRepositoryApi;
             _functionFileRetriever = functionFileRetriever;
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _tenantCacheServices = tenantCacheServices;
@@ -121,50 +112,6 @@ namespace WoopiAiHub.Application.Services
                 _logger.LogError(ex,
                     $"An argument exception occurred in the {nameof(DocumentServices)} in the {nameof(FindAllPaged)} method");
                 throw ex;
-            }
-        }
-
-        /// <summary>
-        /// Delete documents by ids
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <param name="headersDto"></param>
-        /// <returns></returns>
-        public async Task<bool> Delete(List<int> ids, HeadersDto headersDto)
-        {
-            ArgumentNullException.ThrowIfNull(ids);
-
-            var referenceFilesToRemove = _documentRepository.FindHashById(ids).ToList();
-            var hashList = referenceFilesToRemove;
-
-            _unitOfWork.BeginTransaction();
-            try
-            {
-                _documentRepository.ClearWorkflowRelationships(ids);
-
-                var cardIds = await _cardRepository.FindCardIdsByDocumentIdsAsync(ids);
-                if (cardIds.Any())
-                {
-                    _stepToolExecutionRepository.DeleteByCardIds(cardIds);
-                    _stepToolOutputRepository.DeleteByCardIds(cardIds);
-                }
-
-                await _cardRepository.DeleteByDocumentIds(ids);
-                var deleted = _documentRepository.Delete(ids);
-                await Task.WhenAll(hashList.Select(hash => DeleteHash(hash, headersDto.Tenant)));
-
-                if (referenceFilesToRemove.Any())
-                {
-                    await DeleteBlobFilesAsync(referenceFilesToRemove, headersDto.Tenant);
-                }
-
-                _unitOfWork.Commit();
-                return deleted;
-            }
-            catch
-            {
-                _unitOfWork.Rollback();
-                throw;
             }
         }
 
@@ -301,7 +248,6 @@ namespace WoopiAiHub.Application.Services
             return documentDb;
         }
 
-
         /// <summary>
         /// Updates StepToolExecution status and send notification 
         /// </summary>
@@ -353,48 +299,7 @@ namespace WoopiAiHub.Application.Services
             var documentId = _documentRepository.FindDocumentIdByReferenceFile(referenceFile);
             await ChangeStatus(documentId, DocumentStatus.OCR, email);
         }
-
-        /// <summary>
-        /// Delete hash from Embeddings API
-        /// </summary>
-        /// <param name="hash"></param>
-        /// <param name="tenant"></param>
-        /// <param name="keyMongo"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public async Task DeleteHash(string hash,
-            string tenant)
-        {
-            var apikey = _config["IndexerApiKey"]!;
-            var resultRequest = await _embbedingsApi.DeleteHash(tenant,
-                hash,
-                tenant,
-                apikey);
-
-            if (!resultRequest.IsSuccessStatusCode && resultRequest.StatusCode != HttpStatusCode.NotFound)
-            {
-                throw new ArgumentException("Error while sending delete hash in Embeddings API");
-            }
-        }
-
-        /// <summary>
-        /// Deletes blob files from Azure Storage
-        /// </summary>
-        /// <param name="referenceFiles"></param>
-        /// <param name="tenant"></param>
-        /// <returns></returns>
-        private async Task DeleteBlobFilesAsync(List<string> referenceFiles, string tenant)
-        {
-            foreach (var referenceFile in referenceFiles)
-            {
-                if (!string.IsNullOrEmpty(referenceFile))
-                {
-                    string blobPath = $"{tenant}/{referenceFile}";
-                    await _fileRepositoryApi.Delete(blobPath);
-                }
-            }
-        }
-
+  
         /// <summary>
         /// Retrieves a document as a byte array based on the provided file GUID and tenant information.
         /// </summary>
@@ -509,7 +414,6 @@ namespace WoopiAiHub.Application.Services
                 RowCount = totalListCount
             };
         }
-
         
         /// <summary>
         /// Extract normalized context from AnalyzeResult 

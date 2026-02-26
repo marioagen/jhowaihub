@@ -23,9 +23,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 
         Task<bool> CheckerExceededPages(string emailCreator);
 
-        Task<bool> Delete(List<int> ids,
-                          HeadersDto headersDto);
-
         Task<FindDocumentDto> FindDocumentById(int id,
                                                string tenant);
 
