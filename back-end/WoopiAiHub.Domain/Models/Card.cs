@@ -1,5 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
+using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Domain.Models
@@ -57,6 +60,20 @@ namespace WoopiAiHub.Domain.Models
         public bool IsRejected()
         {
             return StatusId == this.Status?.Id && this.Status.Name == StatusNames.Rejected;
+        }
+
+        /// <summary>
+        /// Creates an audit log entry for this card via <see cref="AuditCard.Create"/>.
+        /// User and timestamp are taken from <paramref name="currentUserService"/> and <see cref="AuditCard.Create"/> (OccurredAt = UTC now) respectively.
+        /// </summary>
+        /// <param name="workflowId">Id of the workflow the card belongs to.</param>
+        /// <param name="actionType">The audit action type.</param>
+        /// <param name="currentUserService">Service to resolve the current user; must be authenticated with a valid user Id.</param>
+        /// <returns>A new <see cref="AuditCard"/> instance (not yet persisted).</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the current user is not authenticated or has no user Id.</exception>
+        public AuditCard CreateAuditLog(int workflowId, AuditCardActionType actionType, ICurrentUserService currentUserService)
+        {
+            return AuditCard.Create(Id, workflowId, actionType, currentUserService);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using WoopiAiHub.Domain.Enum.Audit;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Models.Audit
@@ -42,14 +43,23 @@ namespace WoopiAiHub.Domain.Models.Audit
 
         /// <summary>
         /// Creates a new AuditCard for a card action. Id and Created are set to 0 and current UTC time respectively; the database will assign the actual Id on save.
+        /// User and OccurredAt are taken from <paramref name="currentUserService"/> and UTC now.
         /// </summary>
+        /// <param name="cardId">Id of the card.</param>
+        /// <param name="workflowId">Id of the workflow.</param>
+        /// <param name="actionType">The audit action type.</param>
+        /// <param name="currentUserService">Service to resolve the current user; must be authenticated with a valid user Id.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="actionType"/> is not a defined value of <see cref="AuditCardActionType"/>.</exception>
-        public static AuditCard Create(int cardId, int workflowId, AuditCardActionType actionType, Guid userId, DateTime? occurredAt = null)
+        /// <exception cref="InvalidOperationException">Thrown when the current user is not authenticated or has no user Id.</exception>
+        public static AuditCard Create(int cardId, int workflowId, AuditCardActionType actionType, ICurrentUserService currentUserService)
         {
             if (!Enum.IsDefined(typeof(AuditCardActionType), actionType))
                 throw new ArgumentOutOfRangeException(nameof(actionType), actionType, $"Action type must be a defined value of {nameof(AuditCardActionType)}.");
 
-            var at = occurredAt ?? DateTime.UtcNow;
+            if (!currentUserService.IsAuthenticated || currentUserService.Id is not { } userId)
+                throw new InvalidOperationException("Current user is required to create an audit log.");
+
+            var at = DateTime.UtcNow;
             return new AuditCard(0, at, cardId, workflowId, actionType, userId, at);
         }
     }
