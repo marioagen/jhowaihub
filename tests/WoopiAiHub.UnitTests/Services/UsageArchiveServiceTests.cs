@@ -731,9 +731,9 @@ namespace WoopiAiHub.UnitTests.Services
                     Times.Once);
         }
 
-        [Fact(DisplayName = "SendMonthlyUsageIfExpiredAsync should return early when no usage found")]
-        [Trait("SendMonthlyUsage", "EarlyExit")]
-        public async Task SendMonthlyUsageIfExpiredAsync_NoUsage_ReturnsEarly()
+        [Fact(DisplayName = "SendMonthlyUsageIfExpiredAsync should send consumption even when usage is zero")]
+        [Trait("SendMonthlyUsage", "Success")]
+        public async Task SendMonthlyUsageIfExpiredAsync_NoUsage_SendsConsumption()
         {
             // Arrange
             var tenants = new List<TenantListDto>
@@ -769,6 +769,13 @@ namespace WoopiAiHub.UnitTests.Services
                     DateTime.UtcNow.AddMonths(-2),
                     DateTime.UtcNow.AddDays(-1),
                     false));
+            mockSubscriptionPeriodService
+                .Setup(x => x.UpdateToProcessedAsync(It.IsAny<int>()))
+                .Returns(Task.CompletedTask);
+
+            _marketPlaceApiMock
+                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
+                .ReturnsAsync(true);
 
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
@@ -785,7 +792,10 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             _marketPlaceApiMock
-                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Never);
+                .Verify(x => x.ProcessConsumption(
+                    "test-key", 
+                    It.Is<TenantConsumptionDto>(dto => dto.Tenant == "Tenant1" && dto.UsageCount == 0)), 
+                    Times.Once);
         }
 
         [Fact(DisplayName = "SendMonthlyUsageIfExpiredAsync should return early when DateEnd is null")]
