@@ -104,7 +104,7 @@
             queryPage: 1,
             searchInput: "",
             selectedOption: 10,
-            isAscending: false,
+            isAscending: true,
             colType: 2,
             modalTeamShow: false,
             modalAlertShow: false,
