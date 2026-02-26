@@ -16,10 +16,6 @@ namespace WoopiAiHub.Repository.Mappings
                 .HasColumnType("int")
                 .IsRequired();
 
-            builder.Property(c => c.Created)
-                .HasColumnType("datetime")
-                .IsRequired();
-
             builder.Property(c => c.OccurredAt)
                 .HasColumnType("datetime")
                 .IsRequired();
