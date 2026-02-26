@@ -26,6 +26,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IAutomationServices _automationServices;
         private readonly IFileRepositoryApi _fileRepositoryApi;
+        private readonly ILogger<DocumentUploadServices> _logger;
 
         public DocumentUploadServices(
             IDocumentRepository documentRepository,
@@ -34,7 +35,8 @@ namespace WoopiAiHub.Application.Services
             IValidator<RequestCreateDocumentDto> documentDtoValidator,
             IWorkflowRepository workflowRepository,
             IAutomationServices automationServices,
-            IFileRepositoryApi fileRepositoryApi)
+            IFileRepositoryApi fileRepositoryApi,
+            ILogger<DocumentUploadServices> logger)
         {
             _documentRepository = documentRepository;
             _cache = cache;
@@ -43,6 +45,7 @@ namespace WoopiAiHub.Application.Services
             _workflowRepository = workflowRepository;
             _automationServices = automationServices;
             _fileRepositoryApi = fileRepositoryApi;
+            _logger = logger;
         }
 
         /// <summary>
@@ -54,18 +57,26 @@ namespace WoopiAiHub.Application.Services
         public async Task ProcessChunks(RequestCreateDocumentDto requestCreateDocumentDto,
             string tenant)
         {
-            MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions
+            try
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
-            };
+                MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+                };
 
-            var bytes = this.AddNewBytesToArrayChunks(requestCreateDocumentDto,
-                cacheOptions);
+                var bytes = this.AddNewBytesToArrayChunks(requestCreateDocumentDto,
+                    cacheOptions);
 
-            if (requestCreateDocumentDto.IsLast)
+                if (requestCreateDocumentDto.IsLast)
+                {
+                    var referenceFile = await this.FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
+                    _cache.Remove(requestCreateDocumentDto.Name);
+                }
+            }
+            catch (Exception ex)
             {
-                var referenceFile = await this.FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
-                _cache.Remove(requestCreateDocumentDto.Name);
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentUploadServices)} in the {nameof(ProcessChunks)} method");
+                throw;
             }
         }
 

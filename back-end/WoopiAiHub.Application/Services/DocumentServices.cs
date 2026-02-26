@@ -48,7 +48,15 @@ namespace WoopiAiHub.Application.Services
         /// </returns>
         public async Task<bool> CheckerExceededPages(string emailCreator)
         {
-            return await _marketPlaceApi.CheckExceededPages(_config[ConfigKeyAccessName]!, emailCreator);
+            try
+            {
+                return await _marketPlaceApi.CheckExceededPages(_config[ConfigKeyAccessName]!, emailCreator);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(CheckerExceededPages)} method");
+                throw;
+            }
         }
 
         /// <summary>
@@ -61,18 +69,27 @@ namespace WoopiAiHub.Application.Services
         public DocumentPagedResultDto FindAllPaged(DocumentPagedDataDto documentPagedDataDto,
             string emailCreator)
         {
-            if (documentPagedDataDto.Page > 0)
+            try
             {
-                var totalList = _documentRepository.FindAllOrdered(documentPagedDataDto, emailCreator);
-                var result = this.DocumentPagination(totalList, documentPagedDataDto);
-                return result;
+                if (documentPagedDataDto.Page > 0)
+                {
+                    var totalList = _documentRepository.FindAllOrdered(documentPagedDataDto, emailCreator);
+                    var result = this.DocumentPagination(totalList, documentPagedDataDto);
+                    return result;
+                }
+                else
+                {
+                    var ex = new ArgumentException("Invalid Page");
+                    _logger.LogError(ex,
+                        $"An argument exception occurred in the {nameof(DocumentServices)} in the {nameof(FindAllPaged)} method");
+                    throw ex;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                var ex = new ArgumentException("Invalid Page");
-                _logger.LogError(ex,
-                    $"An argument exception occurred in the {nameof(DocumentServices)} in the {nameof(FindAllPaged)} method");
-                throw ex;
+                if (ex is not ArgumentException)
+                    _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(FindAllPaged)} method");
+                throw;
             }
         }
 
@@ -128,27 +145,36 @@ namespace WoopiAiHub.Application.Services
         public async Task<FindDocumentDto> FindDocumentById(int id,
             string tenant)
         {
-            var documentDb = _documentRepository.FindById(id);
-            var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
-
-            if (string.IsNullOrEmpty(functionApiKeyAuth))
+            try
             {
-                _logger.LogError("Function API key is missing in the configuration.");
-                throw new ArgumentNullException(functionApiKeyAuth,
-                    "Function API key is missing in the configuration.");
+                var documentDb = _documentRepository.FindById(id);
+                var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
+
+                if (string.IsNullOrEmpty(functionApiKeyAuth))
+                {
+                    _logger.LogError("Function API key is missing in the configuration.");
+                    throw new ArgumentNullException(functionApiKeyAuth,
+                        "Function API key is missing in the configuration.");
+                }
+
+                HttpResponseMessage document = await _functionFileRetriever.Get(documentDb.ReferenceFile,
+                    functionApiKeyAuth,
+                    tenant);
+
+                byte[] bytesFile = await document.Content.ReadAsByteArrayAsync();
+
+                return new FindDocumentDto
+                {
+                    BytesDocument = bytesFile,
+                    ReferenceFile = documentDb.ReferenceFile
+                };
             }
-
-            HttpResponseMessage document = await _functionFileRetriever.Get(documentDb.ReferenceFile,
-                functionApiKeyAuth,
-                tenant);
-
-            byte[] bytesFile = await document.Content.ReadAsByteArrayAsync();
-
-            return new FindDocumentDto
+            catch (Exception ex)
             {
-                BytesDocument = bytesFile,
-                ReferenceFile = documentDb.ReferenceFile
-            };
+                _logger.LogError(ex, "An exception occurred in {Service}.{Method} method for documentId: {Id} and tenant: {Tenant}.",
+                    nameof(DocumentServices), nameof(FindDocumentById), id, tenant);
+                throw;
+            }
         }
 
         /// <summary>

@@ -15,16 +15,12 @@ namespace WoopiAiHub.Api.Controllers
     public class DocumentHistoryController : ControllerBase
     {
         private readonly IDocumentHistoryServices _documentHistoryServices;
-        private readonly ILogger<DocumentHistoryController> _logger;
 
-        public DocumentHistoryController(
-            IDocumentHistoryServices documentHistoryServices,
-            ILogger<DocumentHistoryController> logger)
+        public DocumentHistoryController(IDocumentHistoryServices documentHistoryServices)
         {
             _documentHistoryServices = documentHistoryServices;
-            _logger = logger;
         }
-        
+
         /// <summary>
         /// Receive a id and return the Document history.
         /// </summary>
@@ -36,17 +32,8 @@ namespace WoopiAiHub.Api.Controllers
         public IActionResult FindDocumentHistory(int id,
                                                 [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
-                var result = _documentHistoryServices.FindById(id,
-                                                               headersDto.EmailCreator);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryController)} in the {nameof(FindDocumentHistory)} method");
-                return BadRequest("Error while finding history" + ex);
-            }
+            var result = _documentHistoryServices.FindById(id, headersDto.EmailCreator);
+            return Ok(result);
         }
 
         /// <summary>
@@ -63,23 +50,15 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("{id}/batch")]
         [SwaggerOperation("Returns document history entries for a document, limited by take (load more: 10, 20, 30...)")]
         [ProducesResponseType(typeof(IEnumerable<DocumentHistoryDto>), StatusCodes.Status200OK)]
-        public IActionResult GetDocumentHistoryBatch(int id,
+        public IActionResult FindDocumentHistoryBatch(int id,
                                                      [FromQuery] int take = 10,
                                                      [FromQuery] string? search = null,
                                                      [FromQuery] string? order = null,
                                                      [FromQuery] string? orderBy = null,
                                                      [FromQuery] Guid? user = null)
         {
-            try
-            {
-                var result = _documentHistoryServices.FindByIdWithTake(id, take, search, order, orderBy, user);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryController)} in the {nameof(GetDocumentHistoryBatch)} method");
-                return BadRequest("Error while finding history batch" + ex);
-            }
+            var result = _documentHistoryServices.FindByIdWithTake(id, take, search, order, orderBy, user);
+            return Ok(result);
         }
 
         /// <summary>
@@ -93,20 +72,10 @@ namespace WoopiAiHub.Api.Controllers
         public IActionResult UpdateDocumentHistory(UpdateHistoryDto updateHistoryDto,
                                                   [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
-                var result = _documentHistoryServices.UpdateHistory(updateHistoryDto,
-                                                                    headersDto.EmailCreator);
-                if (result)
-                    return Ok();
-                else
-                    return BadRequest("Error while deleting from database");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryController)} in the {nameof(UpdateDocumentHistory)} method");
-                return BadRequest("Error while updating history" + ex);
-            }
+            var result = _documentHistoryServices.UpdateHistory(updateHistoryDto, headersDto.EmailCreator);
+            if (result)
+                return Ok();
+            return BadRequest("Error while deleting from database");
         }
 
         /// <summary>
@@ -120,21 +89,10 @@ namespace WoopiAiHub.Api.Controllers
         public IActionResult DeleteDocumentHistory(int id,
                                                   [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
-                var result = _documentHistoryServices.Delete(id,
-                                                             headersDto.EmailCreator);
-                if (result)
-                    return Ok();
-                else
-                    return BadRequest("Error while deleting from database");
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryController)} in the {nameof(DeleteDocumentHistory)} method");
-                return BadRequest("Error while deleting Document history" + ex);
-            }
+            var result = _documentHistoryServices.Delete(id, headersDto.EmailCreator);
+            if (result)
+                return Ok();
+            return BadRequest("Error while deleting from database");
         }
 
     }

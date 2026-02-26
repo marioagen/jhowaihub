@@ -20,19 +20,15 @@ namespace WoopiAiHub.Api.Controllers
         private readonly IDocumentServices _documentServices;
         private readonly IDocumentUploadServices _documentUploadServices;
         private readonly IDocumentDeletionServices _documentDeletionServices;
-        private readonly ILogger<DocumentController> _logger;
         private const string PdfContentType = "application/pdf";
-
 
         public DocumentController(IDocumentServices documentServices,
                                   IDocumentUploadServices documentUploadServices,
-                                  IDocumentDeletionServices documentDeletionServices,
-                                  ILogger<DocumentController> logger)
+                                  IDocumentDeletionServices documentDeletionServices)
         {
             _documentServices = documentServices;
             _documentUploadServices = documentUploadServices;
             _documentDeletionServices = documentDeletionServices;
-            _logger = logger;
         }
 
         /// <summary>
@@ -48,22 +44,8 @@ namespace WoopiAiHub.Api.Controllers
         public IActionResult FindAllPaged([FromQuery] DocumentPagedDataDto documentPagedDataDto,
                                           [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
-                var DocumentList = _documentServices.FindAllPaged(documentPagedDataDto,
-                                                                  headersDto.EmailCreator);
-                return Ok(DocumentList);
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, $"Argument Exception ocurred in the {nameof(DocumentController)} in the {nameof(FindAllPaged)} method");
-                return BadRequest("Invalid Page");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(FindAllPaged)} method");
-                return BadRequest("Error While Finding documents");
-            }
+            var documentList = _documentServices.FindAllPaged(documentPagedDataDto, headersDto.EmailCreator);
+            return Ok(documentList);
         }
 
         /// <summary>
@@ -78,18 +60,8 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> UploadByChunks([FromForm] RequestCreateDocumentDto requestCreateDocumentDto,
                                                         [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
-                await _documentUploadServices.ProcessChunks(requestCreateDocumentDto,
-                                                            headersDto.Tenant);
-
-                return requestCreateDocumentDto.IsLast ? Ok() :Accepted();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(UploadByChunks)} method");
-                return BadRequest("Error when uploading Document: " + ex);
-            }
+            await _documentUploadServices.ProcessChunks(requestCreateDocumentDto, headersDto.Tenant);
+            return requestCreateDocumentDto.IsLast ? Ok() : Accepted();
         }
 
         /// <summary>
@@ -102,22 +74,10 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> Delete([FromBody] List<int> ids,
                                                 [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
-                var result = await _documentDeletionServices.Delete(ids,
-                                                                     headersDto);
-
-                if (result)
-                    return Ok();
-                else
-                    return BadRequest("Error while deleting from database");
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(Delete)} method");
-                return BadRequest("Id not found" + ex);
-            }
+            var result = await _documentDeletionServices.Delete(ids, headersDto);
+            if (result)
+                return Ok();
+            return BadRequest("Error while deleting from database");
         }
 
         /// <summary>
@@ -129,16 +89,8 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> CheckExceededPages([FromHeader] HeadersDto headersDto)
         {
-            try
-            {
-                var result = await _documentServices.CheckerExceededPages(headersDto.EmailCreator);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentController)} in the {nameof(CheckExceededPages)} method");
-                return BadRequest("Error while check exceeded pages" + ex);
-            }
+            var result = await _documentServices.CheckerExceededPages(headersDto.EmailCreator);
+            return Ok(result);
         }
 
         /// <summary>
@@ -153,22 +105,8 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> FindDocumentById(int id,
                                                           [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
-                FindDocumentDto result = await _documentServices.FindDocumentById(id,
-                                                                                  headersDto.Tenant);
-
-                return File(result.BytesDocument, 
-                            PdfContentType, 
-                            $"{result.ReferenceFile}.pdf");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An exception occurred in {Controller}.{Method} method for documentId: {id} and tenant: {Tenant}.",
-                    nameof(DocumentController), nameof(FindDocumentById), id, headersDto.Tenant);
-                return StatusCode(500, "An unexpected error occurred while retrieving the document. Please try again or contact support.");
-            }
+            FindDocumentDto result = await _documentServices.FindDocumentById(id, headersDto.Tenant);
+            return File(result.BytesDocument, PdfContentType, $"{result.ReferenceFile}.pdf");
         }
-
     }
 }

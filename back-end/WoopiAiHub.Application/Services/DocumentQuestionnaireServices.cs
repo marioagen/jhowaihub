@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Net;
 using WoopiAiHub.Application.Utils;
@@ -24,6 +25,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly IUserRepository _userRepository;
+        private readonly ILogger<DocumentQuestionnaireServices> _logger;
 
         private const int DocumentHistoryTypeInputQuestionnaire = 1;
         private const int DocumentHistoryTypeDocumentInput = 2;
@@ -36,7 +38,8 @@ namespace WoopiAiHub.Application.Services
             IDocumentHistoryServices documentHistoryServices,
             ITenantCacheServices tenantCacheServices,
             IUsageDailyServices usageDailyServices,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            ILogger<DocumentQuestionnaireServices> logger)
         {
             _documentRepository = documentRepository;
             _questionnaireRepository = questionnaireRepository;
@@ -46,6 +49,7 @@ namespace WoopiAiHub.Application.Services
             _tenantCacheServices = tenantCacheServices;
             _usageDailyServices = usageDailyServices;
             _userRepository = userRepository;
+            _logger = logger;
         }
 
         /// <summary>
@@ -55,29 +59,37 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> InputQuestionnaire(DocumentQuestionnaireDto documentQuestionnaireDto,
             HeadersDto headersDto)
         {
-            var documentDb = _documentRepository.FindById(documentQuestionnaireDto.IdDocument);
-            var questionnaire = _questionnaireRepository.FindById(documentQuestionnaireDto.IdQuestionnaire);
-
-            foreach (var description in questionnaire.Questions.Select(u => u.Description))
+            try
             {
-                var customQueryRequestDto = await CreateCustomQueryRequestDto(description,
-                        headersDto.Tenant,
-                        headersDto.Language);
-                var apikey = _config["IndexerApiKey"]!;
+                var documentDb = _documentRepository.FindById(documentQuestionnaireDto.IdDocument);
+                var questionnaire = _questionnaireRepository.FindById(documentQuestionnaireDto.IdQuestionnaire);
 
-                var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
-                    documentDb.ReferenceFile.ToString(),
-                    customQueryRequestDto,
-                    apikey);
+                foreach (var description in questionnaire.Questions.Select(u => u.Description))
+                {
+                    var customQueryRequestDto = await CreateCustomQueryRequestDto(description,
+                            headersDto.Tenant,
+                            headersDto.Language);
+                    var apikey = _config["IndexerApiKey"]!;
 
-                await ProcessRequestCustomQuery(resultRequest,
-                    documentQuestionnaireDto.IdDocument,
-                    description,
-                    headersDto.EmailCreator,
-                    isFromQuestionnaire: true);
+                    var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
+                        documentDb.ReferenceFile.ToString(),
+                        customQueryRequestDto,
+                        apikey);
+
+                    await ProcessRequestCustomQuery(resultRequest,
+                        documentQuestionnaireDto.IdDocument,
+                        description,
+                        headersDto.EmailCreator,
+                        isFromQuestionnaire: true);
+                }
+
+                return true;
             }
-
-            return true;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentQuestionnaireServices)} in the {nameof(InputQuestionnaire)} method");
+                throw;
+            }
         }
 
         /// <summary>
@@ -87,25 +99,33 @@ namespace WoopiAiHub.Application.Services
         public async Task<string> InputDocument(DocumentInputDto documentInputDto,
             HeadersDto headersDto)
         {
-            var documentDb = _documentRepository.FindById(documentInputDto.Id);
-            var customQueryRequestDto = await CreateCustomQueryRequestDto(documentInputDto.Input,
-                headersDto.Tenant,
-                headersDto.Language);
+            try
+            {
+                var documentDb = _documentRepository.FindById(documentInputDto.Id);
+                var customQueryRequestDto = await CreateCustomQueryRequestDto(documentInputDto.Input,
+                    headersDto.Tenant,
+                    headersDto.Language);
 
-            var apikey = _config["IndexerApiKey"]!;
+                var apikey = _config["IndexerApiKey"]!;
 
-            var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
-                documentDb.ReferenceFile.ToString(),
-                customQueryRequestDto,
-                apikey);
+                var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
+                    documentDb.ReferenceFile.ToString(),
+                    customQueryRequestDto,
+                    apikey);
 
-            var textResponse = await ProcessRequestCustomQuery(resultRequest,
-                documentInputDto.Id,
-                documentInputDto.Input,
-                headersDto.EmailCreator,
-                isFromQuestionnaire: false);
+                var textResponse = await ProcessRequestCustomQuery(resultRequest,
+                    documentInputDto.Id,
+                    documentInputDto.Input,
+                    headersDto.EmailCreator,
+                    isFromQuestionnaire: false);
 
-            return textResponse;
+                return textResponse;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentQuestionnaireServices)} in the {nameof(InputDocument)} method");
+                throw;
+            }
         }
 
         /// <summary>

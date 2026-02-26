@@ -1,5 +1,6 @@
 using System.Net;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -18,6 +19,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IEmbeddingsApi _embbedingsApi;
         private readonly IConfiguration _config;
         private readonly IFileRepositoryApi _fileRepositoryApi;
+        private readonly ILogger<DocumentDeletionServices> _logger;
 
         public DocumentDeletionServices(
             IDocumentRepository documentRepository,
@@ -27,7 +29,8 @@ namespace WoopiAiHub.Application.Services
             IUnitOfWork unitOfWork,
             IEmbeddingsApi embbedingsApi,
             IConfiguration config,
-            IFileRepositoryApi fileRepositoryApi)
+            IFileRepositoryApi fileRepositoryApi,
+            ILogger<DocumentDeletionServices> logger)
         {
             _documentRepository = documentRepository;
             _cardRepository = cardRepository;
@@ -37,6 +40,7 @@ namespace WoopiAiHub.Application.Services
             _embbedingsApi = embbedingsApi;
             _config = config;
             _fileRepositoryApi = fileRepositoryApi;
+            _logger = logger;
         }
 
         /// <summary>
@@ -76,8 +80,9 @@ namespace WoopiAiHub.Application.Services
                 _unitOfWork.Commit();
                 return deleted;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentDeletionServices)} in the {nameof(Delete)} method");
                 _unitOfWork.Rollback();
                 throw;
             }

@@ -14,14 +14,10 @@ namespace WoopiAiHub.Api.Controllers
     public class DocumentQuestionnarireController : ControllerBase
     {
         private readonly IDocumentQuestionnaireServices _documentQuestionnaireServices;
-        private readonly ILogger<DocumentQuestionnarireController> _logger;
 
-        public DocumentQuestionnarireController(
-            IDocumentQuestionnaireServices documentQuestionnaireServices,
-            ILogger<DocumentQuestionnarireController> logger)
+        public DocumentQuestionnarireController(IDocumentQuestionnaireServices documentQuestionnaireServices)
         {
             _documentQuestionnaireServices = documentQuestionnaireServices;
-            _logger = logger;
         }
 
         /// <summary>
@@ -34,27 +30,8 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> InputDocument([FromBody] DocumentInputDto documentInputDto,
                                                        [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
-                var result = await _documentQuestionnaireServices.InputDocument(documentInputDto,
-                                                                   headersDto);
-                return Ok(result);
-            }
-            catch (FileNotFoundException ex)
-            {
-                _logger.LogError(ex, $"An FileNotFoundException occurred in the {nameof(DocumentQuestionnarireController)} in the {nameof(InputDocument)} method");
-                return NotFound("The file was not found in the llmindexer weavite" + ex);
-            }
-            catch (ApplicationException aex)
-            {
-                _logger.LogError(aex, $"An ApplicationException occurred in the {nameof(DocumentQuestionnarireController)} in the {nameof(InputDocument)} method");
-                return UnprocessableEntity(aex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentQuestionnarireController)} in the {nameof(InputDocument)} method");
-                return BadRequest("Error while processing input" + ex);
-            }
+            var result = await _documentQuestionnaireServices.InputDocument(documentInputDto, headersDto);
+            return Ok(result);
         }
 
         /// <summary>
@@ -67,28 +44,8 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> InputDocumentQuestionnaire([FromBody] DocumentQuestionnaireDto documentQuestionnaireDto,
                                                                     [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
-                var result = await _documentQuestionnaireServices.InputQuestionnaire(documentQuestionnaireDto,
-                                                                        headersDto);
-                return Ok(result);
-            }
-            catch (FileNotFoundException ex)
-            {
-                _logger.LogError(ex, $"An FileNotFoundException occurred in the {nameof(DocumentQuestionnarireController)} in the {nameof(InputDocumentQuestionnaire)} method");
-                return NotFound("The file was not found in the llmindexer weavite" + ex);
-            }
-            catch (HttpException hex)
-            {
-                _logger.LogError(hex, $"An HttpException occurred in the {nameof(DocumentQuestionnarireController)} in the {nameof(InputDocumentQuestionnaire)} method");
-                return UnprocessableEntity(hex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentQuestionnarireController)} in the {nameof(InputDocumentQuestionnaire)} method");
-                return BadRequest("Error while processing input" + ex);
-            }
+            var result = await _documentQuestionnaireServices.InputQuestionnaire(documentQuestionnaireDto, headersDto);
+            return Ok(result);
         }
-
     }
 }

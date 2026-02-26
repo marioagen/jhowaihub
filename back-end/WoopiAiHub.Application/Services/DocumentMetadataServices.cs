@@ -37,26 +37,35 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         public FindByIdAnalyzeDto FindByIdAnalyze(int id, HeadersDto headersDto)
         {
-            var result = _documentRepository.FindById(id);
-
-            if (result == null)
+            try
             {
-                var ex = new ArgumentException(FindingDocumentErrorMessage);
-                _logger.LogError(ex,
-                    $"An exception occurred in the {nameof(DocumentMetadataServices)} in the {nameof(FindByIdAnalyze)} method");
-                throw ex;
+                var result = _documentRepository.FindById(id);
+
+                if (result == null)
+                {
+                    var ex = new ArgumentException(FindingDocumentErrorMessage);
+                    _logger.LogError(ex,
+                        $"An exception occurred in the {nameof(DocumentMetadataServices)} in the {nameof(FindByIdAnalyze)} method");
+                    throw ex;
+                }
+
+                var cards = _cardRepository.FindByDocumentIdCardListAsync(id).Result;
+                var activeCard = cards.FirstOrDefault();
+
+                return new FindByIdAnalyzeDto
+                {
+                    Name = result.Name,
+                    Description = result.Description,
+                    ReferenceFile = result.ReferenceFile,
+                    CardId = activeCard?.Id
+                };
             }
-
-            var cards = _cardRepository.FindByDocumentIdCardListAsync(id).Result;
-            var activeCard = cards.FirstOrDefault();
-
-            return new FindByIdAnalyzeDto
+            catch (Exception ex)
             {
-                Name = result.Name,
-                Description = result.Description,
-                ReferenceFile = result.ReferenceFile,
-                CardId = activeCard?.Id
-            };
+                if (ex is not ArgumentException)
+                    _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentMetadataServices)} in the {nameof(FindByIdAnalyze)} method");
+                throw;
+            }
         }
 
         /// <summary>
@@ -64,34 +73,43 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         public async Task<OcrTextResponseDto> FindOcrTextByDocumentId(int documentId)
         {
-            var response = new OcrTextResponseDto { HasOcr = false };
-
-            var document = _documentRepository.FindById(documentId);
-            if (document == null)
-                return response;
-
-            response.ReferenceFile = document.ReferenceFile;
-
-            var card = await _cardRepository.FindByDocumentIdCardAsync(documentId);
-            if (card == null)
-                return response;
-
-            var ocrExecution = FindReadyOcrExecution(card);
-            if (ocrExecution == null)
-                return response;
-
-            var outputJson = await _stepToolOutputRepository.FindByStepToolId(ocrExecution.StepToolId, card.Id);
-            if (string.IsNullOrEmpty(outputJson))
-                return response;
-
-            var ocrText = ExtractOcrTextFromOutput(outputJson);
-            if (!string.IsNullOrEmpty(ocrText))
+            try
             {
-                response.Content = ocrText;
-                response.HasOcr = true;
-            }
+                var response = new OcrTextResponseDto { HasOcr = false };
 
-            return response;
+                var document = _documentRepository.FindById(documentId);
+                if (document == null)
+                    return response;
+
+                response.ReferenceFile = document.ReferenceFile;
+
+                var card = await _cardRepository.FindByDocumentIdCardAsync(documentId);
+                if (card == null)
+                    return response;
+
+                var ocrExecution = FindReadyOcrExecution(card);
+                if (ocrExecution == null)
+                    return response;
+
+                var outputJson = await _stepToolOutputRepository.FindByStepToolId(ocrExecution.StepToolId, card.Id);
+                if (string.IsNullOrEmpty(outputJson))
+                    return response;
+
+                var ocrText = ExtractOcrTextFromOutput(outputJson);
+                if (!string.IsNullOrEmpty(ocrText))
+                {
+                    response.Content = ocrText;
+                    response.HasOcr = true;
+                }
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An exception occurred in {Service}.{Method} method for documentId: {DocumentId}.",
+                    nameof(DocumentMetadataServices), nameof(FindOcrTextByDocumentId), documentId);
+                throw;
+            }
         }
 
         /// <summary>

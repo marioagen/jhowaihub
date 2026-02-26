@@ -16,16 +16,13 @@ namespace WoopiAiHub.Api.Controllers
     {
         private readonly IDocumentMetadataServices _documentMetadataServices;
         private readonly IDocumentNormalizedServices _documentNormalizedServices;
-        private readonly ILogger<DocumentMetadataController> _logger;
 
         public DocumentMetadataController(
             IDocumentMetadataServices documentMetadataServices,
-            IDocumentNormalizedServices documentNormalizedServices,
-            ILogger<DocumentMetadataController> logger)
+            IDocumentNormalizedServices documentNormalizedServices)
         {
             _documentMetadataServices = documentMetadataServices;
             _documentNormalizedServices = documentNormalizedServices;
-            _logger = logger;
         }
 
         /// <summary>
@@ -38,16 +35,8 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(DocumentNormalized), StatusCodes.Status200OK)]
         public IActionResult FindDocumentNormalizedText(int id)
         {
-            try
-            {
-                var result = _documentNormalizedServices.FindById(id);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentMetadataController)} in the {nameof(FindDocumentNormalizedText)} method");
-                return BadRequest("Error while finding history" + ex);
-            }
+            var result = _documentNormalizedServices.FindById(id);
+            return Ok(result);
         }
 
         /// <summary>
@@ -61,17 +50,8 @@ namespace WoopiAiHub.Api.Controllers
         public IActionResult FindByIdAnalyze(int id,
                                              [FromHeader] HeadersDto headersDto)
         {
-            try
-            {
-                var result = _documentMetadataServices.FindByIdAnalyze(id,
-                                                                headersDto);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentMetadataController)} in the {nameof(FindByIdAnalyze)} method");
-                return BadRequest("Error while finding documents by id" + ex);
-            }
+            var result = _documentMetadataServices.FindByIdAnalyze(id, headersDto);
+            return Ok(result);
         }
 
         /// <summary>
@@ -84,17 +64,8 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(OcrTextResponseDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindOcrText(int id)
         {
-            try
-            {
-                var result = await _documentMetadataServices.FindOcrTextByDocumentId(id);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An exception occurred in {Controller}.{Method} method for documentId: {id}.",
-                    nameof(DocumentMetadataController), nameof(FindOcrText), id);
-                return StatusCode(500, "An unexpected error occurred while retrieving OCR text. Please try again or contact support.");
-            }
+            var result = await _documentMetadataServices.FindOcrTextByDocumentId(id);
+            return Ok(result);
         }
     }
 }

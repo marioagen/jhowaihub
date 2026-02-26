@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+using FluentValidation;
+using Microsoft.Extensions.Logging;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -10,12 +11,15 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly IDocumentNormalizedRepository _documentNormalizedRepository;
         private readonly IValidator<DocumentNormalized> _documentNormalizedValidator;
+        private readonly ILogger<DocumentNormalizedServices> _logger;
 
         public DocumentNormalizedServices(IDocumentNormalizedRepository documentNormalizedRepository,
-                                          IValidator<DocumentNormalized> documentNormalizedValidator)
+                                          IValidator<DocumentNormalized> documentNormalizedValidator,
+                                          ILogger<DocumentNormalizedServices> logger)
         {
             _documentNormalizedRepository = documentNormalizedRepository;
             _documentNormalizedValidator = documentNormalizedValidator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -49,7 +53,15 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public DocumentNormalized FindById(int id)
         {
-            return _documentNormalizedRepository.FindById(id);
+            try
+            {
+                return _documentNormalizedRepository.FindById(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentNormalizedServices)} in the {nameof(FindById)} method");
+                throw;
+            }
         }
 
         /// <summary>
