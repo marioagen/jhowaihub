@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using System.Text;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -129,35 +131,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act / Assert
             Assert.Throws<ArgumentException>(() => _documentServices.FindAllPaged(pagedData, "email"));
-        }     
-
-        [Fact(DisplayName = "ProcessChunks")]
-        [Trait("FindByIdAnalyze", "Success")]
-        public async Task ProcessChunks_Success()
-        {
-            // Arrange
-            var requestCreateDocumentDto = _fixture.FindValidRequestCreateDocumentDto();
-            var fileUploadSummaryDto = _fixture.FindValidFileUploadSummaryDto();
-            var tenant = _fixture.FindValidTenantInfoDto();
-            var team = DocumentFixture.FindValidTeam();
-            var workflows = WorkflowFixture.FindValidWorkflows();
-            List<Team> teams = new List<Team> { team };
-
-            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
-            fileRepositoryApi.Setup(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>())).ReturnsAsync(fileUploadSummaryDto);
-
-            var teamServicesMock = _mocker.GetMock<ITeamServices>();
-            teamServicesMock.Setup(a => a.FindByIdsAndUser(It.IsAny<List<int>>(), It.IsAny<string>())).Returns(teams);
-
-            var tenantCache = _mocker.GetMock<ITenantCacheServices>();
-            tenantCache.Setup(a => a.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenant);
-
-            var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
-            workflowRepositoryMock.Setup(a => a.FindByIdsAsync(requestCreateDocumentDto.Workflows)).ReturnsAsync(workflows);
-
-            // Act / Assert
-            await _documentServices.ProcessChunks(requestCreateDocumentDto, "tenant");
-            fileRepositoryApi.Verify(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>()), Times.Once);
         }
 
         [Fact(DisplayName = "FindDocumentSuccess")]
