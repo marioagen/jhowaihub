@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
@@ -12,18 +13,22 @@ namespace WoopiAiHub.Repository.Context
     public class ApplicationDbContext : DbContext
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ICurrentUserService? _currentUserService;
 
         public ApplicationDbContext(
             IHttpContextAccessor httpContextAccessor,
+            ICurrentUserService currentUserService,
             DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+            _currentUserService = currentUserService;
         }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
             _httpContextAccessor = null!;
+            _currentUserService = null;
         }
 
         public DbSet<Document> Documents { get; set; }
@@ -180,16 +185,15 @@ namespace WoopiAiHub.Repository.Context
         }
 
         /// <summary>
-        /// Retrieves the user associated with the current HTTP request based on the X-Email header.
+        /// Retrieves the user associated with the current request from JWT (via <see cref="ICurrentUserService"/>)
+        /// or, when not available, from the X-Email header for backward compatibility.
         /// </summary>
-        /// <remarks>This method relies on the presence of the X-Email header in the HTTP request to
-        /// identify the user. If the header is missing or does not correspond to a known user, the method returns <see
-        /// langword="null"/>.</remarks>
-        /// <returns>A <see cref="User"/> object representing the current user if the X-Email header is present and matches a
-        /// user; otherwise, <see langword="null"/>.</returns>
+        /// <returns>A <see cref="User"/> object representing the current user if identified; otherwise, <see langword="null"/>.</returns>
         private User? GetCurrentUser()
         {
-            var requestEmail = _httpContextAccessor?.HttpContext?.Request.Headers[HeaderNames.XEmail].ToString();
+            var requestEmail = _currentUserService?.Email;
+            if (string.IsNullOrEmpty(requestEmail))
+                requestEmail = _httpContextAccessor?.HttpContext?.Request.Headers[HeaderNames.XEmail].ToString();
             if (string.IsNullOrEmpty(requestEmail))
                 return null;
 
