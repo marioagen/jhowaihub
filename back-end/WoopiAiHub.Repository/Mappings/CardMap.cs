@@ -37,8 +37,9 @@ namespace WoopiAiHub.Repository.Mappings
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(u => u.DocumentBatch)
-                .WithOne(s => s.Card)
-                .HasForeignKey<DocumentBatch>(c => c.CardId);
+                .WithMany(s => s.Cards)
+                .HasForeignKey(d => d.DocumentBatchId)
+                .IsRequired(false);
 
             builder.HasIndex(c => c.Name);
             builder.HasIndex(c => c.Created);

@@ -30,32 +30,39 @@ namespace WoopiAiHub.Repository.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CardId = table.Column<int>(type: "int", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DocumentBatchs", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_DocumentBatchs_Cards_CardId",
-                        column: x => x.CardId,
-                        principalTable: "Cards",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_DocumentBatchs_CardId",
-                table: "DocumentBatchs",
-                column: "CardId",
-                unique: true);
+                name: "IX_Cards_DocumentBatchId",
+                table: "Cards",
+                column: "DocumentBatchId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Cards_DocumentBatchs_DocumentBatchId",
+                table: "Cards",
+                column: "DocumentBatchId",
+                principalTable: "DocumentBatchs",
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Cards_DocumentBatchs_DocumentBatchId",
+                table: "Cards");
+
             migrationBuilder.DropTable(
                 name: "DocumentBatchs");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Cards_DocumentBatchId",
+                table: "Cards");
 
             migrationBuilder.DropColumn(
                 name: "HasBatch",
