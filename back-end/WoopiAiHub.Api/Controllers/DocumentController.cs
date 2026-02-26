@@ -18,14 +18,17 @@ namespace WoopiAiHub.Api.Controllers
     public class DocumentController : ControllerBase
     {
         private readonly IDocumentServices _documentServices;
+        private readonly IDocumentUploadServices _documentUploadServices;
         private readonly ILogger<DocumentController> _logger;
         private const string PdfContentType = "application/pdf";
 
 
         public DocumentController(IDocumentServices documentServices,
+                                  IDocumentUploadServices documentUploadServices,
                                   ILogger<DocumentController> logger)
         {
             _documentServices = documentServices;
+            _documentUploadServices = documentUploadServices;
             _logger = logger;
         }
 
@@ -74,8 +77,8 @@ namespace WoopiAiHub.Api.Controllers
         {
             try
             {
-                await _documentServices.ProcessChunks(requestCreateDocumentDto,
-                                                      headersDto.Tenant);
+                await _documentUploadServices.ProcessChunks(requestCreateDocumentDto,
+                                                            headersDto.Tenant);
 
                 return requestCreateDocumentDto.IsLast ? Ok() :Accepted();
             }
