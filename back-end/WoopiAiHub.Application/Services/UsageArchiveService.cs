@@ -167,11 +167,6 @@ namespace WoopiAiHub.Application.Services
             }
 
             var usageByTenant = await usageMonthRepository.FindTotalUsageAsync(lastPeriod.PeriodStart, lastPeriod.PeriodEnd);
-            if (usageByTenant == 0)
-            {
-                _logger.LogDebug("No usage found for tenant {TenantName} in period {PeriodStart}-{PeriodEnd}, skipping consumption report", tenant.Name, lastPeriod.PeriodStart, lastPeriod.PeriodEnd);
-                return;
-            }
 
             var tenantConsumption = new TenantConsumptionDto
             {
