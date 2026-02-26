@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WoopiAiHub.Domain.Models;
 
@@ -35,6 +35,10 @@ namespace WoopiAiHub.Repository.Mappings
                 .WithMany(s => s.Cards)
                 .HasForeignKey(s => s.StatusId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(u => u.DocumentBatch)
+                .WithOne(s => s.Card)
+                .HasForeignKey<DocumentBatch>(c => c.CardId);
 
             builder.HasIndex(c => c.Name);
             builder.HasIndex(c => c.Created);
