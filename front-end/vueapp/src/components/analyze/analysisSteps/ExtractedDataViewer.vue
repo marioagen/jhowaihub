@@ -148,7 +148,7 @@
                             class="form-control mt-2"
                             readonly
                             v-model="fields[index].value"
-                            rows="5"
+                            rows="9"
                         ></textarea>
                     </div>
                 </div>
@@ -308,6 +308,7 @@
         border-radius: 8px;
         padding: 1rem;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        height: 100%;
     }
 
     .section-title {

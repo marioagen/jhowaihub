@@ -129,7 +129,7 @@
             selectedQuizz: {},
             queryPage: 1,
             selectedOption: 10,
-            isAscending: false,
+            isAscending: true,
             colType: 2,
             searchInput: "",
             isDeleting: false,

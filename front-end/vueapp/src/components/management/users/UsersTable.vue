@@ -51,10 +51,19 @@
             </template>
             <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" @click="redirectToForm(data.row)" v-tooltip="$t('common.edit')">
+                    <a
+                        :class="actionClass"
+                        @click="redirectToForm(data.row)"
+                        v-tooltip="$t('common.edit')"
+                    >
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass"class="text-danger" @click="openConfirmation(data.row)"  v-tooltip="$t('common.delete')">
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        @click="openConfirmation(data.row)"
+                        v-tooltip="$t('common.delete')"
+                    >
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
@@ -73,7 +82,6 @@
         @confirm="deleteUser"
     />
 </template>
-
 <script>
     import AvatarComponent from "@/components/global/AvatarComponent.vue";
     import UserService from "@/services/users/UserService";
@@ -92,7 +100,7 @@
             BadgeComponent,
             TableComponent,
             ConfirmModal,
-            ActionTableListComponent
+            ActionTableListComponent,
         },
         data: () => ({
             table: {
@@ -114,7 +122,7 @@
             queryPage: 1,
             searchInput: "",
             selectedOption: 10,
-            isAscending: false,
+            isAscending: true,
             colType: 2,
             selectedUser: {},
             isDeleting: false,
@@ -202,7 +210,6 @@
         },
     };
 </script>
-
 <style scoped>
     .badge {
         display: inline-block;

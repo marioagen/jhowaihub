@@ -1044,7 +1044,7 @@ const portuguese = {
             management: "Gestão de Esteira de Processamentos",
         },
         statusList: {
-            analyzed: "Análisado",
+            analyzed: "Analisado",
             approved: "Aprovado",
             awaitinganalysis: "Esperando Análise",
             done: "Concluído",
