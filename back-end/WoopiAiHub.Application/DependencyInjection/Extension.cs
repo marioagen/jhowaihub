@@ -21,6 +21,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IDocumentServices, DocumentServices>();
             services.AddScoped<IDocumentUploadServices, DocumentUploadServices>();
             services.AddScoped<IDocumentDeletionServices, DocumentDeletionServices>();
+            services.AddScoped<IDocumentPipelineServices, DocumentPipelineServices>();
             services.AddScoped<IDocumentHistoryServices, DocumentHistoryServices>();
             services.AddScoped<IDocumentMetadataServices, DocumentMetadataServices>();
             services.AddScoped<IDocumentQuestionnaireServices, DocumentQuestionnaireServices>();

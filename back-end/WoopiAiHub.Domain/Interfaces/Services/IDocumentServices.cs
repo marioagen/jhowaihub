@@ -29,9 +29,5 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> ChangeStatusByReferenceFile(string referenceFile,
                                                string emailCreator,
                                                DocumentStatus status);
-
-        Task<MetaDataAutomationDto> ProcessOcrResult(ProcessOcrResultDto dto);
-        Task<MetaDataAutomationDto> ProcessEmbeddingsResult(DocumentEmbeddingsResultDto documentEmbeddingsResultDto);
-        Task<WoopiAiHub.Domain.Models.Document?> InputToolQuestionnaire(DocumentEmbeddingsQueryResponseDto documentQuestionnaireDto);
     };
 }

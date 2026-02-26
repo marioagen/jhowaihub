@@ -22,6 +22,7 @@ namespace WoopiAiHub.UnitTests.Messaging
         private readonly AutoMocker _mocker;
         private readonly DocumentEmbeddingsQueryResponseDto _documentEmbeddingsQueryResponseDto;
         private readonly Mock<IDocumentServices> _documentServices;
+        private readonly Mock<IDocumentPipelineServices> _documentPipelineServices;
         private readonly Mock<ITenantCacheServices> _tenantCacheServices;
         private readonly Mock<IMessageConsumer<DocumentEmbeddingsQueryResponseDto>> _consumerMock;
         private readonly Mock<ILogger<QuizConsumer>> _loggerMock;
@@ -51,6 +52,7 @@ namespace WoopiAiHub.UnitTests.Messaging
             _mocker.Use<IConfiguration>(configuration);
             _mocker.Use<IOptions<MessageQueues>>(messageQueues);
             _documentServices = new Mock<IDocumentServices>();
+            _documentPipelineServices = new Mock<IDocumentPipelineServices>();
             _usageDailyServices = new Mock<IUsageDailyServices>();
 
             _tenantCacheServices = new Mock<ITenantCacheServices>();
@@ -60,6 +62,8 @@ namespace WoopiAiHub.UnitTests.Messaging
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
                                    .Returns(_documentServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentPipelineServices)))
+                               .Returns(_documentPipelineServices.Object);
 
             var serviceScopeMock = new Mock<IServiceScope>();
             serviceScopeMock.Setup(s => s.ServiceProvider).Returns(serviceProviderMock.Object);
@@ -71,8 +75,8 @@ namespace WoopiAiHub.UnitTests.Messaging
             var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             httpContextAccessorMock.SetupProperty(x => x.HttpContext, null);
 
-            serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
-                               .Returns(_documentServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentPipelineServices)))
+                               .Returns(_documentPipelineServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(ITenantCacheServices)))
                                .Returns(_tenantCacheServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IHttpContextAccessor)))
@@ -102,7 +106,7 @@ namespace WoopiAiHub.UnitTests.Messaging
                 new List<Workflow>(),
                 DateTime.Now
                );
-            _ = _documentServices
+            _ = _documentPipelineServices
                 .Setup(x => x.InputToolQuestionnaire(It.IsAny<DocumentEmbeddingsQueryResponseDto>()))
                 .Returns(Task.FromResult<Document?>(document));
 
@@ -119,7 +123,7 @@ namespace WoopiAiHub.UnitTests.Messaging
             await consumer.StartAsync(CancellationToken.None);
 
             // Assert
-            _documentServices.Verify(x => x.InputToolQuestionnaire(_documentEmbeddingsQueryResponseDto), Times.Once);
+            _documentPipelineServices.Verify(x => x.InputToolQuestionnaire(_documentEmbeddingsQueryResponseDto), Times.Once);
         }
 
         [Fact(DisplayName = "Must catch exception when processing response")]
@@ -129,7 +133,7 @@ namespace WoopiAiHub.UnitTests.Messaging
             // Arrange
             var exceptionEsperada = new ArgumentException("StepToolExecution not found");
 
-            _documentServices
+            _documentPipelineServices
                .Setup(x => x.InputToolQuestionnaire(It.IsAny<DocumentEmbeddingsQueryResponseDto>()))
                .ThrowsAsync(exceptionEsperada);
 
@@ -150,7 +154,7 @@ namespace WoopiAiHub.UnitTests.Messaging
 
             // Assert
             Assert.Null(exception);
-            _documentServices.Verify(x => x.InputToolQuestionnaire(_documentEmbeddingsQueryResponseDto), Times.Once);
+            _documentPipelineServices.Verify(x => x.InputToolQuestionnaire(_documentEmbeddingsQueryResponseDto), Times.Once);
 
             loggerMock.Verify(x =>
                 x.Log(

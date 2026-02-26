@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Messaging;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
@@ -25,6 +26,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         private readonly ProcessOcrResultDto _processOcrResultDto;
         private readonly DocumentEmbeddingsDataDto _documentEmbeddingsDataDto;
         private readonly Mock<IDocumentServices> _documentServices;
+        private readonly Mock<IDocumentPipelineServices> _documentPipelineServices;
         private readonly Mock<ITenantCacheServices> _tenantCacheServices;
         private readonly Mock<IAutomationServices> _automationServices;
         private readonly Mock<IUsageDailyServices> _usageDailyServices;
@@ -58,6 +60,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             _mocker.Use<IConfiguration>(configuration);
             _mocker.Use<IOptions<MessageQueues>>(messageQueues);
             _documentServices = new Mock<IDocumentServices>();
+            _documentPipelineServices = new Mock<IDocumentPipelineServices>();
             _automationServices = new Mock<IAutomationServices>();
             _usageDailyServices = new Mock<IUsageDailyServices>();
 
@@ -68,6 +71,8 @@ namespace WoopiAiHub.UnitTests.Consumers
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
                                .Returns(_documentServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentPipelineServices)))
+                               .Returns(_documentPipelineServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IAutomationServices)))
                                .Returns(_automationServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IUsageDailyServices)))
@@ -85,6 +90,8 @@ namespace WoopiAiHub.UnitTests.Consumers
 
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
                                .Returns(_documentServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentPipelineServices)))
+                               .Returns(_documentPipelineServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(ITenantCacheServices)))
                                .Returns(_tenantCacheServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IHttpContextAccessor)))
@@ -106,7 +113,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task OcrConsumer_ConsumeAsync_ShouldConsumeMessage()
         {
             // Arrange
-            _documentServices
+            _documentPipelineServices
                 .Setup(x => x.ProcessOcrResult(It.IsAny<ProcessOcrResultDto>()))
                 .ReturnsAsync(new MetaDataAutomationDto());
 
@@ -123,7 +130,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             await consumer.StartAsync(CancellationToken.None);
 
             // Assert
-            _documentServices.Verify(x => x.ProcessOcrResult(_processOcrResultDto), Times.Once);
+            _documentPipelineServices.Verify(x => x.ProcessOcrResult(_processOcrResultDto), Times.Once);
         }
 
         [Fact(DisplayName = "Must catch exception when processing response")]
@@ -133,7 +140,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             // Arrange
             var exceptionEsperada = new Exception("Error processing OCR message for Embeddings");
 
-            _documentServices
+            _documentPipelineServices
                 .Setup(x => x.ProcessOcrResult(It.IsAny<ProcessOcrResultDto>()))
                 .ThrowsAsync(exceptionEsperada);
 
@@ -155,7 +162,7 @@ namespace WoopiAiHub.UnitTests.Consumers
 
             // Assert
             Assert.Null(exception);
-            _documentServices.Verify(x => x.ProcessOcrResult(_processOcrResultDto), Times.Once);
+            _documentPipelineServices.Verify(x => x.ProcessOcrResult(_processOcrResultDto), Times.Once);
             _publisherMock.Verify(x => x.PublishAsync(It.IsAny<string>(), It.IsAny<DocumentEmbeddingsDataDto>()), Times.Never);
 
             loggerMock.Verify(x =>

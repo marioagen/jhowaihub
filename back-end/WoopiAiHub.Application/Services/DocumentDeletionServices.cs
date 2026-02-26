@@ -1,6 +1,5 @@
 using System.Net;
 using Microsoft.Extensions.Configuration;
-using Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -39,7 +38,6 @@ namespace WoopiAiHub.Application.Services
             _config = config;
             _fileRepositoryApi = fileRepositoryApi;
         }
-
 
         /// <summary>
         /// Delete documents by ids
