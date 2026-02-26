@@ -15,9 +15,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         DocumentPagedResultDto FindAllPaged(DocumentPagedDataDto documentPagedDataDto,
                                             string emailCreator);
 
-        Task ProcessChunks(RequestCreateDocumentDto requestCreateDocumentDto, 
-                           string tenant);
-
         Task<bool> ChangeStatus(int id,
                                 DocumentStatus status,
                                 string emailCreator);
