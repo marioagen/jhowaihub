@@ -294,12 +294,11 @@
     .view-pdf {
         width: 100% !important;
         height: auto !important;
-        max-height: 65vh;
+        max-height: calc(100vh - 233px);
         min-height: 300px;
         aspect-ratio: 1/1.414;
         display: flex;
         justify-content: center;
-        align-items: center;
     }
     @media (max-width: 768px) {
         .view-pdf {
@@ -307,12 +306,18 @@
         }
     }
 
-    .view-pdf object,
     .view-pdf embed {
         width: 100% !important;
         height: 100% !important;
         max-width: 100%;
         max-height: 70vh;
+        display: block;
+    }
+
+    .view-pdf object {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100%;
         display: block;
     }
 

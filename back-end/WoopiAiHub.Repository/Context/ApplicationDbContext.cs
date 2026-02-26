@@ -60,6 +60,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<SubscriptionPeriod> SubscriptionPeriods { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<DocumentAnalysisRejection> DocumentAnalysisRejections { get; set; }
+        public DbSet<DocumentBatch> DocumentBatchs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -109,6 +110,7 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<SubscriptionPeriod>(new SubscriptionPeriodMap().Configure);
             modelBuilder.Entity<AuditLog>(new AuditLogMap().Configure);
             modelBuilder.Entity<DocumentAnalysisRejection>(new DocumentAnalysisRejectionMap().Configure);
+            modelBuilder.Entity<DocumentBatch>(new DocumentBatchMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
 
