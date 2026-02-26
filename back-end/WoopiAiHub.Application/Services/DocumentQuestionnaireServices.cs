@@ -108,6 +108,9 @@ namespace WoopiAiHub.Application.Services
             return textResponse;
         }
 
+        /// <summary>
+        /// Processes the HTTP response from the custom query API: deserializes the result, records usage, creates and saves document history, and returns the response text or throws on failure.
+        /// </summary>
         private async Task<string> ProcessRequestCustomQuery(HttpResponseMessage resultRequest,
             int id,
             string input,
@@ -147,6 +150,9 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Builds a custom query request DTO from the input text and tenant/language, using cached tenant settings (model, k-value, template, etc.).
+        /// </summary>
         private async Task<CustomQueryRequestRefitDto> CreateCustomQueryRequestDto(string input,
             string tenantName,
             string language)
@@ -167,6 +173,9 @@ namespace WoopiAiHub.Application.Services
             };
         }
 
+        /// <summary>
+        /// Creates a <see cref="DocumentHistory"/> entity for persistence from the document id, input/output text, history type, and optional user id.
+        /// </summary>
         private static DocumentHistory CreateDocumentHistoryForDb(int id,
             string output,
             string input,

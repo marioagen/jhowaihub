@@ -94,6 +94,9 @@ namespace WoopiAiHub.Application.Services
             return response;
         }
 
+        /// <summary>
+        /// Returns the first step-tool execution on the card that has status Ready and is an OCR tool type, or null if none exists.
+        /// </summary>
         private static StepToolExecution? FindReadyOcrExecution(Card card)
         {
             return card.Executions
@@ -104,6 +107,9 @@ namespace WoopiAiHub.Application.Services
                                      e.StepTool.Tool.ToolType.Name == HandlersTypes.Ocr);
         }
 
+        /// <summary>
+        /// Deserializes the step-tool output JSON, extracts text from document embeddings ordered by page number, and returns them concatenated with double newlines.
+        /// </summary>
         private static string ExtractOcrTextFromOutput(string outputJson)
         {
             var embeddingsData = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(outputJson);
