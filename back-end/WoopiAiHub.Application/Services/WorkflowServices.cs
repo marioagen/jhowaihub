@@ -1305,5 +1305,14 @@ namespace WoopiAiHub.Application.Services
                 }
             }
         }
+
+        /// <summary>
+        /// Returns all workflows in a simplified format for internal
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<WorkflowInternalDto> FindAllInternal()
+        {
+            return _workflowRepository.FindAllInternal();
+        }
     }
 }

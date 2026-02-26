@@ -3,7 +3,6 @@ using System.Linq.Expressions;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
@@ -808,6 +807,25 @@ namespace WoopiAiHub.Repository
                                                 .AnyAsync(u => u.Id == userId);
 
             return isValidTeamUser;
+        }
+
+        /// <summary>
+        /// Retrieves all enabled workflows as internal data transfer objects.
+        /// </summary>
+        /// <returns>A collection of <see cref="WorkflowInternalDto"/> objects representing all workflows that are currently
+        /// enabled. The collection is empty if no enabled workflows are found.</returns>
+        public ICollection<WorkflowInternalDto> FindAllInternal()
+        {
+            return _context.Workflows
+                            .AsNoTracking()
+                            .Where(w => w.Enable.Equals(true))
+                            .Select(t => new WorkflowInternalDto
+                            {
+                                Id = t.Id,
+                                Name = t.Name,
+                                Created = t.Created,
+                            })
+                            .ToList();
         }
     }
 }
