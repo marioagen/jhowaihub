@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Mappings;
 using WoopiAiHub.Repository.Util;
@@ -59,6 +60,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<ApiTemplate> ApiTemplates { get; set; }
         public DbSet<SubscriptionPeriod> SubscriptionPeriods { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<AuditCard> AuditCards { get; set; }
         public DbSet<DocumentAnalysisRejection> DocumentAnalysisRejections { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -108,6 +110,7 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<ApiTemplate>(new ApiTemplateMap().Configure);
             modelBuilder.Entity<SubscriptionPeriod>(new SubscriptionPeriodMap().Configure);
             modelBuilder.Entity<AuditLog>(new AuditLogMap().Configure);
+            modelBuilder.Entity<AuditCard>(new AuditCardMap().Configure);
             modelBuilder.Entity<DocumentAnalysisRejection>(new DocumentAnalysisRejectionMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
