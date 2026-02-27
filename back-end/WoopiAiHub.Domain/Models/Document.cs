@@ -1,4 +1,3 @@
-﻿using WoopiAiHub.Domain.Enum;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
@@ -20,6 +19,9 @@ namespace WoopiAiHub.Domain.Models
         [Column("EmailCreator", TypeName = "varchar(50)")]
         public string EmailCreator { get; private set; } = string.Empty;
 
+        [Column("HasBatch", TypeName = "bit")]
+        public bool HasBatch { get; private set; } = false;
+
         public virtual ICollection<DocumentHistory> DocumentHistories { get; set; }
         public virtual DocumentNormalized? DocumentNormalized { get; set; }
         public virtual ICollection<Card> Cards { get; set; }
@@ -32,7 +34,8 @@ namespace WoopiAiHub.Domain.Models
                        string emailCreator,
                        int id,
                        List<Workflow> workflow,
-                       DateTime created) : base(id, created)
+                       DateTime created,
+                       bool hasBatch = false) : base(id, created)
         {
             Name = name;
             Description = description;
@@ -40,6 +43,7 @@ namespace WoopiAiHub.Domain.Models
             Status = status;
             Workflows = workflow;
             EmailCreator = emailCreator;
+            HasBatch = hasBatch;
         }
 
         /// <summary>

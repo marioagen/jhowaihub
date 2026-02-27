@@ -181,7 +181,7 @@
     import QuestionsHistoryModal from "@/components/analyze/QuestionsHistoryModal.vue";
 
     export default {
-        name: "DocChat",
+        name: "DocumentChat",
         components: {
             QuestionsHistoryModal,
         },
@@ -216,7 +216,6 @@
                 this.questionnaireResults = [];
                 this.appliedQuestionnaireId = null;
             },
-            handleInput() {},
             async loadQuestionnaires() {
                 try {
                     const result = await QuizzesService.getQuizzes({
@@ -373,8 +372,8 @@
                 this.$refs.QuestionsHistoryModal.open(this.documentId);
             },
         },
-        mounted() {
-            this.loadQuestionnaires();
+        async mounted() {
+            await this.loadQuestionnaires();
         },
     };
 </script>

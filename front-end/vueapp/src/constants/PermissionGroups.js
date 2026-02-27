@@ -1,5 +1,5 @@
 const PermissionGroups = Object.freeze({
-    Documents: "Actions"
+    Documents: "Actions",
 });
 
 export default PermissionGroups;
