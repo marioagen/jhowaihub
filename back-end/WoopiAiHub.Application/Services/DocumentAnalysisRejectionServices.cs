@@ -4,6 +4,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
@@ -18,6 +19,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepRepository _stepRepository;
         private readonly IPermissionServices _permissionServices;
         private readonly ICardRepository _cardRepository;
+        private readonly IAuditCardRepository _auditCardRepository;
         private readonly IStatusRepository _statusRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -28,6 +30,7 @@ namespace WoopiAiHub.Application.Services
             IStepRepository stepRepository,
             IPermissionServices permissionServices,
             ICardRepository cardRepository,
+            IAuditCardRepository auditCardRepository,
             IStatusRepository statusRepository,
             IUserRepository userRepository,
             IUnitOfWork unitOfWork,
@@ -36,6 +39,7 @@ namespace WoopiAiHub.Application.Services
             _repository = repository;
             _stepRepository = stepRepository;
             _cardRepository = cardRepository;
+            _auditCardRepository = auditCardRepository;
             _statusRepository = statusRepository;
             _permissionServices = permissionServices;
             _userRepository = userRepository;
@@ -68,7 +72,7 @@ namespace WoopiAiHub.Application.Services
             try
             {
                 card.UpdateStepAndStatus(dto.StepId, status.Id);
-                card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Rejection, _currentUserService);
+                card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Rejection, _currentUserService, _auditCardRepository);
                 _cardRepository.Update(card);
                 await _repository.CreateAsync(rejection);
                 _unitOfWork.Commit();

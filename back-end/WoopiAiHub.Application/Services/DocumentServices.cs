@@ -21,6 +21,7 @@ using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
@@ -35,6 +36,7 @@ namespace WoopiAiHub.Application.Services
     public class DocumentServices : IDocumentServices
     {
         private readonly ICardRepository _cardRepository;
+        private readonly IAuditCardRepository _auditCardRepository;
         private readonly IDocumentRepository _documentRepository;
         private readonly IValidator<RequestCreateDocumentDto> _documentDtoValidator;
         private readonly ILogger<DocumentServices> _logger;
@@ -82,6 +84,7 @@ namespace WoopiAiHub.Application.Services
             IHubNotifier documentNotifier,
             IUnitOfWork unitOfWork,
             ICardRepository cardRepository,
+            IAuditCardRepository auditCardRepository,
             IAutomationServices automationServices,
             IWorkflowRepository workflowRepository,
             IStepToolOutputRepository stepToolOutputRepository,
@@ -91,6 +94,7 @@ namespace WoopiAiHub.Application.Services
         {
             _unitOfWork = unitOfWork;
             _cardRepository = cardRepository;
+            _auditCardRepository = auditCardRepository;
             _documentRepository = documentRepository;
             _documentDtoValidator = documentDtoValidator;
             _logger = logger;
@@ -212,7 +216,7 @@ namespace WoopiAiHub.Application.Services
                 }
                 foreach (var card in cards)
                 {
-                    card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.DocumentDeleted, _currentUserService);
+                    card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.DocumentDeleted, _currentUserService, _auditCardRepository);
                 }
 
                 await _cardRepository.DeleteByDocumentIds(ids);
@@ -553,7 +557,7 @@ namespace WoopiAiHub.Application.Services
 
                 foreach (var card in cards)
                 {
-                    card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.DocumentCreated, _currentUserService);
+                    card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.DocumentCreated, _currentUserService, _auditCardRepository);
                 }
 
                 var hasExecutions = await _automationServices.PrepareExecutionAsync(workflows!);

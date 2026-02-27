@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Repository.Context;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
+using WoopiAiHub.Repository.Audit;
 using WoopiAiHub.Repository.Cache;
 
 namespace WoopiAiHub.Repository.DependencyInjection
@@ -35,6 +37,7 @@ namespace WoopiAiHub.Repository.DependencyInjection
             services.AddScoped<IWorkflowRepository, WorkflowRepository>();
             services.AddScoped<IStepRepository, StepRepository>();
             services.AddScoped<ICardRepository, CardRepository>();
+            services.AddScoped<IAuditCardRepository, AuditCardRepository>();
             services.AddScoped<IToolRepository, ToolRepository>();
             services.AddScoped<IToolTypeRepository, ToolTypeRepository>();
             services.AddScoped<IToolDataRepository, ToolDataRepository>();

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using WoopiAiHub.Domain.Enum.Audit;
+using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 
@@ -47,16 +48,18 @@ namespace WoopiAiHub.Domain.Models.Audit
         private AuditCard() { }
 
         /// <summary>
-        /// Creates a new AuditCard for a card action. Id is set to 0; the database will assign the actual Id on save.
+        /// Creates a new AuditCard for a card action and persists it via <paramref name="auditCardRepository"/>.
+        /// Id is set to 0; the database will assign the actual Id on save.
         /// User and OccurredAt are taken from <paramref name="currentUserService"/> and UTC now.
         /// </summary>
         /// <param name="cardId">Id of the card.</param>
         /// <param name="workflowId">Id of the workflow.</param>
         /// <param name="actionType">The audit action type.</param>
         /// <param name="currentUserService">Service to resolve the current user; must be authenticated with a valid user Id.</param>
+        /// <param name="auditCardRepository">Repository used to persist the audit entry.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="actionType"/> is not a defined value of <see cref="AuditCardActionType"/>.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the current user is not authenticated or has no user Id.</exception>
-        public static AuditCard Create(int cardId, int workflowId, AuditCardActionType actionType, ICurrentUserService currentUserService)
+        public static void Create(int cardId, int workflowId, AuditCardActionType actionType, ICurrentUserService currentUserService, IAuditCardRepository auditCardRepository)
         {
             if (!System.Enum.IsDefined(typeof(AuditCardActionType), actionType))
                 throw new ArgumentOutOfRangeException(nameof(actionType), actionType, $"Action type must be a defined value of {nameof(AuditCardActionType)}.");
@@ -64,7 +67,8 @@ namespace WoopiAiHub.Domain.Models.Audit
             if (!currentUserService.IsAuthenticated || currentUserService.Id is not { } userId)
                 throw new InvalidOperationException("Current user is required to create an audit log.");
 
-            return new AuditCard(0, cardId, workflowId, actionType, userId, DateTime.UtcNow);
+            var auditCard = new AuditCard(0, cardId, workflowId, actionType, userId, DateTime.UtcNow);
+            auditCardRepository.Add(auditCard);
         }
     }
 }

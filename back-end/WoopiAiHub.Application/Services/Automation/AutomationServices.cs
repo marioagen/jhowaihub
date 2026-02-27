@@ -11,6 +11,7 @@ using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -29,6 +30,7 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IMessagePublisher<object> _messagePublisher;
         private readonly ILogger<AutomationServices> _logger;
         private readonly ICardRepository _cardRepository;
+        private readonly IAuditCardRepository _auditCardRepository;
         private readonly IToolRepository _toolRepository;
         private readonly IApiClientFactory _apiClientFactory;
         private readonly IStepRepository _stepRepository;
@@ -45,6 +47,7 @@ namespace WoopiAiHub.Application.Services.Automation
                                   IMessagePublisher<object> messagePublisher,
                                   ILogger<AutomationServices> logger,
                                   ICardRepository cardRepository,
+                                  IAuditCardRepository auditCardRepository,
                                   IToolRepository toolRepository,
                                   IApiClientFactory apiClientFactory,
                                   IStepRepository stepRepository,
@@ -61,6 +64,7 @@ namespace WoopiAiHub.Application.Services.Automation
             _messagePublisher = messagePublisher;
             _logger = logger;
             _cardRepository = cardRepository;
+            _auditCardRepository = auditCardRepository;
             _toolRepository = toolRepository;
             _apiClientFactory = apiClientFactory;
             _stepRepository = stepRepository;
@@ -462,7 +466,7 @@ namespace WoopiAiHub.Application.Services.Automation
             }
 
             card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
-            card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Advancement, _currentUserService);
+            card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Advancement, _currentUserService, _auditCardRepository);
             var updated = _cardRepository.Update(card);
 
             if (updated)
