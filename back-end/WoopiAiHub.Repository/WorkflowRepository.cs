@@ -827,5 +827,21 @@ namespace WoopiAiHub.Repository
                             })
                             .ToList();
         }
+
+        /// <summary>
+        /// Retrieves a workflow by its ID, including its associated steps.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Workflow?> FindByIdReturnModelWithSteps(int id)
+        {
+            return await _context.Workflows
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.StepTools)
+                        .ThenInclude(t => t.Tool)
+                            .ThenInclude(tt => tt.ToolType)
+                .Include(w => w.Teams)
+                .FirstAsync(w => w.Id == id && w.Enable.Equals(true));
+        }
     }
 }

@@ -48,13 +48,11 @@ namespace WoopiAiHub.Application.Services.Automation
                     _documentRepository.Create(document);
 
                     var hasExecutions = await _automationServices.PrepareExecutionAsync([workflow]);
-
                     if (hasExecutions)
                     {
                         var automationServicesDto = CreateAutomation(externalFileUploadDto);
                         await _automationServices.StartExecutionByWorkflowsAsync(automationServicesDto, [workflow]);
                     }
-
                 }
                 _unitOfWork.Commit();
             }
@@ -78,7 +76,7 @@ namespace WoopiAiHub.Application.Services.Automation
                 0,
                 externalFileUploadDto.Tenant,
                 externalFileUploadDto.Email,
-                externalFileUploadDto.Guid,
+                externalFileUploadDto.FileReference,
                 0
             );
         }
@@ -116,7 +114,7 @@ namespace WoopiAiHub.Application.Services.Automation
             (
                 externalFileUploadDto.FileName,
                 string.Empty,
-                externalFileUploadDto.Guid,
+                externalFileUploadDto.FileReference,
                 (int)Domain.Enum.DocumentStatus.NotAnalyzed,
                 externalFileUploadDto.Email,
                 0,

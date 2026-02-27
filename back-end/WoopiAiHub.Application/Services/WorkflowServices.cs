@@ -1314,5 +1314,15 @@ namespace WoopiAiHub.Application.Services
         {
             return _workflowRepository.FindAllInternal();
         }
+
+        /// <summary>
+        /// Retrieves a workflow model by its ID, including its steps and associated data.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Task<Workflow?> FindModelById(int id)
+        {
+            return _workflowRepository.FindByIdReturnModelWithSteps(id);
+        }
     }
 }

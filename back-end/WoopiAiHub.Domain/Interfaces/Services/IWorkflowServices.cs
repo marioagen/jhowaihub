@@ -32,6 +32,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default);
         Task<int> CloneAsync(WorkflowCloneRequestDto dto);
         ICollection<WorkflowInternalDto> FindAllInternal();
-        Task<Workflow> FindModelById(int id);
+        Task<Workflow?> FindModelById(int id);
     }
 }
