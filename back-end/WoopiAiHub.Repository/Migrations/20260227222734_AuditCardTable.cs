@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -30,7 +30,7 @@ namespace WoopiAiHub.Repository.Migrations
                         column: x => x.CardId,
                         principalTable: "Cards",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_AuditCards_Users_UserId",
                         column: x => x.UserId,
