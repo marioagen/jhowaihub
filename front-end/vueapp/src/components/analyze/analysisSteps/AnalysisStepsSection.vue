@@ -1,17 +1,18 @@
 <template>
     <div class="step-analysis-container">
-        <doc-chat
+        <DocumentChat
             :document-id="documentId"
             v-if="documentData && documentData.canAnswer"
         />
-        <step-stepper
+
+        <StepsViewer
             v-if="documentData && documentData.steps && documentData.steps.length > 0"
             :steps="documentData.steps"
             :initial-step-id="documentData.lastProcessedStepId"
             @step-changed="handleStepChange"
         />
 
-        <extracted-fields
+        <ExtractedDataViewer
             v-if="currentStepData"
             :fields="currentStepData.outputs"
             :title="`${$t('analyze.extractedData')} - ${currentStepData.name}`"
@@ -20,18 +21,18 @@
     </div>
 </template>
 <script>
-    import StepStepper from "@/components/pages/analyzer/step-stepper";
-    import ExtractedFields from "@/components/pages/analyzer/extracted-fields";
-    import DocChat from "@/components/pages/analyzer/doc-chat";
+    import DocumentChat from "@/components/analyze/analysisSteps/DocumentChat.vue";
+    import StepsViewer from "@/components/analyze/analysisSteps/StepsViewer.vue";
+    import ExtractedDataViewer from "@/components/analyze/analysisSteps/ExtractedDataViewer.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
     import CardsServices from "@/services/cards/CardsServices";
 
     export default {
-        name: "StepAnalysisView",
+        name: "AnalysisStepsSection",
         components: {
-            StepStepper,
-            ExtractedFields,
-            DocChat,
+            DocumentChat,
+            StepsViewer,
+            ExtractedDataViewer,
         },
         props: {
             documentId: {
@@ -80,7 +81,6 @@
             },
             handleStepChange(step) {
                 this.currentStepData = step;
-                console.log(this.currentStepData);
             },
             handleFieldUpdate({ id, field, outputsJson }) {
                 let params = {};
