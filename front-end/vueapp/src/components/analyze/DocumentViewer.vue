@@ -1,7 +1,7 @@
 <template>
     <div
         class="doc-view-scroll"
-        :class="documentView === 'both' ? 'col-md-6' : 'col-12'"
+        :class="fillContainer ? 'w-100' : documentView === 'both' ? 'col-md-6' : 'col-12'"
     >
         <div
             class="mb-2"
@@ -26,16 +26,6 @@
                     :title="$t('documents.ocrText')"
                     v-if="srcPdf && hasOcrText"
                 />
-                <!--
-                <button
-                    type="button"
-                    class="btn btn-primary btn-sm mb-1 reindex-button"
-                    @click="openModal()"
-                >
-                    <i class="fas fa-sync-alt"></i>
-                    {{ $t("common.reprocess") }}
-                </button>
-                -->
                 <div
                     class="view-pdf"
                     v-if="srcPdf"
@@ -112,24 +102,17 @@
                 ></textarea>
             </div>
         </div>
-        <modal-reprocess
-            v-if="showModalForm"
-            @close="closeModal"
-            @formatData="updateModel"
-        />
     </div>
 </template>
 <script>
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
-    import ModalReprocess from "@/components/pages/analyzer/modal-reprocess";
-    import ModalAlert from "@/components/pages/analyzer/modal-alert";
     import LogService from "@/services/log/logService";
 
     const VIEW_MODE_PDF = "pdf";
     const VIEW_MODE_TEXT = "text";
 
     export default {
-        name: "DocView",
+        name: "DocumentViewer",
         VIEW_MODE_PDF,
         VIEW_MODE_TEXT,
         props: {
@@ -137,10 +120,14 @@
                 type: String,
                 required: true,
             },
+            fillContainer: {
+                type: Boolean,
+                default: false,
+            },
         },
         data() {
             return {
-                idAnalyzer: this.$route.params.documentId,
+                documentId: this.$route.params.documentId,
                 viewMode: VIEW_MODE_PDF,
                 srcPdf: null,
                 errorPdf: false,
@@ -148,29 +135,24 @@
                 loadingText: false,
                 textContent: "",
                 hasOcrText: false,
-                showModalForm: false,
                 showLoading: false,
                 message: "",
                 loadingNormalize: false,
                 modalAlertShow: false,
                 dataView: {
-                    Id: parseInt(this.idAnalyzer),
+                    Id: parseInt(this.documentId),
                     Embeddings_model_name: "",
                 },
                 isReprocessing: true,
             };
         },
-        components: {
-            ModalReprocess,
-            ModalAlert,
-        },
         methods: {
             getDocument() {
                 this.srcPdf = null;
                 this.errorPdf = false;
-                DocumentsServices.findDocument(this.idAnalyzer).then((response) => {
+                DocumentsServices.findDocument(this.documentId).then((response) => {
                     if (response.error !== undefined) {
-                        this.$notify({
+                        return this.$notify({
                             title: "analyze.title",
                             message: "analyze.failedLoadDocument",
                             variant: "danger",
@@ -194,10 +176,9 @@
                 this.viewMode = VIEW_MODE_TEXT;
                 if (this.textContent == "") {
                     this.loadingText = true;
-                    DocumentsServices.getOcrText(this.idAnalyzer)
+                    DocumentsServices.getOcrText(this.documentId)
                         .then((response) => {
                             if (response.error !== undefined) {
-                                this.modalAlertShow = true;
                                 this.loadingText = false;
                                 return;
                             }
@@ -215,7 +196,7 @@
                 }
             },
             checkOcrAvailability() {
-                DocumentsServices.getOcrText(this.idAnalyzer)
+                DocumentsServices.getOcrText(this.documentId)
                     .then((response) => {
                         if (response && response.hasOcr) {
                             this.hasOcrText = true;
@@ -234,22 +215,12 @@
             reloadPage() {
                 location.reload();
             },
-            openModal() {
-                this.showModalForm = true;
-                this.dataView.Id = parseInt(this.idAnalyzer);
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
-            },
-            closeModal() {
-                this.showModalForm = false;
-                this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
             normalizeDoc() {
                 window.onbeforeunload = function () {
                     return true;
                 };
                 let paramsReq = {
-                    Id: parseInt(this.idAnalyzer),
+                    Id: parseInt(this.documentId),
                     Embeddings_model_name: "",
                 };
                 this.loadingNormalize = true;
