@@ -3,8 +3,10 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
@@ -21,18 +23,21 @@ namespace WoopiAiHub.Application.Services
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IWorkflowRepository _workflowRepository;
+        private readonly ICurrentUserService _currentUserService;
 
         public CardServices(ICardRepository cardRepository,
                             IStepRepository stepRepository,
                             IAutomationServices automationServices,
                             IStepToolExecutionRepository stepToolExecutionRepository,
-                            IWorkflowRepository workflowRepository)
+                            IWorkflowRepository workflowRepository,
+                            ICurrentUserService currentUserService)
         {
             _cardRepository = cardRepository;
             _stepRepository = stepRepository;
             _automationServices = automationServices;
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _workflowRepository = workflowRepository;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -65,7 +70,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             card.UpdateAssignedUser(updateAssingnedUserDto.UserId);
-
+            card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Assign, _currentUserService);
             return _cardRepository.Update(card);
         }
 
@@ -84,7 +89,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             card.UpdateAssignedUser(null);
-
+            card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Unassign, _currentUserService);
             return _cardRepository.Update(card);
         }
 
@@ -111,6 +116,7 @@ namespace WoopiAiHub.Application.Services
 
             var statusId = card.IsRejected() ? previousStatusId : step.StatusId;
             card.UpdateStepAndStatus(step.Id, statusId);
+            card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Advancement, _currentUserService);
             var result = _cardRepository.Update(card);
 
             if (result)
@@ -152,6 +158,7 @@ namespace WoopiAiHub.Application.Services
                 ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
 
             card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
+            card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Advancement, _currentUserService);
 
             var result = _cardRepository.Update(card);
             return result;

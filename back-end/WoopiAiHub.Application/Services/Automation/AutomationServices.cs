@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Request.Automation;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
@@ -34,6 +35,7 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IHubNotifier _hubNotifier;
         private readonly IEncryptionService _encryptionService;
         private readonly IUsageDailyServices _usageDailyServices;
+        private readonly ICurrentUserService _currentUserService;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -48,7 +50,8 @@ namespace WoopiAiHub.Application.Services.Automation
                                   IStepRepository stepRepository,
                                   IHubNotifier hubNotifier,
                                   IEncryptionService encryptionService,
-                                  IUsageDailyServices usageDailyServices)
+                                  IUsageDailyServices usageDailyServices,
+                                  ICurrentUserService currentUserService)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -64,6 +67,7 @@ namespace WoopiAiHub.Application.Services.Automation
             _hubNotifier = hubNotifier;
             _encryptionService = encryptionService;
             _usageDailyServices = usageDailyServices;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -458,6 +462,7 @@ namespace WoopiAiHub.Application.Services.Automation
             }
 
             card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
+            card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Advancement, _currentUserService);
             var updated = _cardRepository.Update(card);
 
             if (updated)

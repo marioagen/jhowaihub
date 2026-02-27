@@ -16,6 +16,7 @@ using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
@@ -56,6 +57,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly IUserRepository _userRepository;
+        private readonly ICurrentUserService _currentUserService;
         private const string ConfigKeyAccessName = "keyAccess";
         private const string KeyMongoAccessNotFoundMessage = "Could not find embbedings api key";
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
@@ -75,8 +77,8 @@ namespace WoopiAiHub.Application.Services
             IMemoryCache cache,
             IQuestionnaireRepository questionnaireRepository,
             ITenantCacheServices tenantCacheServices,
-            ITeamServices teamServices,
             IOptions<MessageQueues> messageQueues,
+            ICurrentUserService currentUserService,
             IHubNotifier documentNotifier,
             IUnitOfWork unitOfWork,
             ICardRepository cardRepository,
@@ -110,6 +112,7 @@ namespace WoopiAiHub.Application.Services
             _stepToolRepository = stepToolRepository;
             _usageDailyServices = usageDailyServices;
             _userRepository = userRepository;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -198,6 +201,18 @@ namespace WoopiAiHub.Application.Services
                 {
                     _stepToolExecutionRepository.DeleteByCardIds(cardIds);
                     _stepToolOutputRepository.DeleteByCardIds(cardIds);
+                }
+
+                var cards = new List<Card>();
+                foreach (var id in cardIds)
+                {
+                    var card = await _cardRepository.FindByIdWithStepAndProfile(id);
+                    if (card?.Step != null)
+                        cards.Add(card);
+                }
+                foreach (var card in cards)
+                {
+                    card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.DocumentDeleted, _currentUserService);
                 }
 
                 await _cardRepository.DeleteByDocumentIds(ids);
@@ -517,7 +532,6 @@ namespace WoopiAiHub.Application.Services
             string tenant)
         {
             _unitOfWork.BeginTransaction();
-
             try
             {
                 await _documentDtoValidator.ValidateAndThrowAsync(requestCreateDocumentDto);
@@ -536,6 +550,11 @@ namespace WoopiAiHub.Application.Services
 
                 documentForDataBase.Cards = cards;
                 _documentRepository.Create(documentForDataBase);
+
+                foreach (var card in cards)
+                {
+                    card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.DocumentCreated, _currentUserService);
+                }
 
                 var hasExecutions = await _automationServices.PrepareExecutionAsync(workflows!);
                 var automationServicesDto = new AutomationServicesDto

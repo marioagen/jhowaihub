@@ -10,6 +10,9 @@ namespace WoopiAiHub.Domain.Enum.Audit
         AnalyzeApproval = 5,
         AnalyzeRejection = 6,
         Finalize = 7,
-        Removed = 8
+        Removed = 8,
+        DocumentCreated = 9,
+        DocumentDeleted = 10,
+        Rejection = 11
     }
 }

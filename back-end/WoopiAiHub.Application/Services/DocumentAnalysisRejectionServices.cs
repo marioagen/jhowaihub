@@ -2,6 +2,7 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -20,6 +21,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStatusRepository _statusRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICurrentUserService _currentUserService;
 
         public DocumentAnalysisRejectionServices(
             IDocumentAnalysisRejectionRepository repository,
@@ -28,7 +30,8 @@ namespace WoopiAiHub.Application.Services
             ICardRepository cardRepository,
             IStatusRepository statusRepository,
             IUserRepository userRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUserService)
         {
             _repository = repository;
             _stepRepository = stepRepository;
@@ -37,6 +40,7 @@ namespace WoopiAiHub.Application.Services
             _permissionServices = permissionServices;
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -64,6 +68,7 @@ namespace WoopiAiHub.Application.Services
             try
             {
                 card.UpdateStepAndStatus(dto.StepId, status.Id);
+                card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Rejection, _currentUserService);
                 _cardRepository.Update(card);
                 await _repository.CreateAsync(rejection);
                 _unitOfWork.Commit();
