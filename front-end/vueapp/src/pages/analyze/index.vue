@@ -163,7 +163,7 @@
                     :title="$t('quizzes.questionnaireAndAi')"
                     @click="expandHistory"
                 >
-                    <img src="./../../../assets/img/prompt.png" />
+                    <img src="@/assets/img/prompt.png" />
                 </a>
             </div>
         </div>
@@ -186,15 +186,18 @@
     />
 </template>
 <script>
+    import { hasPermission } from "@/utils/permissions";
+    import DocumentRejectionModal from "@/components/analyze/DocumentRejectionModal.vue";
+    import DocumentViewRejectionModal from "@/components/analyze/DocumentViewRejectionModal.vue";
+    import ResizeColumnsComponent from "@/components/global/ResizeColumnsComponent.vue";
+    import PermissionGroups from "@/constants/PermissionGroups";
+    import PermissionNames from "@/constants/PermissionNames";
     import DocumentViewer from "@/components/analyze/DocumentViewer.vue";
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
-    import ResizeColumnsComponent from "@/components/global/ResizeColumnsComponent.vue";
     import CardsServices from "@/services/cards/CardsServices";
     import AnalyzerService from "@/services/documents/AnalyzerService";
     import LogService from "@/services/log/logService";
-    import DocumentRejectionModal from "@/components/analyze/DocumentRejectionModal.vue";
-    import DocumentViewRejectionModal from "@/components/analyze/DocumentViewRejectionModal.vue";
 
     export default {
         name: "AnalyzerIndex",
@@ -231,6 +234,17 @@
             ResizeColumnsComponent,
             DocumentRejectionModal,
             DocumentViewRejectionModal,
+        },
+        computed: {
+            canReject() {
+                return (
+                    hasPermission(PermissionGroups.Documents, PermissionNames.Reject) &&
+                    this.currentStepOrder > 1
+                );
+            },
+            isRejected() {
+                return this.cardStatus?.toLowerCase() === "rejected";
+            },
         },
         methods: {
             normalize(dataView, isReprocessing) {
@@ -312,7 +326,7 @@
         .analyze-doc-history,
         #docHistory {
             overflow-y: auto;
-            max-height: 70vh;
+            max-height: calc(100vh - 200px);
             min-height: 300px;
             height: auto !important;
         }
@@ -325,22 +339,5 @@
         .margin-left {
             margin-left: auto;
         }
-    }
-
-    #docHistory {
-        overflow-y: auto;
-        max-height: calc(100vh - 200px);
-        min-height: 300px;
-        height: auto !important;
-    }
-
-    .btn-check:checked + .btn {
-        background-color: #0d6efd !important;
-        color: white !important;
-        border-color: #0d6efd !important;
-    }
-
-    .margin-left {
-        margin-left: auto;
     }
 </style>
