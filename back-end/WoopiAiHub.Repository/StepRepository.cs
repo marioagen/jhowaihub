@@ -172,41 +172,43 @@ namespace WoopiAiHub.Repository
                                  || (c.AssignedUser != null && c.AssignedUser.Email == login)
                              )
                          )
-                        .Select(c => new CardDto
+                        .GroupBy(c => c.DocumentBatchId.HasValue ? c.DocumentBatchId.Value : -c.Id)
+                        .Select(g => new CardDto
                         {
-                            Id = c.Id,
-                            Name = c.Name,
-                            Created = c.Created,
-                            Description = c.Document!.Description,
-                            Owner = c.Document.EmailCreator,
-                            DocumentId = c.Document.Id,
-                            StatusDocument = c.Document.Status,
-                            Percentage = c.Step!.StepTools.Any(st => st.Executions.Any(e => e.CardId == c.Id))
+                            Id = g.OrderBy(c => c.Id).First().Id,
+                            Name = g.First().Name,
+                            Created = g.OrderBy(c => c.Id).First().Created,
+                            Description = g.First().Document!.Description,
+                            Owner = g.First().Document!.EmailCreator,
+                            DocumentId = g.First().Document!.Id,
+                            StatusDocument = g.First().Document!.Status,
+                            Percentage = s.StepTools.Any(st => st.Executions.Any(e => g.Any(card => e.CardId == card.Id)))
                             ? (
-                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)) * 100
+                                s.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready) && g.All(card => st.Executions.Any(e => e.CardId == card.Id && e.Status == StatusExecution.Ready))) * 100
                                 /
-                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.CardId == c.Id))
+                                s.StepTools.Count(st => st.Executions.Any(e => g.Any(card => e.CardId == card.Id)))
                               )
                             : 100,
-                            ToolName = c.Step!.StepTools
-                                              .Where(st => st.Executions.Any(e => e.CardId == c.Id && e.Status == StatusExecution.Running))
+                            ToolName = s.StepTools
+                                              .Where(st => st.Executions.Any(e => g.Any(card => e.CardId == card.Id) && e.Status == StatusExecution.Running))
                                               .Select(st => st.Tool!.Name)
                                               .FirstOrDefault() ?? string.Empty,
-                            AssignedUser = c.AssignedUser != null ?
+                            AssignedUser = g.First().AssignedUser != null ?
                             new UserDto
                             {
-                                Name = c.AssignedUser.Name,
-                                Email = c.AssignedUser.Email,
-                                Created = c.AssignedUser.Created,
-                                Id = c.AssignedUser.Id
+                                Name = g.First().AssignedUser!.Name,
+                                Email = g.First().AssignedUser!.Email,
+                                Created = g.First().AssignedUser!.Created,
+                                Id = g.First().AssignedUser!.Id
                             }
                             : null,
                             Status = new StatusDto
                             {
-                                Id = c.Status!.Id,
-                                Name = c.Status.Name,
-                                Color = c.Status.Color
+                                Id = g.First().Status!.Id,
+                                Name = g.First().Status!.Name,
+                                Color = g.First().Status!.Color
                             },
+                            IsBatchParent = g.First().DocumentBatchId.HasValue
                         }).ToList()
                 })
                 .AsNoTracking()

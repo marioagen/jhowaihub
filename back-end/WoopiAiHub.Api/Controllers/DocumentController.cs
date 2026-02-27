@@ -83,7 +83,7 @@ namespace WoopiAiHub.Api.Controllers
                 await _documentServices.ProcessChunks(requestCreateDocumentDto,
                                                       headersDto.Tenant);
 
-                return requestCreateDocumentDto.IsLast ? Ok() :Accepted();
+                return requestCreateDocumentDto.IsLast ? Ok() : Accepted();
             }
             catch (Exception ex)
             {
