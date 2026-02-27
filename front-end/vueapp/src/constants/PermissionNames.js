@@ -1,5 +1,5 @@
 const PermissionNames = Object.freeze({
-    Reject: "DocumentReject"
+    Reject: "DocumentReject",
 });
 
 export default PermissionNames;

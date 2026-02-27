@@ -22,13 +22,19 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center mt-1">
-                    <span class="badge bg-light text-dark">
-                        <i class="fas fa-project-diagram me-1 text-primary"></i>
+                    <span class="badge bg-light text-primary">
+                        <LucideIcon
+                            icon="Waypoints"
+                            :size="15"
+                        />
                         {{ workflowName }}
                     </span>
                     /
-                    <span class="badge bg-light text-dark">
-                        <i class="fas fa-file-alt me-1 text-primary"></i>
+                    <span class="badge bg-light text-primary">
+                        <LucideIcon
+                            icon="FileText"
+                            :size="15"
+                        />
                         {{ documentName }}
                     </span>
                     <div
@@ -101,33 +107,49 @@
                         {{ $t("analyze.justification.viewJustification") }}
                     </button>
                 </div>
-                <div class="row">
-                    <prompt-view
-                        :hashDocument="hashDocument"
-                        :historyListOrder="historyListOrder"
-                        @showHistory="showHistory"
-                        @unshiftHistoryList="unshiftHistoryList"
-                        @pushHistoryList="pushHistoryList"
-                        @showAlertToast="showAlertToast"
-                        @clearMyInterval="clearMyInterval"
-                        v-if="!isExpandedHistory"
-                    />
-
-                    <doc-view
+                <ResizeColumnsComponent
+                    v-if="viewMode === 'both'"
+                    preference-key="analyzeLeftColumnPercent"
+                    :min-height="'300px'"
+                >
+                    <template #left>
+                        <DocumentViewer
+                            @showNormalize="normalize"
+                            id="docView"
+                            :documentView="'both'"
+                            :fillContainer="true"
+                        />
+                    </template>
+                    <template #right>
+                        <div
+                            id="docHistory"
+                            class="analyze-doc-history"
+                        >
+                            <AnalysisStepsSection
+                                :document-id="parseInt(documentId)"
+                                :card-id="parseInt(cardId)"
+                            />
+                        </div>
+                    </template>
+                </ResizeColumnsComponent>
+                <div
+                    v-else
+                    class="row"
+                >
+                    <DocumentViewer
                         @showNormalize="normalize"
                         id="docView"
-                        v-if="viewMode === 'doc' || viewMode === 'both'"
+                        v-if="viewMode === 'doc'"
                         :documentView="viewMode"
                     />
                     <div
                         :id="'docHistory'"
-                        :class="viewMode === 'both' ? 'col-md-6' : 'col-12'"
+                        class="col-12"
+                        v-if="viewMode === 'history'"
                     >
-                        <step-analysis-view
-                            :document-id="parseInt(idAnalyzer)"
-                            :card-id="parseInt(idCard)"
-                            @show-alert-toast="showAlertToast"
-                            v-if="viewMode === 'history' || viewMode === 'both'"
+                        <AnalysisStepsSection
+                            :document-id="parseInt(documentId)"
+                            :card-id="parseInt(cardId)"
                         />
                     </div>
                 </div>
@@ -145,54 +167,41 @@
                 </a>
             </div>
         </div>
-
-        <toast-alert
-            :showToast="toastShow"
-            :colorToast="toastColor"
-            :messageToast="toastMessage"
-            @close="closeToast"
-        />
         <NormalizeIndex
             :docData="dataView"
             :isReprocessing="isReprocessing"
             v-if="showLoading"
-        ></NormalizeIndex>
-        <DocumentRejectionModal
-            ref="modalReject"
-            :cardId="idCard"
-            :documentId="idAnalyzer"
-            @close="closeRejectModal"
-            @success="handleRejectSuccess"
-        />
-        <DocumentViewRejectionModal
-            ref="modalViewRejection"
-            @close="closeViewRejectionModal"
         />
     </main>
+    <DocumentRejectionModal
+        v-if="canReject"
+        ref="modalReject"
+        :cardId="idCard"
+        :documentId="idAnalyzer"
+        @success="handleRejectSuccess"
+    />
+    <DocumentViewRejectionModal
+        v-if="isRejected"
+        ref="modalViewRejection"
+    />
 </template>
 <script>
-    import PromptView from "@/components/pages/analyzer/prompt-view";
-    import DocView from "@/components/pages/analyzer/doc-view";
-    import StepAnalysisView from "@/components/pages/analyzer/step-analysis-view";
-    import ToastAlert from "@/components/pages/analyzer/toast-alert";
-    import api from "@/services/api";
+    import DocumentViewer from "@/components/analyze/DocumentViewer.vue";
+    import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
+    import ResizeColumnsComponent from "@/components/global/ResizeColumnsComponent.vue";
     import CardsServices from "@/services/cards/CardsServices";
+    import AnalyzerService from "@/services/documents/AnalyzerService";
     import LogService from "@/services/log/logService";
     import DocumentRejectionModal from "@/components/analyze/DocumentRejectionModal.vue";
     import DocumentViewRejectionModal from "@/components/analyze/DocumentViewRejectionModal.vue";
-    import { hasPermission } from "@/utils/permissions";
-    import PermissionGroups from "@/constants/PermissionGroups";
-    import PermissionNames from "@/constants/PermissionNames";
 
     export default {
         name: "AnalyzerIndex",
         data() {
             return {
-                crumbsData: [],
-                sidebarData: "Documents",
-                idAnalyzer: this.$route.params.documentId,
-                idCard: this.$route.params.cardId,
+                documentId: this.$route.params.documentId,
+                cardId: this.$route.params.cardId,
                 backPage: this.$route.query.page,
                 hashDocument: "",
                 isExpandedHistory: false,
@@ -205,7 +214,7 @@
                 dataUnshiftHistoryList: {},
                 dataPushHistoryList: {},
                 dataView: {
-                    Id: parseInt(this.idAnalyzer),
+                    Id: parseInt(this.documentId),
                     Embeddings_model_name: "",
                 },
                 isReprocessing: true,
@@ -213,98 +222,51 @@
                 workflowName: "",
                 documentName: "",
                 viewMode: "both",
-                cardStatus: null,
-                workflowId: null,
-                currentStepOrder: 0,
             };
         },
         components: {
-            PromptView,
-            DocView,
-            StepAnalysisView,
-            ToastAlert,
+            DocumentViewer,
+            AnalysisStepsSection,
             NormalizeIndex,
+            ResizeColumnsComponent,
             DocumentRejectionModal,
             DocumentViewRejectionModal,
         },
-        computed: {
-            canReject() {
-                return (
-                    hasPermission(PermissionGroups.Documents, PermissionNames.Reject) &&
-                    this.currentStepOrder > 1
-                );
-            },
-            isRejected() {
-                return this.cardStatus?.toLowerCase() === "rejected";
-            },
-        },
         methods: {
-            normalize: function (dataView, isReprocessing) {
+            normalize(dataView, isReprocessing) {
                 this.dataView = dataView;
                 this.isReprocessing = isReprocessing;
                 this.showLoading = true;
             },
-            setCrumbsData: function () {
-                this.crumbsData = [
-                    {
-                        crumb: this.$t("documents.title"),
-                        link: { to: "Documents" },
-                    },
-                    {
-                        crumb: this.$t("documents.listing"),
-                        link: {
-                            to: "Documents",
-                            queryPage: this.$route.query.page,
-                        },
-                    },
-                    {
-                        crumb: this.$t("common.consult"),
-                        link: {
-                            to: "Analyzer",
-                            queryPage: this.$route.query.page,
-                        },
-                    },
-                ];
-            },
-            expandHistory: function () {
+            expandHistory() {
                 this.isExpandedHistory = !this.isExpandedHistory;
             },
-            updateHistoryListOrder: function (data) {
+            updateHistoryListOrder(data) {
                 this.historyListOrder = data.value;
             },
-            showHistory: function () {
+            showHistory() {
                 this.dataShowHistory = !this.dataShowHistory;
             },
-            unshiftHistoryList: function (data) {
+            unshiftHistoryList(data) {
                 this.dataUnshiftHistoryList = data;
             },
-            pushHistoryList: function (data) {
+            pushHistoryList(data) {
                 this.dataPushHistoryList = data;
             },
-            showAlertToast: function (data) {
-                this.alertToast(data.msg, data.color);
-            },
-            getDataDocument: function () {
-                let self = this;
-                api.get("/Document/Analyze/" + this.idAnalyzer)
-                    .then(function (result) {
-                        self.hashDocument = result.data.referenceFile;
+            getDataDocument() {
+                AnalyzerService.getAnalyzeDocument(this.documentId)
+                    .then((result) => {
+                        this.hashDocument = result.referenceFile;
                     })
-                    .catch(function (e) {
-                        LogService.showMessage("Error loading document: " + e);
-                    })
-                    .finally(function () {
-                        LogService.showMessage("Finished request.");
+                    .catch((error) => {
+                        LogService.showMessage("Error loading document: " + error);
                     });
             },
             async getCardHeaderInfo() {
-                const result = await CardsServices.findCardHeaderInfo(this.idCard);
+                const result = await CardsServices.findCardHeaderInfo(this.cardId);
                 if (result && !result.error) {
                     this.workflowName = result.workflowName;
                     this.documentName = result.cardName;
-                    this.cardStatus = result.statusName;
-                    this.currentStepOrder = result.currentStepOrder;
-                    this.workflowId = result.workflowId;
                 }
             },
             goBack() {
@@ -317,32 +279,11 @@
                     this.$router.back();
                 }
             },
-            alertToast: function (msg, color) {
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-                let self = this;
-                this.myInterval = setInterval(function () {
-                    self.toastMessage = "";
-                    self.toastColor = "";
-                    self.toastShow = false;
-                    clearInterval(self.myInterval);
-                }, 3000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval: function () {
-                clearInterval(this.myInterval);
-                this.myInterval = null;
-            },
             openRejectModal() {
                 if (this.workflowId) {
                     this.$refs.modalReject.open(this.workflowId);
                 }
             },
-            closeRejectModal() {},
             handleRejectSuccess() {
                 setTimeout(() => {
                     this.goBack();
@@ -351,10 +292,8 @@
             openViewRejectionModal() {
                 this.$refs.modalViewRejection.open(this.idCard);
             },
-            closeViewRejectionModal() {},
         },
         created() {
-            this.setCrumbsData();
             this.getDataDocument();
             this.getCardHeaderInfo();
         },
@@ -370,8 +309,21 @@
             display: none;
         }
 
+        .analyze-doc-history,
         #docHistory {
-            display: none;
+            overflow-y: auto;
+            max-height: 70vh;
+            min-height: 300px;
+            height: auto !important;
+        }
+
+        .btn-check:checked + .btn {
+            background-color: #0d6efd !important;
+            color: white !important;
+            border-color: #0d6efd !important;
+        }
+        .margin-left {
+            margin-left: auto;
         }
     }
 

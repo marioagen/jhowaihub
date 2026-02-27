@@ -1,7 +1,5 @@
 <template>
-    <div
-        class="d-flex flex-column justify-content-between align-items-start mb-2"
-    >
+    <div class="d-flex flex-column justify-content-between align-items-start mb-2">
         <div class="delete-container">
             <button
                 class="btn btn-outline-danger btn-sm delete-button"
@@ -36,12 +34,21 @@
             <template #cell-created="{ data }">
                 {{ formatDate(data.row.created) }}
             </template>
-            <template #cell-actions="{ data }">                                
+            <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" @click="openEditModal(data.row)" v-tooltip="$t('common.edit')">
+                    <a
+                        :class="actionClass"
+                        @click="openEditModal(data.row)"
+                        v-tooltip="$t('common.edit')"
+                    >
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass" class="text-danger" @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        @click="openConfirmation(data.row)"
+                        v-tooltip="$t('common.delete')"
+                    >
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
@@ -115,7 +122,7 @@
             selectedQuestion: {},
             queryPage: 1,
             selectedOption: 10,
-            isAscending: false,
+            isAscending: true,
             colType: 2,
             modalTypeShow: false,
             modalAlertShow: false,
@@ -130,9 +137,7 @@
                 this.table.isLoading = true;
                 this.searchInput = obj.search;
                 var paramsReq = {
-                    search: this.searchInput.trim()
-                        ? this.searchInput.trim()
-                        : "",
+                    search: this.searchInput.trim() ? this.searchInput.trim() : "",
                     page: obj.page,
                     pageSize: this.selectedOption,
                     isAscending: this.isAscending,
@@ -142,12 +147,10 @@
                 QuestionsService.getQuestions(paramsReq)
                     .then((response) => {
                         this.table.data = response.content;
-                        this.table.pagination =
-                            response.pagination;
+                        this.table.pagination = response.pagination;
                     })
                     .finally(() => {
-                        if (obj.type === "search")
-                            this.searching = true;
+                        if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
                         this.searchInput = "";
                     });
@@ -179,17 +182,13 @@
                 this.$refs.DeleteDialog.open();
             },
             openConfirmationMultiple() {
-                const ids = this.table.selectedRows.map(
-                    (item) => item.id
-                );
+                const ids = this.table.selectedRows.map((item) => item.id);
                 this.selectedQuestion = ids;
                 this.$refs.DeleteDialog.open();
             },
             deleteQuestion() {
                 this.isDeleting = true;
-                QuestionsService.deleteQuestionById(
-                    this.selectedQuestion
-                )
+                QuestionsService.deleteQuestionById(this.selectedQuestion)
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
@@ -199,23 +198,15 @@
                                 type: null,
                             });
                             this.$notify({
-                                title: this.$t(
-                                    "questions.title"
-                                ),
-                                message: this.$t(
-                                    "questions.removeSuccess"
-                                ),
+                                title: this.$t("questions.title"),
+                                message: this.$t("questions.removeSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: this.$t(
-                                    "questions.title"
-                                ),
-                                message: this.$t(
-                                    "questions.errors.removeError"
-                                ),
+                                title: this.$t("questions.title"),
+                                message: this.$t("questions.errors.removeError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -252,9 +243,7 @@
             },
         },
         created() {
-            this.queryPage = this.$route.query.page
-                ? this.$route.query.page
-                : 1;
+            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
             this.getQuestions({
                 search: "",
                 page: this.queryPage,

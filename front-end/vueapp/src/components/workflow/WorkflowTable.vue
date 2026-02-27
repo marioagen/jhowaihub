@@ -144,7 +144,7 @@
                 selectedRows: [],
             },
             filters: {
-                orderBy: "",
+                orderBy: "name asc",
                 input: "",
                 isAsc: true,
                 isAllUsers: true,

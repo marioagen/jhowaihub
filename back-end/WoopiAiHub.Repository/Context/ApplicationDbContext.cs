@@ -67,6 +67,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<AuditLog> AuditLogs { get; set; }
         public DbSet<AuditCard> AuditCards { get; set; }
         public DbSet<DocumentAnalysisRejection> DocumentAnalysisRejections { get; set; }
+        public DbSet<DocumentBatch> DocumentBatchs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -117,6 +118,7 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<AuditLog>(new AuditLogMap().Configure);
             modelBuilder.Entity<AuditCard>(new AuditCardMap().Configure);
             modelBuilder.Entity<DocumentAnalysisRejection>(new DocumentAnalysisRejectionMap().Configure);
+            modelBuilder.Entity<DocumentBatch>(new DocumentBatchMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
 

@@ -18,6 +18,9 @@ export default new Vuex.Store({
         },
         permissions: [],
         lastSelectedWorkflow: null,
+        userPreferences: {
+            analyzeLeftColumnPercent: 50,
+        },
         tempWorkflow: {
             status: false,
             list: [],
@@ -52,6 +55,12 @@ export default new Vuex.Store({
         setLastSelectedWorkflow(state, workflow) {
             state.lastSelectedWorkflow = workflow;
         },
+        setUserPreference(state, { key, value }) {
+            if (!state.userPreferences) {
+                state.userPreferences = {};
+            }
+            state.userPreferences[key] = value;
+        },
         setTempWorkflow(state, payload) {
             state.tempWorkflow.status = true;
             state.tempWorkflow.list = payload.list;
@@ -59,7 +68,7 @@ export default new Vuex.Store({
         },
         setFlowByStep(state, payload) {
             const { stepId, flowData, stepOrder } = payload;
-            state.tempWorkflow.list = state.tempWorkflow.list.map(item => {
+            state.tempWorkflow.list = state.tempWorkflow.list.map((item) => {
                 if (stepOrder !== undefined && (stepId === undefined || stepId == 0)) {
                     return item.order == stepOrder ? { ...item, stepTools: flowData } : item;
                 }
