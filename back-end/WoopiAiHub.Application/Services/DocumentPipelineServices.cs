@@ -224,9 +224,8 @@ namespace WoopiAiHub.Application.Services
         /// Updates document status
         /// </summary>
         /// <param name="referenceFile"></param>
-        /// <param name="email"></param>
         /// <returns></returns>
-        private Task UpdateDocumentStatusAsync(string referenceFile, string email)
+        private Task UpdateDocumentStatusAsync(string referenceFile)
         {
             var documentId = _documentRepository.FindDocumentIdByReferenceFile(referenceFile);
             _documentRepository.ChangeStatus(documentId, DocumentStatus.OCR);
@@ -295,8 +294,7 @@ namespace WoopiAiHub.Application.Services
         private async Task<DocumentEmbeddingsAddDto> CreateAddDocumentsEmbeddingsDtoAsync(
             ProcessOcrResultDto processOcrResultDto,
             string text,
-            CustomDocumentPage page,
-            string keyMongoAccess)
+            CustomDocumentPage page)
         {
             var tenant = await _tenantCacheServices.FindTenantAsync(processOcrResultDto.Tenant);
             return new DocumentEmbeddingsAddDto

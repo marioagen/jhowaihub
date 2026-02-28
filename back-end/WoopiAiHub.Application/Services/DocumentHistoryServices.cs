@@ -1,10 +1,12 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Application.Services
@@ -52,7 +54,7 @@ namespace WoopiAiHub.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryServices)} in the {nameof(FindById)} method");
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 
@@ -87,7 +89,7 @@ namespace WoopiAiHub.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryServices)} in the {nameof(FindByIdWithTake)} method");
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 
@@ -106,7 +108,7 @@ namespace WoopiAiHub.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryServices)} in the {nameof(UpdateHistory)} method");
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 
@@ -125,7 +127,7 @@ namespace WoopiAiHub.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryServices)} in the {nameof(Delete)} method");
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
     }

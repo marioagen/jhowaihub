@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -64,7 +65,7 @@ namespace WoopiAiHub.Application.Services
             {
                 if (ex is not ArgumentException)
                     _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentMetadataServices)} in the {nameof(FindByIdAnalyze)} method");
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 
@@ -108,7 +109,7 @@ namespace WoopiAiHub.Application.Services
             {
                 _logger.LogError(ex, "An exception occurred in {Service}.{Method} method for documentId: {DocumentId}.",
                     nameof(DocumentMetadataServices), nameof(FindOcrTextByDocumentId), documentId);
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 

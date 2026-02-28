@@ -1,7 +1,9 @@
 using System.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -62,7 +64,7 @@ namespace WoopiAiHub.Application.Services
                 _documentRepository.ClearWorkflowRelationships(ids);
 
                 var cardIds = await _cardRepository.FindCardIdsByDocumentIdsAsync(ids);
-                if (cardIds.Any())
+                if (cardIds.Count() > 0)
                 {
                     _stepToolExecutionRepository.DeleteByCardIds(cardIds);
                     _stepToolOutputRepository.DeleteByCardIds(cardIds);
@@ -72,7 +74,7 @@ namespace WoopiAiHub.Application.Services
                 var deleted = _documentRepository.Delete(ids);
                 await Task.WhenAll(hashList.Select(hash => DeleteHash(hash, headersDto.Tenant)));
 
-                if (referenceFilesToRemove.Any())
+                if (referenceFilesToRemove.Count() > 0)
                 {
                     await DeleteBlobFilesAsync(referenceFilesToRemove, headersDto.Tenant);
                 }
@@ -84,7 +86,7 @@ namespace WoopiAiHub.Application.Services
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentDeletionServices)} in the {nameof(Delete)} method");
                 _unitOfWork.Rollback();
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 

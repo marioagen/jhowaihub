@@ -69,14 +69,14 @@ namespace WoopiAiHub.Application.Services
 
                 if (requestCreateDocumentDto.IsLast)
                 {
-                    var referenceFile = await this.FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
+                    await this.FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
                     _cache.Remove(requestCreateDocumentDto.Name);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentUploadServices)} in the {nameof(ProcessChunks)} method");
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 

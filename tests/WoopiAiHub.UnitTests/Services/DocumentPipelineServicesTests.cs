@@ -68,7 +68,6 @@ namespace WoopiAiHub.UnitTests.Services
             var result = await _documentPipelineServices.ProcessOcrResult(processOcrResultDto);
 
             // Assert
-            Assert.NotNull(result);
             Assert.Equal(ProcessOcrDataAutomationDto.CardId, result.CardId);
             Assert.Equal(ProcessOcrDataAutomationDto.StepToolId, result.StepToolId);
 

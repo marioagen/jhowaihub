@@ -1,6 +1,8 @@
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
@@ -60,7 +62,7 @@ namespace WoopiAiHub.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentNormalizedServices)} in the {nameof(FindById)} method");
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 

@@ -106,6 +106,8 @@ namespace WoopiAiHub.Api.Controllers
                                                           [FromHeader] HeadersDto headersDto)
         {
             FindDocumentDto result = await _documentServices.FindDocumentById(id, headersDto.Tenant);
+            if (result?.BytesDocument is null)
+                return NotFound();
             return File(result.BytesDocument, PdfContentType, $"{result.ReferenceFile}.pdf");
         }
     }

@@ -88,7 +88,7 @@ namespace WoopiAiHub.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentQuestionnaireServices)} in the {nameof(InputQuestionnaire)} method");
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 
@@ -124,7 +124,7 @@ namespace WoopiAiHub.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentQuestionnaireServices)} in the {nameof(InputDocument)} method");
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 
