@@ -21,6 +21,13 @@ namespace WoopiAiHub.Repository.Mappings
                 .HasColumnType("datetime")
                 .IsRequired();
 
+            builder.Property(c => c.Enable)
+                .HasColumnType("bit")
+                .HasDefaultValue(true)
+                .IsRequired();
+
+            builder.HasQueryFilter(c => c.Enable);
+
             builder.HasOne(c => c.Step)
                 .WithMany(s => s.Cards)
                 .HasForeignKey(c => c.StepId)

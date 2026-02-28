@@ -142,16 +142,18 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Deletes a card by its document id.
+        /// Logically deletes cards by document ids by setting Enable to false (soft delete).
+        /// Cards are excluded from default queries via the global query filter.
         /// </summary>
-        /// <param name="card"></param>
-        /// <returns></returns>
+        /// <param name="documentIds">Ids of documents whose cards should be logically deleted.</param>
+        /// <returns>True if any card was updated; otherwise false.</returns>
         public async Task<bool> DeleteByDocumentIds(List<int> documentIds)
         {
             var cards = await _context.Cards.Where(c => documentIds.Contains(c.DocumentId)).ToListAsync();
             if (cards.Count > 0)
             {
-                _context.Cards.RemoveRange(cards);
+                foreach (var card in cards)
+                    card.Disable();
                 return await _context.SaveChangesAsync() > 0;
             }
 

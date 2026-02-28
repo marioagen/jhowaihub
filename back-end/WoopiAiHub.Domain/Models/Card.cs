@@ -28,6 +28,12 @@ namespace WoopiAiHub.Domain.Models
         [Column("DocumentBatchId", TypeName = "int")]
         public int? DocumentBatchId { get; private set; }
 
+        /// <summary>
+        /// Logical deletion flag. When false, the card is considered deleted and excluded from default queries.
+        /// </summary>
+        [Column("Enable", TypeName = "bit")]
+        public bool Enable { get; private set; } = true;
+
         public virtual Step? Step { get; set; }
         public virtual Document? Document { get; set; }
         public virtual Status? Status { get; set; }
@@ -36,7 +42,7 @@ namespace WoopiAiHub.Domain.Models
         public virtual ICollection<StepToolExecution> Executions { get; private set; } = new List<StepToolExecution>();
         public virtual ICollection<StepToolOutput> Outputs { get; private set; } = new List<StepToolOutput>();
 
-        public Card(int id, DateTime created, int stepId, int documentId, string name, int statusId, Guid? assignedUserId, int? documentBatchId = null)
+        public Card(int id, DateTime created, int stepId, int documentId, string name, int statusId, Guid? assignedUserId, int? documentBatchId = null, bool enable = true)
             : base(id, created)
         {
             StepId = stepId;
@@ -45,6 +51,7 @@ namespace WoopiAiHub.Domain.Models
             StatusId = statusId;
             AssignedUserId = assignedUserId;
             DocumentBatchId = documentBatchId;
+            Enable = enable;
         }
 
         /// <summary>
@@ -61,6 +68,14 @@ namespace WoopiAiHub.Domain.Models
         public void UpdateAssignedUser(Guid? userId)
         {
             AssignedUserId = userId;
+        }
+
+        /// <summary>
+        /// Marks the card as logically deleted (soft delete). It will be excluded from default queries.
+        /// </summary>
+        public void Disable()
+        {
+            Enable = false;
         }
 
         public bool IsRejected()
