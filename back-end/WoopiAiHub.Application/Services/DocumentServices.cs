@@ -89,8 +89,9 @@ namespace WoopiAiHub.Application.Services
             }
             catch (Exception ex)
             {
-                if (ex is not ArgumentException)
-                    _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(FindAllPaged)} method");
+                if (ex is ArgumentException)
+                    throw;
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(FindAllPaged)} method");
                 throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
@@ -173,6 +174,8 @@ namespace WoopiAiHub.Application.Services
             }
             catch (Exception ex)
             {
+                if (ex is ArgumentNullException or ArgumentException)
+                    throw;
                 _logger.LogError(ex, "An exception occurred in {Service}.{Method} method for documentId: {Id} and tenant: {Tenant}.",
                     nameof(DocumentServices), nameof(FindDocumentById), id, tenant);
                 throw new AppException(ErrorCode.DefaultError, ex.Message, null);

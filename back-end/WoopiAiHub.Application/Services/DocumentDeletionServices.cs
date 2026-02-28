@@ -95,12 +95,16 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="hash"></param>
         /// <param name="tenant"></param>
-        /// <param name="keyMongo"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public async Task DeleteHash(string hash,
             string tenant)
         {
+            if (string.IsNullOrEmpty(hash))
+                throw new ArgumentException("Hash cannot be null or empty.", nameof(hash));
+            if (string.IsNullOrEmpty(tenant))
+                throw new ArgumentException("Tenant cannot be null or empty.", nameof(tenant));
+
             var apikey = _config["IndexerApiKey"]!;
             var resultRequest = await _embbedingsApi.DeleteHash(tenant,
                 hash,
