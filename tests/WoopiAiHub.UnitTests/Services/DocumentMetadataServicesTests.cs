@@ -1,4 +1,5 @@
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -62,7 +63,8 @@ namespace WoopiAiHub.UnitTests.Services
             var headers = DocumentFixture.FindValidHeadersDto();
 
             // Act / Assert
-            Assert.Throws<ArgumentException>(() => _documentMetadataServices.FindByIdAnalyze(documentId, headers));
+            var ex = Assert.Throws<AppException>(() => _documentMetadataServices.FindByIdAnalyze(documentId, headers));
+            Assert.Equal("Error while finding document in database", ex.Message);
             documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
         }
 

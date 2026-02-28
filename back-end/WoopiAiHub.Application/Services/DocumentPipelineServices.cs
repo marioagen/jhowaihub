@@ -93,7 +93,7 @@ namespace WoopiAiHub.Application.Services
             });
 
             await SaveStepToolOutputAsync(execution, embeddingsJson);
-            await UpdateDocumentStatusAsync(dto.ReferenceFile, dto.Email);
+            await UpdateDocumentStatusAsync(dto.ReferenceFile);
 
             return dto.Data;
         }
@@ -240,7 +240,6 @@ namespace WoopiAiHub.Application.Services
         private async Task<List<DocumentEmbeddingsAddDto>> ExtractDocumentEmbeddingsAddDto(
             ProcessOcrResultDto processOcrResultDto)
         {
-            var apikey = _config["IndexerApiKey"]!;
             List<DocumentEmbeddingsAddDto> listDocument = new List<DocumentEmbeddingsAddDto>();
 
             var tablesByPage = processOcrResultDto.AnalyzeResult.Tables
@@ -278,8 +277,7 @@ namespace WoopiAiHub.Application.Services
 
                 var documentEmbeddingsAddDto = await CreateAddDocumentsEmbeddingsDtoAsync(processOcrResultDto,
                     pageText.ToString(),
-                    page,
-                    apikey);
+                    page);
                 listDocument.Add(documentEmbeddingsAddDto);
             }
 
