@@ -64,7 +64,7 @@ namespace WoopiAiHub.Application.Services
                 _documentRepository.ClearWorkflowRelationships(ids);
 
                 var cardIds = await _cardRepository.FindCardIdsByDocumentIdsAsync(ids);
-                if (cardIds.Count() > 0)
+                if (cardIds.Any())
                 {
                     _stepToolExecutionRepository.DeleteByCardIds(cardIds);
                     _stepToolOutputRepository.DeleteByCardIds(cardIds);
@@ -74,7 +74,7 @@ namespace WoopiAiHub.Application.Services
                 var deleted = _documentRepository.Delete(ids);
                 await Task.WhenAll(hashList.Select(hash => DeleteHash(hash, headersDto.Tenant)));
 
-                if (referenceFilesToRemove.Count() > 0)
+                if (referenceFilesToRemove.Any())
                 {
                     await DeleteBlobFilesAsync(referenceFilesToRemove, headersDto.Tenant);
                 }

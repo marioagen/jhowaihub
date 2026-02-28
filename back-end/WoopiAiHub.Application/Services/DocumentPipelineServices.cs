@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Text;
@@ -28,7 +27,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHubNotifier _hubNotifier;
-        private readonly IConfiguration _config;
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly MessageQueues _messageQueues;
@@ -43,7 +41,6 @@ namespace WoopiAiHub.Application.Services
             IWorkflowRepository workflowRepository,
             IUnitOfWork unitOfWork,
             IHubNotifier hubNotifier,
-            IConfiguration config,
             ITenantCacheServices tenantCacheServices,
             IUsageDailyServices usageDailyServices,
             IOptions<MessageQueues> messageQueues)
@@ -55,7 +52,6 @@ namespace WoopiAiHub.Application.Services
             _workflowRepository = workflowRepository;
             _unitOfWork = unitOfWork;
             _hubNotifier = hubNotifier;
-            _config = config;
             _tenantCacheServices = tenantCacheServices;
             _usageDailyServices = usageDailyServices;
             _messageQueues = messageQueues.Value;

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Refit;
 using WoopiAiHub.Application.Dto;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -55,7 +56,7 @@ namespace WoopiAiHub.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(CheckerExceededPages)} method");
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 
@@ -65,7 +66,8 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="documentPagedDataDto"></param>
         /// <returns></returns>
-        /// <exception cref="Exception"></exception>
+        /// <exception cref="AppException"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public DocumentPagedResultDto FindAllPaged(DocumentPagedDataDto documentPagedDataDto,
             string emailCreator)
         {
@@ -89,7 +91,7 @@ namespace WoopiAiHub.Application.Services
             {
                 if (ex is not ArgumentException)
                     _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentServices)} in the {nameof(FindAllPaged)} method");
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 
@@ -173,7 +175,7 @@ namespace WoopiAiHub.Application.Services
             {
                 _logger.LogError(ex, "An exception occurred in {Service}.{Method} method for documentId: {Id} and tenant: {Tenant}.",
                     nameof(DocumentServices), nameof(FindDocumentById), id, tenant);
-                throw;
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 
