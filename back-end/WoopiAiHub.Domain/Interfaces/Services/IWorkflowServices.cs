@@ -31,5 +31,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         StepDto FindStepById(int id);
         Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default);
         Task<int> CloneAsync(WorkflowCloneRequestDto dto);
+        ICollection<WorkflowInternalDto> FindAllInternal();
+        Task<Workflow?> FindModelById(int id);
     }
 }
