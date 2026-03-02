@@ -106,6 +106,7 @@
 </template>
 <script>
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
+    import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices.js";
     import LogService from "@/services/log/logService";
 
     const VIEW_MODE_PDF = "pdf";
@@ -176,7 +177,7 @@
                 this.viewMode = VIEW_MODE_TEXT;
                 if (this.textContent == "") {
                     this.loadingText = true;
-                    DocumentsServices.getOcrText(this.documentId)
+                    DocumentMetadataServices.getOcrText(this.documentId)
                         .then((response) => {
                             if (response.error !== undefined) {
                                 this.loadingText = false;
@@ -196,7 +197,7 @@
                 }
             },
             checkOcrAvailability() {
-                DocumentsServices.getOcrText(this.documentId)
+                DocumentMetadataServices.getOcrText(this.documentId)
                     .then((response) => {
                         if (response && response.hasOcr) {
                             this.hasOcrText = true;
@@ -224,7 +225,7 @@
                     Embeddings_model_name: "",
                 };
                 this.loadingNormalize = true;
-                DocumentsServices.normalizeDocument(paramsReq)
+                DocumentMetadataServices.normalizeDocument(paramsReq)
                     .then((response) => {
                         if (response.error !== undefined) {
                             window.onbeforeunload = null;
