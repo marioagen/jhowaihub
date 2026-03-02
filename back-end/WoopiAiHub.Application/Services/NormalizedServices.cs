@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -9,12 +9,15 @@ namespace WoopiAiHub.Application.Services
     public class DocumentNormalizedServices : IDocumentNormalizedServices
     {
         private readonly IDocumentNormalizedRepository _documentNormalizedRepository;
+        private readonly IDocumentRepository _documentRepository;
         private readonly IValidator<DocumentNormalized> _documentNormalizedValidator;
 
         public DocumentNormalizedServices(IDocumentNormalizedRepository documentNormalizedRepository,
+                                          IDocumentRepository documentRepository,
                                           IValidator<DocumentNormalized> documentNormalizedValidator)
         {
             _documentNormalizedRepository = documentNormalizedRepository;
+            _documentRepository = documentRepository;
             _documentNormalizedValidator = documentNormalizedValidator;
         }
 
@@ -47,8 +50,11 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public DocumentNormalized FindById(int id)
+        public DocumentNormalized? FindById(int id)
         {
+            if (_documentRepository.FindById(id) == null)
+                return null;
+
             return _documentNormalizedRepository.FindById(id);
         }
 
@@ -68,6 +74,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="normalizedContext"></param>
         public void InsertOrUpdate(int documentId, string normalizedContext)
         {
+            if (_documentRepository.FindById(documentId) == null)
+                return;
+
             var normalizedDocument = _documentNormalizedRepository.FindById(documentId);
             if (normalizedDocument is not null)
             {

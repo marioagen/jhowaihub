@@ -11,12 +11,15 @@ namespace WoopiAiHub.Application.Services
     public class DocumentHistoryServices : IDocumentHistoryServices
     {
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
+        private readonly IDocumentRepository _documentRepository;
         private readonly IValidator<DocumentHistory> _documentHistoryValidator;
 
         public DocumentHistoryServices(IDocumentHistoryRepository documentHistoryRepository,
+                                       IDocumentRepository documentRepository,
                                        IValidator<DocumentHistory> documentHistoryValidator)
         {
             _documentHistoryRepository = documentHistoryRepository;
+            _documentRepository = documentRepository;
             _documentHistoryValidator = documentHistoryValidator;
         }
         
@@ -41,6 +44,9 @@ namespace WoopiAiHub.Application.Services
         public JsonResult FindById(int idDocument,
                                    string emailCreator)
         {
+            if (_documentRepository.FindById(idDocument) == null)
+                return new JsonResult(Enumerable.Empty<DocumentHistory>());
+
             return new JsonResult(_documentHistoryRepository.FindById(idDocument));
         }
 
@@ -56,6 +62,9 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public IEnumerable<DocumentHistoryDto> FindByIdWithTake(int idDocument, int take, string? search = null, string? order = null, string? orderBy = null, Guid? userId = null)
         {
+            if (_documentRepository.FindById(idDocument) == null)
+                return Enumerable.Empty<DocumentHistoryDto>();
+
             var entries = _documentHistoryRepository.FindByIdWithTake(idDocument, take, search, order, orderBy, userId);
             return entries.Select(h => new DocumentHistoryDto
             {
@@ -79,6 +88,9 @@ namespace WoopiAiHub.Application.Services
         public bool UpdateHistory(UpdateHistoryDto updateHistoryDto,
                                   string emailCreator)
         {
+            if (_documentRepository.FindById(updateHistoryDto.IdDocument) == null)
+                return false;
+
             var result = _documentHistoryRepository.UpdateHistory(updateHistoryDto);
 
             return result;
@@ -92,6 +104,9 @@ namespace WoopiAiHub.Application.Services
         public bool Delete(int idDocument,
                            string emailCreator)
         {
+            if (_documentRepository.FindById(idDocument) == null)
+                return false;
+
             var result = _documentHistoryRepository.Delete(idDocument);
 
             return result;

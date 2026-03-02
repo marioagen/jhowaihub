@@ -308,11 +308,14 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("Normalized/{id}")]
         [SwaggerOperation("EndPoint that returns the normalized text of an Document by id")]
         [ProducesResponseType(typeof(DocumentNormalized), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult FindDocumentNormalizedText(int id)
         {
             try
             {
                 var result = _documentNormalizedServices.FindById(id);
+                if (result == null)
+                    return NotFound();
                 return Ok(result);
             }
             catch (Exception ex)
