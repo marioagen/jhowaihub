@@ -293,7 +293,8 @@ namespace WoopiAiHub.Application.Services
                 Name = result.Name,
                 Description = result.Description,
                 ReferenceFile = result.ReferenceFile,
-                CardId = activeCard?.Id
+                CardId = activeCard?.Id,
+                DocumentBatchId = activeCard?.DocumentBatchId
             };
         }
 
@@ -391,7 +392,8 @@ namespace WoopiAiHub.Application.Services
             if (execution is null)
                 return dto.Data;
 
-            await UpdateExecutionAsync(execution, dto.Email);
+            await _automationServices.HandleExecutionProgress(execution, dto.Email);
+            //await UpdateExecutionAsync(execution, dto.Email);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(dto.Data.StepToolId);
             string embeddingsJson = JsonConvert.SerializeObject(new DocumentEmbeddingsDataDto
             {

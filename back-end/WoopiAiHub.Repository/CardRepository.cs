@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -240,6 +241,22 @@ namespace WoopiAiHub.Repository
             return await _context.Cards
                 .Where(c => documentIds.Contains(c.DocumentId))
                 .Select(c => c.Id)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a collection of cards associated with the specified document batch identifier.
+        /// </summary>
+        /// <remarks>The returned collection is ordered by card identifier. Ensure that the
+        /// documentBatchId provided is valid to avoid unexpected results.</remarks>
+        /// <param name="documentBatchId">The unique identifier of the document batch for which to retrieve cards. Must be a positive integer.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of Card objects
+        /// linked to the specified document batch. The collection will be empty if no matching cards are found.</returns>
+        public async Task<ICollection<Card>> FindByDocumentBatchId(int documentBatchId)
+        {
+            return await _context.Cards
+                .Where(c => c.DocumentBatchId == documentBatchId)
+                .OrderBy(c => c.Id)
                 .ToListAsync();
         }
     }

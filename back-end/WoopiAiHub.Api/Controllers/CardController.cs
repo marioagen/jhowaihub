@@ -111,5 +111,23 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _cardServices.FindHeaderInfoAsync(id);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Retrieves the collection of card batches associated with the specified document batch identifier.
+        /// </summary>
+        /// <remarks>This method is asynchronous and may involve I/O operations. Ensure that the
+        /// documentBatchId parameter is valid to avoid exceptions.</remarks>
+        /// <param name="documentBatchId">The unique identifier of the document batch for which to retrieve associated card batches. Must be a
+        /// positive integer.</param>
+        /// <returns>An IActionResult containing a collection of CardBatchDto objects that represent the card batches linked to
+        /// the specified document batch identifier. Returns an empty collection if no card batches are found.</returns>
+        [HttpGet("Batch/{documentBatchId}")]
+        [SwaggerOperation("Retrieves the collection of card batches associated with the specified document batch identifier.")]
+        [ProducesResponseType(typeof(ICollection<CardBatchDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindCardsByDocumentBatchId(int documentBatchId)
+        {
+            var result = await _cardServices.FindCardsByDocumentBatchId(documentBatchId);
+            return Ok(result);
+        }
     }
 }

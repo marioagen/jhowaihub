@@ -370,6 +370,9 @@ const spanish = {
         statusSelect: {
             none: "Estado del card",
         },
+        all: "Todos",
+        singleDocuments: "Documentos individuales",
+        batchDocuments: "Documentos en lote",
     },
     flow: {
         downloadJson: "Descargar JSON",

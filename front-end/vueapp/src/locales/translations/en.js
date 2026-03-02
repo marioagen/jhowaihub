@@ -365,6 +365,9 @@ const english = {
         statusSelect: {
             none: "Card status",
         },
+        all: "All",
+        singleDocuments: "Single documents",
+        batchDocuments: "Batch documents",
     },
     flow: {
         downloadJson: "Download JSON",

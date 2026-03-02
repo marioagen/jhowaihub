@@ -10,7 +10,6 @@ using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using Newtonsoft.Json;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -394,6 +393,32 @@ namespace WoopiAiHub.Application.Services
             }
 
             return dto;
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a collection of card batch data transfer objects associated with the specified
+        /// document batch identifier.
+        /// </summary>
+        /// <remarks>If no card batches are associated with the provided document batch identifier, the
+        /// method returns <see langword="null"/> instead of an empty collection.</remarks>
+        /// <param name="documentBatchId">The unique identifier of the document batch for which to retrieve associated card batches. Must be a
+        /// positive integer.</param>
+        /// <returns>A collection of <see cref="CardBatchDto"/> objects representing the card batches linked to the specified
+        /// document batch identifier, or <see langword="null"/> if no card batches are found.</returns>
+        public async Task<ICollection<CardBatchDto>?> FindCardsByDocumentBatchId(int documentBatchId)
+        {
+            var cards = await _cardRepository.FindByDocumentBatchId(documentBatchId);
+            if(cards is null || cards.Count <= 0)
+            {
+                return null;
+            }
+
+            return [.. cards.Select(c => new CardBatchDto
+            {
+                CardId = c.Id,
+                DocumentId = c.DocumentId,
+                DocumentName = c.Name
+            })];
         }
     }
 }

@@ -80,7 +80,6 @@
             },
             handleStepChange(step) {
                 this.currentStepData = step;
-                console.log(this.currentStepData);
             },
             handleFieldUpdate({ id, field, outputsJson }) {
                 let params = {};

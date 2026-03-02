@@ -18,5 +18,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<List<Card>> FindByDocumentIdCardListAsync(int documentId);
         Task<CardHeaderDto?> FindHeaderInfoAsync(int cardId);
         Task<ICollection<int>> FindCardIdsByDocumentIdsAsync(IEnumerable<int> documentIds);
+        Task<ICollection<Card>> FindByDocumentBatchId(int documentBatchId);
     }
 }

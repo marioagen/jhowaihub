@@ -368,6 +368,9 @@ const portuguese = {
         statusSelect: {
             none: "Status do card",
         },
+        all: "Todos",
+        singleDocuments: "Documentos únicos",
+        batchDocuments: "Documentos em lote",
     },
     flow: {
         downloadJson: "Baixar JSON",
