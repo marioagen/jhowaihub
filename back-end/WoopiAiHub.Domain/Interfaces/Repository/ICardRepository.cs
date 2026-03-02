@@ -10,6 +10,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<Card?> FindByIdWithDocument(int id);
         Task<CardAnalysisDto?> FindByIdWithDocumentAndWorkflow(int id);
         Task<Card?> FindByIdWithStepAndProfile(int id);
+        Task<Card?> FindByIdWithStepWorkflow(int id);
         bool Update(Card card);
         Task<bool> DeleteByDocumentIds(List<int> documentIds);
         Task<bool> ExistsStepsInUse(ICollection<int> ids);

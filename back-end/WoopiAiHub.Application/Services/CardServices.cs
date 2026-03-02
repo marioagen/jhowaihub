@@ -57,7 +57,7 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
 
-            var card = await _cardRepository.FindById(updateAssingnedUserDto.CardId);
+            var card = await _cardRepository.FindByIdWithStepWorkflow(updateAssingnedUserDto.CardId);
 
             if (card == null)
             {
@@ -86,7 +86,7 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> UnassignUser(int cardId)
         {
-            var card = await _cardRepository.FindById(cardId);
+            var card = await _cardRepository.FindByIdWithStepWorkflow(cardId);
             if (card == null)
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
@@ -120,7 +120,7 @@ namespace WoopiAiHub.Application.Services
 
             var statusId = card.IsRejected() ? previousStatusId : step.StatusId;
             card.UpdateStepAndStatus(step.Id, statusId);
-            card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Advancement, _currentUserService, _auditCardRepository);
+            card.CreateAuditLog(updateCardStepStatusDto.WorkflowId, AuditCardActionType.Advancement, _currentUserService, _auditCardRepository);
             var result = _cardRepository.Update(card);
 
             if (result)

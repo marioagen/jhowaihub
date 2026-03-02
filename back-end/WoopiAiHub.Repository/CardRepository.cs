@@ -51,6 +51,20 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Returns a card by its ID with status
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Card?> FindByIdWithStepWorkflow(int id)
+        {
+            return await _context.Cards
+                .Include(s => s.Step)
+                    .ThenInclude(st => st.Workflow)
+                .Where(c => c.Id == id)
+                .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
         /// Returns a card by its ID.
         /// </summary>
         /// <param name="id"></param>
