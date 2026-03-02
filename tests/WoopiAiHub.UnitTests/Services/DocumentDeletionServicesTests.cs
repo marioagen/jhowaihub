@@ -31,7 +31,7 @@ namespace WoopiAiHub.UnitTests.Services
             _documentDeletionServices = _mocker.CreateInstance<DocumentDeletionServices>();
         }
 
-        [Fact(DisplayName = "Delete")]
+        [Fact(DisplayName = "Delete - Should delete documents and related data successfully")]
         [Trait("Delete", "Success")]
         public async Task Delete_Success()
         {
@@ -93,7 +93,7 @@ namespace WoopiAiHub.UnitTests.Services
             unitOfWork.Verify(u => u.Rollback(), Times.Never);
         }
 
-        [Fact(DisplayName = "Delete")]
+        [Fact(DisplayName = "Delete - Should return false when repository delete fails")]
         [Trait("Delete", "Fail")]
         public async Task Delete_FailAsync()
         {
@@ -153,7 +153,7 @@ namespace WoopiAiHub.UnitTests.Services
             unitOfWork.Verify(u => u.Rollback(), Times.Never);
         }
 
-        [Fact(DisplayName = "DeleteHash")]
+        [Fact(DisplayName = "DeleteHash - Should delete hash from embeddings successfully")]
         [Trait("DeleteHash", "Success")]
         public async Task DeleteHash_Success()
         {
@@ -178,7 +178,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
         }
 
-        [Fact(DisplayName = "DeleteHash")]
+        [Fact(DisplayName = "DeleteHash - Should throw ArgumentException when API returns error")]
         [Trait("DeleteHash", "Fail")]
         public async Task DeleteHash_Fail()
         {

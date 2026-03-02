@@ -27,7 +27,7 @@ namespace WoopiAiHub.UnitTests.Services
             _documentMetadataServices = _mocker.CreateInstance<DocumentMetadataServices>();
         }
 
-        [Fact(DisplayName = "FindByIdAnalyzeSuccess")]
+        [Fact(DisplayName = "FindByIdAnalyze - Should return document metadata with card when document found")]
         [Trait("FindByIdAnalyze", "Success")]
         public void FindByIdAnalyze_Success()
         {
@@ -52,7 +52,7 @@ namespace WoopiAiHub.UnitTests.Services
             cardRepository.Verify(a => a.FindByDocumentIdCardListAsync(It.IsAny<int>()), Times.Once);
         }
 
-        [Fact(DisplayName = "FindByIdAnalyzeFail")]
+        [Fact(DisplayName = "FindByIdAnalyze - Should throw AppException when document not found")]
         [Trait("FindByIdAnalyze", "Fail")]
         public void FindByIdAnalyze_Fail()
         {

@@ -26,7 +26,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker = new AutoMocker();
         }
 
-        [Fact(DisplayName = "ProcessChunks")]
+        [Fact(DisplayName = "ProcessChunks - Should process document chunks and upload successfully")]
         [Trait("ProcessChunks", "Success")]
         public async Task ProcessChunks_Success()
         {

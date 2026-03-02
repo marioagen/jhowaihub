@@ -41,7 +41,7 @@ namespace WoopiAiHub.UnitTests.Services
             _documentPipelineServices = _mocker.CreateInstance<DocumentPipelineServices>();
         }
 
-        [Fact(DisplayName = "ProcessOcrResult should successfully process OCR result and list of DocumentEmbeddingsAddDto")]
+        [Fact(DisplayName = "ProcessOcrResult - Should successfully process OCR result and return automation DTO")]
         [Trait("ProcessOcrResult", "Success")]
         public async Task ProcessOcrResult_Success()
         {
@@ -75,7 +75,7 @@ namespace WoopiAiHub.UnitTests.Services
             tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
         }
 
-        [Fact(DisplayName = "ProcessEmbeddingsResult should successfully process embeddings result")]
+        [Fact(DisplayName = "ProcessEmbeddingsResult - Should successfully process embeddings result")]
         [Trait("ProcessEmbeddingsResult", "Success")]
         public async Task ProcessEmbeddingsResult_Success()
         {
@@ -96,7 +96,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile), Times.Once);
         }
 
-        [Fact(DisplayName = "InputToolQuestionnaire should successfully process the document questionnaire and return the data")]
+        [Fact(DisplayName = "InputToolQuestionnaire - Should process document questionnaire and return data when document found")]
         [Trait("InputToolQuestionnaire", "Success")]
         public async Task InputToolQuestionnaire_Success()
         {
@@ -124,7 +124,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepositoryMock.Verify(r => r.FindByReferenceFile(documentEmbeddingsQueryResponseDto.ReferenceFile), Times.Once);
         }
 
-        [Fact(DisplayName = "InputToolQuestionnaire should not be successfully process the document questionnaire and return null")]
+        [Fact(DisplayName = "InputToolQuestionnaire - Should return null when document not found")]
         [Trait("InputToolQuestionnaire", "Fail")]
         public async Task InputToolQuestionnaire_Fail()
         {

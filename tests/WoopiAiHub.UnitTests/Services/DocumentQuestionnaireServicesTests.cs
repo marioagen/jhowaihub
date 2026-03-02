@@ -34,7 +34,7 @@ namespace WoopiAiHub.UnitTests.Services
             _documentQuestionnaireServices = _mocker.CreateInstance<DocumentQuestionnaireServices>();
         }
 
-        [Fact(DisplayName = "InputQuestionnaire")]
+        [Fact(DisplayName = "InputQuestionnaire - Should process questionnaire and return true when valid")]
         [Trait("InputQuestionnaire", "Success")]
         public async Task InputQuestionnaire_Success()
         {
@@ -70,7 +70,7 @@ namespace WoopiAiHub.UnitTests.Services
             tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
         }
 
-        [Fact(DisplayName = "InputDocument")]
+        [Fact(DisplayName = "InputDocument - Should process document input and return result when valid")]
         [Trait("InputDocument", "Success")]
         public async Task InputDocument_Success()
         {

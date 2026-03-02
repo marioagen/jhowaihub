@@ -71,7 +71,7 @@ namespace WoopiAiHub.UnitTests.Services
             _documentServices = _mocker.CreateInstance<DocumentServices>();
         }
 
-        [Fact(DisplayName = "CheckerExceededPages")]
+        [Fact(DisplayName = "CheckerExceededPages - Should return true when pages exceeded")]
         [Trait("CheckerExceededPages", "Success")]
         public async Task CheckerExceededPages_Success()
         {
@@ -87,7 +87,7 @@ namespace WoopiAiHub.UnitTests.Services
             marketPlaceApi.Verify(a => a.CheckExceededPages(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
-        [Fact(DisplayName = "CheckerExceededPages")]
+        [Fact(DisplayName = "CheckerExceededPages - Should return false when pages not exceeded")]
         [Trait("CheckerExceededPages", "Fail")]
         public async Task CheckerExceededPages_Fail()
         {
@@ -103,7 +103,7 @@ namespace WoopiAiHub.UnitTests.Services
             marketPlaceApi.Verify(a => a.CheckExceededPages(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
-        [Fact(DisplayName = "FindAllPaged")]
+        [Fact(DisplayName = "FindAllPaged - Should return paged documents when valid paged data")]
         [Trait("FindAllPaged", "Success")]
         public void FindAllPaged_Success()
         {
@@ -121,7 +121,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(a => a.FindAllOrdered(pagedData, "email"), Times.Once);
         }
 
-        [Fact(DisplayName = "FindAllPaged")]
+        [Fact(DisplayName = "FindAllPaged - Should throw ArgumentException when paged data invalid")]
         [Trait("FindAllPaged", "Fail")]
         public void FindAllPaged_Fail()
         {
@@ -133,7 +133,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Throws<ArgumentException>(() => _documentServices.FindAllPaged(pagedData, "email"));
         }
 
-        [Fact(DisplayName = "FindDocumentSuccess")]
+        [Fact(DisplayName = "FindDocumentById - Should return document when found")]
         [Trait("FindDocument", "Success")]
         public async Task FindDocument_Success()
         {
@@ -157,7 +157,7 @@ namespace WoopiAiHub.UnitTests.Services
                                                     It.IsAny<string>()), Times.Once);
         }
 
-        [Fact(DisplayName = "FindDocumentFail")]
+        [Fact(DisplayName = "FindDocumentById - Should throw ArgumentNullException when API key empty")]
         [Trait("FindDocument", "Fail")]
         public async Task FindDocument_Fail()
         {
@@ -173,7 +173,7 @@ namespace WoopiAiHub.UnitTests.Services
             await Assert.ThrowsAsync<ArgumentNullException>(() => documentServices.FindDocumentById(id, tenant));
         }
 
-        [Fact(DisplayName = "FindStatusAndName")]
+        [Fact(DisplayName = "FindStatusAndName - Should return status and name when document found")]
         [Trait("FindStatusAndName", "Success")]
         public void FindStatusAndName_Success()
         {
@@ -190,7 +190,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
         }
 
-        [Fact(DisplayName = "ChangeStatus")]
+        [Fact(DisplayName = "ChangeStatus - Should return true when status updated successfully")]
         [Trait("ChangeStatus", "Success")]
         public async Task ChangeStatus_Success()
         {
@@ -207,7 +207,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
         }
 
-        [Fact(DisplayName = "ChangeStatus")]
+        [Fact(DisplayName = "ChangeStatus - Should return false when repository update fails")]
         [Trait("ChangeStatus", "Fail")]
         public async Task ChangeStatus_Fail()
         {
@@ -224,7 +224,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(r => r.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
         }
 
-        [Fact(DisplayName = "FindDocumentCount")]
+        [Fact(DisplayName = "FindDocumentCount - Should return document count when documents exist")]
         [Trait("FindDocumentCount", "Success")]
         public void FindDocumentCount_Success()
         {
@@ -241,7 +241,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         }
 
-        [Fact(DisplayName = "FindDocumentCount")]
+        [Fact(DisplayName = "FindDocumentCount - Should return zero when no documents")]
         [Trait("FindDocumentCount", "Fail")]
         public void FindDocumentCount_Fail()
         {
@@ -258,7 +258,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         }
 
-        [Fact(DisplayName = "ChangeStatusByReferenceFile Success")]
+        [Fact(DisplayName = "ChangeStatusByReferenceFile - Should return true when status updated successfully")]
         [Trait("ChangeStatusByReferenceFile", "Success")]
         public async Task ChangeStatusByReferenceFile_Success()
         {
