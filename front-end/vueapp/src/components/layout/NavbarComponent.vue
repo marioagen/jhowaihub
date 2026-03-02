@@ -5,8 +5,13 @@
                 <span class="badge bg-light text-dark border">{{ this.selectedTenant }}</span>
                 <div class="dropdown nav-buttons">
                     <button class="btn btn-outline-primary table-btn btn-sm" type="button" data-bs-toggle="dropdown"
-                        aria-expanded="false" style="display: flex; align-items: center; justify-content: center;">
+                            aria-expanded="false" style="display: flex; align-items: center; justify-content: center;">
                         <LucideIcon icon="Globe" />
+                    </button>
+                    <button class="btn btn-outline-primary table-btn btn-sm" type="button" @click="toggleTheme"
+                            aria-expanded="false" style="display: flex; align-items: center; justify-content: center;">
+                        <LucideIcon icon="Moon" v-if="isDarkMode"/>
+                        <LucideIcon icon="Sun" v-else />
                     </button>
                     <ul class="dropdown-menu dropdown-menu-button text-small shadow">
                         <li>
@@ -95,6 +100,7 @@ export default {
             user: this.$store.state.userProfile.name,
             selectedTenant: null,
             tenantsFromState: [],
+            isDarkmode: false,
         };
     },
     methods: {
@@ -161,6 +167,19 @@ export default {
             if (strSplit.length === 1) return strSplit[0];
             return `${strSplit[0]} ${strSplit[strSplit.length - 1]}`;
         },
+        toggleTheme: function () {
+            if (localStorage.getItem("theme") === "css-theme-dark") {
+                this.setTheme("css-theme-light");
+                this.isDarkmode = false;
+            } else {
+                this.setTheme("css-theme-dark");
+                this.isDarkmode = true;
+            }
+        },
+        setTheme: function (themeName) {
+            localStorage.setItem("theme", themeName);
+            document.documentElement.className = themeName;
+        },
     },
     computed: {
         tenantInitialized() {
@@ -195,7 +214,16 @@ export default {
         this.getUserTenants(userEmail, savedTenant);
     },
     mounted() {
-        document.documentElement.className = "css-theme-light";
+        let self = this;
+        (function () {
+            if (localStorage.getItem("theme") === "css-theme-dark") {
+                self.setTheme("css-theme-dark");
+                self.showLogoDarkMode = true;
+            } else {
+                self.setTheme("css-theme-light");
+                self.showLogoDarkMode = false;
+            }
+        })();
     },
 };
 </script>
@@ -207,9 +235,9 @@ export default {
     padding-bottom: 0.8rem;
 }
 
-.navbar-light {
-    background-color: #ffffff;
-}
+    .navbar-light {
+        background-color: var(--color-bg-navbar) !important;
+    }
 
 .navbar-toggler,
 .navbar-toggler-icon {

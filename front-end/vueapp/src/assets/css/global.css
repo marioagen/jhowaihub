@@ -13,7 +13,7 @@ body {
     left: 0;
     height: 100vh;
     width: 240px;
-    background: white;
+    background: var(--color-bg-sidebar-content) !important;
     z-index: 1000;
 }
 
@@ -42,7 +42,7 @@ body {
     top: 0;
     height: 100vh;
     width: 1px;
-    background-color: #ccc;
+    background-color: var(--color-border-form-control) !important;
     z-index: 1000;
     transition: left 0.3s ease;
 }
@@ -53,20 +53,26 @@ body {
     left: 0;
     width: 100%;
     height: 1px;
-    background-color: #d0d4d9;
+    background-color: var(--color-border-form-control) !important;
 }
 
 .modal-backdrop.show {
     background-color: rgba(0, 0, 0, 0.7);
 }
 
+.border {
+    border: 1px solid var(--color-border-form-control) !important;
+}
+
 .css-theme-light {
+    --color-heading-title: #212529;
     --color-bg-sidebar-content: #ffffff;
     --color-sidebar-li: rgba(0, 0, 0, 0.85);
     --color-sidebar-li-collapsed: #212529;
-    --color-sidebar-li-collapsed-hover: #212529;
+    --color-sidebar-li-collapsed-hover: #e1e9f8;
     --color-sidebar-li-collapsed-active: #212529;
     --color-bg-sidebar-li-collapsed-active: #d2f4ea;
+    --color-bg-sidebar-li-selected: #d2f4ea;
     --color-sidebar-dropdown: #212529;
     --color-bg-body-content: #f5f5f5;
     --color-body-content: #212529;
@@ -118,6 +124,7 @@ body {
     --color-fade-buttons: #d2f4ea;
     --color-table-striped: #ffff;
     --color-table-accent: #f3f4f6;
+    --color-bg-table: white;
     --color-bg-form-outline: #0d6efd;
     --color-bg-table-outline: #e7e8e9;
     --image-chevron: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3e%3cpath fill=%27none%27 stroke=%27%237e7e7e%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M2 5l6 6 6-6%27/%3e%3c/svg%3e");
@@ -131,6 +138,93 @@ body {
     --skeleton-base: #e0e0e0;
     --skeleton-highlight: #f5f5f5;
     --btn-primary-dark-bg: #123263;
+    --color-bg-navbar: #ffffff;
+    --color-bg-subscription-card: #eef3ff;
+    --color-border-subscription-card: #d5e0ff;
+    --color-title-subscription-card: #0056d2;
+    --color-text-muted: #6c757d !important;
+}
+
+
+.css-theme-dark {
+    --color-heading-title: #e2e4ea;
+    --color-bg-sidebar-content: #1a1b2e;
+    --color-sidebar-li: rgba(0, 0, 0, 0.85);
+    --color-sidebar-li-collapsed: #212529;
+    --color-sidebar-li-collapsed-hover: #2d3354;
+    --color-sidebar-li-collapsed-active: #212529;
+    --color-bg-sidebar-li-collapsed-active: #d2f4ea;
+    --color-bg-sidebar-li-selected: #27447e;
+    --color-sidebar-dropdown: #212529;
+    --color-bg-body-content: #1f2132;
+    --color-body-content: #9196b0;
+    --color-card-content: #292f4c;
+    --color-card-title: #e2e4ea;
+    --color-card-text: #b0b4c8;
+    --color-bg-btn-primary: #0d6efd;
+    --color-btn-primary: #ffffff;
+    --color-bg-btn-danger: #dc3545;
+    --color-bg-btn-success: #0eaa42;
+    --color-bg-btn-secondary: #b7b7b7;
+    --color-bg-form-control: #ffffff;
+    --color-multiselect-option: #000000;
+    --color-border-form-control: #393e5c;
+    --color-multiselect-tag: #10b981;
+    --color-h5-custom-modal: #0073e6;
+    --color-span-muted: #5e5873;
+    --color-bg-btn-cancel: #f0f7ff;
+    --color-btn-cancel: #0073e6;
+    --color-bg-table-tr-first: #292f4c;
+    --color-fa-list-doc: #0d6efd;
+    --color-bg-page-link: #f5f5f5;
+    --color-bg-page-link-active: #0d6efd;
+    --color-bg-icon-active: #0d6efd;
+    --color-page-link: #0d6efd;
+    --color-page-link-active: #ffffff;
+    --color-page-link-disabled: #6c757d;
+    --color-border-page-link: 1px solid #393e5c;
+    --color-border-btn-outline-primary: #0d6efd;
+    --color-btn-outline-primary: #0d6efd;
+    --filter-btn-close: initial;
+    --color-bg-toast-content: #ffffff;
+    --color-bg-toast-content-primary: #cfe2ff;
+    --color-bg-toast-content-upload: #e3ebf6;
+    --color-bg-toast-content-success: #d1e7dd;
+    --color-bg-toast-content-warning: #fff3cd;
+    --color-bg-toast-content-danger: #f8d7da;
+    --color-bg-toast: rgba(255, 255, 255, 0.85);
+    --color-toast-content: #6c757d;
+    --color-toast-content-primary: #084298;
+    --color-toast-content-success: #0f5132;
+    --color-toast-content-warning: #664d03;
+    --color-toast-content-danger: #842029;
+    --color-border-toast: 1px solid #393e5c;
+    --color-border-header-modal: 1px solid #393e5c;
+    --box-shadow-multiselect-wrapper: 0 0 0 var(--ms-ring-width, 3px) var(--ms-ring-color, rgba(16, 185, 129, 0.188));
+    --color-bg-dropdown-menu: #ffffff;
+    --color-dropdown-menu: #b0b4c8;
+    --color-fade-buttons: #d2f4ea;
+    --color-table-striped: #292f4c;
+    --color-table-accent: #292f4c;
+    --color-bg-form-outline: #0d6efd;
+    --color-bg-table: #292f4c;
+    --color-bg-table-outline: #424763;
+    --image-chevron: url("data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3e%3cpath fill=%27none%27 stroke=%27%237e7e7e%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27 stroke-width=%272%27 d=%27M2 5l6 6 6-6%27/%3e%3c/svg%3e");
+    --color-bg-nav-button: #f0f6ff;
+    --color-icon-nav-button: #0d6efd;
+    --color-bg-nav-pills: #ffffff;
+    --muted: #f5f7fa;
+    --icon-theme: "\f186";
+    --text-sm: 0.775rem;
+    --text-sm--line-height: calc(1.25 / 0.875);
+    --skeleton-base: #e0e0e0;
+    --skeleton-highlight: #f5f5f5;
+    --btn-primary-dark-bg: #123263;
+    --color-bg-navbar: #1a1b2e;
+    --color-bg-subscription-card: #27447e;
+    --color-border-subscription-card: #263b66;
+    --color-title-subscription-card: #ffffff;
+    --color-text-muted: #9196b0;
 }
 
 html {
@@ -174,7 +268,7 @@ main {
     max-height: 100vh;
     overflow-x: auto;
     overflow-y: hidden;
-    background-color: #f8f9fb !important;
+    background-color: var(--color-bg-body-content) !important;
 }
 
 main > .initial-sidebar,
@@ -247,7 +341,7 @@ main > #offcanvas-sidebar > .dropdown > a {
 main > .container-fluid {
     /*padding: 15px 10px 15px 0px;*/
     padding: 15px 15px 0px 0px;
-    background: #f8f9fb !important;
+    background: var(--color-bg-body-content) !important;
 }
 
 main > .container-fluid > .custom-padding > .row > .col-auto > .card {
@@ -513,7 +607,12 @@ main > .container {
 }
 
 .div-card > .card {
-    background: var(--color-card-content) !important;
+    background-color: var(--color-card-content) !important;
+}
+
+.card {
+    background-color: var(--color-card-content) !important;
+    border-color: var(--color-border-form-control) !important;
 }
 
 .div-card > .card > .card-body > .card-title {
@@ -821,4 +920,13 @@ dropzone .dz-preview .dz-details {
 .btn:focus {
   box-shadow: none !important;
   outline: none !important;
+}
+
+td {
+    border-color: var(--color-bg-table-outline) !important;
+}
+
+.btn-outlined {
+    border-color: var( --color-border-form-control) !important;
+    color: var(--color-body-content) !important;
 }
