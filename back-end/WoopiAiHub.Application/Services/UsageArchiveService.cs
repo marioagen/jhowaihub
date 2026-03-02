@@ -167,6 +167,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             var usageByTenant = await usageMonthRepository.FindTotalUsageAsync(lastPeriod.PeriodStart, lastPeriod.PeriodEnd);
+
             var tenantConsumption = new TenantConsumptionDto
             {
                 Tenant = tenant.Name,

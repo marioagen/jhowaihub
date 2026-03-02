@@ -267,10 +267,11 @@
             pushHistoryList(data) {
                 this.dataPushHistoryList = data;
             },
-            getDataDocument() {
-                AnalyzerService.getAnalyzeDocument(this.documentId)
-                    .then((result) => {
-                        this.hashDocument = result.referenceFile;
+            getDataDocument: function () {
+                let self = this;
+                api.get("/DocumentMetadata/Analyze/" + this.idAnalyzer)
+                    .then(function (result) {
+                        self.hashDocument = result.data.referenceFile;
                     })
                     .catch((error) => {
                         LogService.showMessage("Error loading document: " + error);
