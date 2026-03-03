@@ -38,7 +38,7 @@
                         {{ documentName }}
                     </span>
                     <div
-                        class="btn-group-sm margin-left"
+                        class="btn-group btn-group-sm ms-auto section-buttons"
                         role="group"
                     >
                         <input
@@ -59,7 +59,7 @@
 
                         <input
                             type="radio"
-                            class="btn-check ms-2"
+                            class="btn-check"
                             name="view"
                             id="view-both"
                             autocomplete="off"
@@ -176,8 +176,8 @@
     <DocumentRejectionModal
         v-if="canReject"
         ref="modalReject"
-        :cardId="idCard"
-        :documentId="idAnalyzer"
+        :cardId="cardId"
+        :documentId="documentId"
         @success="handleRejectSuccess"
     />
     <DocumentViewRejectionModal
@@ -196,8 +196,7 @@
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import CardsServices from "@/services/cards/CardsServices";
-    import AnalyzerService from "@/services/documents/AnalyzerService";
-    import LogService from "@/services/log/logService";
+    import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices";
 
     export default {
         name: "AnalyzerIndex",
@@ -225,6 +224,9 @@
                 workflowName: "",
                 documentName: "",
                 viewMode: "both",
+                workflowId: null,
+                currentStepOrder: 0,
+                cardStatus: "",
             };
         },
         components: {
@@ -267,21 +269,21 @@
             pushHistoryList(data) {
                 this.dataPushHistoryList = data;
             },
-            getDataDocument: function () {
-                let self = this;
-                api.get("/DocumentMetadata/Analyze/" + this.idAnalyzer)
-                    .then(function (result) {
-                        self.hashDocument = result.data.referenceFile;
-                    })
-                    .catch((error) => {
-                        LogService.showMessage("Error loading document: " + error);
-                    });
+            async getDataDocument() {
+                await DocumentMetadataServices.getDocumentAnalyze(this.documentId).then(
+                    (result) => {
+                        this.hashDocument = result.referenceFile;
+                    }
+                );
             },
             async getCardHeaderInfo() {
                 const result = await CardsServices.findCardHeaderInfo(this.cardId);
-                if (result && !result.error) {
+                if (result.error === undefined) {
                     this.workflowName = result.workflowName;
                     this.documentName = result.cardName;
+                    this.workflowId = result.workflowId ?? null;
+                    this.currentStepOrder = result.currentStepOrder;
+                    this.cardStatus = result.statusName ?? "";
                 }
             },
             goBack() {
@@ -305,18 +307,34 @@
                 }, 2000);
             },
             openViewRejectionModal() {
-                this.$refs.modalViewRejection.open(this.idCard);
+                this.$refs.modalViewRejection.open(this.cardId);
             },
         },
-        created() {
-            this.getDataDocument();
-            this.getCardHeaderInfo();
+        async created() {
+            await this.getDataDocument();
+            await this.getCardHeaderInfo();
         },
     };
 </script>
 <style scoped>
     .container-fluid {
         padding: 0 13px;
+    }
+
+    .section-buttons .btn-check:checked + .btn,
+    .section-buttons .btn-check:active + .btn {
+        background-color: #0d6efd !important;
+        color: #fff !important;
+        border-color: #0d6efd !important;
+    }
+
+    .section-buttons .btn-check:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    .section-buttons .btn-check:focus + .btn {
+        outline: none !important;
+        box-shadow: none !important;
     }
 
     @media (min-width: 320px) and (max-width: 767px) {
@@ -332,11 +350,6 @@
             height: auto !important;
         }
 
-        .btn-check:checked + .btn {
-            background-color: #0d6efd !important;
-            color: white !important;
-            border-color: #0d6efd !important;
-        }
         .margin-left {
             margin-left: auto;
         }
