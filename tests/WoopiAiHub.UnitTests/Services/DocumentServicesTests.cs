@@ -19,6 +19,7 @@ using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
@@ -43,7 +44,8 @@ namespace WoopiAiHub.UnitTests.Services
             var mockQueues = new Mock<IOptions<MessageQueues>>();
             mockQueues.Setup(x => x.Value).Returns(new MessageQueues
             {
-                OcrQueue = "ocrQueue"
+                OcrQueue = "ocrQueue",
+                EmbeddingQueueAiHubResponse = "embeddingQueue"
             });
 
             _mocker.Use(mockQueues);
@@ -52,6 +54,7 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x.GetSection("keyAccess").Value).Returns(Guid.NewGuid().ToString());
             configMock.Setup(x => x.GetSection("UseOcrGoogle").Value).Returns(() => "true");
             configMock.Setup(x => x["RefitExternalSettings:FunctionApiKey"]).Returns(Guid.NewGuid().ToString());
+            configMock.Setup(x => x["IndexerApiKey"]).Returns(Guid.NewGuid().ToString());
 
             _mocker.Use(configMock.Object);
 
@@ -154,6 +157,9 @@ namespace WoopiAiHub.UnitTests.Services
 
             var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
             workflowRepositoryMock.Setup(a => a.FindByIdsAsync(requestCreateDocumentDto.Workflows)).ReturnsAsync(workflows);
+
+            var automationServicesMock = _mocker.GetMock<IAutomationServices>();
+            automationServicesMock.Setup(a => a.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(false);
 
             // Act / Assert
             await _documentServices.ProcessChunks(requestCreateDocumentDto, "tenant");
@@ -814,12 +820,12 @@ namespace WoopiAiHub.UnitTests.Services
 
             var configurationMock = new Mock<IConfiguration>();
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
-            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             // var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
             documentRepositoryMock.Setup(r => r.FindByReferenceFile(documentEmbeddingsQueryResponseDto.ReferenceFile)).Returns(document);
 
-            
+
             var documentServices = _mocker.CreateInstance<DocumentServices>();
 
             // Act
@@ -827,6 +833,234 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.Null(result);
+        }
+
+        [Fact(DisplayName = "ProcessChunks with DocumentBatch - Should create DocumentBatch on first file")]
+        [Trait("ProcessChunks", "DocumentBatch")]
+        public async Task ProcessChunks_WithDocumentBatch_FirstFile()
+        {
+            // Arrange
+            var requestCreateDocumentDto = _fixture.FindValidRequestCreateDocumentDtoForBatch("file1", false);
+
+            var fileUploadSummaryDto = _fixture.FindValidFileUploadSummaryDto();
+            var tenant = _fixture.FindValidTenantInfoDto();
+            var workflows = WorkflowFixture.FindValidWorkflows();
+            var documentBatch = new DocumentBatch(1, DateTime.UtcNow);
+
+            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
+            fileRepositoryApi.Setup(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>())).ReturnsAsync(fileUploadSummaryDto);
+
+            var tenantCache = _mocker.GetMock<ITenantCacheServices>();
+            tenantCache.Setup(a => a.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenant);
+
+            var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
+            workflowRepositoryMock.Setup(a => a.FindByIdsAsync(requestCreateDocumentDto.Workflows)).ReturnsAsync(workflows);
+
+            var documentBatchRepositoryMock = _mocker.GetMock<IDocumentBatchRepository>();
+            documentBatchRepositoryMock.Setup(a => a.CreateAsync(It.IsAny<DocumentBatch>())).ReturnsAsync(documentBatch);
+
+            var automationServicesMock = _mocker.GetMock<IAutomationServices>();
+            automationServicesMock.Setup(a => a.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(false);
+
+            // Act
+            await _documentServices.ProcessChunks(requestCreateDocumentDto, "tenant");
+
+            // Assert
+            fileRepositoryApi.Verify(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>()), Times.Once);
+            documentBatchRepositoryMock.Verify(a => a.CreateAsync(It.IsAny<DocumentBatch>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "ProcessChunks with DocumentBatch - Should use existing batch on subsequent files")]
+        [Trait("ProcessChunks", "DocumentBatch")]
+        public async Task ProcessChunks_WithDocumentBatch_SubsequentFiles()
+        {
+            // Arrange
+            var firstFile = _fixture.FindValidRequestCreateDocumentDtoForBatch("file1", false);
+            var secondFile = _fixture.FindValidRequestCreateDocumentDtoForBatch("file2", false);
+
+            var fileUploadSummaryDto = _fixture.FindValidFileUploadSummaryDto();
+            var tenant = _fixture.FindValidTenantInfoDto();
+            var workflows = WorkflowFixture.FindValidWorkflows();
+            var documentBatch = new DocumentBatch(1, DateTime.UtcNow);
+
+            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
+            fileRepositoryApi.Setup(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>())).ReturnsAsync(fileUploadSummaryDto);
+
+            var tenantCache = _mocker.GetMock<ITenantCacheServices>();
+            tenantCache.Setup(a => a.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenant);
+
+            var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
+            workflowRepositoryMock.Setup(a => a.FindByIdsAsync(It.IsAny<List<int>>())).ReturnsAsync(workflows);
+
+            var documentBatchRepositoryMock = _mocker.GetMock<IDocumentBatchRepository>();
+            documentBatchRepositoryMock.Setup(a => a.CreateAsync(It.IsAny<DocumentBatch>())).ReturnsAsync(documentBatch);
+
+            var automationServicesMock = _mocker.GetMock<IAutomationServices>();
+            automationServicesMock.Setup(a => a.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(false);
+
+            // Act
+            await _documentServices.ProcessChunks(firstFile, "tenant");
+            await _documentServices.ProcessChunks(secondFile, "tenant");
+
+            // Assert
+            fileRepositoryApi.Verify(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>()), Times.Exactly(2));
+            documentBatchRepositoryMock.Verify(a => a.CreateAsync(It.IsAny<DocumentBatch>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "ProcessOcrResult - Should save StepToolOutput with embeddings data")]
+        [Trait("ProcessOcrResult", "StepToolOutput")]
+        public async Task ProcessOcrResult_SavesStepToolOutput()
+        {
+            // Arrange
+            var processOcrResultDto = DocumentFixture.FindValidProcessOcrResultDto();
+            var idDocument = 1;
+            var tenant = _fixture.FindValidTenantInfoDto();
+            var execution = DocumentFixture.FindValidStepToolExecution();
+            var stepTool = WorkflowFixture.FindValidStepTool();
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            var stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
+
+            documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile)).Returns(idDocument);
+            stepToolExecutionRepositoryMock.Setup(e => e.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(execution);
+            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenant);
+            stepToolRepositoryMock.Setup(s => s.FindDependentAsync(processOcrResultDto.Data.StepToolId)).ReturnsAsync(stepTool);
+
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act
+            await documentServices.ProcessOcrResult(processOcrResultDto);
+
+            // Assert
+            stepToolOutputRepositoryMock.Verify(r => r.CreateAsync(It.Is<StepToolOutput>(
+                output => output.StepToolId == execution.StepToolId && 
+                          output.CardId == execution.CardId &&
+                          !string.IsNullOrEmpty(output.Value)
+            )), Times.Once);
+        }
+
+        [Fact(DisplayName = "ProcessEmbeddingsResult - Should save StepToolOutput with reference file")]
+        [Trait("ProcessEmbeddingsResult", "StepToolOutput")]
+        public async Task ProcessEmbeddingsResult_SavesStepToolOutput()
+        {
+            // Arrange
+            var documentEmbeddingsResultDto = DocumentFixture.FindValidDocumentEmbeddingsResultDto();
+            var idDocument = 1;
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            var stepToolExecution = DocumentFixture.FindValidStepToolExecution();
+
+            documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile)).Returns(idDocument);
+            stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(
+                documentEmbeddingsResultDto.Data.StepToolId, 
+                documentEmbeddingsResultDto.Data.CardId)).ReturnsAsync(stepToolExecution);
+
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act
+            await documentServices.ProcessEmbeddingsResult(documentEmbeddingsResultDto);
+
+            // Assert
+            stepToolOutputRepositoryMock.Verify(r => r.CreateAsync(It.Is<StepToolOutput>(
+                output => output.StepToolId == stepToolExecution.StepToolId && 
+                          output.CardId == stepToolExecution.CardId &&
+                          output.Value == documentEmbeddingsResultDto.ReferenceFile
+            )), Times.Once);
+            documentRepositoryMock.Verify(r => r.ChangeStatus(idDocument, DocumentStatus.Embeddings), Times.Once);
+        }
+
+        [Fact(DisplayName = "InputToolQuestionnaire - Should save usage metrics")]
+        [Trait("InputToolQuestionnaire", "UsageMetrics")]
+        public async Task InputToolQuestionnaire_SavesUsageMetrics()
+        {
+            // Arrange
+            var documentEmbeddingsQueryResponseDto = DocumentFixture.FindValidDocumentEmbeddingsQueryResponseDto();
+            var document = DocumentFixture.FindValidDocument();
+            var execution = DocumentFixture.FindValidStepToolExecution();
+            var usageDailyServicesMock = _mocker.GetMock<IUsageDailyServices>();
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            documentRepositoryMock.Setup(r => r.FindByReferenceFile(documentEmbeddingsQueryResponseDto.ReferenceFile)).Returns(document);
+
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            stepToolExecutionRepositoryMock.Setup(e => e.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(execution);
+
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act
+            await documentServices.InputToolQuestionnaire(documentEmbeddingsQueryResponseDto);
+
+            // Assert
+            usageDailyServicesMock.Verify(u => u.AddByRangeValuesAsync(
+                MetricNames.Token,
+                documentEmbeddingsQueryResponseDto.Email,
+                It.IsAny<List<QueryUsageDto>>()
+            ), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindOcrTextByDocumentId - Should concatenate pages in order")]
+        [Trait("FindOcrTextByDocumentId", "PageOrder")]
+        public async Task FindOcrTextByDocumentId_ConcatenatesPagesInOrder()
+        {
+            // Arrange
+            var documentId = 1;
+            var cardId = 10;
+            var stepToolId = 5;
+            var referenceFile = "test-file.pdf";
+
+            var document = new Document("Test Document", "Description", referenceFile, 
+                DocumentStatus.OCR, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
+
+            var toolType = new ToolType(1, DateTime.UtcNow, HandlersTypes.Ocr, string.Empty, true);
+            var tool = new Tool(1, DateTime.UtcNow, "OCR Tool", true, 1, 1, 1, false, null, null);
+            typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
+
+            var stepTool = new StepTool(stepToolId, DateTime.UtcNow, 1, 1, 1, 0, 0);
+            typeof(StepTool).GetProperty("Tool")!.SetValue(stepTool, tool);
+
+            var execution = new StepToolExecution(1, DateTime.UtcNow, stepToolId, StatusExecution.Ready, cardId);
+            typeof(StepToolExecution).GetProperty("StepTool")!.SetValue(execution, stepTool);
+
+            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, null);
+            typeof(Card).GetProperty("Executions")!.SetValue(card, new List<StepToolExecution> { execution });
+
+            var ocrOutput = new DocumentEmbeddingsDataDto
+            {
+                ReferenceFile = referenceFile,
+                DocumentEmbeddings = new List<DocumentEmbeddingsAddDto>
+                {
+                    new DocumentEmbeddingsAddDto { Text = "Page 3 text", Metadata = new { PageNumber = 3 } },
+                    new DocumentEmbeddingsAddDto { Text = "Page 1 text", Metadata = new { PageNumber = 1 } },
+                    new DocumentEmbeddingsAddDto { Text = "Page 2 text", Metadata = new { PageNumber = 2 } }
+                }
+            };
+            var outputJson = Newtonsoft.Json.JsonConvert.SerializeObject(ocrOutput);
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            documentRepositoryMock.Setup(r => r.FindById(documentId)).Returns(document);
+
+            var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
+            cardRepositoryMock.Setup(r => r.FindByDocumentIdCardAsync(documentId)).ReturnsAsync(card);
+
+            var stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            stepToolOutputRepositoryMock.Setup(r => r.FindByStepToolId(stepToolId, cardId)).ReturnsAsync(outputJson);
+
+            var documentServices = _mocker.CreateInstance<DocumentServices>();
+
+            // Act
+            var result = await documentServices.FindOcrTextByDocumentId(documentId);
+
+            // Assert
+            Assert.True(result.HasOcr);
+            var lines = result.Content.Split(new[] { Environment.NewLine + Environment.NewLine }, StringSplitOptions.None);
+            Assert.Equal(3, lines.Length);
+            Assert.Equal("Page 1 text", lines[0]);
+            Assert.Equal("Page 2 text", lines[1]);
+            Assert.Equal("Page 3 text", lines[2]);
         }
     }
 }

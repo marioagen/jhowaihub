@@ -1,7 +1,5 @@
 <template>
-    <div
-        class="d-flex flex-column justify-content-between align-items-start mb-2"
-    >
+    <div class="d-flex flex-column justify-content-between align-items-start mb-2">
         <div class="delete-container">
             <button
                 class="btn btn-outline-danger btn-sm delete-button"
@@ -33,13 +31,24 @@
             @selectedRows="selectedRows"
             @change-page="changePage"
         >
+            <template #cell-name="{ data }">
+                <span class="d-flex align-items-center gap-1">
+                    <LucideIcon
+                        v-if="data.row.hasBatch"
+                        icon="Files"
+                        :size="16"
+                        class="text-primary"
+                        v-tooltip="$t('documents.batchFile')"
+                    />
+                    {{ data.row.name }}
+                </span>
+            </template>
             <template #cell-created="{ data }">
                 {{ formatDate(data.row.created) }}
             </template>
             <template #cell-workflows="{ data }">
                 <BadgeOutlinedComponent
-                    v-for="(workflowData, index) in data.row
-                        .workflowProgress"
+                    v-for="(workflowData, index) in data.row.workflowProgress"
                     :key="index"
                     :text="`${workflowData.workflowName} (${workflowData.currentStep}/${workflowData.totalSteps})`"
                     :clickable="false"
@@ -47,20 +56,12 @@
                 />
             </template>
             <template #cell-actions="{ data }">
-                <ActionTableListComponent
-                    v-slot="{ actionClass }"
-                >
+                <ActionTableListComponent v-slot="{ actionClass }">
                     <a
                         :class="actionClass"
                         class="text-primary"
-                        @click="
-                            getWorkFlowListByDocumentId(
-                                data.row.id
-                            )
-                        "
-                        v-tooltip="
-                            $t('documents.actions.consult')
-                        "
+                        @click="getWorkFlowListByDocumentId(data.row.id)"
+                        v-tooltip="$t('documents.actions.consult')"
                     >
                         <LucideIcon icon="Search" />
                     </a>
@@ -187,8 +188,8 @@
                             });
                         }
                         this.table.data = response.content;
-                        this.table.pagination =
-                            response.pagination;
+                        console.log(response.content);
+                        this.table.pagination = response.pagination;
                     })
                     .finally(() => {
                         this.table.isLoading = false;
@@ -198,17 +199,13 @@
                 this.table.selectedRows = selectedRows;
             },
             openConfirmation() {
-                const ids = this.table.selectedRows.map(
-                    (item) => item.id
-                );
+                const ids = this.table.selectedRows.map((item) => item.id);
                 this.selectedDocument = ids;
                 this.$refs.DeleteDialog.open();
             },
             deleteDocument() {
                 this.isDeleting = true;
-                DocumentsServices.deleteDocument(
-                    this.selectedDocument
-                )
+                DocumentsServices.deleteDocument(this.selectedDocument)
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
@@ -218,23 +215,15 @@
                                 type: null,
                             });
                             this.$notify({
-                                title: this.$t(
-                                    "documents.title"
-                                ),
-                                message: this.$t(
-                                    "documents.removeSuccess"
-                                ),
+                                title: this.$t("documents.title"),
+                                message: this.$t("documents.removeSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: this.$t(
-                                    "documents.title"
-                                ),
-                                message: this.$t(
-                                    "documents.removeError"
-                                ),
+                                title: this.$t("documents.title"),
+                                message: this.$t("documents.removeError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -268,8 +257,7 @@
                         id: id,
                     },
                     query: {
-                        page: this.table.pagination
-                            .currentPage,
+                        page: this.table.pagination.currentPage,
                     },
                 });
             },
@@ -285,12 +273,8 @@
             },
         },
         created() {
-            this.filters.login =
-                this.$store.state.userProfile.login;
-            this.table.pagination.currentPage = this.$route
-                .query.page
-                ? this.$route.query.page
-                : 1;
+            this.filters.login = this.$store.state.userProfile.login;
+            this.table.pagination.currentPage = this.$route.query.page ? this.$route.query.page : 1;
             this.getDocuments();
         },
         computed: {

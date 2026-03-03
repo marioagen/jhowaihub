@@ -52,6 +52,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHubNotifier _hubNotifier;
         private readonly IAutomationServices _automationServices;
+        private readonly IExecutionServices _executionServices;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IStepToolRepository _stepToolRepository;
         private readonly IWorkflowRepository _workflowRepository;
@@ -78,12 +79,12 @@ namespace WoopiAiHub.Application.Services
             IMemoryCache cache,
             IQuestionnaireRepository questionnaireRepository,
             ITenantCacheServices tenantCacheServices,
-            ITeamServices teamServices,
             IOptions<MessageQueues> messageQueues,
             IHubNotifier documentNotifier,
             IUnitOfWork unitOfWork,
             ICardRepository cardRepository,
             IAutomationServices automationServices,
+            IExecutionServices executionServices,
             IWorkflowRepository workflowRepository,
             IStepToolOutputRepository stepToolOutputRepository,
             IStepToolRepository stepToolRepository,
@@ -109,6 +110,7 @@ namespace WoopiAiHub.Application.Services
             _messageQueues = messageQueues.Value;
             _hubNotifier = documentNotifier;
             _automationServices = automationServices;
+            _executionServices = executionServices;
             _workflowRepository = workflowRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
             _stepToolRepository = stepToolRepository;
@@ -392,8 +394,7 @@ namespace WoopiAiHub.Application.Services
             if (execution is null)
                 return dto.Data;
 
-            await _automationServices.HandleExecutionProgress(execution, dto.Email);
-            //await UpdateExecutionAsync(execution, dto.Email);
+            await _executionServices.HandleExecutionProgress(execution, dto.Email);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(dto.Data.StepToolId);
             string embeddingsJson = JsonConvert.SerializeObject(new DocumentEmbeddingsDataDto
             {
@@ -431,7 +432,8 @@ namespace WoopiAiHub.Application.Services
                 var execution = await _stepToolExecutionRepository
                     .FindByStepToolIdAndCardIdAsync(dataDto.StepToolId, dataDto.CardId);
 
-                await UpdateExecutionAsync(execution!, documentQuestionnaireDto.Email);
+                await _executionServices.HandleExecutionProgress(execution!, documentQuestionnaireDto.Email);
+
                 await SaveStepToolOutputAsync(
                     execution!, 
                     System.Text.Json.JsonSerializer.Serialize(
@@ -462,28 +464,6 @@ namespace WoopiAiHub.Application.Services
             }
 
             return documentDb;
-        }
-
-
-        /// <summary>
-        /// Updates StepToolExecution status and send notification 
-        /// </summary>
-        /// <param name="execution"></param>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        private async Task UpdateExecutionAsync(StepToolExecution execution, string email)
-        {
-            var count = await _stepToolExecutionRepository.ExecutionsByStepIdCountAsync(execution.StepTool!.StepId,
-                execution.CardId);
-            var percent = ((double)execution.StepTool.Order / count) * 100;
-
-            execution.UpdateStatusExecution(StatusExecution.Ready);
-            await _stepToolExecutionRepository.UpdateAsync(execution);
-
-            var tool = await _workflowRepository.FindToolByStepToolId(execution.StepTool.Id);
-
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId,
-                tool != null ? tool.Name : string.Empty);
         }
 
         /// <summary>
@@ -815,7 +795,9 @@ namespace WoopiAiHub.Application.Services
             var execution = await _stepToolExecutionRepository
                 .FindByStepToolIdAndCardIdAsync(documentEmbeddingsResultDto.Data.StepToolId,
                     documentEmbeddingsResultDto.Data.CardId);
-            await UpdateExecutionAsync(execution!, documentEmbeddingsResultDto.Email);
+
+            await _executionServices.HandleExecutionProgress(execution!, documentEmbeddingsResultDto.Email);
+
             await SaveStepToolOutputAsync(execution!, documentEmbeddingsResultDto.ReferenceFile);
             await this.ChangeStatus(documentId, DocumentStatus.Embeddings, documentEmbeddingsResultDto.Email);
 

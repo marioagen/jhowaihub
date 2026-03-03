@@ -1,4 +1,4 @@
-﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
+using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Bogus;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
@@ -225,7 +225,31 @@ namespace WoopiAiHub.UnitTests.Fixture
                 Name: "idea",
                 Description: "desc",
                 EmailCreator: faker.Internet.Email(),
-                Workflows: new List<int> { 10 }
+                Workflows: new List<int> { 10 },
+                IsLastFile: true,
+                IsDocumentBatch: false
+            );
+
+            return dto;
+        }
+
+        public RequestCreateDocumentDto FindValidRequestCreateDocumentDtoForBatch(string fileName, bool isLastFile)
+        {
+            var filePath = @"../../../Files/TestPDF.pdf";
+            var file = new FileInfo(filePath);
+            var formFile = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, file.Length, "Chunk", file.Name);
+            var faker = new Faker("pt_BR");
+
+            var dto = new RequestCreateDocumentDto(
+                Chunk: formFile,
+                Filename: "title",
+                IsLast: true,
+                Name: fileName,
+                Description: "desc",
+                EmailCreator: faker.Internet.Email(),
+                Workflows: new List<int> { 10 },
+                IsLastFile: isLastFile,
+                IsDocumentBatch: true
             );
 
             return dto;
@@ -485,6 +509,15 @@ namespace WoopiAiHub.UnitTests.Fixture
                     }
                 });
             return faker;
+        }
+
+        public static DocumentBatch FindValidDocumentBatch()
+        {
+            var faker = new Faker("pt_BR");
+            return new DocumentBatch(
+                faker.Random.Int(1, 1000),
+                faker.Date.Past()
+            );
         }
     }
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Application.Messaging;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Services.Automation;
@@ -69,6 +69,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IApiTemplateServices, ApiTemplateServices>();
             services.AddScoped<ISubscriptionPeriodServices, SubscriptionPeriodServices>();
             services.AddScoped<IDocumentAnalysisRejectionServices, DocumentAnalysisRejectionServices>();
+            services.AddScoped<IExecutionServices, ExecutionServices>();
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
             services.AddHostedService<N8NConsumer>();

@@ -125,14 +125,14 @@ namespace WoopiAiHub.UnitTests.Services
 
             _cardRepositoryMock.Setup(repo => repo.FindById(cardId))
                 .ReturnsAsync(card);
-            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
 
             //Act
             var result = await _cardServices.UnassignUser(cardId);
 
             //Assert
             Assert.True(result);
-            _cardRepositoryMock.Verify(repo => repo.Update(card), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
             Assert.Null(card.AssignedUserId);
         }
 
@@ -213,7 +213,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
                 .ReturnsAsync(card);
-            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
 
             var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
             workflowRepositoryMock.Setup(r => r.IsValidTeamUser(updateAssignedUserDto.CardId, userId)).ReturnsAsync(true);
@@ -223,13 +223,119 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
-            _cardRepositoryMock.Verify(repo => repo.Update(card), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
         }
 
-        [Fact(DisplayName = "FindByIdAnalyzeWithStepsSuccess")]
-        [Trait("FindByIdAnalyzeWithSteps", "Success")]
-        public async Task FindByIdAnalyzeWithSteps_Success()
+        [Fact(DisplayName = "Tests update UnassignUser with DocumentBatch updates all batch cards")]
+        [Trait("UnassignUser", "DocumentBatch")]
+        public async Task UnassignUser_WithDocumentBatch_UpdatesAllBatchCards()
         {
+            //Arrange
+            var cardId = 1;
+            var documentBatchId = 100;
+            var card = new Card(cardId, DateTime.UtcNow, 1, 1, "Card Name", 1, Guid.NewGuid(), documentBatchId);
+
+            var batchCards = new List<Card> 
+            { 
+                card,
+                new Card(2, DateTime.UtcNow, 1, 2, "Card 2", 1, Guid.NewGuid(), documentBatchId),
+                new Card(3, DateTime.UtcNow, 1, 3, "Card 3", 1, Guid.NewGuid(), documentBatchId)
+            };
+
+            _cardRepositoryMock.Setup(repo => repo.FindById(cardId))
+                .ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.FindByDocumentBatchId(documentBatchId))
+                .ReturnsAsync(batchCards);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+
+            //Act
+            var result = await _cardServices.UnassignUser(cardId);
+
+            //Assert
+            Assert.True(result);
+            _cardRepositoryMock.Verify(repo => repo.FindByDocumentBatchId(documentBatchId), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.UpdateList(It.Is<List<Card>>(cards => cards.Count == 3)), Times.Once);
+            Assert.All(batchCards, c => Assert.Null(c.AssignedUserId));
+        }
+
+            [Fact(DisplayName = "Tests update AssignedUser with DocumentBatch updates all batch cards")]
+            [Trait("AssignUser", "DocumentBatch")]
+            public async Task AssignUser_WithDocumentBatch_UpdatesAllBatchCards()
+            {
+                // Arrange
+                var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
+                var documentBatchId = 100;
+                var card = new Card(1, DateTime.UtcNow, 1, 1, "Card Name", 1, null, documentBatchId);
+                card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1)
+                {
+                    Workflow = WorkflowFixture.FindValidWorkflow()
+                };
+                card.Step.Workflow.Teams = [DocumentFixture.FindValidTeam()];
+
+                var batchCards = new List<Card> 
+                { 
+                    card,
+                    new Card(2, DateTime.UtcNow, 1, 2, "Card 2", 1, null, documentBatchId),
+                    new Card(3, DateTime.UtcNow, 1, 3, "Card 3", 1, null, documentBatchId)
+                };
+
+                var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
+                updateAssignedUserDto.UserId = userId;
+
+                _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
+                    .ReturnsAsync(card);
+                _cardRepositoryMock.Setup(repo => repo.FindByDocumentBatchId(documentBatchId))
+                    .ReturnsAsync(batchCards);
+                _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+
+                var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
+                workflowRepositoryMock.Setup(r => r.IsValidTeamUser(updateAssignedUserDto.CardId, userId)).ReturnsAsync(true);
+
+                // Act
+                var result = await _cardServices.AssignUser(updateAssignedUserDto);
+
+                // Assert
+                Assert.True(result);
+                _cardRepositoryMock.Verify(repo => repo.FindByDocumentBatchId(documentBatchId), Times.Once);
+                _cardRepositoryMock.Verify(repo => repo.UpdateList(It.Is<List<Card>>(cards => cards.Count == 3)), Times.Once);
+                Assert.All(batchCards, c => Assert.Equal(userId, c.AssignedUserId));
+            }
+
+            [Fact(DisplayName = "UpdateStatus with DocumentBatch should update all batch cards")]
+            [Trait("UpdateStatus", "DocumentBatch")]
+            public async Task UpdateStatus_WithDocumentBatch_UpdatesAllBatchCards()
+            {
+                // Arrange
+                var documentBatchId = 100;
+                var card = new Card(1, DateTime.UtcNow, 1, 1, "Card Name", 1, null, documentBatchId);
+
+                var batchCards = new List<Card> 
+                { 
+                    card,
+                    new Card(2, DateTime.UtcNow, 1, 2, "Card 2", 1, null, documentBatchId),
+                    new Card(3, DateTime.UtcNow, 1, 3, "Card 3", 1, null, documentBatchId)
+                };
+
+                var updateCardStatusDto = CardFixture.FindValidCardStatusDto();
+
+                _cardRepositoryMock.Setup(repo => repo.FindById(1)).ReturnsAsync(card);
+                _cardRepositoryMock.Setup(repo => repo.FindByDocumentBatchId(documentBatchId))
+                    .ReturnsAsync(batchCards);
+                _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+
+                // Act
+                var result = await _cardServices.UpdateStatus(updateCardStatusDto);
+
+                // Assert
+                    Assert.True(result);
+                    _cardRepositoryMock.Verify(repo => repo.FindByDocumentBatchId(documentBatchId), Times.Once);
+                    _cardRepositoryMock.Verify(repo => repo.UpdateList(It.Is<List<Card>>(cards => cards.Count == 3)), Times.Once);
+                }
+
+                [Fact(DisplayName = "FindByIdAnalyzeWithStepsSuccess")]
+                [Trait("FindByIdAnalyzeWithSteps", "Success")]
+                public async Task FindByIdAnalyzeWithSteps_Success()
+                {
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
@@ -735,7 +841,7 @@ namespace WoopiAiHub.UnitTests.Services
             var card = CardFixture.FindValidCard();
             var updateCardStatusDto = CardFixture.FindValidCardStatusDto();
             _cardRepositoryMock.Setup(repo => repo.FindById(1)).ReturnsAsync(card);
-            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
 
             // Act
             var result = await _cardServices.UpdateStatus(updateCardStatusDto);

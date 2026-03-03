@@ -143,6 +143,20 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Updates the specified collection of card entities in the database.
+        /// </summary>
+        /// <remarks>Throws an exception if any card in the list is invalid or if a database error occurs.
+        /// All changes are committed in a single transaction.</remarks>
+        /// <param name="cards">A list of <see cref="Card"/> objects to update. Each card must have a valid identifier corresponding to an
+        /// existing record in the database. Cannot be null.</param>
+        /// <returns>true if one or more records were updated successfully; otherwise, false.</returns>
+        public bool UpdateList(List<Card> cards)
+        {
+            _context.Cards.UpdateRange(cards);
+            return _context.SaveChanges() > 0;
+        }
+
+        /// <summary>
         /// Deletes a card by its document id.
         /// </summary>
         /// <param name="card"></param>
@@ -252,9 +266,10 @@ namespace WoopiAiHub.Repository
         /// <param name="documentBatchId">The unique identifier of the document batch for which to retrieve cards. Must be a positive integer.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a collection of Card objects
         /// linked to the specified document batch. The collection will be empty if no matching cards are found.</returns>
-        public async Task<ICollection<Card>> FindByDocumentBatchId(int documentBatchId)
+        public async Task<List<Card>> FindByDocumentBatchId(int documentBatchId)
         {
             return await _context.Cards
+                .Include(c => c.Document)
                 .Where(c => c.DocumentBatchId == documentBatchId)
                 .OrderBy(c => c.Id)
                 .ToListAsync();

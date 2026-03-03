@@ -15,6 +15,5 @@ namespace WoopiAiHub.Domain.Interfaces.Services.Automation
         Task ContinueExecution(AutomationServicesDto automationServicesDto);
         Task<ICollection<ConnectorDto>> FindN8nWorkflowsByToolId(int toolId);
         Task<ICollection<FormFieldDto>> FindN8nWebhookInputs(WebhookInputDto webhookInputDto);
-        Task HandleExecutionProgress(StepToolExecution execution, string email);
     }
 }

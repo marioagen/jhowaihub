@@ -89,6 +89,7 @@ namespace WoopiAiHub.Repository
                 ReferenceFile = d.ReferenceFile,
                 Status = d.Status,
                 Created = d.Created,
+                HasBatch = d.HasBatch,
                 WorkflowProgress = d.Workflows.Where(w => w.Enable).Select(w => new DocumentWorkflowProgressDto
                 {
                     WorkflowName = w.Name,
