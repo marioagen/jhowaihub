@@ -155,6 +155,10 @@ namespace WoopiAiHub.UnitTests.Services
             var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionDto();
             var email = "test@example.com";
             var card = CardFixture.FindValidCard();
+            card.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
             var step = CardFixture.FindValidStep();
             var status = CardFixture.FindValidStatus();
             var user = new User(Guid.NewGuid(), "Test User", email, true, DateTime.Now);
@@ -175,6 +179,10 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
             _unitOfWorkMock.Setup(u => u.Commit()).Verifiable();
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(user.Id);
 
             // Act
             var result = await _rejectionServices.CreateRejectionAsync(dto, email);

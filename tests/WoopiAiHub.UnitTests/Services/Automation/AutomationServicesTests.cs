@@ -582,6 +582,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var stepRepositoryMock = _mocker.GetMock<IStepRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
 
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
+
             stepToolRepositoryMock.Setup(r => r.FindById(It.IsAny<int>())).ReturnsAsync(stepToolDto);
             stepToolRepositoryMock.Setup(r => r.FindDependentAsync(It.IsAny<int>())).ReturnsAsync(stepTool);
 

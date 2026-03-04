@@ -17,6 +17,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ILogger<DocumentNormalizedServices> _logger;
 
         public DocumentNormalizedServices(IDocumentNormalizedRepository documentNormalizedRepository,
+                                          IDocumentRepository documentRepository,
                                           IValidator<DocumentNormalized> documentNormalizedValidator,
                                           ILogger<DocumentNormalizedServices> logger)
         {

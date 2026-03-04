@@ -147,7 +147,7 @@ namespace WoopiAiHub.Application.Services
                 }
             }
 
-            return true;
+            return result;
         }
 
         /// <summary>

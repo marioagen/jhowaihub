@@ -19,7 +19,7 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly DocumentFixture _fixture;
         private readonly AutoMocker _mocker;
-        private readonly DocumentPipelineServices _documentPipelineServices;
+        private readonly WoopiAiHub.Application.Services.DocumentPipelineServices _documentPipelineServices;
 
         public DocumentPipelineServicesTests(DocumentFixture documentFixture)
         {
@@ -38,7 +38,7 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x["IndexerApiKey"]).Returns(Guid.NewGuid().ToString());
             _mocker.Use(configMock.Object);
 
-            _documentPipelineServices = _mocker.CreateInstance<DocumentPipelineServices>();
+            _documentPipelineServices = _mocker.CreateInstance<WoopiAiHub.Application.Services.DocumentPipelineServices>();
         }
 
         [Fact(DisplayName = "ProcessOcrResult - Should successfully process OCR result and return automation DTO")]

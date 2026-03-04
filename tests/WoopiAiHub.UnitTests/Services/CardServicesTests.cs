@@ -7,7 +7,9 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
@@ -92,6 +94,10 @@ namespace WoopiAiHub.UnitTests.Services
             _stepToolRepositoryMock.Setup(repo => repo.FindByStepIdAndOrderAsync(1, 1))
                 .ReturnsAsync(It.IsAny<StepTool>());
 
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
+
             // Act
             var result = await _cardServices.UpdateStepAndStatus(updateDto, "tenant", "email");
 
@@ -122,10 +128,18 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var cardId = 1;
             var card = CardFixture.FindValidCard();
+            card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
 
-            _cardRepositoryMock.Setup(repo => repo.FindById(cardId))
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(cardId))
                 .ReturnsAsync(card);
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
 
             //Act
             var result = await _cardServices.UnassignUser(cardId);
@@ -185,8 +199,13 @@ namespace WoopiAiHub.UnitTests.Services
             };
             var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
 
-            _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(updateAssignedUserDto.CardId))
                 .ReturnsAsync(card);
+
+            var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
+            workflowRepositoryMock
+                .Setup(r => r.IsValidTeamUser(updateAssignedUserDto.CardId, updateAssignedUserDto.UserId))
+                .ReturnsAsync(false);
 
             // Act & Assert
             var exception =
@@ -211,12 +230,16 @@ namespace WoopiAiHub.UnitTests.Services
             var updateAssignedUserDto = CardFixture.FindValidUpdateAssignedUserDto();
             updateAssignedUserDto.UserId = userId;
 
-            _cardRepositoryMock.Setup(repo => repo.FindById(updateAssignedUserDto.CardId))
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(updateAssignedUserDto.CardId))
                 .ReturnsAsync(card);
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
 
             var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
             workflowRepositoryMock.Setup(r => r.IsValidTeamUser(updateAssignedUserDto.CardId, userId)).ReturnsAsync(true);
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
 
             // Act
             var result = await _cardServices.AssignUser(updateAssignedUserDto);
@@ -681,6 +704,10 @@ namespace WoopiAiHub.UnitTests.Services
             _automationServices.Setup(s => s.StartExecutionByCardAsync(It.IsAny<AutomationServicesDto>()))
                 .ThrowsAsync(new Exception("Automation service failed"));
 
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
+
             // Act & Assert
             await Assert.ThrowsAsync<Exception>(() => _cardServices.UpdateStepAndStatus(updateDto, "tenant", "email"));
 
@@ -703,11 +730,15 @@ namespace WoopiAiHub.UnitTests.Services
                 updateDto.WorkflowId)).ReturnsAsync(step);
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(false);
 
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
+
             // Act
             var result = await _cardServices.UpdateStepAndStatus(updateDto, "tenant", "email");
 
             // Assert
-            Assert.True(result);
+            Assert.False(result);
             _automationServices.Verify(s => s.StartExecutionByCardAsync(It.IsAny<AutomationServicesDto>()), Times.Never);
         }
 
@@ -733,9 +764,17 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var card = CardFixture.FindValidCard();
+            card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
             var updateCardStatusDto = CardFixture.FindValidCardStatusDto();
-            _cardRepositoryMock.Setup(repo => repo.FindById(1)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.FindById(updateCardStatusDto.CardId)).ReturnsAsync(card);
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
 
             // Act
             var result = await _cardServices.UpdateStatus(updateCardStatusDto);
