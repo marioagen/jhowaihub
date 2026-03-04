@@ -8,6 +8,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
@@ -46,6 +47,10 @@ namespace WoopiAiHub.UnitTests.Services
             var automationServicesMock = _mocker.GetMock<IAutomationServices>();
             automationServicesMock.Setup(a => a.PrepareExecutionAsync(It.IsAny<ICollection<Workflow>>())).ReturnsAsync(true);
             automationServicesMock.Setup(a => a.StartExecutionByWorkflowsAsync(It.IsAny<AutomationServicesDto>(), It.IsAny<List<Workflow>>())).Returns(Task.CompletedTask);
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
 
             var documentUploadServices = _mocker.CreateInstance<DocumentUploadServices>();
 

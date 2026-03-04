@@ -747,15 +747,14 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task UpdateStatus_CardUpdateStatusFails_CardNotFound()
         {
             // Arrange
-            var card = CardFixture.FindValidCard();
             var updateCardStatusDto = CardFixture.FindValidCardStatusDto();
-            _cardRepositoryMock.Setup(repo => repo.FindById(card.Id)).ReturnsAsync((Card)null);
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(updateCardStatusDto.CardId)).ReturnsAsync((Card)null);
 
             // Act
             await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStatus(updateCardStatusDto));
 
             // Assert
-            _cardRepositoryMock.Verify(s => s.FindById(It.IsAny<int>()), Times.Once);
+            _cardRepositoryMock.Verify(s => s.FindByIdWithStepWorkflow(It.IsAny<int>()), Times.Once);
         }
 
         [Fact(DisplayName = "UpdateStatus should return true")]
@@ -769,7 +768,7 @@ namespace WoopiAiHub.UnitTests.Services
                 Workflow = WorkflowFixture.FindValidWorkflow()
             };
             var updateCardStatusDto = CardFixture.FindValidCardStatusDto();
-            _cardRepositoryMock.Setup(repo => repo.FindById(updateCardStatusDto.CardId)).ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(It.IsAny<int>())).ReturnsAsync(card);
             _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
 
             var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
@@ -781,7 +780,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
-            _cardRepositoryMock.Verify(s => s.FindById(It.IsAny<int>()), Times.Once);
+            _cardRepositoryMock.Verify(s => s.FindByIdWithStepWorkflow(It.IsAny<int>()), Times.Once);
         }
     }
 }
