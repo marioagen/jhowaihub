@@ -32,8 +32,8 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ProcessChunks_Success()
         {
             // Arrange
-            var requestCreateDocumentDto = _fixture.FindValidRequestCreateDocumentDto();
-            var fileUploadSummaryDto = _fixture.FindValidFileUploadSummaryDto();
+            var requestCreateDocumentDto = DocumentFixture.FindValidRequestCreateDocumentDto();
+            var fileUploadSummaryDto = DocumentFixture.FindValidFileUploadSummaryDto();
             var workflows = WorkflowFixture.FindValidWorkflows();
 
             _mocker.Use<IMemoryCache>(new MemoryCache(new MemoryCacheOptions()));
@@ -62,10 +62,10 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ProcessChunks_WithDocumentBatch_FirstFile()
         {
             // Arrange
-            var requestCreateDocumentDto = _fixture.FindValidRequestCreateDocumentDtoForBatch("file1", false);
+            var requestCreateDocumentDto = DocumentFixture.FindValidRequestCreateDocumentDtoForBatch("file1", false);
 
-            var fileUploadSummaryDto = _fixture.FindValidFileUploadSummaryDto();
-            var tenant = _fixture.FindValidTenantInfoDto();
+            var fileUploadSummaryDto = DocumentFixture.FindValidFileUploadSummaryDto();
+            var tenant = DocumentFixture.FindValidTenantInfoDto();
             var workflows = WorkflowFixture.FindValidWorkflows();
             var documentBatch = new DocumentBatch(1, DateTime.UtcNow);
 
@@ -104,11 +104,11 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ProcessChunks_WithDocumentBatch_SubsequentFiles()
         {
             // Arrange
-            var firstFile = _fixture.FindValidRequestCreateDocumentDtoForBatch("file1", false);
-            var secondFile = _fixture.FindValidRequestCreateDocumentDtoForBatch("file2", false);
+            var firstFile = DocumentFixture.FindValidRequestCreateDocumentDtoForBatch("file1", false);
+            var secondFile = DocumentFixture.FindValidRequestCreateDocumentDtoForBatch("file2", false);
 
-            var fileUploadSummaryDto = _fixture.FindValidFileUploadSummaryDto();
-            var tenant = _fixture.FindValidTenantInfoDto();
+            var fileUploadSummaryDto = DocumentFixture.FindValidFileUploadSummaryDto();
+            var tenant = DocumentFixture.FindValidTenantInfoDto();
             var workflows = WorkflowFixture.FindValidWorkflows();
             var documentBatch = new DocumentBatch(1, DateTime.UtcNow);
 

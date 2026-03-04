@@ -52,7 +52,7 @@ namespace WoopiAiHub.UnitTests.Services
             var processOcrResultDto = DocumentFixture.FindValidProcessOcrResultDto();
             var ProcessOcrDataAutomationDto = DocumentFixture.FindValidProcessOcrDataAutomationDto();
             var idDocument = 1;
-            var tenant = _fixture.FindValidTenantInfoDto();
+            var tenant = DocumentFixture.FindValidTenantInfoDto();
             var execution = DocumentFixture.FindValidStepToolExecution();
             var stepTool = WorkflowFixture.FindValidStepTool();
 
@@ -152,7 +152,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var processOcrResultDto = DocumentFixture.FindValidProcessOcrResultDto();
             var idDocument = 1;
-            var tenant = _fixture.FindValidTenantInfoDto();
+            var tenant = DocumentFixture.FindValidTenantInfoDto();
             var execution = DocumentFixture.FindValidStepToolExecution();
             var stepTool = WorkflowFixture.FindValidStepTool();
 

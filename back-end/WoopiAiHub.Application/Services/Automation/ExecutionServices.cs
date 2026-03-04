@@ -30,72 +30,113 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns>A task that represents the asynchronous operation of handling execution progress and sending notifications.</returns>
         public async Task HandleExecutionProgress(StepToolExecution execution, string email)
         {
-            execution.UpdateStatusExecution(StatusExecution.Ready);
-            await _stepToolExecutionRepository.UpdateAsync(execution);
+            await UpdateExecutionStatus(execution);
 
             var card = await _cardRepository.FindById(execution.CardId);
             if (card == null)
                 return;
 
-            var relatedCardIds = new List<int> { execution.CardId };
-
-            if (card.DocumentBatchId.HasValue)
-            {
-                var batchCards = await _cardRepository.FindByDocumentBatchId((int)card.DocumentBatchId);
-                relatedCardIds = [.. batchCards.Select(c => c.Id)];
-            }
-
+            var relatedCardIds = await GetRelatedCardIds(card);
             var step = await _stepRepository.FindByIdWithTools(execution.StepTool!.StepId);
+
             if (step == null)
                 return;
 
-            var totalStepTools = step.StepTools.Count;
-            if (totalStepTools == 0)
+            if (step.StepTools.Count == 0)
             {
-                await _hubNotifier.CardProgessAsync(email, execution.CardId, 100.0, execution.StepTool.StepId, string.Empty);
+                await NotifyCompleteProgress(email, execution.CardId, execution.StepTool.StepId);
                 return;
             }
 
+            var (completedCount, currentToolName) = await CalculateProgress(step.StepTools, relatedCardIds);
+            var progressPercent = CalculateProgressPercentage(completedCount, step.StepTools.Count);
+
+            await NotifyAllCards(email, relatedCardIds, progressPercent, execution.StepTool.StepId, currentToolName);
+        }
+
+        private async Task UpdateExecutionStatus(StepToolExecution execution)
+        {
+            execution.UpdateStatusExecution(StatusExecution.Ready);
+            await _stepToolExecutionRepository.UpdateAsync(execution);
+        }
+
+        private async Task<List<int>> GetRelatedCardIds(Card card)
+        {
+            if (!card.DocumentBatchId.HasValue)
+                return [card.Id];
+
+            var batchCards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
+            return [.. batchCards.Select(c => c.Id)];
+        }
+
+        private async Task<(int completedCount, string currentToolName)> CalculateProgress(
+            ICollection<StepTool> stepTools, 
+            List<int> relatedCardIds)
+        {
             int completedStepTools = 0;
             string currentToolName = string.Empty;
 
-            foreach (var stepTool in step.StepTools)
+            foreach (var stepTool in stepTools)
             {
-                bool allCardsReady = true;
-                bool anyCardRunning = false;
+                var (isCompleted, isRunning) = await EvaluateStepToolStatus(stepTool.Id, relatedCardIds);
 
-                foreach (var cardId in relatedCardIds)
-                {
-                    var exec = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(stepTool.Id, cardId);
-
-                    if (exec == null || exec.Status != StatusExecution.Ready)
-                    {
-                        allCardsReady = false;
-                    }
-
-                    if (exec?.Status == StatusExecution.Running)
-                    {
-                        anyCardRunning = true;
-                    }
-                }
-
-                if (allCardsReady)
-                {
+                if (isCompleted)
                     completedStepTools++;
-                }
 
-                if (anyCardRunning && string.IsNullOrEmpty(currentToolName))
-                {
-                    var tool = await _workflowRepository.FindToolByStepToolId(stepTool.Id);
-                    currentToolName = tool?.Name ?? string.Empty;
-                }
+                if (isRunning && string.IsNullOrEmpty(currentToolName))
+                    currentToolName = await GetToolName(stepTool.Id);
             }
 
-            var percent = ((double)completedStepTools / totalStepTools) * 100;
+            return (completedStepTools, currentToolName);
+        }
+
+        private async Task<(bool isCompleted, bool isRunning)> EvaluateStepToolStatus(
+            int stepToolId, 
+            List<int> relatedCardIds)
+        {
+            bool allCardsReady = true;
+            bool anyCardRunning = false;
 
             foreach (var cardId in relatedCardIds)
             {
-                await _hubNotifier.CardProgessAsync(email, cardId, percent, execution.StepTool.StepId, currentToolName);
+                var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(stepToolId, cardId);
+
+                if (execution == null || execution.Status != StatusExecution.Ready)
+                    allCardsReady = false;
+
+                if (execution?.Status == StatusExecution.Running)
+                    anyCardRunning = true;
+            }
+
+            return (allCardsReady, anyCardRunning);
+        }
+
+        private async Task<string> GetToolName(int stepToolId)
+        {
+            var tool = await _workflowRepository.FindToolByStepToolId(stepToolId);
+            return tool?.Name ?? string.Empty;
+        }
+
+        private static double CalculateProgressPercentage(int completedCount, int totalCount)
+        {
+            return ((double)completedCount / totalCount) * 100;
+        }
+
+        private async Task NotifyCompleteProgress(string email, int cardId, int stepId)
+        {
+            await _hubNotifier.CardProgessAsync(email, cardId, 100.0, stepId, string.Empty);
+        }
+
+        private async Task NotifyAllCards(
+            string email, 
+            List<int> relatedCardIds, 
+            double progressPercent, 
+            int stepId, 
+            string currentToolName)
+        {
+            foreach (var cardId in relatedCardIds)
+            {
+                await _hubNotifier.CardProgessAsync(email, cardId, progressPercent, stepId, currentToolName);
             }
         }
     }

@@ -97,7 +97,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var pagedData = _fixture.FindValidDocumentPagedDataDto();
+            var pagedData = DocumentFixture.FindValidDocumentPagedDataDto();
             var iqueryable = new List<DocumentListItemDto>().AsQueryable();
             documentRepository.Setup(a => a.FindAllOrdered(pagedData, "email")).Returns(iqueryable);
 
@@ -115,7 +115,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var pagedData = _fixture.FindInvalidDocumentPagedDataDto();
+            var pagedData = DocumentFixture.FindInvalidDocumentPagedDataDto();
 
             // Act / Assert
             Assert.Throws<ArgumentException>(() => _documentServices.FindAllPaged(pagedData, "email"));
@@ -132,7 +132,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
             functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(),
                                                    It.IsAny<string>(),
-                                                   It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
+                                                   It.IsAny<string>())).ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
 
             // Act
             var result = await _documentServices.FindDocumentById(It.IsAny<int>(),

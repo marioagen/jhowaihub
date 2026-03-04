@@ -108,7 +108,7 @@ namespace WoopiAiHub.Application.Services
                 cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
             }
 
-            var step = await _stepRepository.FindById(dto.StepId) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
+            _ = await _stepRepository.FindById(dto.StepId) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
             var status = await _statusRepository.FindByName(StatusNames.Rejected) ?? throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
 
             return (cards, status);
