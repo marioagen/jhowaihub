@@ -391,4 +391,9 @@
     .margin-left {
         margin-left: auto;
     }
+
+    .bg-light {
+        background-color: var(--color-bg-body-content) !important;
+        color: var(--color-body-content) !important;
+    }
 </style>

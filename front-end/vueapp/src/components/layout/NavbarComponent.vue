@@ -100,7 +100,7 @@ export default {
             user: this.$store.state.userProfile.name,
             selectedTenant: null,
             tenantsFromState: [],
-            isDarkmode: false,
+            currentTheme: localStorage.getItem("theme") || "css-theme-light",
         };
     },
     methods: {
@@ -170,18 +170,20 @@ export default {
         toggleTheme: function () {
             if (localStorage.getItem("theme") === "css-theme-dark") {
                 this.setTheme("css-theme-light");
-                this.isDarkmode = false;
             } else {
                 this.setTheme("css-theme-dark");
-                this.isDarkmode = true;
             }
         },
         setTheme: function (themeName) {
             localStorage.setItem("theme", themeName);
             document.documentElement.className = themeName;
+            this.currentTheme = themeName;
         },
     },
     computed: {
+        isDarkMode() {
+            return this.currentTheme === "css-theme-dark";
+        },
         tenantInitialized() {
             return this.$store.state.tenantInitialized;
         },
@@ -214,16 +216,9 @@ export default {
         this.getUserTenants(userEmail, savedTenant);
     },
     mounted() {
-        let self = this;
-        (function () {
-            if (localStorage.getItem("theme") === "css-theme-dark") {
-                self.setTheme("css-theme-dark");
-                self.showLogoDarkMode = true;
-            } else {
-                self.setTheme("css-theme-light");
-                self.showLogoDarkMode = false;
-            }
-        })();
+        const savedTheme = localStorage.getItem("theme");
+        this.currentTheme = savedTheme === "css-theme-dark" ? "css-theme-dark" : "css-theme-light";
+        this.setTheme(this.currentTheme);
     },
 };
 </script>
@@ -232,7 +227,7 @@ export default {
     .navbar {
         padding: 1%;
         padding-top: 0.9rem;
-        padding-bottom: 1rem;
+        padding-bottom: 0.8rem;
     }
 
     .navbar-light {

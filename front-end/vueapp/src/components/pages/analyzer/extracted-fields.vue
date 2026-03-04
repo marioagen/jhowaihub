@@ -304,7 +304,7 @@
 </script>
 <style scoped>
     .extracted-fields-container {
-        background: white;
+        background: var(--color-card-content) !important;
         border-radius: 8px;
         padding: 1rem;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -312,7 +312,7 @@
     }
 
     .section-title {
-        color: #0073e6;
+        color: var(--color-body-content);
         font-size: 1rem;
         font-weight: 600;
         margin-bottom: 1rem;
@@ -323,7 +323,7 @@
 
     .no-data-message {
         text-align: center;
-        color: #666;
+        color: var(--color-text-body-content);
         padding: 2rem;
         font-size: 0.95rem;
         display: flex;
@@ -377,7 +377,7 @@
     .field-value {
         flex: 1;
         padding: 0.6rem;
-        border: 1px solid #ddd;
+        border: 1px solid var(--color-border-form-control);
         border-radius: 4px;
         font-size: 0.9rem;
         transition: border-color 0.3s ease;
@@ -440,14 +440,12 @@
 
     @media (max-width: 768px) {
         .extracted-fields-container {
-            background: white;
             border-radius: 8px;
             padding: 1rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .section-title {
-            color: #0073e6;
             font-size: 1rem;
             font-weight: 600;
             margin-bottom: 1rem;
@@ -458,7 +456,6 @@
 
         .no-data-message {
             text-align: center;
-            color: #666;
             padding: 2rem;
             font-size: 0.95rem;
             display: flex;
