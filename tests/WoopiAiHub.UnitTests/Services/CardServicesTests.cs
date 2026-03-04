@@ -748,7 +748,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var updateCardStatusDto = CardFixture.FindValidCardStatusDto();
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(updateCardStatusDto.CardId)).ReturnsAsync((Card)null);
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(updateCardStatusDto.CardId)).ReturnsAsync((Card?)null);
 
             // Act
             await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStatus(updateCardStatusDto));
