@@ -32,7 +32,7 @@ namespace WoopiAiHub.UnitTests.Utils
         public void WhenUserIsNull_IsAuthenticated_ReturnsFalse()
         {
             var contextMock = new Mock<HttpContext>();
-            contextMock.Setup(c => c.User).Returns((ClaimsPrincipal?)null);
+            contextMock.Setup(c => c.User).Returns(() => null!);
             var accessorMock = new Mock<IHttpContextAccessor>();
             accessorMock.Setup(a => a.HttpContext).Returns(contextMock.Object);
 
