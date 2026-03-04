@@ -405,7 +405,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             _mocker.GetMock<IWorkflowRepository>()
                 .Setup(x => x.FindToolByStepToolId(stepTool.Id))
-                .ReturnsAsync(null as ToolDto);
+                .ReturnsAsync(default(ToolDto)!);
 
             _mocker.GetMock<IHubNotifier>()
                 .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool.StepId, string.Empty))
