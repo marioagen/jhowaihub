@@ -59,7 +59,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Cards
                 .Include(s => s.Step)
-                    .ThenInclude(st => st.Workflow)
+                    .ThenInclude(st => st!.Workflow)
                 .Where(c => c.Id == id)
                 .FirstOrDefaultAsync();
         }

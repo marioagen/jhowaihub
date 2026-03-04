@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -7,11 +7,13 @@ namespace WoopiAiHub.Repository.Migrations
     /// <inheritdoc />
     public partial class AuditCardTable : Migration
     {
+        private const string AuditCardsTableName = "AuditCards";
+
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AuditCards",
+                name: AuditCardsTableName,
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -47,27 +49,27 @@ namespace WoopiAiHub.Repository.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuditCards_ActionType",
-                table: "AuditCards",
+                table: AuditCardsTableName,
                 column: "ActionType");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuditCards_CardId",
-                table: "AuditCards",
+                table: AuditCardsTableName,
                 column: "CardId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuditCards_OccurredAt",
-                table: "AuditCards",
+                table: AuditCardsTableName,
                 column: "OccurredAt");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuditCards_UserId",
-                table: "AuditCards",
+                table: AuditCardsTableName,
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuditCards_WorkflowId",
-                table: "AuditCards",
+                table: AuditCardsTableName,
                 column: "WorkflowId");
         }
 
@@ -75,7 +77,7 @@ namespace WoopiAiHub.Repository.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AuditCards");
+                name: AuditCardsTableName);
         }
     }
 }
