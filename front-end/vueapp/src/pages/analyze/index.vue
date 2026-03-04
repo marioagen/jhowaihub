@@ -177,7 +177,7 @@
         v-if="canReject"
         ref="modalReject"
         :cardId="idCard"
-        :documentId="idAnalyzer"
+        :documentId="documentId"
         @success="handleRejectSuccess"
     />
     <DocumentViewRejectionModal
@@ -196,9 +196,7 @@
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import CardsServices from "@/services/cards/CardsServices";
-    import AnalyzerService from "@/services/documents/AnalyzerService";
-    import LogService from "@/services/log/logService";
-
+    import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices";
     export default {
         name: "AnalyzerIndex",
         data() {
@@ -267,15 +265,10 @@
             pushHistoryList(data) {
                 this.dataPushHistoryList = data;
             },
-            getDataDocument: function () {
-                let self = this;
-                api.get("/DocumentMetadata/Analyze/" + this.idAnalyzer)
-                    .then(function (result) {
-                        self.hashDocument = result.data.referenceFile;
-                    })
-                    .catch((error) => {
-                        LogService.showMessage("Error loading document: " + error);
-                    });
+            getDataDocument() {
+                DocumentMetadataServices.getDocumentAnalyze(this.documentId).then((result) => {
+                    this.hashDocument = result.referenceFile;
+                });
             },
             async getCardHeaderInfo() {
                 const result = await CardsServices.findCardHeaderInfo(this.cardId);

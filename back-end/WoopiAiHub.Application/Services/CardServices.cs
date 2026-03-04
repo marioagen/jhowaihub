@@ -158,11 +158,12 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto)
         {
-            var card = await _cardRepository.FindById(updateCardStatusDto.CardId)
+            var card = await _cardRepository.FindByIdWithStepWorkflow(updateCardStatusDto.CardId)
                 ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
 
             card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
-            card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Advancement, _currentUserService, _auditCardRepository);
+            if (card.Step != null)
+                card.CreateAuditLog(card.Step.WorkflowId, AuditCardActionType.Finalize, _currentUserService, _auditCardRepository);
 
             var result = _cardRepository.Update(card);
             return result;
@@ -405,6 +406,12 @@ namespace WoopiAiHub.Application.Services
             }
 
             return dto;
+        }
+
+        public async Task<IReadOnlyList<Card>> GetCardsByDocumentIdWithStepWorkflowAsync(int documentId)
+        {
+            var cards = await _cardRepository.FindByDocumentIdCardListWithStepWorkflowAsync(documentId);
+            return cards ?? new List<Card>();
         }
     }
 }

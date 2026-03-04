@@ -209,6 +209,21 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Finds all cards associated with a specific document ID, with Step and Workflow included.
+        /// </summary>
+        /// <param name="documentId">The ID of the document.</param>
+        /// <returns>A list of cards with Step and Workflow loaded.</returns>
+        public async Task<List<Card>> FindByDocumentIdCardListWithStepWorkflowAsync(int documentId)
+        {
+            return await _context.Cards
+                .Where(c => c.DocumentId == documentId)
+                .Include(c => c.Step)
+                    .ThenInclude(s => s!.Workflow)
+                .OrderBy(c => c.Step!.Order)
+                .ToListAsync();
+        }
+
+        /// <summary>
         /// Finds all cards associated with a specific document ID.
         /// </summary>
         /// <param name="documentId">The ID of the document.</param>

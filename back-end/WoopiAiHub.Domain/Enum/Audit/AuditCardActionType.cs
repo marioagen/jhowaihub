@@ -13,6 +13,8 @@ namespace WoopiAiHub.Domain.Enum.Audit
         Removed = 8,
         DocumentCreated = 9,
         DocumentDeleted = 10,
-        Rejection = 11
+        Rejection = 11,
+        InputQuestionnaire = 12,
+        InputDocument = 13
     }
 }
