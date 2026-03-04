@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.Enum;
@@ -47,8 +47,9 @@ namespace WoopiAiHub.Api.Exceptions
                     break;
 
                 case KeyNotFoundException:
+                case FileNotFoundException:
                     problemDetails.Status = StatusCodes.Status404NotFound;
-                    problemDetails.Detail = "The requested resource was not found.";
+                    problemDetails.Detail = exception.Message;
                     break;
 
                 default:

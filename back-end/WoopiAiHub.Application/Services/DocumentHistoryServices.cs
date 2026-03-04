@@ -1,9 +1,12 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Application.Services
@@ -13,14 +16,16 @@ namespace WoopiAiHub.Application.Services
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
         private readonly IDocumentRepository _documentRepository;
         private readonly IValidator<DocumentHistory> _documentHistoryValidator;
+        private readonly ILogger<DocumentHistoryServices> _logger;
 
         public DocumentHistoryServices(IDocumentHistoryRepository documentHistoryRepository,
-                                       IDocumentRepository documentRepository,
-                                       IValidator<DocumentHistory> documentHistoryValidator)
+                                       IValidator<DocumentHistory> documentHistoryValidator,
+                                       ILogger<DocumentHistoryServices> logger)
         {
             _documentHistoryRepository = documentHistoryRepository;
             _documentRepository = documentRepository;
             _documentHistoryValidator = documentHistoryValidator;
+            _logger = logger;
         }
         
 
@@ -44,10 +49,15 @@ namespace WoopiAiHub.Application.Services
         public JsonResult FindById(int idDocument,
                                    string emailCreator)
         {
-            if (_documentRepository.FindById(idDocument) == null)
-                return new JsonResult(Enumerable.Empty<DocumentHistory>());
-
-            return new JsonResult(_documentHistoryRepository.FindById(idDocument));
+            try
+            {
+                return new JsonResult(_documentHistoryRepository.FindById(idDocument));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryServices)} in the {nameof(FindById)} method");
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
         }
 
         /// <summary>
@@ -62,22 +72,27 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public IEnumerable<DocumentHistoryDto> FindByIdWithTake(int idDocument, int take, string? search = null, string? order = null, string? orderBy = null, Guid? userId = null)
         {
-            if (_documentRepository.FindById(idDocument) == null)
-                return Enumerable.Empty<DocumentHistoryDto>();
-
-            var entries = _documentHistoryRepository.FindByIdWithTake(idDocument, take, search, order, orderBy, userId);
-            return entries.Select(h => new DocumentHistoryDto
+            try
             {
-                Id = h.Id,
-                IdDocument = h.IdDocument,
-                Input = h.Input,
-                Output = h.Output,
-                IsEdited = h.IsEdited,
-                Type = h.Type,
-                UserId = h.UserId,
-                UserName = h.User?.Name,
-                Created = h.Created
-            });
+                var entries = _documentHistoryRepository.FindByIdWithTake(idDocument, take, search, order, orderBy, userId);
+                return entries.Select(h => new DocumentHistoryDto
+                {
+                    Id = h.Id,
+                    IdDocument = h.IdDocument,
+                    Input = h.Input,
+                    Output = h.Output,
+                    IsEdited = h.IsEdited,
+                    Type = h.Type,
+                    UserId = h.UserId,
+                    UserName = h.User?.Name,
+                    Created = h.Created
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryServices)} in the {nameof(FindByIdWithTake)} method");
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
         }
 
         /// <summary>
@@ -88,12 +103,15 @@ namespace WoopiAiHub.Application.Services
         public bool UpdateHistory(UpdateHistoryDto updateHistoryDto,
                                   string emailCreator)
         {
-            if (_documentRepository.FindById(updateHistoryDto.IdDocument) == null)
-                return false;
-
-            var result = _documentHistoryRepository.UpdateHistory(updateHistoryDto);
-
-            return result;
+            try
+            {
+                return _documentHistoryRepository.UpdateHistory(updateHistoryDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryServices)} in the {nameof(UpdateHistory)} method");
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
         }
 
         /// <summary>
@@ -104,12 +122,15 @@ namespace WoopiAiHub.Application.Services
         public bool Delete(int idDocument,
                            string emailCreator)
         {
-            if (_documentRepository.FindById(idDocument) == null)
-                return false;
-
-            var result = _documentHistoryRepository.Delete(idDocument);
-
-            return result;
+            try
+            {
+                return _documentHistoryRepository.Delete(idDocument);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentHistoryServices)} in the {nameof(Delete)} method");
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
         }
     }
 }

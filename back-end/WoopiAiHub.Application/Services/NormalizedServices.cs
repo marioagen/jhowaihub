@@ -1,5 +1,8 @@
 using FluentValidation;
+using Microsoft.Extensions.Logging;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
@@ -11,14 +14,16 @@ namespace WoopiAiHub.Application.Services
         private readonly IDocumentNormalizedRepository _documentNormalizedRepository;
         private readonly IDocumentRepository _documentRepository;
         private readonly IValidator<DocumentNormalized> _documentNormalizedValidator;
+        private readonly ILogger<DocumentNormalizedServices> _logger;
 
         public DocumentNormalizedServices(IDocumentNormalizedRepository documentNormalizedRepository,
-                                          IDocumentRepository documentRepository,
-                                          IValidator<DocumentNormalized> documentNormalizedValidator)
+                                          IValidator<DocumentNormalized> documentNormalizedValidator,
+                                          ILogger<DocumentNormalizedServices> logger)
         {
             _documentNormalizedRepository = documentNormalizedRepository;
             _documentRepository = documentRepository;
             _documentNormalizedValidator = documentNormalizedValidator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -52,10 +57,15 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public DocumentNormalized? FindById(int id)
         {
-            if (_documentRepository.FindById(id) == null)
-                return null;
-
-            return _documentNormalizedRepository.FindById(id);
+            try
+            {
+                return _documentNormalizedRepository.FindById(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentNormalizedServices)} in the {nameof(FindById)} method");
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
         }
 
         /// <summary>

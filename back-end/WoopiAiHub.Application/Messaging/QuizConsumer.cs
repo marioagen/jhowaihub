@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -54,8 +54,8 @@ namespace WoopiAiHub.Application.Messaging
                     httpAccessor.HttpContext ??= new DefaultHttpContext();
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
-                    var documentServices = scope.ServiceProvider.GetRequiredService<IDocumentServices>();
-                    await documentServices.InputToolQuestionnaire(message);
+                    var documentPipelineServices = scope.ServiceProvider.GetRequiredService<IDocumentPipelineServices>();
+                    await documentPipelineServices.InputToolQuestionnaire(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
 

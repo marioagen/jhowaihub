@@ -136,8 +136,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                         {
                             Message = new ChatMessageResponseDto
                             {
-                                Role = "assistant",
-                                Content = f.Lorem.Paragraph()
+                                Role = "assistant", Content = f.Lorem.Paragraph()
                             },
                         }
                     }.ToList(),
@@ -157,9 +156,21 @@ namespace WoopiAiHub.UnitTests.Fixture
             var faker = new Faker<SubscriptionPeriodDto>("pt_BR")
                 .CustomInstantiator(f => new SubscriptionPeriodDto
                 {
+                    Tenant = f.Random.String(), PeriodStart = f.Date.Past(), PeriodEnd = f.Date.Future()
+                });
+            return faker;
+        }
+
+        public static ExternalFileUploadDto FindValidExternalFileUploadDto()
+        {
+            var faker = new Faker<ExternalFileUploadDto>("pt_BR")
+                .CustomInstantiator(f => new ExternalFileUploadDto
+                {
+                    FileName = f.System.FileName(),
+                    FileReference = f.Random.Guid().ToString(),
                     Tenant = f.Random.String(),
-                    PeriodStart = f.Date.Past(),
-                    PeriodEnd = f.Date.Future()
+                    Email = f.Internet.Email(),
+                    WorkflowId = f.Random.Int(1, 100)
                 });
             return faker;
         }
@@ -177,19 +188,21 @@ namespace WoopiAiHub.UnitTests.Fixture
                     Tenant = f.Random.String(),
                     Email = f.Random.String(),
                     QuestionsAnswers = new List<QuestionAnswerDto>
-                    { new QuestionAnswerDto
+                    {
+                        new QuestionAnswerDto
+                        {
+                            Question = f.Lorem.Sentence(),
+                            Answer = f.Lorem.Paragraph(),
+                            Usage = new List<QueryUsageDto>
+                            {
+                                new QueryUsageDto
                                 {
-                                    Question = f.Lorem.Sentence(),
-                                    Answer = f.Lorem.Paragraph(),
-                                    Usage = new List<QueryUsageDto>{                                        
-                                        new QueryUsageDto
-                                        {
-                                            Prompt_usage = f.Random.Int(1, 1000),
-                                            Completion_usage = f.Random.Int(1, 1000),
-                                            Total_usage = f.Random.Int(1, 2000)
-                                        }
-                                    }
+                                    Prompt_usage = f.Random.Int(1, 1000),
+                                    Completion_usage = f.Random.Int(1, 1000),
+                                    Total_usage = f.Random.Int(1, 2000)
                                 }
+                            }
+                        }
                     },
                     Data = mockJObject
                 });

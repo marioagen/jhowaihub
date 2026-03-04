@@ -175,7 +175,8 @@
     <QuestionsHistoryModal ref="QuestionsHistoryModal" />
 </template>
 <script>
-    import DocumentServices from "@/services/documents/DocumentsServices";
+    import DocumentQuestionnaireServices from "@/services/documents/DocumentQuestionnaireServices";
+    import DocumentHistoryServices from "@/services/documents/DocumentHistoryServices";
     import QuizzesService from "@/services/quizzes/QuizzesService";
     import QuestionsHistoryModal from "@/components/analyze/QuestionsHistoryModal.vue";
 
@@ -224,8 +225,8 @@
                         isAscending: false,
                         colType: 2,
                     });
-                    if (result.length > 0) {
-                        this.questionnaires = result;
+                    if (result.content) {
+                        this.questionnaires = result.content;
                     }
                 } catch (error) {
                     this.$notify({
@@ -266,13 +267,13 @@
                         idQuestionnaire: this.selectedQuestionnaireId,
                     };
 
-                    const response = await DocumentServices.applyQuestionnaire(params);
+                    const response = await DocumentQuestionnaireServices.applyQuestionnaire(params);
                     if (response.error) {
                         throw new Error("Failed to apply questionnaire");
                     }
 
                     this.appliedQuestionnaireId = this.selectedQuestionnaireId;
-                    const historyResponse = await DocumentServices.getDocumentHistory(
+                    const historyResponse = await DocumentHistoryServices.getDocumentHistory(
                         this.documentId
                     );
                     if (historyResponse.error) {
@@ -346,7 +347,7 @@
                     input: this.question,
                 };
                 try {
-                    await DocumentServices.inputDocument(params).then((response) => {
+                    await DocumentQuestionnaireServices.inputDocument(params).then((response) => {
                         this.output = response.data;
                     });
                 } catch (error) {
