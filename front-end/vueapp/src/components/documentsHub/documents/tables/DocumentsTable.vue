@@ -154,6 +154,7 @@
                 isAllUsers: false,
                 login: null,
                 colType: 2,
+                document: "1",
             },
             isEmbedding: false,
             isDeleting: false,
@@ -172,6 +173,7 @@
                     colType: this.filters.colType,
                     login: this.filters.login,
                     workflowIds: this.filters.workflows,
+                    documentType: this.filters.document,
                 };
                 if (this.filters.statusId !== "" && this.filters.statusId != null) {
                     params.statusId = Number(this.filters.statusId);

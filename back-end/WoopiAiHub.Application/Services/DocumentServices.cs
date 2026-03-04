@@ -145,7 +145,7 @@ namespace WoopiAiHub.Application.Services
             if (documentPagedDataDto.Page > 0)
             {
                 var totalList = _documentRepository.FindAllOrdered(documentPagedDataDto, emailCreator);
-                var result = this.DocumentPagination(totalList, documentPagedDataDto);
+                var result = DocumentPagination(totalList, documentPagedDataDto);
                 return result;
             }
             else

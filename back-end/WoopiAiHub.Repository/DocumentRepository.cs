@@ -77,6 +77,11 @@ namespace WoopiAiHub.Repository
                 ));
             }
 
+            if(documentPagedDataDto.DocumentType is not null && documentPagedDataDto.DocumentType != DocumentFilter.All)
+            {
+                query = query.Where(w => documentPagedDataDto.DocumentType == DocumentFilter.Singles ? !w.HasBatch : w.HasBatch);
+            }
+
             query = documentPagedDataDto.IsAscending
                 ? query.OrderByDynamic(documentPagedDataDto.ColType.ToString())
                 : query.OrderByDynamic(documentPagedDataDto.ColType + " descending");
