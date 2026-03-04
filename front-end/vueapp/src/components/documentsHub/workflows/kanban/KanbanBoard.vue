@@ -54,22 +54,25 @@
                             <div
                                 v-for="card in step.cards"
                                 :key="card.id"
-                                class="card-body"
                                 :id="card.id"
                             >
-                                <KanbanCard
+                                <div
                                     v-if="showFinalized(card.status.id, step)"
-                                    :dataCard="card"
-                                    :dataStep="step"
-                                    :isFirstStep="step.order === minOrder"
-                                    :isLoading="isLoading"
-                                    :isLastStep="isLastStep(step)"
-                                    @reload="reloadList"
-                                    @cardMoved="handleCardMoved"
-                                    @cardUpdated="handleCardUpdated"
-                                    label="common.analyze"
-                                    :users="users"
-                                />
+                                    class="card-body"
+                                >
+                                    <KanbanCard
+                                        :dataCard="card"
+                                        :dataStep="step"
+                                        :isFirstStep="step.order === minOrder"
+                                        :isLoading="isLoading"
+                                        :isLastStep="isLastStep(step)"
+                                        @reload="reloadList"
+                                        @cardMoved="handleCardMoved"
+                                        @cardUpdated="handleCardUpdated"
+                                        label="common.analyze"
+                                        :users="users"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

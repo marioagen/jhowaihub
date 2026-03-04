@@ -24,7 +24,7 @@
                 <div class="d-flex align-items-center mt-1">
                     <div
                         v-if="documentsBatch"
-                        class="input-group w-auto me-2"
+                        class="input-group w-auto me-2 analyze-document-select"
                     >
                         <span class="input-group-text border-end-0 bg-white">
                             <LucideIcon
@@ -34,7 +34,7 @@
                         </span>
                         <select
                             class="form-select form-select-sm border-start-0"
-                            v-model="idCard"
+                            v-model="cardId"
                             @change="changeDocument"
                         >
                             <option
@@ -200,8 +200,8 @@
     <DocumentRejectionModal
         v-if="canReject"
         ref="modalReject"
-        :cardId="idCard"
-        :documentId="idAnalyzer"
+        :cardId="cardId"
+        :documentId="documentId"
         @success="handleRejectSuccess"
     />
     <DocumentViewRejectionModal
@@ -220,7 +220,7 @@
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import CardsServices from "@/services/cards/CardsServices";
-    import AnalyzerService from "@/services/documents/AnalyzerService";
+    import api from "@/services/api";
     import LogService from "@/services/log/logService";
 
     export default {
@@ -294,7 +294,7 @@
             },
             getDataDocument: function () {
                 let self = this;
-                api.get("/DocumentMetadata/Analyze/" + this.idAnalyzer)
+                api.get("/DocumentMetadata/Analyze/" + this.documentId)
                     .then(function (result) {
                         self.hashDocument = result.data.referenceFile;
                         if (result.data && result.data.documentBatchId != null) {
@@ -335,13 +335,14 @@
                 }, 2000);
             },
             openViewRejectionModal() {
-                this.$refs.modalViewRejection.open(this.idCard);
+                this.$refs.modalViewRejection.open(this.cardId);
             },
             getBatchDocuments(documentBatchId) {
                 CardsServices.getCardsByBatch(documentBatchId)
                     .then((response) => {
                         if (response && !response.error) {
                             this.documentsBatch = response;
+                            console.log(this.documentsBatch);
                         }
                     })
                     .catch((e) => {
@@ -350,7 +351,7 @@
             },
             changeDocument() {
                 const selectedDocument = this.documentsBatch.find(
-                    (doc) => doc.cardId === this.idCard
+                    (doc) => doc.cardId === this.cardId
                 );
 
                 this.$router.push({
@@ -372,6 +373,10 @@
 <style scoped>
     .container-fluid {
         padding: 0 13px;
+    }
+
+    .analyze-document-select {
+        max-width: 300px;
     }
 
     @media (min-width: 320px) and (max-width: 767px) {
