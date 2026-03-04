@@ -8,8 +8,10 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -26,6 +28,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IAutomationServices _automationServices;
         private readonly IFileRepositoryApi _fileRepositoryApi;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly IAuditCardRepository _auditCardRepository;
         private readonly ILogger<DocumentUploadServices> _logger;
 
         public DocumentUploadServices(
@@ -36,6 +40,8 @@ namespace WoopiAiHub.Application.Services
             IWorkflowRepository workflowRepository,
             IAutomationServices automationServices,
             IFileRepositoryApi fileRepositoryApi,
+            ICurrentUserService currentUserService,
+            IAuditCardRepository auditCardRepository,
             ILogger<DocumentUploadServices> logger)
         {
             _documentRepository = documentRepository;
@@ -45,6 +51,8 @@ namespace WoopiAiHub.Application.Services
             _workflowRepository = workflowRepository;
             _automationServices = automationServices;
             _fileRepositoryApi = fileRepositoryApi;
+            _currentUserService = currentUserService;
+            _auditCardRepository = auditCardRepository;
             _logger = logger;
         }
 
@@ -111,6 +119,13 @@ namespace WoopiAiHub.Application.Services
 
                 documentForDataBase.Cards = cards;
                 _documentRepository.Create(documentForDataBase);
+
+                var workflowsList = workflows!.ToList();
+                var cardsList = documentForDataBase.Cards.ToList();
+                for (var i = 0; i < cardsList.Count && i < workflowsList.Count; i++)
+                    cardsList[i].CreateAuditLog(workflowsList[i].Id, AuditCardActionType.Upload, _currentUserService, _auditCardRepository);
+                if (cardsList.Count > 0)
+                    await _auditCardRepository.SaveChangesAsync();
 
                 var hasExecutions = await _automationServices.PrepareExecutionAsync(workflows!);
                 var automationServicesDto = new AutomationServicesDto
