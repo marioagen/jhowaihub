@@ -21,18 +21,6 @@ export default {
                 };
             });
     },
-    getQuizzes() {
-        return api
-            .get("/Questionnaire/FindAll")
-            .then(({ data }) => {
-                return data;
-            })
-            .catch((e) => {
-                return {
-                    error: e,
-                };
-            });
-    },
     getQuizzById(id) {
         return api
             .get(`/Questionnaire/${id}`)
