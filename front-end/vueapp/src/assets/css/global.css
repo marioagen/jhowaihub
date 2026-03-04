@@ -4,7 +4,7 @@
 
 body {
     font-family: var(--font-family-base);
-    font-size: .875rem !important;
+    font-size: 0.875rem !important;
 }
 
 .sidebar-wrapper {
@@ -112,7 +112,8 @@ body {
     --color-toast-content-danger: #842029;
     --color-border-toast: 1px solid rgba(0, 0, 0, 0.05);
     --color-border-header-modal: 1px solid #dee2e6;
-    --box-shadow-multiselect-wrapper: 0 0 0 var(--ms-ring-width, 3px) var(--ms-ring-color, rgba(16, 185, 129, 0.188));
+    --box-shadow-multiselect-wrapper: 0 0 0 var(--ms-ring-width, 3px)
+        var(--ms-ring-color, rgba(16, 185, 129, 0.188));
     --color-bg-dropdown-menu: #ffffff;
     --color-dropdown-menu: #212529;
     --color-fade-buttons: #d2f4ea;
@@ -220,7 +221,8 @@ main > #offcanvas-sidebar > .dropdown > a {
 }
 
 .input-group:not(.has-validation) > .dropdown-toggle:nth-last-child(n + 3),
-.input-group:not(.has-validation) > :not(:last-child):not(.dropdown-toggle):not(.dropdown-menu):not(.input-group-text) {
+.input-group:not(.has-validation)
+    > :not(:last-child):not(.dropdown-toggle):not(.dropdown-menu):not(.input-group-text) {
     background: var(--color-bg-form-control) !important;
     color: var(--color-body-content) !important;
 }
@@ -804,7 +806,7 @@ dropzone .dz-preview .dz-details {
 
 .validation-message {
     color: #dc3545;
-    font-size: 0.70rem;
+    font-size: 0.7rem;
     font-weight: 500;
     margin-top: 0.25rem;
     display: block;
@@ -819,6 +821,15 @@ dropzone .dz-preview .dz-details {
 }
 
 .btn:focus {
-  box-shadow: none !important;
-  outline: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.btn-check:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+.btn-check:focus + .btn {
+    outline: none !important;
+    box-shadow: none !important;
 }
