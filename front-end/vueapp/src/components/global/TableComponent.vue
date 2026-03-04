@@ -247,7 +247,7 @@
             vertical-align: middle;
             font-size: 12px;
             font-weight: 500;
-            color: #343a40;
+            color: var(--color-table-text) !important;
             background: var(--color-bg-table) !important;
         }
 

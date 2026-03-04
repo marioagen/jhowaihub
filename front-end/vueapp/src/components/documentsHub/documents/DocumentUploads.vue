@@ -216,7 +216,7 @@
                                         {{ $t("documents.upload.warningWorkflowNotListed") }}
                                     </div>
                                     <div
-                                        class="border rounded p-1 user-list scrollable-list bg-white"
+                                        class="border rounded bg-select p-1 user-list scrollable-list"
                                     >
                                         <div
                                             v-if="isLoading"
@@ -716,8 +716,8 @@
     }
 
     .team-selector-container {
-        background-color: #eff6ff;
-        border: 1.5px solid #bedbff;
+        background-color: var(--color-sidebar-li-collapsed-hover) !important;
+        border: 1.5px solid var(--color-border-form-control);
         border-radius: 0.375rem;
         transition: border-color 0.3s ease;
         min-height: 150px;
@@ -727,13 +727,13 @@
         border-color: #dc3545 !important;
     }
 
-    .team-selector-container.is-valid {
-        border-color: #bedbff;
-    }
+        .team-selector-container.is-valid {
+            border-color: var(--color-bg-primary-badge) !important;
+        }
 
     .selected-count {
-        background-color: #dbe9fc;
-        color: #2547bc;
+        background-color: var(--color-bg-primary-badge) !important;
+        color: var(--color-text-primary-badge) !important;
         padding: 2px 8px;
         border-radius: 12px;
         font-weight: 600;
@@ -752,7 +752,7 @@
     }
 
     .box-upload-form {
-        background-color: #ffffff;
+        background-color: var(--color-card-content);
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         padding: 24px;
@@ -760,9 +760,9 @@
     }
 
     .btn-custom-light {
-        background-color: #f8f9fb !important;
-        border-color: #ced4da !important;
-        color: #212529 !important;
+        background-color: var(--color-bg-body-content) !important;
+        border-color: var(--color-border-form-control) !important;
+        color: var(--color-body-content) !important;
         transition: background-color 0.2s ease;
     }
 
@@ -913,4 +913,10 @@
             display: none;
         }
     }
+
+    .bg-select {
+        background-color: var(--color-card-content) !important;
+        border-color: var(--color-border-form-control) !important;
+    }
+
 </style>

@@ -514,7 +514,7 @@
         height: auto;
         background-color: var(--color-card-content) !important;
         color: var(--color-body-content) !important;
-        border-color: #d0d4d9 !important;
+        border-color: var( --color-border-form-control) !important;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 38%);
     }
 
@@ -599,7 +599,11 @@
     }
 
     .badge {
-        background-color: #fff;
-        color: #676879;
+        background-color: var(--color-bg-badge) !important;
+        color: var(--color-body-content) !important;
+    }
+
+    .border {
+        border: 1px solid var(--color-border-form-control) !important;
     }
 </style>

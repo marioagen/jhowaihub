@@ -229,11 +229,11 @@ export default {
 </script>
 
 <style scoped>
-.navbar {
-    padding: 1;
-    padding-top: 0.9rem;
-    padding-bottom: 0.8rem;
-}
+    .navbar {
+        padding: 1%;
+        padding-top: 0.9rem;
+        padding-bottom: 1rem;
+    }
 
     .navbar-light {
         background-color: var(--color-bg-navbar) !important;
@@ -440,4 +440,9 @@ export default {
     right: 0 !important;
     left: auto !important;
 }
+    .bg-light {
+        background-color: var(--color-bg-body-content) !important;
+        border: 1px solid var( --color-border-form-control) !important;
+        color: var(--color-body-content) !important
+    }
 </style>

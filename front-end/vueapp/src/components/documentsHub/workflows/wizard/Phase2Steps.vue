@@ -133,7 +133,7 @@
                             >
                                 <div class="d-flex flex-column">
                                     <div class="input-group">
-                                        <span class="input-group-text border-end-0 bg-white">
+                                        <span class="input-group-text border-end-0">
                                             <LucideIcon
                                                 icon="Users"
                                                 :size="16"
@@ -323,7 +323,7 @@
     }
 
     .card-header {
-        background-color: #e8f1ff;
+        background-color: var(--color-header-card-step) !important;
         padding: 12px 16px;
     }
 
@@ -345,6 +345,7 @@
         background: transparent;
         font-weight: 600;
         padding: 4px;
+        color: var(--color-body-content) !important;
     }
 
     .input-title:focus {
@@ -355,20 +356,20 @@
     .add-step-card {
         min-width: 240px;
         flex-shrink: 0;
-        border: 2px dashed #d1d5db;
+        border: 2px dashed var(--color-border-subscription-card) !important;
         cursor: pointer;
         min-height: 240px;
         transition: background-color 0.2s;
     }
 
-    .add-step-card:hover {
-        background-color: #f9fafb;
-    }
+        .add-step-card:hover {
+            background-color: var(--color-hover-transfer) !important;
+        }
 
     .icon-circle {
         width: 32px;
         height: 32px;
-        border: 1.5px dashed #9ca3af;
+        border: 2px dashed var(--color-border-subscription-card) !important;
         border-radius: 50%;
         display: flex;
         align-items: center;

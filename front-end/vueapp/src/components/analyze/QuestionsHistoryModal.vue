@@ -35,7 +35,7 @@
                 <div class="row g-2 mb-3">
                     <div class="col">
                         <div class="input-group input-group-sm">
-                            <span class="input-group-text border-end-0 bg-white">
+                            <span class="input-group-text border-end-0">
                                 <LucideIcon
                                     icon="Search"
                                     :size="16"
@@ -52,7 +52,7 @@
                     </div>
                     <div class="col-auto">
                         <div class="input-group input-group-sm">
-                            <span class="input-group-text border-end-0 bg-white">
+                            <span class="input-group-text border-end-0">
                                 <LucideIcon
                                     icon="User"
                                     :size="16"

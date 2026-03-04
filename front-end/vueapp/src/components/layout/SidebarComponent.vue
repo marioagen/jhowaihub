@@ -213,8 +213,8 @@
 <style scoped>
     .collapse-toggle-container:hover,
     .collapse-toggle-container .btn.toggle-button:hover {
-        background-color: #e1e9f8 !important;
-        border-color: #e1e9f8 !important;
+        background-color: var(--color-sidebar-li-collapsed-hover) !important;
+        border-color: var(--color-sidebar-li-collapsed-hover) !important;
         cursor: pointer;
     }
 
@@ -346,10 +346,10 @@
         text-decoration: none;
     }
 
-    .btn-toggle-nav a:hover,
-    .btn-toggle-nav a:focus {
-        background-color: #d2f4ea;
-    }
+        .btn-toggle-nav a:hover,
+        .btn-toggle-nav a:focus {
+            background-color: var(--color-sidebar-li-collapsed-hover);
+        }
 
     .btn-toggle-nav > li > .active {
         background-color: #d2f4ea;
@@ -403,5 +403,9 @@
             opacity: 1;
             transform: translateX(0);
         }
+    }
+
+    .collapse-toggle-container:hover {
+        background-color: var(--color-sidebar-li-collapsed-hover) !important;
     }
 </style>

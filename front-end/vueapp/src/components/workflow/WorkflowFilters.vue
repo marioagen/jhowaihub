@@ -3,7 +3,7 @@
         <div :class="`col-${findColSize('search')}`">
             <div class="input-group">
                 <span
-                    class="input-group-text border-end-0 bg-white"
+                    class="input-group-text border-end-0"
                 >
                     <LucideIcon
                         icon="Search"
@@ -27,7 +27,7 @@
                 />
                 <span
                     v-if="showCleanBtn"
-                    class="input-group-text border-start-0 bg-white"
+                    class="input-group-text border-start-0"
                     @click="cleanInput"
                 >
                     <LucideIcon
@@ -40,7 +40,7 @@
         <div :class="`col-${findColSize('orderBy')}`">
             <div class="input-group">
                 <span
-                    class="input-group-text border-end-0 bg-white"
+                    class="input-group-text border-end-0"
                 >
                     <LucideIcon
                         icon="ArrowUpDown"
@@ -73,7 +73,7 @@
         >
             <div class="input-group">
                 <span
-                    class="input-group-text border-end-0 bg-white"
+                    class="input-group-text border-end-0"
                 >
                     <LucideIcon
                         icon="Users"
@@ -111,7 +111,7 @@
         >
             <div class="input-group">
                 <span
-                    class="input-group-text border-end-0 bg-white"
+                    class="input-group-text border-end-0"
                 >
                     <LucideIcon
                         icon="User"

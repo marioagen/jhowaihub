@@ -544,20 +544,6 @@
         padding: 0 13px;
     }
 
-    .main-div {
-        border: 1px solid #d3d3d3;
-        border-radius: 8px;
-        background: white;
-        padding: 20px 24px;
-    }
-
-    .add-step-card {
-        border: 2px dashed #d1d5db;
-        cursor: pointer;
-        min-height: 240px;
-        transition: background-color 0.2s;
-    }
-
     .add-step-card:hover {
         background-color: #f9fafb;
     }
@@ -582,7 +568,7 @@
     .add-step-card {
         min-width: 240px;
         flex-shrink: 0;
-        border: 2px dashed #d1d5db;
+        border: 2px dashed var(--color-border-form-control) !important;
         cursor: pointer;
         min-height: 240px;
         transition: background-color 0.2s;

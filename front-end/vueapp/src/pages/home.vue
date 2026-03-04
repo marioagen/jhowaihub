@@ -224,7 +224,7 @@
     }
 
     .plan-thanks {
-        color: #6c757d;
+        color:  var(--color-body-content) !important;
     }
 
     .quick-start-section {

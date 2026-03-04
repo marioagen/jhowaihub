@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col">
             <div class="input-group">
-                <span class="input-group-text border-end-0 bg-white">
+                <span class="input-group-text border-end-0">
                     <LucideIcon icon="Search" :size="16" />
                 </span>
                 <input
@@ -16,7 +16,7 @@
                     @keydown.enter="search(1, 'search')"
                     @keydown.delete="search(1, 'search')"
                 />
-                <span v-if="showCleanBtn" class="input-group-text border-start-0 bg-white" @click="cleanBtn">
+                <span v-if="showCleanBtn" class="input-group-text border-start-0" @click="cleanBtn">
                     <LucideIcon icon="X" :size="16" />
                 </span>
             </div>
