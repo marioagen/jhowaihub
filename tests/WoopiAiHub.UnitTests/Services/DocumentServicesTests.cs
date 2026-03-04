@@ -21,6 +21,7 @@ using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
@@ -45,7 +46,8 @@ namespace WoopiAiHub.UnitTests.Services
             var mockQueues = new Mock<IOptions<MessageQueues>>();
             mockQueues.Setup(x => x.Value).Returns(new MessageQueues
             {
-                OcrQueue = "ocrQueue"
+                OcrQueue = "ocrQueue",
+                EmbeddingQueueAiHubResponse = "embeddingQueue"
             });
 
             _mocker.Use(mockQueues);
@@ -54,6 +56,7 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x.GetSection("keyAccess").Value).Returns(Guid.NewGuid().ToString());
             configMock.Setup(x => x.GetSection("UseOcrGoogle").Value).Returns(() => "true");
             configMock.Setup(x => x["RefitExternalSettings:FunctionApiKey"]).Returns(Guid.NewGuid().ToString());
+            configMock.Setup(x => x["IndexerApiKey"]).Returns(Guid.NewGuid().ToString());
 
             _mocker.Use(configMock.Object);
 

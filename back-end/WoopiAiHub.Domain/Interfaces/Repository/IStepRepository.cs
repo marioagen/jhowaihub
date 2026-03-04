@@ -1,4 +1,5 @@
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
@@ -19,7 +20,8 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
                                                   string input = "", 
                                                   bool allUsers = false, 
                                                   string login = "", 
-                                                  string order = "");
+                                                  string order = "",
+                                                  DocumentFilter documentFilter = DocumentFilter.All);
         Task<List<StepDto>> FindPreviousStepsByWorkflowIdAndOrder(int workflowId,
                                                                  int order);
         Task<Step?> FindStepByCardId(int cardId);

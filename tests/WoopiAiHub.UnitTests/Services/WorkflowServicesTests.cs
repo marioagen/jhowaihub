@@ -1247,8 +1247,7 @@ namespace WoopiAiHub.UnitTests.Services
             var expectedSteps = new List<StepDto> { WorkflowFixture.FindValidStepDto() };
 
             _stepRepositoryMock
-                .Setup(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(),
-                    It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(r => r.FindStepsByWorkflowId(workflowId, filter.Input, filter.IsAllUsers ?? false, filter.Login, filter.OrderBy, It.IsAny<DocumentFilter>()))
                 .ReturnsAsync(expectedSteps);
 
             // Act
@@ -1256,9 +1255,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.Equal(expectedSteps, result);
-            _stepRepositoryMock.Verify(
-                r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(),
-                    It.IsAny<string>()), Times.Once);
+            _stepRepositoryMock.Verify(r => r.FindStepsByWorkflowId(workflowId, filter.Input, filter.IsAllUsers ?? false, filter.Login, filter.OrderBy, It.IsAny<DocumentFilter>()), Times.Once);
         }
 
         [Fact(DisplayName = "FindStepsById should throw AppException when no steps found")]
@@ -1273,8 +1270,7 @@ namespace WoopiAiHub.UnitTests.Services
             };
 
             _stepRepositoryMock
-                .Setup(r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(),
-                    It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(r => r.FindStepsByWorkflowId(workflowId, filter.Input, filter.IsAllUsers ?? false, filter.Login, filter.OrderBy, It.IsAny<DocumentFilter>()))
                 .ReturnsAsync((List<StepDto>)null);
 
             // Act & Assert
@@ -1284,9 +1280,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("Workflow not found", ex.Message);
             Assert.Equal(WorkflowLabel.NotFound, ex.LabelError);
 
-            _stepRepositoryMock.Verify(
-                r => r.FindStepsByWorkflowId(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string>(),
-                    It.IsAny<string>()), Times.Once);
+            _stepRepositoryMock.Verify(r => r.FindStepsByWorkflowId(workflowId, filter.Input, filter.IsAllUsers ?? false, filter.Login, filter.OrderBy, It.IsAny<DocumentFilter>()), Times.Once);
         }
 
         [Fact(DisplayName = "FindWorkflowsByDocument success")]

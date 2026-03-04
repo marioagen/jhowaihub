@@ -22,6 +22,30 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center mt-1">
+                    <div
+                        v-if="documentsBatch"
+                        class="input-group w-auto me-2"
+                    >
+                        <span class="input-group-text border-end-0 bg-white">
+                            <LucideIcon
+                                icon="FileText"
+                                size="16"
+                            />
+                        </span>
+                        <select
+                            class="form-select form-select-sm border-start-0"
+                            v-model="idCard"
+                            @change="changeDocument"
+                        >
+                            <option
+                                v-for="document in documentsBatch"
+                                :key="document.cardId"
+                                :value="document.cardId"
+                            >
+                                {{ document.documentName }}
+                            </option>
+                        </select>
+                    </div>
                     <span class="badge bg-light text-primary">
                         <LucideIcon
                             icon="Waypoints"
@@ -225,6 +249,7 @@
                 workflowName: "",
                 documentName: "",
                 viewMode: "both",
+                documentsBatch: null,
             };
         },
         components: {
@@ -272,6 +297,9 @@
                 api.get("/DocumentMetadata/Analyze/" + this.idAnalyzer)
                     .then(function (result) {
                         self.hashDocument = result.data.referenceFile;
+                        if (result.data && result.data.documentBatchId != null) {
+                            self.getBatchDocuments(result.data.documentBatchId);
+                        }
                     })
                     .catch((error) => {
                         LogService.showMessage("Error loading document: " + error);
@@ -291,7 +319,9 @@
                         query: { page: this.backPage },
                     });
                 } else {
-                    this.$router.back();
+                    this.$router.push({
+                        name: "Workflow",
+                    });
                 }
             },
             openRejectModal() {
@@ -306,6 +336,31 @@
             },
             openViewRejectionModal() {
                 this.$refs.modalViewRejection.open(this.idCard);
+            },
+            getBatchDocuments(documentBatchId) {
+                CardsServices.getCardsByBatch(documentBatchId)
+                    .then((response) => {
+                        if (response && !response.error) {
+                            this.documentsBatch = response;
+                        }
+                    })
+                    .catch((e) => {
+                        LogService.showMessage("Error loading batch documents: " + e);
+                    });
+            },
+            changeDocument() {
+                const selectedDocument = this.documentsBatch.find(
+                    (doc) => doc.cardId === this.idCard
+                );
+
+                this.$router.push({
+                    name: "Analyzer",
+                    params: {
+                        documentId: selectedDocument.documentId,
+                        cardId: selectedDocument.cardId,
+                    },
+                    query: { page: this.backPage },
+                });
             },
         },
         created() {

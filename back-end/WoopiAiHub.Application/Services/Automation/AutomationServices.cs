@@ -34,6 +34,7 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IHubNotifier _hubNotifier;
         private readonly IEncryptionService _encryptionService;
         private readonly IUsageDailyServices _usageDailyServices;
+        private readonly IWorkflowRepository _workflowRepository;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -48,7 +49,8 @@ namespace WoopiAiHub.Application.Services.Automation
                                   IStepRepository stepRepository,
                                   IHubNotifier hubNotifier,
                                   IEncryptionService encryptionService,
-                                  IUsageDailyServices usageDailyServices)
+                                  IUsageDailyServices usageDailyServices,
+                                  IWorkflowRepository workflowRepository)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -64,6 +66,7 @@ namespace WoopiAiHub.Application.Services.Automation
             _hubNotifier = hubNotifier;
             _encryptionService = encryptionService;
             _usageDailyServices = usageDailyServices;
+            _workflowRepository = workflowRepository;
         }
 
         /// <summary>

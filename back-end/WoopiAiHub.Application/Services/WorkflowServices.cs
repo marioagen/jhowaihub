@@ -1099,13 +1099,9 @@ namespace WoopiAiHub.Application.Services
             var allUsers = workflowFilterDto?.IsAllUsers ?? false;
             var login = workflowFilterDto?.Login ?? string.Empty;
             var order = workflowFilterDto?.OrderBy ?? string.Empty;
+            var documentFilter = workflowFilterDto?.Document ?? DocumentFilter.All;
 
-            var workflow = await _stepRepository.FindStepsByWorkflowId(id, input, allUsers, login, order);
-            if (workflow == null)
-            {
-                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
-            }
-            return workflow;
+            return await _stepRepository.FindStepsByWorkflowId(id, input, allUsers, login, order, documentFilter) ?? throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
         }
 
         /// <summary>

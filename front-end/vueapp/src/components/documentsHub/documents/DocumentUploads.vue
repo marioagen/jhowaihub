@@ -63,9 +63,28 @@
                                 class="form-upload"
                                 @submit.prevent="save"
                             >
-                                <h5 class="mb-4">
-                                    {{ $t("documents.upload.cardTitle") }}
-                                </h5>
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="mb-4">
+                                        {{ $t("documents.upload.cardTitle") }}
+                                    </h5>
+                                    <div class="form-check d-flex align-items-center mb-3">
+                                        <input
+                                            class="form-check-input me-2"
+                                            type="checkbox"
+                                            id="isDocumentBatchChk"
+                                            :value="isDocumentsBatch"
+                                            v-model="isDocumentsBatch"
+                                        />
+                                        <label
+                                            class="form-check-label d-flex align-items-center w-100"
+                                            for="isDocumentBatchChk"
+                                        >
+                                            <div class="fw-semibold">
+                                                {{ $t("documents.documentsBatchCheckbox") }}
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
                                 <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
                                     <label class="label-container mb-2">
                                         {{ $t("documents.upload.dropZone") }}
@@ -379,6 +398,7 @@
                 dropzoneInstance: null,
                 selectedWorkflows: [],
                 hasError: true,
+                isDocumentsBatch: false,
             };
         },
         components: {
@@ -504,8 +524,11 @@
                     Authorization: `Bearer ${this.$store.state.userProfile.tokenApi}`,
                 };
                 const chunkSize = 19 * 1024 * 1024;
+
                 const filesNames = this.filesList.map((u) => u.name);
-                const promises = this.filesList.map((fileObj) => {
+                const promises = this.filesList.map((fileObj, index) => {
+                    const isLastFile = index === this.filesList.length - 1;
+
                     const file = fileObj;
                     let additionalData = {
                         name: file.name.replace(".pdf", ""),
@@ -535,6 +558,8 @@
                                 url: ENV_CONFIG.VUE_APP_BASE_URL_API,
                                 chunkIndex: i,
                                 totalChunks: totalChunks,
+                                isLastFile: isLastFile,
+                                isDocumentBatch: this.validateDocumentsBatch,
                             });
                         }
                         return chunks;
@@ -620,6 +645,12 @@
                 return this.workflowsList.filter((team) =>
                     team.name.toLowerCase().includes(this.searchTerm.toLowerCase())
                 );
+            },
+            validateDocumentsBatch() {
+                if (this.isDocumentsBatch && this.filesList.length > 1) {
+                    return true;
+                }
+                return false;
             },
         },
         mounted() {

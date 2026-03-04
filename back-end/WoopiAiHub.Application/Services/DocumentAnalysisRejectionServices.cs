@@ -50,22 +50,28 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException">Thrown if the user is not found or does not have permission to reject documents.</exception>
         public async Task<bool> CreateRejectionAsync(CreateDocumentAnalysisRejectionDto dto, string emailCreator)
         {
-            (Card card, Status status) = await Validate(dto, emailCreator);
+            (List<Card> cards, Status status) = await Validate(dto, emailCreator);
             var userId = _userRepository.FindIdByEmail(emailCreator);
-            var rejection = new DocumentAnalysisRejection(
-                0,
-                DateTime.Now,
-                dto.Justification,
-                dto.CardId,
-                dto.StepId,
-                userId
-            );
+
             _unitOfWork.BeginTransaction();
             try
             {
-                card.UpdateStepAndStatus(dto.StepId, status.Id);
-                _cardRepository.Update(card);
-                await _repository.CreateAsync(rejection);
+                foreach (var card in cards)
+                {
+                    var rejection = new DocumentAnalysisRejection(
+                        0,
+                        DateTime.Now,
+                        dto.Justification,
+                        card.Id,
+                        dto.StepId,
+                        userId
+                    );
+
+                    card.UpdateStepAndStatus(dto.StepId, status.Id);
+                    await _repository.CreateAsync(rejection);
+                }
+
+                _cardRepository.UpdateList(cards);
                 _unitOfWork.Commit();
                 return true;
             }
@@ -77,13 +83,13 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Validate and return card, status and user
+        /// Validate and return a list of cards, status and user
         /// </summary>
         /// <param name="dto"></param>
         /// <param name="emailCreator"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        private async Task<(Card card, Status status)> Validate(CreateDocumentAnalysisRejectionDto dto, string emailCreator)
+        private async Task<(List<Card> card, Status status)> Validate(CreateDocumentAnalysisRejectionDto dto, string emailCreator)
         {
             var hasPermission = await _permissionServices.UserHasPermissionAsync(
                 emailCreator,
@@ -93,23 +99,19 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.NotFound, "User does not have permission to reject documents", UserLabel.UnauthorizedOperation);
             }
-            var card = await _cardRepository.FindById(dto.CardId);
-            if (card == null)
+
+            var card = await _cardRepository.FindById(dto.CardId) ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+
+            List<Card> cards = [card];
+            if (card.DocumentBatchId.HasValue)
             {
-                throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
-            }
-            var step = await _stepRepository.FindById(dto.StepId);
-            if (step == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
-            }
-            var status = await _statusRepository.FindByName(StatusNames.Rejected);
-            if (status == null)
-            {
-                throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
+                cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
             }
 
-            return (card, status);
+            var step = await _stepRepository.FindById(dto.StepId) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
+            var status = await _statusRepository.FindByName(StatusNames.Rejected) ?? throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
+
+            return (cards, status);
         }
 
         /// <summary>

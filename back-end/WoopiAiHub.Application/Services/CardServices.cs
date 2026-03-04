@@ -10,7 +10,6 @@ using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using Newtonsoft.Json;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -48,25 +47,29 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
 
-            var card = await _cardRepository.FindById(updateAssingnedUserDto.CardId);
-
-            if (card == null)
-            {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
-            }
+            var card = await _cardRepository.FindById(updateAssingnedUserDto.CardId) ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
 
             var isValidTeamUser = await _workflowRepository.IsValidTeamUser(updateAssingnedUserDto.CardId,
                                                                             updateAssingnedUserDto.UserId);
 
             if (!isValidTeamUser)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found",
+                throw new AppException(ErrorCode.NotFound, "User not found",
                     CardLabel.UserCannotBeAssigned);
             }
 
-            card.UpdateAssignedUser(updateAssingnedUserDto.UserId);
+            List<Card> cards = [card];
+            if (card.DocumentBatchId.HasValue)
+            {
+                cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
+            }
 
-            return _cardRepository.Update(card);
+            foreach(var tempCard in cards)
+            {
+                tempCard.UpdateAssignedUser(updateAssingnedUserDto.UserId);
+            }
+
+            return _cardRepository.UpdateList(cards);
         }
 
         /// <summary>
@@ -77,15 +80,20 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> UnassignUser(int cardId)
         {
-            var card = await _cardRepository.FindById(cardId);
-            if (card == null)
+            var card = await _cardRepository.FindById(cardId) ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+
+            List<Card> cards = [card];
+            if (card.DocumentBatchId.HasValue)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+                cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
             }
 
-            card.UpdateAssignedUser(null);
+            foreach (var tempCard in cards)
+            {
+                tempCard.UpdateAssignedUser(null);
+            }
 
-            return _cardRepository.Update(card);
+            return _cardRepository.UpdateList(cards);
         }
 
         /// <summary>
@@ -100,7 +108,7 @@ namespace WoopiAiHub.Application.Services
             string email
         )
         {
-            var card = await _cardRepository.FindByIdWithDocument(updateCardStepStatusDto.CardId) ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            var card = await _cardRepository.FindByIdWithDocument(updateCardStepStatusDto.CardId) ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
             var previousStepId = card.StepId;
             var previousStatusId = card.StatusId;
 
@@ -109,31 +117,40 @@ namespace WoopiAiHub.Application.Services
                 updateCardStepStatusDto.WorkflowId
             ) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
 
-            var statusId = card.IsRejected() ? previousStatusId : step.StatusId;
-            card.UpdateStepAndStatus(step.Id, statusId);
-            var result = _cardRepository.Update(card);
-
-            if (result)
+            List<Card> cards = [card];
+            if (card.DocumentBatchId.HasValue)
             {
-                try
-                {
-                    var automationServicesDto = new AutomationServicesDto
-                    (
-                        0,
-                        card.Id,
-                        tenant,
-                        email,
-                        card.Document!.ReferenceFile,
-                        step.Id
-                    );
+                cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
+            }
 
-                    await _automationServices.StartExecutionByCardAsync(automationServicesDto);
-                }
-                catch
+            foreach (var tempCard in cards)
+            {
+                var statusId = tempCard.IsRejected() ? previousStatusId : step.StatusId;
+                tempCard.UpdateStepAndStatus(step.Id, statusId);
+                var result = _cardRepository.Update(tempCard);
+
+                if (result)
                 {
-                    card.UpdateStepAndStatus(previousStepId, previousStatusId);
-                    _cardRepository.Update(card);
-                    throw;
+                    try
+                    {
+                        var automationServicesDto = new AutomationServicesDto
+                        (
+                            0,
+                            tempCard.Id,
+                            tenant,
+                            email,
+                            tempCard.Document!.ReferenceFile,
+                            step.Id
+                        );
+
+                        await _automationServices.StartExecutionByCardAsync(automationServicesDto);
+                    }
+                    catch
+                    {
+                        tempCard.UpdateStepAndStatus(previousStepId, previousStatusId);
+                        _cardRepository.Update(tempCard);
+                        throw;
+                    }
                 }
             }
 
@@ -149,11 +166,20 @@ namespace WoopiAiHub.Application.Services
         public async Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto)
         {
             var card = await _cardRepository.FindById(updateCardStatusDto.CardId)
-                ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+                ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
 
-            card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
+            List<Card> cards = [card];
+            if (card.DocumentBatchId.HasValue)
+            {
+                cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
+            }
 
-            var result = _cardRepository.Update(card);
+            foreach (var tempCard in cards)
+            {
+                tempCard.UpdateStepAndStatus(tempCard.StepId, updateCardStatusDto.StatusId);
+            }
+
+            var result = _cardRepository.UpdateList(cards);
             return result;
         }
 
@@ -394,6 +420,32 @@ namespace WoopiAiHub.Application.Services
             }
 
             return dto;
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a collection of card batch data transfer objects associated with the specified
+        /// document batch identifier.
+        /// </summary>
+        /// <remarks>If no card batches are associated with the provided document batch identifier, the
+        /// method returns <see langword="null"/> instead of an empty collection.</remarks>
+        /// <param name="documentBatchId">The unique identifier of the document batch for which to retrieve associated card batches. Must be a
+        /// positive integer.</param>
+        /// <returns>A collection of <see cref="CardBatchDto"/> objects representing the card batches linked to the specified
+        /// document batch identifier, or <see langword="null"/> if no card batches are found.</returns>
+        public async Task<ICollection<CardBatchDto>?> FindCardsByDocumentBatchId(int documentBatchId)
+        {
+            var cards = await _cardRepository.FindByDocumentBatchId(documentBatchId);
+            if(cards is null || cards.Count <= 0)
+            {
+                return null;
+            }
+
+            return [.. cards.Select(c => new CardBatchDto
+            {
+                CardId = c.Id,
+                DocumentId = c.DocumentId,
+                DocumentName = c.Name
+            })];
         }
     }
 }

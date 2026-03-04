@@ -8,14 +8,12 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> UpdateStepAndStatus(UpdateCardStepStatusDto updateCardStepStatusDto,
             string tenant,
             string email);
-
         Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto);
         Task<bool> AssignUser(UpdateAssignedUserDto updateAssingnedUserDto);
         Task<bool> UnassignUser(int cardId);
-
         Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
             HeadersDto headersDto);
-
         Task<CardHeaderDto> FindHeaderInfoAsync(int cardId);
+        Task<ICollection<CardBatchDto>?> FindCardsByDocumentBatchId(int documentBatchId);
     }
 }
