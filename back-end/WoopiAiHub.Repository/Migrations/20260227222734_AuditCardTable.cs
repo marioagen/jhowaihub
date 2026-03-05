@@ -8,6 +8,7 @@ namespace WoopiAiHub.Repository.Migrations
     public partial class AuditCardTable : Migration
     {
         private const string AuditCardsTableName = "AuditCards";
+        private const string EnableColumnName = "Enable";
 
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -73,14 +74,14 @@ namespace WoopiAiHub.Repository.Migrations
                 column: "WorkflowId");
 
             migrationBuilder.AddColumn<bool>(
-                name: "Enable",
+                name: EnableColumnName,
                 table: "Cards",
                 type: "bit",
                 nullable: false,
                 defaultValue: true);
 
             migrationBuilder.AddColumn<bool>(
-                name: "Enable",
+                name: EnableColumnName,
                 table: "Documents",
                 type: "bit",
                 nullable: false,
@@ -94,11 +95,11 @@ namespace WoopiAiHub.Repository.Migrations
                 name: AuditCardsTableName);
 
             migrationBuilder.DropColumn(
-                name: "Enable",
+                name: EnableColumnName,
                 table: "Cards");
 
             migrationBuilder.DropColumn(
-                name: "Enable",
+                name: EnableColumnName,
                 table: "Documents");
         }
     }

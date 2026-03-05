@@ -27,6 +27,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IWorkflowRepository _workflowRepository;
         private readonly ICurrentUserService _currentUserService;
 
+        private const string CardNotFoundMessage = "Card not found";
+
         public CardServices(ICardRepository cardRepository,
                             IAuditCardRepository auditCardRepository,
                             IStepRepository stepRepository,
@@ -60,7 +62,7 @@ namespace WoopiAiHub.Application.Services
             var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(updateAssingnedUserDto.CardId);
             if (cards == null || cards.Count == 0)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
             }
 
             var isValidTeamUser = await _workflowRepository.IsValidTeamUser(updateAssingnedUserDto.CardId,
@@ -95,7 +97,7 @@ namespace WoopiAiHub.Application.Services
         {
             var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
             if (cards == null || cards.Count == 0)
-                throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
 
             foreach (var card in cards)
                 card.UpdateAssignedUser(null);
@@ -124,7 +126,7 @@ namespace WoopiAiHub.Application.Services
         {
             var cards = await _cardRepository.FindCardOrBatchWithDocumentAsync(updateCardStepStatusDto.CardId);
             if (cards == null || cards.Count == 0)
-                throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
 
             var leadCard = cards[0];
             var previousStepId = leadCard.StepId;
@@ -189,7 +191,7 @@ namespace WoopiAiHub.Application.Services
         {
             var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(updateCardStatusDto.CardId);
             if (cards == null || cards.Count == 0)
-                throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
 
             foreach (var card in cards)
                 card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
@@ -438,7 +440,7 @@ namespace WoopiAiHub.Application.Services
             var dto = await _cardRepository.FindHeaderInfoAsync(cardId);
             if (dto == null)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
             }
 
             return dto;
