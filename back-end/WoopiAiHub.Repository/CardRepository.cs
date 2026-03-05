@@ -60,8 +60,8 @@ namespace WoopiAiHub.Repository
             return await _context.Cards
                 .Include(s => s.Step)
                     .ThenInclude(st => st!.Workflow)
-                .Where(c => c.Id == id)
-                .FirstOrDefaultAsync();
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         /// <summary>
@@ -220,6 +220,7 @@ namespace WoopiAiHub.Repository
                 .Include(c => c.Step)
                     .ThenInclude(s => s!.Workflow)
                 .OrderBy(c => c.Step!.Order)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
