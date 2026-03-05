@@ -62,7 +62,7 @@
                         {{ documentName }}
                     </span>
                     <div
-                        class="btn-group-sm margin-left"
+                        class="btn-group btn-group-sm ms-auto section-buttons"
                         role="group"
                     >
                         <input
@@ -83,7 +83,7 @@
 
                         <input
                             type="radio"
-                            class="btn-check ms-2"
+                            class="btn-check"
                             name="view"
                             id="view-both"
                             autocomplete="off"
@@ -222,6 +222,7 @@
     import CardsServices from "@/services/cards/CardsServices";
     import api from "@/services/api";
     import LogService from "@/services/log/logService";
+    import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices";
 
     export default {
         name: "AnalyzerIndex",
@@ -250,6 +251,9 @@
                 documentName: "",
                 viewMode: "both",
                 documentsBatch: null,
+                workflowId: null,
+                currentStepOrder: 0,
+                cardStatus: "",
             };
         },
         components: {
@@ -292,24 +296,24 @@
             pushHistoryList(data) {
                 this.dataPushHistoryList = data;
             },
-            getDataDocument: function () {
-                let self = this;
-                api.get("/DocumentMetadata/Analyze/" + this.documentId)
-                    .then(function (result) {
-                        self.hashDocument = result.data.referenceFile;
-                        if (result.data && result.data.documentBatchId != null) {
-                            self.getBatchDocuments(result.data.documentBatchId);
+            async getDataDocument() {
+                await DocumentMetadataServices.getDocumentAnalyze(this.documentId).then(
+                    (result) => {
+                        this.hashDocument = result.referenceFile;
+                        if (result && result.documentBatchId != null) {
+                            self.getBatchDocuments(result.documentBatchId);
                         }
-                    })
-                    .catch((error) => {
-                        LogService.showMessage("Error loading document: " + error);
-                    });
+                    }
+                );
             },
             async getCardHeaderInfo() {
                 const result = await CardsServices.findCardHeaderInfo(this.cardId);
-                if (result && !result.error) {
+                if (result.error === undefined) {
                     this.workflowName = result.workflowName;
                     this.documentName = result.cardName;
+                    this.workflowId = result.workflowId ?? null;
+                    this.currentStepOrder = result.currentStepOrder;
+                    this.cardStatus = result.statusName ?? "";
                 }
             },
             goBack() {
@@ -363,9 +367,9 @@
                 });
             },
         },
-        created() {
-            this.getDataDocument();
-            this.getCardHeaderInfo();
+        async created() {
+            await this.getDataDocument();
+            await this.getCardHeaderInfo();
         },
     };
 </script>
@@ -376,6 +380,23 @@
 
     .analyze-document-select {
         max-width: 300px;
+    }
+  
+    .section-buttons .btn-check:checked + .btn,
+    .section-buttons .btn-check:active + .btn {
+        background-color: #0d6efd !important;
+        color: #fff !important;
+        border-color: #0d6efd !important;
+    }
+
+    .section-buttons .btn-check:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+  
+    .section-buttons .btn-check:focus + .btn {
+        outline: none !important;
+        box-shadow: none !important;
     }
 
     @media (min-width: 320px) and (max-width: 767px) {
@@ -391,11 +412,6 @@
             height: auto !important;
         }
 
-        .btn-check:checked + .btn {
-            background-color: #0d6efd !important;
-            color: white !important;
-            border-color: #0d6efd !important;
-        }
         .margin-left {
             margin-left: auto;
         }
