@@ -145,7 +145,7 @@
                         />
                     </template>
                     <template #right>
-                        <div class="docHistory">
+                        <div id="docHistory">
                             <AnalysisStepsSection
                                 :document-id="parseInt(documentId)"
                                 :card-id="parseInt(cardId)"
@@ -395,7 +395,7 @@
         box-shadow: none !important;
     }
 
-    .docHistory {
+    #docHistory {
         overflow-y: auto;
         max-height: calc(100vh - 200px);
         min-height: 300px;
