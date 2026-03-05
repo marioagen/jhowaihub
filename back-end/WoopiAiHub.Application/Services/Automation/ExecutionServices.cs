@@ -36,7 +36,7 @@ namespace WoopiAiHub.Application.Services.Automation
             if (card == null)
                 return;
 
-            var relatedCardIds = await GetRelatedCardIds(card);
+            var relatedCardIds = await FindRelatedCardIds(card);
             var step = await _stepRepository.FindByIdWithTools(execution.StepTool!.StepId);
 
             if (step == null)
@@ -79,7 +79,7 @@ namespace WoopiAiHub.Application.Services.Automation
         /// cards; otherwise, only its own ID will be returned.</param>
         /// <returns>A list of integers representing the IDs of related cards. If the specified card does not have a
         /// DocumentBatchId, the list contains only the ID of the provided card.</returns>
-        private async Task<List<int>> GetRelatedCardIds(Card card)
+        private async Task<List<int>> FindRelatedCardIds(Card card)
         {
             if (!card.DocumentBatchId.HasValue)
                 return [card.Id];
@@ -114,7 +114,7 @@ namespace WoopiAiHub.Application.Services.Automation
                     completedStepTools++;
 
                 if (isRunning && string.IsNullOrEmpty(currentToolName))
-                    currentToolName = await GetToolName(stepTool.Id);
+                    currentToolName = await FindToolName(stepTool.Id);
             }
 
             return (completedStepTools, currentToolName);
@@ -160,7 +160,7 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <param name="stepToolId">The unique identifier of the step tool whose name is to be retrieved. Must be a valid step tool ID.</param>
         /// <returns>A string containing the name of the tool associated with the specified step tool ID, or an empty string if
         /// no tool is found.</returns>
-        private async Task<string> GetToolName(int stepToolId)
+        private async Task<string> FindToolName(int stepToolId)
         {
             var tool = await _workflowRepository.FindToolByStepToolId(stepToolId);
             return tool?.Name ?? string.Empty;
