@@ -197,6 +197,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
+                    b.Property<int?>("DocumentBatchId")
+                        .HasColumnType("int")
+                        .HasColumnName("DocumentBatchId");
+
                     b.Property<int>("DocumentId")
                         .HasColumnType("int")
                         .HasColumnName("DocumentId");
@@ -220,6 +224,8 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasIndex("AssignedUserId");
 
                     b.HasIndex("Created");
+
+                    b.HasIndex("DocumentBatchId");
 
                     b.HasIndex("DocumentId");
 
@@ -256,6 +262,12 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("EmailCreator");
+
+                    b.Property<bool>("HasBatch")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("HasBatch");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -319,6 +331,24 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("DocumentAnalysisRejections", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentBatch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DocumentBatchs", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentHistory", b =>
@@ -1482,6 +1512,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .WithMany()
                         .HasForeignKey("AssignedUserId");
 
+                    b.HasOne("WoopiAiHub.Domain.Models.DocumentBatch", "DocumentBatch")
+                        .WithMany("Cards")
+                        .HasForeignKey("DocumentBatchId");
+
                     b.HasOne("WoopiAiHub.Domain.Models.Document", "Document")
                         .WithMany("Cards")
                         .HasForeignKey("DocumentId")
@@ -1503,6 +1537,8 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("AssignedUser");
 
                     b.Navigation("Document");
+
+                    b.Navigation("DocumentBatch");
 
                     b.Navigation("Status");
 
@@ -1914,6 +1950,11 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("DocumentHistories");
 
                     b.Navigation("DocumentNormalized");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentBatch", b =>
+                {
+                    b.Navigation("Cards");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.ModelEmbedding", b =>

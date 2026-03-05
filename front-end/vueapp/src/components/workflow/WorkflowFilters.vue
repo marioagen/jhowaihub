@@ -20,9 +20,7 @@
                     v-model="filters.input"
                     @keydown.enter="filterData"
                     @keydown.delete="filterData"
-                    :placeholder="
-                        $t('filters.workflowInput')
-                    "
+                    :placeholder="$t('filters.workflowInput')"
                     ref="searchInpt"
                 />
                 <span
@@ -87,9 +85,7 @@
                     label="name"
                     trackBy="name"
                     :searchable="true"
-                    :placeholder="
-                        $t('filters.teamsSelect.all')
-                    "
+                    :placeholder="$t('filters.teamsSelect.all')"
                     mode="single"
                     :canClear="true"
                     @change="filterData"
@@ -160,11 +156,10 @@
         data() {
             return {
                 filters: {
-                    orderBy: "created asc",
+                    orderBy: "name asc",
                     input: null,
                     isAllUsers: true,
-                    login: this.$store.state.userProfile
-                        .login,
+                    login: this.$store.state.userProfile.login,
                     teamId: null,
                     userId: null,
                 },
@@ -175,8 +170,7 @@
                 this.$emit("filter", this.filters);
             },
             filterUsers() {
-                this.filters.isAllUsers =
-                    !this.filters.isAllUsers;
+                this.filters.isAllUsers = !this.filters.isAllUsers;
                 this.filterData();
             },
             cleanInput() {
@@ -186,15 +180,9 @@
             findColSize(item) {
                 switch (item) {
                     case "search":
-                        return this.hasTeams ||
-                            this.hasUsers
-                            ? "5"
-                            : "7";
+                        return this.hasTeams || this.hasUsers ? "5" : "7";
                     case "orderBy":
-                        return this.hasTeams ||
-                            this.hasUsers
-                            ? "3"
-                            : "5";
+                        return this.hasTeams || this.hasUsers ? "3" : "5";
                     case "team":
                         return this.hasTeams ? "2" : "0";
                     case "user":
@@ -218,9 +206,7 @@
                 return [
                     {
                         id: "",
-                        name: this.$t(
-                            "filters.teamsSelect.all"
-                        ),
+                        name: this.$t("filters.teamsSelect.all"),
                     },
                     ...this.teamsList,
                 ];

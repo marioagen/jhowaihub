@@ -22,17 +22,47 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center mt-1">
-                    <span class="badge bg-light text-dark">
-                        <i class="fas fa-project-diagram me-1 text-primary"></i>
+                    <div
+                        v-if="documentsBatch"
+                        class="input-group w-auto me-2 analyze-document-select"
+                    >
+                        <span class="input-group-text border-end-0 bg-white">
+                            <LucideIcon
+                                icon="FileText"
+                                size="16"
+                            />
+                        </span>
+                        <select
+                            class="form-select form-select-sm border-start-0"
+                            v-model="cardId"
+                            @change="changeDocument"
+                        >
+                            <option
+                                v-for="document in documentsBatch"
+                                :key="document.cardId"
+                                :value="document.cardId"
+                            >
+                                {{ document.documentName }}
+                            </option>
+                        </select>
+                    </div>
+                    <span class="badge bg-light text-primary">
+                        <LucideIcon
+                            icon="Waypoints"
+                            :size="15"
+                        />
                         {{ workflowName }}
                     </span>
                     /
-                    <span class="badge bg-light text-dark">
-                        <i class="fas fa-file-alt me-1 text-primary"></i>
+                    <span class="badge bg-light text-primary">
+                        <LucideIcon
+                            icon="FileText"
+                            :size="15"
+                        />
                         {{ documentName }}
                     </span>
                     <div
-                        class="btn-group-sm margin-left"
+                        class="btn-group btn-group-sm ms-auto section-buttons"
                         role="group"
                     >
                         <input
@@ -53,7 +83,7 @@
 
                         <input
                             type="radio"
-                            class="btn-check ms-2"
+                            class="btn-check"
                             name="view"
                             id="view-both"
                             autocomplete="off"
@@ -101,33 +131,46 @@
                         {{ $t("analyze.justification.viewJustification") }}
                     </button>
                 </div>
-                <div class="row">
-                    <prompt-view
-                        :hashDocument="hashDocument"
-                        :historyListOrder="historyListOrder"
-                        @showHistory="showHistory"
-                        @unshiftHistoryList="unshiftHistoryList"
-                        @pushHistoryList="pushHistoryList"
-                        @showAlertToast="showAlertToast"
-                        @clearMyInterval="clearMyInterval"
-                        v-if="!isExpandedHistory"
-                    />
-
-                    <doc-view
+                <ResizeColumnsComponent
+                    v-if="viewMode === 'both'"
+                    preference-key="analyzeLeftColumnPercent"
+                    :min-height="'300px'"
+                >
+                    <template #left>
+                        <DocumentViewer
+                            @showNormalize="normalize"
+                            id="docView"
+                            :documentView="'both'"
+                            :fillContainer="true"
+                        />
+                    </template>
+                    <template #right>
+                        <div id="docHistory">
+                            <AnalysisStepsSection
+                                :document-id="parseInt(documentId)"
+                                :card-id="parseInt(cardId)"
+                            />
+                        </div>
+                    </template>
+                </ResizeColumnsComponent>
+                <div
+                    v-else
+                    class="row"
+                >
+                    <DocumentViewer
                         @showNormalize="normalize"
                         id="docView"
-                        v-if="viewMode === 'doc' || viewMode === 'both'"
+                        v-if="viewMode === 'doc'"
                         :documentView="viewMode"
                     />
                     <div
                         :id="'docHistory'"
-                        :class="viewMode === 'both' ? 'col-md-6' : 'col-12'"
+                        class="col-12"
+                        v-if="viewMode === 'history'"
                     >
-                        <step-analysis-view
-                            :document-id="parseInt(idAnalyzer)"
-                            :card-id="parseInt(idCard)"
-                            @show-alert-toast="showAlertToast"
-                            v-if="viewMode === 'history' || viewMode === 'both'"
+                        <AnalysisStepsSection
+                            :document-id="parseInt(documentId)"
+                            :card-id="parseInt(cardId)"
                         />
                     </div>
                 </div>
@@ -141,58 +184,48 @@
                     :title="$t('quizzes.questionnaireAndAi')"
                     @click="expandHistory"
                 >
-                    <img src="./../../../assets/img/prompt.png" />
+                    <img src="@/assets/img/prompt.png" />
                 </a>
             </div>
         </div>
-
-        <toast-alert
-            :showToast="toastShow"
-            :colorToast="toastColor"
-            :messageToast="toastMessage"
-            @close="closeToast"
-        />
         <NormalizeIndex
             :docData="dataView"
             :isReprocessing="isReprocessing"
             v-if="showLoading"
-        ></NormalizeIndex>
-        <DocumentRejectionModal
-            ref="modalReject"
-            :cardId="idCard"
-            :documentId="idAnalyzer"
-            @close="closeRejectModal"
-            @success="handleRejectSuccess"
-        />
-        <DocumentViewRejectionModal
-            ref="modalViewRejection"
-            @close="closeViewRejectionModal"
         />
     </main>
+    <DocumentRejectionModal
+        v-if="canReject"
+        ref="modalReject"
+        :cardId="cardId"
+        :documentId="documentId"
+        @success="handleRejectSuccess"
+    />
+    <DocumentViewRejectionModal
+        v-if="isRejected"
+        ref="modalViewRejection"
+    />
 </template>
 <script>
-    import PromptView from "@/components/pages/analyzer/prompt-view";
-    import DocView from "@/components/pages/analyzer/doc-view";
-    import StepAnalysisView from "@/components/pages/analyzer/step-analysis-view";
-    import ToastAlert from "@/components/pages/analyzer/toast-alert";
-    import api from "@/services/api";
+    import { hasPermission } from "@/utils/permissions";
+    import DocumentRejectionModal from "@/components/analyze/DocumentRejectionModal.vue";
+    import DocumentViewRejectionModal from "@/components/analyze/DocumentViewRejectionModal.vue";
+    import ResizeColumnsComponent from "@/components/global/ResizeColumnsComponent.vue";
+    import PermissionGroups from "@/constants/PermissionGroups";
+    import PermissionNames from "@/constants/PermissionNames";
+    import DocumentViewer from "@/components/analyze/DocumentViewer.vue";
+    import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import CardsServices from "@/services/cards/CardsServices";
     import LogService from "@/services/log/logService";
-    import DocumentRejectionModal from "@/components/analyze/DocumentRejectionModal.vue";
-    import DocumentViewRejectionModal from "@/components/analyze/DocumentViewRejectionModal.vue";
-    import { hasPermission } from "@/utils/permissions";
-    import PermissionGroups from "@/constants/PermissionGroups";
-    import PermissionNames from "@/constants/PermissionNames";
+    import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices";
 
     export default {
         name: "AnalyzerIndex",
         data() {
             return {
-                crumbsData: [],
-                sidebarData: "Documents",
-                idAnalyzer: this.$route.params.documentId,
-                idCard: this.$route.params.cardId,
+                documentId: this.$route.params.documentId,
+                cardId: this.$route.params.cardId,
                 backPage: this.$route.query.page,
                 hashDocument: "",
                 isExpandedHistory: false,
@@ -205,7 +238,7 @@
                 dataUnshiftHistoryList: {},
                 dataPushHistoryList: {},
                 dataView: {
-                    Id: parseInt(this.idAnalyzer),
+                    Id: parseInt(this.documentId),
                     Embeddings_model_name: "",
                 },
                 isReprocessing: true,
@@ -213,17 +246,17 @@
                 workflowName: "",
                 documentName: "",
                 viewMode: "both",
-                cardStatus: null,
+                documentsBatch: null,
                 workflowId: null,
                 currentStepOrder: 0,
+                cardStatus: "",
             };
         },
         components: {
-            PromptView,
-            DocView,
-            StepAnalysisView,
-            ToastAlert,
+            DocumentViewer,
+            AnalysisStepsSection,
             NormalizeIndex,
+            ResizeColumnsComponent,
             DocumentRejectionModal,
             DocumentViewRejectionModal,
         },
@@ -239,72 +272,44 @@
             },
         },
         methods: {
-            normalize: function (dataView, isReprocessing) {
+            normalize(dataView, isReprocessing) {
                 this.dataView = dataView;
                 this.isReprocessing = isReprocessing;
                 this.showLoading = true;
             },
-            setCrumbsData: function () {
-                this.crumbsData = [
-                    {
-                        crumb: this.$t("documents.title"),
-                        link: { to: "Documents" },
-                    },
-                    {
-                        crumb: this.$t("documents.listing"),
-                        link: {
-                            to: "Documents",
-                            queryPage: this.$route.query.page,
-                        },
-                    },
-                    {
-                        crumb: this.$t("common.consult"),
-                        link: {
-                            to: "Analyzer",
-                            queryPage: this.$route.query.page,
-                        },
-                    },
-                ];
-            },
-            expandHistory: function () {
+            expandHistory() {
                 this.isExpandedHistory = !this.isExpandedHistory;
             },
-            updateHistoryListOrder: function (data) {
+            updateHistoryListOrder(data) {
                 this.historyListOrder = data.value;
             },
-            showHistory: function () {
+            showHistory() {
                 this.dataShowHistory = !this.dataShowHistory;
             },
-            unshiftHistoryList: function (data) {
+            unshiftHistoryList(data) {
                 this.dataUnshiftHistoryList = data;
             },
-            pushHistoryList: function (data) {
+            pushHistoryList(data) {
                 this.dataPushHistoryList = data;
             },
-            showAlertToast: function (data) {
-                this.alertToast(data.msg, data.color);
-            },
-            getDataDocument: function () {
-                let self = this;
-                api.get("/Document/Analyze/" + this.idAnalyzer)
-                    .then(function (result) {
-                        self.hashDocument = result.data.referenceFile;
-                    })
-                    .catch(function (e) {
-                        LogService.showMessage("Error loading document: " + e);
-                    })
-                    .finally(function () {
-                        LogService.showMessage("Finished request.");
-                    });
+            async getDataDocument() {
+                await DocumentMetadataServices.getDocumentAnalyze(this.documentId).then(
+                    (result) => {
+                        this.hashDocument = result.referenceFile;
+                        if (result && result.documentBatchId != null) {
+                            this.getBatchDocuments(result.documentBatchId);
+                        }
+                    }
+                );
             },
             async getCardHeaderInfo() {
-                const result = await CardsServices.findCardHeaderInfo(this.idCard);
-                if (result && !result.error) {
+                const result = await CardsServices.findCardHeaderInfo(this.cardId);
+                if (result.error === undefined) {
                     this.workflowName = result.workflowName;
                     this.documentName = result.cardName;
-                    this.cardStatus = result.statusName;
+                    this.workflowId = result.workflowId ?? null;
                     this.currentStepOrder = result.currentStepOrder;
-                    this.workflowId = result.workflowId;
+                    this.cardStatus = result.statusName ?? "";
                 }
             },
             goBack() {
@@ -314,49 +319,53 @@
                         query: { page: this.backPage },
                     });
                 } else {
-                    this.$router.back();
+                    this.$router.push({
+                        name: "Workflow",
+                    });
                 }
-            },
-            alertToast: function (msg, color) {
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-                let self = this;
-                this.myInterval = setInterval(function () {
-                    self.toastMessage = "";
-                    self.toastColor = "";
-                    self.toastShow = false;
-                    clearInterval(self.myInterval);
-                }, 3000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval: function () {
-                clearInterval(this.myInterval);
-                this.myInterval = null;
             },
             openRejectModal() {
                 if (this.workflowId) {
                     this.$refs.modalReject.open(this.workflowId);
                 }
             },
-            closeRejectModal() {},
             handleRejectSuccess() {
                 setTimeout(() => {
                     this.goBack();
                 }, 2000);
             },
             openViewRejectionModal() {
-                this.$refs.modalViewRejection.open(this.idCard);
+                this.$refs.modalViewRejection.open(this.cardId);
             },
-            closeViewRejectionModal() {},
+            getBatchDocuments(documentBatchId) {
+                CardsServices.getCardsByBatch(documentBatchId)
+                    .then((response) => {
+                        if (response && !response.error) {
+                            this.documentsBatch = response;
+                        }
+                    })
+                    .catch((e) => {
+                        LogService.showMessage("Error loading batch documents: " + e);
+                    });
+            },
+            changeDocument() {
+                const selectedDocument = this.documentsBatch.find(
+                    (doc) => doc.cardId === this.cardId
+                );
+
+                this.$router.push({
+                    name: "Analyzer",
+                    params: {
+                        documentId: selectedDocument.documentId,
+                        cardId: selectedDocument.cardId,
+                    },
+                    query: { page: this.backPage },
+                });
+            },
         },
-        created() {
-            this.setCrumbsData();
-            this.getDataDocument();
-            this.getCardHeaderInfo();
+        async created() {
+            await this.getDataDocument();
+            await this.getCardHeaderInfo();
         },
     };
 </script>
@@ -365,14 +374,25 @@
         padding: 0 13px;
     }
 
-    @media (min-width: 320px) and (max-width: 767px) {
-        #docView {
-            display: none;
-        }
+    .analyze-document-select {
+        max-width: 300px;
+    }
 
-        #docHistory {
-            display: none;
-        }
+    .section-buttons .btn-check:checked + .btn,
+    .section-buttons .btn-check:active + .btn {
+        background-color: #0d6efd !important;
+        color: #fff !important;
+        border-color: #0d6efd !important;
+    }
+
+    .section-buttons .btn-check:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .section-buttons .btn-check:focus + .btn {
+        outline: none !important;
+        box-shadow: none !important;
     }
 
     #docHistory {
@@ -382,14 +402,14 @@
         height: auto !important;
     }
 
-    .btn-check:checked + .btn {
-        background-color: #0d6efd !important;
-        color: white !important;
-        border-color: #0d6efd !important;
-    }
+    @media (min-width: 320px) and (max-width: 767px) {
+        #docView {
+            display: none;
+        }
 
-    .margin-left {
-        margin-left: auto;
+        .margin-left {
+            margin-left: auto;
+        }
     }
 
     .bg-light {

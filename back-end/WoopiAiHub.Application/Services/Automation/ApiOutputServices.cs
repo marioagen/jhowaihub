@@ -4,7 +4,6 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
-using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
@@ -13,13 +12,11 @@ namespace WoopiAiHub.Application.Services.Automation
 {
     public class ApiOutputServices(IStepToolOutputRepository stepToolOutputRepository,
         IStepToolExecutionRepository stepToolExecutionRepository,
-        IWorkflowRepository workflowRepository,
-        IHubNotifier hubNotifier) : IApiOutputServices
+        IExecutionServices executionServices) : IApiOutputServices
     {
         private readonly IStepToolOutputRepository _stepToolOutputRepository = stepToolOutputRepository;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository = stepToolExecutionRepository;
-        private readonly IWorkflowRepository _workflowRepository = workflowRepository;
-        private readonly IHubNotifier _hubNotifier = hubNotifier;
+        private readonly IExecutionServices _executionServices = executionServices;
         private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
         /// <summary>
@@ -51,7 +48,7 @@ namespace WoopiAiHub.Application.Services.Automation
 
             await _stepToolOutputRepository.CreateAsync(stepToolOutput);
 
-            await UpdateExecutionAsync(execution, outputDto.Email);
+            await _executionServices.HandleExecutionProgress(execution, outputDto.Email);
 
             return new AutomationServicesDto
             (
@@ -62,24 +59,6 @@ namespace WoopiAiHub.Application.Services.Automation
                 execution.Card!.Document!.ReferenceFile,
                 0
             );
-        }
-
-        /// <summary>
-        /// Updates StepToolExecution status and send notification 
-        /// </summary>
-        /// <param name="execution"></param>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        private async Task UpdateExecutionAsync(StepToolExecution execution, string email)
-        {
-            var count = await _stepToolExecutionRepository.ExecutionsByStepIdCountAsync(execution.StepTool!.StepId, execution.CardId);
-            var percent = (count / execution.StepTool.Order) * 100;
-
-            execution.UpdateStatusExecution(StatusExecution.Ready);
-            await _stepToolExecutionRepository.UpdateAsync(execution);
-
-            var tool = await _workflowRepository.FindToolByStepToolId(execution.StepToolId);
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId, tool != null ? tool.Name : string.Empty);
         }
     }
 }

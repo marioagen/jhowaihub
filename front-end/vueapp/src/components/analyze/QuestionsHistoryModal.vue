@@ -228,7 +228,7 @@
     import ModalComponent from "@/components/global/ModalComponent.vue";
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
-    import DocumentsServices from "@/services/documents/DocumentsServices";
+    import DocumentHistoryServices from "@/services/documents/DocumentHistoryServices";
     import UserService from "@/services/users/UserService";
 
     export default {
@@ -314,7 +314,7 @@
                     order: this.filters.order,
                     orderBy: this.filters.orderBy,
                 };
-                DocumentsServices.getDocumentQuestionsHistory(this.documentId, filters)
+                DocumentHistoryServices.getDocumentQuestionsHistory(this.documentId, filters)
                     .then((response) => {
                         if (response?.error) {
                             this.conversationCards = [];

@@ -10,10 +10,7 @@
                         <div v-if="isLoading">
                             <div
                                 class="mb-3"
-                                style="
-                                    width: 100%;
-                                    float: left;
-                                "
+                                style="width: 100%; float: left"
                             >
                                 <h5
                                     class="h5-custom-modal"
@@ -37,7 +34,8 @@
     </main>
 </template>
 <script>
-    import NormalizeServices from "@/services/documents/NormalizeServices";
+    import DocumentsServices from "@/services/documents/DocumentsServices";
+    import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices";
     export default {
         name: "EmbeddingDocument",
         props: {
@@ -57,26 +55,19 @@
                 backPage: this.$route.query.page,
                 isLoading: true,
                 message: "",
-                timeoutMessage:
-                    ENV_CONFIG.VUE_APP_WAITING_TIME_MSG_UPLD,
+                timeoutMessage: ENV_CONFIG.VUE_APP_WAITING_TIME_MSG_UPLD,
             };
         },
         components: {},
         methods: {
             verifyNormalizedDoc() {
-                NormalizeServices.VerifyNormalize(
-                    this.docData.Id
-                ).then((response) => {
+                DocumentsServices.VerifyNormalize(this.docData.Id).then((response) => {
                     if (response.status === 0) {
-                        this.message = this.$t(
-                            "documents.normalizingTheDocument"
-                        );
+                        this.message = this.$t("documents.normalizingTheDocument");
                         this.normalizeDoc();
                     } else {
                         if (this.isReprocessing) {
-                            this.message = this.$t(
-                                "documents.normalizingTheDocument"
-                            );
+                            this.message = this.$t("documents.normalizingTheDocument");
                             this.normalizeDoc();
                         } else {
                             this.message = this.$t(
@@ -95,22 +86,17 @@
 
                 let paramsReq = {
                     Id: this.docData.Id,
-                    Embeddings_model_name:
-                        this.docData.Embeddings_model_name,
+                    Embeddings_model_name: this.docData.Embeddings_model_name,
                 };
 
                 this.isLoading = true;
-                NormalizeServices.AnalyzeDocument(paramsReq)
+                DocumentMetadataServices.AnalyzeDocument(paramsReq)
                     .then((response) => {
                         window.onbeforeunload = null;
                         if (response.error !== undefined) {
                             return this.$notify({
-                                title: this.$t(
-                                    "documents.failedToNormalize"
-                                ),
-                                message: this.$t(
-                                    "documents.theFileMayBeUnreadableOrHaveAnError"
-                                ),
+                                title: this.$t("documents.failedToNormalize"),
+                                message: this.$t("documents.theFileMayBeUnreadableOrHaveAnError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -148,9 +134,7 @@
             },
         },
         created() {
-            this.message = this.$t(
-                "documents.preparingTheDocument"
-            );
+            this.message = this.$t("documents.preparingTheDocument");
             this.verifyNormalizedDoc();
         },
     };
@@ -202,9 +186,7 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: var(
-            --color-bg-body-content
-        ) !important;
+        background-color: var(--color-bg-body-content) !important;
         display: flex;
         justify-content: center;
         align-items: center;

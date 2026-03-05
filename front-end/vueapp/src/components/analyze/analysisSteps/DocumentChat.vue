@@ -47,11 +47,7 @@
                         class="questionnaire-select"
                     >
                         <option :value="null">
-                            {{
-                                $t(
-                                    "analyze.selectQuestionnaire"
-                                )
-                            }}
+                            {{ $t("analyze.selectQuestionnaire") }}
                         </option>
                         <option
                             v-for="questionnaire in questionnaires"
@@ -64,10 +60,7 @@
                     <button
                         class="apply-button"
                         @click="applyQuestionnaire"
-                        :disabled="
-                            !selectedQuestionnaireId ||
-                            isApplyingQuestionnaire
-                        "
+                        :disabled="!selectedQuestionnaireId || isApplyingQuestionnaire"
                     >
                         <div
                             v-if="isApplyingQuestionnaire"
@@ -88,11 +81,7 @@
             >
                 <div class="results-header">
                     <label class="input-label">
-                        {{
-                            $t(
-                                "analyze.questionnaireResults"
-                            )
-                        }}
+                        {{ $t("analyze.questionnaireResults") }}
                     </label>
                     <button
                         class="close-results-button"
@@ -105,9 +94,7 @@
                 </div>
                 <div class="results-list">
                     <div
-                        v-for="(
-                            result, index
-                        ) in questionnaireResults"
+                        v-for="(result, index) in questionnaireResults"
                         :key="index"
                         class="result-card"
                     >
@@ -122,12 +109,8 @@
                                 v-if="result.confirmed"
                                 class="confirmed-badge"
                             >
-                                <i
-                                    class="fas fa-check-circle"
-                                ></i>
-                                {{
-                                    $t("analyze.confirmed")
-                                }}
+                                <i class="fas fa-check-circle"></i>
+                                {{ $t("analyze.confirmed") }}
                             </span>
                         </div>
                     </div>
@@ -137,9 +120,7 @@
                 <textarea
                     v-model="question"
                     class="chat-textarea"
-                    :placeholder="
-                        $t('analyze.typeYourQuestion')
-                    "
+                    :placeholder="$t('analyze.typeYourQuestion')"
                     rows="4"
                     @input="handleInput"
                 ></textarea>
@@ -194,12 +175,13 @@
     <QuestionsHistoryModal ref="QuestionsHistoryModal" />
 </template>
 <script>
-    import DocumentServices from "@/services/documents/DocumentsServices";
+    import DocumentQuestionnaireServices from "@/services/documents/DocumentQuestionnaireServices";
+    import DocumentHistoryServices from "@/services/documents/DocumentHistoryServices";
     import QuizzesService from "@/services/quizzes/QuizzesService";
     import QuestionsHistoryModal from "@/components/analyze/QuestionsHistoryModal.vue";
 
     export default {
-        name: "DocChat",
+        name: "DocumentChat",
         components: {
             QuestionsHistoryModal,
         },
@@ -234,26 +216,22 @@
                 this.questionnaireResults = [];
                 this.appliedQuestionnaireId = null;
             },
-            handleInput() {},
             async loadQuestionnaires() {
                 try {
-                    const result =
-                        await QuizzesService.getQuizzes({
-                            page: 1,
-                            pageSize: 100,
-                            search: "",
-                            isAscending: false,
-                            colType: 2,
-                        });
+                    const result = await QuizzesService.getQuizzes({
+                        page: 1,
+                        pageSize: 100,
+                        search: "",
+                        isAscending: false,
+                        colType: 2,
+                    });
                     if (result.content) {
-                        this.questionnaires =
-                            result.content;
+                        this.questionnaires = result.content;
                     }
                 } catch (error) {
                     this.$notify({
                         title: "analyze.title",
-                        message:
-                            "analyze.errorLoadingQuestionnaires",
+                        message: "analyze.errorLoadingQuestionnaires",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -263,8 +241,7 @@
                 if (!this.selectedQuestionnaireId) {
                     this.$notify({
                         title: "analyze.title",
-                        message:
-                            "analyze.pleaseSelectQuestionnaire",
+                        message: "analyze.pleaseSelectQuestionnaire",
                         variant: "warning",
                         icon: "AlertTriangle",
                     });
@@ -274,116 +251,70 @@
                 this.isApplyingQuestionnaire = true;
 
                 try {
-                    const questionnaireDetails =
-                        await QuizzesService.getQuizzById(
-                            this.selectedQuestionnaireId
-                        );
+                    const questionnaireDetails = await QuizzesService.getQuizzById(
+                        this.selectedQuestionnaireId
+                    );
                     if (questionnaireDetails.error) {
-                        throw new Error(
-                            "Failed to load questionnaire details"
-                        );
+                        throw new Error("Failed to load questionnaire details");
                     }
-                    const questions =
-                        questionnaireDetails.questions ||
-                        [];
+                    const questions = questionnaireDetails.questions || [];
                     const questionTexts = questions
                         .map((q) => q.description?.trim())
                         .filter((q) => q);
 
                     const params = {
                         idDocument: this.documentId,
-                        idQuestionnaire:
-                            this.selectedQuestionnaireId,
+                        idQuestionnaire: this.selectedQuestionnaireId,
                     };
 
-                    const response =
-                        await DocumentServices.applyQuestionnaire(
-                            params
-                        );
+                    const response = await DocumentQuestionnaireServices.applyQuestionnaire(params);
                     if (response.error) {
-                        throw new Error(
-                            "Failed to apply questionnaire"
-                        );
+                        throw new Error("Failed to apply questionnaire");
                     }
 
-                    this.appliedQuestionnaireId =
-                        this.selectedQuestionnaireId;
-                    const historyResponse =
-                        await DocumentServices.getDocumentHistory(
-                            this.documentId
-                        );
+                    this.appliedQuestionnaireId = this.selectedQuestionnaireId;
+                    const historyResponse = await DocumentHistoryServices.getDocumentHistory(
+                        this.documentId
+                    );
                     if (historyResponse.error) {
-                        throw new Error(
-                            "Failed to load document history"
-                        );
+                        throw new Error("Failed to load document history");
                     }
 
                     let historyData = null;
                     if (
                         historyResponse.data &&
                         historyResponse.data.value &&
-                        Array.isArray(
-                            historyResponse.data.value
-                        )
+                        Array.isArray(historyResponse.data.value)
                     ) {
-                        historyData =
-                            historyResponse.data.value;
-                    } else if (
-                        historyResponse.data &&
-                        Array.isArray(historyResponse.data)
-                    ) {
+                        historyData = historyResponse.data.value;
+                    } else if (historyResponse.data && Array.isArray(historyResponse.data)) {
                         historyData = historyResponse.data;
                     }
 
                     if (historyData) {
-                        const sortedHistory = [
-                            ...historyData,
-                        ].sort((a, b) => {
-                            const dateA = new Date(
-                                a.created ||
-                                    a.createdAt ||
-                                    0
-                            );
-                            const dateB = new Date(
-                                b.created ||
-                                    b.createdAt ||
-                                    0
-                            );
+                        const sortedHistory = [...historyData].sort((a, b) => {
+                            const dateA = new Date(a.created || a.createdAt || 0);
+                            const dateB = new Date(b.created || b.createdAt || 0);
                             return dateB - dateA;
                         });
 
                         const results = [];
                         for (const questionText of questionTexts) {
                             if (!questionText) continue;
-                            const matchingEntry =
-                                sortedHistory.find(
-                                    (item) => {
-                                        const itemInput =
-                                            item.input?.trim();
-                                        const textMatches =
-                                            itemInput &&
-                                            itemInput ===
-                                                questionText;
-                                        const idMatches =
-                                            !item.questionnaireId ||
-                                            item.questionnaireId ===
-                                                this
-                                                    .appliedQuestionnaireId;
-                                        return (
-                                            textMatches &&
-                                            idMatches
-                                        );
-                                    }
-                                );
+                            const matchingEntry = sortedHistory.find((item) => {
+                                const itemInput = item.input?.trim();
+                                const textMatches = itemInput && itemInput === questionText;
+                                const idMatches =
+                                    !item.questionnaireId ||
+                                    item.questionnaireId === this.appliedQuestionnaireId;
+                                return textMatches && idMatches;
+                            });
                             if (matchingEntry) {
                                 results.push({
-                                    question:
-                                        matchingEntry.input,
+                                    question: matchingEntry.input,
                                     answer: matchingEntry.output,
-                                    confirmed:
-                                        matchingEntry.confirmed,
-                                    questionnaireId:
-                                        matchingEntry.questionnaireId,
+                                    confirmed: matchingEntry.confirmed,
+                                    questionnaireId: matchingEntry.questionnaireId,
                                 });
                             }
                         }
@@ -393,16 +324,14 @@
 
                     this.$notify({
                         title: "analyze.title",
-                        message:
-                            "analyze.successApplyingQuestionnaire",
+                        message: "analyze.successApplyingQuestionnaire",
                         variant: "success",
                         icon: "CircleCheckBig",
                     });
                 } catch (error) {
                     this.$notify({
                         title: "analyze.title",
-                        message:
-                            "analyze.errorApplyingQuestionnaire",
+                        message: "analyze.errorApplyingQuestionnaire",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -418,16 +347,13 @@
                     input: this.question,
                 };
                 try {
-                    await DocumentServices.inputDocument(
-                        params
-                    ).then((response) => {
+                    await DocumentQuestionnaireServices.inputDocument(params).then((response) => {
                         this.output = response.data;
                     });
                 } catch (error) {
                     this.$notify({
                         title: "analyze.title",
-                        message:
-                            "analyze.errorApplyingQuestionnaire",
+                        message: "analyze.errorApplyingQuestionnaire",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -443,13 +369,11 @@
             },
             openQuestionsHistoryModal() {
                 console.log("Temp button clicked");
-                this.$refs.QuestionsHistoryModal.open(
-                    this.documentId
-                );
+                this.$refs.QuestionsHistoryModal.open(this.documentId);
             },
         },
-        mounted() {
-            this.loadQuestionnaires();
+        async mounted() {
+            await this.loadQuestionnaires();
         },
     };
 </script>

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,6 +24,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         private readonly AutoMocker _mocker;
         private readonly DocumentEmbeddingsResultDto _documentEmbeddingsResultDto;
         private readonly Mock<IDocumentServices> _documentServices;
+        private readonly Mock<IDocumentPipelineServices> _documentPipelineServices;
         private readonly Mock<IMessageConsumer<DocumentEmbeddingsResultDto>> _consumerMock;
         private readonly Mock<ILogger<DocumentEmbeddingsConsumer>> _loggerMock;
         private readonly Mock<ITenantCacheServices> _tenantCacheServices;
@@ -53,6 +54,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             _mocker.Use<IConfiguration>(configuration);
             _mocker.Use<IOptions<MessageQueues>>(messageQueues);
             _documentServices = new Mock<IDocumentServices>();
+            _documentPipelineServices = new Mock<IDocumentPipelineServices>();
             _automationServices = new Mock<IAutomationServices>();
             _usageDailyServices = new Mock<IUsageDailyServices>();
 
@@ -63,6 +65,8 @@ namespace WoopiAiHub.UnitTests.Consumers
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
                                .Returns(_documentServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentPipelineServices)))
+                               .Returns(_documentPipelineServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IAutomationServices)))
                                .Returns(_automationServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IUsageDailyServices)))
@@ -80,6 +84,8 @@ namespace WoopiAiHub.UnitTests.Consumers
 
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
                                .Returns(_documentServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentPipelineServices)))
+                               .Returns(_documentPipelineServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(ITenantCacheServices)))
                                .Returns(_tenantCacheServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IHttpContextAccessor)))
@@ -104,7 +110,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                          })
                          .Returns(Task.CompletedTask);
 
-            _documentServices.Setup(x => x.ProcessEmbeddingsResult(_documentEmbeddingsResultDto))
+            _documentPipelineServices.Setup(x => x.ProcessEmbeddingsResult(_documentEmbeddingsResultDto))
                              .ReturnsAsync(It.IsAny<MetaDataAutomationDto>());
 
             var consumer = _mocker.CreateInstance<DocumentEmbeddingsConsumer>();
@@ -113,7 +119,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             await consumer.StartAsync(CancellationToken.None);
 
             // Assert
-            _documentServices.Verify(x => x.ProcessEmbeddingsResult(_documentEmbeddingsResultDto), Times.Once);
+            _documentPipelineServices.Verify(x => x.ProcessEmbeddingsResult(_documentEmbeddingsResultDto), Times.Once);
         }
 
         [Fact(DisplayName = "Must catch exception when processing response")]
@@ -123,7 +129,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             // Arrange
             var exceptionExpected = new Exception("Error processing Embeddings response");
 
-            _documentServices
+            _documentPipelineServices
                 .Setup(x => x.ProcessEmbeddingsResult(It.IsAny<DocumentEmbeddingsResultDto>()))
                 .ThrowsAsync(exceptionExpected);
 
@@ -142,7 +148,7 @@ namespace WoopiAiHub.UnitTests.Consumers
 
             // Assert
             Assert.Null(exception);
-            _documentServices.Verify(x => x.ProcessEmbeddingsResult(_documentEmbeddingsResultDto), Times.Once);
+            _documentPipelineServices.Verify(x => x.ProcessEmbeddingsResult(_documentEmbeddingsResultDto), Times.Once);
 
             _loggerMock.Verify(x =>
                 x.Log(

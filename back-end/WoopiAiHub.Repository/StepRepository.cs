@@ -136,7 +136,7 @@ namespace WoopiAiHub.Repository
         /// <param name="login"></param>
         /// <param name="order"></param>
         /// <returns></returns>
-        public async Task<List<StepDto>> FindStepsByWorkflowId(int id, string input = "", bool allUsers = false, string login = "", string order = "")
+        public async Task<List<StepDto>> FindStepsByWorkflowId(int id, string input = "", bool allUsers = false, string login = "", string order = "", DocumentFilter documentFilter = DocumentFilter.All)
         {
             var steps = await _context.Steps
                 .Where(s => s.WorkflowId == id)
@@ -170,43 +170,50 @@ namespace WoopiAiHub.Repository
                              (
                                  allUsers == true
                                  || (c.AssignedUser != null && c.AssignedUser.Email == login)
+                             ) &&
+                                                          (
+                                 documentFilter == DocumentFilter.All
+                                 || (documentFilter == DocumentFilter.Singles && c.DocumentBatchId == null)
+                                 || (documentFilter == DocumentFilter.Batches && c.DocumentBatchId != null)
                              )
                          )
-                        .Select(c => new CardDto
+                        .GroupBy(c => c.DocumentBatchId ?? -c.Id)
+                        .Select(g => new CardDto
                         {
-                            Id = c.Id,
-                            Name = c.Name,
-                            Created = c.Created,
-                            Description = c.Document!.Description,
-                            Owner = c.Document.EmailCreator,
-                            DocumentId = c.Document.Id,
-                            StatusDocument = c.Document.Status,
-                            Percentage = c.Step!.StepTools.Any(st => st.Executions.Any(e => e.CardId == c.Id))
+                            Id = g.OrderBy(c => c.Id).First().Id,
+                            Name = g.OrderBy(c => c.Id).First().Name,
+                            Created = g.OrderBy(c => c.Id).First().Created,
+                            Description = g.OrderBy(c => c.Id).First().Document!.Description,
+                            Owner = g.OrderBy(c => c.Id).First().Document!.EmailCreator,
+                            DocumentId = g.OrderBy(c => c.Id).First().Document!.Id,
+                            StatusDocument = g.OrderBy(c => c.Id).First().Document!.Status,
+                            Percentage = s.StepTools.Any(st => st.Executions.Any(e => g.Any(card => e.CardId == card.Id)))
                             ? (
-                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready && e.CardId == c.Id)) * 100
+                                s.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready) && g.All(card => st.Executions.Any(e => e.CardId == card.Id && e.Status == StatusExecution.Ready))) * 100
                                 /
-                                c.Step.StepTools.Count(st => st.Executions.Any(e => e.CardId == c.Id))
+                                s.StepTools.Count(st => st.Executions.Any(e => g.Any(card => e.CardId == card.Id)))
                               )
                             : 100,
-                            ToolName = c.Step!.StepTools
-                                              .Where(st => st.Executions.Any(e => e.CardId == c.Id && e.Status == StatusExecution.Running))
-                                              .Select(st => st.Tool!.Name)
-                                              .FirstOrDefault() ?? string.Empty,
-                            AssignedUser = c.AssignedUser != null ?
+                            ToolName = s.StepTools
+                                .Where(st => st.Executions.Any(e => g.Any(card => e.CardId == card.Id) && e.Status == StatusExecution.Running))
+                                .Select(st => st.Tool!.Name)
+                                .FirstOrDefault() ?? string.Empty,
+                            AssignedUser = g.OrderBy(c => c.Id).First().AssignedUser != null ?
                             new UserDto
                             {
-                                Name = c.AssignedUser.Name,
-                                Email = c.AssignedUser.Email,
-                                Created = c.AssignedUser.Created,
-                                Id = c.AssignedUser.Id
+                                Name = g.OrderBy(c => c.Id).First().AssignedUser!.Name,
+                                Email = g.OrderBy(c => c.Id).First().AssignedUser!.Email,
+                                Created = g.OrderBy(c => c.Id).First().AssignedUser!.Created,
+                                Id = g.OrderBy(c => c.Id).First().AssignedUser!.Id
                             }
                             : null,
                             Status = new StatusDto
                             {
-                                Id = c.Status!.Id,
-                                Name = c.Status.Name,
-                                Color = c.Status.Color
+                                Id = g.OrderBy(c => c.Id).First().Status!.Id,
+                                Name = g.OrderBy(c => c.Id).First().Status!.Name,
+                                Color = g.OrderBy(c => c.Id).First().Status!.Color
                             },
+                            IsBatchParent = g.OrderBy(c => c.Id).First().DocumentBatchId.HasValue
                         }).ToList()
                 })
                 .AsNoTracking()

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,6 +53,7 @@ namespace WoopiAiHub.Repository.DependencyInjection
             services.AddScoped<IApiTemplateRepository, ApiTemplateRepository>();
             services.AddScoped<ISubscriptionPeriodRepository, SubscriptionPeriodRepository>();
             services.AddScoped<IDocumentAnalysisRejectionRepository, DocumentAnalysisRejectionRepository>();
+            services.AddScoped<IDocumentBatchRepository, DocumentBatchRepository>();
 
             services.AddStackExchangeRedisCache(options =>
             {

@@ -1099,13 +1099,9 @@ namespace WoopiAiHub.Application.Services
             var allUsers = workflowFilterDto?.IsAllUsers ?? false;
             var login = workflowFilterDto?.Login ?? string.Empty;
             var order = workflowFilterDto?.OrderBy ?? string.Empty;
+            var documentFilter = workflowFilterDto?.Document ?? DocumentFilter.All;
 
-            var workflow = await _stepRepository.FindStepsByWorkflowId(id, input, allUsers, login, order);
-            if (workflow == null)
-            {
-                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
-            }
-            return workflow;
+            return await _stepRepository.FindStepsByWorkflowId(id, input, allUsers, login, order, documentFilter) ?? throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
         }
 
         /// <summary>
@@ -1304,6 +1300,25 @@ namespace WoopiAiHub.Application.Services
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns all workflows in a simplified format for internal
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<WorkflowInternalDto> FindAllInternal()
+        {
+            return _workflowRepository.FindAllInternal();
+        }
+
+        /// <summary>
+        /// Retrieves a workflow model by its ID, including its steps and associated data.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Task<Workflow?> FindModelById(int id)
+        {
+            return _workflowRepository.FindByIdReturnModelWithSteps(id);
         }
     }
 }

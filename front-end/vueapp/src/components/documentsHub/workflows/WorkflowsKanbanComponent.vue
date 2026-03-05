@@ -2,8 +2,8 @@
     <div>
         <div class="card mb-2">
             <div class="card-body p-3">
-                <div class="row align-items-center">
-                    <div class="col-6">
+                <div class="row align-items-center gap-3">
+                    <div class="col-12">
                         <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
                             <div>
                                 <LucideIcon
@@ -91,18 +91,24 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-6 d-flex align-items-center justify-content-end gap-2">
-                        <WorkflowFilters @filter="filterData" />
-                        <button
-                            class="btn btn-primary btn-sm new-doc-btn py-1 px-2"
-                            @click="redirectToNewUpload"
-                        >
-                            <LucideIcon
-                                icon="Plus"
-                                :size="14"
-                            />
-                            {{ $t("documents.createBtn") }}
-                        </button>
+                    <div class="col-12 d-flex align-items-center">
+                        <div class="row w-100 m-0">
+                            <div class="col-10 p-0">
+                                <WorkflowViewFilters @filter="filterData" />
+                            </div>
+                            <div class="col-2 pe-0 ps-4">
+                                <button
+                                    class="btn btn-primary new-doc-btn py-1 px-2"
+                                    @click="redirectToNewUpload"
+                                >
+                                    <LucideIcon
+                                        icon="Plus"
+                                        :size="14"
+                                    />
+                                    {{ $t("documents.createBtn") }}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -143,7 +149,7 @@
     import GlobalEventService from "@/services/globalEventService.js";
     import WorkflowService from "@/services/workflow/WorkflowService.js";
     import KanbanBoard from "@/components/documentsHub/workflows/kanban/KanbanBoard.vue";
-    import WorkflowFilters from "@/components/workflow/WorkflowFilters.vue";
+    import WorkflowViewFilters from "@/components/workflow/WorkflowViewFilters.vue";
     import UserService from "@/services/users/UserService";
     import LogService from "@/services/log/logService";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
@@ -173,7 +179,7 @@
                 isLoadingKanban: true,
                 signalrEventExecutionChanged: "CardExecutionChanged",
                 filters: {
-                    orderBy: "",
+                    orderBy: "created desc",
                     input: null,
                     login: null,
                     isAllUsers: true,
@@ -185,7 +191,7 @@
         },
         components: {
             LoadingComponent,
-            WorkflowFilters,
+            WorkflowViewFilters,
             KanbanBoard,
         },
         computed: {
@@ -565,6 +571,8 @@
     .new-doc-btn {
         font-size: 0.75rem;
         line-height: 1.2;
+        width: 100%;
+        height: 100%;
     }
     .border {
         border: 1px solid var(--color-border-form-control) !important;

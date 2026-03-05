@@ -1,6 +1,6 @@
 <template>
-    <div class="row">
-        <div class="col-6">
+    <div class="row p-0">
+        <div class="col-4">
             <div class="input-group">
                 <span class="input-group-text border-end-0">
                     <LucideIcon
@@ -51,7 +51,7 @@
                 </option>
             </select>
         </div>
-        <div class="col-2 doc-filters-select-col">
+        <div class="col-3">
             <select
                 v-model="filters.workflowId"
                 class="form-select form-select-sm w-100"
@@ -72,7 +72,32 @@
                 </option>
             </select>
         </div>
-        <div class="col-2 doc-filters-btn-col">
+        <div class="col-2">
+            <div class="input-group">
+                <span class="input-group-text border-end-0 bg-white">
+                    <LucideIcon
+                        icon="FileText"
+                        size="16"
+                    />
+                </span>
+                <select
+                    class="form-select form-select-sm border-start-0"
+                    v-model="filters.document"
+                    @change="filterData"
+                >
+                    <option value="1">
+                        {{ $t("filters.all") }}
+                    </option>
+                    <option value="2">
+                        {{ $t("filters.singleDocuments") }}
+                    </option>
+                    <option value="3">
+                        {{ $t("filters.batchDocuments") }}
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="col-1">
             <button
                 v-tooltip="
                     filters.isAllUsers
@@ -113,6 +138,7 @@
                     login: this.$store.state.userProfile.login,
                     colType: 2,
                     statusId: "",
+                    document: "1",
                 },
             };
         },
@@ -167,14 +193,5 @@
     .custom-input::placeholder {
         font-size: 12px;
         color: #999;
-    }
-
-    .doc-filters-select-col {
-        min-width: 0;
-    }
-
-    .doc-filters-btn-col {
-        flex-shrink: 0;
-        min-width: 2.25rem;
     }
 </style>
