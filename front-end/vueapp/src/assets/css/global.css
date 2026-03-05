@@ -668,7 +668,7 @@ main > .container {
     color: var(--color-body-content) !important;
 }
 
-/* Alerts (notificações globais) com as mesmas cores dos toasts no dark mode */
+/* Alerts (notificaÃ§Ãµes globais) com as mesmas cores dos toasts no dark mode */
 .css-theme-dark .alert.alert-primary {
     background-color: var(--color-bg-toast-content-primary) !important;
     color: var(--color-toast-content-primary) !important;
@@ -1017,10 +1017,6 @@ dropzone .dz-preview .dz-details {
     outline: none !important;
     box-shadow: none !important;
 }
-  box-shadow: none !important;
-  outline: none !important;
-}
-
 td {
     border-color: var(--color-bg-table-outline) !important;
 }

@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-6">
             <div class="input-group">
-                <span class="input-group-text border-end-0 bg-white">
+                <span class="input-group-text border-end-0">
                     <LucideIcon
                         icon="Search"
                         size="16"
@@ -23,7 +23,7 @@
                 />
                 <span
                     v-if="showCleanBtn"
-                    class="input-group-text border-start-0 bg-white"
+                    class="input-group-text border-start-0"
                     @click="cleanInput"
                 >
                     <LucideIcon
@@ -35,7 +35,7 @@
         </div>
         <div class="col-3">
             <div class="input-group">
-                <span class="input-group-text border-end-0 bg-white">
+                <span class="input-group-text border-end-0">
                     <LucideIcon
                         icon="ArrowUpDown"
                         size="16"
@@ -63,7 +63,7 @@
         </div>
         <div class="col-3">
             <div class="input-group">
-                <span class="input-group-text border-end-0 bg-white">
+                <span class="input-group-text border-end-0">
                     <LucideIcon
                         icon="FileText"
                         size="16"

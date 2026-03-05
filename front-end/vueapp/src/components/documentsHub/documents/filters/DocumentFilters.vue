@@ -74,7 +74,7 @@
         </div>
         <div class="col-2">
             <div class="input-group">
-                <span class="input-group-text border-end-0 bg-white">
+                <span class="input-group-text border-end-0">
                     <LucideIcon
                         icon="FileText"
                         size="16"
