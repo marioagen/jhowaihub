@@ -145,10 +145,7 @@
                         />
                     </template>
                     <template #right>
-                        <div
-                            id="docHistory"
-                            class="analyze-doc-history"
-                        >
+                        <div class="docHistory">
                             <AnalysisStepsSection
                                 :document-id="parseInt(documentId)"
                                 :card-id="parseInt(cardId)"
@@ -220,7 +217,6 @@
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import CardsServices from "@/services/cards/CardsServices";
-    import api from "@/services/api";
     import LogService from "@/services/log/logService";
     import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices";
 
@@ -399,17 +395,16 @@
         box-shadow: none !important;
     }
 
+    .docHistory {
+        overflow-y: auto;
+        max-height: calc(100vh - 200px);
+        min-height: 300px;
+        height: auto !important;
+    }
+
     @media (min-width: 320px) and (max-width: 767px) {
         #docView {
             display: none;
-        }
-
-        .analyze-doc-history,
-        #docHistory {
-            overflow-y: auto;
-            max-height: calc(100vh - 200px);
-            min-height: 300px;
-            height: auto !important;
         }
 
         .margin-left {
