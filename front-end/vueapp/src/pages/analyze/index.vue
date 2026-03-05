@@ -342,7 +342,6 @@
                     .then((response) => {
                         if (response && !response.error) {
                             this.documentsBatch = response;
-                            console.log(this.documentsBatch);
                         }
                     })
                     .catch((e) => {

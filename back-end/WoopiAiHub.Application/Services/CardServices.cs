@@ -64,10 +64,11 @@ namespace WoopiAiHub.Application.Services
                 cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
             }
 
-            foreach(var tempCard in cards)
+            cards = [.. cards.Select(c =>
             {
-                tempCard.UpdateAssignedUser(updateAssingnedUserDto.UserId);
-            }
+                c.UpdateAssignedUser(updateAssingnedUserDto.UserId);
+                return c;
+            })];
 
             return _cardRepository.UpdateList(cards);
         }
@@ -88,10 +89,11 @@ namespace WoopiAiHub.Application.Services
                 cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
             }
 
-            foreach (var tempCard in cards)
+            cards = [.. cards.Select(c =>
             {
-                tempCard.UpdateAssignedUser(null);
-            }
+                c.UpdateAssignedUser(null);
+                return c;
+            })];
 
             return _cardRepository.UpdateList(cards);
         }
@@ -123,13 +125,17 @@ namespace WoopiAiHub.Application.Services
                 cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
             }
 
-            foreach (var tempCard in cards)
+            cards = [.. cards.Select(c =>
             {
-                var statusId = tempCard.IsRejected() ? previousStatusId : step.StatusId;
-                tempCard.UpdateStepAndStatus(step.Id, statusId);
-                var result = _cardRepository.Update(tempCard);
+                var statusId = c.IsRejected() ? previousStatusId : step.StatusId;
+                c.UpdateStepAndStatus(step.Id, statusId);
+                return c;
+            })];
 
-                if (result)
+            var result = _cardRepository.UpdateList(cards);
+            if (result)
+            {
+                foreach (var tempCard in cards)
                 {
                     try
                     {
@@ -174,10 +180,11 @@ namespace WoopiAiHub.Application.Services
                 cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
             }
 
-            foreach (var tempCard in cards)
+            cards = [.. cards.Select(c =>
             {
-                tempCard.UpdateStepAndStatus(tempCard.StepId, updateCardStatusDto.StatusId);
-            }
+                c.UpdateStepAndStatus(c.StepId, updateCardStatusDto.StatusId);
+                return c;
+            })];
 
             var result = _cardRepository.UpdateList(cards);
             return result;
@@ -294,7 +301,7 @@ namespace WoopiAiHub.Application.Services
                     .Where(o => o.StepToolId == stepTool.Id)
                     .ToList();
 
-                if(outputs is null || outputs.Count <= 0)
+                if (outputs is null || outputs.Count <= 0)
                 {
                     continue;
                 }
@@ -435,7 +442,7 @@ namespace WoopiAiHub.Application.Services
         public async Task<ICollection<CardBatchDto>?> FindCardsByDocumentBatchId(int documentBatchId)
         {
             var cards = await _cardRepository.FindByDocumentBatchId(documentBatchId);
-            if(cards is null || cards.Count <= 0)
+            if (cards is null || cards.Count <= 0)
             {
                 return null;
             }

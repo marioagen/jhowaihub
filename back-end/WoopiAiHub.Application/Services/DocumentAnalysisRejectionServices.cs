@@ -56,6 +56,7 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
+                List<DocumentAnalysisRejection> rejections = [];
                 foreach (var card in cards)
                 {
                     var rejection = new DocumentAnalysisRejection(
@@ -67,10 +68,11 @@ namespace WoopiAiHub.Application.Services
                         userId
                     );
 
+                    rejections.Add(rejection);
                     card.UpdateStepAndStatus(dto.StepId, status.Id);
-                    await _repository.CreateAsync(rejection);
                 }
 
+                await _repository.CreateRangeAsync(rejections);
                 _cardRepository.UpdateList(cards);
                 _unitOfWork.Commit();
                 return true;

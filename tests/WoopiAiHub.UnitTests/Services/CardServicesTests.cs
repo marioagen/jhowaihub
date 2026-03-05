@@ -86,7 +86,7 @@ namespace WoopiAiHub.UnitTests.Services
             _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
                 updateDto.WorkflowId)).ReturnsAsync(step);
 
-            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
 
 
             _stepToolRepositoryMock.Setup(repo => repo.FindByStepIdAndOrderAsync(1, 1))
@@ -97,7 +97,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
-            _cardRepositoryMock.Verify(repo => repo.Update(card), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
         }
 
         [Fact(DisplayName = "Tests update UnassignUser when card not found and throws AppException")]
@@ -782,7 +782,8 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindByIdWithDocument(updateDto.CardId)).ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
                 updateDto.WorkflowId)).ReturnsAsync(step);
-            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.Update(It.IsAny<Card>())).Returns(true);
 
             _automationServices.Setup(s => s.StartExecutionByCardAsync(It.IsAny<AutomationServicesDto>()))
                 .ThrowsAsync(new Exception("Automation service failed"));
@@ -790,7 +791,8 @@ namespace WoopiAiHub.UnitTests.Services
             // Act & Assert
             await Assert.ThrowsAsync<Exception>(() => _cardServices.UpdateStepAndStatus(updateDto, "tenant", "email"));
 
-            _cardRepositoryMock.Verify(repo => repo.Update(card), Times.Exactly(2));
+            _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.Update(It.IsAny<Card>()), Times.Once);
             Assert.Equal(previousStepId, card.StepId);
             Assert.Equal(previousStatusId, card.StatusId);
         }
@@ -807,7 +809,7 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindByIdWithDocument(updateDto.CardId)).ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
                 updateDto.WorkflowId)).ReturnsAsync(step);
-            _cardRepositoryMock.Setup(repo => repo.Update(card)).Returns(false);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(false);
 
             // Act
             var result = await _cardServices.UpdateStepAndStatus(updateDto, "tenant", "email");

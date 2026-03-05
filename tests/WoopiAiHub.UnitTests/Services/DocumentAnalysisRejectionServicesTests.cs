@@ -172,7 +172,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(user.Id);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
                 .Returns(true);
-            _rejectionRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<DocumentAnalysisRejection>()))
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
             _unitOfWorkMock.Setup(u => u.Commit()).Verifiable();
@@ -183,7 +183,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.True(result);
             _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
-            _rejectionRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<DocumentAnalysisRejection>()), Times.Once);
+            _rejectionRepositoryMock.Verify(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()), Times.Once);
             _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
         }
@@ -216,7 +216,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(user.Id);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
                 .Returns(true);
-            _rejectionRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<DocumentAnalysisRejection>()))
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ThrowsAsync(new Exception("Database error"));
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
             _unitOfWorkMock.Setup(u => u.Rollback()).Verifiable();
@@ -405,7 +405,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
                 .Returns(true);
-            _rejectionRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<DocumentAnalysisRejection>()))
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
             _unitOfWorkMock.Setup(u => u.Commit()).Verifiable();
@@ -417,7 +417,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             _cardRepositoryMock.Verify(repo => repo.FindByDocumentBatchId(documentBatchId), Times.Once);
             _cardRepositoryMock.Verify(repo => repo.UpdateList(It.Is<List<Card>>(cards => cards.Count == 3)), Times.Once);
-            _rejectionRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<DocumentAnalysisRejection>()), Times.Exactly(3));
+            _rejectionRepositoryMock.Verify(repo => repo.CreateRangeAsync(It.Is<List<DocumentAnalysisRejection>>(r => r.Count == 3)), Times.Once);
             _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
         }
@@ -446,7 +446,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
                 .Returns(true);
-            _rejectionRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<DocumentAnalysisRejection>()))
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
             _unitOfWorkMock.Setup(u => u.Commit()).Verifiable();
@@ -458,7 +458,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             _cardRepositoryMock.Verify(repo => repo.FindByDocumentBatchId(It.IsAny<int>()), Times.Never);
             _cardRepositoryMock.Verify(repo => repo.UpdateList(It.Is<List<Card>>(cards => cards.Count == 1)), Times.Once);
-            _rejectionRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<DocumentAnalysisRejection>()), Times.Once);
+            _rejectionRepositoryMock.Verify(repo => repo.CreateRangeAsync(It.Is<List<DocumentAnalysisRejection>>(r => r.Count == 1)), Times.Once);
             _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
         }
@@ -494,7 +494,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
                 .Returns(true);
-            _rejectionRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<DocumentAnalysisRejection>()))
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
             _unitOfWorkMock.Setup(u => u.Commit()).Verifiable();

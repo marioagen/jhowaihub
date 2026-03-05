@@ -190,7 +190,6 @@
                             });
                         }
                         this.table.data = response.content;
-                        console.log(response.content);
                         this.table.pagination = response.pagination;
                     })
                     .finally(() => {

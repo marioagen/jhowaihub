@@ -72,7 +72,7 @@ namespace WoopiAiHub.Application.Services
 
             if (requestCreateDocumentDto.IsLast)
             {
-                _ = await FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
+                await FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
                 _cache.Remove(requestCreateDocumentDto.Name);
 
                 if (requestCreateDocumentDto.IsLastFile)
