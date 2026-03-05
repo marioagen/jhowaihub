@@ -2,14 +2,13 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Text;
 using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
-using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
@@ -24,11 +23,10 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IStepToolRepository _stepToolRepository;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
-        private readonly IWorkflowRepository _workflowRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IHubNotifier _hubNotifier;
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly IUsageDailyServices _usageDailyServices;
+        private readonly IExecutionServices _executionServices;
         private readonly MessageQueues _messageQueues;
 
         private const string FindingDocumentErrorMessage = "Error while finding document in database";
@@ -38,22 +36,20 @@ namespace WoopiAiHub.Application.Services
             IStepToolExecutionRepository stepToolExecutionRepository,
             IStepToolRepository stepToolRepository,
             IStepToolOutputRepository stepToolOutputRepository,
-            IWorkflowRepository workflowRepository,
             IUnitOfWork unitOfWork,
-            IHubNotifier hubNotifier,
             ITenantCacheServices tenantCacheServices,
             IUsageDailyServices usageDailyServices,
+            IExecutionServices executionServices,
             IOptions<MessageQueues> messageQueues)
         {
             _documentRepository = documentRepository;
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
-            _workflowRepository = workflowRepository;
             _unitOfWork = unitOfWork;
-            _hubNotifier = hubNotifier;
             _tenantCacheServices = tenantCacheServices;
             _usageDailyServices = usageDailyServices;
+            _executionServices = executionServices;
             _messageQueues = messageQueues.Value;
         }
 
@@ -78,7 +74,7 @@ namespace WoopiAiHub.Application.Services
             if (execution is null)
                 return dto.Data;
 
-            await UpdateExecutionAsync(execution, dto.Email);
+            await _executionServices.HandleExecutionProgress(execution, dto.Email);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(dto.Data.StepToolId);
             string embeddingsJson = JsonConvert.SerializeObject(new DocumentEmbeddingsDataDto
             {
@@ -116,7 +112,7 @@ namespace WoopiAiHub.Application.Services
                 var execution = await _stepToolExecutionRepository
                     .FindByStepToolIdAndCardIdAsync(dataDto.StepToolId, dataDto.CardId);
 
-                await UpdateExecutionAsync(execution!, documentQuestionnaireDto.Email);
+                await _executionServices.HandleExecutionProgress(execution!, documentQuestionnaireDto.Email);
                 await SaveStepToolOutputAsync(
                     execution!, 
                     System.Text.Json.JsonSerializer.Serialize(
@@ -169,32 +165,11 @@ namespace WoopiAiHub.Application.Services
             var execution = await _stepToolExecutionRepository
                 .FindByStepToolIdAndCardIdAsync(documentEmbeddingsResultDto.Data.StepToolId,
                     documentEmbeddingsResultDto.Data.CardId);
-            await UpdateExecutionAsync(execution!, documentEmbeddingsResultDto.Email);
+            await _executionServices.HandleExecutionProgress(execution!, documentEmbeddingsResultDto.Email);
             await SaveStepToolOutputAsync(execution!, documentEmbeddingsResultDto.ReferenceFile);
             _documentRepository.ChangeStatus(documentId, DocumentStatus.Embeddings);
 
             return documentEmbeddingsResultDto.Data;
-        }
-
-        /// <summary>
-        /// Updates StepToolExecution status and send notification 
-        /// </summary>
-        /// <param name="execution"></param>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        private async Task UpdateExecutionAsync(StepToolExecution execution, string email)
-        {
-            var count = await _stepToolExecutionRepository.ExecutionsByStepIdCountAsync(execution.StepTool!.StepId,
-                execution.CardId);
-            var percent = ((double)execution.StepTool.Order / count) * 100;
-
-            execution.UpdateStatusExecution(StatusExecution.Ready);
-            await _stepToolExecutionRepository.UpdateAsync(execution);
-
-            var tool = await _workflowRepository.FindToolByStepToolId(execution.StepTool.Id);
-
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId,
-                tool != null ? tool.Name : string.Empty);
         }
 
         /// <summary>

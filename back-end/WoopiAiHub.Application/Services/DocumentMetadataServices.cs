@@ -58,7 +58,8 @@ namespace WoopiAiHub.Application.Services
                     Name = result.Name,
                     Description = result.Description,
                     ReferenceFile = result.ReferenceFile,
-                    CardId = activeCard?.Id
+                    CardId = activeCard?.Id,
+                    DocumentBatchId = activeCard?.DocumentBatchId
                 };
             }
             catch (Exception ex)

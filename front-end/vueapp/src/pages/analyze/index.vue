@@ -22,6 +22,30 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center mt-1">
+                    <div
+                        v-if="documentsBatch"
+                        class="input-group w-auto me-2 analyze-document-select"
+                    >
+                        <span class="input-group-text border-end-0 bg-white">
+                            <LucideIcon
+                                icon="FileText"
+                                size="16"
+                            />
+                        </span>
+                        <select
+                            class="form-select form-select-sm border-start-0"
+                            v-model="cardId"
+                            @change="changeDocument"
+                        >
+                            <option
+                                v-for="document in documentsBatch"
+                                :key="document.cardId"
+                                :value="document.cardId"
+                            >
+                                {{ document.documentName }}
+                            </option>
+                        </select>
+                    </div>
                     <span class="badge bg-light text-primary">
                         <LucideIcon
                             icon="Waypoints"
@@ -38,7 +62,7 @@
                         {{ documentName }}
                     </span>
                     <div
-                        class="btn-group-sm margin-left"
+                        class="btn-group btn-group-sm ms-auto section-buttons"
                         role="group"
                     >
                         <input
@@ -59,7 +83,7 @@
 
                         <input
                             type="radio"
-                            class="btn-check ms-2"
+                            class="btn-check"
                             name="view"
                             id="view-both"
                             autocomplete="off"
@@ -176,7 +200,7 @@
     <DocumentRejectionModal
         v-if="canReject"
         ref="modalReject"
-        :cardId="idCard"
+        :cardId="cardId"
         :documentId="documentId"
         @success="handleRejectSuccess"
     />
@@ -196,7 +220,9 @@
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import CardsServices from "@/services/cards/CardsServices";
+    import LogService from "@/services/log/logService";
     import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices";
+
     export default {
         name: "AnalyzerIndex",
         data() {
@@ -223,6 +249,10 @@
                 workflowName: "",
                 documentName: "",
                 viewMode: "both",
+                documentsBatch: null,
+                workflowId: null,
+                currentStepOrder: 0,
+                cardStatus: "",
             };
         },
         components: {
@@ -265,16 +295,24 @@
             pushHistoryList(data) {
                 this.dataPushHistoryList = data;
             },
-            getDataDocument() {
-                DocumentMetadataServices.getDocumentAnalyze(this.documentId).then((result) => {
-                    this.hashDocument = result.referenceFile;
-                });
+            async getDataDocument() {
+                await DocumentMetadataServices.getDocumentAnalyze(this.documentId).then(
+                    (result) => {
+                        this.hashDocument = result.referenceFile;
+                        if (result && result.documentBatchId != null) {
+                            this.getBatchDocuments(result.documentBatchId);
+                        }
+                    }
+                );
             },
             async getCardHeaderInfo() {
                 const result = await CardsServices.findCardHeaderInfo(this.cardId);
-                if (result && !result.error) {
+                if (result.error === undefined) {
                     this.workflowName = result.workflowName;
                     this.documentName = result.cardName;
+                    this.workflowId = result.workflowId ?? null;
+                    this.currentStepOrder = result.currentStepOrder;
+                    this.cardStatus = result.statusName ?? "";
                 }
             },
             goBack() {
@@ -284,7 +322,9 @@
                         query: { page: this.backPage },
                     });
                 } else {
-                    this.$router.back();
+                    this.$router.push({
+                        name: "Workflow",
+                    });
                 }
             },
             openRejectModal() {
@@ -298,18 +338,64 @@
                 }, 2000);
             },
             openViewRejectionModal() {
-                this.$refs.modalViewRejection.open(this.idCard);
+                this.$refs.modalViewRejection.open(this.cardId);
+            },
+            getBatchDocuments(documentBatchId) {
+                CardsServices.getCardsByBatch(documentBatchId)
+                    .then((response) => {
+                        if (response && !response.error) {
+                            this.documentsBatch = response;
+                        }
+                    })
+                    .catch((e) => {
+                        LogService.showMessage("Error loading batch documents: " + e);
+                    });
+            },
+            changeDocument() {
+                const selectedDocument = this.documentsBatch.find(
+                    (doc) => doc.cardId === this.cardId
+                );
+
+                this.$router.push({
+                    name: "Analyzer",
+                    params: {
+                        documentId: selectedDocument.documentId,
+                        cardId: selectedDocument.cardId,
+                    },
+                    query: { page: this.backPage },
+                });
             },
         },
-        created() {
-            this.getDataDocument();
-            this.getCardHeaderInfo();
+        async created() {
+            await this.getDataDocument();
+            await this.getCardHeaderInfo();
         },
     };
 </script>
 <style scoped>
     .container-fluid {
         padding: 0 13px;
+    }
+
+    .analyze-document-select {
+        max-width: 300px;
+    }
+
+    .section-buttons .btn-check:checked + .btn,
+    .section-buttons .btn-check:active + .btn {
+        background-color: #0d6efd !important;
+        color: #fff !important;
+        border-color: #0d6efd !important;
+    }
+
+    .section-buttons .btn-check:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .section-buttons .btn-check:focus + .btn {
+        outline: none !important;
+        box-shadow: none !important;
     }
 
     @media (min-width: 320px) and (max-width: 767px) {
@@ -325,11 +411,6 @@
             height: auto !important;
         }
 
-        .btn-check:checked + .btn {
-            background-color: #0d6efd !important;
-            color: white !important;
-            border-color: #0d6efd !important;
-        }
         .margin-left {
             margin-left: auto;
         }

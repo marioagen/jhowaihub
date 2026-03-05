@@ -16,6 +16,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils.ErrorLabels;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -30,7 +31,9 @@ namespace WoopiAiHub.Application.Services
         private readonly IFileRepositoryApi _fileRepositoryApi;
         private readonly ICurrentUserService _currentUserService;
         private readonly IAuditCardRepository _auditCardRepository;
+        private readonly IDocumentBatchRepository _documentBatchRepository;
         private readonly ILogger<DocumentUploadServices> _logger;
+        private const string BatchCacheKey = "batchCacheKey";
 
         public DocumentUploadServices(
             IDocumentRepository documentRepository,
@@ -42,6 +45,7 @@ namespace WoopiAiHub.Application.Services
             IFileRepositoryApi fileRepositoryApi,
             ICurrentUserService currentUserService,
             IAuditCardRepository auditCardRepository,
+            IDocumentBatchRepository documentBatchRepository,
             ILogger<DocumentUploadServices> logger)
         {
             _documentRepository = documentRepository;
@@ -53,6 +57,7 @@ namespace WoopiAiHub.Application.Services
             _fileRepositoryApi = fileRepositoryApi;
             _currentUserService = currentUserService;
             _auditCardRepository = auditCardRepository;
+            _documentBatchRepository = documentBatchRepository;
             _logger = logger;
         }
 
@@ -65,26 +70,23 @@ namespace WoopiAiHub.Application.Services
         public async Task ProcessChunks(RequestCreateDocumentDto requestCreateDocumentDto,
             string tenant)
         {
-            try
+            MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions
             {
-                MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
-                };
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+            };
 
-                var bytes = this.AddNewBytesToArrayChunks(requestCreateDocumentDto,
-                    cacheOptions);
+            var bytes = AddNewBytesToArrayChunks(requestCreateDocumentDto,
+                cacheOptions);
 
-                if (requestCreateDocumentDto.IsLast)
+            if (requestCreateDocumentDto.IsLast)
+            {
+                await FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
+                _cache.Remove(requestCreateDocumentDto.Name);
+
+                if (requestCreateDocumentDto.IsLastFile)
                 {
-                    await this.FinalizeUploadAsync(requestCreateDocumentDto, bytes, tenant);
-                    _cache.Remove(requestCreateDocumentDto.Name);
+                    _cache.Remove(BatchCacheKey);
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(DocumentUploadServices)} in the {nameof(ProcessChunks)} method");
-                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 
@@ -115,7 +117,7 @@ namespace WoopiAiHub.Application.Services
                 var workflows = await _workflowRepository.FindByIdsAsync(requestCreateDocumentDto.Workflows);
                 var documentForDataBase = CreateDocumentForDb(requestCreateDocumentDto, workflows, referenceFile);
 
-                ICollection<Card> cards = CreateDocumentCard(requestCreateDocumentDto, workflows);
+                ICollection<Card> cards = await CreateDocumentCard(requestCreateDocumentDto, workflows);
 
                 documentForDataBase.Cards = cards;
                 _documentRepository.Create(documentForDataBase);
@@ -249,10 +251,29 @@ namespace WoopiAiHub.Application.Services
         /// <param name="requestCreateDocumentDto"></param>
         /// <param name="teams"></param>
         /// <returns></returns>
-        private static List<Card> CreateDocumentCard(RequestCreateDocumentDto requestCreateDocumentDto,
+        private async Task<List<Card>> CreateDocumentCard(RequestCreateDocumentDto requestCreateDocumentDto,
             ICollection<Workflow> workflow)
         {
-            return workflow
+            int? documentBatchId = null;
+
+            if (requestCreateDocumentDto.IsDocumentBatch)
+            {
+                documentBatchId = _cache.Get<int?>(BatchCacheKey);
+
+                if (documentBatchId == null)
+                {
+                    var documentBatch = new DocumentBatch(0, DateTime.UtcNow);
+                    documentBatch = await _documentBatchRepository.CreateAsync(documentBatch) ?? throw new AppException(ErrorCode.UploadFailed, "Error on create new document batch", DocumentLabel.BatchError);
+
+                    documentBatchId = documentBatch.Id;
+                    _cache.Set(BatchCacheKey, documentBatchId, new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+                    });
+                }
+            }
+
+            return [.. workflow
                 .Select(w => w.Steps.OrderBy(s => s.Order).FirstOrDefault())
                 .Where(step => step != null)
                 .Select(step => new Card
@@ -263,9 +284,9 @@ namespace WoopiAiHub.Application.Services
                     0,
                     requestCreateDocumentDto.Filename,
                     step.StatusId,
-                    null
-                ))
-                .ToList();
+                    null,
+                    documentBatchId
+                ))];
         }
     }
 }

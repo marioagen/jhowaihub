@@ -28,7 +28,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void Create_Success()
         {
             // Arrange
-            var documentHistory = _fixture.FindValidDocumentHistory();
+            var documentHistory = DocumentFixture.FindValidDocumentHistory();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.Create(It.IsAny<DocumentHistory>())).Returns(true);
 
@@ -45,7 +45,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void Create_Fail()
         {
             // Arrange
-            var documentHistory = _fixture.FindValidDocumentHistory();
+            var documentHistory = DocumentFixture.FindValidDocumentHistory();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.Create(It.IsAny<DocumentHistory>())).Returns(false);
 
@@ -63,7 +63,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var document = DocumentFixture.FindValidDocument();
-            var documentHistoryList = _fixture.FindValidDocumentHistoryList();
+            var documentHistoryList = DocumentFixture.FindValidDocumentHistoryList();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(documentHistoryList);
 
@@ -101,7 +101,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void UpdateHistory_Success()
         {
             // Arrange
-            var updateHistoryDto = _fixture.FindValidUpdateHistoryDto();
+            var updateHistoryDto = DocumentFixture.FindValidUpdateHistoryDto();
             var document = DocumentFixture.FindValidDocument();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.UpdateHistory(It.IsAny<UpdateHistoryDto>())).Returns(true);
@@ -119,7 +119,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void UpdateHistory_Fail()
         {
             // Arrange
-            var updateHistoryDto = _fixture.FindValidUpdateHistoryDto();
+            var updateHistoryDto = DocumentFixture.FindValidUpdateHistoryDto();
             var document = DocumentFixture.FindValidDocument();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.UpdateHistory(It.IsAny<UpdateHistoryDto>())).Returns(false);

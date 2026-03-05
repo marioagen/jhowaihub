@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum;
 namespace WoopiAiHub.Domain.DTOs.Response
 {
     public record class CardDto
@@ -18,5 +18,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public DateTime Created { get; set; }
 
         public string ToolName { get; set; } = string.Empty;
+        public bool IsBatchParent { get; set; }
     }
 }
