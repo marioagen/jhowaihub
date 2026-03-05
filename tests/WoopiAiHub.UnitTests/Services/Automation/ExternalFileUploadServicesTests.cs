@@ -19,12 +19,12 @@ namespace WoopiAiHub.UnitTests.Services.Automation
     public class ExternalFileUploadServicesTests
     {
         private readonly AutoMocker _mocker;
-        private readonly WoopiAiHub.Application.Services.Automation.ExternalFileUploadServices _service;
+        private readonly ExternalFileUploadServices _service;
 
         public ExternalFileUploadServicesTests()
         {
             _mocker = new AutoMocker();
-            _service = _mocker.CreateInstance<WoopiAiHub.Application.Services.Automation.ExternalFileUploadServices>();
+            _service = _mocker.CreateInstance<ExternalFileUploadServices>();
         }
 
         [Fact(DisplayName = "ProcessExternalFileUpload should successfully process when workflow exists and has executions")]
