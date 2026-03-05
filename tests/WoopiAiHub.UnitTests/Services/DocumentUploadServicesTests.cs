@@ -7,6 +7,7 @@ using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -94,6 +95,14 @@ namespace WoopiAiHub.UnitTests.Services
             var automationServicesMock = _mocker.GetMock<IAutomationServices>();
             automationServicesMock.Setup(a => a.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(false);
 
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns((Guid?)Guid.NewGuid());
+            _mocker.Use<ICurrentUserService>(currentUserServiceMock.Object);
+
+            var auditCardRepositoryMock = _mocker.GetMock<IAuditCardRepository>();
+            auditCardRepositoryMock.Setup(a => a.AddRangeAsync(It.IsAny<IEnumerable<Domain.Models.Audit.AuditCard>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
             var documentUploadServices = _mocker.CreateInstance<DocumentUploadServices>();
 
             // Act
@@ -136,6 +145,14 @@ namespace WoopiAiHub.UnitTests.Services
 
             var automationServicesMock = _mocker.GetMock<IAutomationServices>();
             automationServicesMock.Setup(a => a.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(false);
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns((Guid?)Guid.NewGuid());
+            _mocker.Use<ICurrentUserService>(currentUserServiceMock.Object);
+
+            var auditCardRepositoryMock = _mocker.GetMock<IAuditCardRepository>();
+            auditCardRepositoryMock.Setup(a => a.AddRangeAsync(It.IsAny<IEnumerable<Domain.Models.Audit.AuditCard>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
             var documentUploadServices = _mocker.CreateInstance<DocumentUploadServices>();
 

@@ -181,7 +181,7 @@ namespace WoopiAiHub.UnitTests.Services
             int documentId = 1;
             string normalizedContext = "Test Content";
             var document = DocumentFixture.FindValidDocument();
-            var existingDocument = _fixture.FindValidDocumentNormalized();
+            var existingDocument = DocumentFixture.FindValidDocumentNormalized();
 
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             documentRepositoryMock.Setup(repo => repo.FindById(It.IsAny<int>())).Returns(document);
