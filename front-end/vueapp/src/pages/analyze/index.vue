@@ -26,7 +26,7 @@
                         v-if="documentsBatch"
                         class="input-group w-auto me-2 analyze-document-select"
                     >
-                        <span class="input-group-text border-end-0 bg-white">
+                        <span class="input-group-text border-end-0">
                             <LucideIcon
                                 icon="FileText"
                                 size="16"
@@ -410,5 +410,10 @@
         .margin-left {
             margin-left: auto;
         }
+    }
+
+    .bg-light {
+        background-color: var(--color-bg-body-content) !important;
+        color: var(--color-body-content) !important;
     }
 </style>

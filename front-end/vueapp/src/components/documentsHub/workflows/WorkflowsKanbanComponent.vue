@@ -574,4 +574,11 @@
         width: 100%;
         height: 100%;
     }
+    .border {
+        border: 1px solid var(--color-border-form-control) !important;
+    }
+    .bg-secondary {
+        background-color: var(--color-hover-transfer) !important;
+        border-color: var(--color-hover-transfer) !important;
+    }
 </style>

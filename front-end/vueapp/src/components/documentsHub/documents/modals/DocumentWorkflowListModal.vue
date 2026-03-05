@@ -29,7 +29,7 @@
             <div class="px-2">
                 <!-- Search Input -->
                 <div class="input-group mt-3 mb-3 search-container">
-                    <span class="input-group-text bg-white border-end-0">
+                    <span class="input-group-text border-end-0">
                         <LucideIcon
                             icon="Search"
                             size="18"
@@ -47,7 +47,7 @@
                         @input="filterData"
                     />
                     <span
-                        class="input-group-text bg-white border-start-0"
+                        class="input-group-text border-start-0"
                         v-if="searchData.search"
                         @click="cleanInput"
                         style="cursor: pointer"
@@ -59,7 +59,7 @@
                         />
                     </span>
                     <span
-                        class="input-group-text bg-white border-start-0"
+                        class="input-group-text border-start-0"
                         v-else
                     ></span>
                 </div>
@@ -84,7 +84,7 @@
                             </div>
                             <div class="workflow-info">
                                 <h6
-                                    class="mb-0 fw-normal text-dark d-flex align-items-center gap-2 flex-wrap"
+                                    class="mb-0 fw-normal d-flex align-items-center gap-2 flex-wrap"
                                 >
                                     {{ workflow.name }}
                                     <span
@@ -255,18 +255,18 @@
     }
 
     .workflow-card {
-        border: 1px solid #e5e7eb;
+        border: 1px solid var(--color-card-content) !important;
         border-radius: 8px;
-        background-color: #fff;
+        background-color: var(--color-card-content) !important;
         transition: all 0.2s ease;
         cursor: pointer;
     }
 
-    .workflow-card:hover {
-        border-color: #3b82f6;
-        background-color: #f8fafc;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
+        .workflow-card:hover {
+            border-color: var(--color-sidebar-li-collapsed-hover) !important;
+            background-color: var(--color-sidebar-li-collapsed-hover) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
 
     .icon-circle {
         width: 40px;
@@ -282,5 +282,9 @@
     .status-badge {
         font-size: 0.7rem;
         font-weight: 500;
+    }
+
+    .border-top {
+        border-top: 1px solid var(--color-border-form-control) !important;
     }
 </style>

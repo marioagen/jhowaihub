@@ -411,10 +411,4 @@
         padding: 0 13px;
     }
 
-    .main-div {
-        border: 1px solid #d3d3d3;
-        border-radius: 8px;
-        background: white;
-        padding: 20px 24px;
-    }
 </style>
