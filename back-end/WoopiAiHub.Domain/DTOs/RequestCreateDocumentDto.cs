@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http;
 
 namespace WoopiAiHub.Application.Dto
 {
@@ -10,7 +9,9 @@ namespace WoopiAiHub.Application.Dto
         string Name,
         string Description,
         string EmailCreator,
-        ICollection<int> Workflows
+        ICollection<int> Workflows,
+        bool IsLastFile = false,
+        bool IsDocumentBatch = false
     );
 }
 

@@ -190,9 +190,6 @@
                         <h6 class="card-title">
                             {{ $t("template.requestBody") }}
                         </h6>
-                        <small class="text-muted">
-                            {{ $t("template.bodySubtitle") }}
-                        </small>
                     </div>
                     <div class="position-relative">
                         <textarea
@@ -202,16 +199,6 @@
                             rows="15"
                             :disabled="readOnly && !editable"
                         ></textarea>
-                    </div>
-                    <div class="alert alert-info mt-3 py-2 px-3 d-flex align-items-start">
-                        <LucideIcon
-                            icon="Lightbulb"
-                            :size="16"
-                            class="me-2 flex-shrink-0"
-                        />
-                        <small>
-                            {{ $t("template.variablesTip") }}
-                        </small>
                     </div>
                 </div>
             </div>

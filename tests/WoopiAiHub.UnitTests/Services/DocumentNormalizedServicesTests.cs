@@ -28,7 +28,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void Create_Success()
         {
             // Arrange
-            var documentNormalized = _fixture.FindValidDocumentNormalized();
+            var documentNormalized = DocumentFixture.FindValidDocumentNormalized();
             var documentNormalizedRepository = _mocker.GetMock<IDocumentNormalizedRepository>();
             documentNormalizedRepository.Setup(a => a.Create(It.IsAny<DocumentNormalized>())).Returns(true);
 
@@ -45,7 +45,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void Create_Fail()
         {
             // Arrange
-            var documentNormalized = _fixture.FindValidDocumentNormalized();
+            var documentNormalized = DocumentFixture.FindValidDocumentNormalized();
             var documentNormalizedRepository = _mocker.GetMock<IDocumentNormalizedRepository>();
             documentNormalizedRepository.Setup(a => a.Create(It.IsAny<DocumentNormalized>())).Returns(false);
 
@@ -63,7 +63,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var document = DocumentFixture.FindValidDocument();
-            var documentNormalized = _fixture.FindValidDocumentNormalized();
+            var documentNormalized = DocumentFixture.FindValidDocumentNormalized();
             var documentNormalizedRepository = _mocker.GetMock<IDocumentNormalizedRepository>();
             documentNormalizedRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(documentNormalized);
 
@@ -146,7 +146,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             int documentId = 1;
             string normalizedContext = "Test Content";
-            var existingDocument = _fixture.FindValidDocumentNormalized();
+            var existingDocument = DocumentFixture.FindValidDocumentNormalized();
             var _documentNormalizedRepositoryMock = _mocker.GetMock<IDocumentNormalizedRepository>();
             _documentNormalizedRepositoryMock.Setup(repo => repo.FindById(documentId))
                                              .Returns(existingDocument);

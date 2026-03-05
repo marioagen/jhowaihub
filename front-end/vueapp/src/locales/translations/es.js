@@ -227,6 +227,7 @@ const spanish = {
             uploadedFilesError: "¡Error al cargar archivos!",
             uploadError: "Algo salió mal",
             uploadFailure: "Error de carga",
+            batchError: "Error al procesar el lote de documentos",
         },
         expandHistory: "Ampliar historia",
         failedToNormalize: "No se pudo normalizar",
@@ -319,6 +320,7 @@ const spanish = {
         youAreAboutToDeleteDocument: "Estás a punto de eliminar <br/> el documento del sistema",
         youAreAboutToDeleteDocumentQuery:
             "Estás a punto de eliminar <br/> el historial de consultas del sistema",
+        documentsBatchCheckbox: "Documentos en lote",
     },
     documentsHub: {
         title: "Cadenas de procesamiento",
@@ -368,6 +370,9 @@ const spanish = {
         statusSelect: {
             none: "Estado del card",
         },
+        all: "Todos",
+        singleDocuments: "Documentos individuales",
+        batchDocuments: "Documentos en lote",
     },
     flow: {
         downloadJson: "Descargar JSON",

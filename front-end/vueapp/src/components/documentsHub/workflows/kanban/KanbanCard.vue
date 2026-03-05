@@ -1,8 +1,17 @@
 <template>
-    <div class="card">
+    <div
+        class="card"
+        :class="{ 'batch-card': dataCard.isBatchParent }"
+    >
         <div class="card-content">
             <div class="card-body pb-0">
                 <div class="mb-1 title-text">
+                    <LucideIcon
+                        v-if="dataCard.isBatchParent"
+                        icon="Files"
+                        :size="16"
+                        class="batch-icon me-1"
+                    />
                     {{ truncateText(dataCard.name) }}
                     <div
                         v-if="isCardRejected"
@@ -785,5 +794,15 @@
 
     .title-text {
         font-size: 13px;
+    }
+
+    .batch-card {
+        border-top: 3px solid #2b7fff !important;
+        border: 1px solid #2b7fff;
+    }
+
+    .batch-icon {
+        color: #2b7fff;
+        vertical-align: middle;
     }
 </style>
