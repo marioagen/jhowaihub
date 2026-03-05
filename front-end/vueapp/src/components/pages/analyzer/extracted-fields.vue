@@ -167,10 +167,8 @@
             </div>
         </div>
     </div>
-    <ExtractDataModal
-        ref="ExtractModal"
-        @update="handleModalUpdate"
-    />
+    <ExtractDataModal ref="ExtractModal"
+                      @update="handleModalUpdate" />
 </template>
 <script>
     import ExtractDataModal from "@/components/analyze/ExtractDataModal.vue";
@@ -388,9 +386,9 @@
         border-color: #0073e6;
     }
 
-    .field-value:read-only {
-        background-color: #f8f9fa;
-    }
+        .field-value:read-only {
+            background-color: var(--color-read-only)!important;
+        }
 
     .edit-button,
     .save-button,
@@ -592,7 +590,12 @@
 
     .question {
         padding: 10px;
-        border: 1px solid #ddd;
+        border: 1px solid var(--color-border-form-control);
         margin-top: 10px;
     }
+
+    .border-top {
+        border-top: 1px solid var(--color-border-form-control) !important;
+    }
+
 </style>

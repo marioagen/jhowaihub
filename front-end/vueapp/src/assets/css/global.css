@@ -168,6 +168,7 @@ body {
     --color-kanban-primary: #2b7fff;
     --color-bg-kanban-primary-accent: #a7bad3;
     --color-bg-kanban-success-accent: #a1cfb1;
+    --color-read-only: #ffffff;
 }
 
 .css-theme-dark {
@@ -275,6 +276,7 @@ body {
     --color-text-error-badge: rgb(252, 165, 165);
     --color-bg-warning-badge: rgba(120, 53, 15, 0.4);
     --color-text-warning-badge: rgb(252, 211, 77);
+    --color-read-only: #232945;
 }
     .css-theme-dark input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
