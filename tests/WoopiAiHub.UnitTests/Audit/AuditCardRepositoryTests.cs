@@ -25,7 +25,7 @@ namespace WoopiAiHub.UnitTests.Audit
             var repository = new AuditCardRepository(context);
 
             var occurredAt = DateTime.UtcNow;
-            var auditCard = new AuditCard(0, cardId: 1, workflowId: 1, AuditCardActionType.Assign, Guid.NewGuid(), occurredAt);
+            var auditCard = new AuditCard(0, occurredAt, cardId: 1, workflowId: 1, AuditCardActionType.Assign, Guid.NewGuid());
 
             repository.Add(auditCard);
 
@@ -42,7 +42,7 @@ namespace WoopiAiHub.UnitTests.Audit
 
             var userId = Guid.NewGuid();
             var occurredAt = DateTime.UtcNow;
-            var auditCard = new AuditCard(0, cardId: 1, workflowId: 1, AuditCardActionType.Advancement, userId, occurredAt);
+            var auditCard = new AuditCard(0, occurredAt, cardId: 1, workflowId: 1, AuditCardActionType.Advancement, userId);
 
             repository.Add(auditCard);
             context.SaveChanges();
@@ -64,8 +64,8 @@ namespace WoopiAiHub.UnitTests.Audit
 
             var guid1 = Guid.NewGuid();
             var guid2 = Guid.NewGuid();
-            repository.Add(new AuditCard(0, 1, 1, AuditCardActionType.Assign, guid1, DateTime.UtcNow));
-            repository.Add(new AuditCard(0, 2, 1, AuditCardActionType.Unassign, guid2, DateTime.UtcNow));
+            repository.Add(new AuditCard(0, DateTime.UtcNow, 1, 1, AuditCardActionType.Assign, guid1));
+            repository.Add(new AuditCard(0, DateTime.UtcNow, 2, 1, AuditCardActionType.Unassign, guid2));
 
             context.SaveChanges();
 

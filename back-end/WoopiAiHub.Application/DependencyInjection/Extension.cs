@@ -84,7 +84,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddHostedService<SubscriptionConsumer>();
             services.AddHostedService<SubscriptionEndPeriodConsumer>();
             services.AddHostedService<ApiOutputConsumer>();
-            services.AddHostedService<WoopiAiHub.Application.Messaging.ExternalFileUploadConsumer>();
+            services.AddHostedService<ExternalFileUploadConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();

@@ -55,6 +55,6 @@ namespace WoopiAiHub.Application.Utils
         }
 
         /// <inheritdoc />
-        public string? GetClaim(string claimType) => User?.FindFirst(claimType)?.Value;
+        public string? FindClaim(string claimType) => User?.FindFirst(claimType)?.Value;
     }
 }

@@ -22,9 +22,6 @@ namespace WoopiAiHub.Domain.Models
         [Column("HasBatch", TypeName = "bit")]
         public bool HasBatch { get; private set; } = false;
 
-        /// <summary>
-        /// Logical deletion flag. When false, the document is considered deleted and excluded from default queries.
-        /// </summary>
         [Column("Enable", TypeName = "bit")]
         public bool Enable { get; private set; } = true;
 
@@ -52,17 +49,11 @@ namespace WoopiAiHub.Domain.Models
             HasBatch = hasBatch;
         }
 
-        /// <summary>
-        /// Marks the document as logically deleted (soft delete). It will be excluded from default queries.
-        /// </summary>
         public void Disable()
         {
             Enable = false;
         }
 
-        /// <summary>
-        /// Use to EF context
-        /// </summary>
         private Document(int id, DateTime created) : base(id, created) { }
     }
 }

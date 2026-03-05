@@ -282,9 +282,9 @@ namespace WoopiAiHub.UnitTests.Utils
             Assert.False(service.IsAdmin);
         }
 
-        [Fact(DisplayName = "GetClaim should return claim value when present")]
-        [Trait("CurrentUserService", "GetClaim")]
-        public void GetClaim_WhenClaimExists_ReturnsValue()
+        [Fact(DisplayName = "FindClaim should return claim value when present")]
+        [Trait("CurrentUserService", "FindClaim")]
+        public void FindClaim_WhenClaimExists_ReturnsValue()
         {
             var identity = new ClaimsIdentity(
                 new[] { new Claim("customClaim", "customValue") },
@@ -297,12 +297,12 @@ namespace WoopiAiHub.UnitTests.Utils
 
             var service = new CurrentUserService(accessorMock.Object);
 
-            Assert.Equal("customValue", service.GetClaim("customClaim"));
+            Assert.Equal("customValue", service.FindClaim("customClaim"));
         }
 
-        [Fact(DisplayName = "GetClaim should return null when claim is missing")]
-        [Trait("CurrentUserService", "GetClaim")]
-        public void GetClaim_WhenClaimMissing_ReturnsNull()
+        [Fact(DisplayName = "FindClaim should return null when claim is missing")]
+        [Trait("CurrentUserService", "FindClaim")]
+        public void FindClaim_WhenClaimMissing_ReturnsNull()
         {
             var identity = new ClaimsIdentity(Array.Empty<Claim>(), "Bearer");
             var user = new ClaimsPrincipal(identity);
@@ -313,10 +313,10 @@ namespace WoopiAiHub.UnitTests.Utils
 
             var service = new CurrentUserService(accessorMock.Object);
 
-            Assert.Null(service.GetClaim("nonexistent"));
+            Assert.Null(service.FindClaim("nonexistent"));
         }
 
-        [Fact(DisplayName = "When HttpContext is null, Id UserId Email IsAdmin and GetClaim should return null or false")]
+        [Fact(DisplayName = "When HttpContext is null, Id UserId Email IsAdmin and FindClaim should return null or false")]
         [Trait("CurrentUserService", "NoContext")]
         public void WhenHttpContextIsNull_AllUserProperties_ReturnNullOrFalse()
         {
@@ -330,7 +330,7 @@ namespace WoopiAiHub.UnitTests.Utils
             Assert.Null(service.UserId);
             Assert.Null(service.Email);
             Assert.False(service.IsAdmin);
-            Assert.Null(service.GetClaim("any"));
+            Assert.Null(service.FindClaim("any"));
         }
     }
 }

@@ -35,6 +35,6 @@ namespace WoopiAiHub.Domain.Interfaces.Utils
         /// Gets the value of a claim by type, or null if not present.
         /// </summary>
         /// <param name="claimType">Claim type (e.g. "sub", "email", "isAdmin", "permissions").</param>
-        string? GetClaim(string claimType);
+        string? FindClaim(string claimType);
     }
 }

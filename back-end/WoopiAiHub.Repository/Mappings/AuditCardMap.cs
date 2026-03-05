@@ -16,7 +16,8 @@ namespace WoopiAiHub.Repository.Mappings
                 .HasColumnType("int")
                 .IsRequired();
 
-            builder.Property(c => c.OccurredAt)
+            builder.Property(c => c.Created)
+                .HasColumnName("OccurredAt")
                 .HasColumnType("datetime")
                 .IsRequired();
 
@@ -39,7 +40,7 @@ namespace WoopiAiHub.Repository.Mappings
             builder.HasIndex(c => c.WorkflowId);
             builder.HasIndex(c => c.UserId);
             builder.HasIndex(c => c.ActionType);
-            builder.HasIndex(c => c.OccurredAt);
+            builder.HasIndex(c => c.Created);
         }
     }
 }

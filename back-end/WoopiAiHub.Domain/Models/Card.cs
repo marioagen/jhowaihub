@@ -28,9 +28,6 @@ namespace WoopiAiHub.Domain.Models
         [Column("DocumentBatchId", TypeName = "int")]
         public int? DocumentBatchId { get; private set; }
 
-        /// <summary>
-        /// Logical deletion flag. When false, the card is considered deleted and excluded from default queries.
-        /// </summary>
         [Column("Enable", TypeName = "bit")]
         public bool Enable { get; private set; } = true;
 
@@ -54,9 +51,6 @@ namespace WoopiAiHub.Domain.Models
             Enable = enable;
         }
 
-        /// <summary>
-        /// Use to EF context
-        /// </summary>
         private Card(int id, DateTime created) : base(id, created) { }
 
         public void UpdateStepAndStatus(int stepId, int statusId)
@@ -70,9 +64,6 @@ namespace WoopiAiHub.Domain.Models
             AssignedUserId = userId;
         }
 
-        /// <summary>
-        /// Marks the card as logically deleted (soft delete). It will be excluded from default queries.
-        /// </summary>
         public void Disable()
         {
             Enable = false;
@@ -83,15 +74,6 @@ namespace WoopiAiHub.Domain.Models
             return StatusId == this.Status?.Id && this.Status.Name == StatusNames.Rejected;
         }
 
-        /// <summary>
-        /// Creates and persists an audit log entry for this card via <see cref="AuditCard.Create"/>.
-        /// User and timestamp are taken from <paramref name="currentUserService"/> and <see cref="AuditCard.Create"/> (OccurredAt = UTC now) respectively.
-        /// </summary>
-        /// <param name="workflowId">Id of the workflow the card belongs to.</param>
-        /// <param name="actionType">The audit action type.</param>
-        /// <param name="currentUserService">Service to resolve the current user; must be authenticated with a valid user Id.</param>
-        /// <param name="auditCardRepository">Repository used to persist the audit entry.</param>
-        /// <exception cref="InvalidOperationException">Thrown when the current user is not authenticated or has no user Id.</exception>
         public void CreateAuditLog(int workflowId, AuditCardActionType actionType, ICurrentUserService currentUserService, IAuditCardRepository auditCardRepository)
         {
             AuditCard.Create(Id, workflowId, actionType, currentUserService, auditCardRepository);

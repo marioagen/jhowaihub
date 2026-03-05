@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
@@ -7,12 +6,8 @@ using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Models.Audit
 {
-    public class AuditCard
+    public class AuditCard : BaseEntity
     {
-        [Key]
-        [Column("Id", TypeName = "int")]
-        public int Id { get; private set; }
-
         [Column("CardId", TypeName = "int")]
         public int CardId { get; private set; }
 
@@ -25,32 +20,28 @@ namespace WoopiAiHub.Domain.Models.Audit
         [Column("UserId", TypeName = "uniqueidentifier")]
         public Guid UserId { get; private set; }
 
-        [Column("OccurredAt", TypeName = "datetime")]
-        public DateTime OccurredAt { get; private set; }
-
         public virtual Card? Card { get; set; }
         public virtual Workflow? Workflow { get; set; }
         public virtual User? User { get; set; }
 
-        public AuditCard(int id, int cardId, int workflowId, AuditCardActionType actionType, Guid userId, DateTime occurredAt)
+        public AuditCard(int id, DateTime created, int cardId, int workflowId, AuditCardActionType actionType, Guid userId)
+            : base(id, created)
         {
-            Id = id;
             CardId = cardId;
             WorkflowId = workflowId;
             ActionType = actionType;
             UserId = userId;
-            OccurredAt = occurredAt;
         }
 
         /// <summary>
         /// Use for EF context
         /// </summary>
-        private AuditCard() { }
+        private AuditCard(int id, DateTime created) : base(id, created) { }
 
         /// <summary>
         /// Creates a new AuditCard for a card action and persists it via <paramref name="auditCardRepository"/>.
         /// Id is set to 0; the database will assign the actual Id on save.
-        /// User and OccurredAt are taken from <paramref name="currentUserService"/> and UTC now.
+        /// User and Created (OccurredAt) are taken from <paramref name="currentUserService"/> and UTC now.
         /// </summary>
         /// <param name="cardId">Id of the card.</param>
         /// <param name="workflowId">Id of the workflow.</param>
@@ -67,7 +58,7 @@ namespace WoopiAiHub.Domain.Models.Audit
             if (!currentUserService.IsAuthenticated || currentUserService.Id is not { } userId)
                 throw new InvalidOperationException("Current user is required to create an audit log.");
 
-            var auditCard = new AuditCard(0, cardId, workflowId, actionType, userId, DateTime.UtcNow);
+            var auditCard = new AuditCard(0, DateTime.UtcNow, cardId, workflowId, actionType, userId);
             auditCardRepository.Add(auditCard);
         }
     }

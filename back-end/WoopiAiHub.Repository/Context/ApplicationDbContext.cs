@@ -167,7 +167,7 @@ namespace WoopiAiHub.Repository.Context
             ChangeTracker.DetectChanges();
             var auditLogs = new List<AuditLog>();
 
-            var user = GetCurrentUser();
+            var user = FindCurrentUser();
             if (user == null)
                 return auditLogs;
 
@@ -191,7 +191,7 @@ namespace WoopiAiHub.Repository.Context
         /// or, when not available, from the X-Email header for backward compatibility.
         /// </summary>
         /// <returns>A <see cref="User"/> object representing the current user if identified; otherwise, <see langword="null"/>.</returns>
-        private User? GetCurrentUser()
+        private User? FindCurrentUser()
         {
             var requestEmail = _currentUserService?.Email;
             if (string.IsNullOrEmpty(requestEmail))
