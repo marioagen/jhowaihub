@@ -17,9 +17,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<ICollection<int>> FindActiveCardIdsInFirstStepAsync(IEnumerable<int> cardIds);
         Task<Card?> FindByDocumentIdCardAsync(int documentId);
         Task<List<Card>> FindByDocumentIdCardListAsync(int documentId);
-        /// <summary>
-        /// Finds all cards for the document with Step and Workflow included.
-        /// </summary>
         Task<List<Card>> FindByDocumentIdCardListWithStepWorkflowAsync(int documentId);
         Task<CardHeaderDto?> FindHeaderInfoAsync(int cardId);
         Task<ICollection<int>> FindCardIdsByDocumentIdsAsync(IEnumerable<int> documentIds);

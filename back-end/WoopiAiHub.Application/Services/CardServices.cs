@@ -408,7 +408,12 @@ namespace WoopiAiHub.Application.Services
             return dto;
         }
 
-        public async Task<IReadOnlyList<Card>> GetCardsByDocumentIdWithStepWorkflowAsync(int documentId)
+        /// <summary>
+        /// Gets all cards for a document including step and workflow data.
+        /// </summary>
+        /// <param name="documentId">The document ID to get cards for.</param>
+        /// <returns>Read-only list of cards with step and workflow; empty list if none found.</returns>
+        public async Task<IReadOnlyList<Card>> FindCardsByDocumentIdWithStepWorkflowAsync(int documentId)
         {
             var cards = await _cardRepository.FindByDocumentIdCardListWithStepWorkflowAsync(documentId);
             return cards ?? new List<Card>();
