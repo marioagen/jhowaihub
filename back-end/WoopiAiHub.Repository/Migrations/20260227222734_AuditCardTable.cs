@@ -71,6 +71,20 @@ namespace WoopiAiHub.Repository.Migrations
                 name: "IX_AuditCards_WorkflowId",
                 table: AuditCardsTableName,
                 column: "WorkflowId");
+
+            migrationBuilder.AddColumn<bool>(
+                name: "Enable",
+                table: "Cards",
+                type: "bit",
+                nullable: false,
+                defaultValue: true);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "Enable",
+                table: "Documents",
+                type: "bit",
+                nullable: false,
+                defaultValue: true);
         }
 
         /// <inheritdoc />
@@ -78,6 +92,14 @@ namespace WoopiAiHub.Repository.Migrations
         {
             migrationBuilder.DropTable(
                 name: AuditCardsTableName);
+
+            migrationBuilder.DropColumn(
+                name: "Enable",
+                table: "Cards");
+
+            migrationBuilder.DropColumn(
+                name: "Enable",
+                table: "Documents");
         }
     }
 }
