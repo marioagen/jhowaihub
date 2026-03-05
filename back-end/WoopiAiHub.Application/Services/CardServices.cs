@@ -74,8 +74,7 @@ namespace WoopiAiHub.Application.Services
                     CardLabel.UserCannotBeAssigned);
             }
 
-            foreach (var card in cards)
-                card.UpdateAssignedUser(updateAssingnedUserDto.UserId);
+            Card.UpdateAssignedUser(cards, updateAssingnedUserDto.UserId);
 
             var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)
@@ -99,8 +98,7 @@ namespace WoopiAiHub.Application.Services
             if (cards == null || cards.Count == 0)
                 throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
 
-            foreach (var card in cards)
-                card.UpdateAssignedUser(null);
+            Card.UpdateAssignedUser(cards, null);
 
             var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)
@@ -137,11 +135,7 @@ namespace WoopiAiHub.Application.Services
                 updateCardStepStatusDto.WorkflowId
             ) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
 
-            foreach (var card in cards)
-            {
-                var statusId = card.IsRejected() ? previousStatusId : step.StatusId;
-                card.UpdateStepAndStatus(step.Id, statusId);
-            }
+            Card.UpdateStepAndStatus(cards, step.Id, card => card.IsRejected() ? previousStatusId : step.StatusId);
 
             var cardWorkflows = cards.Select(card => (card.Id, updateCardStepStatusDto.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)

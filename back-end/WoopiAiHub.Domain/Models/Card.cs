@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
+using System;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
@@ -59,9 +61,27 @@ namespace WoopiAiHub.Domain.Models
             StatusId = statusId;
         }
 
+        public static void UpdateStepAndStatus(IEnumerable<Card> cards, int stepId, int statusId)
+        {
+            foreach (var card in cards)
+                card.UpdateStepAndStatus(stepId, statusId);
+        }
+
+        public static void UpdateStepAndStatus(IEnumerable<Card> cards, int stepId, Func<Card, int> getStatusId)
+        {
+            foreach (var card in cards)
+                card.UpdateStepAndStatus(stepId, getStatusId(card));
+        }
+
         public void UpdateAssignedUser(Guid? userId)
         {
             AssignedUserId = userId;
+        }
+
+        public static void UpdateAssignedUser(IEnumerable<Card> cards, Guid? userId)
+        {
+            foreach (var card in cards)
+                card.UpdateAssignedUser(userId);
         }
 
         public void Disable()

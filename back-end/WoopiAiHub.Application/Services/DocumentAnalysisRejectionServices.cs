@@ -78,8 +78,9 @@ namespace WoopiAiHub.Application.Services
                     );
 
                     rejections.Add(rejection);
-                    card.UpdateStepAndStatus(dto.StepId, status.Id);
                 }
+
+                Card.UpdateStepAndStatus(cards, dto.StepId, status.Id);
 
                 var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId)).ToList();
                 if (cardWorkflows.Count > 0)
