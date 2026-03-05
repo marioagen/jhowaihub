@@ -27,7 +27,7 @@ namespace WoopiAiHub.UnitTests.Audit
             var occurredAt = DateTime.UtcNow;
             var auditCard = new AuditCard(0, occurredAt, cardId: 1, workflowId: 1, AuditCardActionType.Assign, Guid.NewGuid());
 
-            await repository.AddAsync(auditCard);
+            await repository.AddAsync(auditCard, CancellationToken.None);
 
             var entry = context.Entry(auditCard);
             Assert.Equal(EntityState.Unchanged, entry.State);
@@ -44,7 +44,7 @@ namespace WoopiAiHub.UnitTests.Audit
             var occurredAt = DateTime.UtcNow;
             var auditCard = new AuditCard(0, occurredAt, cardId: 1, workflowId: 1, AuditCardActionType.Advancement, userId);
 
-            await repository.AddAsync(auditCard);
+            await repository.AddAsync(auditCard, CancellationToken.None);
 
             var saved = context.Set<AuditCard>().FirstOrDefault(a => a.CardId == 1 && a.WorkflowId == 1 && a.UserId == userId);
             Assert.NotNull(saved);
@@ -69,7 +69,7 @@ namespace WoopiAiHub.UnitTests.Audit
                 new AuditCard(0, DateTime.UtcNow, 2, 1, AuditCardActionType.Unassign, guid2)
             };
 
-            await repository.AddRangeAsync(auditCards);
+            await repository.AddRangeAsync(auditCards, CancellationToken.None);
 
             var count = context.Set<AuditCard>().Count();
             Assert.Equal(2, count);
