@@ -301,7 +301,7 @@
                     (result) => {
                         this.hashDocument = result.referenceFile;
                         if (result && result.documentBatchId != null) {
-                            self.getBatchDocuments(result.documentBatchId);
+                            this.getBatchDocuments(result.documentBatchId);
                         }
                     }
                 );
@@ -381,7 +381,7 @@
     .analyze-document-select {
         max-width: 300px;
     }
-  
+
     .section-buttons .btn-check:checked + .btn,
     .section-buttons .btn-check:active + .btn {
         background-color: #0d6efd !important;
@@ -393,7 +393,7 @@
         outline: none !important;
         box-shadow: none !important;
     }
-  
+
     .section-buttons .btn-check:focus + .btn {
         outline: none !important;
         box-shadow: none !important;
