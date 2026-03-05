@@ -10,7 +10,6 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using Newtonsoft.Json;
@@ -79,8 +78,7 @@ namespace WoopiAiHub.Application.Services
             var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)
             {
-                var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Assign, _currentUserService);
-                await _auditCardRepository.AddRangeAsync(auditCards);
+                await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign, _currentUserService);
             }
 
             return _cardRepository.UpdateList(cards);
@@ -103,8 +101,7 @@ namespace WoopiAiHub.Application.Services
             var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)
             {
-                var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Unassign, _currentUserService);
-                await _auditCardRepository.AddRangeAsync(auditCards);
+                await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign, _currentUserService);
             }
 
             return _cardRepository.UpdateList(cards);
@@ -140,8 +137,7 @@ namespace WoopiAiHub.Application.Services
             var cardWorkflows = cards.Select(card => (card.Id, updateCardStepStatusDto.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)
             {
-                var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Advancement, _currentUserService);
-                await _auditCardRepository.AddRangeAsync(auditCards);
+                await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, _currentUserService);
             }
 
             var result = _cardRepository.UpdateList(cards);
@@ -193,8 +189,7 @@ namespace WoopiAiHub.Application.Services
             var cardWorkflows = cards.Where(card => card.Step != null).Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)
             {
-                var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Finalize, _currentUserService);
-                await _auditCardRepository.AddRangeAsync(auditCards);
+                await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Finalize, _currentUserService);
             }
 
             var result = _cardRepository.UpdateList(cards);

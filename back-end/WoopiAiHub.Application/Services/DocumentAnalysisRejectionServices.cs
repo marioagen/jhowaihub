@@ -8,7 +8,6 @@ using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 
@@ -85,8 +84,7 @@ namespace WoopiAiHub.Application.Services
                 var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId)).ToList();
                 if (cardWorkflows.Count > 0)
                 {
-                    var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Rejection, _currentUserService);
-                    await _auditCardRepository.AddRangeAsync(auditCards);
+                    await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Rejection, _currentUserService);
                 }
 
                 await _repository.CreateRangeAsync(rejections);

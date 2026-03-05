@@ -2,10 +2,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Collections.Generic;
 using System;
 using WoopiAiHub.Domain.Enum;
-using WoopiAiHub.Domain.Enum.Audit;
-using WoopiAiHub.Domain.Interfaces.Repository.Audit;
-using WoopiAiHub.Domain.Interfaces.Utils;
-using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Domain.Models
@@ -92,11 +88,6 @@ namespace WoopiAiHub.Domain.Models
         public bool IsRejected()
         {
             return StatusId == this.Status?.Id && this.Status.Name == StatusNames.Rejected;
-        }
-
-        public void CreateAuditLog(int workflowId, AuditCardActionType actionType, ICurrentUserService currentUserService, IAuditCardRepository auditCardRepository)
-        {
-            AuditCard.Create(Id, workflowId, actionType, currentUserService, auditCardRepository);
         }
     }
 }
