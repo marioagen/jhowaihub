@@ -19,7 +19,7 @@ namespace WoopiAiHub.Application.Services
     public class CardServices : ICardServices
     {
         private readonly ICardRepository _cardRepository;
-        private readonly IAuditCardRepository _auditCardRepository;
+        private readonly IAuditCardService _auditCardService;
         private readonly IStepRepository _stepRepository;
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
@@ -29,7 +29,7 @@ namespace WoopiAiHub.Application.Services
         private const string CardNotFoundMessage = "Card not found";
 
         public CardServices(ICardRepository cardRepository,
-                            IAuditCardRepository auditCardRepository,
+                            IAuditCardService auditCardService,
                             IStepRepository stepRepository,
                             IAutomationServices automationServices,
                             IStepToolExecutionRepository stepToolExecutionRepository,
@@ -37,7 +37,7 @@ namespace WoopiAiHub.Application.Services
                             ICurrentUserService currentUserService)
         {
             _cardRepository = cardRepository;
-            _auditCardRepository = auditCardRepository;
+            _auditCardService = auditCardService;
             _stepRepository = stepRepository;
             _automationServices = automationServices;
             _stepToolExecutionRepository = stepToolExecutionRepository;
@@ -78,7 +78,7 @@ namespace WoopiAiHub.Application.Services
             var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)
             {
-                await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign, _currentUserService);
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
             }
 
             return _cardRepository.UpdateList(cards);
@@ -101,7 +101,7 @@ namespace WoopiAiHub.Application.Services
             var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)
             {
-                await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign, _currentUserService);
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign);
             }
 
             return _cardRepository.UpdateList(cards);
@@ -137,7 +137,7 @@ namespace WoopiAiHub.Application.Services
             var cardWorkflows = cards.Select(card => (card.Id, updateCardStepStatusDto.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)
             {
-                await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, _currentUserService);
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement);
             }
 
             var result = _cardRepository.UpdateList(cards);
@@ -189,7 +189,7 @@ namespace WoopiAiHub.Application.Services
             var cardWorkflows = cards.Where(card => card.Step != null).Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)
             {
-                await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Finalize, _currentUserService);
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Finalize);
             }
 
             var result = _cardRepository.UpdateList(cards);

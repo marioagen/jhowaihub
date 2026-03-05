@@ -9,7 +9,6 @@ using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -30,7 +29,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly ICardServices _cardServices;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IAuditCardRepository _auditCardRepository;
+        private readonly IAuditCardService _auditCardService;
         private readonly ILogger<DocumentQuestionnaireServices> _logger;
 
         private const int DocumentHistoryTypeInputQuestionnaire = 1;
@@ -47,7 +46,7 @@ namespace WoopiAiHub.Application.Services
             IUserRepository userRepository,
             ICardServices cardServices,
             ICurrentUserService currentUserService,
-            IAuditCardRepository auditCardRepository,
+            IAuditCardService auditCardService,
             ILogger<DocumentQuestionnaireServices> logger)
         {
             _documentRepository = documentRepository;
@@ -60,7 +59,7 @@ namespace WoopiAiHub.Application.Services
             _userRepository = userRepository;
             _cardServices = cardServices;
             _currentUserService = currentUserService;
-            _auditCardRepository = auditCardRepository;
+            _auditCardService = auditCardService;
             _logger = logger;
         }
 
@@ -195,7 +194,7 @@ namespace WoopiAiHub.Application.Services
             var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId)).ToList();
             if (cardWorkflows.Count > 0)
             {
-                await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, actionType, _currentUserService);
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, actionType);
             }
         }
 

@@ -4,7 +4,6 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
@@ -19,7 +18,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepRepository _stepRepository;
         private readonly IPermissionServices _permissionServices;
         private readonly ICardRepository _cardRepository;
-        private readonly IAuditCardRepository _auditCardRepository;
+        private readonly IAuditCardService _auditCardService;
         private readonly IStatusRepository _statusRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -30,7 +29,7 @@ namespace WoopiAiHub.Application.Services
             IStepRepository stepRepository,
             IPermissionServices permissionServices,
             ICardRepository cardRepository,
-            IAuditCardRepository auditCardRepository,
+            IAuditCardService auditCardService,
             IStatusRepository statusRepository,
             IUserRepository userRepository,
             IUnitOfWork unitOfWork,
@@ -39,7 +38,7 @@ namespace WoopiAiHub.Application.Services
             _repository = repository;
             _stepRepository = stepRepository;
             _cardRepository = cardRepository;
-            _auditCardRepository = auditCardRepository;
+            _auditCardService = auditCardService;
             _statusRepository = statusRepository;
             _permissionServices = permissionServices;
             _userRepository = userRepository;
@@ -84,7 +83,7 @@ namespace WoopiAiHub.Application.Services
                 var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId)).ToList();
                 if (cardWorkflows.Count > 0)
                 {
-                    await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Rejection, _currentUserService);
+                    await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Rejection);
                 }
 
                 await _repository.CreateRangeAsync(rejections);

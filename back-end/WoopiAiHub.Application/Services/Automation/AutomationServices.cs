@@ -11,7 +11,6 @@ using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -30,7 +29,7 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IMessagePublisher<object> _messagePublisher;
         private readonly ILogger<AutomationServices> _logger;
         private readonly ICardRepository _cardRepository;
-        private readonly IAuditCardRepository _auditCardRepository;
+        private readonly IAuditCardService _auditCardService;
         private readonly IToolRepository _toolRepository;
         private readonly IApiClientFactory _apiClientFactory;
         private readonly IStepRepository _stepRepository;
@@ -47,7 +46,7 @@ namespace WoopiAiHub.Application.Services.Automation
                                   IMessagePublisher<object> messagePublisher,
                                   ILogger<AutomationServices> logger,
                                   ICardRepository cardRepository,
-                                  IAuditCardRepository auditCardRepository,
+                                  IAuditCardService auditCardService,
                                   IToolRepository toolRepository,
                                   IApiClientFactory apiClientFactory,
                                   IStepRepository stepRepository,
@@ -64,7 +63,7 @@ namespace WoopiAiHub.Application.Services.Automation
             _messagePublisher = messagePublisher;
             _logger = logger;
             _cardRepository = cardRepository;
-            _auditCardRepository = auditCardRepository;
+            _auditCardService = auditCardService;
             _toolRepository = toolRepository;
             _apiClientFactory = apiClientFactory;
             _stepRepository = stepRepository;
@@ -467,7 +466,7 @@ namespace WoopiAiHub.Application.Services.Automation
 
             card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
             var cardWorkflows = new List<(int cardId, int workflowId)> { (card.Id, card.Step!.WorkflowId) };
-            await _auditCardRepository.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, _currentUserService);
+            await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement);
             var updated = _cardRepository.Update(card);
 
             if (updated)
