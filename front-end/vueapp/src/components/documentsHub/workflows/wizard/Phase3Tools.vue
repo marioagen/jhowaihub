@@ -9,7 +9,7 @@
         </div>
         <div
             v-if="!workflowSteps || workflowSteps.length === 0"
-            class="text-center text-muted py-5"
+            class="text-center py-5"
         >
             <p>{{ $t("workflow.noStepsAvailable") }}</p>
         </div>
@@ -35,7 +35,7 @@
                                 {{ step.name }}
                             </h6>
                         </div>
-                        <div class="text-muted small">
+                        <div class="small">
                             <LucideIcon
                                 icon="Users"
                                 :size="14"
@@ -175,8 +175,8 @@
     }
 
     .card-header {
-        background-color: #f9fafb;
-        border-bottom: 1px solid #e5e7eb;
+        background-color: var(--color-header-card-step) !important;
+        border-bottom: 1px solid var(--color-border-form-control);
         padding: 12px 16px;
     }
 

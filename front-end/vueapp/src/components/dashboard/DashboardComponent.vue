@@ -18,7 +18,7 @@
                         </p>
                     </div>
                     <div class="plan-box plan-right">
-                        <small class="text-muted">
+                        <small>
                             {{ $t("plan.current") }}
                         </small>
                         <br />
@@ -37,7 +37,7 @@
                         v-outsideClick="handleOutsideClick"
                     >
                         <button
-                            class="btn btn-outlined-light btn-sm border d-flex align-items-center justify-content-between"
+                            class="btn btn-outlined btn-sm d-flex align-items-center justify-content-between"
                             style="width: 200px"
                             @click="toggleDateFilter"
                         >
@@ -241,16 +241,16 @@
 </script>
 <style scoped>
     .plan-box {
-        background: #eef3ff;
+        background: var(--color-bg-subscription-card) !important;
         border-radius: 12px;
         padding: 12px 20px;
         display: inline-block;
         text-align: right;
-        border: 1px solid #d5e0ff;
+        border: 1px solid var(--color-border-subscription-card) !important;
     }
 
     .plan-title {
-        color: #0056d2;
+        color: var(--color-title-subscription-card) !important;
         font-weight: 600;
         font-size: 1rem;
     }

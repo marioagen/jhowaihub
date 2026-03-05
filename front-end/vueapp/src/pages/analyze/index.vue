@@ -26,7 +26,7 @@
                         v-if="documentsBatch"
                         class="input-group w-auto me-2 analyze-document-select"
                     >
-                        <span class="input-group-text border-end-0 bg-white">
+                        <span class="input-group-text border-end-0">
                             <LucideIcon
                                 icon="FileText"
                                 size="16"
@@ -145,10 +145,7 @@
                         />
                     </template>
                     <template #right>
-                        <div
-                            id="docHistory"
-                            class="analyze-doc-history"
-                        >
+                        <div id="docHistory">
                             <AnalysisStepsSection
                                 :document-id="parseInt(documentId)"
                                 :card-id="parseInt(cardId)"
@@ -398,21 +395,25 @@
         box-shadow: none !important;
     }
 
+    #docHistory {
+        overflow-y: auto;
+        max-height: calc(100vh - 200px);
+        min-height: 300px;
+        height: auto !important;
+    }
+
     @media (min-width: 320px) and (max-width: 767px) {
         #docView {
             display: none;
         }
 
-        .analyze-doc-history,
-        #docHistory {
-            overflow-y: auto;
-            max-height: calc(100vh - 200px);
-            min-height: 300px;
-            height: auto !important;
-        }
-
         .margin-left {
             margin-left: auto;
         }
+    }
+
+    .bg-light {
+        background-color: var(--color-bg-body-content) !important;
+        color: var(--color-body-content) !important;
     }
 </style>
