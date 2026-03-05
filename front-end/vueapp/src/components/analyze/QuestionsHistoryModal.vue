@@ -388,17 +388,17 @@
     }
 
     .conversation-card {
-        background-color: var(--bs-light, #f8f9fa) !important;
+        background-color: var(--color-bg-navbar) !important;
     }
 
     .badge-tag-questionario {
-        background-color: #e8e0f0 !important;
-        color: #6b5b7a !important;
+        background-color: var(--color-bg-badge) !important;
+        color: var(--color-body-content) !important;
     }
 
     .badge-tag-pergunta-livre {
-        background-color: #cce5ff !important;
-        color: #004085 !important;
+        background-color: var(--color-bg-primary-badge) !important;
+        color: var(--color-text-primary-badge) !important;
     }
 
     .modal-header .modal-title {

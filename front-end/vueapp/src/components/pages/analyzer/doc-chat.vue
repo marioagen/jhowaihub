@@ -542,7 +542,7 @@
 
     .input-label {
         font-size: 0.9rem;
-        color: #333;
+        color: var(--color-body-content);
         font-weight: 500;
         margin: 0;
     }
@@ -792,7 +792,6 @@
 
         .input-label {
             font-size: 0.9rem;
-            color: #333;
             font-weight: 500;
             margin: 0;
         }
