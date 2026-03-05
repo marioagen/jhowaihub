@@ -28,7 +28,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IAutomationServices _automationServices;
         private readonly IFileRepositoryApi _fileRepositoryApi;
-        private readonly ICurrentUserService _currentUserService;
         private readonly IAuditCardService _auditCardService;
         private readonly IDocumentBatchRepository _documentBatchRepository;
         private readonly ILogger<DocumentUploadServices> _logger;
@@ -42,7 +41,6 @@ namespace WoopiAiHub.Application.Services
             IWorkflowRepository workflowRepository,
             IAutomationServices automationServices,
             IFileRepositoryApi fileRepositoryApi,
-            ICurrentUserService currentUserService,
             IAuditCardService auditCardService,
             IDocumentBatchRepository documentBatchRepository,
             ILogger<DocumentUploadServices> logger)
@@ -54,7 +52,6 @@ namespace WoopiAiHub.Application.Services
             _workflowRepository = workflowRepository;
             _automationServices = automationServices;
             _fileRepositoryApi = fileRepositoryApi;
-            _currentUserService = currentUserService;
             _auditCardService = auditCardService;
             _documentBatchRepository = documentBatchRepository;
             _logger = logger;

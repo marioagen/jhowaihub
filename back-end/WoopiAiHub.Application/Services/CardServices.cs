@@ -24,7 +24,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IWorkflowRepository _workflowRepository;
-        private readonly ICurrentUserService _currentUserService;
 
         private const string CardNotFoundMessage = "Card not found";
 
@@ -33,8 +32,7 @@ namespace WoopiAiHub.Application.Services
                             IStepRepository stepRepository,
                             IAutomationServices automationServices,
                             IStepToolExecutionRepository stepToolExecutionRepository,
-                            IWorkflowRepository workflowRepository,
-                            ICurrentUserService currentUserService)
+                            IWorkflowRepository workflowRepository)
         {
             _cardRepository = cardRepository;
             _auditCardService = auditCardService;
@@ -42,7 +40,6 @@ namespace WoopiAiHub.Application.Services
             _automationServices = automationServices;
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _workflowRepository = workflowRepository;
-            _currentUserService = currentUserService;
         }
 
         /// <summary>

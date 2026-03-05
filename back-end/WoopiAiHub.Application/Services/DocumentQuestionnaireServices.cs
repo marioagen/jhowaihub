@@ -28,7 +28,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly IUserRepository _userRepository;
         private readonly ICardServices _cardServices;
-        private readonly ICurrentUserService _currentUserService;
         private readonly IAuditCardService _auditCardService;
         private readonly ILogger<DocumentQuestionnaireServices> _logger;
 
@@ -45,7 +44,6 @@ namespace WoopiAiHub.Application.Services
             IUsageDailyServices usageDailyServices,
             IUserRepository userRepository,
             ICardServices cardServices,
-            ICurrentUserService currentUserService,
             IAuditCardService auditCardService,
             ILogger<DocumentQuestionnaireServices> logger)
         {
@@ -58,7 +56,6 @@ namespace WoopiAiHub.Application.Services
             _usageDailyServices = usageDailyServices;
             _userRepository = userRepository;
             _cardServices = cardServices;
-            _currentUserService = currentUserService;
             _auditCardService = auditCardService;
             _logger = logger;
         }

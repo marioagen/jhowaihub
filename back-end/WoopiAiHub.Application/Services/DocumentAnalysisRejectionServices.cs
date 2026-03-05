@@ -22,7 +22,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IStatusRepository _statusRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ICurrentUserService _currentUserService;
 
         public DocumentAnalysisRejectionServices(
             IDocumentAnalysisRejectionRepository repository,
@@ -32,8 +31,7 @@ namespace WoopiAiHub.Application.Services
             IAuditCardService auditCardService,
             IStatusRepository statusRepository,
             IUserRepository userRepository,
-            IUnitOfWork unitOfWork,
-            ICurrentUserService currentUserService)
+            IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _stepRepository = stepRepository;
@@ -43,7 +41,6 @@ namespace WoopiAiHub.Application.Services
             _permissionServices = permissionServices;
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
-            _currentUserService = currentUserService;
         }
 
         /// <summary>
