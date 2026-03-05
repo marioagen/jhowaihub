@@ -31,9 +31,6 @@ namespace WoopiAiHub.Domain.Models.Audit
             UserId = userId;
         }
 
-        /// <summary>
-        /// Use for EF context
-        /// </summary>
         private AuditCard(int id, DateTime created) : base(id, created) { }
     }
 }
