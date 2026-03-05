@@ -17,9 +17,9 @@ namespace WoopiAiHub.UnitTests.Audit
             return new ApplicationDbContext(options);
         }
 
-        [Fact(DisplayName = "Add should attach AuditCard to context")]
-        [Trait("AuditCardRepository", "Add")]
-        public void Add_ShouldAttachAuditCardToContext()
+        [Fact(DisplayName = "AddAsync should persist AuditCard")]
+        [Trait("AuditCardRepository", "AddAsync")]
+        public async Task AddAsync_ShouldPersistAuditCard()
         {
             using var context = CreateContext();
             var repository = new AuditCardRepository(context);
@@ -27,15 +27,15 @@ namespace WoopiAiHub.UnitTests.Audit
             var occurredAt = DateTime.UtcNow;
             var auditCard = new AuditCard(0, occurredAt, cardId: 1, workflowId: 1, AuditCardActionType.Assign, Guid.NewGuid());
 
-            repository.Add(auditCard);
+            await repository.AddAsync(auditCard);
 
             var entry = context.Entry(auditCard);
-            Assert.Equal(EntityState.Added, entry.State);
+            Assert.Equal(EntityState.Unchanged, entry.State);
         }
 
-        [Fact(DisplayName = "Add then SaveChanges should persist AuditCard")]
-        [Trait("AuditCardRepository", "Add")]
-        public void Add_ThenSaveChanges_ShouldPersistAuditCard()
+        [Fact(DisplayName = "AddAsync should persist AuditCard to database")]
+        [Trait("AuditCardRepository", "AddAsync")]
+        public async Task AddAsync_ShouldPersistAuditCardToDatabase()
         {
             using var context = CreateContext();
             var repository = new AuditCardRepository(context);
@@ -44,8 +44,7 @@ namespace WoopiAiHub.UnitTests.Audit
             var occurredAt = DateTime.UtcNow;
             var auditCard = new AuditCard(0, occurredAt, cardId: 1, workflowId: 1, AuditCardActionType.Advancement, userId);
 
-            repository.Add(auditCard);
-            context.SaveChanges();
+            await repository.AddAsync(auditCard);
 
             var saved = context.Set<AuditCard>().FirstOrDefault(a => a.CardId == 1 && a.WorkflowId == 1 && a.UserId == userId);
             Assert.NotNull(saved);
@@ -55,19 +54,22 @@ namespace WoopiAiHub.UnitTests.Audit
             Assert.Equal(userId, saved.UserId);
         }
 
-        [Fact(DisplayName = "Add should allow multiple AuditCards before SaveChanges")]
-        [Trait("AuditCardRepository", "Add")]
-        public void Add_ShouldAllowMultipleAuditCardsBeforeSaveChanges()
+        [Fact(DisplayName = "AddRangeAsync should persist multiple AuditCards")]
+        [Trait("AuditCardRepository", "AddRangeAsync")]
+        public async Task AddRangeAsync_ShouldPersistMultipleAuditCards()
         {
             using var context = CreateContext();
             var repository = new AuditCardRepository(context);
 
             var guid1 = Guid.NewGuid();
             var guid2 = Guid.NewGuid();
-            repository.Add(new AuditCard(0, DateTime.UtcNow, 1, 1, AuditCardActionType.Assign, guid1));
-            repository.Add(new AuditCard(0, DateTime.UtcNow, 2, 1, AuditCardActionType.Unassign, guid2));
+            var auditCards = new[]
+            {
+                new AuditCard(0, DateTime.UtcNow, 1, 1, AuditCardActionType.Assign, guid1),
+                new AuditCard(0, DateTime.UtcNow, 2, 1, AuditCardActionType.Unassign, guid2)
+            };
 
-            context.SaveChanges();
+            await repository.AddRangeAsync(auditCards);
 
             var count = context.Set<AuditCard>().Count();
             Assert.Equal(2, count);

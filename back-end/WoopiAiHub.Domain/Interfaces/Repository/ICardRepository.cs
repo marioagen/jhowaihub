@@ -22,5 +22,15 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<CardHeaderDto?> FindHeaderInfoAsync(int cardId);
         Task<ICollection<int>> FindCardIdsByDocumentIdsAsync(IEnumerable<int> documentIds);
         Task<List<Card>> FindByDocumentBatchId(int documentBatchId);
+        /// <summary>
+        /// Returns the card (or all cards in its document batch) with Step and Workflow loaded.
+        /// Use when operating on a single card or its batch in the same way (e.g. assign, unassign, update status).
+        /// </summary>
+        Task<List<Card>?> FindCardOrBatchWithStepWorkflowAsync(int cardId);
+        /// <summary>
+        /// Returns the card (or all cards in its document batch) with Document loaded.
+        /// Use when step/status updates need document reference (e.g. advancement with automation).
+        /// </summary>
+        Task<List<Card>?> FindCardOrBatchWithDocumentAsync(int cardId);
     }
 }

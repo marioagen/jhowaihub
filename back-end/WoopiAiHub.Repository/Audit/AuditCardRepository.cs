@@ -14,21 +14,26 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Adds an audit card entry to the context. Call <see cref="SaveChangesAsync"/> to persist.
+        /// Adds an audit card entry to the context and persists immediately.
         /// </summary>
-        public void Add(AuditCard auditCard)
+        public async Task AddAsync(AuditCard auditCard, CancellationToken cancellationToken = default)
         {
             _context.AuditCards.Add(auditCard);
+            await SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
-        /// Persists all pending changes in the context (e.g. audit entries added via <see cref="Add"/>).
+        /// Adds multiple audit card entries to the context and persists immediately.
         /// </summary>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>The number of state entries written to the database.</returns>
-        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public async Task AddRangeAsync(IEnumerable<AuditCard> auditCards, CancellationToken cancellationToken = default)
         {
-            return await _context.SaveChangesAsync(cancellationToken);
+            _context.AuditCards.AddRange(auditCards);
+            await SaveChangesAsync(cancellationToken);
+        }
+
+        private async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

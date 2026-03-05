@@ -14,6 +14,7 @@ using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Services
@@ -192,14 +193,12 @@ namespace WoopiAiHub.Application.Services
         private async Task CreateAuditLogForDocumentCardsAsync(int documentId, AuditCardActionType actionType)
         {
             var cards = await _cardServices.FindCardsByDocumentIdWithStepWorkflowAsync(documentId) ?? Array.Empty<Card>();
-            foreach (var card in cards)
+            var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId)).ToList();
+            if (cardWorkflows.Count > 0)
             {
-                if (card.Step != null)
-                    card.CreateAuditLog(card.Step.WorkflowId, actionType, _currentUserService, _auditCardRepository);
+                var auditCards = AuditCard.CreateBatch(cardWorkflows, actionType, _currentUserService);
+                await _auditCardRepository.AddRangeAsync(auditCards);
             }
-
-            if (cards.Count > 0)
-                await _auditCardRepository.SaveChangesAsync();
         }
 
         /// <summary>

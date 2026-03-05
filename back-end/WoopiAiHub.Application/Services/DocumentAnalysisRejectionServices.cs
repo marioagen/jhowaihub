@@ -8,6 +8,7 @@ using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 
@@ -78,7 +79,13 @@ namespace WoopiAiHub.Application.Services
 
                     rejections.Add(rejection);
                     card.UpdateStepAndStatus(dto.StepId, status.Id);
-                    card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Rejection, _currentUserService, _auditCardRepository);
+                }
+
+                var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId)).ToList();
+                if (cardWorkflows.Count > 0)
+                {
+                    var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Rejection, _currentUserService);
+                    await _auditCardRepository.AddRangeAsync(auditCards);
                 }
 
                 await _repository.CreateRangeAsync(rejections);
@@ -111,7 +118,7 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "User does not have permission to reject documents", UserLabel.UnauthorizedOperation);
             }
 
-            var card = await _cardRepository.FindById(dto.CardId) ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            var card = await _cardRepository.FindByIdWithStepWorkflow(dto.CardId) ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
 
             List<Card> cards = [card];
             if (card.DocumentBatchId.HasValue)

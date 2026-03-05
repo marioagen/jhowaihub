@@ -302,9 +302,32 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Cards
                 .Include(c => c.Document)
+                .Include(c => c.Step)
                 .Where(c => c.DocumentBatchId == documentBatchId)
                 .OrderBy(c => c.Id)
                 .ToListAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<List<Card>?> FindCardOrBatchWithStepWorkflowAsync(int cardId)
+        {
+            var card = await FindByIdWithStepWorkflow(cardId);
+            if (card == null)
+                return null;
+            if (card.DocumentBatchId.HasValue)
+                return await FindByDocumentBatchId(card.DocumentBatchId.Value);
+            return [card];
+        }
+
+        /// <inheritdoc />
+        public async Task<List<Card>?> FindCardOrBatchWithDocumentAsync(int cardId)
+        {
+            var card = await FindByIdWithDocument(cardId);
+            if (card == null)
+                return null;
+            if (card.DocumentBatchId.HasValue)
+                return await FindByDocumentBatchId(card.DocumentBatchId.Value);
+            return [card];
         }
     }
 }

@@ -10,6 +10,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using Newtonsoft.Json;
@@ -56,9 +57,8 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
 
-            var card = await _cardRepository.FindByIdWithStepWorkflow(updateAssingnedUserDto.CardId);
-
-            if (card == null)
+            var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(updateAssingnedUserDto.CardId);
+            if (cards == null || cards.Count == 0)
             {
                 throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
             }
@@ -72,18 +72,15 @@ namespace WoopiAiHub.Application.Services
                     CardLabel.UserCannotBeAssigned);
             }
 
-            List<Card> cards = [card];
-            if (card.DocumentBatchId.HasValue)
-            {
-                cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
-            }
+            foreach (var card in cards)
+                card.UpdateAssignedUser(updateAssingnedUserDto.UserId);
 
-            cards = [.. cards.Select(c =>
+            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
+            if (cardWorkflows.Count > 0)
             {
-                c.UpdateAssignedUser(updateAssingnedUserDto.UserId);
-                c.CreateAuditLog(c.Step!.WorkflowId, AuditCardActionType.Assign, _currentUserService, _auditCardRepository);
-                return c;
-            })];
+                var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Assign, _currentUserService);
+                await _auditCardRepository.AddRangeAsync(auditCards);
+            }
 
             return _cardRepository.UpdateList(cards);
         }
@@ -96,20 +93,19 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> UnassignUser(int cardId)
         {
-            var card = await _cardRepository.FindByIdWithStepWorkflow(cardId) ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
+            if (cards == null || cards.Count == 0)
+                throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
 
-            List<Card> cards = [card];
-            if (card.DocumentBatchId.HasValue)
+            foreach (var card in cards)
+                card.UpdateAssignedUser(null);
+
+            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
+            if (cardWorkflows.Count > 0)
             {
-                cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
+                var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Unassign, _currentUserService);
+                await _auditCardRepository.AddRangeAsync(auditCards);
             }
-
-            cards = [.. cards.Select(c =>
-            {
-                c.UpdateAssignedUser(null);
-                c.CreateAuditLog(c.Step!.WorkflowId, AuditCardActionType.Unassign, _currentUserService, _auditCardRepository);
-                return c;
-            })];
 
             return _cardRepository.UpdateList(cards);
         }
@@ -126,28 +122,31 @@ namespace WoopiAiHub.Application.Services
             string email
         )
         {
-            var card = await _cardRepository.FindByIdWithDocument(updateCardStepStatusDto.CardId) ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
-            var previousStepId = card.StepId;
-            var previousStatusId = card.StatusId;
+            var cards = await _cardRepository.FindCardOrBatchWithDocumentAsync(updateCardStepStatusDto.CardId);
+            if (cards == null || cards.Count == 0)
+                throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+
+            var leadCard = cards[0];
+            var previousStepId = leadCard.StepId;
+            var previousStatusId = leadCard.StatusId;
 
             var step = await _stepRepository.FindByOrderAndWorkflowId(
                 updateCardStepStatusDto.NextStepOrder,
                 updateCardStepStatusDto.WorkflowId
             ) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
 
-            List<Card> cards = [card];
-            if (card.DocumentBatchId.HasValue)
+            foreach (var card in cards)
             {
-                cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
+                var statusId = card.IsRejected() ? previousStatusId : step.StatusId;
+                card.UpdateStepAndStatus(step.Id, statusId);
             }
 
-            cards = [.. cards.Select(c =>
+            var cardWorkflows = cards.Select(card => (card.Id, updateCardStepStatusDto.WorkflowId)).ToList();
+            if (cardWorkflows.Count > 0)
             {
-                var statusId = c.IsRejected() ? previousStatusId : step.StatusId;
-                c.UpdateStepAndStatus(step.Id, statusId);
-                c.CreateAuditLog(updateCardStepStatusDto.WorkflowId, AuditCardActionType.Advancement, _currentUserService, _auditCardRepository);
-                return c;
-            })];
+                var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Advancement, _currentUserService);
+                await _auditCardRepository.AddRangeAsync(auditCards);
+            }
 
             var result = _cardRepository.UpdateList(cards);
             if (result)
@@ -188,21 +187,19 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto)
         {
-            var card = await _cardRepository.FindById(updateCardStatusDto.CardId)
-                ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(updateCardStatusDto.CardId);
+            if (cards == null || cards.Count == 0)
+                throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
 
-            List<Card> cards = [card];
-            if (card.DocumentBatchId.HasValue)
+            foreach (var card in cards)
+                card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
+
+            var cardWorkflows = cards.Where(card => card.Step != null).Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
+            if (cardWorkflows.Count > 0)
             {
-                cards = await _cardRepository.FindByDocumentBatchId(card.DocumentBatchId.Value);
+                var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Finalize, _currentUserService);
+                await _auditCardRepository.AddRangeAsync(auditCards);
             }
-
-            cards = [.. cards.Select(c =>
-            {
-                c.UpdateStepAndStatus(c.StepId, updateCardStatusDto.StatusId);
-                c.CreateAuditLog(c.Step!.WorkflowId, AuditCardActionType.Finalize, _currentUserService, _auditCardRepository);
-                return c;
-            })];
 
             var result = _cardRepository.UpdateList(cards);
             return result;
@@ -476,11 +473,11 @@ namespace WoopiAiHub.Application.Services
                 return null;
             }
 
-            return [.. cards.Select(c => new CardBatchDto
+            return [.. cards.Select(card => new CardBatchDto
             {
-                CardId = c.Id,
-                DocumentId = c.DocumentId,
-                DocumentName = c.Name
+                CardId = card.Id,
+                DocumentId = card.DocumentId,
+                DocumentName = card.Name
             })];
         }
     }

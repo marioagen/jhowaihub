@@ -16,6 +16,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 
 namespace WoopiAiHub.Application.Services
@@ -124,10 +125,12 @@ namespace WoopiAiHub.Application.Services
 
                 var workflowsList = workflows!.ToList();
                 var cardsList = documentForDataBase.Cards.ToList();
-                for (var i = 0; i < cardsList.Count && i < workflowsList.Count; i++)
-                    cardsList[i].CreateAuditLog(workflowsList[i].Id, AuditCardActionType.Upload, _currentUserService, _auditCardRepository);
-                if (cardsList.Count > 0)
-                    await _auditCardRepository.SaveChangesAsync();
+                var cardWorkflows = cardsList.Zip(workflowsList, (card, workflow) => (card.Id, workflow.Id)).ToList();
+                if (cardWorkflows.Count > 0)
+                {
+                    var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Upload, _currentUserService);
+                    await _auditCardRepository.AddRangeAsync(auditCards);
+                }
 
                 var hasExecutions = await _automationServices.PrepareExecutionAsync(workflows!);
                 var automationServicesDto = new AutomationServicesDto

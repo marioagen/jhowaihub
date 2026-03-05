@@ -16,6 +16,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Services.Automation
@@ -466,7 +467,9 @@ namespace WoopiAiHub.Application.Services.Automation
             }
 
             card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
-            card.CreateAuditLog(card.Step!.WorkflowId, AuditCardActionType.Advancement, _currentUserService, _auditCardRepository);
+            var cardWorkflows = new List<(int cardId, int workflowId)> { (card.Id, card.Step!.WorkflowId) };
+            var auditCards = AuditCard.CreateBatch(cardWorkflows, AuditCardActionType.Advancement, _currentUserService);
+            await _auditCardRepository.AddRangeAsync(auditCards);
             var updated = _cardRepository.Update(card);
 
             if (updated)
