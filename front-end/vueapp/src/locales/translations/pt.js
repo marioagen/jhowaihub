@@ -199,6 +199,7 @@ const portuguese = {
         update: "Atualizar",
         WTCText:
             "WTC (Woopi Total Cost) é a soma ponderada do consumo no período selecionado, baseada nos multiplicadores do seu plano. Este não é um valor financeiro.",
+        refreshText: "Atualização automática a cada 5 minutos",
     },
     documents: {
         actions: {

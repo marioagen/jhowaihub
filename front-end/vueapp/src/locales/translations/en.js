@@ -187,6 +187,7 @@ const english = {
         update: "Update",
         WTCText:
             "WTC (Woopi Total Cost) is the weighted sum of consumption in the selected period, based on your plan's multipliers. This is not a financial value.",
+        refreshText: "Automatic update every 5 minutes",
     },
     documents: {
         actions: {
