@@ -106,7 +106,7 @@ body {
     --filter-btn-close: initial;
     --color-bg-toast-content: #ffffff;
     --color-bg-toast-content-primary: #cfe2ff;
-    --color-bg-toast-content-upload: #d1e7dd;
+    --color-bg-toast-content-upload: #e9ecef;
     --color-bg-toast-content-success: #d1e7dd;
     --color-bg-toast-content-warning: #fff3cd;
     --color-bg-toast-content-danger: #f8d7da;
@@ -214,7 +214,7 @@ body {
     --filter-btn-close: invert(1);
     --color-bg-toast-content: #1a1b2e;
     --color-bg-toast-content-primary: #1c398e;
-    --color-bg-toast-content-upload: #0d542b;
+    --color-bg-toast-content-upload: #2d3354;
     --color-bg-toast-content-success: #0d542b;
     --color-bg-toast-content-warning: rgba(124, 45, 18, 0.4);
     --color-bg-toast-content-danger: #82181a;
@@ -473,6 +473,15 @@ main > .container-fluid > .custom-padding > .row > .table-responsive > table > t
 .form-check-input {
     background-color: var(--color-card-content) !important;
     border-color: var(--color-border-form-control) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--color-bg-btn-primary) !important;
+    border-color: var(--color-bg-btn-primary) !important;
+}
+
+.form-check-input:checked[type="checkbox"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
 }
 
 .custom-textarea {
