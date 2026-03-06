@@ -11,15 +11,16 @@
             @change-page="changePage"
         >
             <template #cell-name="{ data }">
-                <div class="p-1">
-                    <div class="d-flex">
-                        <label class="form-check-label d-flex align-items-center w-100">
-                            <AvatarComponent :name="data.row.name" />
-                            <div>
-                                <div class="fw-semibold">{{ data.row.name }}</div>
-                                <div class="text-muted small">{{ data.row.email }}</div>
-                            </div>
-                        </label>
+                <div class="user-cell">
+                    <div class="d-flex align-items-center">
+                        <AvatarComponent
+                            :name="data.row.name"
+                            :size="28"
+                        />
+                        <div>
+                            <div class="fw-semibold">{{ data.row.name }}</div>
+                            <div class="text-muted small">{{ data.row.email }}</div>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -211,6 +212,10 @@
     };
 </script>
 <style scoped>
+    .user-cell {
+        padding: 2px 4px;
+    }
+
     .badge {
         display: inline-block;
         background-color: #e0ecff;
@@ -219,11 +224,6 @@
         border-radius: 6px;
         font-size: 12px;
         margin-right: 4px;
-    }
-
-    .initials {
-        width: 30px;
-        height: 30px;
     }
 
     .link-action:hover {
