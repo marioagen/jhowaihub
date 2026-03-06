@@ -43,18 +43,19 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Retrieves a step by its ID, including related profile, status, and cards.
+        /// Retrieves a step by its ID without tracking, including related profile, status, cards, and workflow.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         public async Task<Step?> FindById(int id)
         {
             return await _context.Steps
-                           .Include(s => s.Profile)
-                           .Include(s => s.Status)
-                           .Include(s => s.Cards)
-                           .Include(s => s.Workflow)
-                           .FirstOrDefaultAsync(s => s.Id == id);
+                .Include(s => s.Profile)
+                .Include(s => s.Status)
+                .Include(s => s.Cards)
+                .Include(s => s.Workflow)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == id);
         }
 
         /// <summary>
