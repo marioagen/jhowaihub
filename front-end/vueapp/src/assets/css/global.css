@@ -475,7 +475,9 @@ main > .container-fluid > .custom-padding > .row > .table-responsive > table > t
     border-color: var(--color-border-form-control) !important;
 }
 
-.form-check-input:checked {
+.form-check-input:checked,
+.form-check .form-check-input:checked,
+input.form-check-input:checked {
     background-color: var(--color-bg-btn-primary) !important;
     border-color: var(--color-bg-btn-primary) !important;
 }
