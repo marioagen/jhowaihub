@@ -1,29 +1,15 @@
-using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.AutoMock;
-using Refit;
-using System.Net;
-using System.Text;
 using WoopiAiHub.Application.Services;
-using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.DTOs.Messaging;
-using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Repository.Cache;
-using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.Interfaces.Utils;
-using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
@@ -45,7 +31,8 @@ namespace WoopiAiHub.UnitTests.Services
             var mockQueues = new Mock<IOptions<MessageQueues>>();
             mockQueues.Setup(x => x.Value).Returns(new MessageQueues
             {
-                OcrQueue = "ocrQueue"
+                OcrQueue = "ocrQueue",
+                EmbeddingQueueAiHubResponse = "embeddingQueue"
             });
 
             _mocker.Use(mockQueues);
@@ -54,6 +41,7 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x.GetSection("keyAccess").Value).Returns(Guid.NewGuid().ToString());
             configMock.Setup(x => x.GetSection("UseOcrGoogle").Value).Returns(() => "true");
             configMock.Setup(x => x["RefitExternalSettings:FunctionApiKey"]).Returns(Guid.NewGuid().ToString());
+            configMock.Setup(x => x["IndexerApiKey"]).Returns(Guid.NewGuid().ToString());
 
             _mocker.Use(configMock.Object);
 
@@ -109,7 +97,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var pagedData = _fixture.FindValidDocumentPagedDataDto();
+            var pagedData = DocumentFixture.FindValidDocumentPagedDataDto();
             var iqueryable = new List<DocumentListItemDto>().AsQueryable();
             documentRepository.Setup(a => a.FindAllOrdered(pagedData, "email")).Returns(iqueryable);
 
@@ -127,7 +115,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var pagedData = _fixture.FindInvalidDocumentPagedDataDto();
+            var pagedData = DocumentFixture.FindInvalidDocumentPagedDataDto();
 
             // Act / Assert
             Assert.Throws<ArgumentException>(() => _documentServices.FindAllPaged(pagedData, "email"));
@@ -144,7 +132,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
             functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(),
                                                    It.IsAny<string>(),
-                                                   It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
+                                                   It.IsAny<string>())).ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
 
             // Act
             var result = await _documentServices.FindDocumentById(It.IsAny<int>(),

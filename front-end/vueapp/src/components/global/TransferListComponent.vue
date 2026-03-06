@@ -181,11 +181,14 @@ export default {
     border-radius: 4px;
     cursor: pointer;
 }
-.selectable-item:hover {
-    background-color: #f0f0f0;
-}
-.selectable-item.selected {
-    background-color: #0d6efd;
-    color: white;
+    .selectable-item:hover {
+        background-color: var(--color-hover-transfer) !important;
+    }
+    .selectable-item.selected {
+        background-color: var(--color-transfer-transfer) !important;
+        color: white;
+    }
+.border {
+        border: 1px solid var(--color-border-form-control) !important;
 }
 </style>

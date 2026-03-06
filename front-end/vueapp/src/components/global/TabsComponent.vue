@@ -62,19 +62,20 @@
 
 <style scoped>
     .nav-pills {
-        background-color: var(--muted);
+        background-color: var(--color-bg-nav-pills) !important;
         border-radius: 50rem !important;
+        border-color: none;
     }
-    .nav-pills .nav-link.btn-custom {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.775rem;
-        font-weight: 500;
-        color: #323338;
-    }
-    .nav-pills .nav-link.btn-custom.active {
-        background-color: var(--color-card-content) !important;
-        color: #323338;
-    }
+        .nav-pills .nav-link.btn-custom {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.775rem;
+            font-weight: 500;
+            color: var(--color-body-content) !important;
+        }
+            .nav-pills .nav-link.btn-custom.active {
+                background-color: var( --color-bg-navbar) !important;
+                color: var(--color-body-content) !important;
+            }
     .icon-pill {
         vertical-align: text-bottom;
         margin-right: 5px;

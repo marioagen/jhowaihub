@@ -18,6 +18,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ILogger<DocumentHistoryServices> _logger;
 
         public DocumentHistoryServices(IDocumentHistoryRepository documentHistoryRepository,
+                                       IDocumentRepository documentRepository,
                                        IValidator<DocumentHistory> documentHistoryValidator,
                                        ILogger<DocumentHistoryServices> logger)
         {

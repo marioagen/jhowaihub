@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;

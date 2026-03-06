@@ -54,22 +54,25 @@
                             <div
                                 v-for="card in step.cards"
                                 :key="card.id"
-                                class="card-body"
                                 :id="card.id"
                             >
-                                <KanbanCard
+                                <div
                                     v-if="showFinalized(card.status.id, step)"
-                                    :dataCard="card"
-                                    :dataStep="step"
-                                    :isFirstStep="step.order === minOrder"
-                                    :isLoading="isLoading"
-                                    :isLastStep="isLastStep(step)"
-                                    @reload="reloadList"
-                                    @cardMoved="handleCardMoved"
-                                    @cardUpdated="handleCardUpdated"
-                                    label="common.analyze"
-                                    :users="users"
-                                />
+                                    class="card-body"
+                                >
+                                    <KanbanCard
+                                        :dataCard="card"
+                                        :dataStep="step"
+                                        :isFirstStep="step.order === minOrder"
+                                        :isLoading="isLoading"
+                                        :isLastStep="isLastStep(step)"
+                                        @reload="reloadList"
+                                        @cardMoved="handleCardMoved"
+                                        @cardUpdated="handleCardUpdated"
+                                        label="common.analyze"
+                                        :users="users"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -223,43 +226,39 @@
     }
 
     .first-steps {
-        background-color: #dbe9fc;
+        background-color: var(--color-bg-kanban-primary) !important;
     }
 
-    .first-steps > span > span {
-        background-color: #a7bad3 !important;
-    }
+        .first-steps > span > span {
+            background-color: var(--color-bg-kanban-primary-accent) !important;
+        }
 
     .last-step {
-        background-color: #dcfce7;
+        background-color: var(--color-bg-kanban-success) !important;
     }
 
-    .last-step > span > span {
-        background-color: #a1cfb1 !important;
-    }
-    .bg-primary {
-        background-color: #dbeafe !important;
-        color: #2b7fff !important;
-    }
+        .last-step > span > span {
+            background-color: var(--color-bg-kanban-success-accent) !important;
+        }
 
     .bg-primary {
-        background-color: #dbeafe !important;
-        color: #2b7fff !important;
+        background-color: var(--color-bg-kanban-primary) !important;
+        color: var(--color-kanban-primary) !important;
     }
 
     .bg-warning {
-        background-color: #fef9c2 !important;
-        color: #a65f00 !important;
+        background-color: var(--color-bg-kanban-warning) !important;
+        color: var(--color-kanban-warning) !important;
     }
 
     .bg-danger {
-        background-color: #ffedd4 !important;
-        color: #ca3500 !important;
+        background-color: var(--color-bg-kanban-danger) !important;
+        color: var(--color-kanban-danger) !important;
     }
 
     .bg-success {
-        background-color: #d0fae5 !important;
-        color: #007a55 !important;
+        background-color: var(--color-bg-kanban-success) !important;
+        color: var(--color-kanban-success) !important;
     }
 
     @media (min-width: 768px) and (max-width: 1024px) {
@@ -293,6 +292,8 @@
 
     .badge {
         color: unset;
-        background-color: #ebebeb;
+        background-color: var(--color-hover-transfer) !important;
     }
+
+
 </style>

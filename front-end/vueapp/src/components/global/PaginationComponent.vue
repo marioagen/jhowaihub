@@ -130,22 +130,23 @@
         border: 1px solid transparent;
         font-weight: 500;
         transition: background-color 0.2s ease;
+        background-color: var(--color-card-content) !important
     }
 
     .page-item.active .page-link {
-        background-color: #eaeef2;
-        border: 1px solid #d0d7de;
-        color: #24292f;
+        background-color: var(--color-page-link-active) !important;
+        color: var(--color-body-content);
     }
 
     .page-item.disabled .page-link {
         pointer-events: none;
-        color: #8c959f;
+        color: var(--color-body-content) !important;
         background-color: transparent;
         border: none;
     }
 
     .page-link:hover {
-        background-color: #f6f8fa;
+        background-color: var(--color-sidebar-li-collapsed-hover) !important;
+        border-color: var(--color-sidebar-li-collapsed-hover) !important;
     }
 </style>

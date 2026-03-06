@@ -7,6 +7,6 @@ namespace WoopiAiHub.Domain.Models
         /// <summary>
         /// Use to EF context
         /// </summary>
-        private DocumentBatch(int id, DateTime created) : base(id, created) { }
+        public DocumentBatch(int id, DateTime created) : base(id, created) { }
     }
 }

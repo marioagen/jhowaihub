@@ -224,6 +224,7 @@ const english = {
             uploadedFilesError: "Fail to upload files!",
             uploadError: "Something is wrong",
             uploadFailure: "Upload failure",
+            batchError: "Error processing batch of documents",
         },
         expandHistory: "Expand history",
         failedToNormalize: "Failed to normalize",
@@ -314,6 +315,7 @@ const english = {
         youAreAboutToDeleteDocument: "You are about to delete <br/> the document from the system",
         youAreAboutToDeleteDocumentQuery:
             "You are about to delete <br/> the query history from the system",
+        documentsBatchCheckbox: "Documents in batch",
     },
     documentsHub: {
         title: "Processing workflows",
@@ -363,6 +365,9 @@ const english = {
         statusSelect: {
             none: "Card status",
         },
+        all: "All",
+        singleDocuments: "Single documents",
+        batchDocuments: "Batch documents",
     },
     flow: {
         downloadJson: "Download JSON",

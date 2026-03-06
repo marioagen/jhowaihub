@@ -17,7 +17,7 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly DocumentFixture _fixture;
         private readonly AutoMocker _mocker;
-        private readonly DocumentDeletionServices _documentDeletionServices;
+        private readonly WoopiAiHub.Application.Services.DocumentDeletionServices _documentDeletionServices;
 
         public DocumentDeletionServicesTests(DocumentFixture documentFixture)
         {
@@ -28,7 +28,7 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x["IndexerApiKey"]).Returns(Guid.NewGuid().ToString());
             _mocker.Use(configMock.Object);
 
-            _documentDeletionServices = _mocker.CreateInstance<DocumentDeletionServices>();
+            _documentDeletionServices = _mocker.CreateInstance<WoopiAiHub.Application.Services.DocumentDeletionServices>();
         }
 
         [Fact(DisplayName = "Delete - Should delete documents and related data successfully")]
@@ -54,10 +54,10 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(r => r.FindHashById(ids)).Returns(hashes.AsQueryable());
 
             embeddingsApi.Setup(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                         .ReturnsAsync(_fixture.FindHttpResponseMessage);
+                         .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
 
             fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
-                            .ReturnsAsync(_fixture.FindHttpResponseMessage);
+                            .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
 
             cardRepository
                 .Setup(r => r.FindCardIdsByDocumentIdsAsync(ids))
@@ -116,9 +116,9 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(a => a.FindHashById(list)).Returns(stringArray.AsQueryable());
             embeddingRepository
                 .Setup(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(_fixture.FindHttpResponseMessage);
+                .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
             fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
-                            .ReturnsAsync(_fixture.FindHttpResponseMessage);
+                            .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
             cardRepository
                 .Setup(a => a.FindCardIdsByDocumentIdsAsync(list))
                 .ReturnsAsync(cardIds);
@@ -161,7 +161,7 @@ namespace WoopiAiHub.UnitTests.Services
             bool result;
             var embeddingsRepository = _mocker.GetMock<IEmbeddingsApi>();
             embeddingsRepository.Setup(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                                .ReturnsAsync(_fixture.FindHttpResponseMessage);
+                                .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
 
             // Act
             try
@@ -189,7 +189,7 @@ namespace WoopiAiHub.UnitTests.Services
                 Content = new StringContent("{'response':'value'}", Encoding.UTF8, "application/json")
             };
             embeddingsRepository.Setup(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                                .ReturnsAsync(_fixture.FindInvalidHttpResponseMessage);
+                                .ReturnsAsync(DocumentFixture.FindInvalidHttpResponseMessage());
 
             // Act // Assert
             await Assert.ThrowsAsync<ArgumentException>(() => _documentDeletionServices.DeleteHash("test", "test"));

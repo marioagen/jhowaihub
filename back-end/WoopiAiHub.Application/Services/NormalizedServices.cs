@@ -12,14 +12,17 @@ namespace WoopiAiHub.Application.Services
     public class DocumentNormalizedServices : IDocumentNormalizedServices
     {
         private readonly IDocumentNormalizedRepository _documentNormalizedRepository;
+        private readonly IDocumentRepository _documentRepository;
         private readonly IValidator<DocumentNormalized> _documentNormalizedValidator;
         private readonly ILogger<DocumentNormalizedServices> _logger;
 
         public DocumentNormalizedServices(IDocumentNormalizedRepository documentNormalizedRepository,
+                                          IDocumentRepository documentRepository,
                                           IValidator<DocumentNormalized> documentNormalizedValidator,
                                           ILogger<DocumentNormalizedServices> logger)
         {
             _documentNormalizedRepository = documentNormalizedRepository;
+            _documentRepository = documentRepository;
             _documentNormalizedValidator = documentNormalizedValidator;
             _logger = logger;
         }
@@ -53,7 +56,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public DocumentNormalized FindById(int id)
+        public DocumentNormalized? FindById(int id)
         {
             try
             {
@@ -82,6 +85,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="normalizedContext"></param>
         public void InsertOrUpdate(int documentId, string normalizedContext)
         {
+            if (_documentRepository.FindById(documentId) == null)
+                return;
+
             var normalizedDocument = _documentNormalizedRepository.FindById(documentId);
             if (normalizedDocument is not null)
             {

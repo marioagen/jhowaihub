@@ -22,6 +22,9 @@ namespace WoopiAiHub.Domain.Models
         [Column("HasBatch", TypeName = "bit")]
         public bool HasBatch { get; private set; } = false;
 
+        [Column("Enable", TypeName = "bit")]
+        public bool Enable { get; private set; } = true;
+
         public virtual ICollection<DocumentHistory> DocumentHistories { get; set; }
         public virtual DocumentNormalized? DocumentNormalized { get; set; }
         public virtual ICollection<Card> Cards { get; set; }
@@ -46,9 +49,11 @@ namespace WoopiAiHub.Domain.Models
             HasBatch = hasBatch;
         }
 
-        /// <summary>
-        /// Use to EF context
-        /// </summary>
+        public void Disable()
+        {
+            Enable = false;
+        }
+
         private Document(int id, DateTime created) : base(id, created) { }
     }
 }

@@ -1,11 +1,7 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Refit;
-using WoopiAiHub.Application.Dto;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
@@ -76,7 +72,7 @@ namespace WoopiAiHub.Application.Services
                 if (documentPagedDataDto.Page > 0)
                 {
                     var totalList = _documentRepository.FindAllOrdered(documentPagedDataDto, emailCreator);
-                    var result = this.DocumentPagination(totalList, documentPagedDataDto);
+                    var result = DocumentPagination(totalList, documentPagedDataDto);
                     return result;
                 }
                 else

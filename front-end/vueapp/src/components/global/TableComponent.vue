@@ -3,7 +3,7 @@
         <p class="mx-1 my-1">
             <small>{{ $t(modalName) }} ({{ pagination.totalItems }})</small>
         </p>
-        <table class="table table-hover table-light table-sm table-responsive custom-table">
+        <table class="table table-hover table-sm table-responsive custom-table">
             <thead>
                 <tr>
                     <th v-if="hasSelection">
@@ -237,24 +237,24 @@
         width: 100%;
     }
 
-    .custom-table thead th {
-        border-bottom: 1px solid #d3d3d3 !important;
-        background: white;
-    }
+        .custom-table thead th {
+            border-bottom: 1px solid var(--color-bg-table-outline) !important;
+            background: var(--color-bg-table) !important;
+        }
 
-    .custom-table th,
-    .custom-table td {
-        vertical-align: middle;
-        font-size: 12px;
-        font-weight: 500;
-        color: #343a40;
-        background: white;
-    }
+        .custom-table th,
+        .custom-table td {
+            vertical-align: middle;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--color-table-text) !important;
+            background: var(--color-bg-table) !important;
+        }
 
     .table-div {
-        border: 1px solid #d3d3d3;
+        border: 1px solid var(--color-bg-table-outline) !important;
         border-radius: 8px;
-        background: white;
+        background: var(--color-bg-table) !important;
         padding: 20px 24px;
         overflow-x: auto;
     }

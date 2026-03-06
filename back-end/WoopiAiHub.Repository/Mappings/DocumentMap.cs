@@ -40,6 +40,12 @@ namespace WoopiAiHub.Repository.Mappings
                 .HasDefaultValue(false)
                 .IsRequired();
 
+            builder.Property(u => u.Enable)
+                .HasDefaultValue(true)
+                .IsRequired();
+
+            builder.HasQueryFilter(d => d.Enable);
+
             builder.HasMany(u => u.DocumentHistories)
                    .WithOne(s => s.Document)
                    .HasForeignKey(c => c.IdDocument);

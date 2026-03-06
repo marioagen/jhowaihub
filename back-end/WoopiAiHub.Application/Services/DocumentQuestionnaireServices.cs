@@ -6,10 +6,12 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 
@@ -25,6 +27,8 @@ namespace WoopiAiHub.Application.Services
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly IUserRepository _userRepository;
+        private readonly ICardServices _cardServices;
+        private readonly IAuditCardService _auditCardService;
         private readonly ILogger<DocumentQuestionnaireServices> _logger;
 
         private const int DocumentHistoryTypeInputQuestionnaire = 1;
@@ -39,6 +43,8 @@ namespace WoopiAiHub.Application.Services
             ITenantCacheServices tenantCacheServices,
             IUsageDailyServices usageDailyServices,
             IUserRepository userRepository,
+            ICardServices cardServices,
+            IAuditCardService auditCardService,
             ILogger<DocumentQuestionnaireServices> logger)
         {
             _documentRepository = documentRepository;
@@ -49,6 +55,8 @@ namespace WoopiAiHub.Application.Services
             _tenantCacheServices = tenantCacheServices;
             _usageDailyServices = usageDailyServices;
             _userRepository = userRepository;
+            _cardServices = cardServices;
+            _auditCardService = auditCardService;
             _logger = logger;
         }
 
@@ -82,6 +90,8 @@ namespace WoopiAiHub.Application.Services
                         headersDto.EmailCreator,
                         isFromQuestionnaire: true);
                 }
+
+                await CreateAuditLogForDocumentCardsAsync(documentQuestionnaireDto.IdDocument, AuditCardActionType.InputQuestionnaire);
 
                 return true;
             }
@@ -118,6 +128,8 @@ namespace WoopiAiHub.Application.Services
                     documentInputDto.Input,
                     headersDto.EmailCreator,
                     isFromQuestionnaire: false);
+
+                await CreateAuditLogForDocumentCardsAsync(documentInputDto.Id, AuditCardActionType.InputDocument);
 
                 return textResponse;
             }
@@ -167,6 +179,19 @@ namespace WoopiAiHub.Application.Services
             else
             {
                 throw new AppException(ErrorCode.RefitApiError, "Error while sending question to Embeddings API", null);
+            }
+        }
+
+        /// <summary>
+        /// Creates audit log entries for all cards associated with the document (no-op when document has no cards).
+        /// </summary>
+        private async Task CreateAuditLogForDocumentCardsAsync(int documentId, AuditCardActionType actionType)
+        {
+            var cards = await _cardServices.FindCardsByDocumentIdWithStepWorkflowAsync(documentId) ?? Array.Empty<Card>();
+            var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId)).ToList();
+            if (cardWorkflows.Count > 0)
+            {
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, actionType);
             }
         }
 

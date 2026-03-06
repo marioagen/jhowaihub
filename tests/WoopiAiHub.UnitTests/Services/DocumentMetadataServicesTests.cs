@@ -1,14 +1,15 @@
+using Moq;
+using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Utils;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.UnitTests.Fixture;
-using Moq;
-using Moq.AutoMock;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
@@ -18,13 +19,13 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly DocumentFixture _fixture;
         private readonly AutoMocker _mocker;
-        private readonly DocumentMetadataServices _documentMetadataServices;
+        private readonly WoopiAiHub.Application.Services.DocumentMetadataServices _documentMetadataServices;
 
         public DocumentMetadataServicesTests(DocumentFixture documentFixture)
         {
             _fixture = documentFixture;
             _mocker = new AutoMocker();
-            _documentMetadataServices = _mocker.CreateInstance<DocumentMetadataServices>();
+            _documentMetadataServices = _mocker.CreateInstance<WoopiAiHub.Application.Services.DocumentMetadataServices>();
         }
 
         [Fact(DisplayName = "FindByIdAnalyze - Should return document metadata with card when document found")]
@@ -176,6 +177,65 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(referenceFile, result.ReferenceFile);
             documentRepositoryMock.Verify(r => r.FindById(documentId), Times.Once);
             cardRepositoryMock.Verify(r => r.FindByDocumentIdCardAsync(documentId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindOcrTextByDocumentId - Should concatenate pages in order")]
+        [Trait("FindOcrTextByDocumentId", "PageOrder")]
+        public async Task FindOcrTextByDocumentId_ConcatenatesPagesInOrder()
+        {
+            // Arrange
+            var documentId = 1;
+            var cardId = 10;
+            var stepToolId = 5;
+            var referenceFile = "test-file.pdf";
+
+            var document = new Document("Test Document", "Description", referenceFile,
+                DocumentStatus.OCR, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
+
+            var toolType = new ToolType(1, DateTime.UtcNow, HandlersTypes.Ocr, string.Empty, true);
+            var tool = new Tool(1, DateTime.UtcNow, "OCR Tool", true, 1, 1, 1, false, null, null);
+            typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
+
+            var stepTool = new StepTool(stepToolId, DateTime.UtcNow, 1, 1, 1, 0, 0);
+            typeof(StepTool).GetProperty("Tool")!.SetValue(stepTool, tool);
+
+            var execution = new StepToolExecution(1, DateTime.UtcNow, stepToolId, StatusExecution.Ready, cardId);
+            typeof(StepToolExecution).GetProperty("StepTool")!.SetValue(execution, stepTool);
+
+            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, null);
+            typeof(Card).GetProperty("Executions")!.SetValue(card, new List<StepToolExecution> { execution });
+
+            var ocrOutput = new DocumentEmbeddingsDataDto
+            {
+                ReferenceFile = referenceFile,
+                DocumentEmbeddings = new List<DocumentEmbeddingsAddDto>
+                {
+                    new DocumentEmbeddingsAddDto { Text = "Page 3 text", Metadata = new { PageNumber = 3 } },
+                    new DocumentEmbeddingsAddDto { Text = "Page 1 text", Metadata = new { PageNumber = 1 } },
+                    new DocumentEmbeddingsAddDto { Text = "Page 2 text", Metadata = new { PageNumber = 2 } }
+                }
+            };
+            var outputJson = Newtonsoft.Json.JsonConvert.SerializeObject(ocrOutput);
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            documentRepositoryMock.Setup(r => r.FindById(documentId)).Returns(document);
+
+            var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
+            cardRepositoryMock.Setup(r => r.FindByDocumentIdCardAsync(documentId)).ReturnsAsync(card);
+
+            var stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            stepToolOutputRepositoryMock.Setup(r => r.FindByStepToolId(stepToolId, cardId)).ReturnsAsync(outputJson);
+
+            // Act
+            var result = await _documentMetadataServices.FindOcrTextByDocumentId(documentId);
+
+            // Assert
+            Assert.True(result.HasOcr);
+            var lines = result.Content.Split(new[] { Environment.NewLine + Environment.NewLine }, StringSplitOptions.None);
+            Assert.Equal(3, lines.Length);
+            Assert.Equal("Page 1 text", lines[0]);
+            Assert.Equal("Page 2 text", lines[1]);
+            Assert.Equal("Page 3 text", lines[2]);
         }
     }
 }

@@ -23,7 +23,7 @@
                             <label for="email" class="form-label">Email</label>
                             <Field name="email" rules="required|email" v-slot="{ field, errorMessage }">
                                 <div class="input-group">
-                                    <span class="input-group-text border-end-0 bg-white">
+                                    <span class="input-group-text border-end-0">
                                         <LucideIcon icon="Mail" :size="16" />
                                     </span>
                                     <input v-bind="field" type="text" id="email"
@@ -38,7 +38,7 @@
                         <div class="mb-3">
                             <label for="password" class="form-label">{{ $t("login.password") }}</label>
                             <div class="input-group">
-                                <span class="input-group-text border-end-0 bg-white">
+                                <span class="input-group-text border-end-0">
                                     <LucideIcon icon="Lock" :size="16" />
                                 </span>
                                 <input v-bind="field" id="password" name="password" placeholder="******"
@@ -46,7 +46,7 @@
                                     class="form-control form-control-sm border-start-0 border-end-0"
                                     :type="showPassword ? 'text' : 'password'"
                                     :class="{ 'is-invalid': errorMessage }" />
-                                <span class="input-group-text border-start-0 bg-white">
+                                <span class="input-group-text border-start-0">
                                     <LucideIcon v-if="showPassword" icon="Eye" :size="16" @click="togglePassword" />
                                     <LucideIcon v-else icon="EyeClosed" :size="16" @click="togglePassword" />
                                 </span>

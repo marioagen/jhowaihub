@@ -236,6 +236,7 @@ const portuguese = {
             uploadedFilesError: "Falha ao fazer upload dos arquivos!",
             uploadError: "Algo deu errado",
             uploadFailure: "Falha no upload",
+            batchError: "Erro ao processar o lote de documentos",
         },
         expandHistory: "Expandir histórico",
         failedToNormalize: "Falha ao normalizar",
@@ -327,6 +328,7 @@ const portuguese = {
         youAreAboutToDeleteDocument: "Você está prestes a deletar <br/> o documento do sistema",
         youAreAboutToDeleteDocumentQuery:
             "Você está prestes a deletar <br/> o histórico de consulta do sistema",
+        documentsBatchCheckbox: "Documentos em lote",
     },
     filters: {
         assignment: {
@@ -366,6 +368,9 @@ const portuguese = {
         statusSelect: {
             none: "Status do card",
         },
+        all: "Todos",
+        singleDocuments: "Documentos únicos",
+        batchDocuments: "Documentos em lote",
     },
     flow: {
         downloadJson: "Baixar JSON",

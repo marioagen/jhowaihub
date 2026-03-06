@@ -385,7 +385,7 @@
     .chat-toggle-button {
         width: 100%;
         padding: 0.75rem 1rem;
-        background: #f8f9fa;
+        background: var(--color-card-content);
         border: 2px dashed #0073e6;
         border-radius: 8px;
         color: #0073e6;
@@ -399,17 +399,17 @@
         transition: all 0.3s ease;
     }
 
-    .chat-toggle-button:hover {
-        background: #e7f3ff;
-        border-color: #005bb5;
-    }
+        .chat-toggle-button:hover {
+            background: var(--color-sidebar-li-collapsed-hover) !important;
+            border-color: #005bb5;
+        }
 
     .chat-toggle-button.expanded {
         display: none;
     }
 
     .chat-panel {
-        background: white;
+        background: var(--color-card-content) !important;
         border: 2px solid #0073e6;
         border-radius: 8px;
         padding: 1rem;
@@ -432,7 +432,6 @@
     .chat-toggle-button {
         width: 100%;
         padding: 0.75rem 1rem;
-        background: #f8f9fa;
         border: 2px dashed #0073e6;
         border-radius: 8px;
         color: #0073e6;
@@ -467,7 +466,7 @@
 
     .input-label {
         font-size: 0.9rem;
-        color: #333;
+        color: var(--color-body-content);
         font-weight: 500;
         margin: 0;
     }
@@ -475,12 +474,14 @@
     .chat-textarea {
         width: 100%;
         padding: 0.75rem;
-        border: 1px solid #ddd;
+        border: 1px solid var(--color-border-form-control);
         border-radius: 6px;
         font-size: 0.9rem;
         font-family: inherit;
         resize: vertical;
         transition: border-color 0.3s ease;
+        background-color: var(--color-card-content);
+        color: var(--color-body-content) !important;
     }
 
     .chat-textarea:focus {
@@ -522,7 +523,7 @@
         gap: 0.75rem;
         margin-bottom: 1.5rem;
         padding-bottom: 1.5rem;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--color-border-form-control);
     }
 
     .questionnaire-controls {
@@ -534,14 +535,15 @@
     .questionnaire-select {
         flex: 1;
         padding: 0.75rem;
-        border: 1px solid #ddd;
+        border: 1px solid var(--color-border-form-control);
         border-radius: 6px;
         font-size: 0.9rem;
         font-family: inherit;
-        background: white;
+        background: var(--color-card-content);
         cursor: pointer;
         transition: border-color 0.3s ease;
         width: 50%;
+        color: var(--color-body-content) !important;
     }
 
     .questionnaire-select:focus {
@@ -684,7 +686,6 @@
 
     @media (max-width: 768px) {
         .chat-panel {
-            background: white;
             border: 2px solid #0073e6;
             border-radius: 8px;
             padding: 1rem;
@@ -715,7 +716,6 @@
 
         .input-label {
             font-size: 0.9rem;
-            color: #333;
             font-weight: 500;
             margin: 0;
         }
@@ -998,7 +998,7 @@
         font-weight: 600;
         margin-bottom: 1rem;
         padding-bottom: 0.75rem;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--color-border-form-control);
         position: relative;
     }
 

@@ -63,9 +63,28 @@
                                 class="form-upload"
                                 @submit.prevent="save"
                             >
-                                <h5 class="mb-4">
-                                    {{ $t("documents.upload.cardTitle") }}
-                                </h5>
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="mb-4">
+                                        {{ $t("documents.upload.cardTitle") }}
+                                    </h5>
+                                    <div class="form-check d-flex align-items-center mb-3">
+                                        <input
+                                            class="form-check-input me-2"
+                                            type="checkbox"
+                                            id="isDocumentBatchChk"
+                                            :value="isDocumentsBatch"
+                                            v-model="isDocumentsBatch"
+                                        />
+                                        <label
+                                            class="form-check-label d-flex align-items-center w-100"
+                                            for="isDocumentBatchChk"
+                                        >
+                                            <div class="fw-semibold">
+                                                {{ $t("documents.documentsBatchCheckbox") }}
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
                                 <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
                                     <label class="label-container mb-2">
                                         {{ $t("documents.upload.dropZone") }}
@@ -216,7 +235,7 @@
                                         {{ $t("documents.upload.warningWorkflowNotListed") }}
                                     </div>
                                     <div
-                                        class="border rounded p-1 user-list scrollable-list bg-white"
+                                        class="border rounded bg-select p-1 user-list scrollable-list"
                                     >
                                         <div
                                             v-if="isLoading"
@@ -379,6 +398,7 @@
                 dropzoneInstance: null,
                 selectedWorkflows: [],
                 hasError: true,
+                isDocumentsBatch: false,
             };
         },
         components: {
@@ -504,8 +524,11 @@
                     Authorization: `Bearer ${this.$store.state.userProfile.tokenApi}`,
                 };
                 const chunkSize = 19 * 1024 * 1024;
+
                 const filesNames = this.filesList.map((u) => u.name);
-                const promises = this.filesList.map((fileObj) => {
+                const promises = this.filesList.map((fileObj, index) => {
+                    const isLastFile = index === this.filesList.length - 1;
+
                     const file = fileObj;
                     let additionalData = {
                         name: file.name.replace(".pdf", ""),
@@ -535,6 +558,8 @@
                                 url: ENV_CONFIG.VUE_APP_BASE_URL_API,
                                 chunkIndex: i,
                                 totalChunks: totalChunks,
+                                isLastFile: isLastFile,
+                                isDocumentBatch: this.validateDocumentsBatch,
                             });
                         }
                         return chunks;
@@ -621,6 +646,12 @@
                     team.name.toLowerCase().includes(this.searchTerm.toLowerCase())
                 );
             },
+            validateDocumentsBatch() {
+                if (this.isDocumentsBatch && this.filesList.length > 1) {
+                    return true;
+                }
+                return false;
+            },
         },
         mounted() {
             this.initializeDropzone();
@@ -665,8 +696,8 @@
     }
 
     .team-selector-container {
-        background-color: #eff6ff;
-        border: 1.5px solid #bedbff;
+        background-color: var(--color-sidebar-li-collapsed-hover) !important;
+        border: 1.5px solid var(--color-border-form-control);
         border-radius: 0.375rem;
         transition: border-color 0.3s ease;
         min-height: 150px;
@@ -676,13 +707,13 @@
         border-color: #dc3545 !important;
     }
 
-    .team-selector-container.is-valid {
-        border-color: #bedbff;
-    }
+        .team-selector-container.is-valid {
+            border-color: var(--color-bg-primary-badge) !important;
+        }
 
     .selected-count {
-        background-color: #dbe9fc;
-        color: #2547bc;
+        background-color: var(--color-bg-primary-badge) !important;
+        color: var(--color-text-primary-badge) !important;
         padding: 2px 8px;
         border-radius: 12px;
         font-weight: 600;
@@ -701,7 +732,7 @@
     }
 
     .box-upload-form {
-        background-color: #ffffff;
+        background-color: var(--color-card-content);
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         padding: 24px;
@@ -709,9 +740,9 @@
     }
 
     .btn-custom-light {
-        background-color: #f8f9fb !important;
-        border-color: #ced4da !important;
-        color: #212529 !important;
+        background-color: var(--color-bg-body-content) !important;
+        border-color: var(--color-border-form-control) !important;
+        color: var(--color-body-content) !important;
         transition: background-color 0.2s ease;
     }
 
@@ -862,4 +893,10 @@
             display: none;
         }
     }
+
+    .bg-select {
+        background-color: var(--color-card-content) !important;
+        border-color: var(--color-border-form-control) !important;
+    }
+
 </style>

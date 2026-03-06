@@ -99,7 +99,7 @@ namespace WoopiAiHub.UnitTests.Services
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
                 .Options;
-            var realDbContext = new ApplicationDbContext(mockHttpAccessor.Object, options);
+            var realDbContext = new ApplicationDbContext(options);
             mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
 
             mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
@@ -182,7 +182,7 @@ namespace WoopiAiHub.UnitTests.Services
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
                 .Options;
-            var realDbContext = new ApplicationDbContext(mockHttpAccessor.Object, options);
+            var realDbContext = new ApplicationDbContext(options);
             mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
 
             mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);

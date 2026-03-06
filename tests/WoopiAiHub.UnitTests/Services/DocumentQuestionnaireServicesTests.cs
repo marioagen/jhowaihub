@@ -20,7 +20,7 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly DocumentFixture _fixture;
         private readonly AutoMocker _mocker;
-        private readonly DocumentQuestionnaireServices _documentQuestionnaireServices;
+        private readonly WoopiAiHub.Application.Services.DocumentQuestionnaireServices _documentQuestionnaireServices;
 
         public DocumentQuestionnaireServicesTests(DocumentFixture documentFixture)
         {
@@ -31,7 +31,7 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x["IndexerApiKey"]).Returns(Guid.NewGuid().ToString());
             _mocker.Use(configMock.Object);
 
-            _documentQuestionnaireServices = _mocker.CreateInstance<DocumentQuestionnaireServices>();
+            _documentQuestionnaireServices = _mocker.CreateInstance<WoopiAiHub.Application.Services.DocumentQuestionnaireServices>();
         }
 
         [Fact(DisplayName = "InputQuestionnaire - Should process questionnaire and return true when valid")]
@@ -41,9 +41,9 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var document = DocumentFixture.FindValidDocument();
             var headers = DocumentFixture.FindValidHeadersDto();
-            var tenant = _fixture.FindValidTenantInfoDto();
-            var documentQuestionnaireDto = _fixture.FindDocumentQuestionnaireDto();
-            var questionnaire = _fixture.FindValidQuestionnaireDto();
+            var tenant = DocumentFixture.FindValidTenantInfoDto();
+            var documentQuestionnaireDto = DocumentFixture.FindDocumentQuestionnaireDto();
+            var questionnaire = DocumentFixture.FindValidQuestionnaireDto();
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             documentRepository.Setup(a => a.FindById(1)).Returns(document);
             var questionnaireRepository = _mocker.GetMock<IQuestionnaireRepository>();
@@ -77,8 +77,8 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var document = DocumentFixture.FindValidDocument();
             var headers = DocumentFixture.FindValidHeadersDto();
-            var tenant = _fixture.FindValidTenantInfoDto();
-            var documentInput = _fixture.FindValidDocumentInputDto();
+            var tenant = DocumentFixture.FindValidTenantInfoDto();
+            var documentInput = DocumentFixture.FindValidDocumentInputDto();
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             documentRepository.Setup(a => a.FindById(1)).Returns(document);
             var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();

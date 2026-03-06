@@ -5,8 +5,13 @@
                 <span class="badge bg-light text-dark border">{{ this.selectedTenant }}</span>
                 <div class="dropdown nav-buttons">
                     <button class="btn btn-outline-primary table-btn btn-sm" type="button" data-bs-toggle="dropdown"
-                        aria-expanded="false" style="display: flex; align-items: center; justify-content: center;">
+                            aria-expanded="false" style="display: flex; align-items: center; justify-content: center;">
                         <LucideIcon icon="Globe" />
+                    </button>
+                    <button class="btn btn-outline-primary table-btn btn-sm" type="button" @click="toggleTheme"
+                            aria-expanded="false" style="display: flex; align-items: center; justify-content: center;">
+                        <LucideIcon icon="Moon" v-if="isDarkMode"/>
+                        <LucideIcon icon="Sun" v-else />
                     </button>
                     <ul class="dropdown-menu dropdown-menu-button text-small shadow">
                         <li>
@@ -95,6 +100,7 @@ export default {
             user: this.$store.state.userProfile.name,
             selectedTenant: null,
             tenantsFromState: [],
+            currentTheme: localStorage.getItem("theme") || "css-theme-light",
         };
     },
     methods: {
@@ -161,8 +167,23 @@ export default {
             if (strSplit.length === 1) return strSplit[0];
             return `${strSplit[0]} ${strSplit[strSplit.length - 1]}`;
         },
+        toggleTheme: function () {
+            if (localStorage.getItem("theme") === "css-theme-dark") {
+                this.setTheme("css-theme-light");
+            } else {
+                this.setTheme("css-theme-dark");
+            }
+        },
+        setTheme: function (themeName) {
+            localStorage.setItem("theme", themeName);
+            document.documentElement.className = themeName;
+            this.currentTheme = themeName;
+        },
     },
     computed: {
+        isDarkMode() {
+            return this.currentTheme === "css-theme-dark";
+        },
         tenantInitialized() {
             return this.$store.state.tenantInitialized;
         },
@@ -195,21 +216,23 @@ export default {
         this.getUserTenants(userEmail, savedTenant);
     },
     mounted() {
-        document.documentElement.className = "css-theme-light";
+        const savedTheme = localStorage.getItem("theme");
+        this.currentTheme = savedTheme === "css-theme-dark" ? "css-theme-dark" : "css-theme-light";
+        this.setTheme(this.currentTheme);
     },
 };
 </script>
 
 <style scoped>
-.navbar {
-    padding: 1;
-    padding-top: 0.9rem;
-    padding-bottom: 0.8rem;
-}
+    .navbar {
+        padding: 1%;
+        padding-top: 0.9rem;
+        padding-bottom: 0.8rem;
+    }
 
-.navbar-light {
-    background-color: #ffffff;
-}
+    .navbar-light {
+        background-color: var(--color-bg-navbar) !important;
+    }
 
 .navbar-toggler,
 .navbar-toggler-icon {
@@ -412,4 +435,9 @@ export default {
     right: 0 !important;
     left: auto !important;
 }
+    .bg-light {
+        background-color: var(--color-bg-body-content) !important;
+        border: 1px solid var( --color-border-form-control) !important;
+        color: var(--color-body-content) !important
+    }
 </style>

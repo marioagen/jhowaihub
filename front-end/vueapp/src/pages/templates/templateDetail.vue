@@ -477,10 +477,12 @@
                 return this.routeId !== undefined;
             },
             filteredAutocompleteOptions() {
-                return this.autocompleteOptions.map((opt) => ({
-                    ...opt,
-                    label: opt.labelKey ? this.$t(opt.labelKey) : opt.label,
-                }));
+                return this.autocompleteOptions
+                    .filter((w) => w.active)
+                    .map((opt) => ({
+                        ...opt,
+                        label: opt.labelKey ? this.$t(opt.labelKey) : opt.label,
+                    }));
             },
             getTemplateTitle() {
                 return this.isEditMode

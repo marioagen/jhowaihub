@@ -440,4 +440,9 @@
         border-color: #d6ccff;
         background: #faf8ff;
     }
+
+    .vue-flow__node-default {
+        background: var(--color-card-content) !important;
+        color: var(--color-body-content) !important;
+    }
 </style>
