@@ -106,7 +106,7 @@ body {
     --filter-btn-close: initial;
     --color-bg-toast-content: #ffffff;
     --color-bg-toast-content-primary: #cfe2ff;
-    --color-bg-toast-content-upload: #d1e7dd;
+    --color-bg-toast-content-upload: #e9ecef;
     --color-bg-toast-content-success: #d1e7dd;
     --color-bg-toast-content-warning: #fff3cd;
     --color-bg-toast-content-danger: #f8d7da;
@@ -214,7 +214,7 @@ body {
     --filter-btn-close: invert(1);
     --color-bg-toast-content: #1a1b2e;
     --color-bg-toast-content-primary: #1c398e;
-    --color-bg-toast-content-upload: #0d542b;
+    --color-bg-toast-content-upload: #2d3354;
     --color-bg-toast-content-success: #0d542b;
     --color-bg-toast-content-warning: rgba(124, 45, 18, 0.4);
     --color-bg-toast-content-danger: #82181a;
