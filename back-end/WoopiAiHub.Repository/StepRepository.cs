@@ -136,9 +136,16 @@ namespace WoopiAiHub.Repository
         /// <param name="login"></param>
         /// <param name="order"></param>
         /// <returns></returns>
-        public async Task<List<StepDto>> FindStepsByWorkflowId(int id, string input = "", bool allUsers = false, string login = "", string order = "", DocumentFilter documentFilter = DocumentFilter.All)
+        public async Task<List<StepDto>> FindStepsByWorkflowId(
+            int id,
+            string input = "",
+            bool allUsers = false,
+            string login = "",
+            string order = "",
+            DocumentFilter documentFilter = DocumentFilter.All)
         {
             var steps = await _context.Steps
+                .AsNoTracking()
                 .Where(s => s.WorkflowId == id)
                 .Select(s => new StepDto
                 {
@@ -155,71 +162,91 @@ namespace WoopiAiHub.Repository
                     {
                         Id = s.Status!.Id,
                         Name = s.Status.Name,
-                        Color = s.Status.Color,
+                        Color = s.Status.Color
                     },
-                    HasStepTools = s.StepTools.Count > 0,
+                    HasStepTools = s.StepTools.Any(),
                     Cards = s.Cards
-                         .Where(c =>
-                             (
-                                 string.IsNullOrWhiteSpace(input)
-                                 || c.Name.Contains(input)
-                                 || c.Document!.Name.Contains(input)
-                                 || c.Document.Description.Contains(input)
-                                 || c.Document.EmailCreator.Contains(input)
-                             ) &&
-                             (
-                                 allUsers == true
-                                 || (c.AssignedUser != null && c.AssignedUser.Email == login)
-                             ) &&
-                                                          (
-                                 documentFilter == DocumentFilter.All
-                                 || (documentFilter == DocumentFilter.Singles && c.DocumentBatchId == null)
-                                 || (documentFilter == DocumentFilter.Batches && c.DocumentBatchId != null)
-                             )
-                         )
+                        .Where(c =>
+                            (
+                                string.IsNullOrWhiteSpace(input)
+                                || c.Name.Contains(input)
+                                || c.Document!.Name.Contains(input)
+                                || c.Document.Description.Contains(input)
+                                || c.Document.EmailCreator.Contains(input)
+                            )
+                            &&
+                            (
+                                allUsers
+                                || (c.AssignedUser != null && c.AssignedUser.Email == login)
+                            )
+                            &&
+                            (
+                                documentFilter == DocumentFilter.All
+                                || (documentFilter == DocumentFilter.Singles && c.DocumentBatchId == null)
+                                || (documentFilter == DocumentFilter.Batches && c.DocumentBatchId != null)
+                            )
+                        )
                         .GroupBy(c => c.DocumentBatchId ?? -c.Id)
-                        .Select(g => new CardDto
-                        {
-                            Id = g.OrderBy(c => c.Id).First().Id,
-                            Name = g.OrderBy(c => c.Id).First().Name,
-                            Created = g.OrderBy(c => c.Id).First().Created,
-                            Description = g.OrderBy(c => c.Id).First().Document!.Description,
-                            Owner = g.OrderBy(c => c.Id).First().Document!.EmailCreator,
-                            DocumentId = g.OrderBy(c => c.Id).First().Document!.Id,
-                            StatusDocument = g.OrderBy(c => c.Id).First().Document!.Status,
-                            Percentage = s.StepTools.Any(st => st.Executions.Any(e => g.Any(card => e.CardId == card.Id)))
-                            ? (
-                                s.StepTools.Count(st => st.Executions.Any(e => e.Status == StatusExecution.Ready) && g.All(card => st.Executions.Any(e => e.CardId == card.Id && e.Status == StatusExecution.Ready))) * 100
-                                /
-                                s.StepTools.Count(st => st.Executions.Any(e => g.Any(card => e.CardId == card.Id)))
-                              )
-                            : 100,
-                            ToolName = s.StepTools
-                                .Where(st => st.Executions.Any(e => g.Any(card => e.CardId == card.Id) && e.Status == StatusExecution.Running))
-                                .Select(st => st.Tool!.Name)
-                                .FirstOrDefault() ?? string.Empty,
-                            AssignedUser = g.OrderBy(c => c.Id).First().AssignedUser != null ?
-                            new UserDto
-                            {
-                                Name = g.OrderBy(c => c.Id).First().AssignedUser!.Name,
-                                Email = g.OrderBy(c => c.Id).First().AssignedUser!.Email,
-                                Created = g.OrderBy(c => c.Id).First().AssignedUser!.Created,
-                                Id = g.OrderBy(c => c.Id).First().AssignedUser!.Id
-                            }
-                            : null,
-                            Status = new StatusDto
-                            {
-                                Id = g.OrderBy(c => c.Id).First().Status!.Id,
-                                Name = g.OrderBy(c => c.Id).First().Status!.Name,
-                                Color = g.OrderBy(c => c.Id).First().Status!.Color
-                            },
-                            IsBatchParent = g.OrderBy(c => c.Id).First().DocumentBatchId.HasValue
-                        }).ToList()
-                })
-                .AsNoTracking()
-                .ToListAsync();
+                        .Select(g =>
+                            g.OrderBy(c => c.Id)
+                             .Select(first => new CardDto
+                             {
+                                 Id = first.Id,
+                                 Name = first.Name,
+                                 Created = first.Created,
+                                 Description = first.Document!.Description,
+                                 Owner = first.Document.EmailCreator,
+                                 DocumentId = first.Document.Id,
+                                 StatusDocument = first.Document.Status,
+                                 Percentage =
+                                     s.StepTools.Any(st =>
+                                         st.Executions.Any(e => g.Any(card => e.CardId == card.Id)))
+                                     ?
+                                     (
+                                         s.StepTools.Count(st =>
+                                             st.Executions.Any(e => e.Status == StatusExecution.Ready)
+                                             && g.All(card =>
+                                                 st.Executions.Any(e =>
+                                                     e.CardId == card.Id &&
+                                                     e.Status == StatusExecution.Ready)))
+                                         * 100
+                                         /
+                                         s.StepTools.Count(st =>
+                                             st.Executions.Any(e =>
+                                                 g.Any(card => e.CardId == card.Id)))
+                                     )
+                                     : 100,
+                                 ToolName =
+                                     s.StepTools
+                                         .Where(st =>
+                                             st.Executions.Any(e =>
+                                                 g.Any(card => e.CardId == card.Id)
+                                                 && e.Status == StatusExecution.Running))
+                                         .Select(st => st.Tool!.Name)
+                                         .FirstOrDefault() ?? "",
+                                 AssignedUser =
+                                     first.AssignedUser == null
+                                         ? null
+                                         : new UserDto
+                                         {
+                                             Id = first.AssignedUser.Id,
+                                             Name = first.AssignedUser.Name,
+                                             Email = first.AssignedUser.Email,
+                                             Created = first.AssignedUser.Created
+                                         },
+                                 Status = new StatusDto
+                                 {
+                                     Id = first.Status!.Id,
+                                     Name = first.Status.Name,
+                                     Color = first.Status.Color
+                                 },
+                                 IsBatchParent = first.DocumentBatchId != null
+                             }).First()
+                        ).ToList()
+                }).ToListAsync();
 
-            steps.ForEach(step => step.Cards = ApplyCardOrdering(step.Cards, order));
+            steps.ForEach(step =>
+                step.Cards = ApplyCardOrdering(step.Cards, order));
 
             return steps;
         }
