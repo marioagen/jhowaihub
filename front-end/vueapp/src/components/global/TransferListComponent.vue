@@ -80,7 +80,7 @@
                         v-else
                         class="text-muted small"
                     >
-                        Nenhum item selecionado
+                        {{ $t("quizzes.noItemsSelected") }}
                     </div>
                 </div>
             </div>
