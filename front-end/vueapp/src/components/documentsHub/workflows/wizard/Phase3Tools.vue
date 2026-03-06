@@ -171,7 +171,7 @@
     }
 
     .step-tool-card {
-        border: 1px solid #e5e7eb;
+        border: 1px solid var(--color-border-form-control);
     }
 
     .card-header {
@@ -193,7 +193,7 @@
     }
 
     .tools-list {
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid var(--color-border-form-control);
         padding-top: 12px;
     }
 

@@ -805,6 +805,7 @@ const portuguese = {
         type: "Tipo de documento",
         youAreAboutToDeleteQuestionnaire:
             "Você está prestes a deletar <br/> um questionário do sistema",
+        noItemsSelected: "Nenhum item selecionado",
     },
     template: {
         title: "Templates de API",
