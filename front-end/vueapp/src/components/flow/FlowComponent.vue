@@ -55,7 +55,7 @@
             />
 
             <div
-                class="offcanvas offcanvas-end"
+                class="offcanvas offcanvas-end offcanvas-themed"
                 tabindex="-1"
                 id="offcanvasRight"
                 aria-labelledby="offcanvasRightLabel"
@@ -959,10 +959,11 @@
     }
 
     .background-div {
-        background-color: rgb(249 250 251);
-        border-width: 1px;
+        background-color: var(--color-bg-form-control);
+        border: 1px solid var(--color-border-form-control);
         border-radius: 0.375rem;
         padding: 15px;
+        color: var(--color-body-content);
     }
 
     .font-medium {
@@ -987,5 +988,21 @@
 
     .text-long {
         resize: none;
+    }
+
+    .offcanvas-themed {
+        background-color: var(--color-card-content) !important;
+        color: var(--color-body-content) !important;
+    }
+
+    .offcanvas-themed .offcanvas-header {
+        background-color: var(--color-card-content) !important;
+        color: var(--color-body-content) !important;
+        border-bottom: 1px solid var(--color-border-form-control) !important;
+    }
+
+    .offcanvas-themed .offcanvas-body {
+        background-color: var(--color-card-content) !important;
+        color: var(--color-body-content) !important;
     }
 </style>
