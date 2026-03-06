@@ -167,8 +167,10 @@
             </div>
         </div>
     </div>
-    <ExtractDataModal ref="ExtractModal"
-                      @update="handleModalUpdate" />
+    <ExtractDataModal
+        ref="ExtractModal"
+        @update="handleModalUpdate"
+    />
 </template>
 <script>
     import ExtractDataModal from "@/components/analyze/ExtractDataModal.vue";
@@ -350,7 +352,7 @@
 
     .field-label {
         font-size: 0.85rem;
-        color: #333;
+        color: var(--color-body-content);
         font-weight: 500;
         margin: 0;
     }
@@ -386,9 +388,9 @@
         border-color: #0073e6;
     }
 
-        .field-value:read-only {
-            background-color: var(--color-read-only)!important;
-        }
+    .field-value:read-only {
+        background-color: var(--color-read-only) !important;
+    }
 
     .edit-button,
     .save-button,
@@ -482,9 +484,6 @@
 
         .field-label {
             font-size: 0.85rem;
-            color: #333;
-            font-weight: 500;
-            margin: 0;
         }
 
         .edited-badge {
@@ -597,5 +596,4 @@
     .border-top {
         border-top: 1px solid var(--color-border-form-control) !important;
     }
-
 </style>

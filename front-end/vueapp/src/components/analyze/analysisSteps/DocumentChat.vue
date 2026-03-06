@@ -399,10 +399,10 @@
         transition: all 0.3s ease;
     }
 
-        .chat-toggle-button:hover {
-            background: var(--color-sidebar-li-collapsed-hover) !important;
-            border-color: #005bb5;
-        }
+    .chat-toggle-button:hover {
+        background: var(--color-sidebar-li-collapsed-hover) !important;
+        border-color: #005bb5;
+    }
 
     .chat-toggle-button.expanded {
         display: none;
@@ -596,19 +596,19 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        background: #f8f9fa;
-        border: 1px solid #ddd;
+        background: var(--color-card-content);
+        border: 1px solid var(--color-border-form-control);
         border-radius: 6px;
-        color: #666;
+        color: var(--color-body-content);
         font-size: 0.85rem;
         cursor: pointer;
         transition: all 0.3s ease;
     }
 
     .close-results-button:hover {
-        background: #e9ecef;
-        border-color: #ccc;
-        color: #333;
+        background: var(--color-card-content-hover);
+        border-color: var(--color-border-form-control);
+        color: var(--color-body-content);
     }
 
     .close-results-button i {
@@ -646,8 +646,8 @@
     }
 
     .result-card {
-        background: #f8f9fa;
-        border: 1px solid #e0e0e0;
+        background: var(--color-card-content);
+        border: 1px solid var(--color-border-form-control);
         border-radius: 6px;
         padding: 1rem;
         transition: box-shadow 0.3s ease;
@@ -658,13 +658,13 @@
     }
 
     .result-question {
-        color: #333;
+        color: var(--color-body-content);
         margin-bottom: 0.5rem;
         font-size: 0.95rem;
     }
 
     .result-answer {
-        color: #666;
+        color: var(--color-body-content);
         font-size: 0.9rem;
         line-height: 1.5;
         white-space: pre-wrap;
@@ -677,8 +677,8 @@
         gap: 0.25rem;
         margin-left: 0.5rem;
         padding: 0.25rem 0.5rem;
-        background: #d4edda;
-        color: #155724;
+        background: var(--color-bg-badge-confirmed);
+        color: var(--color-text-badge-confirmed);
         border-radius: 4px;
         font-size: 0.75rem;
         font-weight: 500;
