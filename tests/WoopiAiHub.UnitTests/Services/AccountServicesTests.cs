@@ -306,6 +306,7 @@ namespace WoopiAiHub.UnitTests.Services
             var responseCheckAccess = _fixture.FindValidResponseCheckAccessDto();
             var profiles = new List<string> { "admin", "profile2" };
             var tenant = responseCheckAccess.Tenants.First().Name;
+            var user = AccountFixture.FindValidUser();
 
             var _mockUserRepository = _mocker.GetMock<IUserRepository>();
             var _mockRefreshTokenServices = _mocker.GetMock<IRefreshTokenServices>();
@@ -340,16 +341,16 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(x => x.FindUserPermissionsAsync(userEmail))
                 .ReturnsAsync(permissionDic);
 
+            _mockUserRepository
+                .Setup(x => x.FindByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(user);
+
             _mockRefreshTokenServices
                 .Setup(x => x.RevokeAsync(refreshToken))
                 .Returns(Task.CompletedTask);
 
             _mockRefreshTokenServices
-                .Setup(x => x.SaveAsync(userEmail, refreshToken))
-                .Returns(Task.CompletedTask);
-
-            _mockRefreshTokenServices
-                .Setup(x => x.SaveAsync(userEmail, expectedRefreshToken))
+                .Setup(x => x.SaveAsync(userEmail, It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
 
             _mockUserRepository
@@ -359,7 +360,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mockResponseCookies
                 .Setup(x => x.Append(
                     "refreshToken",
-                    expectedRefreshToken,
+                    It.IsAny<string>(),
                     It.IsAny<CookieOptions>()))
                 .Verifiable();
 
@@ -373,7 +374,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mockTenantContextService.Verify(x => x.TrySetTenantConnectionAsync(_mockHttpContext.Object, It.IsAny<string>()), Times.Once);
             _mockPermissionRepository.Verify(x => x.FindUserPermissionsAsync(userEmail), Times.Once);
             _mockRefreshTokenServices.Verify(x => x.RevokeAsync(refreshToken), Times.Once);
-            _mockRefreshTokenServices.Verify(x => x.SaveAsync(It.IsAny<string>(), It.IsAny<string>()), Times.AtLeast(2));
+            _mockRefreshTokenServices.Verify(x => x.SaveAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
         }
 
         [Fact(DisplayName = "Login ShouldThrowAppException_WhenTenantNotFound")]

@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.DTOs.Connector;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Request.Automation;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Messaging;
@@ -28,6 +29,7 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IMessagePublisher<object> _messagePublisher;
         private readonly ILogger<AutomationServices> _logger;
         private readonly ICardRepository _cardRepository;
+        private readonly IAuditCardService _auditCardService;
         private readonly IToolRepository _toolRepository;
         private readonly IApiClientFactory _apiClientFactory;
         private readonly IStepRepository _stepRepository;
@@ -43,6 +45,7 @@ namespace WoopiAiHub.Application.Services.Automation
                                   IMessagePublisher<object> messagePublisher,
                                   ILogger<AutomationServices> logger,
                                   ICardRepository cardRepository,
+                                  IAuditCardService auditCardService,
                                   IToolRepository toolRepository,
                                   IApiClientFactory apiClientFactory,
                                   IStepRepository stepRepository,
@@ -58,6 +61,7 @@ namespace WoopiAiHub.Application.Services.Automation
             _messagePublisher = messagePublisher;
             _logger = logger;
             _cardRepository = cardRepository;
+            _auditCardService = auditCardService;
             _toolRepository = toolRepository;
             _apiClientFactory = apiClientFactory;
             _stepRepository = stepRepository;
@@ -458,6 +462,8 @@ namespace WoopiAiHub.Application.Services.Automation
             }
 
             card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
+            var cardWorkflows = new List<(int cardId, int workflowId)> { (card.Id, card.Step!.WorkflowId) };
+            await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement);
             var updated = _cardRepository.Update(card);
 
             if (updated)

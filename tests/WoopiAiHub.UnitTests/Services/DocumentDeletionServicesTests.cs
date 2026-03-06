@@ -17,7 +17,7 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly DocumentFixture _fixture;
         private readonly AutoMocker _mocker;
-        private readonly DocumentDeletionServices _documentDeletionServices;
+        private readonly WoopiAiHub.Application.Services.DocumentDeletionServices _documentDeletionServices;
 
         public DocumentDeletionServicesTests(DocumentFixture documentFixture)
         {
@@ -28,7 +28,7 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x["IndexerApiKey"]).Returns(Guid.NewGuid().ToString());
             _mocker.Use(configMock.Object);
 
-            _documentDeletionServices = _mocker.CreateInstance<DocumentDeletionServices>();
+            _documentDeletionServices = _mocker.CreateInstance<WoopiAiHub.Application.Services.DocumentDeletionServices>();
         }
 
         [Fact(DisplayName = "Delete - Should delete documents and related data successfully")]

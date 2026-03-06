@@ -8,6 +8,7 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -27,6 +28,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IAutomationServices _automationServices;
         private readonly IFileRepositoryApi _fileRepositoryApi;
+        private readonly IAuditCardService _auditCardService;
         private readonly IDocumentBatchRepository _documentBatchRepository;
         private readonly ILogger<DocumentUploadServices> _logger;
         private const string BatchCacheKey = "batchCacheKey";
@@ -39,6 +41,7 @@ namespace WoopiAiHub.Application.Services
             IWorkflowRepository workflowRepository,
             IAutomationServices automationServices,
             IFileRepositoryApi fileRepositoryApi,
+            IAuditCardService auditCardService,
             IDocumentBatchRepository documentBatchRepository,
             ILogger<DocumentUploadServices> logger)
         {
@@ -49,6 +52,7 @@ namespace WoopiAiHub.Application.Services
             _workflowRepository = workflowRepository;
             _automationServices = automationServices;
             _fileRepositoryApi = fileRepositoryApi;
+            _auditCardService = auditCardService;
             _documentBatchRepository = documentBatchRepository;
             _logger = logger;
         }
@@ -113,6 +117,14 @@ namespace WoopiAiHub.Application.Services
 
                 documentForDataBase.Cards = cards;
                 _documentRepository.Create(documentForDataBase);
+
+                var workflowsList = workflows!.ToList();
+                var cardsList = documentForDataBase.Cards.ToList();
+                var cardWorkflows = cardsList.Zip(workflowsList, (card, workflow) => (card.Id, workflow.Id)).ToList();
+                if (cardWorkflows.Count > 0)
+                {
+                    await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Upload);
+                }
 
                 var hasExecutions = await _automationServices.PrepareExecutionAsync(workflows!);
                 var automationServicesDto = new AutomationServicesDto

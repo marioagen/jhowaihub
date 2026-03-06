@@ -5,6 +5,7 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
@@ -91,7 +92,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(dto.CardId))
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync((Step?)null);
@@ -115,7 +116,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(dto.CardId))
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
@@ -156,13 +157,17 @@ namespace WoopiAiHub.UnitTests.Services
             var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionDto();
             var email = "test@example.com";
             var card = CardFixture.FindValidCard();
+            card.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
             var step = CardFixture.FindValidStep();
             var status = CardFixture.FindValidStatus();
             var user = new User(Guid.NewGuid(), "Test User", email, true, DateTime.Now);
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(dto.CardId))
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
@@ -176,6 +181,10 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
             _unitOfWorkMock.Setup(u => u.Commit()).Verifiable();
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(user.Id);
 
             // Act
             var result = await _rejectionServices.CreateRejectionAsync(dto, email);
@@ -206,7 +215,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(dto.CardId))
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
@@ -393,7 +402,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(dto.CardId))
                 .ReturnsAsync(card1);
             _cardRepositoryMock.Setup(repo => repo.FindByDocumentBatchId(documentBatchId))
                 .ReturnsAsync(batchCards);
@@ -436,7 +445,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(dto.CardId))
                 .ReturnsAsync(card);
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
@@ -475,14 +484,16 @@ namespace WoopiAiHub.UnitTests.Services
             var card1 = new Card(1, DateTime.UtcNow, 1, 1, "Card 1", 1, null, documentBatchId);
             var card2 = new Card(2, DateTime.UtcNow, 1, 2, "Card 2", 1, null, documentBatchId);
 
-            var batchCards = new List<Card> { card1, card2 };
             var step = new Step(dto.StepId, DateTime.Now, dto.StepId, "Rejection Step", 1, 1, 1);
+            card1.Step = step;
+
+            var batchCards = new List<Card> { card1, card2 };
             var status = new Status("Rejected", "Rejected status", 99, DateTime.Now);
             var userId = Guid.NewGuid();
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(dto.CardId))
                 .ReturnsAsync(card1);
             _cardRepositoryMock.Setup(repo => repo.FindByDocumentBatchId(documentBatchId))
                 .ReturnsAsync(batchCards);
@@ -499,8 +510,19 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
             _unitOfWorkMock.Setup(u => u.Commit()).Verifiable();
 
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns((Guid?)userId);
+            _mocker.Use<ICurrentUserService>(currentUserServiceMock.Object);
+
+            var auditCardRepositoryMock = _mocker.GetMock<IAuditCardRepository>();
+            auditCardRepositoryMock.Setup(a => a.AddRangeAsync(It.IsAny<IEnumerable<Domain.Models.Audit.AuditCard>>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            var rejectionServices = _mocker.CreateInstance<DocumentAnalysisRejectionServices>();
+
             // Act
-            var result = await _rejectionServices.CreateRejectionAsync(dto, email);
+            var result = await rejectionServices.CreateRejectionAsync(dto, email);
 
             // Assert
             Assert.True(result);
@@ -533,7 +555,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindById(dto.CardId))
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(dto.CardId))
                 .ReturnsAsync(card1);
             _cardRepositoryMock.Setup(repo => repo.FindByDocumentBatchId(documentBatchId))
                 .ReturnsAsync(batchCards);

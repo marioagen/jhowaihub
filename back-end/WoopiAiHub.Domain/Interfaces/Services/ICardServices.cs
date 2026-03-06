@@ -1,5 +1,6 @@
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
 {
@@ -14,6 +15,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
             HeadersDto headersDto);
         Task<CardHeaderDto> FindHeaderInfoAsync(int cardId);
+        Task<IReadOnlyList<Card>> FindCardsByDocumentIdWithStepWorkflowAsync(int documentId);
         Task<ICollection<CardBatchDto>?> FindCardsByDocumentBatchId(int documentBatchId);
     }
 }

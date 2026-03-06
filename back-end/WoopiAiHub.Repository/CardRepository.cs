@@ -52,6 +52,20 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Returns a card by its ID with status
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Card?> FindByIdWithStepWorkflow(int id)
+        {
+            return await _context.Cards
+                .Include(s => s.Step)
+                    .ThenInclude(st => st!.Workflow)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        /// <summary>
         /// Returns a card by its ID.
         /// </summary>
         /// <param name="id"></param>
@@ -157,16 +171,18 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Deletes a card by its document id.
+        /// Logically deletes cards by document ids by setting Enable to false (soft delete).
+        /// Cards are excluded from default queries via the global query filter.
         /// </summary>
-        /// <param name="card"></param>
-        /// <returns></returns>
+        /// <param name="documentIds">Ids of documents whose cards should be logically deleted.</param>
+        /// <returns>True if any card was updated; otherwise false.</returns>
         public async Task<bool> DeleteByDocumentIds(List<int> documentIds)
         {
             var cards = await _context.Cards.Where(c => documentIds.Contains(c.DocumentId)).ToListAsync();
             if (cards.Count > 0)
             {
-                _context.Cards.RemoveRange(cards);
+                foreach (var card in cards)
+                    card.Disable();
                 return await _context.SaveChangesAsync() > 0;
             }
 
@@ -205,6 +221,22 @@ namespace WoopiAiHub.Repository
                 .           ThenInclude(t => t!.ToolType)
                 .OrderByDescending(c => c.Created)
                 .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Finds all cards associated with a specific document ID, with Step and Workflow included.
+        /// </summary>
+        /// <param name="documentId">The ID of the document.</param>
+        /// <returns>A list of cards with Step and Workflow loaded.</returns>
+        public async Task<List<Card>> FindByDocumentIdCardListWithStepWorkflowAsync(int documentId)
+        {
+            return await _context.Cards
+                .Where(c => c.DocumentId == documentId)
+                .Include(c => c.Step)
+                    .ThenInclude(s => s!.Workflow)
+                .OrderBy(c => c.Step!.Order)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         /// <summary>
@@ -270,9 +302,32 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Cards
                 .Include(c => c.Document)
+                .Include(c => c.Step)
                 .Where(c => c.DocumentBatchId == documentBatchId)
                 .OrderBy(c => c.Id)
                 .ToListAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<List<Card>?> FindCardOrBatchWithStepWorkflowAsync(int cardId)
+        {
+            var card = await FindByIdWithStepWorkflow(cardId);
+            if (card == null)
+                return null;
+            if (card.DocumentBatchId.HasValue)
+                return await FindByDocumentBatchId(card.DocumentBatchId.Value);
+            return [card];
+        }
+
+        /// <inheritdoc />
+        public async Task<List<Card>?> FindCardOrBatchWithDocumentAsync(int cardId)
+        {
+            var card = await FindByIdWithDocument(cardId);
+            if (card == null)
+                return null;
+            if (card.DocumentBatchId.HasValue)
+                return await FindByDocumentBatchId(card.DocumentBatchId.Value);
+            return [card];
         }
     }
 }

@@ -158,24 +158,25 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Search the database for an document by id and change the enable
+        /// Logically deletes documents by setting Enable to false (soft delete).
+        /// Documents are excluded from default queries via the global query filter.
+        /// Call card soft-delete (e.g. DeleteByDocumentIds) before this so related cards are disabled.
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <param name="ids">Ids of documents to logically delete.</param>
+        /// <returns>True if any document was updated; otherwise false.</returns>
         public bool Delete(List<int> ids)
         {
             var documents = _context.Documents.Where(a => ids.Contains(a.Id)).ToList();
-            
+
             if (documents.Count > 0)
             {
-                _context.Documents.RemoveRange(documents);
+                foreach (var document in documents)
+                    document.Disable();
                 _context.SaveChanges();
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         /// <summary>

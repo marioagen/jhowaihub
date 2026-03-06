@@ -2,6 +2,7 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -17,6 +18,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepRepository _stepRepository;
         private readonly IPermissionServices _permissionServices;
         private readonly ICardRepository _cardRepository;
+        private readonly IAuditCardService _auditCardService;
         private readonly IStatusRepository _statusRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -26,6 +28,7 @@ namespace WoopiAiHub.Application.Services
             IStepRepository stepRepository,
             IPermissionServices permissionServices,
             ICardRepository cardRepository,
+            IAuditCardService auditCardService,
             IStatusRepository statusRepository,
             IUserRepository userRepository,
             IUnitOfWork unitOfWork)
@@ -33,6 +36,7 @@ namespace WoopiAiHub.Application.Services
             _repository = repository;
             _stepRepository = stepRepository;
             _cardRepository = cardRepository;
+            _auditCardService = auditCardService;
             _statusRepository = statusRepository;
             _permissionServices = permissionServices;
             _userRepository = userRepository;
@@ -69,7 +73,14 @@ namespace WoopiAiHub.Application.Services
                     );
 
                     rejections.Add(rejection);
-                    card.UpdateStepAndStatus(dto.StepId, status.Id);
+                }
+
+                Card.UpdateStepAndStatus(cards, dto.StepId, status.Id);
+
+                var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId)).ToList();
+                if (cardWorkflows.Count > 0)
+                {
+                    await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Rejection);
                 }
 
                 await _repository.CreateRangeAsync(rejections);
@@ -102,7 +113,7 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "User does not have permission to reject documents", UserLabel.UnauthorizedOperation);
             }
 
-            var card = await _cardRepository.FindById(dto.CardId) ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            var card = await _cardRepository.FindByIdWithStepWorkflow(dto.CardId) ?? throw new AppException(ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
 
             List<Card> cards = [card];
             if (card.DocumentBatchId.HasValue)

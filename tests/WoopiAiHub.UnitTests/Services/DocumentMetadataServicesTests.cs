@@ -19,13 +19,13 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly DocumentFixture _fixture;
         private readonly AutoMocker _mocker;
-        private readonly DocumentMetadataServices _documentMetadataServices;
+        private readonly WoopiAiHub.Application.Services.DocumentMetadataServices _documentMetadataServices;
 
         public DocumentMetadataServicesTests(DocumentFixture documentFixture)
         {
             _fixture = documentFixture;
             _mocker = new AutoMocker();
-            _documentMetadataServices = _mocker.CreateInstance<DocumentMetadataServices>();
+            _documentMetadataServices = _mocker.CreateInstance<WoopiAiHub.Application.Services.DocumentMetadataServices>();
         }
 
         [Fact(DisplayName = "FindByIdAnalyze - Should return document metadata with card when document found")]
