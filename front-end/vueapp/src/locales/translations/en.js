@@ -795,6 +795,7 @@ const english = {
         type: "Document type",
         youAreAboutToDeleteQuestionnaire:
             "You are about to delete <br/> a questionnaire from the system",
+        noItemsSelected: "No items selected",
     },
     template: {
         title: "API Templates",

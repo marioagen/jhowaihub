@@ -801,6 +801,7 @@ const spanish = {
         type: "Tipo de documento",
         youAreAboutToDeleteQuestionnaire:
             "Estás a punto de eliminar <br/> un cuestionario del sistema",
+        noItemsSelected: "No se seleccionó ningún item",
     },
     template: {
         addParam: "Agregar Parámetro",
