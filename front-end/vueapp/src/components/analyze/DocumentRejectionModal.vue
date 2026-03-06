@@ -183,8 +183,10 @@
                 }
 
                 const params = {
-                    cardId: this.cardId,
-                    stepId: this.values.selectedStepId,
+                    cardId: Number(this.cardId) || parseInt(this.cardId, 10),
+                    stepId:
+                        Number(this.values.selectedStepId) ||
+                        parseInt(this.values.selectedStepId, 10),
                     justification: this.values.justification,
                 };
 

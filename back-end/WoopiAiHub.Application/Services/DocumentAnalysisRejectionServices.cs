@@ -78,6 +78,12 @@ namespace WoopiAiHub.Application.Services
                 Card.UpdateStepAndStatus(cards, dto.StepId, status.Id);
 
                 var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId)).ToList();
+                foreach (var card in cards)
+                {
+                    card.Step = null;
+                    card.Status = null;
+                }
+
                 if (cardWorkflows.Count > 0)
                 {
                     await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Rejection);
