@@ -475,6 +475,15 @@ main > .container-fluid > .custom-padding > .row > .table-responsive > table > t
     border-color: var(--color-border-form-control) !important;
 }
 
+.form-check-input:checked {
+    background-color: var(--color-bg-btn-primary) !important;
+    border-color: var(--color-bg-btn-primary) !important;
+}
+
+.form-check-input:checked[type="checkbox"] {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+}
+
 .custom-textarea {
     border-color: var(--color-bg-form-outline) !important;
 }
