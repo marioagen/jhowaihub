@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace WoopiAiHub.Repository.Migrations
 {
-    /// <inheritdoc />
     public partial class AuditCardTable : Migration
     {
         private const string AuditCardsTableName = "AuditCards";
@@ -23,7 +22,7 @@ namespace WoopiAiHub.Repository.Migrations
                     WorkflowId = table.Column<int>(type: "int", nullable: false),
                     ActionType = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OccurredAt = table.Column<DateTime>(type: "datetime", nullable: false)
+                    Created = table.Column<DateTime>(type: "datetime", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -59,9 +58,9 @@ namespace WoopiAiHub.Repository.Migrations
                 column: "CardId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AuditCards_OccurredAt",
+                name: "IX_AuditCards_Created",
                 table: AuditCardsTableName,
-                column: "OccurredAt");
+                column: "Created");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuditCards_UserId",

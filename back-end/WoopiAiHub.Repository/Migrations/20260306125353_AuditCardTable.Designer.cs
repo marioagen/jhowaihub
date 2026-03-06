@@ -12,7 +12,7 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260227222734_AuditCardTable")]
+    [Migration("20260306125353_AuditCardTable")]
     partial class AuditCardTable
     {
         /// <inheritdoc />
@@ -157,9 +157,9 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("int")
                         .HasColumnName("CardId");
 
-                    b.Property<DateTime>("OccurredAt")
+                    b.Property<DateTime>("Created")
                         .HasColumnType("datetime")
-                        .HasColumnName("OccurredAt");
+                        .HasColumnName("Created");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier")
@@ -175,7 +175,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("CardId");
 
-                    b.HasIndex("OccurredAt");
+                    b.HasIndex("Created");
 
                     b.HasIndex("UserId");
 
@@ -252,6 +252,12 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("int")
                         .HasColumnName("DocumentId");
 
+                    b.Property<bool>("Enable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("Enable");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -309,6 +315,12 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("EmailCreator");
+
+                    b.Property<bool>("Enable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("Enable");
 
                     b.Property<bool>("HasBatch")
                         .ValueGeneratedOnAdd()
