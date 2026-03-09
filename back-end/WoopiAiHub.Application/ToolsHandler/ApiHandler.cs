@@ -106,14 +106,19 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// <param name="body"></param>
         /// <param name="referenceFile"></param>
         /// <returns></returns>
-        private string AddReferenceFileToBody(string? body, string referenceFile)
+        private static string AddReferenceFileToBody(string? body, string referenceFile)
         {
             if (string.IsNullOrEmpty(body))
             {
-                return "{ \"referenceFile\": \"" + referenceFile + "\" }";
+                return string.Concat("{ \"referenceFile\": \"", referenceFile, "\" }");
             }
 
-            return "{ \"referenceFile\": \"" + referenceFile + "\", " + body.Substring(1);
+            return string.Concat(
+                "{ \"referenceFile\": \"",
+                referenceFile,
+                "\", ",
+                body.AsSpan(1)
+            );
         }
 
         /// <summary>
