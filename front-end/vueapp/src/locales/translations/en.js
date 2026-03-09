@@ -523,6 +523,7 @@ const english = {
             createSubtitle: "Create a new team for the system",
             createTitle: "New Team",
             deleteSuccess: "Team deleted successfully",
+            duplicated: "Team already registered",
             editSubtitle: "Update the selected team's information",
             editTitle: "Edit Team",
             errors: {
