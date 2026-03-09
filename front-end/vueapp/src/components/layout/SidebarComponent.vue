@@ -190,6 +190,16 @@
                         },
                         labelKey: "pages.templates",
                     },
+                    {
+                        permission: "Auditor",
+                        activeKey: "Auditor",
+                        to: "/auditor",
+                        icon: {
+                            name: "ShieldUser",
+                            color: "#f56565",
+                        },
+                        labelKey: "pages.auditor",
+                    },
                 ],
             };
         },
