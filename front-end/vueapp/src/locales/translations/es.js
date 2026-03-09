@@ -625,6 +625,7 @@ const spanish = {
         types: "Tipos",
         workflowManagement: "Gestión de Flujos de Trabajo",
         workflows: "Flujos de Trabajo de Documentos",
+        auditor: "Auditoría",
     },
     pagination: {
         next: "Siguiente",

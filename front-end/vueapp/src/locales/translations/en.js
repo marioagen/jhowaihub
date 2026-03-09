@@ -616,6 +616,7 @@ const english = {
         types: "Types",
         workflowManagement: "Workflow Management",
         workflows: "Document Workflows",
+        auditor: "Audit",
     },
     pagination: {
         next: "Next",

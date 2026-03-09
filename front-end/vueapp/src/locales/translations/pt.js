@@ -625,6 +625,7 @@ const portuguese = {
         types: "Tipos",
         workflowManagement: "Gestão de Esteiras",
         workflows: "Esteiras de Processamento",
+        auditor: "Auditoria",
     },
     pagination: {
         next: "Próximo",
