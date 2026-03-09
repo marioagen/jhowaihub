@@ -88,11 +88,8 @@ namespace WoopiAiHub.Application.ToolsHandler
 
             var template = await _apiTemplateRepository.FindById(request.TemplateId) ?? throw new AppException(ErrorCode.NotFound, "API template not found", null);
 
-            if (!string.IsNullOrEmpty(request.Body))
-            {
-                request.Body = ConvertOutputsToJson(outputs, request.Body);
-            }
-
+            request.Body = AddReferenceFileToBody(request.Body, automation.ReferenceFile ?? string.Empty);
+            request.Body = ConvertOutputsToJson(outputs, request.Body);
             request.Email = automation.Email;
             request.Tenant = automation.Tenant;
             request.Data = new MetaDataAutomationDto(automation.CardId, automation.StepToolId);
@@ -101,6 +98,27 @@ namespace WoopiAiHub.Application.ToolsHandler
             request.TemplateName = template.Name;
 
             return request;
+        }
+
+        /// <summary>
+        /// Add reference file information to the body of the API request. If the body is null or empty, a new JSON object is created to hold the reference file information.
+        /// </summary>
+        /// <param name="body"></param>
+        /// <param name="referenceFile"></param>
+        /// <returns></returns>
+        private static string AddReferenceFileToBody(string? body, string referenceFile)
+        {
+            if (string.IsNullOrEmpty(body))
+            {
+                return string.Concat("{ \"referenceFile\": \"", referenceFile, "\" }");
+            }
+
+            return string.Concat(
+                "{ \"referenceFile\": \"",
+                referenceFile,
+                "\", ",
+                body.AsSpan(1)
+            );
         }
 
         /// <summary>
