@@ -74,6 +74,11 @@ const english = {
             tagFreeQuestion: "Free Question",
         },
     },
+    auditor: {
+        placeholder: "Audit content will be displayed here.",
+        subtitle: "Track the full history of actions on documents, workflows and users",
+        title: "Audit",
+    },
     card: {
         assignBtn: "Assign",
         cardsOpened: "There are open cards in this Workflow",

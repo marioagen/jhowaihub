@@ -76,6 +76,12 @@ const spanish = {
             tagFreeQuestion: "Pregunta libre",
         },
     },
+    auditor: {
+        placeholder: "El contenido de auditoría se mostrará aquí.",
+        subtitle:
+            "Consulte el historial completo de acciones en documentos, flujos de trabajo y usuarios",
+        title: "Auditoría",
+    },
     card: {
         assignBtn: "Asignar",
         cardsOpened: "Hay tarjetas abiertas en este Workflow",

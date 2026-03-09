@@ -75,6 +75,11 @@ const portuguese = {
             tagFreeQuestion: "Pergunta Livre",
         },
     },
+    auditor: {
+        placeholder: "O conteúdo de auditoria será exibido aqui.",
+        subtitle: "Acompanhe o histórico completo de ações em documentos, esteiras e usuários",
+        title: "Auditoria",
+    },
     card: {
         assignBtn: "Atribuir",
         cardsOpened: "Existem cards abertos nesta esteira",
