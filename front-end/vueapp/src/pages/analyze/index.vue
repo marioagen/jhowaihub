@@ -329,7 +329,8 @@
                     this.$refs.modalReject.open(this.workflowId);
                 }
             },
-            handleRejectSuccess() {
+            async handleRejectSuccess() {
+                await this.getCardHeaderInfo();
                 setTimeout(() => {
                     this.goBack();
                 }, 2000);
