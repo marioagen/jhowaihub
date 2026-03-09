@@ -43,7 +43,7 @@
                     <div
                         v-for="(rejection, index) in rejections"
                         :key="index"
-                        class="card border mb-3 bg-light"
+                        class="card border mb-3"
                     >
                         <div class="card-body">
                             <h6

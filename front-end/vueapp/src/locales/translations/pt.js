@@ -531,6 +531,7 @@ const portuguese = {
             createBtn: "Novo Time",
             createSubtitle: "Crie um novo time para o sistema",
             createTitle: "Novo Time",
+            duplicated: "Time duplicado",
             deleteSuccess: "Time deletado com sucesso",
             editSubtitle: "Atualize as informações do time selecionado",
             editTitle: "Editar Time",

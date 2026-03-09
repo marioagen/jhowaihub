@@ -532,6 +532,7 @@ const spanish = {
             createSubtitle: "Crea un nuevo equipo para el sistema",
             createTitle: "Nuevo Equipo",
             deleteSuccess: "Equipo eliminado con éxito",
+            duplicated: "Equipo duplicado",
             editSubtitle: "Actualiza la información del equipo seleccionado",
             editTitle: "Editar Equipo",
             errors: {
