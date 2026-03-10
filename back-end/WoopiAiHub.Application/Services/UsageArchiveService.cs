@@ -11,6 +11,8 @@ using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
+using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -101,6 +103,10 @@ namespace WoopiAiHub.Application.Services
             var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
             httpAccessor.HttpContext ??= new DefaultHttpContext();
             httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
+
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            dbContext.Database.GetDbConnection().ConnectionString = connectionString;
+
             var usageDailyRepository = scope.ServiceProvider.GetRequiredService<IUsageDailyRepository>();
             var usageLogRepository = scope.ServiceProvider.GetRequiredService<IUsageLogRepository>();
 
@@ -156,6 +162,10 @@ namespace WoopiAiHub.Application.Services
             var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
             httpAccessor.HttpContext ??= new DefaultHttpContext();
             httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
+
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            dbContext.Database.GetDbConnection().ConnectionString = connectionString;
+
             var usageMonthRepository = scope.ServiceProvider.GetRequiredService<IUsageMonthRepository>();
             var subcriptionPeriodService = scope.ServiceProvider.GetRequiredService<ISubscriptionPeriodServices>();
 
