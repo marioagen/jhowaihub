@@ -10,13 +10,13 @@ namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
         [JsonPropertyName("max_tool_calls")]
         public int MaxToolCalls { get; set; }
         [JsonPropertyName("model")]
-        public string Model { get; set; }
+        public string Model { get; set; } = string.Empty;
         [JsonPropertyName("instructions")]
-        public string Instructions { get; set; }
+        public string Instructions { get; set; } = string.Empty;
         [JsonPropertyName("tools")]
-        public List<ResponseOpenAiRequestToolsDto> Tools { get; set; }
+        public List<ResponseOpenAiRequestToolsDto> Tools { get; set; } = new ();
         [JsonPropertyName("input")]
-        public List<ResponseOpenAiRequestInputDto> Input { get; set; }
+        public List<ResponseOpenAiRequestInputDto> Input { get; set; } = new ();
 
     }
 }

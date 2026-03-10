@@ -6,10 +6,6 @@ using System.Text.Json.Serialization;
 
 namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
 {
-    // [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-    // [JsonDerivedType(typeof(ResponseOpenAiResponseOutputMessageDto), OpenAiResponsesTypes.Message)]
-    // [JsonDerivedType(typeof(ResponseOpenAiResponseOutputMcpCallDto), OpenAiResponsesTypes.McpCall)]
-    // [JsonDerivedType(typeof(ResponseOpenAiResponseOutputMcpListToolsDto), OpenAiResponsesTypes.McpListTools)]
     public class ResponseOpenAiResponseOutputDto
     {
         public string Id { get; set; }

@@ -51,7 +51,7 @@ namespace WoopiAiHub.Application.Services
                                IHttpContextAccessor httpContextAccessor,
                                IPasswordHasher passwordHasher,
                                IRefreshTokenServices refreshTokenServices,
-            IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
+                                IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
                                IResponseApi responseApi,
                                IApiTemplateServices apiTemplateServices)
         {
@@ -80,8 +80,6 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public async Task<object> Login(LoginDto loginDto)
         {
-
-
             var userAccess = await CheckMarketplaceAccess(loginDto.Email);
             if (userAccess != null && userAccess.HasAccess)
             {

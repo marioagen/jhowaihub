@@ -7,9 +7,9 @@
         public string Name { get; set; } = string.Empty;
         public string Method { get; set; } = string.Empty;
         public string Url { get; set; } = string.Empty;
-        public string? QueryTemplate { get; set; }
-        public string? HeaderTemplate { get; set; }
-        public string? BodyTemplate { get; set; }
-        public string? Description { get; set; }
+        public string? QueryTemplate { get; set; } = string.Empty;
+        public string? HeaderTemplate { get; set; } = string.Empty;
+        public string? BodyTemplate { get; set; } = string.Empty;
+        public string? Description { get; set; } = string.Empty;
     }
 }

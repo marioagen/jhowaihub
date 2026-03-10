@@ -4,13 +4,13 @@ using System.Text.Json.Serialization;
 
 namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
 {
-    public class ResponseOpenAiResponseOutputMessageContentDto 
+    public class ResponseOpenAiResponseOutputMessageContentDto
     {
         [JsonPropertyName("type")]
-        public string Type { get; set; } = default!;   // "output_text", etc.
+        public string Type { get; set; } = string.Empty;
 
         [JsonPropertyName("text")]
-        public string? Text { get; set; }
+        public string? Text { get; set; } = string.Empty;
 
     }
 }

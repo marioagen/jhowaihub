@@ -43,7 +43,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly IApiTemplateServices _apiTemplateServices;
 
-
         public PromptServices(IUnitOfWork unitOfWork,
             IPromptRepository promptRepository,
             IValidatePrompt validatePrompt,
@@ -84,7 +83,6 @@ namespace WoopiAiHub.Application.Services
             _responseApi = responseApi;
             _apiTemplateServices = apiTemplateServices;
         }
-
 
         /// <summary>
         /// Find prompt templates from external source
@@ -627,7 +625,6 @@ namespace WoopiAiHub.Application.Services
                 _chatCompletionSettings.ApiVersion,
                 tenantInfo.AiGatewayKey,
                 chatCompletionDto);
-
 
             var tokens = response.Usage?.TotalTokens ?? 0;
             await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model);

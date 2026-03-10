@@ -12,7 +12,7 @@ namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
         public string ApplicationId {  get; set; } = string.Empty;
         public string ApplicationKey { get; set; } = string.Empty;
         public string ResponseQueue { get; set; } = string.Empty;
-        public MetaDataAutomationDto Data { get; set; }
+        public MetaDataAutomationDto Data { get; set; } = new ();
         public ResponseOpenAiRequestDto OpenAiResponse { get; set; } = new();
     }
 }

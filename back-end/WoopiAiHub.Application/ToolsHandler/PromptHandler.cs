@@ -163,26 +163,7 @@ REGRAS DE RESPOSTA:
                  }
         };
 
-        // try
-        // {
-        //     var response2 = await _responseApi.GetResponseOpenAi(
-        //         // tenantInfo.AiGatewayApplicationId.Value.ToString(),
-        //         "85032382-3b50-4b4c-e757-08de641e689e",
-        //         "gpt-4.1",
-        //         // _responseOpenAiSettings.ApiVersion,
-        //         // Guid.NewGuid().ToString(),
-        //         "d354301e-6b4b-4a3f-beef-1f9715dd2dfd",
-        //         // tenantInfo.AiGatewayKey,
-        //         "5759793d457c3554be2a4269d0a0c3e5a52d6668201c05099829b993aacbfe8",
-        //         dto);
-        // }
-        // catch (Exception ex)
-        // {
-        //     // TODO
-        //     System.Console.WriteLine(ex.Message);
-        // }
-
-        var x = new ExecutionMessageDto
+        return new ExecutionMessageDto
         {
             Queue = _messageQueues.OpenAiResponseQueue,
             Message = new OpenAiResponseQueryDto
@@ -199,35 +180,5 @@ REGRAS DE RESPOSTA:
                 Email = automationServicesDto.Email
             }
         };
-        return x;
-        // return new ExecutionMessageDto
-        // {
-        //     Queue = _messageQueues.ChatCompletionQueue,
-        //     Message = new ChatCompletionQueryDto
-        //     {
-        //         ResponseQueue = _messageQueues.ChatCompletionQueueAiHubResponse,
-        //         Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
-        //         ReferenceFile = automationServicesDto.ReferenceFile!,
-        //         Tenant = automationServicesDto.Tenant,
-        //         Model = _chatCompletionSettings.Model,
-        //         ApiVersion = _chatCompletionSettings.ApiVersion,
-        //         ApplicationId = tenantInfo!.AiGatewayApplicationId.Value.ToString(),
-        //         ApplicationKey = tenantInfo!.AiGatewayKey,
-        //         ChatCompletion = new ChatCompletionDto
-        //         {
-        //             Temperature = _chatCompletionSettings.Temperature,
-        //             MaxTokens = _chatCompletionSettings.MaxTokens,
-        //             Messages = new List<ChatMessageDto>
-        //                 {
-        //                     new ChatMessageDto
-        //                     {
-        //                         Role = "system",
-        //                         Content = string.Concat("Baseado no: \"", fullText, "\" e seguindo as orientações a seguir: ", promptDto!.Text)
-        //                     }
-        //                 }
-        //         },
-        //         Email = automationServicesDto.Email
-        //     }
-        // };
     }
 }

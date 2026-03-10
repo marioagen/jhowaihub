@@ -103,7 +103,7 @@ namespace WoopiAiHub.Application.Services
                 templateCreateDto.QueryTemplate,
                 templateCreateDto.HeaderTemplate,
                 templateCreateDto.BodyTemplate,
-                ""
+                templateCreateDto.Description
             );
 
             return await _templateRepository.CreateAsync(template);

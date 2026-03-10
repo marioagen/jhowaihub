@@ -58,7 +58,6 @@ namespace WoopiAiHub.Application.Messaging
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
                     var promptServices = scope.ServiceProvider.GetRequiredService<IPromptServices>();
-                    // await promptServices.ProcessChatCompletionResult(message);
                     await promptServices.ProcessOpenAiResponseResult(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
