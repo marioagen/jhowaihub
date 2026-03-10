@@ -99,7 +99,8 @@ namespace WoopiAiHub.Repository
                 Url = item.Url,
                 QueryTemplate = item.QueryTemplate,
                 HeaderTemplate = item.HeaderTemplate,
-                BodyTemplate = item.BodyTemplate
+                BodyTemplate = item.BodyTemplate,
+                Description=item.Description
             })];
         }
 

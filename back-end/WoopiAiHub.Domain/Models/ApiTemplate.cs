@@ -26,6 +26,9 @@ namespace WoopiAiHub.Domain.Models
         [Column("BodyTemplate", TypeName = "varchar(max)")]
         public string? BodyTemplate { get; private set; }
 
+        [Column("Description", TypeName = "varchar(max)")]
+        public string Description { get; private set; }
+
 
         public void UpdateName(string name) => Name = name;
         public void UpdateMethod(string method) => Method = method;
@@ -34,7 +37,7 @@ namespace WoopiAiHub.Domain.Models
         public void UpdateHeaderTemplate(string? headerTemplate) => HeaderTemplate = headerTemplate;
         public void UpdateBodyTemplate(string? bodyTemplate) => BodyTemplate = bodyTemplate;
 
-        public ApiTemplate(string name, string method, string url, string? queryTemplate, string? headerTemplate, string? bodyTemplate) 
+        public ApiTemplate(string name, string method, string url, string? queryTemplate, string? headerTemplate, string? bodyTemplate, string? description) 
             : base(0, DateTime.Now)
         {
             Name = name;
@@ -43,6 +46,7 @@ namespace WoopiAiHub.Domain.Models
             QueryTemplate = queryTemplate;
             HeaderTemplate = headerTemplate;
             BodyTemplate = bodyTemplate;
+            Description = description ?? string.Empty;
             Validate();
         }
 

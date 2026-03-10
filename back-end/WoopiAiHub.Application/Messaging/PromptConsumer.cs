@@ -7,7 +7,7 @@ using System.Text.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
-using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -20,24 +20,24 @@ namespace WoopiAiHub.Application.Messaging
 {
     public class PromptConsumer : BaseConsumer
     {
-        private readonly IMessageConsumer<ChatCompletionResponseDto> _consumer;
+        private readonly IMessageConsumer<OpenAiResponseConsumerResponseDto> _consumer;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<PromptConsumer> _logger;
         private readonly MessageQueues _queues;
-        private readonly ChatCompletionSettings _chatCompletionSettings;
+        private readonly ResponseOpenAiSettings _responseOpenAiSettings;
 
         public PromptConsumer(IServiceScopeFactory scopeFactory,
                               IConfiguration configuration,
-                              IMessageConsumer<ChatCompletionResponseDto> consumer,
+                              IMessageConsumer<OpenAiResponseConsumerResponseDto> consumer,
                               ILogger<PromptConsumer> logger,
                               IOptions<MessageQueues> queues,
-                              IOptions<ChatCompletionSettings> chatCompletionSettings) : base(configuration)
+                              IOptions<ResponseOpenAiSettings> responseOpenAiSettings) : base(configuration)
         {
             _scopeFactory = scopeFactory;
             _queues = queues.Value;
-            _chatCompletionSettings = chatCompletionSettings.Value;
             _consumer = consumer;
             _logger = logger;
+            _responseOpenAiSettings = responseOpenAiSettings.Value;
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace WoopiAiHub.Application.Messaging
         /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _consumer.ConsumerAsync(_queues.ChatCompletionQueueAiHubResponse, async message =>
+            await _consumer.ConsumerAsync(_queues.OpenAiResponseQueueAiHubResponse, async message =>
             {
                 using var scope = _scopeFactory.CreateScope();
                 try
@@ -58,13 +58,14 @@ namespace WoopiAiHub.Application.Messaging
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
                     var promptServices = scope.ServiceProvider.GetRequiredService<IPromptServices>();
-                    await promptServices.ProcessChatCompletionResult(message);
+                    // await promptServices.ProcessChatCompletionResult(message);
+                    await promptServices.ProcessOpenAiResponseResult(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
 
-                    var tokens = message.Usage?.TotalTokens ?? 0;
-                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email, tokens, _chatCompletionSettings.Model);
+                    var tokens = message.Response.Usage?.TotalTokens ?? 0;
+                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email, tokens, _responseOpenAiSettings.Model);
 
                     var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(message.Data.ToString());
                     var automationServicesDto = new AutomationServicesDto

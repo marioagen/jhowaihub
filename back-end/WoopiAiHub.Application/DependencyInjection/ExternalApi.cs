@@ -4,7 +4,6 @@ using Refit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Utils;
-using WoopiAiHub.Infrastructure.Messaging.Configuration;
 
 namespace WoopiAiHub.Application.DependencyInjection
 {
@@ -39,6 +38,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddRefitClient<IGraphApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.GraphApiBaseAddress));
             services.AddRefitClient<IMarketPlaceApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.MarketPlaceBaseAddress));
             services.AddRefitClient<IChatCompletionApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.AiGatewayApiBaseAddress));
+            services.AddRefitClient<IResponseApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.AiGatewayApiBaseAddress));
 
             services.Configure<EncryptionSettings>(configuration.GetSection("EncryptionSettings"));
             services.Configure<PromptSettings>(configuration.GetSection("PromptSettings"));

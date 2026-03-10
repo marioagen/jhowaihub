@@ -10,5 +10,6 @@ namespace WoopiAiHub.Domain.Utils
         public const string XFunctionsKey = "x-functions-key";
         public const string KeyAccess = "Key-Access";
         public const string ChatCompletionApyKey = "api-key";
+        public const string ResponseApiKey = "api-key";
     }
 }

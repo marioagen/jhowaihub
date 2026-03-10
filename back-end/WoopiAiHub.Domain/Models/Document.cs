@@ -1,5 +1,4 @@
-﻿using WoopiAiHub.Domain.Enum;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {

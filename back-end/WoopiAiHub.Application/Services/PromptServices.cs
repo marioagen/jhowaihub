@@ -7,6 +7,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
@@ -36,8 +37,12 @@ namespace WoopiAiHub.Application.Services
         private readonly PromptSettings _promptSettings;
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly IChatCompletionApi _chatCompletionApi;
+        private readonly IResponseApi _responseApi;
         private readonly ChatCompletionSettings _chatCompletionSettings;
+        private readonly ResponseOpenAiSettings _responseOpenAiSettings;
         private readonly IUsageDailyServices _usageDailyServices;
+        private readonly IApiTemplateServices _apiTemplateServices;
+
 
         public PromptServices(IUnitOfWork unitOfWork,
             IPromptRepository promptRepository,
@@ -54,7 +59,10 @@ namespace WoopiAiHub.Application.Services
             ITenantCacheServices tenantCacheServices,
             IChatCompletionApi chatCompletionApi,
             IOptions<ChatCompletionSettings> chatCompletionSettings,
-            IUsageDailyServices usageDailyServices)
+            IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
+            IUsageDailyServices usageDailyServices,
+            IResponseApi responseApi,
+            IApiTemplateServices apiTemplateServices)
         {
             _unitOfWork = unitOfWork;
             _promptRepository = promptRepository;
@@ -71,7 +79,10 @@ namespace WoopiAiHub.Application.Services
             _tenantCacheServices = tenantCacheServices;
             _chatCompletionApi = chatCompletionApi;
             _chatCompletionSettings = chatCompletionSettings.Value;
+            _responseOpenAiSettings = responseOpenAiSettings.Value;
             _usageDailyServices = usageDailyServices;
+            _responseApi = responseApi;
+            _apiTemplateServices = apiTemplateServices;
         }
 
 
@@ -373,7 +384,10 @@ namespace WoopiAiHub.Application.Services
 
             return new PagedResultDto<PromptDto>()
             {
-                Items = query, CurrentPage = currentPage, TotalPages = pageCount, Count = count
+                Items = query,
+                CurrentPage = currentPage,
+                TotalPages = pageCount,
+                Count = count
             };
         }
 
@@ -494,6 +508,48 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        public async Task ProcessOpenAiResponseResult(OpenAiResponseConsumerResponseDto responseDto)
+        {
+            var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(responseDto.Data.ToString());
+            var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(dataDto.StepToolId,
+                dataDto.CardId);
+            if (execution == null)
+            {
+                throw new ArgumentException("StepToolExecution not found");
+            }
+
+            var message = responseDto
+                    .Response
+                    .Output
+                    .FirstOrDefault(x => x.Type == OpenAiResponsesTypes.Message)?
+                    .Content
+                    .FirstOrDefault(x => x.Type == OpenAiResponseInputContentType.OutputText)?
+                    .Text ?? string.Empty;
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+
+                if (!string.IsNullOrEmpty(message))
+                {
+                    var documentHistory = new DocumentHistory(execution.Card!.DocumentId,
+                    "Prompt",
+                    message,
+                    0,
+                    DateTime.Now);
+                    _documentHistoryRepository.Create(documentHistory);
+                    await UpdateExecutionAsync(execution!, responseDto.Email);
+                    await SaveStepToolOutputAsync(execution!, message);
+                }
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
+        }
+
         /// <summary>
         /// Updates StepToolExecution status and send notification 
         /// </summary>
@@ -564,12 +620,14 @@ namespace WoopiAiHub.Application.Services
                 MaxTokens = _chatCompletionSettings.MaxTokens,
                 Messages = new List<ChatMessageDto> { new ChatMessageDto { Role = "system", Content = fullPrompt } }
             };
+
             var response = await _chatCompletionApi.GetChatCompletion(
                 tenantInfo.AiGatewayApplicationId.Value.ToString(),
                 _chatCompletionSettings.Model,
                 _chatCompletionSettings.ApiVersion,
                 tenantInfo.AiGatewayKey,
                 chatCompletionDto);
+
 
             var tokens = response.Usage?.TotalTokens ?? 0;
             await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model);
