@@ -4,8 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WoopiAiHub.Application.DependencyInjection;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Repository;
 using WoopiAiHub.Repository.DependencyInjection;
 
@@ -29,8 +31,8 @@ var host = new HostBuilder()
         services.AddScoped<IUsageAggregationService, UsageAggregationService>();
         services.AddScoped<IUsageArchiveService, UsageArchiveService>();
         services.AddScoped<IUsageLogRepository, UsageLogRepository>();
-        services.AddScoped<IUsageLogRepository, UsageLogRepository>();
         services.AddScoped<ISubscriptionPeriodServices, SubscriptionPeriodServices>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
     })
     .Build();
 
