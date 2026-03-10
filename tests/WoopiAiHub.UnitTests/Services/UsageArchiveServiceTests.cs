@@ -12,6 +12,8 @@ using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
+using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Repository.Context;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
@@ -108,6 +110,11 @@ namespace WoopiAiHub.UnitTests.Services
             mockUsageDailyRepo.Setup(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<UsageDaily>());
 
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
                 .Returns(mockUsageDailyRepo.Object);
@@ -194,6 +201,11 @@ namespace WoopiAiHub.UnitTests.Services
             mockSubscriptionPeriodService.Setup(x => x.FindLastUnprocessedAsync())
                 .ReturnsAsync((SubscriptionPeriod?)null);
 
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
                 .Returns(mockUsageDailyRepo.Object);
@@ -244,6 +256,11 @@ namespace WoopiAiHub.UnitTests.Services
             mockUsageDailyRepo.Setup(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<UsageDaily>());
 
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
                 .Returns(mockUsageDailyRepo.Object);
@@ -295,6 +312,11 @@ namespace WoopiAiHub.UnitTests.Services
             mockUsageDailyRepo.Setup(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<UsageDaily>());
 
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
                 .Returns(mockUsageDailyRepo.Object);
@@ -357,6 +379,11 @@ namespace WoopiAiHub.UnitTests.Services
             mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
             mockUsageDailyRepo.Setup(x => x.FindOldRecordsAsync(It.IsAny<DateTime>()))
                 .ReturnsAsync(new List<UsageDaily>());
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
                 .Returns(mockUsageDailyRepo.Object);
@@ -419,6 +446,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(x => x.ExistsAsync(It.Is<int>(id => id == 2), It.IsAny<DateTime>(),
                     It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository)))
                 .Returns(mockUsageDailyRepo.Object);
@@ -449,9 +481,9 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var tenants = new List<TenantListDto>
             {
-                new TenantListDto 
-                { 
-                    Name = "Tenant1", 
+                new TenantListDto
+                {
+                    Name = "Tenant1",
                     DatabaseName = "DB1",
                     DateStart = DateTime.UtcNow.AddMonths(-2),
                     DateEnd = DateTime.UtcNow.AddDays(-1)
@@ -488,6 +520,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .ThrowsAsync(new HttpRequestException("Network error"))
                 .ReturnsAsync(true);
 
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(mockUsageLogRepo.Object);
@@ -513,9 +550,9 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var tenants = new List<TenantListDto>
             {
-                new TenantListDto 
-                { 
-                    Name = "Tenant1", 
+                new TenantListDto
+                {
+                    Name = "Tenant1",
                     DatabaseName = "DB1",
                     DateStart = DateTime.UtcNow.AddMonths(-2),
                     DateEnd = DateTime.UtcNow.AddDays(-1)
@@ -550,6 +587,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
                 .ThrowsAsync(new HttpRequestException("Service unavailable"));
 
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(mockUsageLogRepo.Object);
@@ -593,6 +635,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(x => x.FindLastUnprocessedAsync())
                 .ReturnsAsync((SubscriptionPeriod?)null);
 
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(new Mock<IUsageLogRepository>().Object);
@@ -619,9 +666,9 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var tenants = new List<TenantListDto>
             {
-                new TenantListDto 
-                { 
-                    Name = "Tenant1", 
+                new TenantListDto
+                {
+                    Name = "Tenant1",
                     DatabaseName = "DB1",
                     DateStart = DateTime.UtcNow.AddMonths(-1),
                     DateEnd = DateTime.UtcNow.AddDays(30)
@@ -646,6 +693,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(x => x.FindLastUnprocessedAsync())
                 .ReturnsAsync((SubscriptionPeriod?)null);
 
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(new Mock<IUsageLogRepository>().Object);
@@ -671,9 +723,9 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var tenants = new List<TenantListDto>
             {
-                new TenantListDto 
-                { 
-                    Name = "Tenant1", 
+                new TenantListDto
+                {
+                    Name = "Tenant1",
                     DatabaseName = "DB1",
                     DateStart = DateTime.UtcNow.AddMonths(-2),
                     DateEnd = DateTime.UtcNow.AddDays(-1)
@@ -710,6 +762,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
                 .ReturnsAsync(true);
 
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(new Mock<IUsageLogRepository>().Object);
@@ -726,21 +783,21 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             _marketPlaceApiMock
                 .Verify(x => x.ProcessConsumption(
-                    "test-key", 
-                    It.Is<TenantConsumptionDto>(dto => dto.Tenant == "Tenant1" && dto.UsageCount == 150)), 
+                    "test-key",
+                    It.Is<TenantConsumptionDto>(dto => dto.Tenant == "Tenant1" && dto.UsageCount == 150)),
                     Times.Once);
         }
 
-        [Fact(DisplayName = "SendMonthlyUsageIfExpiredAsync should return early when no usage found")]
-        [Trait("SendMonthlyUsage", "EarlyExit")]
-        public async Task SendMonthlyUsageIfExpiredAsync_NoUsage_ReturnsEarly()
+        [Fact(DisplayName = "SendMonthlyUsageIfExpiredAsync should send consumption even when usage is zero")]
+        [Trait("SendMonthlyUsage", "Success")]
+        public async Task SendMonthlyUsageIfExpiredAsync_NoUsage_SendsConsumption()
         {
             // Arrange
             var tenants = new List<TenantListDto>
             {
-                new TenantListDto 
-                { 
-                    Name = "Tenant1", 
+                new TenantListDto
+                {
+                    Name = "Tenant1",
                     DatabaseName = "DB1",
                     DateStart = DateTime.UtcNow.AddMonths(-2),
                     DateEnd = DateTime.UtcNow.AddDays(-1)
@@ -769,7 +826,19 @@ namespace WoopiAiHub.UnitTests.Services
                     DateTime.UtcNow.AddMonths(-2),
                     DateTime.UtcNow.AddDays(-1),
                     false));
+            mockSubscriptionPeriodService
+                .Setup(x => x.UpdateToProcessedAsync(It.IsAny<int>()))
+                .Returns(Task.CompletedTask);
 
+            _marketPlaceApiMock
+                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
+                .ReturnsAsync(true);
+
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(new Mock<IUsageLogRepository>().Object);
@@ -785,7 +854,10 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             _marketPlaceApiMock
-                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Never);
+                .Verify(x => x.ProcessConsumption(
+                    "test-key",
+                    It.Is<TenantConsumptionDto>(dto => dto.Tenant == "Tenant1" && dto.UsageCount == 0)),
+                    Times.Once);
         }
 
         [Fact(DisplayName = "SendMonthlyUsageIfExpiredAsync should return early when DateEnd is null")]
@@ -795,9 +867,9 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var tenants = new List<TenantListDto>
             {
-                new TenantListDto 
-                { 
-                    Name = "Tenant1", 
+                new TenantListDto
+                {
+                    Name = "Tenant1",
                     DatabaseName = "DB1",
                     DateStart = DateTime.UtcNow.AddMonths(-1),
                     DateEnd = null
@@ -822,6 +894,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(x => x.FindLastUnprocessedAsync())
                 .ReturnsAsync((SubscriptionPeriod?)null);
 
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
             mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
             mockServiceProvider.Setup(x => x.GetService(typeof(IUsageLogRepository))).Returns(new Mock<IUsageLogRepository>().Object);

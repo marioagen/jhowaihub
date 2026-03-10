@@ -199,6 +199,7 @@ const portuguese = {
         update: "Atualizar",
         WTCText:
             "WTC (Woopi Total Cost) é a soma ponderada do consumo no período selecionado, baseada nos multiplicadores do seu plano. Este não é um valor financeiro.",
+        refreshText: "Atualização automática a cada 5 minutos",
     },
     documents: {
         actions: {
@@ -236,6 +237,7 @@ const portuguese = {
             uploadedFilesError: "Falha ao fazer upload dos arquivos!",
             uploadError: "Algo deu errado",
             uploadFailure: "Falha no upload",
+            batchError: "Erro ao processar o lote de documentos",
         },
         expandHistory: "Expandir histórico",
         failedToNormalize: "Falha ao normalizar",
@@ -327,6 +329,7 @@ const portuguese = {
         youAreAboutToDeleteDocument: "Você está prestes a deletar <br/> o documento do sistema",
         youAreAboutToDeleteDocumentQuery:
             "Você está prestes a deletar <br/> o histórico de consulta do sistema",
+        documentsBatchCheckbox: "Documentos em lote",
     },
     filters: {
         assignment: {
@@ -366,6 +369,9 @@ const portuguese = {
         statusSelect: {
             none: "Status do card",
         },
+        all: "Todos",
+        singleDocuments: "Documentos únicos",
+        batchDocuments: "Documentos em lote",
     },
     flow: {
         downloadJson: "Baixar JSON",
@@ -525,6 +531,7 @@ const portuguese = {
             createBtn: "Novo Time",
             createSubtitle: "Crie um novo time para o sistema",
             createTitle: "Novo Time",
+            duplicated: "Time duplicado",
             deleteSuccess: "Time deletado com sucesso",
             editSubtitle: "Atualize as informações do time selecionado",
             editTitle: "Editar Time",
@@ -799,6 +806,7 @@ const portuguese = {
         type: "Tipo de documento",
         youAreAboutToDeleteQuestionnaire:
             "Você está prestes a deletar <br/> um questionário do sistema",
+        noItemsSelected: "Nenhum item selecionado",
     },
     template: {
         title: "Templates de API",
@@ -1044,7 +1052,7 @@ const portuguese = {
             management: "Gestão de Esteira de Processamentos",
         },
         statusList: {
-            analyzed: "Análisado",
+            analyzed: "Analisado",
             approved: "Aprovado",
             awaitinganalysis: "Esperando Análise",
             done: "Concluído",

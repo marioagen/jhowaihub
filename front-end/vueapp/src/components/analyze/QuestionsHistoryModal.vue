@@ -35,7 +35,7 @@
                 <div class="row g-2 mb-3">
                     <div class="col">
                         <div class="input-group input-group-sm">
-                            <span class="input-group-text border-end-0 bg-white">
+                            <span class="input-group-text border-end-0">
                                 <LucideIcon
                                     icon="Search"
                                     :size="16"
@@ -52,7 +52,7 @@
                     </div>
                     <div class="col-auto">
                         <div class="input-group input-group-sm">
-                            <span class="input-group-text border-end-0 bg-white">
+                            <span class="input-group-text border-end-0">
                                 <LucideIcon
                                     icon="User"
                                     :size="16"
@@ -228,7 +228,7 @@
     import ModalComponent from "@/components/global/ModalComponent.vue";
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
-    import DocumentsServices from "@/services/documents/DocumentsServices";
+    import DocumentHistoryServices from "@/services/documents/DocumentHistoryServices";
     import UserService from "@/services/users/UserService";
 
     export default {
@@ -314,7 +314,7 @@
                     order: this.filters.order,
                     orderBy: this.filters.orderBy,
                 };
-                DocumentsServices.getDocumentQuestionsHistory(this.documentId, filters)
+                DocumentHistoryServices.getDocumentQuestionsHistory(this.documentId, filters)
                     .then((response) => {
                         if (response?.error) {
                             this.conversationCards = [];
@@ -388,17 +388,17 @@
     }
 
     .conversation-card {
-        background-color: var(--bs-light, #f8f9fa) !important;
+        background-color: var(--color-bg-navbar) !important;
     }
 
     .badge-tag-questionario {
-        background-color: #e8e0f0 !important;
-        color: #6b5b7a !important;
+        background-color: var(--color-bg-badge) !important;
+        color: var(--color-body-content) !important;
     }
 
     .badge-tag-pergunta-livre {
-        background-color: #cce5ff !important;
-        color: #004085 !important;
+        background-color: var(--color-bg-primary-badge) !important;
+        color: var(--color-text-primary-badge) !important;
     }
 
     .modal-header .modal-title {

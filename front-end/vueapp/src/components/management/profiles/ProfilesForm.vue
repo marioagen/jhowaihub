@@ -688,13 +688,6 @@
         padding: 0 13px;
     }
 
-    .main-div {
-        border: 1px solid #d3d3d3;
-        border-radius: 8px;
-        background: white;
-        padding: 20px 24px;
-    }
-
     .accordion-wrapper-scroll {
         max-height: 300px;
         overflow-y: auto;
@@ -708,5 +701,9 @@
     .accordion-wrapper-scroll::-webkit-scrollbar-thumb {
         background-color: rgba(0, 0, 0, 0.2);
         border-radius: 3px;
+    }
+
+    .border {
+        border: 1px solid var(--color-border-form-control) !important;
     }
 </style>

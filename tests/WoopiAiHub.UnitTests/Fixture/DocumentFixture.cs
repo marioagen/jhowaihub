@@ -1,4 +1,4 @@
-﻿using Azure.AI.FormRecognizer.DocumentAnalysis;
+using Azure.AI.FormRecognizer.DocumentAnalysis;
 using Bogus;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
@@ -35,7 +35,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return Document;
         }
 
-        public TenantInfoDto FindValidTenantInfoDto()
+        public static TenantInfoDto FindValidTenantInfoDto()
         {
             var faker = new Faker<TenantInfoDto>("pt_BR")
               .CustomInstantiator(f => new TenantInfoDto
@@ -67,43 +67,39 @@ namespace WoopiAiHub.UnitTests.Fixture
             return DocumentAnalysisModelFactory.AnalyzeResult("Analysis", "Content", documentPages, documentTables);
         }
 
-        public HttpResponseMessage FindHttpResponseMessage()
+        public static HttpResponseMessage FindHttpResponseMessage()
         {
             var filePath = @"../../../Files/TestPDF.pdf";
-            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                var stream = new MemoryStream();
-                fileStream.CopyTo(stream);
+            using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            var stream = new MemoryStream();
+            fileStream.CopyTo(stream);
 
-                HttpResponseMessage httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK);
-                httpResponseMessage.Content = new StreamContent(stream);
-                httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
-                httpResponseMessage.Content.Headers.ContentDisposition.FileName = "TestPDF";
-                httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+            HttpResponseMessage httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK);
+            httpResponseMessage.Content = new StreamContent(stream);
+            httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+            httpResponseMessage.Content.Headers.ContentDisposition.FileName = "TestPDF";
+            httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
 
-                return httpResponseMessage;
-            }
+            return httpResponseMessage;
         }
 
-        public HttpResponseMessage FindInvalidHttpResponseMessage()
+        public static HttpResponseMessage FindInvalidHttpResponseMessage()
         {
             var filePath = @"../../../Files/TestPDF.pdf";
-            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                var stream = new MemoryStream();
-                fileStream.CopyTo(stream);
+            using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            var stream = new MemoryStream();
+            fileStream.CopyTo(stream);
 
-                HttpResponseMessage httpResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
-                httpResponseMessage.Content = new StreamContent(stream);
-                httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
-                httpResponseMessage.Content.Headers.ContentDisposition.FileName = "TestPDF";
-                httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+            HttpResponseMessage httpResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
+            httpResponseMessage.Content = new StreamContent(stream);
+            httpResponseMessage.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+            httpResponseMessage.Content.Headers.ContentDisposition.FileName = "TestPDF";
+            httpResponseMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
 
-                return httpResponseMessage;
-            }
+            return httpResponseMessage;
         }
 
-        public DocumentHistory FindValidDocumentHistory()
+        public static DocumentHistory FindValidDocumentHistory()
         {
             DocumentHistory DocumentHistory = new Faker<DocumentHistory>("pt_BR")
             .CustomInstantiator(f => new DocumentHistory
@@ -119,7 +115,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return DocumentHistory;
         }
 
-        public List<DocumentHistory> FindValidDocumentHistoryList()
+        public static List<DocumentHistory> FindValidDocumentHistoryList()
         {
             List<DocumentHistory> DocumentHistory = new Faker<DocumentHistory>("pt_BR")
             .CustomInstantiator(f => new DocumentHistory
@@ -134,7 +130,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return DocumentHistory;
         }
 
-        public DocumentNormalized FindValidDocumentNormalized()
+        public static DocumentNormalized FindValidDocumentNormalized()
         {
             DocumentNormalized DocumentNormalized = new Faker<DocumentNormalized>("pt_BR")
             .CustomInstantiator(f => new DocumentNormalized
@@ -148,7 +144,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return DocumentNormalized;
         }
 
-        public DocumentPagedDataDto FindValidDocumentPagedDataDto()
+        public static DocumentPagedDataDto FindValidDocumentPagedDataDto()
         {
             DocumentPagedDataDto documentPagedDataDto = new Faker<DocumentPagedDataDto>("pt_BR")
             .RuleFor(a => a.Page, 1)
@@ -160,7 +156,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return documentPagedDataDto;
         }
 
-        public DocumentPagedDataDto FindInvalidDocumentPagedDataDto()
+        public static DocumentPagedDataDto FindInvalidDocumentPagedDataDto()
         {
             DocumentPagedDataDto documentPagedDataDto = new Faker<DocumentPagedDataDto>("pt_BR")
             .RuleFor(a => a.Page, 0)
@@ -172,7 +168,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return documentPagedDataDto;
         }
 
-        public UpdateHistoryDto FindValidUpdateHistoryDto()
+        public static UpdateHistoryDto FindValidUpdateHistoryDto()
         {
             UpdateHistoryDto updateHistoryDto = new Faker<UpdateHistoryDto>("pt_BR")
              .RuleFor(a => a.IdDocument, f => f.IndexFaker)
@@ -182,7 +178,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return updateHistoryDto;
         }
 
-        public QuestionnaireDto FindValidQuestionnaireDto()
+        public static QuestionnaireDto FindValidQuestionnaireDto()
         {
             var typeDoc = new TypeDoc("name", "email", 1, DateTime.Now);
             QuestionnaireDto questionnaireDto = new Faker<QuestionnaireDto>("pt_BR")
@@ -197,7 +193,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return questionnaireDto;
         }
 
-        public ICollection<Question> FindValidQuestion()
+        public static ICollection<Question> FindValidQuestion()
         {
             var Question = new Faker<Question>("pt_BR")
             .CustomInstantiator(f => new Question
@@ -211,7 +207,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return Question.Generate(1);
         }
 
-        public RequestCreateDocumentDto FindValidRequestCreateDocumentDto()
+        public static RequestCreateDocumentDto FindValidRequestCreateDocumentDto()
         {
             var filePath = @"../../../Files/TestPDF.pdf";
             var file = new FileInfo(filePath);
@@ -225,13 +221,37 @@ namespace WoopiAiHub.UnitTests.Fixture
                 Name: "idea",
                 Description: "desc",
                 EmailCreator: faker.Internet.Email(),
-                Workflows: new List<int> { 10 }
+                Workflows: new List<int> { 10 },
+                IsLastFile: true,
+                IsDocumentBatch: false
             );
 
             return dto;
         }
 
-        public FileUploadSummaryDto FindValidFileUploadSummaryDto()
+        public static RequestCreateDocumentDto FindValidRequestCreateDocumentDtoForBatch(string fileName, bool isLastFile)
+        {
+            var filePath = @"../../../Files/TestPDF.pdf";
+            var file = new FileInfo(filePath);
+            var formFile = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, file.Length, "Chunk", file.Name);
+            var faker = new Faker("pt_BR");
+
+            var dto = new RequestCreateDocumentDto(
+                Chunk: formFile,
+                Filename: "title",
+                IsLast: true,
+                Name: fileName,
+                Description: "desc",
+                EmailCreator: faker.Internet.Email(),
+                Workflows: new List<int> { 10 },
+                IsLastFile: isLastFile,
+                IsDocumentBatch: true
+            );
+
+            return dto;
+        }
+
+        public static FileUploadSummaryDto FindValidFileUploadSummaryDto()
         {
             FileUploadSummaryDto fileUploadSummaryDto = new Faker<FileUploadSummaryDto>("pt_BR")
              .RuleFor(a => a.TotalSizeUploaded, "test")
@@ -241,7 +261,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return fileUploadSummaryDto;
         }
 
-        public DocumentAnalysisResponseDto FindValidDocumentAnalysisResponseDto()
+        public static DocumentAnalysisResponseDto FindValidDocumentAnalysisResponseDto()
         {
             DocumentAnalysisResponseDto documentAnalysisResponseDto = new Faker<DocumentAnalysisResponseDto>("pt_BR")
              .RuleFor(a => a.Id, 1)
@@ -264,7 +284,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return headersDto;
         }
 
-        public DocumentInputDto FindValidDocumentInputDto()
+        public static DocumentInputDto FindValidDocumentInputDto()
         {
             DocumentInputDto documentInputDto = new Faker<DocumentInputDto>("pt_BR")
             .RuleFor(a => a.Id, 1)
@@ -273,7 +293,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return documentInputDto;
         }
 
-        public DocumentQuestionnaireDto FindDocumentQuestionnaireDto()
+        public static DocumentQuestionnaireDto FindDocumentQuestionnaireDto()
         {
             DocumentQuestionnaireDto documentQuestionnaireDto = new Faker<DocumentQuestionnaireDto>("pt_BR")
             .RuleFor(a => a.IdDocument, 1)
@@ -485,6 +505,15 @@ namespace WoopiAiHub.UnitTests.Fixture
                     }
                 });
             return faker;
+        }
+
+        public static DocumentBatch FindValidDocumentBatch()
+        {
+            var faker = new Faker("pt_BR");
+            return new DocumentBatch(
+                faker.Random.Int(1, 1000),
+                faker.Date.Past()
+            );
         }
     }
 

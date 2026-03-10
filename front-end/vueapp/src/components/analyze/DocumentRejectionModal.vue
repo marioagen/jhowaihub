@@ -1,5 +1,10 @@
 <template>
-    <ModalComponent id="modalReject" :isLoading="loading" @save="confirm" ref="ModalReject">
+    <ModalComponent
+        id="modalReject"
+        :isLoading="loading"
+        @save="confirm"
+        ref="ModalReject"
+    >
         <template #header>
             <div class="modal-header border-0 pb-0">
                 <div>
@@ -11,39 +16,76 @@
                         {{ $t("analyze.rejection.justificationInstructions") }}
                     </small>
                 </div>
-                <button class="btn-close" data-bs-dismiss="modal" @click="close" />
+                <button
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    @click="close"
+                />
             </div>
         </template>
         <template #body>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label for="justification" class="form-label">
+                    <label
+                        for="justification"
+                        class="form-label"
+                    >
                         {{ $t("analyze.rejection.justification") }}
                         <span class="text-danger">*</span>
                     </label>
-                    <Field name="justification" rules="required" v-slot="{ field, errorMessage }">
-                        <textarea v-bind="field" class="form-control" id="justification" rows="3"
+                    <Field
+                        name="justification"
+                        rules="required"
+                        v-slot="{ field, errorMessage }"
+                    >
+                        <textarea
+                            v-bind="field"
+                            class="form-control"
+                            id="justification"
+                            rows="3"
                             :class="{ 'is-invalid': errorMessage }"
-                            :placeholder="$t('analyze.rejection.justificationPlaceholder')"></textarea>
-                        <span v-if="errorMessage" class="validation-message text-danger">
+                            :placeholder="$t('analyze.rejection.justificationPlaceholder')"
+                        ></textarea>
+                        <span
+                            v-if="errorMessage"
+                            class="validation-message text-danger"
+                        >
                             {{ errorMessage }}
                         </span>
                     </Field>
                 </div>
                 <div class="mb-3">
-                    <label for="returnStep" class="form-label">
+                    <label
+                        for="returnStep"
+                        class="form-label"
+                    >
                         {{ $t("analyze.rejection.returnToStep") }}
                         <span class="text-danger">*</span>
                     </label>
-                    <Field name="selectedStepId" rules="required" v-slot="{ field, errorMessage }">
-                        <select v-bind="field" class="form-select" id="returnStep"
-                            :class="{ 'is-invalid': errorMessage }">
+                    <Field
+                        name="selectedStepId"
+                        rules="required"
+                        v-slot="{ field, errorMessage }"
+                    >
+                        <select
+                            v-bind="field"
+                            class="form-select"
+                            id="returnStep"
+                            :class="{ 'is-invalid': errorMessage }"
+                        >
                             <option value="">{{ $t("analyze.rejection.selectStep") }}</option>
-                            <option v-for="step in steps" :key="step.id" :value="step.id">
+                            <option
+                                v-for="step in steps"
+                                :key="step.id"
+                                :value="step.id"
+                            >
                                 {{ step.name }}
                             </option>
                         </select>
-                        <span v-if="errorMessage" class="validation-message text-danger">
+                        <span
+                            v-if="errorMessage"
+                            class="validation-message text-danger"
+                        >
                             {{ errorMessage }}
                         </span>
                     </Field>
@@ -52,10 +94,19 @@
         </template>
         <template #footer>
             <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-light" @click="close">
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    @click="close"
+                >
                     {{ $t("analyze.rejection.cancel") }}
                 </button>
-                <button type="button" class="btn btn-danger" @click="confirm" :disabled="loading">
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    @click="confirm"
+                    :disabled="loading"
+                >
                     {{ $t("analyze.rejection.confirm") }}
                 </button>
             </div>
@@ -63,111 +114,113 @@
     </ModalComponent>
 </template>
 <script>
-import { Field, useForm } from "vee-validate";
-import ModalComponent from "@/components/global/ModalComponent.vue";
-import AnalysisRejectionServices from "@/services/documents/AnalysisRejectionServices";
-import LogService from "@/services/log/logService";
+    import { Field, useForm } from "vee-validate";
+    import ModalComponent from "@/components/global/ModalComponent.vue";
+    import AnalysisRejectionServices from "@/services/documents/AnalysisRejectionServices";
+    import LogService from "@/services/log/logService";
 
-export default {
-    name: "DocumentRejectionModal",
-    components: {
-        ModalComponent,
-        Field,
-    },
-    setup() {
-        const { validate, setValues, values, resetForm } = useForm();
-        return { validate, setValues, values, resetForm };
-    },
-    props: {
-        cardId: {
-            type: [Number, String],
-            required: true,
+    export default {
+        name: "DocumentRejectionModal",
+        components: {
+            ModalComponent,
+            Field,
         },
-        documentId: {
-            type: [Number, String],
-            required: true,
+        setup() {
+            const { validate, setValues, values, resetForm } = useForm();
+            return { validate, setValues, values, resetForm };
         },
-    },
-    data() {
-        return {
-            steps: [],
-            loading: false,
-        };
-    },
-    methods: {
-        async fetchSteps(workflowId) {
-            try {
-                this.loading = true;
-                const response = await AnalysisRejectionServices.findWorkflowPreviousSteps(
-                    workflowId,
-                    this.cardId
-                );
-                if (response && Array.isArray(response)) {
-                    this.steps = response;
-                }
-            } catch (error) {
-                LogService.showMessage("Error fetching steps: " + error);
-            } finally {
-                this.loading = false;
-            }
+        props: {
+            cardId: {
+                type: [Number, String],
+                required: true,
+            },
+            documentId: {
+                type: [Number, String],
+                required: true,
+            },
         },
-        open(workflowId = null) {
-            this.resetForm({
-                values: {
-                    justification: "",
-                    selectedStepId: "",
-                },
-            });
-            this.fetchSteps(workflowId);
-            this.$refs.ModalReject.open();
-        },
-        close() {
-            this.$refs.ModalReject.close();
-            this.$emit("close");
-        },
-        async confirm() {
-            const result = await this.validate();
-            if (!result.valid) {
-                return LogService.showMessage(this.$t("analyze.reject.validationError"));
-            }
-
-            const params = {
-                cardId: this.cardId,
-                stepId: this.values.selectedStepId,
-                justification: this.values.justification,
+        data() {
+            return {
+                steps: [],
+                loading: false,
             };
+        },
+        methods: {
+            async fetchSteps(workflowId) {
+                try {
+                    this.loading = true;
+                    const response = await AnalysisRejectionServices.findWorkflowPreviousSteps(
+                        workflowId,
+                        this.cardId
+                    );
+                    if (response && Array.isArray(response)) {
+                        this.steps = response;
+                    }
+                } catch (error) {
+                    LogService.showMessage("Error fetching steps: " + error);
+                } finally {
+                    this.loading = false;
+                }
+            },
+            open(workflowId = null) {
+                this.resetForm({
+                    values: {
+                        justification: "",
+                        selectedStepId: "",
+                    },
+                });
+                this.fetchSteps(workflowId);
+                this.$refs.ModalReject.open();
+            },
+            close() {
+                this.$refs.ModalReject.close();
+                this.$emit("close");
+            },
+            async confirm() {
+                const result = await this.validate();
+                if (!result.valid) {
+                    return LogService.showMessage(this.$t("analyze.reject.validationError"));
+                }
 
-            try {
-                this.loading = true;
-                const response = await AnalysisRejectionServices.rejectAnalysis(params);
-                if (response && !response.error) {
-                    this.$emit("success");
-                    this.close();
-                    this.$notify({
-                        title: "analyze.rejection.title",
-                        message: "analyze.rejection.success",
-                        variant: "success",
-                        icon: "CircleCheckBig",
-                    });
-                } else {
+                const params = {
+                    cardId: Number(this.cardId) || parseInt(this.cardId, 10),
+                    stepId:
+                        Number(this.values.selectedStepId) ||
+                        parseInt(this.values.selectedStepId, 10),
+                    justification: this.values.justification,
+                };
+
+                try {
+                    this.loading = true;
+                    const response = await AnalysisRejectionServices.rejectAnalysis(params);
+                    if (response && !response.error) {
+                        this.$emit("success");
+                        this.close();
+                        this.$notify({
+                            title: "analyze.rejection.title",
+                            message: "analyze.rejection.success",
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
+                    } else {
+                        this.$notify({
+                            title: "analyze.rejection.title",
+                            message: "analyze.rejection.error",
+                            variant: "danger",
+                            icon: "CircleXBig",
+                        });
+                    }
+                } catch (error) {
                     this.$notify({
                         title: "analyze.rejection.title",
                         message: "analyze.rejection.error",
                         variant: "danger",
                         icon: "CircleXBig",
                     });
+                } finally {
+                    this.loading = false;
                 }
-            } catch (error) {
-                this.$notify({
-                    title: "analyze.rejection.title",
-                    message: "analyze.rejection.error",
-                    variant: "danger",
-                    icon: "CircleXBig",
-                });
-            } finally {
-                this.loading = false;
-            }
+            },
         },
-    },
-};
+    };
 </script>

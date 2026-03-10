@@ -187,6 +187,7 @@ const english = {
         update: "Update",
         WTCText:
             "WTC (Woopi Total Cost) is the weighted sum of consumption in the selected period, based on your plan's multipliers. This is not a financial value.",
+        refreshText: "Automatic update every 5 minutes",
     },
     documents: {
         actions: {
@@ -224,6 +225,7 @@ const english = {
             uploadedFilesError: "Fail to upload files!",
             uploadError: "Something is wrong",
             uploadFailure: "Upload failure",
+            batchError: "Error processing batch of documents",
         },
         expandHistory: "Expand history",
         failedToNormalize: "Failed to normalize",
@@ -314,6 +316,7 @@ const english = {
         youAreAboutToDeleteDocument: "You are about to delete <br/> the document from the system",
         youAreAboutToDeleteDocumentQuery:
             "You are about to delete <br/> the query history from the system",
+        documentsBatchCheckbox: "Documents in batch",
     },
     documentsHub: {
         title: "Processing workflows",
@@ -363,6 +366,9 @@ const english = {
         statusSelect: {
             none: "Card status",
         },
+        all: "All",
+        singleDocuments: "Single documents",
+        batchDocuments: "Batch documents",
     },
     flow: {
         downloadJson: "Download JSON",
@@ -517,6 +523,7 @@ const english = {
             createSubtitle: "Create a new team for the system",
             createTitle: "New Team",
             deleteSuccess: "Team deleted successfully",
+            duplicated: "Team already registered",
             editSubtitle: "Update the selected team's information",
             editTitle: "Edit Team",
             errors: {
@@ -789,6 +796,7 @@ const english = {
         type: "Document type",
         youAreAboutToDeleteQuestionnaire:
             "You are about to delete <br/> a questionnaire from the system",
+        noItemsSelected: "No items selected",
     },
     template: {
         title: "API Templates",

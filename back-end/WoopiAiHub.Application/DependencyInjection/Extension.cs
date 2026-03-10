@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Application.Messaging;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Application.Services.Audit;
 using WoopiAiHub.Application.Services.Automation;
 using WoopiAiHub.Application.ToolsHandler;
 using WoopiAiHub.Application.Utils;
@@ -19,7 +20,12 @@ namespace WoopiAiHub.Application.DependencyInjection
         {
             services.AddSingleton<IServiceCollection, ServiceCollection>();
             services.AddScoped<IDocumentServices, DocumentServices>();
+            services.AddScoped<IDocumentUploadServices, DocumentUploadServices>();
+            services.AddScoped<IDocumentDeletionServices, DocumentDeletionServices>();
+            services.AddScoped<IDocumentPipelineServices, DocumentPipelineServices>();
             services.AddScoped<IDocumentHistoryServices, DocumentHistoryServices>();
+            services.AddScoped<IDocumentMetadataServices, DocumentMetadataServices>();
+            services.AddScoped<IDocumentQuestionnaireServices, DocumentQuestionnaireServices>();
             services.AddScoped<IDocumentNormalizedServices, DocumentNormalizedServices>();
             services.AddScoped<IAccountServices, AccountServices>();
             services.AddScoped<ITenantServices, TenantServices>();
@@ -29,6 +35,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IQuestionServices, QuestionServices>();
             services.AddScoped<ITypeDocServices, TypeDocServices>();
             services.AddScoped<ICoreDependencies, CoreDependencies>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IApiDependencies, ApiDependencies>();
             services.AddScoped<ITeamServices, TeamServices>();
             services.AddScoped<IProfileServices, ProfileServices>();
@@ -42,6 +49,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IValidateStep, ValidateStep>();
             services.AddScoped<IValidateWorkflow, ValidateWorkflow>();
             services.AddScoped<ICardServices, CardServices>();
+            services.AddScoped<IAuditCardService, AuditCardService>();
             services.AddScoped<IToolServices, ToolServices>();
             services.AddScoped<IToolTypeServices, ToolTypeServices>();
             services.AddScoped<IToolDataServices, ToolDataServices>();
@@ -69,6 +77,8 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IApiTemplateServices, ApiTemplateServices>();
             services.AddScoped<ISubscriptionPeriodServices, SubscriptionPeriodServices>();
             services.AddScoped<IDocumentAnalysisRejectionServices, DocumentAnalysisRejectionServices>();
+            services.AddScoped<IExecutionServices, ExecutionServices>();
+            services.AddScoped<IExternalFileUploadServices, ExternalFileUploadServices>();
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
             services.AddHostedService<N8NConsumer>();
@@ -77,6 +87,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddHostedService<SubscriptionConsumer>();
             services.AddHostedService<SubscriptionEndPeriodConsumer>();
             services.AddHostedService<ApiOutputConsumer>();
+            services.AddHostedService<ExternalFileUploadConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();

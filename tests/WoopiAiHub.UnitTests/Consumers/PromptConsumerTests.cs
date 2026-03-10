@@ -18,6 +18,7 @@ using WoopiAiHub.UnitTests.Fixture;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Application.Utils;
 
 namespace WoopiAiHub.UnitTests.Consumers
 {
@@ -32,6 +33,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         private readonly Mock<IMessageConsumer<ChatCompletionResponseDto>> _consumerMock;
         private readonly Mock<ILogger<PromptConsumer>> _loggerMock;
         private readonly Mock<IUsageDailyServices> _usageDailyServices;
+        private readonly Mock<IAutomationServices> _automationServices;
 
         public PromptConsumerTests()
         {
@@ -47,26 +49,31 @@ namespace WoopiAiHub.UnitTests.Consumers
 
             var inMemorySettings = new Dictionary<string, string?>
             {
-                { "ConnectionStrings:TemplateConnection",
-                  "Password=123;Persist Security Info=True;User ID=sa;Initial Catalog=___NEWDB___;Data Source=test;TrustServerCertificate=True;" }
+                {
+                    "ConnectionStrings:TemplateConnection",
+                    "Password=123;Persist Security Info=True;User ID=sa;Initial Catalog=___NEWDB___;Data Source=test;TrustServerCertificate=True;"
+                }
             };
 
             var configuration = new ConfigurationBuilder()
-                               .AddInMemoryCollection(inMemorySettings)
-                               .Build();
+                .AddInMemoryCollection(inMemorySettings)
+                .Build();
+            var chatCompletionSettings = Options.Create(new ChatCompletionSettings { Model = "gpt-test-model", });
             _mocker.Use<IConfiguration>(configuration);
             _mocker.Use<IOptions<MessageQueues>>(messageQueues);
+            _mocker.Use<IOptions<ChatCompletionSettings>>(chatCompletionSettings);
             _documentServices = new Mock<IDocumentServices>();
             _promptServices = new Mock<IPromptServices>();
             _usageDailyServices = new Mock<IUsageDailyServices>();
+            _automationServices = new Mock<IAutomationServices>();
 
             _tenantCacheServices = new Mock<ITenantCacheServices>();
             _tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
-                             .ReturnsAsync(tenant);
+                .ReturnsAsync(tenant);
 
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
-                                   .Returns(_documentServices.Object);
+                .Returns(_documentServices.Object);
 
             var serviceScopeMock = new Mock<IServiceScope>();
             serviceScopeMock.Setup(s => s.ServiceProvider).Returns(serviceProviderMock.Object);
@@ -79,15 +86,17 @@ namespace WoopiAiHub.UnitTests.Consumers
             httpContextAccessorMock.SetupProperty(x => x.HttpContext, null);
 
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
-                               .Returns(_documentServices.Object);
+                .Returns(_documentServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IPromptServices)))
-                                   .Returns(_promptServices.Object);
+                .Returns(_promptServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(ITenantCacheServices)))
-                               .Returns(_tenantCacheServices.Object);
+                .Returns(_tenantCacheServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IHttpContextAccessor)))
-                               .Returns(httpContextAccessorMock.Object);
+                .Returns(httpContextAccessorMock.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IUsageDailyServices)))
-                               .Returns(_usageDailyServices.Object);
+                .Returns(_usageDailyServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IAutomationServices)))
+                .Returns(_automationServices.Object);
 
             _loggerMock = new Mock<ILogger<PromptConsumer>>();
             _consumerMock = new Mock<IMessageConsumer<ChatCompletionResponseDto>>();
@@ -105,12 +114,18 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .Setup(x => x.ProcessChatCompletionResult(It.IsAny<ChatCompletionResponseDto>()))
                 .Returns(Task.CompletedTask);
 
-            _consumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ChatCompletionResponseDto, Task>>()))
-                         .Callback<string, Func<ChatCompletionResponseDto, Task>>(async (queue, callback) =>
-                         {
-                             await callback(_chatCompletionResponseDto);
-                         })
-                         .Returns(Task.CompletedTask);
+            _usageDailyServices
+                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(),
+                    It.IsAny<string>()))
+                .ReturnsAsync(true);
+
+            _consumerMock.Setup(x =>
+                    x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ChatCompletionResponseDto, Task>>()))
+                .Callback<string, Func<ChatCompletionResponseDto, Task>>(async (queue, callback) =>
+                {
+                    await callback(_chatCompletionResponseDto);
+                })
+                .Returns(Task.CompletedTask);
 
             var consumer = _mocker.CreateInstance<PromptConsumer>();
 
@@ -119,6 +134,9 @@ namespace WoopiAiHub.UnitTests.Consumers
 
             // Assert
             _promptServices.Verify(x => x.ProcessChatCompletionResult(_chatCompletionResponseDto), Times.Once);
+            _usageDailyServices.Verify(
+                x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()),
+                Times.Once);
         }
 
         [Fact(DisplayName = "Must catch exception when processing response")]
@@ -129,15 +147,16 @@ namespace WoopiAiHub.UnitTests.Consumers
             var exceptionEsperada = new ArgumentException("StepToolExecution not found");
 
             _promptServices
-               .Setup(x => x.ProcessChatCompletionResult(It.IsAny<ChatCompletionResponseDto>()))
-               .ThrowsAsync(exceptionEsperada);
+                .Setup(x => x.ProcessChatCompletionResult(It.IsAny<ChatCompletionResponseDto>()))
+                .ThrowsAsync(exceptionEsperada);
 
-            _consumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ChatCompletionResponseDto, Task>>()))
-                         .Callback<string, Func<ChatCompletionResponseDto, Task>>(async (queue, callback) =>
-                         {
-                             await callback(_chatCompletionResponseDto);
-                         })
-                         .Returns(Task.CompletedTask);
+            _consumerMock.Setup(x =>
+                    x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ChatCompletionResponseDto, Task>>()))
+                .Callback<string, Func<ChatCompletionResponseDto, Task>>(async (queue, callback) =>
+                {
+                    await callback(_chatCompletionResponseDto);
+                })
+                .Returns(Task.CompletedTask);
 
             var loggerMock = new Mock<ILogger<PromptConsumer>>();
             _mocker.Use(loggerMock);
@@ -152,12 +171,12 @@ namespace WoopiAiHub.UnitTests.Consumers
             _promptServices.Verify(x => x.ProcessChatCompletionResult(_chatCompletionResponseDto), Times.Once);
 
             loggerMock.Verify(x =>
-                x.Log(
-                    LogLevel.Error,
-                    It.IsAny<EventId>(),
-                    It.IsAny<It.IsAnyType>(),
-                    exceptionEsperada,
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+                    x.Log(
+                        LogLevel.Error,
+                        It.IsAny<EventId>(),
+                        It.IsAny<It.IsAnyType>(),
+                        exceptionEsperada,
+                        It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.Once);
         }
     }

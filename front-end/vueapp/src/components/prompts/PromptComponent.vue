@@ -45,7 +45,7 @@
         <button
             type="button"
             class="btn delete-custom d-flex align-items-center"
-            @click="confirmationDialog(item)"
+            @click="confirmationDialog()"
             v-if="this.listIds.length > 0"
         >
             <i class="fas fa-trash text-danger icon-delete"></i>
@@ -183,19 +183,20 @@
             </div>
         </div>
     </div>
-    <modal-alert
-        v-if="modalAlertShow"
-        :type="'Confirm'"
-        :alertTitle="$t('prompts.removeAllPrompts')"
-        :alertMessage="$t('common.thisActionCannotBeUndone')"
-        :okLabel="$t('common.confirm')"
-        :cancelLabel="$t('common.cancel')"
-        @open="deletePrompts"
-        @close="closeModal"
+    <ConfirmModal
+        id="deletePromptsConfirm"
+        title="prompts.removeAllPrompts"
+        message="common.thisActionCannotBeUndone"
+        cancelText="common.cancel"
+        confirmText="common.confirm"
+        confirmVariant="primary"
+        ref="DeleteDialog"
+        :isLoading="isDeleting"
+        @confirm="deletePrompts"
     />
 </template>
 <script>
-    import ModalAlert from "@/components/pages/analyzer/modal-alert";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import PromptService from "@/services/prompts/PromptsService";
     export default {
         name: "PromptComponent",
@@ -215,8 +216,7 @@
                     count: 0,
                     totalPages: 0,
                 },
-                modalAlertShow: false,
-                modalEntity: {},
+                isDeleting: false,
                 isAscending: false,
                 dataModal: {},
                 colType: 2,
@@ -232,10 +232,10 @@
             };
         },
         components: {
-            ModalAlert,
+            ConfirmModal,
         },
         methods: {
-            checkAll: function (event) {
+            checkAll(event) {
                 const checkboxes = document.querySelectorAll(".checkbox");
                 let checkboxIds = [];
                 this.listIds = [];
@@ -245,7 +245,7 @@
                 });
                 this.countMultipleChecks(checkboxIds);
             },
-            countChecks: function (id) {
+            countChecks(id) {
                 let checkBox = document.querySelector(`input[type="checkbox"][id="${id}"]`);
                 if (checkBox && checkBox.checked) {
                     this.listIds.push(id);
@@ -253,7 +253,7 @@
                     this.listIds = this.listIds.filter((i) => i !== id);
                 }
             },
-            countMultipleChecks: function (checkboxIds) {
+            countMultipleChecks(checkboxIds) {
                 parseInt(checkboxIds);
                 checkboxIds.forEach((id) => {
                     let checkBox = document.querySelector(`input[type="checkbox"][id="${id}"]`);
@@ -264,25 +264,25 @@
                     }
                 });
             },
-            redirectToNewPrompt: function (prompt) {
+            redirectToNewPrompt(prompt) {
                 this.$router.push({
                     name: "PromptNew",
                     query: { name: prompt },
                 });
             },
-            redirectToClonePrompt: function (id) {
+            redirectToClonePrompt(id) {
                 this.$router.push({
                     name: "PromptNew",
                     query: { clone: id },
                 });
             },
-            redirectToEditPrompt: function (id) {
+            redirectToEditPrompt(id) {
                 this.$router.push({
                     name: "PromptNew",
                     query: { id: id },
                 });
             },
-            getList: function (obj) {
+            getList(obj) {
                 this.dataPrompt = [];
                 this.listIds = [];
                 this.searchInput = obj.search;
@@ -313,18 +313,13 @@
                     this.loading = false;
                 });
             },
-            confirmationDialog: function (item) {
-                this.modalEntity = item;
-                this.modalAlertShow = true;
-                document.getElementsByTagName("BODY")[0].children[1].className += " active";
+            confirmationDialog() {
+                this.$refs.DeleteDialog?.open();
             },
-            closeModal: function () {
-                this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            deletePrompts: function () {
-                PromptService.deletePrompts(this.listIds).then((response) => {
-                    try {
+            deletePrompts() {
+                this.isDeleting = true;
+                PromptService.deletePrompts(this.listIds)
+                    .then((response) => {
                         if (!response) {
                             return this.$notify({
                                 title: "prompts.title",
@@ -333,30 +328,32 @@
                                 icon: "CircleX",
                             });
                         }
-                        return this.$notify({
+                        this.$refs.DeleteDialog?.close();
+                        this.$notify({
                             title: "prompts.title",
                             message: "prompts.deleteSuccess",
                             variant: "success",
                             icon: "CircleCheckBig",
                         });
-                    } catch {
-                        return this.$notify({
-                            title: "prompts.title",
-                            message: "prompts.deleteError",
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                    } finally {
                         this.getList({
                             search: "",
                             page: this.queryPage,
                             type: null,
                         });
-                        this.closeModal();
-                    }
-                });
+                    })
+                    .catch(() => {
+                        this.$notify({
+                            title: "prompts.title",
+                            message: "prompts.deleteError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    })
+                    .finally(() => {
+                        this.isDeleting = false;
+                    });
             },
-            formatDate: function (dataObj) {
+            formatDate(dataObj) {
                 const date = new Date(dataObj);
                 let formattedDate =
                     `${String(date.getDate()).padStart(2, "0")}/` +
@@ -364,7 +361,7 @@
                     `${date.getFullYear()}`;
                 return formattedDate;
             },
-            loadMore: function () {
+            loadMore() {
                 this.selectedOption = this.selectedOption * 2;
                 this.getList({
                     search: "",
@@ -372,7 +369,7 @@
                     type: null,
                 });
             },
-            getAllPrompts: function () {
+            getAllPrompts() {
                 this.loadAllPrompts = true;
                 this.getList({
                     search: "",
@@ -380,7 +377,7 @@
                     type: null,
                 });
             },
-            getOnlyUserPrompts: function () {
+            getOnlyUserPrompts() {
                 this.loadAllPrompts = false;
                 this.getUserPrompts({
                     search: "",
@@ -388,7 +385,7 @@
                     type: null,
                 });
             },
-            getUserPrompts: function (obj) {
+            getUserPrompts(obj) {
                 var userId;
                 this.dataPrompt = [];
                 this.listIds = [];
@@ -514,7 +511,7 @@
         height: auto;
         background-color: var(--color-card-content) !important;
         color: var(--color-body-content) !important;
-        border-color: #d0d4d9 !important;
+        border-color: var( --color-border-form-control) !important;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 38%);
     }
 
@@ -599,7 +596,11 @@
     }
 
     .badge {
-        background-color: #fff;
-        color: #676879;
+        background-color: var(--color-bg-badge) !important;
+        color: var(--color-body-content) !important;
+    }
+
+    .border {
+        border: 1px solid var(--color-border-form-control) !important;
     }
 </style>

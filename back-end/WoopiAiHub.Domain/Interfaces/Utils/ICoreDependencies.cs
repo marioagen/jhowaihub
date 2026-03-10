@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
@@ -8,6 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Utils
     {
         IConfiguration Configuration { get; }
         IHttpContextAccessor HttpContextAccessor { get; }
+        ICurrentUserService CurrentUserService { get; }
         IMapper Mapper { get; }
     }
 }

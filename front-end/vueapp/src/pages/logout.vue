@@ -12,8 +12,8 @@ export default {
             })
             .finally(() => {
                 cancelTokenRefresh();
-                document.documentElement.className = "css-theme-light";
-                window.localStorage.removeItem("theme");
+                const savedTheme = window.localStorage.getItem("theme");
+                document.documentElement.className = savedTheme === "css-theme-dark" ? "css-theme-dark" : "css-theme-light";
                 window.localStorage.removeItem("project");
 
                 const dataUser = {
