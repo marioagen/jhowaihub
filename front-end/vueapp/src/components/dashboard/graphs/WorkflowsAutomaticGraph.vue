@@ -3,10 +3,10 @@
         <div class="card-body">
             <div class="d-flex align-items-center gap-2 mb-3">
                 <h6 class="mb-0 fw-bold">
-                    {{ $t("dashboard.graphs.pagesGraphTitle") }}
+                    {{ $t("dashboard.graphs.workflowsAutomaticGraphTitle") }}
                 </h6>
                 <LucideIcon
-                    v-tooltip.right="$t('dashboard.graphs.pagesTooltip')"
+                    v-tooltip.right="$t('dashboard.graphs.workflowAutomaticTooltip')"
                     icon="Info"
                     :size="17"
                 />
@@ -14,27 +14,24 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <h6>
-                        {{ $t("dashboard.graphs.totalPages") }}
+                        {{ $t("dashboard.graphs.workflowsAutomaticGraphTitle") }}
                     </h6>
                     <h4 class="mb-0 fw-bold">
-                        {{ totalPages }}
+                        {{ totalWorkflowsAutomatic }}
                     </h4>
                     <span>
                         {{ $t("dashboard.graphs.unitValue") }}
-                        {{ usageUnitPages }}
+                        {{ usageUnitWorkflowAutomatic }}
                     </span>
                     <hr />
                     <span class="mt-1">
                         {{ $t("dashboard.graphs.periodTotal") }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
-                        {{ totalPages * usageUnitPages }}
+                        {{ totalWorkflowsAutomatic * usageUnitWorkflowAutomatic }}
                     </h4>
                 </div>
             </div>
-            <h6>
-                {{ $t("dashboard.graphs.pagesGraphSubtitle") }}
-            </h6>
             <BarGraphComponent
                 v-if="isLoaded"
                 :options="graph.options"
@@ -68,13 +65,13 @@
                 required: true,
             },
         },
-        emits: ["setTotalPages"],
+        emits: ["totalCalculated"],
         data: () => ({
             isLoaded: false,
             graph: {
                 options: {
                     chart: {
-                        id: "sales-bar",
+                        id: "workflows-automatic-bar",
                         toolbar: {
                             show: false,
                         },
@@ -94,37 +91,54 @@
                 },
                 series: [
                     {
-                        name: "Pages",
+                        name: "Automatic Workflows",
                         data: [],
                     },
                 ],
             },
         }),
+        created() {
+            this.getWorkflowsAutomaticData();
+        },
         computed: {
-            totalPages() {
+            totalWorkflowsAutomatic() {
+                if (!this.isLoaded || !this.graph.series[0]?.data?.length) {
+                    return 0;
+                }
                 return this.graph.series[0].data.reduce((a, b) => a + b, 0);
             },
-            usageUnitPages() {
+            usageUnitWorkflowAutomatic() {
                 if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
                     return 0;
                 }
                 return (
-                    this.usageUnits.find((item) => item.usageTypeName === ColTypeUsage.Page)
+                    this.usageUnits.find((item) => item.usageTypeName === ColTypeUsage.Automation)
                         ?.value ?? 0
                 );
             },
+            calculatedTotal() {
+                return this.usageUnitWorkflowAutomatic * this.totalWorkflowsAutomatic;
+            },
         },
-        created() {
-            this.getPagesData();
+        watch: {
+            start() {
+                this.getWorkflowsAutomaticData();
+            },
+            end() {
+                this.getWorkflowsAutomaticData();
+            },
+            calculatedTotal(newValue) {
+                this.$emit("totalCalculated", newValue);
+            },
         },
         methods: {
-            getPagesData() {
-                this.isLoaded = false;
+            getWorkflowsAutomaticData() {
                 let params = {
                     start: this.start,
                     end: this.end,
-                    usageType: ColTypeUsage.Page,
+                    usageType: ColTypeUsage.Automation,
                 };
+                this.isLoaded = false;
                 DashboardServices.GetByUsageType(params)
                     .then((response) => {
                         if (response && !response.error) {
@@ -136,7 +150,7 @@
                             };
                             this.graph.series = [
                                 {
-                                    name: "Pages",
+                                    name: "Automatic Workflows",
                                     data: response.map((item) => item.value),
                                 },
                             ];
@@ -144,16 +158,7 @@
                     })
                     .finally(() => {
                         this.isLoaded = true;
-                        this.setTotalPages();
                     });
-            },
-            setTotalPages() {
-                this.$emit("setTotalPages", this.usageUnitPages * this.totalPages);
-            },
-            updateGraph(start, end) {
-                this.start = start;
-                this.end = end;
-                this.getPagesData();
             },
         },
     };
