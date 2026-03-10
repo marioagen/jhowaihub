@@ -21,33 +21,46 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns the first N documents for auditing (load more: take=10 first, then 20, 30...). One row per card.
-        /// Optional filters: search (CardId, CardName or WorkflowName), statusId.
+        /// Returns the first N cards for the auditor (load-more pattern). One row per card with CardId, CardName, Workflows, ActionsCount, StatusName.
         /// </summary>
-        [HttpGet("Documents")]
-        [SwaggerOperation("Endpoint that returns documents for the auditor (load more pattern)")]
+        /// <param name="take">Maximum number of cards to return (default 10).</param>
+        /// <param name="search">Optional. Matches CardId when numeric, or CardName/WorkflowName by contains.</param>
+        /// <param name="statusId">Optional. Exact match on card status.</param>
+        [HttpGet("Cards")]
+        [SwaggerOperation("Returns cards for the auditor with optional search and status filter")]
         [ProducesResponseType(typeof(ICollection<AuditorDocumentDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetDocuments(
+        public async Task<IActionResult> FindCardsAudit(
             [FromQuery] int take = 10,
             [FromQuery] string? search = null,
             [FromQuery] int? statusId = null)
         {
-            var result = await _auditorServices.GetDocumentsAsync(take, search, statusId);
+            var result = await _auditorServices.FindCardsAuditAsync(take, search, statusId);
             return Ok(result);
         }
 
         /// <summary>
-        /// Returns a single document by id for auditing.
+        /// Returns up to N audit rows for the given card and workflow (load-more pattern).
         /// </summary>
-        [HttpGet("Document/{id:int}")]
-        [SwaggerOperation("Endpoint that returns a document by id for the auditor")]
-        [ProducesResponseType(typeof(DocumentDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetDocument(int id)
+        /// <param name="cardId">Card identifier.</param>
+        /// <param name="workflowId">Workflow identifier.</param>
+        /// <param name="take">Maximum number of audit rows to return (default 10).</param>
+        /// <param name="userId">Optional. Filter by user who performed the action.</param>
+        /// <param name="action">Optional. Filter by action type (AuditCardActionType enum value).</param>
+        /// <param name="step">Optional. Filter by step id.</param>
+        /// <param name="orderDescending">Order by Created descending when true (default), ascending when false.</param>
+        [HttpGet("Cards/{cardId:int}/Workflows/{workflowId:int}")]
+        [SwaggerOperation("Returns audit rows for a card and workflow with optional filters and sort")]
+        [ProducesResponseType(typeof(ICollection<AuditorCardResponseDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindAuditByCardId(
+            int cardId,
+            int workflowId,
+            [FromQuery] int take = 10,
+            [FromQuery] Guid? userId = null,
+            [FromQuery] int? action = null,
+            [FromQuery] int? step = null,
+            [FromQuery] bool orderDescending = true)
         {
-            var result = await _auditorServices.GetDocumentByIdAsync(id);
-            if (result is null)
-                return NotFound();
+            var result = await _auditorServices.FindAuditByCardIdAsync(cardId, workflowId, take, userId, action, step, orderDescending);
             return Ok(result);
         }
 

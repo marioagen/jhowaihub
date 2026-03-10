@@ -27,7 +27,7 @@ namespace WoopiAiHub.Repository.Audit
         /// Returns the first N cards for the auditor (load-more pattern: take 10, then 20, 30…). One row per card with CardId, CardName, Workflows, ActionsCount, StatusName.
         /// Optional filters: search (matches CardId when numeric, or CardName/WorkflowName by contains), and statusId (exact match on StatusId).
         /// </summary>
-        public async Task<ICollection<AuditorDocumentDto>> GetDocumentsAsync(int take, string? search, int? statusId)
+        public async Task<ICollection<AuditorDocumentDto>> FindCardsAuditAsync(int take, string? search, int? statusId)
         {
             const int defaultTake = 10;
             if (take <= 0) take = defaultTake;
@@ -67,21 +67,43 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns a single document by id.
+        /// Returns up to N audit rows for a card and workflow (load-more pattern). Optional filters: userId, actionType, stepId. Order by Created desc or asc.
         /// </summary>
-        public async Task<DocumentDto?> GetDocumentByIdAsync(int id)
+        public async Task<ICollection<AuditorCardResponseDto>> FindAuditByCardIdAsync(int cardId, int workflowId, int take, Guid? userId, int? actionType, int? stepId, bool orderDescending = true)
         {
-            return await _context.Documents
-                .AsNoTracking()
-                .Where(d => d.Id == id)
-                .Select(d => new DocumentDto
+            const int defaultTake = 10;
+            if (take <= 0) take = defaultTake;
+
+            var query = _context.AuditCards.AsNoTracking()
+                .Where(a => a.CardId == cardId && a.WorkflowId == workflowId);
+
+            if (userId.HasValue)
+                query = query.Where(a => a.UserId == userId.Value);
+            if (actionType.HasValue)
+                query = query.Where(a => (int)a.ActionType == actionType.Value);
+            if (stepId.HasValue)
+                query = query.Where(a => a.Card != null && a.Card.StepId == stepId.Value);
+
+            var ordered = orderDescending
+                ? query.OrderByDescending(a => a.Created)
+                : query.OrderBy(a => a.Created);
+
+            return await ordered
+                .Take(take)
+                .Select(a => new AuditorCardResponseDto
                 {
-                    Id = d.Id,
-                    Name = d.Name,
-                    Description = d.Description,
-                    ReferenceFile = d.ReferenceFile
+                    CardId = a.CardId,
+                    CardName = a.Card != null ? a.Card.Name : string.Empty,
+                    Created = a.Created,
+                    WorkflowId = a.WorkflowId,
+                    WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
+                    UserId = a.UserId,
+                    UserName = a.User != null ? a.User.Name : string.Empty,
+                    ActionName = a.ActionType.ToString(),
+                    StepId = a.Card != null ? a.Card.StepId : 0,
+                    StepName = a.Card != null && a.Card.Step != null ? a.Card.Step.Name : string.Empty
                 })
-                .FirstOrDefaultAsync();
+                .ToListAsync();
         }
 
         /// <summary>
