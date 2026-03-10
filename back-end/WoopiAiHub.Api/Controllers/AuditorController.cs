@@ -28,7 +28,7 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="statusId">Optional. Exact match on card status.</param>
         [HttpGet("Cards")]
         [SwaggerOperation("Returns cards for the auditor with optional search and status filter")]
-        [ProducesResponseType(typeof(ICollection<AuditorDocumentDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ICollection<AuditorCardsDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindCardsAudit(
             [FromQuery] int take = 10,
             [FromQuery] string? search = null,

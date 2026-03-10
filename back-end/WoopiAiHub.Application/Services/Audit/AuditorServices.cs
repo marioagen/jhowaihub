@@ -17,7 +17,7 @@ namespace WoopiAiHub.Application.Services.Audit
             _auditorRepository = auditorRepository;
         }
 
-        public Task<ICollection<AuditorDocumentDto>> FindCardsAuditAsync(int take, string? search, int? statusId)
+        public Task<ICollection<AuditorCardsDto>> FindCardsAuditAsync(int take, string? search, int? statusId)
             => _auditorRepository.FindCardsAuditAsync(take, search, statusId);
 
         public Task<ICollection<AuditorCardResponseDto>> FindAuditByCardIdAsync(int cardId, int workflowId, int take, Guid? userId, int? actionType, int? stepId, bool orderDescending = true)

@@ -27,7 +27,7 @@ namespace WoopiAiHub.Repository.Audit
         /// Returns the first N cards for the auditor (load-more pattern: take 10, then 20, 30…). One row per card with CardId, CardName, Workflows, ActionsCount, StatusName.
         /// Optional filters: search (matches CardId when numeric, or CardName/WorkflowName by contains), and statusId (exact match on StatusId).
         /// </summary>
-        public async Task<ICollection<AuditorDocumentDto>> FindCardsAuditAsync(int take, string? search, int? statusId)
+        public async Task<ICollection<AuditorCardsDto>> FindCardsAuditAsync(int take, string? search, int? statusId)
         {
             const int defaultTake = 10;
             if (take <= 0) take = defaultTake;
@@ -53,13 +53,13 @@ namespace WoopiAiHub.Repository.Audit
             return await query
                 .OrderBy(c => c.Id)
                 .Take(take)
-                .Select(c => new AuditorDocumentDto
+                .Select(c => new AuditorCardsDto
                 {
                     CardId = c.Id,
                     CardName = c.Name,
                     Workflows = c.Step != null && c.Step.Workflow != null
-                        ? new List<AuditorWorkflowInfoDto> { new() { Id = c.Step.Workflow.Id, Name = c.Step.Workflow.Name } }
-                        : new List<AuditorWorkflowInfoDto>(),
+                        ? new List<AuditorWorkflowListDto> { new() { Id = c.Step.Workflow.Id, Name = c.Step.Workflow.Name } }
+                        : new List<AuditorWorkflowListDto>(),
                     ActionsCount = _context.AuditCards.Count(a => a.CardId == c.Id),
                     StatusName = c.Status != null ? c.Status.Name : string.Empty
                 })
