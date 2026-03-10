@@ -1,4 +1,5 @@
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Response.Auditor;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository.Audit
 {
@@ -7,7 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository.Audit
     /// </summary>
     public interface IAuditorRepository
     {
-        Task<ICollection<DocumentDto>> GetDocumentsAsync();
+        Task<ICollection<AuditorDocumentDto>> GetDocumentsAsync(int take, string? search, int? statusId);
         Task<DocumentDto?> GetDocumentByIdAsync(int id);
         Task<ICollection<WorkflowDto>> GetWorkflowsAsync();
         Task<WorkflowDto?> GetWorkflowByIdAsync(int id);

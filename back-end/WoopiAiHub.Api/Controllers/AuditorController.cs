@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Response.Auditor;
 using WoopiAiHub.Domain.Interfaces.Services.Audit;
 
 namespace WoopiAiHub.Api.Controllers
@@ -20,14 +21,18 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns all documents for auditing. Query params can be used for filtering (managed later).
+        /// Returns the first N documents for auditing (load more: take=10 first, then 20, 30...). One row per card.
+        /// Optional filters: search (CardId, CardName or WorkflowName), statusId.
         /// </summary>
         [HttpGet("Documents")]
-        [SwaggerOperation("Endpoint that returns all documents for the auditor")]
-        [ProducesResponseType(typeof(ICollection<DocumentDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetDocuments()
+        [SwaggerOperation("Endpoint that returns documents for the auditor (load more pattern)")]
+        [ProducesResponseType(typeof(ICollection<AuditorDocumentDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetDocuments(
+            [FromQuery] int take = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] int? statusId = null)
         {
-            var result = await _auditorServices.GetDocumentsAsync();
+            var result = await _auditorServices.GetDocumentsAsync(take, search, statusId);
             return Ok(result);
         }
 

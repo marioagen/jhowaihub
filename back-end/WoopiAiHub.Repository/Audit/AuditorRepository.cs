@@ -1,14 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Response.Auditor;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository.Audit
 {
-    /// <summary>
-    /// Repository for auditor-related queries. Placeholder queries return everything (list) or filter by id (get by id).
-    /// </summary>
     public class AuditorRepository : IAuditorRepository
     {
         private readonly ApplicationDbContext _context;
@@ -26,18 +24,44 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns all documents. Query can be refined later.
+        /// Returns the first N cards for the auditor (load-more pattern: take 10, then 20, 30…). One row per card with CardId, CardName, Workflows, ActionsCount, StatusName.
+        /// Optional filters: search (matches CardId when numeric, or CardName/WorkflowName by contains), and statusId (exact match on StatusId).
         /// </summary>
-        public async Task<ICollection<DocumentDto>> GetDocumentsAsync()
+        public async Task<ICollection<AuditorDocumentDto>> GetDocumentsAsync(int take, string? search, int? statusId)
         {
-            return await _context.Documents
-                .AsNoTracking()
-                .Select(d => new DocumentDto
+            const int defaultTake = 10;
+            if (take <= 0) take = defaultTake;
+
+            int? searchAsCardId = null;
+            if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
+                searchAsCardId = parsedId;
+
+            var query = _context.Cards.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchTerm = search!.Trim();
+                query = query.Where(c =>
+                    (searchAsCardId != null && c.Id == searchAsCardId.Value)
+                    || c.Name.Contains(searchTerm)
+                    || (c.Step != null && c.Step.Workflow != null && c.Step.Workflow.Name.Contains(searchTerm)));
+            }
+
+            if (statusId.HasValue)
+                query = query.Where(c => c.StatusId == statusId.Value);
+
+            return await query
+                .OrderBy(c => c.Id)
+                .Take(take)
+                .Select(c => new AuditorDocumentDto
                 {
-                    Id = d.Id,
-                    Name = d.Name,
-                    Description = d.Description,
-                    ReferenceFile = d.ReferenceFile
+                    CardId = c.Id,
+                    CardName = c.Name,
+                    Workflows = c.Step != null && c.Step.Workflow != null
+                        ? new List<AuditorWorkflowInfoDto> { new() { Id = c.Step.Workflow.Id, Name = c.Step.Workflow.Name } }
+                        : new List<AuditorWorkflowInfoDto>(),
+                    ActionsCount = _context.AuditCards.Count(a => a.CardId == c.Id),
+                    StatusName = c.Status != null ? c.Status.Name : string.Empty
                 })
                 .ToListAsync();
         }

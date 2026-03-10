@@ -1,4 +1,5 @@
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Response.Auditor;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services.Audit;
 
@@ -16,8 +17,8 @@ namespace WoopiAiHub.Application.Services.Audit
             _auditorRepository = auditorRepository;
         }
 
-        public Task<ICollection<DocumentDto>> GetDocumentsAsync()
-            => _auditorRepository.GetDocumentsAsync();
+        public Task<ICollection<AuditorDocumentDto>> GetDocumentsAsync(int take, string? search, int? statusId)
+            => _auditorRepository.GetDocumentsAsync(take, search, statusId);
 
         public Task<DocumentDto?> GetDocumentByIdAsync(int id)
             => _auditorRepository.GetDocumentByIdAsync(id);
