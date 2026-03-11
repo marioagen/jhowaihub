@@ -135,100 +135,98 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// values. If no placeholders are matched, the original input string is returned.</returns>
         private string ConvertOutputsToJson(ICollection<StepToolOutput> outputs, string inputValue)
         {
+            if (string.IsNullOrEmpty(inputValue)) return inputValue;
+
             var result = inputValue;
-
-            if (string.IsNullOrEmpty(result)) return result;
-
-            // Group outputs by tool type
             var groups = outputs
                 .Where(o => o.StepTool?.Tool?.ToolType != null)
                 .GroupBy(o => o.StepTool!.Tool!.ToolType!.Name, StringComparer.OrdinalIgnoreCase);
 
             foreach (var group in groups)
             {
-                var toolType = group.Key;
-                string placeholder;
-                var isJsonNode = false;
+                if (!TryGetToolConfig(group.Key, out var placeholder, out var isJsonNode)) continue;
+                if (!result.Contains(placeholder, StringComparison.OrdinalIgnoreCase)) continue;
 
-                switch (toolType)
-                {
-                    case HandlersTypes.Ocr:
-                        placeholder = "{{ocr}}";
-                        break;
-                    case HandlersTypes.Prompt:
-                        placeholder = "{{prompt}}";
-                        break;
-                    case HandlersTypes.N8N:
-                        placeholder = "{{n8n}}";
-                        isJsonNode = true;
-                        break;
-                    case HandlersTypes.API:
-                        placeholder = "{{api}}";
-                        isJsonNode = true;
-                        break;
-                    case HandlersTypes.Quiz:
-                        placeholder = "{{quiz}}";
-                        isJsonNode = true;
-                        break;
-                    default:
-                        continue;
-                }
+                var processedValues = group
+                    .Select(o => ProcessOutputValue(group.Key, o.Value, isJsonNode))
+                    .ToList();
 
-                if (!result.Contains(placeholder, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                var processedValues = new List<string>();
-
-                foreach (var output in group)
-                {
-                    var raw = output.Value ?? string.Empty;
-                    string processed;
-
-                    if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
-                    {
-                        processed = ExtractOcrText(raw);
-                    }
-                    else if (string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase))
-                    {
-                        processed = raw;
-                    }
-                    else
-                    {
-                        processed = string.IsNullOrWhiteSpace(raw) ? "null" : raw;
-                    }
-
-                    if (!isJsonNode)
-                    {
-                        if (!processed.StartsWith('"') && !processed.EndsWith('"'))
-                        {
-                            processed = JsonSerializer.Serialize(processed, _jsonOptions);
-                        }
-                    }
-
-                    processedValues.Add(processed);
-                }
-
-                string replacement;
-
-                if (processedValues.Count == 0)
-                {
-                    replacement = isJsonNode ? "null" : JsonSerializer.Serialize(string.Empty, _jsonOptions);
-                }
-                else if (processedValues.Count == 1)
-                {
-                    replacement = processedValues[0];
-                }
-                else
-                {
-                    replacement = "[" + string.Join(", ", processedValues) + "]";
-                }
-
+                var replacement = BuildReplacementString(processedValues, isJsonNode);
                 result = result.Replace(placeholder, replacement, StringComparison.OrdinalIgnoreCase);
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Tries to get the placeholder string and JSON node flag for a given tool type.
+        /// </summary>
+        /// <param name="toolType">The tool type to get the placeholder and JSON node flag for.</param>
+        /// <param name="placeholder">The placeholder string for the given tool type.</param>
+        /// <param name="isJsonNode">A boolean indicating whether the given tool type is a JSON node.</param>
+        /// <returns>True if the tool type is found, false otherwise.</returns>
+        private bool TryGetToolConfig(string toolType, out string placeholder, out bool isJsonNode)
+        {
+            isJsonNode = false;
+            switch (toolType)
+            {
+                case HandlersTypes.Ocr: placeholder = "{{ocr}}"; return true;
+                case HandlersTypes.Prompt: placeholder = "{{prompt}}"; return true;
+                case HandlersTypes.N8N: placeholder = "{{n8n}}"; isJsonNode = true; return true;
+                case HandlersTypes.API: placeholder = "{{api}}"; isJsonNode = true; return true;
+                case HandlersTypes.Quiz: placeholder = "{{quiz}}"; isJsonNode = true; return true;
+                default: placeholder = string.Empty; return false;
+            }
+        }
+
+        /// <summary>
+        /// Processes the output value of a given tool type.
+        /// </summary>
+        /// <param name="toolType">The tool type to process the output value for.</param>
+        /// <param name="rawValue">The raw output value to process.</param>
+        /// <param name="isJsonNode">A boolean indicating whether the given tool type is a JSON node.</param>
+        /// <returns>The processed output value.</returns>
+        private string ProcessOutputValue(string toolType, string? rawValue, bool isJsonNode)
+        {
+            var raw = rawValue ?? string.Empty;
+            string processed;
+
+            if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
+            {
+                processed = ExtractOcrText(raw);
+            }
+            else if (string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase))
+            {
+                processed = raw;
+            }
+            else
+            {
+                processed = string.IsNullOrWhiteSpace(raw) ? "null" : raw;
+            }
+
+            if (!isJsonNode && !processed.StartsWith('"') && !processed.EndsWith('"'))
+            {
+                processed = JsonSerializer.Serialize(processed, _jsonOptions);
+            }
+
+            return processed;
+        }
+
+        /// <summary>
+        /// Builds the replacement string for the given tool type.
+        /// </summary>
+        /// <param name="processedValues">The processed output values for the given tool type.</param>
+        /// <param name="isJsonNode">A boolean indicating whether the given tool type is a JSON node.</param>
+        /// <returns>The replacement string for the given tool type.</returns>
+        private string BuildReplacementString(List<string> processedValues, bool isJsonNode)
+        {
+            if (processedValues.Count == 0)
+                return isJsonNode ? "null" : JsonSerializer.Serialize(string.Empty, _jsonOptions);
+                
+            if (processedValues.Count == 1)
+                return processedValues[0];
+                
+            return "[" + string.Join(", ", processedValues) + "]";
         }
 
         /// <summary>
