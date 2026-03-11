@@ -850,6 +850,15 @@ const spanish = {
         variablesPrompt: "Agente",
         variablesTip:
             "Consejo: Use variables como [ocr] o [prompt] que serán reemplazadas en el momento de la ejecución.",
+        configuration: {
+            title: "Configurar Plantilla de API",
+            subtitle: "Seleccione y configure una plantilla de API",
+            savedSuccessfully: "Configuración de plantilla guardada exitosamente",
+            saveError: "Error al guardar la configuración de la plantilla",
+            leaveMessage: "Existen diferencias en el cuerpo de la solicitud y en las dependencias.",
+            saveAndExit: "Guardar y salir",
+            keepEditing: "Seguir editando",
+        },
     },
     tools: {
         createBtn: "Nueva Herramienta",

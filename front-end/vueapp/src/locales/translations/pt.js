@@ -862,6 +862,9 @@ const portuguese = {
             subtitle: "Selecione e configure um template de API",
             savedSuccessfully: "Configuração do template salva com sucesso",
             saveError: "Erro ao salvar configuração do template",
+            leaveMessage: "Existem diferenças no corpo da requisição e nas dependências.",
+            saveAndExit: "Salvar e sair",
+            keepEditing: "Continuar editando",
         },
     },
     tools: {

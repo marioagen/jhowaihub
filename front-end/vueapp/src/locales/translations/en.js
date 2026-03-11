@@ -855,6 +855,9 @@ const english = {
             subtitle: "Select and configure an API template",
             savedSuccessfully: "Template configuration saved successfully",
             saveError: "Error saving template configuration",
+            leaveMessage: "There are differences between the request body and the dependencies.",
+            saveAndExit: "Save and exit",
+            keepEditing: "Keep editing",
         },
     },
     tools: {
