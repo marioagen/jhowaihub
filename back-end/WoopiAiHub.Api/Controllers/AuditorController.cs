@@ -65,14 +65,14 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns all workflows for auditing. Query params can be used for filtering (managed later).
+        /// Returns workflow-based audit entries (one row per workflow) with CardCount, CardsByStatus, LogsCount, Team, Profile. Limited to 10 entries. Filters and take to be added later.
         /// </summary>
         [HttpGet("Workflows")]
-        [SwaggerOperation("Endpoint that returns all workflows for the auditor")]
-        [ProducesResponseType(typeof(ICollection<WorkflowDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetWorkflows()
+        [SwaggerOperation("Returns workflow audit list for the auditor")]
+        [ProducesResponseType(typeof(ICollection<AuditorWorkflowResponseDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindWorkflowAudit()
         {
-            var result = await _auditorServices.GetWorkflowsAsync();
+            var result = await _auditorServices.FindWorkflowAuditAsync();
             return Ok(result);
         }
 

@@ -107,12 +107,64 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns all workflows. Query can be refined later.
+        /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, Profile. Source: AuditCards grouped by WorkflowId. Limited to 10 entries. Filters and take parameter to be added later.
         /// </summary>
-        public Task<ICollection<WorkflowDto>> GetWorkflowsAsync()
+        public async Task<ICollection<AuditorWorkflowResponseDto>> FindWorkflowAuditAsync()
         {
-            var list = _workflowRepository.FindAll();
-            return Task.FromResult<ICollection<WorkflowDto>>(list);
+            const int take = 10;
+            var workflowList = await _context.AuditCards
+                .AsNoTracking()
+                .OrderByDescending(a => a.Created)
+                .Select(a => a.WorkflowId)
+                .Take(take)
+                .ToListAsync();
+
+            if (workflowList.Count == 0)
+                return [];
+
+            var auditRows = await _context.AuditCards
+                .AsNoTracking()
+                .Where(a => workflowList.Contains(a.WorkflowId))
+                .Select(a => new
+                {
+                    a.WorkflowId,
+                    a.CardId,
+                    WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
+                    TeamId = a.Workflow != null && a.Workflow.Teams.Any()
+                        ? (int?)a.Workflow.Teams.OrderBy(t => t.Id).Select(t => t.Id).FirstOrDefault()
+                        : null,
+                    TeamName = a.Workflow != null && a.Workflow.Teams.Any()
+                        ? a.Workflow.Teams.OrderBy(t => t.Id).Select(t => t.Name).FirstOrDefault() ?? string.Empty
+                        : string.Empty,
+                    ProfileId = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
+                        ? (int?)a.Card.Step.Profile.Id
+                        : null,
+                    ProfileName = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
+                        ? a.Card.Step.Profile.Name ?? string.Empty
+                        : string.Empty
+                })
+                .ToListAsync();
+
+            var AuditorByWorkflow = auditRows
+                .GroupBy(a => a.WorkflowId)
+                .OrderBy(g => g.Key)
+                .ToList();
+
+            return AuditorByWorkflow.Select(g =>
+            {
+                var first = g.First();
+                return new AuditorWorkflowResponseDto
+                {
+                    WorkflowId = g.Key,
+                    WorkflowName = first.WorkflowName,
+                    CardCount = g.Select(a => a.CardId).Distinct().Count(),
+                    LogsCount = g.Count(),
+                    TeamId = first.TeamId,
+                    TeamName = first.TeamName,
+                    ProfileId = first.ProfileId,
+                    ProfileName = first.ProfileName
+                };
+            }).ToList();
         }
 
         /// <summary>

@@ -23,8 +23,8 @@ namespace WoopiAiHub.Application.Services.Audit
         public Task<ICollection<AuditorCardResponseDto>> FindAuditByCardIdAsync(int cardId, int workflowId, int take, Guid? userId, int? actionType, int? stepId, bool orderDescending = true)
             => _auditorRepository.FindAuditByCardIdAsync(cardId, workflowId, take, userId, actionType, stepId, orderDescending);
 
-        public Task<ICollection<WorkflowDto>> GetWorkflowsAsync()
-            => _auditorRepository.GetWorkflowsAsync();
+        public Task<ICollection<AuditorWorkflowResponseDto>> FindWorkflowAuditAsync()
+            => _auditorRepository.FindWorkflowAuditAsync();
 
         public Task<WorkflowDto?> GetWorkflowByIdAsync(int id)
             => _auditorRepository.GetWorkflowByIdAsync(id);
