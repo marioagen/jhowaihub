@@ -120,7 +120,7 @@ namespace WoopiAiHub.Repository.Audit
                 .ToListAsync();
 
             if (workflowList.Count == 0)
-                return [];
+                return new List<AuditorWorkflowResponseDto>();
 
             var auditRows = await _context.AuditCards
                 .AsNoTracking()
