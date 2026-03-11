@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Models;
 
@@ -14,6 +14,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         bool Update(User user);
         IQueryable<UserPagedDto> FindAllPaged(PagedDataDto pagedDataDto);
         Task<bool> EmailExistsAsync(string email, Guid? excludeUserId = null);
+        Task<bool> ExistsUserNameAsync(string name, Guid? excludeUserId = null);
         Task<List<string>> FindUserProfilesByEmailAsync(string email);
         Task<ICollection<UserDto>> FindByTeamIdAsync(int teamId);
         Task<UserDto?> FindUserByEmail(string email);

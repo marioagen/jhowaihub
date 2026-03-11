@@ -23,14 +23,21 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool CreateUniqueProfile(Domain.Models.Profile profile)
         {
-            var exists = _context.Profiles.Any(t => t.Name == profile.Name);
-            if (!exists)
-            {
-                _context.Profiles.Add(profile);
-                _context.SaveChanges();
-                return true;
-            }
-            return false;
+            if (ExistsProfileByNameExceptId(profile.Name, 0))
+                return false;
+            _context.Profiles.Add(profile);
+            _context.SaveChanges();
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if the profile's name already exists.
+        /// </summary>
+        public bool ExistsProfileByNameExceptId(string name, int excludeId)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return false;
+            var nameLower = name.Trim().ToLowerInvariant();
+            return _context.Profiles.Any(t => t.Name.ToLower() == nameLower && t.Id != excludeId);
         }
 
         /// <summary>

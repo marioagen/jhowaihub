@@ -495,6 +495,7 @@ const portuguese = {
             errors: {
                 addError: "Erro ao criar perfil",
                 deleteError: "Erro ao deletar perfil",
+                duplicated: "Perfil já cadastrado",
                 editError: "Erro ao editar perfil",
                 editProfileError: "Erro ao editar perfil",
                 invalid: "Perfil inválido",
@@ -575,6 +576,7 @@ const portuguese = {
                 emailDuplicated: "Email já cadastrado",
                 invalid: "Usuário inválido",
                 saveError: "Erro ao salvar usuário",
+                duplicated: "Usuário duplicado",
             },
             manageUsers: "Gestão de usuários",
             newTeamUserMessage: "Crie um novo usuário que será automaticamente selecionado",

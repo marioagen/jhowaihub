@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -59,6 +59,10 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.Duplicated, "Duplicated user", null);
             }
+            else if (await _userRepository.ExistsUserNameAsync(userCreateDto.Name, null))
+            {
+                throw new AppException(ErrorCode.Duplicated, "Duplicated user name", null);
+            }
             else
             {
                 var userEnabledReference = await AssignLicensesMarketplace(userCreateDto.Email, Guid.Empty, headersDto);
@@ -117,6 +121,10 @@ namespace WoopiAiHub.Application.Services
             else if (existingUser != null && existingUser.IsActive && !existingUser.Id.Equals(userUpdateDto.Id))
             {
                 throw new AppException(ErrorCode.Duplicated, "Duplicated user", null);
+            }
+            else if (await _userRepository.ExistsUserNameAsync(userUpdateDto.Name, userUpdateDto.Id))
+            {
+                throw new AppException(ErrorCode.Duplicated, "Duplicated user name", null);
             }
             else
             {

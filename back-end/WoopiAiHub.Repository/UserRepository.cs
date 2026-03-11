@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -101,6 +101,18 @@ namespace WoopiAiHub.Repository
             _context.Users.Update(user);
             _context.SaveChanges();
             return true;
+        }
+
+        /// <summary>
+        /// Checks if the  users's name already exists.
+        /// </summary>
+        public async Task<bool> ExistsUserNameAsync(string name, Guid? excludeUserId = null)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return false;
+            var nameLower = name.Trim().ToLowerInvariant();
+            return await _context.Users.AnyAsync(u =>
+                u.Name.ToLower() == nameLower &&
+                (excludeUserId == null || u.Id != excludeUserId.Value));
         }
 
         /// <summary>

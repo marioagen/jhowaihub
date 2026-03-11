@@ -495,6 +495,7 @@ const spanish = {
             errors: {
                 addError: "Erro al crear perfil",
                 deleteError: "Error al eliminar el perfil",
+                duplicated: "Perfil ya registrado",
                 editError: "Error al actualizar el perfil",
                 editProfileError: "Erro al actualizar perfil",
                 invalid: "Perfil inválido",
@@ -575,6 +576,7 @@ const spanish = {
                 emailDuplicated: "Correo electrónico ya registrado",
                 invalid: "Usuario inválido",
                 saveError: "Error al guardar el usuario",
+                duplicated: "Usuario duplicado",
             },
             manageUsers: "Gestión de usuarios",
             newTeamUserMessage: "Crea un nuevo usuario que será seleccionado automáticamente",
