@@ -499,6 +499,11 @@
                 foundCard.percentage = message.percentage;
                 foundCard.toolName = message.toolName;
 
+                if (message.failed === true) {
+                    foundCard.status.name = "Fail";
+                    foundCard.status.color = "#D10000";
+                }
+
                 if (message.percentage === 100.0 && foundCard.stepId !== message.stepId) {
                     if (!this.cardIdsToUpdate.includes(message.cardId)) {
                         this.cardIdsToUpdate.push(message.cardId);

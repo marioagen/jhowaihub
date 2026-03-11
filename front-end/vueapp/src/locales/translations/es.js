@@ -87,6 +87,8 @@ const spanish = {
         unassignInfo: "Desasignar documento",
         userApplicant: "Solicitante",
         userAssigned: "Responsable",
+        executionFailed: "Falló al procesar",
+        reprocess: "Reprocesar",
     },
     common: {
         action: "Acción",

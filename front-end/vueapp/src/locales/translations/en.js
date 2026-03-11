@@ -85,6 +85,8 @@ const english = {
         unassignInfo: "Unassign document",
         userApplicant: "Applicant",
         userAssigned: "Assigned",
+        executionFailed: "Execution failed",
+        reprocess: "Reprocess",
     },
     common: {
         action: "Action",

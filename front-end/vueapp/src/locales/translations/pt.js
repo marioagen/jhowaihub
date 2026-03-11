@@ -86,6 +86,8 @@ const portuguese = {
         unassignInfo: "Desatribuir documento",
         userApplicant: "Solicitante",
         userAssigned: "Responsável",
+        executionFailed: "Falha ao processar",
+        reprocess: "Reprocessar",
     },
     common: {
         action: "Ação",
