@@ -8,11 +8,11 @@ namespace WoopiAiHub.Domain.Interfaces.Services.Audit
     /// </summary>
     public interface IAuditorServices
     {
-        Task<ICollection<AuditorCardsDto>> FindCardsAuditAsync(int take, string? search, int? statusId);
-        Task<ICollection<AuditorCardResponseDto>> FindAuditByCardIdAsync(int cardId, int workflowId, int take, Guid? userId, int? actionType, int? stepId, bool orderDescending = true);
-        Task<ICollection<AuditorWorkflowResponseDto>> FindWorkflowAuditAsync();
-        Task<WorkflowDto?> GetWorkflowByIdAsync(int id);
-        Task<ICollection<UserDto>> GetUsersAsync();
-        Task<UserDto?> GetUserByIdAsync(Guid id);
+        Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, int? statusId);
+        Task<ICollection<CardAuditorDetailDto>> FindCardAuditDetailsAsync(int cardId, int workflowId, int take, Guid? userId, int? actionType, int? stepId, bool orderDescending = true);
+        Task<ICollection<AuditorWorkflowListItemDto>> FindWorkflowAuditSummaryAsync();
+        Task<AuditorWorkflowResponseDto?> FindWorkflowAuditDetailsAsync(int workflowId);
+        Task<ICollection<UserDto>> FindUserAuditSummaryAsync();
+        Task<UserDto?> FindUserAuditDetailsAsync(Guid id);
     }
 }

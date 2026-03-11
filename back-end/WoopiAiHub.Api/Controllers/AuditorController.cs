@@ -28,13 +28,13 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="statusId">Optional. Exact match on card status.</param>
         [HttpGet("Cards")]
         [SwaggerOperation("Returns cards for the auditor with optional search and status filter")]
-        [ProducesResponseType(typeof(ICollection<AuditorCardsDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindCardsAudit(
+        [ProducesResponseType(typeof(ICollection<CardAuditorSummaryDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindCardsAuditSummary(
             [FromQuery] int take = 10,
             [FromQuery] string? search = null,
             [FromQuery] int? statusId = null)
         {
-            var result = await _auditorServices.FindCardsAuditAsync(take, search, statusId);
+            var result = await _auditorServices.FindCardsAuditSummaryAsync(take, search, statusId);
             return Ok(result);
         }
 
@@ -50,8 +50,8 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="orderDescending">Order by Created descending when true (default), ascending when false.</param>
         [HttpGet("Cards/{cardId:int}/Workflows/{workflowId:int}")]
         [SwaggerOperation("Returns audit rows for a card and workflow with optional filters and sort")]
-        [ProducesResponseType(typeof(ICollection<AuditorCardResponseDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindAuditByCardId(
+        [ProducesResponseType(typeof(ICollection<CardAuditorDetailDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindCardAuditDetails(
             int cardId,
             int workflowId,
             [FromQuery] int take = 10,
@@ -60,7 +60,7 @@ namespace WoopiAiHub.Api.Controllers
             [FromQuery] int? step = null,
             [FromQuery] bool orderDescending = true)
         {
-            var result = await _auditorServices.FindAuditByCardIdAsync(cardId, workflowId, take, userId, action, step, orderDescending);
+            var result = await _auditorServices.FindCardAuditDetailsAsync(cardId, workflowId, take, userId, action, step, orderDescending);
             return Ok(result);
         }
 
@@ -69,23 +69,23 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         [HttpGet("Workflows")]
         [SwaggerOperation("Returns workflow audit list for the auditor")]
-        [ProducesResponseType(typeof(ICollection<AuditorWorkflowResponseDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindWorkflowAudit()
+        [ProducesResponseType(typeof(ICollection<AuditorWorkflowListItemDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindWorkflowAuditSummary()
         {
-            var result = await _auditorServices.FindWorkflowAuditAsync();
+            var result = await _auditorServices.FindWorkflowAuditSummaryAsync();
             return Ok(result);
         }
 
         /// <summary>
-        /// Returns a single workflow by id for auditing.
+        /// Returns audit data for a workflow by id: WorkflowId, WorkflowName, LogCount, StepsCount, CardStatusCount, Cards. Returns 404 when no audit entries exist for the workflow.
         /// </summary>
         [HttpGet("Workflow/{id:int}")]
-        [SwaggerOperation("Endpoint that returns a workflow by id for the auditor")]
-        [ProducesResponseType(typeof(WorkflowDto), StatusCodes.Status200OK)]
+        [SwaggerOperation("Returns audit data for a workflow by id")]
+        [ProducesResponseType(typeof(AuditorWorkflowResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetWorkflow(int id)
+        public async Task<IActionResult> FindWorkflowAuditDetails(int id)
         {
-            var result = await _auditorServices.GetWorkflowByIdAsync(id);
+            var result = await _auditorServices.FindWorkflowAuditDetailsAsync(id);
             if (result is null)
                 return NotFound();
             return Ok(result);
@@ -97,9 +97,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("Users")]
         [SwaggerOperation("Endpoint that returns all users for the auditor")]
         [ProducesResponseType(typeof(ICollection<UserDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> FindUserAuditSummary()
         {
-            var result = await _auditorServices.GetUsersAsync();
+            var result = await _auditorServices.FindUserAuditSummaryAsync();
             return Ok(result);
         }
 
@@ -110,9 +110,9 @@ namespace WoopiAiHub.Api.Controllers
         [SwaggerOperation("Endpoint that returns a user by id for the auditor")]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetUser(Guid id)
+        public async Task<IActionResult> FindUserAuditDetails(Guid id)
         {
-            var result = await _auditorServices.GetUserByIdAsync(id);
+            var result = await _auditorServices.FindUserAuditDetailsAsync(id);
             if (result is null)
                 return NotFound();
             return Ok(result);

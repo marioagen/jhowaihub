@@ -17,22 +17,22 @@ namespace WoopiAiHub.Application.Services.Audit
             _auditorRepository = auditorRepository;
         }
 
-        public Task<ICollection<AuditorCardsDto>> FindCardsAuditAsync(int take, string? search, int? statusId)
-            => _auditorRepository.FindCardsAuditAsync(take, search, statusId);
+        public Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, int? statusId)
+            => _auditorRepository.FindCardsAuditSummaryAsync(take, search, statusId);
 
-        public Task<ICollection<AuditorCardResponseDto>> FindAuditByCardIdAsync(int cardId, int workflowId, int take, Guid? userId, int? actionType, int? stepId, bool orderDescending = true)
-            => _auditorRepository.FindAuditByCardIdAsync(cardId, workflowId, take, userId, actionType, stepId, orderDescending);
+        public Task<ICollection<CardAuditorDetailDto>> FindCardAuditDetailsAsync(int cardId, int workflowId, int take, Guid? userId, int? actionType, int? stepId, bool orderDescending = true)
+            => _auditorRepository.FindCardAuditDetailsAsync(cardId, workflowId, take, userId, actionType, stepId, orderDescending);
 
-        public Task<ICollection<AuditorWorkflowResponseDto>> FindWorkflowAuditAsync()
-            => _auditorRepository.FindWorkflowAuditAsync();
+        public Task<ICollection<AuditorWorkflowListItemDto>> FindWorkflowAuditSummaryAsync()
+            => _auditorRepository.FindWorkflowAuditSummaryAsync();
 
-        public Task<WorkflowDto?> GetWorkflowByIdAsync(int id)
-            => _auditorRepository.GetWorkflowByIdAsync(id);
+        public Task<AuditorWorkflowResponseDto?> FindWorkflowAuditDetailsAsync(int workflowId)
+            => _auditorRepository.FindWorkflowAuditDetailsAsync(workflowId);
 
-        public Task<ICollection<UserDto>> GetUsersAsync()
-            => _auditorRepository.GetUsersAsync();
+        public Task<ICollection<UserDto>> FindUserAuditSummaryAsync()
+            => _auditorRepository.FindUserAuditSummaryAsync();
 
-        public Task<UserDto?> GetUserByIdAsync(Guid id)
-            => _auditorRepository.GetUserByIdAsync(id);
+        public Task<UserDto?> FindUserAuditDetailsAsync(Guid id)
+            => _auditorRepository.FindUserAuditDetailsAsync(id);
     }
 }

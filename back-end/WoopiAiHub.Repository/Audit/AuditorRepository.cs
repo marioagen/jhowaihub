@@ -3,6 +3,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Response.Auditor;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository.Audit
@@ -10,16 +11,13 @@ namespace WoopiAiHub.Repository.Audit
     public class AuditorRepository : IAuditorRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly IWorkflowRepository _workflowRepository;
         private readonly IUserRepository _userRepository;
 
         public AuditorRepository(
             ApplicationDbContext context,
-            IWorkflowRepository workflowRepository,
             IUserRepository userRepository)
         {
             _context = context;
-            _workflowRepository = workflowRepository;
             _userRepository = userRepository;
         }
 
@@ -27,7 +25,7 @@ namespace WoopiAiHub.Repository.Audit
         /// Returns the first N cards for the auditor (load-more pattern: take 10, then 20, 30…). One row per card with CardId, CardName, Workflows, ActionsCount, StatusName.
         /// Optional filters: search (matches CardId when numeric, or CardName/WorkflowName by contains), and statusId (exact match on StatusId).
         /// </summary>
-        public async Task<ICollection<AuditorCardsDto>> FindCardsAuditAsync(int take, string? search, int? statusId)
+        public async Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, int? statusId)
         {
             const int defaultTake = 10;
             if (take <= 0) take = defaultTake;
@@ -53,13 +51,13 @@ namespace WoopiAiHub.Repository.Audit
             return await query
                 .OrderBy(c => c.Id)
                 .Take(take)
-                .Select(c => new AuditorCardsDto
+                .Select(c => new CardAuditorSummaryDto
                 {
                     CardId = c.Id,
                     CardName = c.Name,
                     Workflows = c.Step != null && c.Step.Workflow != null
-                        ? new List<AuditorWorkflowListDto> { new() { Id = c.Step.Workflow.Id, Name = c.Step.Workflow.Name } }
-                        : new List<AuditorWorkflowListDto>(),
+                        ? new List<CardAuditorWorkflowsDto> { new() { Id = c.Step.Workflow.Id, Name = c.Step.Workflow.Name } }
+                        : new List<CardAuditorWorkflowsDto>(),
                     ActionsCount = _context.AuditCards.Count(a => a.CardId == c.Id),
                     StatusName = c.Status != null ? c.Status.Name : string.Empty
                 })
@@ -69,7 +67,7 @@ namespace WoopiAiHub.Repository.Audit
         /// <summary>
         /// Returns up to N audit rows for a card and workflow (load-more pattern). Optional filters: userId, actionType, stepId. Order by Created desc or asc.
         /// </summary>
-        public async Task<ICollection<AuditorCardResponseDto>> FindAuditByCardIdAsync(int cardId, int workflowId, int take, Guid? userId, int? actionType, int? stepId, bool orderDescending = true)
+        public async Task<ICollection<CardAuditorDetailDto>> FindCardAuditDetailsAsync(int cardId, int workflowId, int take, Guid? userId, int? actionType, int? stepId, bool orderDescending = true)
         {
             const int defaultTake = 10;
             if (take <= 0) take = defaultTake;
@@ -90,7 +88,7 @@ namespace WoopiAiHub.Repository.Audit
 
             return await ordered
                 .Take(take)
-                .Select(a => new AuditorCardResponseDto
+                .Select(a => new CardAuditorDetailDto
                 {
                     CardId = a.CardId,
                     CardName = a.Card != null ? a.Card.Name : string.Empty,
@@ -109,7 +107,7 @@ namespace WoopiAiHub.Repository.Audit
         /// <summary>
         /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, Profile. Source: AuditCards grouped by WorkflowId. Limited to 10 entries. Filters and take parameter to be added later.
         /// </summary>
-        public async Task<ICollection<AuditorWorkflowResponseDto>> FindWorkflowAuditAsync()
+        public async Task<ICollection<AuditorWorkflowListItemDto>> FindWorkflowAuditSummaryAsync()
         {
             const int take = 10;
             var workflowList = await _context.AuditCards
@@ -120,7 +118,7 @@ namespace WoopiAiHub.Repository.Audit
                 .ToListAsync();
 
             if (workflowList.Count == 0)
-                return new List<AuditorWorkflowResponseDto>();
+                return new List<AuditorWorkflowListItemDto>();
 
             var auditRows = await _context.AuditCards
                 .AsNoTracking()
@@ -153,7 +151,7 @@ namespace WoopiAiHub.Repository.Audit
             return AuditorByWorkflow.Select(g =>
             {
                 var first = g.First();
-                return new AuditorWorkflowResponseDto
+                return new AuditorWorkflowListItemDto
                 {
                     WorkflowId = g.Key,
                     WorkflowName = first.WorkflowName,
@@ -168,17 +166,96 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns a single workflow by id.
+        /// Returns audit data for a workflow: WorkflowId, WorkflowName, LogCount, StepsCount, CardStatusCount, Cards. Returns null when no audit entries exist for the workflow.
         /// </summary>
-        public Task<WorkflowDto?> GetWorkflowByIdAsync(int id)
+        public async Task<AuditorWorkflowResponseDto?> FindWorkflowAuditDetailsAsync(int workflowId)
         {
-            return _workflowRepository.FindById(id, null);
+            var auditRows = await _context.AuditCards
+                .AsNoTracking()
+                .Where(a => a.WorkflowId == workflowId)
+                .Select(a => new
+                {
+                    a.Id,
+                    a.CardId,
+                    a.WorkflowId,
+                    WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
+                    a.Created,
+                    a.UserId,
+                    UserName = a.User != null ? a.User.Name : string.Empty,
+                    a.ActionType,
+                    CardName = a.Card != null ? a.Card.Name : string.Empty,
+                    CardStatus = a.Card != null && a.Card.Status != null ? a.Card.Status.Name : string.Empty,
+                    StepId = a.Card != null ? a.Card.StepId : 0,
+                    StepName = a.Card != null && a.Card.Step != null ? a.Card.Step.Name : string.Empty
+                })
+                .ToListAsync();
+
+            if (auditRows.Count == 0)
+                return null;
+
+            var first = auditRows.First();
+            var distinctCardIds = auditRows.Select(a => a.CardId).Distinct().ToList();
+
+            var cards = auditRows
+                .Select(a => new WorkflowAuditCardResponseDto
+                {
+                    CardId = a.CardId,
+                    CardName = a.CardName,
+                    CardStatus = a.CardStatus,
+                    StepId = a.StepId,
+                    StepName = a.StepName,
+                    UserId = a.UserId,
+                    UserName = a.UserName,
+                    ActionType = a.ActionType.ToString(),
+                    Created = a.Created
+                })
+                .ToList();
+
+            var stepsCount = auditRows
+                .GroupBy(a => new { a.StepId, a.StepName })
+                .Select(g => new StepsCountResponseDto
+                {
+                    StepId = g.Key.StepId,
+                    StepName = g.Key.StepName,
+                    CardCount = g.Select(a => a.CardId).Distinct().Count()
+                })
+                .ToList();
+
+            int finalized = 0;
+            int rejected = 0;
+            if (distinctCardIds.Count > 0)
+            {
+                var cardStatuses = await _context.Cards
+                    .AsNoTracking()
+                    .Where(c => distinctCardIds.Contains(c.Id))
+                    .Select(c => new { c.Id, StatusName = c.Status != null ? c.Status.Name : string.Empty })
+                    .ToListAsync();
+                finalized = cardStatuses.Count(s => s.StatusName == StatusNames.Finalize);
+                rejected = cardStatuses.Count(s => s.StatusName == StatusNames.Rejected);
+            }
+
+            var cardStatusCount = new WorkflowAuditCardStatusCountResponseDto
+            {
+                TotalCards = distinctCardIds.Count,
+                Finalized = finalized,
+                Rejected = rejected
+            };
+
+            return new AuditorWorkflowResponseDto
+            {
+                WorkflowId = first.WorkflowId,
+                WorkflowName = first.WorkflowName,
+                LogCount = auditRows.Count,
+                StepsCount = stepsCount,
+                CardStatusCount = cardStatusCount,
+                Cards = cards
+            };
         }
 
         /// <summary>
         /// Returns all users. Query can be refined later.
         /// </summary>
-        public Task<ICollection<UserDto>> GetUsersAsync()
+        public Task<ICollection<UserDto>> FindUserAuditSummaryAsync()
         {
             return _userRepository.FindAllAsync();
         }
@@ -186,7 +263,7 @@ namespace WoopiAiHub.Repository.Audit
         /// <summary>
         /// Returns a single user by id.
         /// </summary>
-        public async Task<UserDto?> GetUserByIdAsync(Guid id)
+        public async Task<UserDto?> FindUserAuditDetailsAsync(Guid id)
         {
             return await _context.Users
                 .AsNoTracking()
