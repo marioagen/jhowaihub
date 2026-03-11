@@ -74,7 +74,7 @@
             <div v-for="(
 item, index
                 ) in internalDependencies" :key="index"
-                class="d-flex align-items-center justify-content-between bg-light rounded p-2 mb-2">
+                class="d-flex align-items-center justify-content-between rounded p-2 mb-2">
                 <div class="d-flex align-items-center flex-grow-1">
                     <div class="flex-grow-1">
                         <div class="fw-medium">
