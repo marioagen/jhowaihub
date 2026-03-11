@@ -1059,6 +1059,7 @@ const portuguese = {
             finalize: "Finalizado",
             waitingforapproval: "Esperando Aprovação",
             rejected: "Reprovado",
+            fail: "Falha",
         },
         stepFlow: "Automação de documentos",
         stepNamePlaceholder: "Nome da etapa",
