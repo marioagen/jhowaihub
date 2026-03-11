@@ -2,7 +2,7 @@
     <div v-if="
         previousStepTools &&
         previousStepTools.length > 0
-    " class="mt-4">
+    ">
         <h6 class="mb-0">
             {{ $t("flow.sidebar.dependencies") }}
             <span class="text-danger">*</span>
@@ -69,12 +69,12 @@
                 </li>
             </ul>
         </div>
-        <!-- Selected Dependencies Display -->
-        <div v-if="selectedDependencies.length > 0" class="mb-3 mt-2">
+
+        <div v-if="internalDependencies.length > 0" class="mb-3 mt-2">
             <div v-for="(
 item, index
-                ) in selectedDependencies" :key="index"
-                class="d-flex align-items-center justify-content-between dep-item rounded p-2 mb-2">
+                ) in internalDependencies" :key="index"
+                class="d-flex align-items-center justify-content-between bg-light rounded p-2 mb-2">
                 <div class="d-flex align-items-center flex-grow-1">
                     <div class="flex-grow-1">
                         <div class="fw-medium">
@@ -113,7 +113,7 @@ export default {
             type: Array,
             default: () => [],
         },
-        modelValue: {
+        selectedDependencies: {
             type: Array,
             default: () => [],
         },
@@ -123,17 +123,17 @@ export default {
     },
     data() {
         return {
-            selectedDependencies: this.modelValue
+            internalDependencies: this.selectedDependencies
                 ? JSON.parse(
-                    JSON.stringify(this.modelValue)
+                    JSON.stringify(this.selectedDependencies)
                 )
                 : [],
         };
     },
     watch: {
-        modelValue: {
+        selectedDependencies: {
             handler(newValue) {
-                this.selectedDependencies = newValue
+                this.internalDependencies = newValue
                     ? JSON.parse(
                         JSON.stringify(newValue)
                     )
@@ -149,7 +149,7 @@ export default {
                     ...step,
                     stepTools: step.stepTools.filter(
                         (stepTool) =>
-                            !this.selectedDependencies.some(
+                            !this.internalDependencies.some(
                                 (selected) =>
                                     selected.stepOrder ===
                                     step.order &&
@@ -166,20 +166,20 @@ export default {
     methods: {
         updateModel() {
             this.$emit(
-                "update:modelValue",
-                this.selectedDependencies
+                "update:selectedDependencies",
+                this.internalDependencies
             );
         },
         addDependency(step, stepTool) {
-            this.selectedDependencies.push({
+            this.internalDependencies.push({
                 stepOrder: step.order,
                 stepToolOrder: stepTool.order,
             });
             this.updateModel();
         },
         removeDependency(item) {
-            this.selectedDependencies =
-                this.selectedDependencies.filter(
+            this.internalDependencies =
+                this.internalDependencies.filter(
                     (dependency) =>
                         dependency.stepToolOrder !==
                         item.stepToolOrder ||
@@ -189,9 +189,9 @@ export default {
             this.updateModel();
         },
         reloadData() {
-            this.selectedDependencies = this.modelValue
+            this.internalDependencies = this.selectedDependencies
                 ? JSON.parse(
-                    JSON.stringify(this.modelValue)
+                    JSON.stringify(this.selectedDependencies)
                 )
                 : [];
         },

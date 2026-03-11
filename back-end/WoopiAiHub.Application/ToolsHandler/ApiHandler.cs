@@ -126,51 +126,106 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// and returns the resulting JSON string.
         /// </summary>
         /// <remarks>Placeholders are replaced in a case-insensitive manner. Only outputs with tool types
-        /// of OCR, Embeddings, or Prompt are processed; other tool types are ignored.</remarks>
+        /// of OCR, Prompt, N8N, API, or Quiz are processed; other tool types are ignored. Embeddings is explicitly excluded.</remarks>
         /// <param name="outputs">A collection of tool output objects whose values are used to replace placeholders in the input string. Only
         /// outputs with recognized tool types are considered.</param>
         /// <param name="inputValue">The input string containing placeholders to be replaced with output values. Placeholders must match the
-        /// expected format (e.g., "{{ocr}}", "{{embeddings}}", or "{{prompt}}").</param>
+        /// expected format (e.g., "{{ocr}}", "{{prompt}}", "{{n8n}}", "{{api}}", or "{{quiz}}").</param>
         /// <returns>A string representing the input value with recognized placeholders replaced by the corresponding output
         /// values. If no placeholders are matched, the original input string is returned.</returns>
         private string ConvertOutputsToJson(ICollection<StepToolOutput> outputs, string inputValue)
         {
             var result = inputValue;
 
-            foreach (var output in outputs)
-            {
-                if (output.StepTool?.Tool?.ToolType == null)
-                {
-                    continue;
-                }
+            if (string.IsNullOrEmpty(result)) return result;
 
-                var toolType = output.StepTool.Tool.ToolType.Name;
-                var placeholder = string.Empty;
-                var replaceValue = string.Empty;
+            // Group outputs by tool type
+            var groups = outputs
+                .Where(o => o.StepTool?.Tool?.ToolType != null)
+                .GroupBy(o => o.StepTool!.Tool!.ToolType!.Name, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var group in groups)
+            {
+                var toolType = group.Key;
+                string placeholder;
+                var isJsonNode = false;
 
                 switch (toolType)
                 {
                     case HandlersTypes.Ocr:
                         placeholder = "{{ocr}}";
-                        replaceValue = ExtractOcrText(output.Value);
                         break;
                     case HandlersTypes.Prompt:
                         placeholder = "{{prompt}}";
-                        replaceValue = output.Value;
+                        break;
+                    case HandlersTypes.N8N:
+                        placeholder = "{{n8n}}";
+                        isJsonNode = true;
+                        break;
+                    case HandlersTypes.API:
+                        placeholder = "{{api}}";
+                        isJsonNode = true;
+                        break;
+                    case HandlersTypes.Quiz:
+                        placeholder = "{{quiz}}";
+                        isJsonNode = true;
                         break;
                     default:
                         continue;
                 }
 
-                if (result.Contains(placeholder, StringComparison.OrdinalIgnoreCase))
+                if (!result.Contains(placeholder, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!replaceValue.StartsWith('\"') && !replaceValue.EndsWith('\"'))
+                    continue;
+                }
+
+                var processedValues = new List<string>();
+
+                foreach (var output in group)
+                {
+                    var raw = output.Value ?? string.Empty;
+                    string processed;
+
+                    if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
                     {
-                        replaceValue = JsonSerializer.Serialize(replaceValue, _jsonOptions);
+                        processed = ExtractOcrText(raw);
+                    }
+                    else if (string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase))
+                    {
+                        processed = raw;
+                    }
+                    else
+                    {
+                        processed = string.IsNullOrWhiteSpace(raw) ? "null" : raw;
                     }
 
-                    result = result.Replace(placeholder, replaceValue, StringComparison.OrdinalIgnoreCase);
+                    if (!isJsonNode)
+                    {
+                        if (!processed.StartsWith('"') && !processed.EndsWith('"'))
+                        {
+                            processed = JsonSerializer.Serialize(processed, _jsonOptions);
+                        }
+                    }
+
+                    processedValues.Add(processed);
                 }
+
+                string replacement;
+
+                if (processedValues.Count == 0)
+                {
+                    replacement = isJsonNode ? "null" : JsonSerializer.Serialize(string.Empty, _jsonOptions);
+                }
+                else if (processedValues.Count == 1)
+                {
+                    replacement = processedValues[0];
+                }
+                else
+                {
+                    replacement = "[" + string.Join(", ", processedValues) + "]";
+                }
+
+                result = result.Replace(placeholder, replacement, StringComparison.OrdinalIgnoreCase);
             }
 
             return result;
