@@ -401,15 +401,196 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.Contains(promptText, message.Body);
         }
 
-        [Fact(DisplayName = "Type property should return API handler type")]
-        [Trait("Type", "Success")]
-        public void Type_ShouldReturnApiHandlerType()
+        // New tests to cover N8N, API and Quiz tool types (isJsonNode = true)
+        [Fact(DisplayName = "BuildPayload should replace N8N placeholder in body as JSON node")]
+        [Trait("BuildPayload", "Success")]
+        public async Task BuildPayload_ShouldReplaceN8nPlaceholder_InBody()
         {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolDto = CreateValidStepToolDto();
+            var apiTemplate = CreateValidApiTemplateDto();
+            var execution = AutomationFixture.FindValidStepToolExecution();
+
+            var n8nJson = "{\"status\":\"ok\"}";
+            var output = CreateStepToolOutput(HandlersTypes.N8N, n8nJson);
+            var outputs = new List<StepToolOutput> { output };
+
+            var apiRequest = new ApiRequestDto
+            {
+                TemplateId = apiTemplate.Id!.Value,
+                Url = apiTemplate.Url,
+                Method = apiTemplate.Method,
+                Body = "{\"data\": {{n8n}}}"
+            };
+
+            var encryptedData = JsonSerializer.Serialize(apiRequest);
+
+            _mockStepToolRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(stepToolDto);
+
+            _mockEncryptionService
+                .Setup(service => service.Decrypt(It.IsAny<string>()))
+                .Returns(encryptedData);
+
+            _mockApiTemplateRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(apiTemplate);
+
             // Act
-            var type = _handler.Type;
+            var result = await _handler.BuildPayload(automationServicesDto, null, outputs, execution);
 
             // Assert
-            Assert.Equal(HandlersTypes.API, type);
+            var message = result.Message as ApiRequestDto;
+            Assert.NotNull(message);
+            Assert.NotNull(message.Body);
+            // Ensure the JSON node was inserted without being quoted
+            Assert.Contains("{\"status\":\"ok\"}", message.Body);
+        }
+
+        [Fact(DisplayName = "BuildPayload should handle multiple N8N placeholders as JSON array")]
+        [Trait("BuildPayload", "Success")]
+        public async Task BuildPayload_ShouldHandleMultipleN8nPlaceholders_InBody()
+        {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolDto = CreateValidStepToolDto();
+            var apiTemplate = CreateValidApiTemplateDto();
+            var execution = AutomationFixture.FindValidStepToolExecution();
+
+            var n8nJson1 = "{\"id\":1}";
+            var n8nJson2 = "{\"id\":2}";
+            var output1 = CreateStepToolOutput(HandlersTypes.N8N, n8nJson1);
+            var output2 = CreateStepToolOutput(HandlersTypes.N8N, n8nJson2);
+            var outputs = new List<StepToolOutput> { output1, output2 };
+
+            var apiRequest = new ApiRequestDto
+            {
+                TemplateId = apiTemplate.Id!.Value,
+                Url = apiTemplate.Url,
+                Method = apiTemplate.Method,
+                Body = "{\"items\": {{n8n}}}"
+            };
+
+            var encryptedData = JsonSerializer.Serialize(apiRequest);
+
+            _mockStepToolRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(stepToolDto);
+
+            _mockEncryptionService
+                .Setup(service => service.Decrypt(It.IsAny<string>()))
+                .Returns(encryptedData);
+
+            _mockApiTemplateRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(apiTemplate);
+
+            // Act
+            var result = await _handler.BuildPayload(automationServicesDto, null, outputs, execution);
+
+            // Assert
+            var message = result.Message as ApiRequestDto;
+            Assert.NotNull(message);
+            Assert.NotNull(message.Body);
+            // Should contain a JSON array with both objects
+            Assert.Contains("[", message.Body);
+            Assert.Contains("{\"id\":1}", message.Body);
+            Assert.Contains("{\"id\":2}", message.Body);
+            Assert.Contains(", ", message.Body); // join uses comma + space
+        }
+
+        [Fact(DisplayName = "BuildPayload should replace API placeholder in body as JSON node")]
+        [Trait("BuildPayload", "Success")]
+        public async Task BuildPayload_ShouldReplaceApiPlaceholder_InBody()
+        {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolDto = CreateValidStepToolDto();
+            var apiTemplate = CreateValidApiTemplateDto();
+            var execution = AutomationFixture.FindValidStepToolExecution();
+
+            var apiJson = "{\"result\":123}";
+            var output = CreateStepToolOutput(HandlersTypes.API, apiJson);
+            var outputs = new List<StepToolOutput> { output };
+
+            var apiRequest = new ApiRequestDto
+            {
+                TemplateId = apiTemplate.Id!.Value,
+                Url = apiTemplate.Url,
+                Method = apiTemplate.Method,
+                Body = "{\"apiResult\": {{api}}}"
+            };
+
+            var encryptedData = JsonSerializer.Serialize(apiRequest);
+
+            _mockStepToolRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(stepToolDto);
+
+            _mockEncryptionService
+                .Setup(service => service.Decrypt(It.IsAny<string>()))
+                .Returns(encryptedData);
+
+            _mockApiTemplateRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(apiTemplate);
+
+            // Act
+            var result = await _handler.BuildPayload(automationServicesDto, null, outputs, execution);
+
+            // Assert
+            var message = result.Message as ApiRequestDto;
+            Assert.NotNull(message);
+            Assert.NotNull(message.Body);
+            Assert.Contains("{\"result\":123}", message.Body);
+        }
+
+        [Fact(DisplayName = "BuildPayload should replace Quiz placeholder in body as JSON node")]
+        [Trait("BuildPayload", "Success")]
+        public async Task BuildPayload_ShouldReplaceQuizPlaceholder_InBody()
+        {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolDto = CreateValidStepToolDto();
+            var apiTemplate = CreateValidApiTemplateDto();
+            var execution = AutomationFixture.FindValidStepToolExecution();
+
+            var quizJson = "{\"score\":10}";
+            var output = CreateStepToolOutput(HandlersTypes.Quiz, quizJson);
+            var outputs = new List<StepToolOutput> { output };
+
+            var apiRequest = new ApiRequestDto
+            {
+                TemplateId = apiTemplate.Id!.Value,
+                Url = apiTemplate.Url,
+                Method = apiTemplate.Method,
+                Body = "{\"quiz\": {{quiz}}}"
+            };
+
+            var encryptedData = JsonSerializer.Serialize(apiRequest);
+
+            _mockStepToolRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(stepToolDto);
+
+            _mockEncryptionService
+                .Setup(service => service.Decrypt(It.IsAny<string>()))
+                .Returns(encryptedData);
+
+            _mockApiTemplateRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(apiTemplate);
+
+            // Act
+            var result = await _handler.BuildPayload(automationServicesDto, null, outputs, execution);
+
+            // Assert
+            var message = result.Message as ApiRequestDto;
+            Assert.NotNull(message);
+            Assert.NotNull(message.Body);
+            Assert.Contains("{\"score\":10}", message.Body);
         }
 
         private static StepToolDto CreateValidStepToolDto()
