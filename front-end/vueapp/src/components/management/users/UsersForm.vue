@@ -387,10 +387,24 @@ export default {
                     });
                 })
                 .catch((e) => {
+                    const errorCode = e?.response?.data?.errorCode;
+                    const detail = (e?.response?.data?.detail || "").toLowerCase();
+                    const isNameDuplicated = errorCode === ErrorCode.Duplicated && detail.includes("name");
+                    if (errorCode === ErrorCode.Duplicated && this.$refs.formRef) {
+                        if (isNameDuplicated) {
+                            this.$refs.formRef.setFieldError("userName", this.$t("management.users.errors.duplicated"));
+                        } else {
+                            this.$refs.formRef.setFieldError("userEmail", this.$t("management.users.errors.emailDuplicated"));
+                        }
+                    }
+                    const notifyMessage = isNameDuplicated
+                        ? this.$t("management.users.errors.duplicated")
+                        : errorCode === ErrorCode.Duplicated
+                            ? this.$t("management.users.errors.emailDuplicated")
+                            : this.$t("management.users.errors.saveError");
                     this.$notify({
                         title: "management.users.title",
-                        message:
-                            "management.users.errors.saveError",
+                        message: notifyMessage,
                         variant: "danger",
                         icon: "CircleX",
                     });

@@ -1,13 +1,9 @@
 <template>
     <main>
-        <div class="container-fluid mx-2">
+        <div class="container-fluid scroll-area mx-2">
             <div class="row align-items-center mb-3">
                 <div class="col-auto">
-                    <button
-                        class="btn btn-outline-primary btn-table btn-sm"
-                        @click="handleNavigateBack"
-                        type="button"
-                    >
+                    <button class="btn btn-outline-primary btn-table btn-sm" @click="handleNavigateBack" type="button">
                         <LucideIcon icon="ArrowLeft" />
                     </button>
                 </div>
@@ -23,494 +19,512 @@
                         </p>
                     </div>
                 </div>
+                <div class="col-auto ms-auto">
+                    <button type="button" class="btn btn-primary" :disabled="isLoading || !selectedTemplate"
+                        @click="handleConfirm">
+                        <div style="min-width: 80px" class="text-center">
+                            <span v-if="isLoading" class="spinner-grow spinner-grow-sm" role="status"></span>
+                            <span v-else>
+                                {{ $t("common.save") }}
+                            </span>
+                        </div>
+                    </button>
+                </div>
             </div>
 
             <div class="row">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="mb-4">
-                                <label
-                                    for="templateSelect"
-                                    class="form-label fw-bold"
-                                >
-                                    {{ $t("template.selectTemplate") }}
-                                </label>
-                                <select
-                                    id="templateSelect"
-                                    class="form-select"
-                                    v-model="selectedTemplateId"
-                                    @change="onTemplateSelect"
-                                    :disabled="isLoading"
-                                >
-                                    <option value="">
-                                        {{ $t("template.selectTemplatePlaceholder") }}
-                                    </option>
-                                    <option
-                                        v-for="template in templates"
-                                        :key="template.id"
-                                        :value="template.id"
-                                    >
-                                        {{ template.name }}
-                                    </option>
-                                </select>
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="templateSelect" class="form-label fw-bold">
+                                        {{ $t("template.selectTemplate") }}
+                                    </label>
+                                    <select id="templateSelect" class="form-select" v-model="selectedTemplateId"
+                                        @change="onTemplateSelect" :disabled="isLoading">
+                                        <option value="">
+                                            {{ $t("template.selectTemplatePlaceholder") }}
+                                        </option>
+                                        <option v-for="template in templates" :key="template.id" :value="template.id">
+                                            {{ template.name }}
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div v-if="selectedTemplate">
-                                <TemplateFormDisplay
-                                    :template-data="templateData"
-                                    :read-only="false"
-                                    :editable="true"
-                                    @update:url="handleUrlUpdate"
-                                    @update:queryParam="handleQueryParamUpdate"
-                                    @update:header="handleHeaderUpdate"
-                                    @update:body="handleBodyUpdate"
-                                />
+                                <TemplateFormDisplay :template-data="templateData" :read-only="false" :editable="true"
+                                    :previous-step-tools="previousStepTools"
+                                    :selected-dependencies="selectedDependencies" @update:url="handleUrlUpdate"
+                                    @update:queryParam="handleQueryParamUpdate" @update:header="handleHeaderUpdate"
+                                    @update:body="handleBodyUpdate" @update:dependencies="updateDependencies" />
                             </div>
-                        </div>
-
-                        <div class="card-footer d-flex justify-content-end">
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                :disabled="isLoading || !selectedTemplate"
-                                @click="handleConfirm"
-                            >
-                                <div
-                                    style="min-width: 80px"
-                                    class="text-center"
-                                >
-                                    <span
-                                        v-if="isLoading"
-                                        class="spinner-grow spinner-grow-sm"
-                                        role="status"
-                                    ></span>
-                                    <span v-else>
-                                        {{ $t("common.confirm") }}
-                                    </span>
-                                </div>
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+    <ConfirmModal id="confirm-datatype-modal" :isLoading="isLoading" title="common.caution"
+        message="template.configuration.leaveMessage" confirmText="template.configuration.saveAndExit"
+        cancelText="template.configuration.keepEditing" confirmVariant="primary" iconeName="AlertTriangle"
+        iconVariant="warning" @confirm="confirmSave" @cancel="cancelSave" ref="confirmDatatypeModal" />
 </template>
 <script>
-    import TemplateService from "@/services/template/TemplateService";
-    import TemplateFormDisplay from "@/components/templates/TemplateFormDisplay.vue";
+import TemplateService from "@/services/template/TemplateService";
+import TemplateFormDisplay from "@/components/templates/TemplateFormDisplay.vue";
+import flowStateHelper from "@/helpers/flowStateHelper";
+import ConfirmModal from "@/components/global/ConfirmModal.vue";
+import textHelper from "@/helpers/textHelper";
 
-    export default {
-        name: "TemplateConfiguration",
-        components: {
-            TemplateFormDisplay,
+export default {
+    name: "TemplateConfiguration",
+    components: {
+        TemplateFormDisplay,
+        ConfirmModal,
+    },
+    data() {
+        return {
+            isLoading: false,
+            templates: [],
+            selectedTemplateId: "",
+            selectedTemplate: null,
+            editableQueryParams: [],
+            editableHeaders: [],
+            editableBody: "",
+            editableUrl: "",
+            previousStepTools: [],
+            selectedDependencies: [],
+        };
+    },
+    computed: {
+        computedUrl() {
+            if (!this.selectedTemplate || !this.selectedTemplate.url) {
+                return "";
+            }
+
+            const baseUrl = this.editableUrl
+                ? this.editableUrl.split("?")[0]
+                : this.selectedTemplate.url.split("?")[0];
+
+            const validParams = this.editableQueryParams.filter(
+                (p) => p.value && p.value.trim() !== ""
+            );
+
+            if (validParams.length === 0) {
+                return baseUrl;
+            }
+
+            const queryString = validParams.map((p) => `${p.key}=${p.value}`).join("&");
+
+            return `${baseUrl}?${queryString}`;
         },
-        data() {
+        templateData() {
+            if (!this.selectedTemplate) {
+                return {
+                    name: "",
+                    method: "GET",
+                    url: "",
+                    queryParams: [],
+                    headers: [],
+                    body: "",
+                };
+            }
+
             return {
-                isLoading: false,
-                templates: [],
-                selectedTemplateId: "",
-                selectedTemplate: null,
-                editableQueryParams: [],
-                editableHeaders: [],
-                editableBody: "",
-                editableUrl: "",
+                name: this.selectedTemplate.name || "",
+                method: this.selectedTemplate.method || "GET",
+                url: this.computedUrl,
+                queryParams: this.editableQueryParams,
+                headers: this.editableHeaders,
+                body: this.editableBody,
             };
         },
-        computed: {
-            computedUrl() {
-                if (!this.selectedTemplate || !this.selectedTemplate.url) {
-                    return "";
-                }
+        hasDatatypeMismatch() {
+            const depTypes = this.selectedDependencies
+                .map((dep) => {
+                    const step = this.previousStepTools.find((s) => s.order === dep.stepOrder);
+                    const st = step?.stepTools?.find((st) => st.order === dep.stepToolOrder);
+                    return st?.tool?.toolType
+                        ? textHelper.sanitizeToolNameForVariable(st.tool.toolType)
+                        : null;
+                })
+                .filter(Boolean);
 
-                const baseUrl = this.editableUrl
-                    ? this.editableUrl.split("?")[0]
-                    : this.selectedTemplate.url.split("?")[0];
+            const bodyPlaceholders = [
+                ...new Set(
+                    [...(this.editableBody || "").matchAll(/\{\{([^}]+)\}\}/g)].map((m) => m[1])
+                ),
+            ];
 
-                const validParams = this.editableQueryParams.filter(
-                    (p) => p.value && p.value.trim() !== ""
-                );
+            if (bodyPlaceholders.length === 0 && depTypes.length === 0) return false;
 
-                if (validParams.length === 0) {
-                    return baseUrl;
-                }
-
-                const queryString = validParams.map((p) => `${p.key}=${p.value}`).join("&");
-
-                return `${baseUrl}?${queryString}`;
-            },
-            templateData() {
-                if (!this.selectedTemplate) {
-                    return {
-                        name: "",
-                        method: "GET",
-                        url: "",
-                        queryParams: [],
-                        headers: [],
-                        body: "",
-                    };
-                }
-
-                return {
-                    name: this.selectedTemplate.name || "",
-                    method: this.selectedTemplate.method || "GET",
-                    url: this.computedUrl,
-                    queryParams: this.editableQueryParams,
-                    headers: this.editableHeaders,
-                    body: this.editableBody,
-                };
-            },
+            const missingDep = bodyPlaceholders.some((p) => !depTypes.includes(p));
+            const missingPlaceholder = depTypes.some((t) => !bodyPlaceholders.includes(t));
+            return missingDep || missingPlaceholder;
         },
-        mounted() {
-            this.loadTemplates();
-            this.loadExistingStepToolParameter();
+    },
+    mounted() {
+        this.loadTemplates();
+        this.loadExistingStepToolParameter();
+    },
+    methods: {
+        resetForm() {
+            this.selectedTemplateId = "";
+            this.selectedTemplate = null;
+            this.editableQueryParams = [];
+            this.editableHeaders = [];
+            this.editableBody = "";
+            this.editableUrl = "";
         },
-        methods: {
-            resetForm() {
-                this.selectedTemplateId = "";
-                this.selectedTemplate = null;
-                this.editableQueryParams = [];
-                this.editableHeaders = [];
-                this.editableBody = "";
-                this.editableUrl = "";
-            },
-            loadExistingStepToolParameter() {
-                const flowStateJson = localStorage.getItem("flow_state_params");
+        loadExistingStepToolParameter() {
+            const flowStateJson = localStorage.getItem("flow_state_params");
 
-                if (!flowStateJson) {
+            if (!flowStateJson) {
+                return;
+            }
+
+            try {
+                const flowState = JSON.parse(flowStateJson);
+                const selectedNode = flowState.selectedNode;
+                this.previousStepTools = flowState.previousStepTools;
+                this.selectedDependencies = flowState.selectedDependencies;
+
+                if (
+                    !selectedNode ||
+                    !selectedNode.data.parameters ||
+                    selectedNode.data.parameters.length === 0
+                ) {
                     return;
                 }
 
-                try {
-                    const flowState = JSON.parse(flowStateJson);
-                    const selectedNode = flowState.selectedNode;
+                const parameter = selectedNode.data.parameters[0];
+                if (!parameter.value) {
+                    return;
+                }
 
-                    if (
-                        !selectedNode ||
-                        !selectedNode.data.parameters ||
-                        selectedNode.data.parameters.length === 0
-                    ) {
-                        return;
-                    }
+                this.isLoading = true;
 
-                    const parameter = selectedNode.data.parameters[0];
-                    if (!parameter.value) {
-                        return;
-                    }
+                const savedConfig = JSON.parse(parameter.value);
 
-                    this.isLoading = true;
+                if (savedConfig.url) {
+                    this.editableUrl = savedConfig.url;
+                }
 
-                    const savedConfig = JSON.parse(parameter.value);
+                if (savedConfig.query) {
+                    this.editableQueryParams = Object.entries(savedConfig.query).map(
+                        ([key, value]) => ({
+                            key,
+                            value,
+                        })
+                    );
+                }
 
-                    if (savedConfig.url) {
-                        this.editableUrl = savedConfig.url;
-                    }
+                if (savedConfig.headers) {
+                    this.editableHeaders = Object.entries(savedConfig.headers).map(
+                        ([key, value]) => ({
+                            key,
+                            value,
+                        })
+                    );
+                }
 
-                    if (savedConfig.query) {
-                        this.editableQueryParams = Object.entries(savedConfig.query).map(
-                            ([key, value]) => ({
-                                key,
-                                value,
-                            })
-                        );
-                    }
+                if (savedConfig.body) {
+                    this.editableBody =
+                        typeof savedConfig.body === "string"
+                            ? savedConfig.body
+                            : JSON.stringify(savedConfig.body, null, 2);
+                }
 
-                    if (savedConfig.headers) {
-                        this.editableHeaders = Object.entries(savedConfig.headers).map(
-                            ([key, value]) => ({
-                                key,
-                                value,
-                            })
-                        );
-                    }
-
-                    if (savedConfig.body) {
-                        this.editableBody =
-                            typeof savedConfig.body === "string"
-                                ? savedConfig.body
-                                : JSON.stringify(savedConfig.body, null, 2);
-                    }
-
-                    if (savedConfig.templateId) {
-                        const checkTemplates = setInterval(() => {
-                            if (this.templates.length > 0) {
-                                clearInterval(checkTemplates);
-
-                                const matchingTemplate = this.templates.find(
-                                    (t) => t.id === savedConfig.templateId
-                                );
-
-                                if (matchingTemplate) {
-                                    this.selectedTemplateId = matchingTemplate.id;
-                                    this.selectedTemplate = matchingTemplate;
-                                }
-                                this.isLoading = false;
-                            }
-                        }, 100);
-
-                        setTimeout(() => {
+                if (savedConfig.templateId) {
+                    const checkTemplates = setInterval(() => {
+                        if (this.templates.length > 0) {
                             clearInterval(checkTemplates);
+
+                            const matchingTemplate = this.templates.find(
+                                (t) => t.id === savedConfig.templateId
+                            );
+
+                            if (matchingTemplate) {
+                                this.selectedTemplateId = matchingTemplate.id;
+                                this.selectedTemplate = matchingTemplate;
+                            }
                             this.isLoading = false;
-                        }, 5000);
-                    } else {
+                        }
+                    }, 100);
+
+                    setTimeout(() => {
+                        clearInterval(checkTemplates);
                         this.isLoading = false;
+                    }, 5000);
+                } else {
+                    this.isLoading = false;
+                }
+            } catch {
+                this.isLoading = false;
+            }
+        },
+        loadTemplates() {
+            this.isLoading = true;
+            TemplateService.getAllTemplates()
+                .then((data) => {
+                    this.templates = data;
+                })
+                .catch(() => {
+                    this.$notify({
+                        title: "common.error",
+                        message: "template.loadError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
+        },
+        onTemplateSelect() {
+            if (!this.selectedTemplateId) {
+                this.resetForm();
+                return;
+            }
+
+            this.isLoading = true;
+            TemplateService.getTemplateById(this.selectedTemplateId)
+                .then((data) => {
+                    this.selectedTemplate = data;
+                    this.initializeEditableData();
+                })
+                .catch(() => {
+                    this.$notify({
+                        title: "common.error",
+                        message: "template.loadError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                })
+                .finally(() => {
+                    this.isLoading = false;
+                });
+        },
+        initializeEditableData() {
+            this.editableQueryParams = this.parseQueryParams(
+                this.selectedTemplate.queryTemplate
+            );
+            this.editableHeaders = this.parseHeaders(this.selectedTemplate.headerTemplate);
+            this.editableBody = this.selectedTemplate.bodyTemplate || "";
+            this.editableUrl = "";
+        },
+        handleUrlUpdate(value) {
+            this.editableUrl = value;
+        },
+        handleQueryParamUpdate({ index, value }) {
+            if (this.editableQueryParams[index]) {
+                this.editableQueryParams[index].value = value;
+            }
+        },
+        handleHeaderUpdate({ index, value }) {
+            if (this.editableHeaders[index]) {
+                this.editableHeaders[index].value = value;
+            }
+        },
+        handleBodyUpdate(value) {
+            this.editableBody = value;
+        },
+        updateDependencies(dependencies) {
+            this.selectedDependencies = dependencies;
+        },
+        parseQueryParams(queryTemplate) {
+            if (!queryTemplate) return [];
+            try {
+                const parsed =
+                    typeof queryTemplate === "string"
+                        ? JSON.parse(queryTemplate)
+                        : queryTemplate;
+                return parsed.map((p) => ({
+                    key: p.key,
+                    value: p.value || "",
+                }));
+            } catch (e) {
+                return [];
+            }
+        },
+        parseHeaders(headerTemplate) {
+            if (!headerTemplate) return [];
+            try {
+                const parsed =
+                    typeof headerTemplate === "string"
+                        ? JSON.parse(headerTemplate)
+                        : headerTemplate;
+                return parsed.map((h) => ({
+                    key: h.key,
+                    value: h.value || "",
+                }));
+            } catch (e) {
+                return [];
+            }
+        },
+        formatTemplateJson(json, templateId) {
+            const formatted = {
+                templateId: templateId,
+                method: json.method,
+                url: json.url,
+            };
+
+            if (json.queryTemplate) {
+                try {
+                    const queryArray =
+                        typeof json.queryTemplate === "string"
+                            ? JSON.parse(json.queryTemplate)
+                            : json.queryTemplate;
+
+                    const queryObj = {};
+                    queryArray.forEach((param) => {
+                        if (param.key && param.value !== undefined) {
+                            queryObj[param.key] = param.value;
+                        }
+                    });
+
+                    if (Object.keys(queryObj).length > 0) {
+                        formatted.query = queryObj;
                     }
                 } catch {
-                    this.isLoading = false;
-                }
-            },
-            loadTemplates() {
-                this.isLoading = true;
-                TemplateService.getAllTemplates()
-                    .then((data) => {
-                        this.templates = data;
-                    })
-                    .catch(() => {
-                        this.$notify({
-                            title: "common.error",
-                            message: "template.loadError",
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
-            },
-            onTemplateSelect() {
-                if (!this.selectedTemplateId) {
-                    this.resetForm();
-                    return;
-                }
-
-                this.isLoading = true;
-                TemplateService.getTemplateById(this.selectedTemplateId)
-                    .then((data) => {
-                        this.selectedTemplate = data;
-                        this.initializeEditableData();
-                    })
-                    .catch(() => {
-                        this.$notify({
-                            title: "common.error",
-                            message: "template.loadError",
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
-                    });
-            },
-            initializeEditableData() {
-                this.editableQueryParams = this.parseQueryParams(
-                    this.selectedTemplate.queryTemplate
-                );
-
-                this.editableHeaders = this.parseHeaders(this.selectedTemplate.headerTemplate);
-
-                this.editableBody = this.selectedTemplate.bodyTemplate || "";
-
-                this.editableUrl = "";
-            },
-            handleUrlUpdate(value) {
-                this.editableUrl = value;
-            },
-            handleQueryParamUpdate({ index, value }) {
-                if (this.editableQueryParams[index]) {
-                    this.editableQueryParams[index].value = value;
-                }
-            },
-            handleHeaderUpdate({ index, value }) {
-                if (this.editableHeaders[index]) {
-                    this.editableHeaders[index].value = value;
-                }
-            },
-            handleBodyUpdate(value) {
-                this.editableBody = value;
-            },
-            parseQueryParams(queryTemplate) {
-                if (!queryTemplate) return [];
-                try {
-                    const parsed =
-                        typeof queryTemplate === "string"
-                            ? JSON.parse(queryTemplate)
-                            : queryTemplate;
-                    return parsed.map((p) => ({
-                        key: p.key,
-                        value: p.value || "",
-                    }));
-                } catch (e) {
-                    return [];
-                }
-            },
-            parseHeaders(headerTemplate) {
-                if (!headerTemplate) return [];
-                try {
-                    const parsed =
-                        typeof headerTemplate === "string"
-                            ? JSON.parse(headerTemplate)
-                            : headerTemplate;
-                    return parsed.map((h) => ({
-                        key: h.key,
-                        value: h.value || "",
-                    }));
-                } catch (e) {
-                    return [];
-                }
-            },
-            formatTemplateJson(json, templateId) {
-                const formatted = {
-                    templateId: templateId,
-                    method: json.method,
-                    url: json.url,
-                };
-
-                if (json.queryTemplate) {
-                    try {
-                        const queryArray =
-                            typeof json.queryTemplate === "string"
-                                ? JSON.parse(json.queryTemplate)
-                                : json.queryTemplate;
-
-                        const queryObj = {};
-                        queryArray.forEach((param) => {
-                            if (param.key && param.value !== undefined) {
-                                queryObj[param.key] = param.value;
-                            }
-                        });
-
-                        if (Object.keys(queryObj).length > 0) {
-                            formatted.query = queryObj;
-                        }
-                    } catch {
-                        this.$notify({
-                            title: "common.error",
-                            message: "template.loadError",
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                    }
-                }
-
-                if (json.headerTemplate) {
-                    try {
-                        const headerArray =
-                            typeof json.headerTemplate === "string"
-                                ? JSON.parse(json.headerTemplate)
-                                : json.headerTemplate;
-
-                        const headerObj = {};
-                        headerArray.forEach((header) => {
-                            if (header.key && header.value !== undefined) {
-                                headerObj[header.key] = header.value;
-                            }
-                        });
-
-                        if (Object.keys(headerObj).length > 0) {
-                            formatted.headers = headerObj;
-                        }
-                    } catch (e) {
-                        console.error("Error parsing headerTemplate:", e);
-                    }
-                }
-
-                if (json.bodyTemplate) {
-                    try {
-                        formatted.body =
-                            typeof json.bodyTemplate === "string"
-                                ? JSON.parse(json.bodyTemplate)
-                                : json.bodyTemplate;
-                    } catch {
-                        formatted.body = json.bodyTemplate;
-                    }
-                }
-
-                return JSON.stringify(formatted);
-            },
-            handleConfirm() {
-                this.isLoading = true;
-                const json = {
-                    method: this.selectedTemplate.method,
-                    url: this.computedUrl,
-                    bodyTemplate: this.editableBody,
-                    queryTemplate:
-                        this.editableQueryParams.length > 0
-                            ? JSON.stringify(this.editableQueryParams)
-                            : null,
-                    headerTemplate:
-                        this.editableHeaders.length > 0
-                            ? JSON.stringify(this.editableHeaders)
-                            : null,
-                };
-
-                const formattedJson = this.formatTemplateJson(json, this.selectedTemplateId);
-
-                const newParam = {
-                    stepToolId: this.$route.params.stepToolId,
-                    value: formattedJson,
-                };
-
-                const flowStateJson = localStorage.getItem("flow_state_params");
-
-                if (!flowStateJson) {
                     this.$notify({
                         title: "common.error",
-                        message: "template.configuration.saveError",
+                        message: "template.loadError",
                         variant: "danger",
                         icon: "CircleX",
                     });
-                    this.isLoading = false;
-                    this.handleNavigateBack();
-                    return;
                 }
+            }
 
-                const flowState = JSON.parse(flowStateJson);
+            if (json.headerTemplate) {
+                try {
+                    const headerArray =
+                        typeof json.headerTemplate === "string"
+                            ? JSON.parse(json.headerTemplate)
+                            : json.headerTemplate;
 
-                let node = flowState.nodes.find((n) => n.id === flowState.selectedNode.id);
-
-                if (!node) {
-                    this.$notify({
-                        title: "common.error",
-                        message: "template.configuration.saveError",
-                        variant: "danger",
-                        icon: "CircleX",
+                    const headerObj = {};
+                    headerArray.forEach((header) => {
+                        if (header.key && header.value !== undefined) {
+                            headerObj[header.key] = header.value;
+                        }
                     });
-                    this.isLoading = false;
-                    this.handleNavigateBack();
-                    return;
+
+                    if (Object.keys(headerObj).length > 0) {
+                        formatted.headers = headerObj;
+                    }
+                } catch (e) {
+                    console.error("Error parsing headerTemplate:", e);
                 }
+            }
 
-                node.data.parameters = [newParam];
-                flowState.selectedNode = undefined;
+            if (json.bodyTemplate) {
+                try {
+                    formatted.body =
+                        typeof json.bodyTemplate === "string"
+                            ? JSON.parse(json.bodyTemplate)
+                            : json.bodyTemplate;
+                } catch {
+                    formatted.body = json.bodyTemplate;
+                }
+            }
 
-                localStorage.setItem("flow_state_params", JSON.stringify(flowState));
+            return JSON.stringify(formatted);
+        },
+        handleConfirm() {
+            if (this.hasDatatypeMismatch) {
+                this.$refs.confirmDatatypeModal.open();
+                return;
+            }
+            this.doSave();
+        },
+        confirmSave() {
+            this.$refs.confirmDatatypeModal.close();
+            this.doSave();
+        },
+        cancelSave() {
+            this.$refs.confirmDatatypeModal.close();
+        },
+        doSave() {
+            this.isLoading = true;
+            const json = {
+                method: this.selectedTemplate.method,
+                url: this.computedUrl,
+                bodyTemplate: this.editableBody,
+                queryTemplate:
+                    this.editableQueryParams.length > 0
+                        ? JSON.stringify(this.editableQueryParams)
+                        : null,
+                headerTemplate:
+                    this.editableHeaders.length > 0
+                        ? JSON.stringify(this.editableHeaders)
+                        : null,
+            };
 
+            const formattedJson = this.formatTemplateJson(json, this.selectedTemplateId);
+            const flowStateJson = localStorage.getItem("flow_state_params");
+
+            if (!flowStateJson) {
+                this.$notify({
+                    title: "common.error",
+                    message: "template.configuration.saveError",
+                    variant: "danger",
+                    icon: "CircleX",
+                });
                 this.isLoading = false;
                 this.handleNavigateBack();
-            },
-            handleCancel() {
+                return;
+            }
+
+            const flowState = JSON.parse(flowStateJson);
+            const flowStateUpdated = flowStateHelper.commitNodeConfig(
+                flowState.selectedNode?.id,
+                formattedJson,
+                this.selectedTemplate?.name ?? null,
+                this.selectedDependencies
+            );
+
+            if (!flowStateUpdated) {
+                this.$notify({
+                    title: "common.error",
+                    message: "template.configuration.saveError",
+                    variant: "danger",
+                    icon: "CircleX",
+                });
+                this.isLoading = false;
                 this.handleNavigateBack();
-            },
-            handleNavigateBack() {
-                this.$router.back();
-            },
+                return;
+            }
+
+            this.isLoading = false;
+            this.handleNavigateBack();
         },
-    };
+        handleCancel() {
+            this.handleNavigateBack();
+        },
+        handleNavigateBack() {
+            this.$router.back();
+        },
+    },
+};
 </script>
 <style>
-    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
-        background-color: var(--color-card-content) !important;
-        border-color: var(--color-border-form-control) var(--color-border-form-control) var(--color-border-form-control) !important;
-        color: var(--color-body-content) !important;
-    }
-    .nav-tabs {
-        border-bottom: 1px solid var(--color-border-form-control) !important;
-    }
+.nav-tabs .nav-item.show .nav-link,
+.nav-tabs .nav-link.active {
+    background-color: var(--color-card-content) !important;
+    border-color: var(--color-border-form-control) var(--color-border-form-control) var(--color-border-form-control) !important;
+    color: var(--color-body-content) !important;
+}
 
-    .alert-info {
-        color: var(--color-kanban-primary)!important;
-        background-color: var(--color-bg-kanban-primary)!important;
-        border-color: var(--color-border-form-control) !important;
-    }
+.nav-tabs {
+    border-bottom: 1px solid var(--color-border-form-control) !important;
+}
+
+.alert-info {
+    color: var(--color-kanban-primary) !important;
+    background-color: var(--color-bg-kanban-primary) !important;
+    border-color: var(--color-border-form-control) !important;
+}
 </style>

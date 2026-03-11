@@ -203,6 +203,39 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.False(result);
         }
 
+        [Fact(DisplayName = "Update should throw when team name already exists (ExistsTeamByNameExceptId)")]
+        [Trait("Update", "Fail")]
+        public async Task Update_ShouldThrowAppException_WhenTeamNameAlreadyExists()
+        {
+            // Arrange - team exists but new name is already used by another team
+            var teamId = 1;
+            var teamUpdateDto = new TeamUpdateDto
+            {
+                Id = teamId,
+                Name = "NameAlreadyInUse",
+                UserIds = new List<Guid> { Guid.NewGuid() },
+                ProfileIds = new List<int>()
+            };
+
+            var team = new Team("Current Name", teamId, DateTime.Now)
+            {
+                Users = new List<User>(),
+                Profiles = new List<Profile>()
+            };
+
+            _teamRepositoryMock.Setup(r => r.FindByIdReturnModel(teamId)).Returns(team);
+            _teamRepositoryMock
+                .Setup(r => r.ExistsTeamByNameExceptId(teamUpdateDto.Name, teamUpdateDto.Id))
+                .Returns(true);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<AppException>(() => _service.Update(teamUpdateDto));
+            Assert.Equal("Duplicated Team Name", ex.Message);
+            _teamRepositoryMock.Verify(
+                r => r.ExistsTeamByNameExceptId(teamUpdateDto.Name, teamUpdateDto.Id),
+                Times.Once);
+        }
+
         [Fact(DisplayName = "Update should throw exception when create relationship to Users")]
         [Trait("Update", "Fail")]
         public async Task Update_ShouldThrowArgumentException_WhenCreateRelationshipUsers()

@@ -53,11 +53,13 @@ export default {
             })
             .catch((e) => {
                 const status = e?.response?.status ?? 500;
-                const message = e?.response?.data?.message || "Erro desconhecido";
+                const data = e?.response?.data ?? {};
+                const message = data.detail || data.message || "Erro desconhecido";
                 return {
                     success: false,
                     status,
                     error: message,
+                    errorCode: data.errorCode,
                 };
             });
     },
@@ -73,11 +75,13 @@ export default {
             })
             .catch((e) => {
                 const status = e?.response?.status ?? 500;
-                const message = e?.response?.data?.message || "Erro desconhecido";
+                const data = e?.response?.data ?? {};
+                const message = data.detail || data.message || "Erro desconhecido";
                 return {
                     success: false,
                     status,
                     error: message,
+                    errorCode: data.errorCode,
                 };
             });
     },

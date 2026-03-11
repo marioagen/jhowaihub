@@ -3,7 +3,7 @@
         <div class="card-body">
             <div class="d-flex align-items-center gap-2 mb-3">
                 <h6 class="mb-0 fw-bold">
-                    {{ $t("dashboard.graphs.pagesGraphTitle") }}
+                    {{ $t("dashboard.graphs.workflowsGraphTitle") }}
                 </h6>
                 <LucideIcon
                     v-tooltip.right="$t('dashboard.graphs.pagesTooltip')"
@@ -14,27 +14,24 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <h6>
-                        {{ $t("dashboard.graphs.totalPages") }}
+                        {{ $t("dashboard.graphs.workflowsGraphTitle") }}
                     </h6>
                     <h4 class="mb-0 fw-bold">
-                        {{ totalPages }}
+                        {{ totalWorkflows }}
                     </h4>
                     <span>
                         {{ $t("dashboard.graphs.unitValue") }}
-                        {{ usageUnitPages }}
+                        {{ usageUnitWorkflow }}
                     </span>
                     <hr />
                     <span class="mt-1">
                         {{ $t("dashboard.graphs.periodTotal") }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
-                        {{ totalPages * usageUnitPages }}
+                        {{ totalWorkflows * usageUnitWorkflow }}
                     </h4>
                 </div>
             </div>
-            <h6>
-                {{ $t("dashboard.graphs.pagesGraphSubtitle") }}
-            </h6>
             <BarGraphComponent
                 v-if="isLoaded"
                 :options="graph.options"
@@ -68,13 +65,13 @@
                 required: true,
             },
         },
-        emits: ["setTotalPages"],
+        emits: ["totalCalculated"],
         data: () => ({
             isLoaded: false,
             graph: {
                 options: {
                     chart: {
-                        id: "sales-bar",
+                        id: "workflows-execution-bar",
                         toolbar: {
                             show: false,
                         },
@@ -94,37 +91,54 @@
                 },
                 series: [
                     {
-                        name: "Pages",
+                        name: "Workflows",
                         data: [],
                     },
                 ],
             },
         }),
+        created() {
+            this.getWorkflowsData();
+        },
         computed: {
-            totalPages() {
+            totalWorkflows() {
+                if (!this.isLoaded || !this.graph.series[0]?.data?.length) {
+                    return 0;
+                }
                 return this.graph.series[0].data.reduce((a, b) => a + b, 0);
             },
-            usageUnitPages() {
+            usageUnitWorkflow() {
                 if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
                     return 0;
                 }
                 return (
-                    this.usageUnits.find((item) => item.usageTypeName === ColTypeUsage.Page)
+                    this.usageUnits.find((item) => item.usageTypeName === ColTypeUsage.Execution)
                         ?.value ?? 0
                 );
             },
+            calculatedTotal() {
+                return this.usageUnitWorkflow * this.totalWorkflows;
+            },
         },
-        created() {
-            this.getPagesData();
+        watch: {
+            start() {
+                this.getWorkflowsData();
+            },
+            end() {
+                this.getWorkflowsData();
+            },
+            calculatedTotal(newValue) {
+                this.$emit("totalCalculated", newValue);
+            },
         },
         methods: {
-            getPagesData() {
-                this.isLoaded = false;
+            getWorkflowsData() {
                 let params = {
                     start: this.start,
                     end: this.end,
-                    usageType: ColTypeUsage.Page,
+                    usageType: ColTypeUsage.Execution,
                 };
+                this.isLoaded = false;
                 DashboardServices.GetByUsageType(params)
                     .then((response) => {
                         if (response && !response.error) {
@@ -136,7 +150,7 @@
                             };
                             this.graph.series = [
                                 {
-                                    name: "Pages",
+                                    name: "Workflows",
                                     data: response.map((item) => item.value),
                                 },
                             ];
@@ -144,16 +158,7 @@
                     })
                     .finally(() => {
                         this.isLoaded = true;
-                        this.setTotalPages();
                     });
-            },
-            setTotalPages() {
-                this.$emit("setTotalPages", this.usageUnitPages * this.totalPages);
-            },
-            updateGraph(start, end) {
-                this.start = start;
-                this.end = end;
-                this.getPagesData();
             },
         },
     };

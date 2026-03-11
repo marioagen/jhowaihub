@@ -486,6 +486,7 @@ const english = {
             errors: {
                 addError: "Erro while creating profile",
                 deleteError: "Error deleting profile",
+                duplicated: "Profile already registered",
                 editError: "Error updating profile",
                 editProfileError: "Erro while editing profile",
                 invalid: "Invalid profile",
@@ -566,6 +567,7 @@ const english = {
                 emailDuplicated: "Email already registered",
                 invalid: "Invalid user",
                 saveError: "Error saving user",
+                duplicated: "Duplicated user",
             },
             manageUsers: "User management",
             newTeamUserMessage: "Create a new user that will be automatically selected",
@@ -855,6 +857,9 @@ const english = {
             subtitle: "Select and configure an API template",
             savedSuccessfully: "Template configuration saved successfully",
             saveError: "Error saving template configuration",
+            leaveMessage: "There are differences between the request body and the dependencies.",
+            saveAndExit: "Save and exit",
+            keepEditing: "Keep editing",
         },
     },
     tools: {
@@ -1048,6 +1053,7 @@ const english = {
             finalize: "Finalize",
             waitingforapproval: "Waiting for Approval",
             rejected: "Rejected",
+            fail: "Fail",
         },
         stepFlow: "Document Automation",
         stepNamePlaceholder: "Step Name",
