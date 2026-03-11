@@ -165,7 +165,7 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// <param name="placeholder">The placeholder string for the given tool type.</param>
         /// <param name="isJsonNode">A boolean indicating whether the given tool type is a JSON node.</param>
         /// <returns>True if the tool type is found, false otherwise.</returns>
-        private bool TryGetToolConfig(string toolType, out string placeholder, out bool isJsonNode)
+        private static bool TryGetToolConfig(string toolType, out string placeholder, out bool isJsonNode)
         {
             isJsonNode = false;
             switch (toolType)
