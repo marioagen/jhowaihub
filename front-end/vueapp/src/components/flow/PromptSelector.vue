@@ -90,7 +90,6 @@
         </div>
     </main>
 </template>
-
 <script>
     import DependencySelector from "@/components/flow/DependencySelector.vue";
     import PromptForm from "@/components/prompts/PromptForm.vue";
@@ -135,6 +134,18 @@
                     this.$notify({
                         title: "common.warning",
                         message: "flow.formFlow.dependenciesRequired",
+                        variant: "warning",
+                        icon: "TriangleAlert",
+                    });
+                    return;
+                }
+                const invalid = this.selectedDependencies.filter(
+                    (d) => !this.dependencyExistsInStepTools(d)
+                );
+                if (invalid.length > 0) {
+                    this.$notify({
+                        title: "common.warning",
+                        message: "flow.formFlow.dependenciesInvalidOrRemoved",
                         variant: "warning",
                         icon: "TriangleAlert",
                     });
@@ -200,6 +211,12 @@
                     LogService.showMessage("Erro ao carregar prompts");
                 }
             },
+            dependencyExistsInStepTools(dep) {
+                if (!this.previousStepTools?.length) return false;
+                const step = this.previousStepTools.find((s) => s.order === dep.stepOrder);
+                if (!step?.stepTools?.length) return false;
+                return step.stepTools.some((st) => st.order === dep.stepToolOrder);
+            },
             loadState() {
                 const stateStr = localStorage.getItem("flow_state_params");
                 if (stateStr) {
@@ -225,17 +242,9 @@
         },
     };
 </script>
-
 <style scoped>
     .container-fluid {
         padding: 0 13px;
-    }
-
-    .main-div {
-        border: 1px solid #d3d3d3;
-        border-radius: 8px;
-        background: white;
-        padding: 20px 24px;
     }
 
     .border-dashed {

@@ -21,6 +21,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Configuration
         public string MarketplaceEndSubscriptionPeriodQueue { get; set; } = string.Empty;
         public string ApiRequestQueue { get; set; } = string.Empty;
         public string ApiRequestQueueResponse { get; set; } = string.Empty;
+        public string ExternalFileUploadQueue { get; set; } = string.Empty;
 
         public IEnumerable<string> Queues()
         {
@@ -44,7 +45,8 @@ namespace WoopiAiHub.Infrastructure.Messaging.Configuration
                 ApiRequestQueue,
                 ApiRequestQueueResponse,
                 OpenAiResponseQueue,
-                OpenAiResponseQueueAiHubResponse
+                OpenAiResponseQueueAiHubResponse,
+                ExternalFileUploadQueue
             ];
         }
     }

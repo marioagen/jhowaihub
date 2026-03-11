@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -35,6 +36,33 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Cards.Where(c => c.Id == id)
                 .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Returns a card by its ID with status
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Card?> FindByIdWithStatus(int id)
+        {
+            return await _context.Cards
+                .Include(s => s.Status)
+                .Where(c => c.Id == id)
+                .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Returns a card by its ID with status
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Card?> FindByIdWithStepWorkflow(int id)
+        {
+            return await _context.Cards
+                .Include(s => s.Step)
+                    .ThenInclude(st => st!.Workflow)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         /// <summary>
@@ -129,16 +157,32 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Deletes a card by its document id.
+        /// Updates the specified collection of card entities in the database.
         /// </summary>
-        /// <param name="card"></param>
-        /// <returns></returns>
+        /// <remarks>Throws an exception if any card in the list is invalid or if a database error occurs.
+        /// All changes are committed in a single transaction.</remarks>
+        /// <param name="cards">A list of <see cref="Card"/> objects to update. Each card must have a valid identifier corresponding to an
+        /// existing record in the database. Cannot be null.</param>
+        /// <returns>true if one or more records were updated successfully; otherwise, false.</returns>
+        public bool UpdateList(List<Card> cards)
+        {
+            _context.Cards.UpdateRange(cards);
+            return _context.SaveChanges() > 0;
+        }
+
+        /// <summary>
+        /// Logically deletes cards by document ids by setting Enable to false (soft delete).
+        /// Cards are excluded from default queries via the global query filter.
+        /// </summary>
+        /// <param name="documentIds">Ids of documents whose cards should be logically deleted.</param>
+        /// <returns>True if any card was updated; otherwise false.</returns>
         public async Task<bool> DeleteByDocumentIds(List<int> documentIds)
         {
             var cards = await _context.Cards.Where(c => documentIds.Contains(c.DocumentId)).ToListAsync();
             if (cards.Count > 0)
             {
-                _context.Cards.RemoveRange(cards);
+                foreach (var card in cards)
+                    card.Disable();
                 return await _context.SaveChangesAsync() > 0;
             }
 
@@ -177,6 +221,22 @@ namespace WoopiAiHub.Repository
                 .           ThenInclude(t => t!.ToolType)
                 .OrderByDescending(c => c.Created)
                 .FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Finds all cards associated with a specific document ID, with Step and Workflow included.
+        /// </summary>
+        /// <param name="documentId">The ID of the document.</param>
+        /// <returns>A list of cards with Step and Workflow loaded.</returns>
+        public async Task<List<Card>> FindByDocumentIdCardListWithStepWorkflowAsync(int documentId)
+        {
+            return await _context.Cards
+                .Where(c => c.DocumentId == documentId)
+                .Include(c => c.Step)
+                    .ThenInclude(s => s!.Workflow)
+                .OrderBy(c => c.Step!.Order)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         /// <summary>
@@ -228,6 +288,46 @@ namespace WoopiAiHub.Repository
                 .Where(c => documentIds.Contains(c.DocumentId))
                 .Select(c => c.Id)
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a collection of cards associated with the specified document batch identifier.
+        /// </summary>
+        /// <remarks>The returned collection is ordered by card identifier. Ensure that the
+        /// documentBatchId provided is valid to avoid unexpected results.</remarks>
+        /// <param name="documentBatchId">The unique identifier of the document batch for which to retrieve cards. Must be a positive integer.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of Card objects
+        /// linked to the specified document batch. The collection will be empty if no matching cards are found.</returns>
+        public async Task<List<Card>> FindByDocumentBatchId(int documentBatchId)
+        {
+            return await _context.Cards
+                .Include(c => c.Document)
+                .Include(c => c.Step)
+                .Where(c => c.DocumentBatchId == documentBatchId)
+                .OrderBy(c => c.Id)
+                .ToListAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<List<Card>?> FindCardOrBatchWithStepWorkflowAsync(int cardId)
+        {
+            var card = await FindByIdWithStepWorkflow(cardId);
+            if (card == null)
+                return null;
+            if (card.DocumentBatchId.HasValue)
+                return await FindByDocumentBatchId(card.DocumentBatchId.Value);
+            return [card];
+        }
+
+        /// <inheritdoc />
+        public async Task<List<Card>?> FindCardOrBatchWithDocumentAsync(int cardId)
+        {
+            var card = await FindByIdWithDocument(cardId);
+            if (card == null)
+                return null;
+            if (card.DocumentBatchId.HasValue)
+                return await FindByDocumentBatchId(card.DocumentBatchId.Value);
+            return [card];
         }
     }
 }

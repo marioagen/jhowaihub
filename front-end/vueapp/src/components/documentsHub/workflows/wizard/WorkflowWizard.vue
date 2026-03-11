@@ -662,10 +662,6 @@
     }
 
     .main-div {
-        border: 1px solid #d3d3d3;
-        border-radius: 8px;
-        background: white;
-        padding: 20px 24px;
         min-height: 400px;
     }
 
@@ -687,7 +683,7 @@
         width: 48px;
         height: 48px;
         border-radius: 50%;
-        background-color: #e5e7eb;
+        background-color: var(--color-bg-phase-circle);
         color: #6b7280;
         display: flex;
         align-items: center;
@@ -704,7 +700,7 @@
     }
 
     .phase-item.completed .phase-circle {
-        background-color: #10b981;
+        background-color: var( --color-bg-phase-circle-success)!important;
         color: white;
     }
 
@@ -722,7 +718,7 @@
     }
 
     .phase-item.completed .phase-label {
-        color: #10b981;
+        color: var( --color-bg-phase-circle-success)!important;
     }
 
     .phase-connector {
@@ -731,11 +727,11 @@
         left: 50%;
         width: 100%;
         height: 2px;
-        background-color: #e5e7eb;
+        background-color: var( --color-bg-phase-circle) !important;
         z-index: 1;
     }
 
     .phase-item.completed .phase-connector {
-        background-color: #10b981;
+        background-color: var( --color-bg-phase-circle-success) !important;
     }
 </style>

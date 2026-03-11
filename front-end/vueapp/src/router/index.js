@@ -3,7 +3,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import DocumentsHub from "@/pages/documentsHub/index.vue";
 import DocumentsUpload from "@/pages/documentsHub/uploads.vue";
 import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
-import AnalyzerIndex from "@/components/pages/analyzer";
+import AnalyzerIndex from "@/pages/analyze/index.vue";
 
 import LoginIndex from "@/pages/login.vue";
 import LogoutPage from "@/pages/logout";
@@ -291,7 +291,7 @@ const routes = [
         component: WorkflowPage,
         meta: {
             layout: "default",
-            module: "WorkflowPage",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -302,7 +302,7 @@ const routes = [
         component: NewWorkflow,
         meta: {
             layout: "default",
-            module: "WorkflowPage",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -313,7 +313,7 @@ const routes = [
         component: EditWorkflow,
         meta: {
             layout: "default",
-            module: "WorkflowPage",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,

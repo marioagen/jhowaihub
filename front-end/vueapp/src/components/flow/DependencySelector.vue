@@ -74,7 +74,7 @@
             <div v-for="(
 item, index
                 ) in selectedDependencies" :key="index"
-                class="d-flex align-items-center justify-content-between bg-light rounded p-2 mb-2">
+                class="d-flex align-items-center justify-content-between dep-item rounded p-2 mb-2">
                 <div class="d-flex align-items-center flex-grow-1">
                     <div class="flex-grow-1">
                         <div class="fw-medium">
@@ -221,5 +221,23 @@ export default {
 .dropdown-menu {
     max-height: 300px;
     overflow-y: auto;
+    background-color: var(--color-bg-dropdown-menu) !important;
+    color: var(--color-dropdown-menu) !important;
+}
+
+.dropdown-item {
+    color: var(--color-dropdown-menu) !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--color-bg-table-tr-first) !important;
+    color: var(--color-body-content) !important;
+}
+
+.dep-item {
+    background-color: var(--color-bg-table-tr-first) !important;
+    color: var(--color-body-content) !important;
+    border: 1px solid var(--color-border-form-control);
 }
 </style>

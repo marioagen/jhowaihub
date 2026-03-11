@@ -183,9 +183,13 @@
         box-shadow: none !important;
     }
 
+    .date-preset-btn {
+        color: var(--color-body-content) !important;
+    }
+
     .date-preset-selected {
-        background-color: #e7f1ff !important;
-        color: #0d6efd !important;
+        background-color: var(--color-bg-sidebar-li-selected) !important;
+        color: var(--color-body-content) !important;
         font-weight: 500;
     }
 </style>

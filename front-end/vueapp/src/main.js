@@ -21,8 +21,8 @@ import "@/assets/css/bootstrap-5.0.2/css/bootstrap.min.css";
 import "@/assets/webfont/fontawesome-5.15.4/css/all.min.css";
 import "@vueform/multiselect/themes/default.css";
 
-localStorage.removeItem("theme");
-document.documentElement.className = "css-theme-light";
+const savedTheme = localStorage.getItem("theme");
+document.documentElement.className = savedTheme === "css-theme-dark" ? "css-theme-dark" : "css-theme-light";
 
 const app = createApp(App);
 app.use(FloatingVue);

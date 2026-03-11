@@ -23,12 +23,12 @@ namespace WoopiAiHub.UnitTests.Services
             _documentHistoryServices = _mocker.CreateInstance<DocumentHistoryServices>();
         }
 
-        [Fact(DisplayName = "Test creation of a valid document history")]
+        [Fact(DisplayName = "Create - Should create document history successfully when valid")]
         [Trait("Create", "Success")]
         public void Create_Success()
         {
             // Arrange
-            var documentHistory = _fixture.FindValidDocumentHistory();
+            var documentHistory = DocumentFixture.FindValidDocumentHistory();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.Create(It.IsAny<DocumentHistory>())).Returns(true);
 
@@ -40,12 +40,12 @@ namespace WoopiAiHub.UnitTests.Services
             documentHistoryRepository.Verify(a => a.Create(It.IsAny<DocumentHistory>()), Times.Once);
         }
 
-        [Fact(DisplayName = "Test creation of a not valid document history")]
+        [Fact(DisplayName = "Create - Should return false when repository create fails")]
         [Trait("Create", "Fail")]
         public void Create_Fail()
         {
             // Arrange
-            var documentHistory = _fixture.FindValidDocumentHistory();
+            var documentHistory = DocumentFixture.FindValidDocumentHistory();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.Create(It.IsAny<DocumentHistory>())).Returns(false);
 
@@ -57,13 +57,13 @@ namespace WoopiAiHub.UnitTests.Services
             documentHistoryRepository.Verify(a => a.Create(It.IsAny<DocumentHistory>()), Times.Once);
         }
 
-        [Fact(DisplayName = "Test to find by id valid Document history")]
+        [Fact(DisplayName = "FindById - Should return document history list when found")]
         [Trait("FindById", "Success")]
         public void FindById_Success()
         {
             // Arrange
             var document = DocumentFixture.FindValidDocument();
-            var documentHistoryList = _fixture.FindValidDocumentHistoryList();
+            var documentHistoryList = DocumentFixture.FindValidDocumentHistoryList();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(documentHistoryList);
 
@@ -77,7 +77,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentHistoryRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
         }
 
-        [Fact(DisplayName = "Test to find by id not valid document history")]
+        [Fact(DisplayName = "FindById - Should return empty list when no history found")]
         [Trait("FindById", "Fail")]
         public void FindById_Fail()
         {
@@ -96,12 +96,12 @@ namespace WoopiAiHub.UnitTests.Services
             documentHistoryRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
         }
 
-        [Fact(DisplayName = "Test to update history  with valid document history")]
+        [Fact(DisplayName = "UpdateHistory - Should update history successfully when valid")]
         [Trait("UpdateHistory", "Success")]
         public void UpdateHistory_Success()
         {
             // Arrange
-            var updateHistoryDto = _fixture.FindValidUpdateHistoryDto();
+            var updateHistoryDto = DocumentFixture.FindValidUpdateHistoryDto();
             var document = DocumentFixture.FindValidDocument();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.UpdateHistory(It.IsAny<UpdateHistoryDto>())).Returns(true);
@@ -114,12 +114,12 @@ namespace WoopiAiHub.UnitTests.Services
             documentHistoryRepository.Verify(a => a.UpdateHistory(It.IsAny<UpdateHistoryDto>()), Times.Once);
         }
 
-        [Fact(DisplayName = "Test to update history witg failed result")]
+        [Fact(DisplayName = "UpdateHistory - Should return false when repository update fails")]
         [Trait("UpdateHistory", "Fail")]
         public void UpdateHistory_Fail()
         {
             // Arrange
-            var updateHistoryDto = _fixture.FindValidUpdateHistoryDto();
+            var updateHistoryDto = DocumentFixture.FindValidUpdateHistoryDto();
             var document = DocumentFixture.FindValidDocument();
             var documentHistoryRepository = _mocker.GetMock<IDocumentHistoryRepository>();
             documentHistoryRepository.Setup(a => a.UpdateHistory(It.IsAny<UpdateHistoryDto>())).Returns(false);
@@ -132,7 +132,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentHistoryRepository.Verify(a => a.UpdateHistory(It.IsAny<UpdateHistoryDto>()), Times.Once);
         }
 
-        [Fact(DisplayName = "Test to delete document history with valid document history")]
+        [Fact(DisplayName = "Delete - Should delete document history successfully")]
         [Trait("Delete", "Success")]
         public void Delete_Success()
         {
@@ -149,7 +149,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentHistoryRepository.Verify(a => a.Delete(It.IsAny<int>()), Times.Once);
         }
 
-        [Fact(DisplayName = "Test to delete document history with failed result")]
+        [Fact(DisplayName = "Delete - Should return false when repository delete fails")]
         [Trait("Delete", "Fail")]
         public void Delete_Fail()
         {
@@ -166,7 +166,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentHistoryRepository.Verify(a => a.Delete(It.IsAny<int>()), Times.Once);
         }
 
-        [Fact(DisplayName = "Test FindByIdWithTake returns mapped DTOs")]
+        [Fact(DisplayName = "FindByIdWithTake - Should return mapped DTOs when entries exist")]
         [Trait("FindByIdWithTake", "Success")]
         public void FindByIdWithTake_ReturnsMappedDtos_Success()
         {
@@ -203,7 +203,7 @@ namespace WoopiAiHub.UnitTests.Services
                 Times.Once);
         }
 
-        [Fact(DisplayName = "Test FindByIdWithTake returns empty when no entries")]
+        [Fact(DisplayName = "FindByIdWithTake - Should return empty when no entries")]
         [Trait("FindByIdWithTake", "Empty")]
         public void FindByIdWithTake_ReturnsEmpty_WhenNoEntries()
         {
@@ -222,7 +222,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Empty(result);
         }
 
-        [Fact(DisplayName = "Test FindByIdWithTake passes all parameters to repository")]
+        [Fact(DisplayName = "FindByIdWithTake - Should pass all parameters to repository")]
         [Trait("FindByIdWithTake", "Parameters")]
         public void FindByIdWithTake_PassesParametersToRepository()
         {
@@ -247,7 +247,7 @@ namespace WoopiAiHub.UnitTests.Services
                 Times.Once);
         }
 
-        [Fact(DisplayName = "Test FindByIdWithTake maps UserName when User is included")]
+        [Fact(DisplayName = "FindByIdWithTake - Should map UserName when User is included")]
         [Trait("FindByIdWithTake", "UserName")]
         public void FindByIdWithTake_MapsUserName_WhenUserIsIncluded()
         {

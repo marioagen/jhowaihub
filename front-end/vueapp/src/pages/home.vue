@@ -193,7 +193,7 @@
     .home-title {
         font-size: 2rem;
         font-weight: bold;
-        color: #212529;
+        color: var(--color-heading-title) !important;
         margin-bottom: 1rem;
     }
 
@@ -203,7 +203,6 @@
     }
 
     .plan-card {
-        background: white;
         border: 1px solid #dee2e6;
         border-radius: 12px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -214,7 +213,7 @@
     }
 
     .plan-label {
-        color: #212529;
+        color: var(--color-card-text) !important;
         margin-bottom: 0.5rem;
     }
 
@@ -225,7 +224,7 @@
     }
 
     .plan-thanks {
-        color: #6c757d;
+        color:  var(--color-body-content) !important;
     }
 
     .quick-start-section {
@@ -235,7 +234,7 @@
     .quick-start-title {
         font-size: 1.5rem;
         font-weight: bold;
-        color: #212529;
+        color: var( --color-card-title) !important;
     }
 
     .quick-start-card {
@@ -263,7 +262,7 @@
     .quick-start-card .card-title {
         font-size: 1.25rem;
         font-weight: 600;
-        color: #212529;
+        color: var(--color-card-title) !important;
         margin-bottom: 1rem;
     }
 
@@ -274,7 +273,7 @@
     }
 
     .quick-start-card .btn-link {
-        color: #0d6efd;
+        color: #005ebc !important;
         font-weight: 500;
         font-size: 1rem;
         padding: 0;

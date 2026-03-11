@@ -199,6 +199,7 @@ const portuguese = {
         update: "Atualizar",
         WTCText:
             "WTC (Woopi Total Cost) é a soma ponderada do consumo no período selecionado, baseada nos multiplicadores do seu plano. Este não é um valor financeiro.",
+        refreshText: "Atualização automática a cada 5 minutos",
     },
     documents: {
         actions: {
@@ -236,6 +237,7 @@ const portuguese = {
             uploadedFilesError: "Falha ao fazer upload dos arquivos!",
             uploadError: "Algo deu errado",
             uploadFailure: "Falha no upload",
+            batchError: "Erro ao processar o lote de documentos",
         },
         expandHistory: "Expandir histórico",
         failedToNormalize: "Falha ao normalizar",
@@ -327,6 +329,7 @@ const portuguese = {
         youAreAboutToDeleteDocument: "Você está prestes a deletar <br/> o documento do sistema",
         youAreAboutToDeleteDocumentQuery:
             "Você está prestes a deletar <br/> o histórico de consulta do sistema",
+        documentsBatchCheckbox: "Documentos em lote",
     },
     filters: {
         assignment: {
@@ -366,6 +369,9 @@ const portuguese = {
         statusSelect: {
             none: "Status do card",
         },
+        all: "Todos",
+        singleDocuments: "Documentos únicos",
+        batchDocuments: "Documentos em lote",
     },
     flow: {
         downloadJson: "Baixar JSON",
@@ -387,6 +393,8 @@ const portuguese = {
                 "Conector da esteira de processamento não respondeu. Verifique a URL e a chave da API da ferramenta",
             createNewPrompt: "Criar novo agente",
             dependenciesRequired: "Selecione ao menos uma dependência",
+            dependenciesInvalidOrRemoved:
+                "Uma ou mais dependências selecionadas são inválidas ou foram removidas do fluxo.",
             editFlowNodeFail: "Falha ao editar o nodo",
             editFlowNodeSuccess: "Nodo editado com sucesso",
             progressFlowFail: "Não foi possível inserir fluxo",
@@ -523,6 +531,7 @@ const portuguese = {
             createBtn: "Novo Time",
             createSubtitle: "Crie um novo time para o sistema",
             createTitle: "Novo Time",
+            duplicated: "Time duplicado",
             deleteSuccess: "Time deletado com sucesso",
             editSubtitle: "Atualize as informações do time selecionado",
             editTitle: "Editar Time",
@@ -641,6 +650,7 @@ const portuguese = {
             workflowStepView: "Visualizar Etapas",
         },
         groups: {
+            actions: "Ações",
             dashboard: "Dashboard",
             documents: "Documentos",
             management: "Gestão",
@@ -796,6 +806,7 @@ const portuguese = {
         type: "Tipo de documento",
         youAreAboutToDeleteQuestionnaire:
             "Você está prestes a deletar <br/> um questionário do sistema",
+        noItemsSelected: "Nenhum item selecionado",
     },
     template: {
         title: "Templates de API",
@@ -938,6 +949,7 @@ const portuguese = {
     unauthorized: {
         returnToHome: "Retornar",
         title: "Você não tem permissão para acessar esta tela.",
+        operation: "Você não tem permissão para realizar esta ação.",
     },
     unexpectedError:
         "Ocorreu um erro inesperado. Se o problema persistir, contate o administrador.",
@@ -1040,7 +1052,7 @@ const portuguese = {
             management: "Gestão de Esteira de Processamentos",
         },
         statusList: {
-            analyzed: "Análisado",
+            analyzed: "Analisado",
             approved: "Aprovado",
             awaitinganalysis: "Esperando Análise",
             done: "Concluído",
@@ -1050,10 +1062,10 @@ const portuguese = {
         },
         stepFlow: "Automação de documentos",
         stepNamePlaceholder: "Nome da etapa",
-        steps: "Etapas do Esteira de Processamento",
-        stepsTitle: "Etapas do Esteira de Processamento",
+        steps: "Etapas da Esteira de Processamento",
+        stepsTitle: "Etapas da Esteira de Processamento",
         stepSubtitle: "Configure as regras e responsáveis",
-        stepTitle: "Etapa do Esteira de Processamento",
+        stepTitle: "Etapa da Esteira de Processamento",
         subtitle: "Visualize o fluxo de documentos através das etapas de processamento",
         subtitleEditor: "Gerencie e configure as esteiras de processamento de documentos",
         teams: "Times associados",

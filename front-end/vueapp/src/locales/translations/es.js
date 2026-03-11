@@ -190,6 +190,7 @@ const spanish = {
         update: "Actualizar",
         WTCText:
             "WTC (Woopi Total Cost) es la suma ponderada del consumo en el período seleccionado, basada en los multiplicadores de tu plan. No es un valor financiero.",
+        refreshText: "Actualización automática a cada 5 minutos",
     },
     documents: {
         actions: {
@@ -227,6 +228,7 @@ const spanish = {
             uploadedFilesError: "¡Error al cargar archivos!",
             uploadError: "Algo salió mal",
             uploadFailure: "Error de carga",
+            batchError: "Error al procesar el lote de documentos",
         },
         expandHistory: "Ampliar historia",
         failedToNormalize: "No se pudo normalizar",
@@ -319,6 +321,7 @@ const spanish = {
         youAreAboutToDeleteDocument: "Estás a punto de eliminar <br/> el documento del sistema",
         youAreAboutToDeleteDocumentQuery:
             "Estás a punto de eliminar <br/> el historial de consultas del sistema",
+        documentsBatchCheckbox: "Documentos en lote",
     },
     documentsHub: {
         title: "Cadenas de procesamiento",
@@ -368,6 +371,9 @@ const spanish = {
         statusSelect: {
             none: "Estado del card",
         },
+        all: "Todos",
+        singleDocuments: "Documentos individuales",
+        batchDocuments: "Documentos en lote",
     },
     flow: {
         downloadJson: "Descargar JSON",
@@ -389,6 +395,8 @@ const spanish = {
                 "El conector del workflow no respondió. Verifica la URL y la clave API de la herramienta",
             createNewPrompt: "Crear nuevo agente",
             dependenciesRequired: "Seleccione al menos una dependencia",
+            dependenciesInvalidOrRemoved:
+                "Una o más dependencias seleccionadas no son válidas o se eliminaron del flujo.",
             editFlowNodeFail: "No se pudo editar el nodo",
             editFlowNodeSuccess: "Nodo editado exitosamente",
             progressFlowFail: "No se pudo insertar el flujo",
@@ -524,6 +532,7 @@ const spanish = {
             createSubtitle: "Crea un nuevo equipo para el sistema",
             createTitle: "Nuevo Equipo",
             deleteSuccess: "Equipo eliminado con éxito",
+            duplicated: "Equipo duplicado",
             editSubtitle: "Actualiza la información del equipo seleccionado",
             editTitle: "Editar Equipo",
             errors: {
@@ -641,6 +650,7 @@ const spanish = {
             workflowStepView: "Ver Pasos",
         },
         groups: {
+            actions: "Acciones",
             dashboard: "Dashboard",
             documents: "Documentos",
             management: "Gestión",
@@ -792,6 +802,7 @@ const spanish = {
         type: "Tipo de documento",
         youAreAboutToDeleteQuestionnaire:
             "Estás a punto de eliminar <br/> un cuestionario del sistema",
+        noItemsSelected: "No se seleccionó ningún item",
     },
     template: {
         addParam: "Agregar Parámetro",
@@ -925,6 +936,7 @@ const spanish = {
     unauthorized: {
         returnToHome: "Volver",
         title: "No tiene permiso para acceder a esta pantalla.",
+        operation: "No tiene permiso para realizar esta acción.",
     },
     unexpectedError:
         "Ocurrió un error inesperado. Por favor, póngase en contacto con el administrador del sistema.",

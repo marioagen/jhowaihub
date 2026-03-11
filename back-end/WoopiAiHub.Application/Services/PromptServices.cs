@@ -1,7 +1,7 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using System.Linq.Dynamic.Core;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
@@ -9,12 +9,11 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Domain.Enum;
-using WoopiAiHub.Domain.Interfaces.Hubs;
-using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
@@ -29,9 +28,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IUserServices _userServices;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
-        private readonly IHubNotifier _hubNotifier;
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
-        private readonly IWorkflowRepository _workflowRepository;
         private readonly IFunctionFileRetriever _functionFileRetriever;
         private readonly IConfiguration _config;
         private readonly PromptSettings _promptSettings;
@@ -42,6 +39,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ResponseOpenAiSettings _responseOpenAiSettings;
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly IApiTemplateServices _apiTemplateServices;
+        private readonly IExecutionServices _executionServices;
 
         public PromptServices(IUnitOfWork unitOfWork,
             IPromptRepository promptRepository,
@@ -49,9 +47,7 @@ namespace WoopiAiHub.Application.Services
             IUserServices userServices,
             IStepToolExecutionRepository stepToolExecutionRepository,
             IStepToolOutputRepository stepToolOutputRepository,
-            IHubNotifier hubNotifier,
             IDocumentHistoryRepository documentHistoryRepository,
-            IWorkflowRepository workflowRepository,
             IFunctionFileRetriever functionFileRetriever,
             IOptions<PromptSettings> promptSettingsOptions,
             IConfiguration config,
@@ -61,7 +57,8 @@ namespace WoopiAiHub.Application.Services
             IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
             IUsageDailyServices usageDailyServices,
             IResponseApi responseApi,
-            IApiTemplateServices apiTemplateServices)
+            IApiTemplateServices apiTemplateServices,
+            IExecutionServices executionServices)
         {
             _unitOfWork = unitOfWork;
             _promptRepository = promptRepository;
@@ -69,9 +66,7 @@ namespace WoopiAiHub.Application.Services
             _userServices = userServices;
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
-            _hubNotifier = hubNotifier;
             _documentHistoryRepository = documentHistoryRepository;
-            _workflowRepository = workflowRepository;
             _functionFileRetriever = functionFileRetriever;
             _config = config;
             _promptSettings = promptSettingsOptions.Value;
@@ -82,6 +77,7 @@ namespace WoopiAiHub.Application.Services
             _usageDailyServices = usageDailyServices;
             _responseApi = responseApi;
             _apiTemplateServices = apiTemplateServices;
+            _executionServices = executionServices;
         }
 
         /// <summary>
@@ -397,13 +393,7 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public PromptDto FindById(int id)
         {
-            var promptDto = _promptRepository.FindById(id);
-            if (promptDto == null)
-            {
-                throw new ArgumentException("Prompt not found");
-            }
-
-            return promptDto;
+            return _promptRepository.FindById(id) ?? throw new ArgumentException("Prompt not found");
         }
 
         /// <summary>
@@ -414,10 +404,8 @@ namespace WoopiAiHub.Application.Services
         public IQueryable<PromptDto> FindAll(string emailCreator)
         {
             var idUser = _userServices.FindIdByEmail(emailCreator);
-            var query = _promptRepository.FindAllWithOwnerStatus(idUser);
+            var query = _promptRepository.FindAllWithOwnerStatus(idUser) ?? throw new ArgumentException("Prompt not found");
 
-            if (query == null)
-                throw new ArgumentException("Prompt not found");
             if (idUser == Guid.Empty)
                 throw new ArgumentException("Invalid user id");
 
@@ -438,9 +426,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="promptCreateDto"></param>
         /// <param name="emailCreator"></param>
-        private static Domain.Models.Prompt GeneratePromptToCreate(PromptCreateDto promptCreateDto, Guid idUser)
+        private static Prompt GeneratePromptToCreate(PromptCreateDto promptCreateDto, Guid idUser)
         {
-            var prompt = new Domain.Models.Prompt(
+            var prompt = new Prompt(
                 0,
                 DateTime.Now,
                 promptCreateDto.Name,
@@ -479,11 +467,7 @@ namespace WoopiAiHub.Application.Services
         {
             var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(chatCompletionResponseDto.Data.ToString());
             var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(dataDto.StepToolId,
-                dataDto.CardId);
-            if (execution == null)
-            {
-                throw new ArgumentException("StepToolExecution not found");
-            }
+                dataDto.CardId) ?? throw new ArgumentException("StepToolExecution not found");
 
             var documentHistory = new DocumentHistory(execution.Card!.DocumentId,
                 "Prompt",
@@ -495,7 +479,7 @@ namespace WoopiAiHub.Application.Services
             try
             {
                 _documentHistoryRepository.Create(documentHistory);
-                await UpdateExecutionAsync(execution!, chatCompletionResponseDto.Email);
+                await _executionServices.HandleExecutionProgress(execution, chatCompletionResponseDto.Email);
                 await SaveStepToolOutputAsync(execution!, chatCompletionResponseDto.Choices[0].Message.Content);
                 _unitOfWork.Commit();
             }
@@ -536,7 +520,7 @@ namespace WoopiAiHub.Application.Services
                     0,
                     DateTime.Now);
                     _documentHistoryRepository.Create(documentHistory);
-                    await UpdateExecutionAsync(execution!, responseDto.Email);
+                    await _executionServices.HandleExecutionProgress(execution!, responseDto.Email);
                     await SaveStepToolOutputAsync(execution!, message);
                 }
                 _unitOfWork.Commit();
@@ -546,27 +530,6 @@ namespace WoopiAiHub.Application.Services
                 _unitOfWork.Rollback();
                 throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
-        }
-
-        /// <summary>
-        /// Updates StepToolExecution status and send notification 
-        /// </summary>
-        /// <param name="execution"></param>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        private async Task UpdateExecutionAsync(StepToolExecution execution, string email)
-        {
-            var count = await _stepToolExecutionRepository.ExecutionsByStepIdCountAsync(execution.StepTool!.StepId,
-                execution.CardId);
-            var percent = ((double)execution.StepTool.Order / count) * 100;
-
-            execution.UpdateStatusExecution(StatusExecution.Ready);
-            await _stepToolExecutionRepository.UpdateAsync(execution);
-
-            var tool = await _workflowRepository.FindToolByStepToolId(execution.StepTool.Id);
-
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId,
-                tool != null ? tool.Name : string.Empty);
         }
 
         /// <summary>

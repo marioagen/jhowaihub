@@ -49,12 +49,13 @@
                 :step="step"
                 :stepOrder="stepOrder"
                 @openNodeConfig="openNodeConfig"
+                @nodeDeleted="onNodeDeleted"
                 ref="VueflowComponent"
                 :hasStepTools="hasStepTools"
             />
 
             <div
-                class="offcanvas offcanvas-end"
+                class="offcanvas offcanvas-end offcanvas-themed"
                 tabindex="-1"
                 id="offcanvasRight"
                 aria-labelledby="offcanvasRightLabel"
@@ -216,7 +217,7 @@
                                 {{ $t("common.save") }}
                             </button>
                         </div>
-                    </div>                    
+                    </div>
                     <div v-else-if="isQuizTool">
                         <h6>Quiz</h6>
                         <div class="background-div">
@@ -462,17 +463,25 @@
                 this.nodeFlow = selectedNode;
                 this.parameters = selectedNode.data.parameters;
                 this.toolType = selectedNode.data.toolType;
-
                 await this.loadPreviousStepTools(selectedNode);
 
-                this.selectedDependencies = selectedNode.data.dependencies;
+                const rawDeps = selectedNode.data.dependencies || [];
+                const validDeps = this.filterDependenciesToValidOnly(rawDeps);
+                this.selectedDependencies = validDeps;
 
                 if (this.isTargetTool(ToolType.API)) {
+                    const orderedToolNodes =
+                        this.$refs.VueflowComponent.getNodesOrderedByEdges?.() ??
+                        nodes.filter((n) => n.id !== "start");
+                    const startNode = nodes.find((n) => n.id === "start");
+                    const nodesInFlowOrder = startNode
+                        ? [startNode, ...orderedToolNodes]
+                        : orderedToolNodes;
                     const state = {
                         selectedNode: selectedNode,
                         previousStepTools: this.previousStepTools,
                         selectedDependencies: this.selectedDependencies,
-                        nodes: nodes,
+                        nodes: nodesInFlowOrder,
                         edges: this.$refs.VueflowComponent.edges,
                         step: this.step,
                     };
@@ -517,11 +526,18 @@
                         });
                 } else if (this.isTargetTool(ToolType.Prompt)) {
                     const edges = this.$refs.VueflowComponent.edges;
+                    const orderedToolNodes =
+                        this.$refs.VueflowComponent.getNodesOrderedByEdges?.() ??
+                        nodes.filter((n) => n.id !== "start");
+                    const startNode = nodes.find((n) => n.id === "start");
+                    const nodesInFlowOrder = startNode
+                        ? [startNode, ...orderedToolNodes]
+                        : orderedToolNodes;
                     const state = {
                         selectedNode: selectedNode,
                         previousStepTools: this.previousStepTools,
                         selectedDependencies: this.selectedDependencies,
-                        nodes: nodes,
+                        nodes: nodesInFlowOrder,
                         edges: edges,
                         step: this.step,
                     };
@@ -530,9 +546,7 @@
                         name: "PromptSelector",
                     });
                     return;
-                } else if (
-                    this.isTargetTool(ToolType.Quiz)
-                ) {
+                } else if (this.isTargetTool(ToolType.Quiz)) {
                     this.findAllQuizzes();
                     if (this.parameters.length === 0) {
                         this.idSelected = 0;
@@ -543,9 +557,7 @@
                             webhookId: null,
                         });
                     } else {
-                        this.idSelected = parseInt(
-                            this.parameters[0]?.value
-                        );
+                        this.idSelected = parseInt(this.parameters[0]?.value);
                     }
                 } else if (this.parameters.length === 0) {
                     this.parameters.push({
@@ -566,6 +578,16 @@
                     sidebar.hide();
                 }
             },
+            onNodeDeleted(nodeId) {
+                if (!this.step?.stepTools?.length) return;
+                const idStr = String(nodeId);
+                const index = this.step.stepTools.findIndex((st) => st.id.toString() === idStr);
+                if (index === -1) return;
+                this.step.stepTools.splice(index, 1);
+                this.step.stepTools.forEach((st, i) => {
+                    st.order = i + 1;
+                });
+            },
             updateNode() {
                 if (this.idSelected) {
                     this.parameters[0].value = this.idSelected.toString();
@@ -575,7 +597,10 @@
                     }
                 }
 
-                if (!this.selectedDependencies || this.selectedDependencies.length === 0) {
+                const depsToSave = this.filterDependenciesToValidOnly(
+                    this.selectedDependencies || []
+                );
+                if (!depsToSave.length) {
                     this.$notify({
                         title: "common.warning",
                         message: "flow.formFlow.dependenciesRequired",
@@ -588,7 +613,7 @@
                 this.$refs.VueflowComponent.updateNodeInput(
                     this.nodeFlow.id,
                     this.parameters,
-                    this.selectedDependencies
+                    depsToSave
                 );
                 this.closeSidebar();
                 this.showMessage();
@@ -618,10 +643,13 @@
                 this.parameters[0].value = JSON.stringify(this.formData);
                 this.parameters[0].webhookId = this.connector;
 
+                const depsToSave = this.filterDependenciesToValidOnly(
+                    this.selectedDependencies || []
+                );
                 this.$refs.VueflowComponent.updateNodeInput(
                     this.nodeFlow.id,
                     this.parameters,
-                    this.selectedDependencies
+                    depsToSave
                 );
                 this.closeSidebar();
                 this.showMessage();
@@ -722,26 +750,24 @@
                 });
             },
             findAllPrompts() {
-                PromptService.getPrompts().then(
-                    (response) => {
-                        this.promptlist = response;
-                    }
-                );
+                PromptService.getPrompts().then((response) => {
+                    this.promptlist = response;
+                });
             },
             findAllQuizzes() {
-                QuizzesService.getQuizzesList().then(
-                    (response) => {
-                        this.quizlist = response;
-                    }
-                );
+                QuizzesService.getQuizzesList().then((response) => {
+                    this.quizlist = response;
+                });
             },
             async loadPreviousStepTools(node) {
                 let workflowSteps = [];
+                let dataSource = "none";
                 if (this.workflowId) {
                     try {
                         const workflow = await WorkflowService.getWorkflowById(this.workflowId);
                         if (!workflow.error) {
                             workflowSteps = workflow.steps || [];
+                            dataSource = "api";
                         }
                     } catch (error) {
                         LogService.showMessage("Error loading workflow steps: " + error);
@@ -750,6 +776,7 @@
 
                 if (workflowSteps.length === 0) {
                     workflowSteps = this.$store.state.tempWorkflow.list || [];
+                    dataSource = dataSource === "none" ? "store" : dataSource;
                 }
 
                 const relevantSteps = workflowSteps.filter((step) => step.order <= this.stepOrder);
@@ -761,19 +788,51 @@
 
                 const maxOrder = Math.max(...relevantSteps.map((step) => step.order));
                 const nodesToolIds = this.nodes.map((n) => n.data?.toolId).filter(Boolean);
+                const currentStepFromWorkflow = relevantSteps.find((s) => s.order === maxOrder);
+                const currentStepBackendToolCount = (currentStepFromWorkflow?.stepTools || [])
+                    .length;
 
-                this.previousStepTools = relevantSteps.map((step) => ({
-                    id: step.id,
-                    name: step?.name || step.name || "Unnamed Tool",
-                    order: step.order,
-                    stepTools: (step.stepTools || []).filter(
-                        (stepTool) =>
-                            step.order < maxOrder ||
-                            (step.order === maxOrder &&
-                                stepTool.order < node.data.order &&
-                                nodesToolIds.includes(stepTool.tool?.id))
-                    ),
-                }));
+                this.previousStepTools = relevantSteps.map((step) => {
+                    if (step.order < maxOrder) {
+                        return {
+                            id: step.id,
+                            name: step?.name || step.name || "Unnamed Tool",
+                            order: step.order,
+                            stepTools: step.stepTools || [],
+                        };
+                    }
+
+                    const stepToolsFromNodes = this.nodes
+                        .filter(
+                            (n) =>
+                                n.id !== "start" &&
+                                n.data?.order != null &&
+                                n.data.order < node.data.order
+                        )
+                        .map((n) => ({
+                            order: n.data.order,
+                            tool: {
+                                id: n.data.toolId,
+                                name: n.label,
+                                toolType: n.data.toolType || "",
+                            },
+                        }));
+                    return {
+                        id: step.id,
+                        name: step?.name || step.name || "Unnamed Tool",
+                        order: step.order,
+                        stepTools: stepToolsFromNodes,
+                    };
+                });
+            },
+            filterDependenciesToValidOnly(dependencies) {
+                if (!dependencies?.length || !this.previousStepTools?.length)
+                    return dependencies || [];
+                return dependencies.filter((d) => {
+                    const step = this.previousStepTools.find((s) => s.order === d.stepOrder);
+                    if (!step || !step.stepTools?.length) return false;
+                    return step.stepTools.some((st) => st.order === d.stepToolOrder);
+                });
             },
             resetFormConnector() {
                 this.connectors = [];
@@ -809,42 +868,40 @@
                 }
 
                 const flowState = JSON.parse(flowStateJson);
-
                 if (flowState.nodes && this.step.stepTools) {
-                    flowState.nodes.forEach((node) => {
-                        if (node.id === "start") {
-                            return;
-                        }
-
-                        let stepTool = this.step.stepTools.find(
+                    const toolNodes = flowState.nodes.filter((n) => n.id !== "start");
+                    const newStepTools = toolNodes.map((node, index) => {
+                        const existing = this.step.stepTools.find(
                             (st) => st.id.toString() === node.id
                         );
-
-                        if (stepTool) {
-                            stepTool.parameters = node.data.parameters || [];
-                            stepTool.dependencies = node.data.dependencies || [];
-                            stepTool.positionX = node.position.x;
-                            stepTool.positionY = node.position.y;
-                        } else {
-                            const newStepTool = {
-                                id: parseInt(node.id) || 0,
-                                positionX: node.position.x,
-                                positionY: node.position.y,
-                                toolId: node.data.toolId,
-                                order: node.data.order,
+                        const order = index + 1;
+                        if (existing) {
+                            return {
+                                ...existing,
                                 parameters: node.data.parameters || [],
                                 dependencies: node.data.dependencies || [],
-                                tool: {
-                                    id: node.data.toolId,
-                                    name: node.label,
-                                    isEditableInput: node.data.isEditableInput,
-                                    toolType: node.data.toolType,
-                                },
+                                positionX: node.position.x,
+                                positionY: node.position.y,
+                                order,
                             };
-
-                            this.step.stepTools.push(newStepTool);
                         }
+                        return {
+                            id: parseInt(node.id) || 0,
+                            positionX: node.position.x,
+                            positionY: node.position.y,
+                            toolId: node.data.toolId,
+                            order,
+                            parameters: node.data.parameters || [],
+                            dependencies: node.data.dependencies || [],
+                            tool: {
+                                id: node.data.toolId,
+                                name: node.label,
+                                isEditableInput: node.data.isEditableInput,
+                                toolType: node.data.toolType,
+                            },
+                        };
                     });
+                    this.step.stepTools = newStepTools;
                 }
 
                 this.$nextTick(() => {
@@ -863,12 +920,9 @@
                 localStorage.removeItem("flow_state_params");
             },
             onQuizSelect() {
-                const selectedQuiz = this.quizlist.find(
-                    (q) => q.id === this.idSelected
-                );
+                const selectedQuiz = this.quizlist.find((q) => q.id === this.idSelected);
                 if (selectedQuiz) {
-                    this.nodeFlow.data.subtitle =
-                        selectedQuiz.name;
+                    this.nodeFlow.data.subtitle = selectedQuiz.name;
                 }
             },
         },
@@ -905,10 +959,11 @@
     }
 
     .background-div {
-        background-color: rgb(249 250 251);
-        border-width: 1px;
+        background-color: var(--color-bg-form-control);
+        border: 1px solid var(--color-border-form-control);
         border-radius: 0.375rem;
         padding: 15px;
+        color: var(--color-body-content);
     }
 
     .font-medium {
@@ -933,5 +988,21 @@
 
     .text-long {
         resize: none;
+    }
+
+    .offcanvas-themed {
+        background-color: var(--color-card-content) !important;
+        color: var(--color-body-content) !important;
+    }
+
+    .offcanvas-themed .offcanvas-header {
+        background-color: var(--color-card-content) !important;
+        color: var(--color-body-content) !important;
+        border-bottom: 1px solid var(--color-border-form-control) !important;
+    }
+
+    .offcanvas-themed .offcanvas-body {
+        background-color: var(--color-card-content) !important;
+        color: var(--color-body-content) !important;
     }
 </style>

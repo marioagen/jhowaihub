@@ -16,9 +16,9 @@ export default {
 </script>
 
 <style scoped>
-:deep(.link-action) {
-  color: #555;
-}
+    :deep(.link-action) {
+        color: var( --color-bg-icon-active)
+    }
 :deep(.link-action:hover) {
   cursor: pointer;
 }

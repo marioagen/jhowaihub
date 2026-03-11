@@ -498,3 +498,19 @@
         },
     };
 </script>
+<style>
+    .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+        background-color: var(--color-card-content) !important;
+        border-color: var(--color-border-form-control) var(--color-border-form-control) var(--color-border-form-control) !important;
+        color: var(--color-body-content) !important;
+    }
+    .nav-tabs {
+        border-bottom: 1px solid var(--color-border-form-control) !important;
+    }
+
+    .alert-info {
+        color: var(--color-kanban-primary)!important;
+        background-color: var(--color-bg-kanban-primary)!important;
+        border-color: var(--color-border-form-control) !important;
+    }
+</style>

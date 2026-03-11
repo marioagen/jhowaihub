@@ -11,15 +11,16 @@
             @change-page="changePage"
         >
             <template #cell-name="{ data }">
-                <div class="p-1">
-                    <div class="d-flex">
-                        <label class="form-check-label d-flex align-items-center w-100">
-                            <AvatarComponent :name="data.row.name" />
-                            <div>
-                                <div class="fw-semibold">{{ data.row.name }}</div>
-                                <div class="text-muted small">{{ data.row.email }}</div>
-                            </div>
-                        </label>
+                <div class="user-cell">
+                    <div class="d-flex align-items-center">
+                        <AvatarComponent
+                            :name="data.row.name"
+                            :size="28"
+                        />
+                        <div>
+                            <div class="fw-semibold">{{ data.row.name }}</div>
+                            <div class="text-muted small">{{ data.row.email }}</div>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -51,10 +52,19 @@
             </template>
             <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" @click="redirectToForm(data.row)" v-tooltip="$t('common.edit')">
+                    <a
+                        :class="actionClass"
+                        @click="redirectToForm(data.row)"
+                        v-tooltip="$t('common.edit')"
+                    >
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass"class="text-danger" @click="openConfirmation(data.row)"  v-tooltip="$t('common.delete')">
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        @click="openConfirmation(data.row)"
+                        v-tooltip="$t('common.delete')"
+                    >
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
@@ -73,7 +83,6 @@
         @confirm="deleteUser"
     />
 </template>
-
 <script>
     import AvatarComponent from "@/components/global/AvatarComponent.vue";
     import UserService from "@/services/users/UserService";
@@ -92,7 +101,7 @@
             BadgeComponent,
             TableComponent,
             ConfirmModal,
-            ActionTableListComponent
+            ActionTableListComponent,
         },
         data: () => ({
             table: {
@@ -114,7 +123,7 @@
             queryPage: 1,
             searchInput: "",
             selectedOption: 10,
-            isAscending: false,
+            isAscending: true,
             colType: 2,
             selectedUser: {},
             isDeleting: false,
@@ -202,8 +211,11 @@
         },
     };
 </script>
-
 <style scoped>
+    .user-cell {
+        padding: 2px 4px;
+    }
+
     .badge {
         display: inline-block;
         background-color: #e0ecff;
@@ -212,11 +224,6 @@
         border-radius: 6px;
         font-size: 12px;
         margin-right: 4px;
-    }
-
-    .initials {
-        width: 30px;
-        height: 30px;
     }
 
     .link-action:hover {

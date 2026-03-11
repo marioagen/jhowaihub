@@ -147,7 +147,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             var permissions = await _permissionRepository.FindUserPermissionsAsync(user.Email);
-            var tokenJWT = await GenerateTokensAsync(user.Email, permissions);
+            var tokenJWT = await GenerateTokensAsync(user.Id, user.Email, permissions);
             this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
 
             return new AccessDataAuthDto
@@ -283,7 +283,8 @@ namespace WoopiAiHub.Application.Services
                                                                         tenant.Name);
                 var permissions = await _permissionRepository.FindUserPermissionsAsync(userEmail);
 
-                var tokens = await GenerateTokensAsync(userEmail, permissions);
+                var user = await _userRepository.FindByEmailAsync(userEmail);
+                var tokens = await GenerateTokensAsync(user.Id, userEmail, permissions);
 
                 await _refreshTokenServices.RevokeAsync(refreshToken);
                 await _refreshTokenServices.SaveAsync(userEmail, tokens.RefreshToken);
@@ -400,7 +401,8 @@ namespace WoopiAiHub.Application.Services
         /// short expiration time,  and the refresh token is a string used to obtain a new access token after
         /// expiration.</returns>
         /// <exception cref="ArgumentException">Thrown if the JWT key is not configured in the application settings.</exception>
-        private async Task<(string AccessToken, string RefreshToken)> GenerateTokensAsync(string userEmail,
+        private async Task<(string AccessToken, string RefreshToken)> GenerateTokensAsync(Guid userId,
+                                                                                          string userEmail,
                                                                                           Dictionary<string, List<string>> permissions)
         {
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
@@ -413,6 +415,7 @@ namespace WoopiAiHub.Application.Services
             var permissionsJson = JsonConvert.SerializeObject(permissionsList);
             var claims = new List<Claim>
             {
+                new Claim("userId", userId.ToString()),
                 new Claim(ClaimTypes.Email, userEmail),
                 new Claim(JwtRegisteredClaimNames.Sub, userEmail),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),

@@ -63,9 +63,28 @@
                                 class="form-upload"
                                 @submit.prevent="save"
                             >
-                                <h5 class="mb-4">
-                                    {{ $t("documents.upload.cardTitle") }}
-                                </h5>
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="mb-4">
+                                        {{ $t("documents.upload.cardTitle") }}
+                                    </h5>
+                                    <div class="form-check d-flex align-items-center mb-3">
+                                        <input
+                                            class="form-check-input me-2"
+                                            type="checkbox"
+                                            id="isDocumentBatchChk"
+                                            :value="isDocumentsBatch"
+                                            v-model="isDocumentsBatch"
+                                        />
+                                        <label
+                                            class="form-check-label d-flex align-items-center w-100"
+                                            for="isDocumentBatchChk"
+                                        >
+                                            <div class="fw-semibold">
+                                                {{ $t("documents.documentsBatchCheckbox") }}
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
                                 <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
                                     <label class="label-container mb-2">
                                         {{ $t("documents.upload.dropZone") }}
@@ -216,7 +235,7 @@
                                         {{ $t("documents.upload.warningWorkflowNotListed") }}
                                     </div>
                                     <div
-                                        class="border rounded p-1 user-list scrollable-list bg-white"
+                                        class="border rounded bg-select p-1 user-list scrollable-list"
                                     >
                                         <div
                                             v-if="isLoading"
@@ -313,32 +332,25 @@
                 </div>
             </div>
         </div>
-        <!-- Component ToastAlert -->
-        <toast-alert
-            :showToast="toastShow"
-            :colorToast="toastColor"
-            :messageToast="toastMessage"
-            @close="closeToast"
-        />
-        <modal-alert
-            v-if="modalAlertShow"
-            :type="'Confirm'"
-            :alertTitle="$t('documents.upload.removeAllDropzone')"
-            :alertMessage="$t('documents.thisActionRemoveAllFiles')"
-            :okLabel="$t('common.confirm')"
-            :cancelLabel="$t('common.cancel')"
-            @open="removeAllFiles"
-            @close="closeModal"
+        <ConfirmModal
+            id="deleteConfirm"
+            title="documents.upload.removeAllDropzone"
+            message="documents.thisActionRemoveAllFiles"
+            cancelText="common.cancel"
+            confirmText="common.confirm"
+            confirmVariant="primary"
+            ref="DeleteDialog"
+            :isLoading="isLoading"
+            @confirm="removeAllFiles"
         />
     </main>
 </template>
 <script>
-    import ModalAlert from "@/components/pages/analyzer/modal-alert";
-    import ToastAlert from "@/components/pages/analyzer/toast-alert";
-    import api from "@/services/api";
-    import uploadFileWorker from "@/workers";
-    import Dropzone from "dropzone";
     import "dropzone/dist/dropzone.css";
+    import api from "@/services/api";
+    import Dropzone from "dropzone";
+    import uploadFileWorker from "@/workers";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
 
     export default {
@@ -365,9 +377,8 @@
         },
         data() {
             return {
-                crumbsData: [],
-                sidebarData: "DocumentUpload",
-                title: "Form Here",
+                timeoutMessage: ENV_CONFIG.VUE_APP_WAITING_TIME_MSG_UPLD,
+                timerReq: ENV_CONFIG.VUE_APP_TIMER_REQ,
                 maxFiles: 10000000000,
                 filesList: [],
                 url: null,
@@ -379,25 +390,19 @@
                 searchTerm: "",
                 isLoading: false,
                 message: "",
-                modalAlertShow: false,
                 myInterval: null,
                 fileUpload: null,
                 chunks: [],
                 teams: [],
                 workflowsList: [],
-                toastShow: false,
-                toastColor: "",
-                toastMessage: "",
-                timeoutMessage: ENV_CONFIG.VUE_APP_WAITING_TIME_MSG_UPLD,
-                timerReq: ENV_CONFIG.VUE_APP_TIMER_REQ,
                 dropzoneInstance: null,
                 selectedWorkflows: [],
                 hasError: true,
+                isDocumentsBatch: false,
             };
         },
         components: {
-            ModalAlert,
-            ToastAlert,
+            ConfirmModal,
         },
         watch: {
             selectedWorkflows() {
@@ -432,20 +437,8 @@
             validateSelection() {
                 this.hasError = this.selectedWorkflows.length === 0;
             },
-            clickUplodFile: function () {
+            clickUplodFile() {
                 document.getElementById("inputFileId").click();
-            },
-            setCrumbsData: function () {
-                this.crumbsData = [
-                    {
-                        crumb: this.$t("documents.title"),
-                        link: { to: "Documents" },
-                    },
-                    {
-                        crumb: this.$t("common.upload"),
-                        link: { to: "DocumentUpload" },
-                    },
-                ];
             },
             onFileAdded(message) {
                 if (this.filesList.some((f) => f.name == message.name)) {
@@ -463,7 +456,7 @@
                 this.dropzoneInstance.removeAllFiles();
                 this.filesList = [];
                 this.updateDropzoneState();
-                this.closeModal();
+                this.$refs.DeleteDialog?.close();
             },
             updateDropzoneState() {
                 const dropzone = this.$refs.dropzone;
@@ -477,37 +470,39 @@
                 const fileId = message.upload.uuid;
                 this.removeFile(fileId);
             },
-            checkExceededPages: function () {
-                let self = this;
+            checkExceededPages() {
                 api.get("/Document/CheckExceededPages")
-                    .then(function (response) {
+                    .then((response) => {
                         if (response.data === true) {
-                            self.clearMyInterval();
-                            self.alertToast(
-                                self.$t("documents.numberOfPagesHasBeenExceeded"),
-                                "toast-warning"
-                            );
+                            this.$notify({
+                                title: "documents.numberOfPagesHasBeenExceeded",
+                                message: "documents.numberOfPagesHasBeenExceeded",
+                                variant: "warning",
+                                icon: "CircleX",
+                            });
                         }
                     })
-                    .catch(function (e) {
+                    .catch((e) => {
                         console.log(e);
                     });
             },
             validateForm() {
                 let valid = true;
                 if (this.filesList.length == 0) {
-                    this.clearMyInterval();
-                    this.alertToast(
-                        this.$t("documents.upload.noFileChosen") + ".",
-                        "toast-warning"
-                    );
+                    this.$notify({
+                        title: "documents.upload.noFileChosen",
+                        message: "documents.upload.noFileChosen",
+                        variant: "warning",
+                        icon: "CircleX",
+                    });
                     valid = false;
                 } else if (this.selectedWorkflows.length == 0) {
-                    this.clearMyInterval();
-                    this.alertToast(
-                        this.$t("documents.upload.noTeamChosen") + ".",
-                        "toast-warning"
-                    );
+                    this.$notify({
+                        title: "documents.upload.noTeamChosen",
+                        message: "documents.upload.noTeamChosen",
+                        variant: "warning",
+                        icon: "CircleX",
+                    });
                     valid = false;
                 }
                 return valid;
@@ -529,8 +524,11 @@
                     Authorization: `Bearer ${this.$store.state.userProfile.tokenApi}`,
                 };
                 const chunkSize = 19 * 1024 * 1024;
+
                 const filesNames = this.filesList.map((u) => u.name);
-                const promises = this.filesList.map((fileObj) => {
+                const promises = this.filesList.map((fileObj, index) => {
+                    const isLastFile = index === this.filesList.length - 1;
+
                     const file = fileObj;
                     let additionalData = {
                         name: file.name.replace(".pdf", ""),
@@ -560,6 +558,8 @@
                                 url: ENV_CONFIG.VUE_APP_BASE_URL_API,
                                 chunkIndex: i,
                                 totalChunks: totalChunks,
+                                isLastFile: isLastFile,
+                                isDocumentBatch: this.validateDocumentsBatch,
                             });
                         }
                         return chunks;
@@ -597,7 +597,7 @@
                     reader.readAsArrayBuffer(file);
                 });
             },
-            createChunks: function (file) {
+            createChunks(file) {
                 let size = 19922944,
                     chunks = Math.ceil(file.size / size);
                 for (let i = 0; i < chunks; i++) {
@@ -606,39 +606,16 @@
                     );
                 }
             },
-            closeModal: function () {
-                this.modalAlertShow = false;
-                document.getElementsByTagName("BODY")[0].children[1].className = "overlay";
-            },
-            alertToast: function (msg, color) {
-                this.toastMessage = msg;
-                this.toastColor = color;
-                this.toastShow = true;
-                let self = this;
-                this.myInterval = setInterval(function () {
-                    self.toastMessage = "";
-                    self.toastColor = "";
-                    self.toastShow = false;
-                    clearInterval(self.myInterval);
-                }, 4000);
-            },
-            closeToast: function () {
-                this.toastShow = false;
-                this.clearMyInterval();
-            },
-            clearMyInterval: function () {
-                clearInterval(this.myInterval);
-                this.myInterval = null;
-            },
-            confirmationDialog: function () {
+            confirmationDialog() {
                 if (this.filesList.length > 0) {
-                    this.modalAlertShow = true;
-                    document.getElementsByTagName("BODY")[0].children[1].className += " active";
+                    this.$refs.DeleteDialog?.open();
                 } else {
-                    this.alertToast(
-                        this.$t("documents.upload.noFileChosen") + ".",
-                        "toast-warning"
-                    );
+                    this.$notify({
+                        title: "documents.upload.noFileChosen",
+                        message: "documents.upload.noFileChosen",
+                        variant: "warning",
+                        icon: "CircleX",
+                    });
                 }
             },
             getWorkflows() {
@@ -669,9 +646,12 @@
                     team.name.toLowerCase().includes(this.searchTerm.toLowerCase())
                 );
             },
-        },
-        created() {
-            this.setCrumbsData();
+            validateDocumentsBatch() {
+                if (this.isDocumentsBatch && this.filesList.length > 1) {
+                    return true;
+                }
+                return false;
+            },
         },
         mounted() {
             this.initializeDropzone();
@@ -716,8 +696,8 @@
     }
 
     .team-selector-container {
-        background-color: #eff6ff;
-        border: 1.5px solid #bedbff;
+        background-color: var(--color-sidebar-li-collapsed-hover) !important;
+        border: 1.5px solid var(--color-border-form-control);
         border-radius: 0.375rem;
         transition: border-color 0.3s ease;
         min-height: 150px;
@@ -727,13 +707,13 @@
         border-color: #dc3545 !important;
     }
 
-    .team-selector-container.is-valid {
-        border-color: #bedbff;
-    }
+        .team-selector-container.is-valid {
+            border-color: var(--color-bg-primary-badge) !important;
+        }
 
     .selected-count {
-        background-color: #dbe9fc;
-        color: #2547bc;
+        background-color: var(--color-bg-primary-badge) !important;
+        color: var(--color-text-primary-badge) !important;
         padding: 2px 8px;
         border-radius: 12px;
         font-weight: 600;
@@ -752,7 +732,7 @@
     }
 
     .box-upload-form {
-        background-color: #ffffff;
+        background-color: var(--color-card-content);
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         padding: 24px;
@@ -760,9 +740,9 @@
     }
 
     .btn-custom-light {
-        background-color: #f8f9fb !important;
-        border-color: #ced4da !important;
-        color: #212529 !important;
+        background-color: var(--color-bg-body-content) !important;
+        border-color: var(--color-border-form-control) !important;
+        color: var(--color-body-content) !important;
         transition: background-color 0.2s ease;
     }
 
@@ -913,4 +893,10 @@
             display: none;
         }
     }
+
+    .bg-select {
+        background-color: var(--color-card-content) !important;
+        border-color: var(--color-border-form-control) !important;
+    }
+
 </style>
