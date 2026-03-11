@@ -109,11 +109,6 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnName("Created")
                         .HasDefaultValueSql("(GETDATE())");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("varchar(max)")
-                        .HasColumnName("Description");
-
                     b.Property<string>("HeaderTemplate")
                         .HasColumnType("varchar(max)")
                         .HasColumnName("HeaderTemplate");
@@ -424,7 +419,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ModelEmbeddings");
+                    b.ToTable("ModelEmbeddings", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Permission", b =>
@@ -1158,7 +1153,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UsageDailies");
+                    b.ToTable("UsageDailies", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageLog", b =>
@@ -1202,7 +1197,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UsageLogs");
+                    b.ToTable("UsageLogs", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageMonth", b =>
@@ -1242,7 +1237,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UsageMonths");
+                    b.ToTable("UsageMonths", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageType", b =>
@@ -1265,7 +1260,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UsageTypes");
+                    b.ToTable("UsageTypes", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageUnit", b =>
@@ -1304,7 +1299,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.HasIndex("UsageTypeId");
 
-                    b.ToTable("UsageUnits");
+                    b.ToTable("UsageUnits", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.User", b =>
