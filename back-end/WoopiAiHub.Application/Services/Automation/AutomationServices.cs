@@ -456,11 +456,12 @@ namespace WoopiAiHub.Application.Services.Automation
             var nextStepOrder = card.Step.Order + 1;
             var nextStep = await _stepRepository.FindByOrderAndWorkflowId(nextStepOrder, card.Step.WorkflowId);
 
-            // Only stop when nextStep is null or when the next step is not the IA profile.
-            // While next step exists and is also IA profile, advance and repeat validation.
+            // Advance at least once to the next step, then keep advancing while the next step is also IA profile.
             Step? lastAdvancedStep = null;
-            while (nextStep != null && nextStep.Profile?.Name == Profile.IAFileName)
+            do
             {
+                if (nextStep == null)
+                    break;
                 card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
                 var cardWorkflows = new List<(int cardId, int workflowId)> { (card.Id, nextStep.WorkflowId) };
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, automationServicesDto.Email);
@@ -468,6 +469,7 @@ namespace WoopiAiHub.Application.Services.Automation
                 nextStepOrder = nextStep.Order + 1;
                 nextStep = await _stepRepository.FindByOrderAndWorkflowId(nextStepOrder, nextStep.WorkflowId);
             }
+            while (nextStep != null && nextStep.Profile?.Name == Profile.IAFileName);
 
             if (lastAdvancedStep == null)
                 return;
