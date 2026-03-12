@@ -270,9 +270,6 @@
                     // TODO: replace with real API call (e.g. audit/documents list), pass params
                     await new Promise((r) => setTimeout(r, 400));
                     this.auditItems = [...MOCK_AUDIT_ITEMS];
-                    if (this.auditItems.length) {
-                        this.$emit("select-document", this.auditItems[0]);
-                    }
                 } finally {
                     this.loading = false;
                 }
