@@ -456,25 +456,34 @@ namespace WoopiAiHub.Application.Services.Automation
             var nextStepOrder = card.Step.Order + 1;
             var nextStep = await _stepRepository.FindByOrderAndWorkflowId(nextStepOrder, card.Step.WorkflowId);
 
-            if (nextStep == null)
+            Step? lastAdvancedStep = null;
+            do
             {
-                return;
+                if (nextStep == null)
+                    break;
+                card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
+                var cardWorkflows = new List<(int cardId, int workflowId)> { (card.Id, nextStep.WorkflowId) };
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, automationServicesDto.Email);
+                lastAdvancedStep = nextStep;
+                nextStepOrder = nextStep.Order + 1;
+                nextStep = await _stepRepository.FindByOrderAndWorkflowId(nextStepOrder, nextStep.WorkflowId);
             }
+            while (nextStep != null && nextStep.Profile?.Name == Profile.IAFileName);
 
-            card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
-            var cardWorkflows = new List<(int cardId, int workflowId)> { (card.Id, card.Step!.WorkflowId) };
-            await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement);
+            if (lastAdvancedStep == null)
+                return;
+
             var updated = _cardRepository.Update(card);
 
             if (updated)
             {
-                await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, nextStep.Id, string.Empty);
-                
+                await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, lastAdvancedStep.Id, string.Empty);
+
                 if (dependentStepTool != null)
                 {
                     var nextStepDto = automationServicesDto with
                     {
-                        StepId = nextStep.Id,
+                        StepId = lastAdvancedStep.Id,
                         StepToolId = dependentStepTool.Id
                     };
                     await StartExecutionByCardAsync(nextStepDto);
