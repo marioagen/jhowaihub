@@ -364,6 +364,7 @@
     </main>
 </template>
 <script>
+    import ErrorCode from "@/constants/Errorcode";
     import PermissionsService from "@/services/permissions/PermissionsService";
     import ProfilesService from "@/services/profiles/ProfilesService";
     import WorkflowService from "@/services/workflow/WorkflowService";
@@ -585,11 +586,14 @@
                                 icon: "CircleCheckBig",
                             });
                         } else {
+                            if (result.errorCode === ErrorCode.Duplicated) {
+                                this.nameError = this.$t("management.profiles.errors.duplicated");
+                            }
                             this.$notify({
                                 title: "Profiles",
-                                message: this.$t(
-                                    "management.profiles.errors.saveError"
-                                ),
+                                message: result.errorCode === ErrorCode.Duplicated
+                                    ? this.$t("management.profiles.errors.duplicated")
+                                    : this.$t("management.profiles.errors.saveError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -615,7 +619,7 @@
                         if (result.success) {
                             this.returnToTable();
                             return this.$notify({
-                                title: "Profiles",
+                                title: this.$t("management.profiles.title"),
                                 message: this.$t(
                                     "management.profiles.editSuccess"
                                 ),
@@ -623,11 +627,14 @@
                                 icon: "CircleCheckBig",
                             });
                         } else {
+                            if (result.errorCode === ErrorCode.Duplicated) {
+                                this.nameError = this.$t("management.profiles.errors.duplicated");
+                            }
                             this.$notify({
-                                title: "Profiles",
-                                message: this.$t(
-                                    "management.profiles.errors.editError"
-                                ),
+                                title: this.$t("management.profiles.title"),
+                                message: result.errorCode === ErrorCode.Duplicated
+                                    ? this.$t("management.profiles.errors.duplicated")
+                                    : this.$t("management.profiles.errors.editError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });

@@ -841,7 +841,6 @@ namespace WoopiAiHub.Repository
                         .ThenInclude(t => t.Tool)
                             .ThenInclude(tt => tt.ToolType)
                 .Include(w => w.Teams)
-                .AsNoTracking()
                 .AsSplitQuery()
                 .FirstAsync(w => w.Id == id && w.Enable.Equals(true));
         }

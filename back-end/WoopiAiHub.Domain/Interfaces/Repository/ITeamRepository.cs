@@ -8,6 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     public interface ITeamRepository
     {
         bool CreateUniqueTeam(Team team);
+        bool ExistsTeamByNameExceptId(string name, int excludeId);
         TeamDto? FindById(int id);
         bool Update(Team team);
         bool DeleteByIds(List<int> ids);

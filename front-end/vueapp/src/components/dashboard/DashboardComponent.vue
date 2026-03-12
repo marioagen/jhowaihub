@@ -102,40 +102,56 @@
                     </h2>
                 </div>
             </div>
-            <TokensGraph
-                :start="filters.start"
-                :end="filters.end"
-                :key="datesChange"
-                :usageUnits="usageUnits"
-                :isLoading="isLoading"
-                @setTotalTokens="setTotalWTC"
-                ref="TokensGraph"
-            />
-            <PagesProcessedGraph
-                :start="filters.start"
-                :end="filters.end"
-                :key="datesChange"
-                :usageUnits="usageUnits"
-                :isLoading="isLoading"
-                @setTotalPages="setTotalWTC"
-                ref="PagesProcessedGraph"
-            />
-            <WorkflowsGraph
-                :start="filters.start"
-                :end="filters.end"
-                :key="datesChange"
-                :usageUnits="usageUnits"
-                :isLoading="isLoading"
-                @setTotalExecution="setTotalWTC"
-                ref="WorkflowsGraph"
-            />
+            <div class="row m-0">
+                <div class="col-12 col-md-6 ps-0 pe-2">
+                    <TokensGraph
+                        :start="filters.start"
+                        :end="filters.end"
+                        :key="datesChange"
+                        :usageUnits="usageUnits"
+                        :isLoading="isLoading"
+                        @setTotalTokens="setTotalWTC"
+                        ref="TokensGraph"
+                    />
+                </div>
+                <div class="col-12 col-md-6 pe-0 ps-2">
+                    <PagesProcessedGraph
+                        :start="filters.start"
+                        :end="filters.end"
+                        :key="datesChange"
+                        :usageUnits="usageUnits"
+                        :isLoading="isLoading"
+                        @setTotalPages="setTotalWTC"
+                        ref="PagesProcessedGraph"
+                    />
+                </div>
+                <div class="col-12 col-md-6 ps-0 pe-2">
+                    <WorkflowsAutomaticGraph
+                        :start="filters.start"
+                        :end="filters.end"
+                        :key="datesChange"
+                        :usage-units="usageUnits"
+                        @total-calculated="setTotalWTC"
+                    />
+                </div>
+                <div class="col-12 col-md-6 pe-0 ps-2">
+                    <WorkflowsExecutionGraph
+                        :start="filters.start"
+                        :end="filters.end"
+                        :key="datesChange"
+                        :usage-units="usageUnits"
+                        @total-calculated="setTotalWTC"
+                    />
+                </div>
+            </div>
         </div>
     </main>
 </template>
 <script>
     import TokensGraph from "@/components/dashboard/graphs/TokensGraph.vue";
     import PagesProcessedGraph from "@/components/dashboard/graphs/PagesProcessedGraph.vue";
-    import WorkflowsGraph from "@/components/dashboard/graphs/WorkflowsGraph.vue";
+    import WorkflowsAutomaticGraph from "@/components/dashboard/graphs/WorkflowsAutomaticGraph.vue";
+    import WorkflowsExecutionGraph from "@/components/dashboard/graphs/WorkflowsExecutionGraph.vue";
     import DashboardDateFilter from "@/components/dashboard/DashboardDateFilter.vue";
     import DashboardServices from "@/services/dashboard/DashboardServices";
     import store from "@/store";
@@ -144,7 +160,8 @@
         components: {
             DashboardDateFilter,
             TokensGraph,
-            WorkflowsGraph,
+            WorkflowsAutomaticGraph,
+            WorkflowsExecutionGraph,
             PagesProcessedGraph,
             LoadingComponent,
         },

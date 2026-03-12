@@ -23,14 +23,21 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public bool CreateUniqueTeam(Team team)
         {
-            var exists = _context.Teams.Any(t => t.Name == team.Name);
-            if (!exists)
-            {
-                _context.Teams.Add(team);
-                _context.SaveChanges();
-                return true;
-            }
-            return false;
+            if (ExistsTeamByNameExceptId(team.Name, 0))
+                return false;
+            _context.Teams.Add(team);
+            _context.SaveChanges();
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if the teams's name already exists.
+        /// </summary>
+        public bool ExistsTeamByNameExceptId(string name, int excludeId)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return false;
+            var nameLower = name.Trim().ToLowerInvariant();
+            return _context.Teams.Any(t => t.Name.ToLower() == nameLower && t.Id != excludeId);
         }
 
         /// <summary>

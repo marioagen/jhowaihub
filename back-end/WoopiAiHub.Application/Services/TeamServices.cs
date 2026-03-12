@@ -197,6 +197,9 @@ namespace WoopiAiHub.Application.Services
             if (team == null)
                 return false;
 
+            if (_teamRepository.ExistsTeamByNameExceptId(teamUpdateDto.Name, teamUpdateDto.Id))
+                throw new AppException(Domain.Enum.ErrorCode.Duplicated, "Duplicated Team Name", null);
+
             var teamsOldProfiles = team.Profiles.ToList();
             team.Update(teamUpdateDto.Name);
             if (teamUpdateDto.UserIds != null)

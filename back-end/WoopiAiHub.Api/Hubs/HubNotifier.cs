@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.CodeAnalysis;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;

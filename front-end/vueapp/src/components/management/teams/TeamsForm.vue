@@ -305,14 +305,14 @@
                     })
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
-                        let errorMessage = "management.teams.errors.invalid";
+                        let notifyMessage = this.$t("management.teams.errors.invalid");
                         if (errorCode && errorCode === ErrorCode.Duplicated) {
                             this.$refs.formRef.setFieldError("teamName", this.$t("management.teams.errors.duplicated"));
-                            errorMessage = "management.teams.errors.duplicated";
-                        } 
+                            notifyMessage = this.$t("management.teams.errors.duplicated");
+                        }
                         this.$notify({
-                            title: 'management.teams.title',
-                            message: errorMessage,
+                            title: this.$t('management.teams.title'),
+                            message: notifyMessage,
                             variant: 'danger',
                             icon: 'CircleX',
                         });
@@ -361,14 +361,16 @@
                     })
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
-                        let errorMessage = "management.teams.errors.invalid";
+                        const detail = (err?.response?.data?.detail || "").toLowerCase();
+                        let notifyMessage = this.$t("management.users.errors.saveError");
                         if (errorCode && errorCode === ErrorCode.Duplicated) {
-                            this.$refs.formRef.setFieldError("teamName", this.$t("management.teams.errors.duplicated"));
-                            errorMessage = "management.teams.errors.duplicated";
-                        } 
+                            notifyMessage = detail.includes("name")
+                                ? this.$t("management.users.errors.duplicated")
+                                : this.$t("management.users.errors.emailDuplicated");
+                        }
                         this.$notify({
-                            title: 'management.users.title',
-                            message: errorMessage,
+                            title: this.$t('management.users.title'),
+                            message: notifyMessage,
                             variant: 'danger',
                             icon: 'CircleX',
                         });
