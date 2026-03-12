@@ -30,7 +30,7 @@ namespace WoopiAiHub.Application.Services.Audit
             if (!Enum.IsDefined(typeof(AuditCardActionType), actionType))
                 throw new ArgumentOutOfRangeException(nameof(actionType), actionType, $"Action type must be a defined value of {nameof(AuditCardActionType)}.");
 
-            var userId = await ResolveUserIdAsync(automationUserEmail, cancellationToken);
+            var userId = await ResolveUserIdAsync(automationUserEmail);
 
             var auditCard = new AuditCard(0, DateTime.UtcNow, cardId, workflowId, actionType, userId);
             await _auditCardRepository.AddAsync(auditCard, cancellationToken);
@@ -49,7 +49,7 @@ namespace WoopiAiHub.Application.Services.Audit
             if (!Enum.IsDefined(typeof(AuditCardActionType), actionType))
                 throw new ArgumentOutOfRangeException(nameof(actionType), actionType, $"Action type must be a defined value of {nameof(AuditCardActionType)}.");
 
-            var userId = await ResolveUserIdAsync(automationUserEmail, cancellationToken);
+            var userId = await ResolveUserIdAsync(automationUserEmail);
 
             var now = DateTime.UtcNow;
             var auditCards = new List<AuditCard>(cardWorkflows.Count);
@@ -59,7 +59,7 @@ namespace WoopiAiHub.Application.Services.Audit
             await _auditCardRepository.AddRangeAsync(auditCards, cancellationToken);
         }
 
-        private async Task<Guid> ResolveUserIdAsync(string? automationUserEmail, CancellationToken cancellationToken)
+        private async Task<Guid> ResolveUserIdAsync(string? automationUserEmail)
         {
             if (_currentUserService.IsAuthenticated && _currentUserService.Id is { } userId)
                 return userId;
