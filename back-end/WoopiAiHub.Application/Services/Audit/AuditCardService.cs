@@ -69,16 +69,10 @@ namespace WoopiAiHub.Application.Services.Audit
                 var user = await _userRepository.FindByEmailAsync(automationUserEmail);
                 if (user != null)
                 {
-                    // #region agent log
-                    try { System.IO.File.AppendAllText(@"k:\Projekten\Arbeite\Woopi\woopiai-hub\debug-a44fd4.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "a44fd4", hypothesisId = "H3", location = "AuditCardService.ResolveUserIdAsync", message = "Resolved userId from automation email", data = new { resolved = true }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-                    // #endregion
                     return user.Id;
                 }
             }
 
-            // #region agent log
-            try { System.IO.File.AppendAllText(@"k:\Projekten\Arbeite\Woopi\woopiai-hub\debug-a44fd4.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "a44fd4", hypothesisId = "H3", location = "AuditCardService.ResolveUserIdAsync", message = "Throwing: no auth and no/invalid automation email", data = new { hasEmail = !string.IsNullOrWhiteSpace(automationUserEmail) }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-            // #endregion
             throw new InvalidOperationException("Current user is required to create an audit log. When running in automation context, provide the user email from the automation DTO.");
         }
     }
