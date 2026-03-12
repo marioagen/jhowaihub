@@ -124,7 +124,9 @@ namespace WoopiAiHub.Repository
                                                     int workflowId)
         {
             return _context.Steps
-                           .FirstOrDefaultAsync(s => s.Order == order &&
+                .Include(s => s.Profile)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Order == order &&
                                                      s.WorkflowId == workflowId);
         }
 
