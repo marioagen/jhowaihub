@@ -298,7 +298,7 @@
     }
     .audit-list-wrapper {
         min-height: 0;
-        max-height: calc(100vh - 400px);
+        max-height: calc(100vh - 450px);
     }
     .audit-list-wrapper .audit-list {
         min-height: 0;

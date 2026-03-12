@@ -58,12 +58,14 @@
     };
 </script>
 <style scoped>
+    .auditor-summary-card,
     .auditor-detail-card {
         height: 70vh;
         display: flex;
         flex-direction: column;
         overflow: hidden;
     }
+    .auditor-summary-card .auditor-summary-card-body,
     .auditor-detail-card > * {
         flex: 1 1 0;
         min-height: 0;
