@@ -15,7 +15,7 @@
                         :key="item.id"
                         class="audit-list-item rounded-2 p-2 mb-2 cursor-pointer"
                         :class="{
-                            'bg-light border-start border-primary border-3':
+                            'audit-list-item-selected border-start border-primary border-3':
                                 selectedDocument && selectedDocument.id === item.id,
                             border: !selectedDocument || selectedDocument.id !== item.id,
                         }"
@@ -290,8 +290,11 @@
     };
 </script>
 <style scoped>
+    .audit-list-item-selected {
+        background-color: var(--bs-primary-bg-subtle, var(--bs-tertiary-bg, transparent));
+    }
     .audit-list-item:hover {
-        background-color: rgba(0, 0, 0, 0.04);
+        background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.04));
     }
     .cursor-pointer {
         cursor: pointer;

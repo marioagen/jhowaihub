@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="input-group input-group-sm auditor-filter-sm mb-3">
-            <span class="input-group-text bg-white border-end-0 py-1">
+            <span class="input-group-text border-end-0 py-1">
                 <LucideIcon
                     icon="Search"
                     :size="14"

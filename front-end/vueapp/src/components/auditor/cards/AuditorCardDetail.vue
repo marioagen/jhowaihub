@@ -6,7 +6,9 @@
                 <!-- Workflow selection screen -->
                 <template v-if="!selectedWorkflowId && !detailLoading">
                     <div class="p-3">
-                        <h6 class="mb-2 fw-bold d-flex align-items-center gap-2 text-body">
+                        <h6
+                            class="workflow-select-heading mb-2 fw-bold d-flex align-items-center gap-2"
+                        >
                             <LucideIcon
                                 icon="GitBranch"
                                 :size="20"
@@ -20,7 +22,7 @@
                             diferentes. Selecione qual deseja visualizar.
                         </p>
                         <!-- Document info card (not clickable) -->
-                        <div class="workflow-select-card rounded-2 p-2 mb-2 border bg-light">
+                        <div class="workflow-select-card rounded-2 p-2 mb-2 border">
                             <div class="d-flex align-items-start gap-2">
                                 <span
                                     class="workflow-doc-icon d-inline-flex align-items-center justify-content-center flex-shrink-0"
@@ -31,7 +33,7 @@
                                     />
                                 </span>
                                 <div class="min-w-0 flex-grow-1">
-                                    <div class="fw-semibold text-body">
+                                    <div class="workflow-select-card-title fw-semibold">
                                         {{ selectedDocument.title }}
                                     </div>
                                     <div class="small text-muted">
@@ -59,7 +61,9 @@
                                 />
                             </span>
                             <div class="min-w-0 flex-grow-1">
-                                <div class="fw-semibold text-body">{{ wf.name }}</div>
+                                <div class="workflow-select-card-title fw-semibold">
+                                    {{ wf.name }}
+                                </div>
                                 <div class="small text-muted">
                                     Etapa: {{ wf.stage }} · {{ wf.eventsCount }} eventos
                                 </div>
@@ -200,7 +204,7 @@
                             </div>
                         </div>
                         <div class="input-group input-group-sm auditor-filter-sm">
-                            <span class="input-group-text bg-white border-end-0 py-1">
+                            <span class="input-group-text border-end-0 py-1">
                                 <LucideIcon
                                     icon="Search"
                                     :size="14"
@@ -361,7 +365,7 @@
                         </div>
                     </div>
                     <div class="input-group input-group-sm auditor-filter-sm">
-                        <span class="input-group-text bg-white border-end-0 py-1">
+                        <span class="input-group-text border-end-0 py-1">
                             <LucideIcon
                                 icon="Search"
                                 :size="14"
@@ -423,7 +427,7 @@
         <template v-else>
             <div class="d-flex align-items-center justify-content-center flex-grow-1 min-vh-50 p-4">
                 <div class="text-center text-muted py-5">
-                    <div class="rounded-circle bg-light d-inline-flex p-4 mb-3">
+                    <div class="rounded-circle d-inline-flex p-4 mb-3 workflow-empty-icon-wrap">
                         <LucideIcon
                             icon="History"
                             :size="48"
@@ -530,11 +534,11 @@
         max-height: calc(100vh - 320px);
     }
     .audit-history-card {
-        background-color: #fff;
+        background-color: transparent;
     }
     .audit-user-badge {
-        background-color: #ececec;
-        color: #6c757d;
+        background-color: var(--bs-secondary-bg, #ececec);
+        color: var(--bs-secondary-color, #6c757d);
         border-radius: 999px;
         width: 24px;
         height: 24px;
@@ -549,11 +553,21 @@
         width: 40px;
         height: 40px;
         border-radius: 8px;
-        background-color: #e7f1ff;
-        color: #0d6efd;
+        background-color: var(--bs-primary-bg-subtle, rgba(13, 110, 253, 0.15));
+        color: var(--bs-primary);
+    }
+    .workflow-select-heading,
+    .workflow-select-card-title {
+        color: var(--bs-body-color);
+    }
+    .workflow-select-card {
+        background-color: var(--bs-secondary-bg, transparent);
     }
     .workflow-select-card-clickable:hover {
-        background-color: rgba(0, 0, 0, 0.03);
+        background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.04));
+    }
+    .workflow-empty-icon-wrap {
+        background-color: var(--bs-secondary-bg, transparent);
     }
     .cursor-pointer {
         cursor: pointer;
