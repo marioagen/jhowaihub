@@ -456,7 +456,6 @@ namespace WoopiAiHub.Application.Services.Automation
             var nextStepOrder = card.Step.Order + 1;
             var nextStep = await _stepRepository.FindByOrderAndWorkflowId(nextStepOrder, card.Step.WorkflowId);
 
-            // Advance at least once to the next step, then keep advancing while the next step is also IA profile.
             Step? lastAdvancedStep = null;
             do
             {
