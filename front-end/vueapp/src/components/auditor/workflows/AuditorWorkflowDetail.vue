@@ -20,7 +20,7 @@
 
         <!-- Detail content when workflow selected -->
         <template v-else>
-            <div class="p-3 d-flex flex-column flex-grow-1 min-h-0">
+            <div class="workflow-detail-content p-3 d-flex flex-column flex-grow-1 min-h-0">
                 <!-- 1. Summary cards -->
                 <div class="row g-2 mb-3">
                     <div class="col-4">
@@ -102,7 +102,7 @@
                 </div>
 
                 <!-- 3. Timeline Processual -->
-                <div class="d-flex flex-column flex-grow-1 min-h-0">
+                <div class="workflow-timeline-section d-flex flex-column flex-grow-1 min-h-0">
                     <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
                         <h6 class="mb-0 fw-bold d-flex align-items-center gap-1">
                             <LucideIcon
@@ -204,7 +204,9 @@
                         </div>
                     </div>
 
-                    <div class="workflow-timeline-list overflow-auto flex-grow-1 min-h-0">
+                    <div
+                        class="workflow-timeline-list overflow-auto flex-grow-1 min-h-0 d-flex flex-column"
+                    >
                         <div
                             v-for="entry in displayedTimelineEntries"
                             :key="entry.id"
@@ -268,18 +270,18 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div
-                        v-if="showTimelineLoadMore"
-                        class="flex-shrink-0 pt-2"
-                    >
-                        <button
-                            type="button"
-                            class="btn btn-outline-primary btn-sm w-100"
-                            @click="timelineDisplayedLimit += 3"
+                        <div
+                            v-if="showTimelineLoadMore"
+                            class="mt-2 mb-3 text-center"
                         >
-                            Load more
-                        </button>
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary btn-sm"
+                                @click="loadMoreTimeline"
+                            >
+                                Carregar mais
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -513,7 +515,7 @@
                 timelineSearch: "",
                 selectedStageId: "",
                 selectedActionId: "",
-                timelineDisplayedLimit: 3,
+                timelineDisplayedLimit: 10,
             };
         },
         computed: {
@@ -575,10 +577,13 @@
                 return this.filteredTimelineEntries.slice(0, this.timelineDisplayedLimit);
             },
             showTimelineLoadMore() {
-                return (
-                    this.filteredTimelineEntries.length > 3 &&
-                    this.timelineDisplayedLimit < this.filteredTimelineEntries.length
-                );
+                const total = this.filteredTimelineEntries.length;
+                return total > 10 && this.timelineDisplayedLimit < total;
+            },
+        },
+        methods: {
+            loadMoreTimeline() {
+                this.timelineDisplayedLimit += 10;
             },
         },
         watch: {
@@ -586,10 +591,10 @@
                 handler(w) {
                     if (w) {
                         this.timelineEntries = [...MOCK_TIMELINE_ENTRIES];
-                        this.timelineDisplayedLimit = 3;
                     } else {
                         this.timelineEntries = [];
                     }
+                    this.timelineDisplayedLimit = 10;
                 },
                 immediate: true,
             },
@@ -626,9 +631,19 @@
     .workflow-stage-arrow {
         background-color: var(--bs-secondary-bg, #f8f9fa);
     }
-    .workflow-timeline-list {
+    .workflow-detail-content {
+        flex: 1 1 0;
         min-height: 0;
-        max-height: calc(100vh - 520px);
+        overflow: hidden;
+    }
+    .workflow-timeline-section {
+        flex: 1 1 0;
+        min-height: 0;
+        overflow: hidden;
+    }
+    .workflow-timeline-list {
+        flex: 1 1 0;
+        min-height: 0;
     }
     .workflow-timeline-card {
         background-color: transparent;

@@ -220,9 +220,11 @@
                             />
                         </div>
                     </div>
-                    <div class="audit-history-list overflow-auto flex-grow-1 px-3 pb-3">
+                    <div
+                        class="audit-history-list overflow-auto flex-grow-1 px-3 pb-3 d-flex flex-column min-h-0"
+                    >
                         <div
-                            v-for="entry in auditHistoryEntries"
+                            v-for="entry in displayedEntries"
                             :key="entry.id"
                             class="audit-history-card rounded-2 p-2 mt-2 mb-2 border"
                         >
@@ -259,6 +261,18 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div
+                            v-if="showHistoryLoadMore"
+                            class="mt-2 mb-3 text-center"
+                        >
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary btn-sm"
+                                @click="loadMoreHistory"
+                            >
+                                Carregar mais
+                            </button>
                         </div>
                     </div>
                 </template>
@@ -381,9 +395,11 @@
                         />
                     </div>
                 </div>
-                <div class="audit-history-list overflow-auto flex-grow-1 px-3 pb-3">
+                <div
+                    class="audit-history-list overflow-auto flex-grow-1 px-3 pb-3 d-flex flex-column min-h-0"
+                >
                     <div
-                        v-for="entry in auditHistoryEntries"
+                        v-for="entry in displayedEntries"
                         :key="entry.id"
                         class="audit-history-card rounded-2 p-2 mt-2 mb-2 border"
                     >
@@ -420,6 +436,18 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div
+                        v-if="showHistoryLoadMore"
+                        class="mt-2 mb-3 text-center"
+                    >
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary btn-sm"
+                            @click="loadMoreHistory"
+                        >
+                            Carregar mais
+                        </button>
                     </div>
                 </div>
             </template>
@@ -485,6 +513,7 @@
         data() {
             return {
                 detailLoading: false,
+                historyDisplayedLimit: 10,
             };
         },
         computed: {
@@ -495,8 +524,18 @@
             hasMultipleWorkflows() {
                 return this.documentWorkflows.length > 1;
             },
+            displayedEntries() {
+                return (this.auditHistoryEntries || []).slice(0, this.historyDisplayedLimit);
+            },
+            showHistoryLoadMore() {
+                const total = (this.auditHistoryEntries || []).length;
+                return total > 10 && this.historyDisplayedLimit < total;
+            },
         },
         methods: {
+            loadMoreHistory() {
+                this.historyDisplayedLimit += 10;
+            },
             onSelectWorkflow(workflow) {
                 const cardId = this.selectedDocument?.id;
                 if (!cardId || !workflow?.id) return;
@@ -511,9 +550,11 @@
         watch: {
             selectedDocument() {
                 this.detailLoading = false;
+                this.historyDisplayedLimit = 10;
             },
             selectedWorkflowId() {
                 if (!this.selectedWorkflowId) this.detailLoading = false;
+                this.historyDisplayedLimit = 10;
             },
         },
     };
@@ -530,8 +571,8 @@
         min-height: 50vh;
     }
     .audit-history-list {
+        flex: 1 1 0;
         min-height: 0;
-        max-height: calc(100vh - 320px);
     }
     .audit-history-card {
         background-color: transparent;
