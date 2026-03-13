@@ -9,7 +9,7 @@
         <template v-else>
             <div class="audit-list-wrapper d-flex flex-column flex-grow-1 min-h-0">
                 <div
-                    v-if="filteredAuditItems.length === 0"
+                    v-if="auditCardList.length === 0"
                     class="audit-list-empty text-muted small text-center py-5"
                 >
                     No audit cards to show.
@@ -19,7 +19,7 @@
                     class="audit-list overflow-auto flex-grow-1 min-h-0"
                 >
                     <div
-                        v-for="item in displayedAuditItems"
+                        v-for="item in auditCardList"
                         :key="item.cardId"
                         class="audit-list-item rounded-2 p-2 mb-2 cursor-pointer"
                         :class="{
@@ -97,73 +97,34 @@
             BadgeComponent,
             LoadingComponent,
         },
-        props: {
-            /** Current selection from parent (Section); used to highlight the active row */
-            selectedDocument: {
-                type: Object,
-                default: null,
-            },
-            /** Filter params from Section (set by Filters); when Section updates this, it calls getData again */
-            filterParams: {
-                type: Object,
-                default: () => ({ search: "", statusId: "" }),
-            },
-        },
         emits: ["select-document"],
         data() {
             return {
                 isLoading: false,
+                filters: {
+                    search: "",
+                    statusId: "",
+                },
                 auditCardList: [],
                 displayedLimit: 10,
             };
-        },
-        computed: {
-            filteredAuditItems() {
-                const list = this.auditCardList ?? [];
-                const search = (this.filterParams?.search || "").toLowerCase().trim();
-                const statusId = this.filterParams?.statusId || "";
-                return list.filter((item) => {
-                    const cardIdStr = item.cardId != null ? String(item.cardId) : "";
-                    const cardName = (item.cardName || "").toLowerCase();
-                    const workflowNames = (item.workflows || [])
-                        .map((w) => (w.name || "").toLowerCase())
-                        .join(" ");
-                    const matchesSearch =
-                        !search ||
-                        cardIdStr.toLowerCase().includes(search) ||
-                        cardName.includes(search) ||
-                        workflowNames.includes(search);
-                    const statusName = (item.statusName || "").toLowerCase();
-                    const matchesStatus = !statusId || statusName === statusId.toLowerCase();
-                    return matchesSearch && matchesStatus;
-                });
-            },
-            displayedAuditItems() {
-                return this.filteredAuditItems.slice(0, this.displayedLimit);
-            },
-            showLoadMoreButton() {
-                return (
-                    this.filteredAuditItems.length > 10 &&
-                    this.displayedLimit < this.filteredAuditItems.length
-                );
-            },
         },
         methods: {
             workflowsCount(item) {
                 return item.workflows.length;
             },
             workflowsLabel(item) {
-                const w = item.workflows;
-                if (!Array.isArray(w) || w.length === 0) return "—";
-                return w
-                    .map((x) => x.name)
+                const workflows = item.workflows;
+                if (!Array.isArray(workflows) || workflows.length === 0) return "—";
+                return workflows
+                    .map((workflow) => workflow.name)
                     .filter(Boolean)
                     .join(", ");
             },
             async getAuditCardsSummary() {
                 this.isLoading = true;
                 try {
-                    const params = this.filterParams || {};
+                    const params = this.filters;
                     const response = await AuditorsService.getCardsAuditSummary(params);
                     console.log(response);
                     if (response.error) {
@@ -184,10 +145,8 @@
                 }
             },
             loadMore() {
-                this.displayedLimit = Math.min(
-                    this.displayedLimit + 10,
-                    this.filteredAuditItems.length
-                );
+                this.displayedLimit = Math.min(this.displayedLimit + 10, this.auditCardList.length);
+                this.getAuditCardsSummary();
             },
         },
         async created() {
