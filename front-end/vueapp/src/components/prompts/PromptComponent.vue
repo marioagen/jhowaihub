@@ -157,6 +157,27 @@
                 </p>
             </div>
             <div class="card-footer">
+                <div class="owner-info d-flex align-items-center">
+                    <span class="owner-label">{{ $t("common.owner") }}:</span>
+                    <span
+                        v-if="item.ownerName || item.ownerEmail"
+                        class="owner-avatar-wrapper"
+                        v-tooltip="ownerTooltip(item)"
+                    >
+                        <AvatarComponent
+                            :name="item.ownerName || item.ownerEmail || ''"
+                            variant="secondary"
+                            :size="28"
+                        />
+                    </span>
+                    <span
+                        v-else
+                        class="owner-avatar-placeholder"
+                        v-tooltip="'-'"
+                    >
+                        —
+                    </span>
+                </div>
                 <div class="date-info float-end">
                     <i class="far fa-clock mt-1"></i>
                     <span>
@@ -197,6 +218,7 @@
 </template>
 <script>
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import AvatarComponent from "@/components/global/AvatarComponent.vue";
     import PromptService from "@/services/prompts/PromptsService";
     export default {
         name: "PromptComponent",
@@ -233,8 +255,16 @@
         },
         components: {
             ConfirmModal,
+            AvatarComponent,
         },
         methods: {
+            ownerTooltip(item) {
+                if (!item.ownerName && !item.ownerEmail) return "-";
+                const parts = [];
+                if (item.ownerName) parts.push(item.ownerName);
+                if (item.ownerEmail) parts.push(item.ownerEmail);
+                return parts.join("\n");
+            },
             checkAll(event) {
                 const checkboxes = document.querySelectorAll(".checkbox");
                 let checkboxIds = [];
@@ -537,6 +567,32 @@
     .card-footer {
         background-color: initial;
         border-top: none;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .owner-info {
+        flex-shrink: 0;
+    }
+
+    .owner-label {
+        font-size: 0.85rem;
+        color: var(--color-body-content);
+        margin-right: 0.35rem;
+    }
+
+    .owner-avatar-wrapper {
+        display: inline-flex;
+        cursor: default;
+    }
+
+    .owner-avatar-placeholder {
+        font-size: 0.9rem;
+        color: var(--color-body-content);
+        opacity: 0.7;
     }
 
     .card-list {
