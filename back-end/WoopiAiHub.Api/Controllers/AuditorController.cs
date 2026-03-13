@@ -92,27 +92,33 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns all users for auditing. Query params can be used for filtering (managed later).
+        /// Returns user-based audit entries (one row per user) with UserId, UserName, Teams, Profiles, WorkflowCount, LogCount. Load-more pattern: skip 0 = first 10 users, skip 10 = next 10, etc.
         /// </summary>
+        /// <param name="skip">Number of users to skip (default 0). Use for load-more: 0, 10, 20, ...</param>
+        /// <param name="userName">Optional. Filter by user name (contains, case-sensitive).</param>
+        /// <param name="teamId">Optional. Filter to users that have at least one audit entry in a workflow with this team.</param>
         [HttpGet("Users")]
-        [SwaggerOperation("Endpoint that returns all users for the auditor")]
-        [ProducesResponseType(typeof(ICollection<UserDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindUserAuditSummary()
+        [SwaggerOperation("Returns user audit list for the auditor with load-more and filters")]
+        [ProducesResponseType(typeof(ICollection<UserAuditorSummaryDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindUserAuditSummary([FromQuery] int skip = 0, [FromQuery] string? userName = null, [FromQuery] int? teamId = null)
         {
-            var result = await _auditorServices.FindUserAuditSummaryAsync();
+            var result = await _auditorServices.FindUserAuditSummaryAsync(skip, userName, teamId);
             return Ok(result);
         }
 
         /// <summary>
-        /// Returns a single user by id for auditing.
+        /// Returns full audit details for a user: UserId, UserName, Teams, Profiles, log counts (total and by action type), and list of actions. Returns 404 when the user has no audit entries.
         /// </summary>
-        [HttpGet("User/{id:guid}")]
-        [SwaggerOperation("Endpoint that returns a user by id for the auditor")]
-        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        /// <param name="userId">User id.</param>
+        /// <param name="actionTypeCode">Optional. Filter by action type (AuditCardActionType enum value as int).</param>
+        /// <param name="orderDescending">Order by Created: true = newest first (default), false = oldest first.</param>
+        [HttpGet("User/{userId:guid}")]
+        [SwaggerOperation("Returns user audit details by user id with optional filters and sort")]
+        [ProducesResponseType(typeof(UserAuditorDetailsDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> FindUserAuditDetails(Guid id)
+        public async Task<IActionResult> FindUserAuditDetails(Guid userId, [FromQuery] int? actionTypeCode = null, [FromQuery] bool orderDescending = true)
         {
-            var result = await _auditorServices.FindUserAuditDetailsAsync(id);
+            var result = await _auditorServices.FindUserAuditDetailsAsync(userId, actionTypeCode, orderDescending);
             if (result is null)
                 return NotFound();
             return Ok(result);

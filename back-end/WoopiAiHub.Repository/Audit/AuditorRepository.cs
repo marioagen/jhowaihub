@@ -253,30 +253,168 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns all users. Query can be refined later.
+        /// Returns user-based audit entries (one row per user) with UserId, UserName, Teams, Profiles, WorkflowCount, LogCount.
+        /// Source: AuditCards grouped by UserId. Load-more pattern: skip 0 = first 10 users, skip 10 = next 10, etc.
+        /// Optional filters: userName (contains on User.Name), teamId (user has at least one audit entry in a workflow with that team).
         /// </summary>
-        public Task<ICollection<UserDto>> FindUserAuditSummaryAsync()
+        public async Task<ICollection<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int skip = 0, string? userName = null, int? teamId = null)
         {
-            return _userRepository.FindAllAsync();
+            const int take = 10;
+            var query = _context.AuditCards.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(userName))
+            {
+                var nameTerm = userName.Trim();
+                query = query.Where(a => a.User != null && a.User.Name.Contains(nameTerm));
+            }
+
+            if (teamId.HasValue)
+                query = query.Where(a => a.Workflow != null && a.Workflow.Teams.Any(t => t.Id == teamId.Value));
+
+            var userIds = await query
+                .Select(a => a.UserId)
+                .Distinct()
+                .OrderBy(id => id)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+
+            if (userIds.Count == 0)
+                return new List<UserAuditorSummaryDto>();
+
+            var auditRows = await _context.AuditCards
+                .AsNoTracking()
+                .Where(a => userIds.Contains(a.UserId))
+                .Select(a => new
+                {
+                    a.UserId,
+                    UserName = a.User != null ? a.User.Name : string.Empty,
+                    a.WorkflowId,
+                    Teams = a.Workflow != null && a.Workflow.Teams != null
+                        ? a.Workflow.Teams.Select(t => new AuditorTeamItemDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
+                        : (IEnumerable<AuditorTeamItemDto>)new List<AuditorTeamItemDto>(),
+                    ProfileId = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
+                        ? (int?)a.Card.Step.Profile.Id
+                        : (int?)null,
+                    ProfileName = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
+                        ? a.Card.Step.Profile.Name ?? string.Empty
+                        : string.Empty
+                })
+                .ToListAsync();
+
+            var groupedByUser = auditRows
+                .GroupBy(a => a.UserId)
+                .OrderBy(g => g.Key)
+                .ToList();
+
+            return groupedByUser.Select(g =>
+            {
+                var first = g.First();
+                var allTeams = g.SelectMany(a => a.Teams);
+                var distinctTeams = allTeams
+                    .GroupBy(t => new { t.TeamId, t.TeamName })
+                    .Select(x => x.First())
+                    .ToList();
+                var distinctProfiles = g
+                    .Where(a => a.ProfileId.HasValue)
+                    .Select(a => new AuditorProfileItemDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
+                    .GroupBy(p => new { p.ProfileId, p.ProfileName })
+                    .Select(x => x.First())
+                    .ToList();
+                return new UserAuditorSummaryDto
+                {
+                    UserId = g.Key,
+                    UserName = first.UserName,
+                    Teams = distinctTeams,
+                    Profiles = distinctProfiles,
+                    WorkflowCount = g.Select(a => a.WorkflowId).Distinct().Count(),
+                    LogCount = g.Count()
+                };
+            }).ToList();
         }
 
         /// <summary>
-        /// Returns a single user by id.
+        /// Returns full audit details for a single user by userId: UserId, UserName, Teams, Profiles, LogCountTotal, LogCountByActionType, and Actions list.
+        /// Returns null when the user has no audit entries. Optional: filter by action type code; order by Created desc (newest first) or asc.
         /// </summary>
-        public async Task<UserDto?> FindUserAuditDetailsAsync(Guid id)
+        public async Task<UserAuditorDetailsDto?> FindUserAuditDetailsAsync(Guid userId, int? actionTypeCode = null, bool orderDescending = true)
         {
-            return await _context.Users
+            var query = _context.AuditCards
                 .AsNoTracking()
-                .Where(u => u.Id == id)
-                .Select(u => new UserDto
+                .Where(a => a.UserId == userId);
+
+            if (actionTypeCode.HasValue)
+                query = query.Where(a => (int)a.ActionType == actionTypeCode.Value);
+
+            var projected = query
+                .Select(a => new
                 {
-                    Id = u.Id,
-                    Name = u.Name,
-                    Email = u.Email,
-                    IsActive = u.IsActive,
-                    Created = u.Created
+                    a.UserId,
+                    UserName = a.User != null ? a.User.Name : string.Empty,
+                    a.WorkflowId,
+                    WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
+                    Teams = a.Workflow != null && a.Workflow.Teams != null
+                        ? a.Workflow.Teams.Select(t => new AuditorTeamItemDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
+                        : (IEnumerable<AuditorTeamItemDto>)new List<AuditorTeamItemDto>(),
+                    ProfileId = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
+                        ? (int?)a.Card.Step.Profile.Id
+                        : (int?)null,
+                    ProfileName = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
+                        ? a.Card.Step.Profile.Name ?? string.Empty
+                        : string.Empty,
+                    a.ActionType,
+                    a.CardId,
+                    CardName = a.Card != null ? a.Card.Name : string.Empty,
+                    a.Created
+                });
+
+            var auditRows = await (orderDescending
+                ? projected.OrderByDescending(a => a.Created)
+                : projected.OrderBy(a => a.Created))
+                .ToListAsync();
+
+            if (auditRows.Count == 0)
+                return null;
+
+            var first = auditRows.First();
+            var distinctTeams = auditRows
+                .SelectMany(a => a.Teams)
+                .GroupBy(t => new { t.TeamId, t.TeamName })
+                .Select(x => x.First())
+                .ToList();
+            var distinctProfiles = auditRows
+                .Where(a => a.ProfileId.HasValue)
+                .Select(a => new AuditorProfileItemDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
+                .GroupBy(p => new { p.ProfileId, p.ProfileName })
+                .Select(x => x.First())
+                .ToList();
+            var countByActionType = auditRows
+                .GroupBy(a => (int)a.ActionType)
+                .Select(g => new UserAuditorActionTypeCountDto { ActionTypeCode = g.Key, Count = g.Count() })
+                .OrderBy(x => x.ActionTypeCode)
+                .ToList();
+            var actions = auditRows
+                .Select(a => new UserAuditorActionDto
+                {
+                    CardId = a.CardId,
+                    CardName = a.CardName,
+                    ActionType = a.ActionType.ToString(),
+                    WorkflowId = a.WorkflowId,
+                    WorkflowName = a.WorkflowName,
+                    Created = a.Created
                 })
-                .FirstOrDefaultAsync();
+                .ToList();
+
+            return new UserAuditorDetailsDto
+            {
+                UserId = first.UserId,
+                UserName = first.UserName,
+                Teams = distinctTeams,
+                Profiles = distinctProfiles,
+                LogCountTotal = auditRows.Count,
+                LogCountByActionType = countByActionType,
+                Actions = actions
+            };
         }
     }
 }

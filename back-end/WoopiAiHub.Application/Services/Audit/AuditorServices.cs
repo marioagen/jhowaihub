@@ -29,10 +29,10 @@ namespace WoopiAiHub.Application.Services.Audit
         public Task<AuditorWorkflowResponseDto?> FindWorkflowAuditDetailsAsync(int workflowId)
             => _auditorRepository.FindWorkflowAuditDetailsAsync(workflowId);
 
-        public Task<ICollection<UserDto>> FindUserAuditSummaryAsync()
-            => _auditorRepository.FindUserAuditSummaryAsync();
+        public Task<ICollection<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int skip = 0, string? userName = null, int? teamId = null)
+            => _auditorRepository.FindUserAuditSummaryAsync(skip, userName, teamId);
 
-        public Task<UserDto?> FindUserAuditDetailsAsync(Guid id)
-            => _auditorRepository.FindUserAuditDetailsAsync(id);
+        public Task<UserAuditorDetailsDto?> FindUserAuditDetailsAsync(Guid userId, int? actionTypeCode = null, bool orderDescending = true)
+            => _auditorRepository.FindUserAuditDetailsAsync(userId, actionTypeCode, orderDescending);
     }
 }
