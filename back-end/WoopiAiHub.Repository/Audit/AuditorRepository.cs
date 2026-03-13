@@ -13,6 +13,9 @@ namespace WoopiAiHub.Repository.Audit
         private readonly ApplicationDbContext _context;
         private readonly IUserRepository _userRepository;
 
+        /// <summary>
+        /// Initializes the auditor repository with the application database context and user repository.
+        /// </summary>
         public AuditorRepository(
             ApplicationDbContext context,
             IUserRepository userRepository)
@@ -105,7 +108,7 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, Profile. Source: AuditCards grouped by WorkflowId. Limited to 10 entries. Filters and take parameter to be added later.
+        /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, and Profile. Limited to the 10 most recently audited workflows.
         /// </summary>
         public async Task<ICollection<AuditorWorkflowListItemDto>> FindWorkflowAuditSummaryAsync()
         {
