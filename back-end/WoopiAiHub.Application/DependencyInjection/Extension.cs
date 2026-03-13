@@ -90,6 +90,11 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddHostedService<ApiOutputConsumer>();
             services.AddHostedService<ExternalFileUploadConsumer>();
             services.AddHostedService<OcrDeadLetterConsumer>();
+            services.AddHostedService<EmbeddingsDeadLetterConsumer>();
+            services.AddHostedService<PromptDeadLetterConsumer>();
+            services.AddHostedService<ApiDeadLetterConsumer>();
+            services.AddHostedService<QuizDeadLetterConsumer>();
+            services.AddHostedService<N8NDeadLetterConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();

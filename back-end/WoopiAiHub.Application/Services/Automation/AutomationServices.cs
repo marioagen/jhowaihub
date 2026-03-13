@@ -225,6 +225,28 @@ namespace WoopiAiHub.Application.Services.Automation
         }
 
         /// <summary>
+        /// Initiates reprocessing of the next pending step tool for the specified automation step.
+        /// </summary>
+        /// <remarks>This method locates the next pending step tool for the given step and triggers its
+        /// execution. If no pending step tool is found, no action is taken.</remarks>
+        /// <param name="automationServicesDto">An object containing information about the automation service, including the step identifier to reprocess.
+        /// The <paramref name="StepId"/> property must be set.</param>
+        /// <returns>A task that represents the asynchronous reprocessing operation.</returns>
+        /// <exception cref="AppException">Thrown if <paramref name="automationServicesDto.StepId"/> is not set, indicating that a step identifier is
+        /// required for reprocessing.</exception>
+        public async Task ReprocessStepTool(AutomationServicesDto automationServicesDto)
+        {
+            if (!automationServicesDto.StepId.HasValue)
+            {
+                throw new AppException(ErrorCode.InvalidValue, "StepId is required for reprocessing", null);
+            }
+
+            var stepTool = await _stepToolRepository.FindNextPending(automationServicesDto.StepId.Value, automationServicesDto.CardId);
+            if (stepTool != null)
+                await RunStepToolExecutionAsync(stepTool, automationServicesDto, 0);
+        }
+
+        /// <summary>
         /// Executes the specified step tool for the given card asynchronously.
         /// </summary>
         /// <remarks>This method retrieves the execution record for the specified step tool and card. If

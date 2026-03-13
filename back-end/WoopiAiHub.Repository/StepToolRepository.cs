@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
@@ -256,6 +257,28 @@ namespace WoopiAiHub.Repository
                                             .ThenInclude(s => s!.ToolType)
                                            .Include(st => st.Dependencies)
                                            .FirstOrDefaultAsync(s => s.StepId == stepId && s.Order == order);
+        }
+
+        /// <summary>
+        /// Finds the next pending tool for the specified step, ordered by execution sequence.
+        /// </summary>
+        /// <remarks>The returned StepTool includes related dependencies, executions, and tool
+        /// information. Only tools with at least one pending execution are considered. This method is intended for
+        /// scenarios where steps may have multiple tools and execution order matters.</remarks>
+        /// <param name="stepId">The identifier of the step for which to locate the next pending tool.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the next pending StepTool for
+        /// the step, or null if none are pending.</returns>
+        public async Task<StepTool?> FindNextPending(int stepId, int cardId)
+        {
+            return await _context.StepTools
+                .Include(st => st.DependsOnStepTool)
+                .Include(st => st.Dependencies)
+                .Include(st => st.Executions)
+                .Include(st => st.Tool)
+                    .ThenInclude(t => t!.ToolType)
+                .Where(st => st.StepId == stepId && st.Executions.Any(e => e.CardId == cardId && e.Status == StatusExecution.Pending))
+                .OrderBy(st => st.Order)
+                .FirstOrDefaultAsync();
         }
 
         /// <summary>

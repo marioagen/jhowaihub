@@ -488,7 +488,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns>A task that represents the asynchronous operation.</returns>
         /// <exception cref="AppException">Thrown if the card with the specified identifier is not found, if the fail status is not found, or if an
         /// error occurs during the update process.</exception>
-        public async Task SetFailingCard(int cardId, string email)
+        public async Task SetFailingCard(int cardId, string? email)
         {
             var card = await _cardRepository.FindByIdWithExecutions(cardId) ?? throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
             var failStatus = await _statusRepository.FindByName(StatusNames.Fail) ?? throw new AppException(ErrorCode.NotFound, $"Status '{StatusNames.Fail}' not found", null);
@@ -506,7 +506,10 @@ namespace WoopiAiHub.Application.Services
                     await _stepToolExecutionRepository.UpdateAsync(execution);
                 }
 
-                await _hubNotifier.CardProgessAsync(email, card.Id, 0.0, card.StepId, string.Empty, true);
+                if (!string.IsNullOrEmpty(email))
+                {
+                    await _hubNotifier.CardProgessAsync(email, card.Id, 0.0, card.StepId, string.Empty, true);
+                }
 
                 _unitOfWork.Commit();
             }
@@ -547,7 +550,7 @@ namespace WoopiAiHub.Application.Services
                 card.StepId
             );
 
-            await _automationServices.StartExecutionByCardAsync(automationServicesDto);
+            await _automationServices.ReprocessStepTool(automationServicesDto);
             return true;
         }
     }
