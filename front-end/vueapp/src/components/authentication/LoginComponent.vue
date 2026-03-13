@@ -3,7 +3,7 @@
         <div class="container" style="padding: 0">
             <div class="row justify-content-center">
                 <div class="text-center">
-                    <img src="../../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px; height: 50px;"
+                    <img :src="logoSrc" style="padding-bottom: 10px; height: 50px;"
                         alt="WOOPI AI" />
                 </div>
                 <div class="card mb-3" style="max-width: 25rem;">
@@ -128,6 +128,14 @@ export default {
             tenants: [],
             typeLogin: ""
         };
+    },
+    computed: {
+        logoSrc() {
+            const theme = this.$store.state.theme || localStorage.getItem("theme") || "css-theme-light";
+            return theme === "css-theme-dark"
+                ? require("@/assets/img/woopiai-logo-dark.png")
+                : require("@/assets/img/woopiai-logo-light.png");
+        },
     },
     methods: {
         continueLogin(tenant, typeLogin) {

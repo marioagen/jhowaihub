@@ -12,14 +12,14 @@
             >
                 <img
                     v-if="isCollapsed"
-                    src="./../../assets/img/woopiai-hub-small-logo.png"
+                    :src="logoSmallSrc"
                     :title="$t('common.home')"
                     width="30"
                     height="30"
                 />
                 <img
                     v-else
-                    src="./../../assets/img/woopiai-hub-logo.png"
+                    :src="logoSrc"
                     :title="$t('common.home')"
                     height="23"
                     alt="WOOPI AI"
@@ -194,6 +194,20 @@
             };
         },
         computed: {
+            isDarkMode() {
+                const theme = this.$store.state.theme || localStorage.getItem("theme") || "css-theme-light";
+                return theme === "css-theme-dark";
+            },
+            logoSrc() {
+                return this.isDarkMode
+                    ? require("@/assets/img/woopiai-logo-dark.png")
+                    : require("@/assets/img/woopiai-logo-light.png");
+            },
+            logoSmallSrc() {
+                return this.isDarkMode
+                    ? require("@/assets/img/woopiai-logo-dark.png")
+                    : require("@/assets/img/woopiai-logo-light.png");
+            },
             filteredMenuItems() {
                 return this.menuItems.filter((item) => {
                     if (!item.permission) {

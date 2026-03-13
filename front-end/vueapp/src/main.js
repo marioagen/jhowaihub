@@ -22,12 +22,14 @@ import "@/assets/webfont/fontawesome-5.15.4/css/all.min.css";
 import "@vueform/multiselect/themes/default.css";
 
 const savedTheme = localStorage.getItem("theme");
-document.documentElement.className = savedTheme === "css-theme-dark" ? "css-theme-dark" : "css-theme-light";
+const themeClass = savedTheme === "css-theme-dark" ? "css-theme-dark" : "css-theme-light";
+document.documentElement.className = themeClass;
 
 const app = createApp(App);
 app.use(FloatingVue);
 app.use(router);
 app.use(store);
+store.commit("setTheme", themeClass);
 app.use(i18n);
 app.use(
     VueGtag,
