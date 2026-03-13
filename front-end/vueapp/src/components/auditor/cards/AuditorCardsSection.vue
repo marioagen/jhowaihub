@@ -5,8 +5,9 @@
                 <div class="card-body d-flex flex-column auditor-summary-card-body">
                     <AuditorCardFilters @filter="filterData" />
                     <AuditorCardSummary
-                        @select-document="onSelectDocument"
                         ref="AuditorCardSummary"
+                        :filters="filterParams"
+                        @select-document="onDocumentSelection"
                     />
                 </div>
             </div>
@@ -50,10 +51,9 @@
         methods: {
             filterData(filters) {
                 this.filterParams = filters;
-                this.$refs.AuditorCardSummary.filters = filters;
-                this.$refs.AuditorCardSummary.getAuditCardsSummary();
+                this.$refs.AuditorCardSummary?.refreshWithCurrentFilters();
             },
-            onSelectDocument(document) {
+            onDocumentSelection(document) {
                 this.selectedDocument = document;
             },
         },

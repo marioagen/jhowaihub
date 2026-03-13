@@ -27,7 +27,7 @@
                                 selectedDocument && selectedDocument.cardId === item.cardId,
                             border: !selectedDocument || selectedDocument.cardId !== item.cardId,
                         }"
-                        @click="$emit('select-document', item)"
+                        @click="selectDocument(item)"
                     >
                         <div class="d-flex align-items-start gap-2">
                             <LucideIcon
@@ -97,14 +97,17 @@
             BadgeComponent,
             LoadingComponent,
         },
+        props: {
+            filters: {
+                type: Object,
+                default: () => ({ search: "", statusId: "" }),
+            },
+        },
         emits: ["select-document"],
         data() {
             return {
                 isLoading: false,
-                filters: {
-                    search: "",
-                    statusId: "",
-                },
+                selectedDocument: null,
                 auditCardList: [],
                 displayedLimit: 10,
             };
@@ -121,12 +124,18 @@
                     .filter(Boolean)
                     .join(", ");
             },
+            selectDocument(item) {
+                this.selectedDocument = item;
+                this.$emit("select-document", item);
+            },
             async getAuditCardsSummary() {
                 this.isLoading = true;
                 try {
-                    const params = this.filters;
+                    const params = {
+                        ...this.filters,
+                        take: this.displayedLimit,
+                    };
                     const response = await AuditorsService.getCardsAuditSummary(params);
-                    console.log(response);
                     if (response.error) {
                         return this.$notify({
                             title: "audit-cards.title",
@@ -145,8 +154,17 @@
                 }
             },
             loadMore() {
-                this.displayedLimit = Math.min(this.displayedLimit + 10, this.auditCardList.length);
+                this.displayedLimit += 10;
                 this.getAuditCardsSummary();
+            },
+            refreshWithCurrentFilters() {
+                this.displayedLimit = 10;
+                this.getAuditCardsSummary();
+            },
+        },
+        computed: {
+            showLoadMoreButton() {
+                return this.auditCardList.length === this.displayedLimit;
             },
         },
         async created() {

@@ -98,7 +98,6 @@
             },
             cleanInput() {
                 this.filters.search = "";
-                this.filters.statusId = "";
                 this.$emit("filter", this.filters);
             },
         },
