@@ -16,6 +16,7 @@
             <div class="card rounded-3 auditor-detail-card">
                 <AuditorCardDetail
                     :selected-document="selectedDocument"
+                    :selected-document-workflows="selectedDocument?.workflows ?? []"
                     ref="AuditorCardDetail"
                 />
             </div>
@@ -55,6 +56,9 @@
             },
             onDocumentSelection(document) {
                 this.selectedDocument = document;
+                this.$nextTick(() => {
+                    this.$refs.AuditorCardDetail?.refreshWithCurrentDocument();
+                });
             },
         },
     };
