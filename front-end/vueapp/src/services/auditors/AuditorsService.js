@@ -1,76 +1,40 @@
 import api from "@/services/api";
 
 export default {
-    getAuditorDocuments(params) {
+    getCardsAuditSummary(params = {}) {
         return api
-            .get("/Auditor/Documents", { params: params })
-            .then(({ data }) => {
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                };
-            });
+            .get("/Auditor/Cards", { params })
+            .then(({ data }) => data)
+            .catch((error) => ({ error: error }));
     },
-    getAuditorWorkflows(params) {
+    getCardAuditDetails(cardId, workflowId, params = {}) {
         return api
-            .get("/Auditor/Workflows", { params: params })
-            .then(({ data }) => {
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                };
-            });
+            .get(`/Auditor/Cards/${cardId}/Workflows/${workflowId}`, { params })
+            .then(({ data }) => data)
+            .catch((error) => ({ error: error }));
     },
-    getAuditorUsers(params) {
+    getWorkflowAuditSummary() {
         return api
-            .get("/Auditor/Users", { params: params })
-            .then(({ data }) => {
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                };
-            });
+            .get("/Auditor/Workflows")
+            .then(({ data }) => data)
+            .catch((error) => ({ error: error }));
     },
-    getAuditorDocument(id) {
-        return api
-            .get(`/Auditor/Document/${id}`)
-            .then(({ data }) => {
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                };
-            });
-    },
-    getAuditorWorkflow(id) {
+    getWorkflowAuditDetails(id) {
         return api
             .get(`/Auditor/Workflow/${id}`)
-            .then(({ data }) => {
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                };
-            });
+            .then(({ data }) => data)
+            .catch((error) => ({ error: error }));
     },
-    getAuditorUser(id) {
+    getUserAuditSummary(params = {}) {
         return api
-            .get(`/Auditor/User/${id}`)
-            .then(({ data }) => {
-                return data;
-            })
-            .catch((error) => {
-                return {
-                    error: error,
-                };
-            });
+            .get("/Auditor/Users", { params })
+            .then(({ data }) => data)
+            .catch((error) => ({ error: error }));
+    },
+    getUserAuditDetails(userId, params = {}) {
+        return api
+            .get(`/Auditor/User/${userId}`, { params })
+            .then(({ data }) => data)
+            .catch((error) => ({ error: error }));
     },
 };
