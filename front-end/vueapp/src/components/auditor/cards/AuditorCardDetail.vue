@@ -34,12 +34,13 @@
                                 </span>
                                 <div class="min-w-0 flex-grow-1">
                                     <div class="workflow-select-card-title fw-semibold">
-                                        {{ selectedDocument.title }}
+                                        {{ selectedDocument.cardName }}
                                     </div>
                                     <div class="small text-muted">
                                         {{
-                                            selectedDocument.alterations ||
-                                            documentWorkflows.length + " esteiras"
+                                            selectedDocument.actionsCount != null
+                                                ? selectedDocument.actionsCount + " ação(ões)"
+                                                : documentWorkflows.length + " esteira(s)"
                                         }}
                                     </div>
                                 </div>
@@ -65,11 +66,18 @@
                                     {{ wf.name }}
                                 </div>
                                 <div class="small text-muted">
-                                    Etapa: {{ wf.stage }} · {{ wf.eventsCount }} eventos
+                                    <template v-if="wf.stage != null || wf.eventsCount != null">
+                                        Etapa: {{ wf.stage ?? "—" }} ·
+                                        {{ wf.eventsCount ?? "—" }} eventos
+                                    </template>
+                                    <template v-else>Workflow ID: {{ wf.id }}</template>
                                 </div>
-                                <div class="small text-muted">
-                                    Última ação: {{ wf.lastAction }}
-                                    <span class="ms-1">{{ wf.lastActionTimestamp }}</span>
+                                <div
+                                    v-if="wf.lastAction || wf.lastActionTimestamp"
+                                    class="small text-muted"
+                                >
+                                    Última ação: {{ wf.lastAction ?? "—" }}
+                                    <span class="ms-1">{{ wf.lastActionTimestamp ?? "" }}</span>
                                 </div>
                             </div>
                             <LucideIcon
@@ -110,7 +118,7 @@
                                     icon="History"
                                     :size="18"
                                 />
-                                Histórico - {{ selectedDocument.title }}
+                                Histórico - {{ selectedDocument.cardName }}
                                 <BadgeComponent
                                     :text="auditHistoryEntries.length"
                                     variant="secondary"
@@ -287,7 +295,7 @@
                                 icon="History"
                                 :size="18"
                             />
-                            Histórico - {{ selectedDocument.title }}
+                            Histórico - {{ selectedDocument.cardName }}
                             <BadgeComponent
                                 :text="auditHistoryEntries.length"
                                 variant="secondary"
@@ -537,8 +545,8 @@
                 this.historyDisplayedLimit += 10;
             },
             onSelectWorkflow(workflow) {
-                const cardId = this.selectedDocument?.id;
-                if (!cardId || !workflow?.id) return;
+                const cardId = this.selectedDocument?.cardId;
+                if (cardId == null || workflow?.id == null) return;
                 this.$emit("select-workflow", { cardId, workflowId: workflow.id });
                 this.detailLoading = true;
                 // Simulate API call; replace with actual call in parent if needed

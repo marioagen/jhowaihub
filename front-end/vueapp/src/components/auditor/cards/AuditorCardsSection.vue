@@ -115,15 +115,16 @@
         },
         computed: {
             stageFilterOptions() {
-                if (!this.selectedDocument || !this.selectedDocument.step) return [];
-                return this.selectedDocument.step.split(" • ").map((label, i) => ({
-                    value: String(i),
-                    label: label.trim(),
+                const w = this.selectedDocument?.workflows;
+                if (!Array.isArray(w) || w.length === 0) return [];
+                return w.map((wf) => ({
+                    value: String(wf.id),
+                    label: wf.name || String(wf.id),
                 }));
             },
             auditHistoryEntries() {
-                if (!this.selectedDocument || !this.selectedDocument.id) return [];
-                const list = this.auditHistoryByDocument[this.selectedDocument.id];
+                if (!this.selectedDocument || this.selectedDocument.cardId == null) return [];
+                const list = this.auditHistoryByDocument[this.selectedDocument.cardId];
                 return list || [];
             },
         },
@@ -145,7 +146,7 @@
             filterParams: {
                 handler(newVal, oldVal) {
                     if (oldVal && this.$refs.summaryRef) {
-                        this.$refs.summaryRef.getData();
+                        this.$refs.summaryRef.getAuditCardsSummary();
                     }
                 },
                 deep: true,

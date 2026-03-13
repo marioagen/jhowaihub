@@ -1,60 +1,70 @@
 <template>
     <div>
-        <!-- List (filters are in Section) -->
         <div
-            v-if="loading"
+            v-if="isLoading"
             class="audit-list-wrapper d-flex flex-column flex-grow-1 min-h-0 align-items-center justify-content-center py-5"
         >
             <LoadingComponent />
         </div>
         <template v-else>
             <div class="audit-list-wrapper d-flex flex-column flex-grow-1 min-h-0">
-                <div class="audit-list overflow-auto flex-grow-1 min-h-0">
+                <div
+                    v-if="filteredAuditItems.length === 0"
+                    class="audit-list-empty text-muted small text-center py-5"
+                >
+                    No audit cards to show.
+                </div>
+                <div
+                    v-else
+                    class="audit-list overflow-auto flex-grow-1 min-h-0"
+                >
                     <div
                         v-for="item in displayedAuditItems"
-                        :key="item.id"
+                        :key="item.cardId"
                         class="audit-list-item rounded-2 p-2 mb-2 cursor-pointer"
                         :class="{
                             'audit-list-item-selected border-start border-primary border-3':
-                                selectedDocument && selectedDocument.id === item.id,
-                            border: !selectedDocument || selectedDocument.id !== item.id,
+                                selectedDocument && selectedDocument.cardId === item.cardId,
+                            border: !selectedDocument || selectedDocument.cardId !== item.cardId,
                         }"
                         @click="$emit('select-document', item)"
                     >
                         <div class="d-flex align-items-start gap-2">
                             <LucideIcon
-                                :icon="item.icon"
+                                icon="FileText"
                                 :size="16"
                                 class="text-muted mt-1 flex-shrink-0"
                             />
                             <div class="min-w-0 flex-grow-1">
                                 <div class="d-flex align-items-center flex-wrap gap-1 mb-1">
                                     <span class="fw-semibold small text-break">
-                                        {{ item.title }}
+                                        {{ item.cardName }}
                                     </span>
                                     <BadgeComponent
-                                        :text="item.status"
-                                        :variant="item.statusVariant"
+                                        :text="item.statusName"
+                                        variant="secondary"
                                         size="sm"
                                         :clickable="false"
                                     />
                                     <BadgeComponent
-                                        v-if="item.workflowsCount"
-                                        :text="item.workflowsCount"
+                                        v-if="workflowsCount(item) > 1"
+                                        :text="workflowsCount(item)"
                                         variant="warning"
                                         size="sm"
                                         :clickable="false"
                                     />
                                 </div>
-                                <div class="small text-muted d-flex align-items-center gap-1 mb-0">
+                                <div
+                                    class="small text-primary d-flex align-items-center gap-1 mb-0"
+                                >
                                     <LucideIcon
                                         icon="Workflow"
                                         :size="12"
                                     />
-                                    {{ item.step }}
+                                    {{ workflowsLabel(item) }}
                                 </div>
                                 <div class="small text-muted">
-                                    {{ item.alterations }}
+                                    {{ item.actionsCount }} action(s)
                                 </div>
                             </div>
                         </div>
@@ -79,137 +89,7 @@
 <script>
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
-
-    const MOCK_AUDIT_ITEMS = [
-        {
-            id: "boleto-2345",
-            title: "Boleto #2345",
-            icon: "FileText",
-            status: "Ativo",
-            statusVariant: "primary",
-            step: "Análise Jurídica de Contratos • Protocolo",
-            alterations: "7 alterações",
-            workflowsCount: null,
-        },
-        {
-            id: "nota-5673",
-            title: "Nota Fiscal #5673",
-            icon: "FileText",
-            status: "Finalizado",
-            statusVariant: "success",
-            step: "Processamento de Notas Fiscais • Pagos e Conciliados",
-            alterations: "12 alterações",
-            workflowsCount: null,
-        },
-        {
-            id: "contrato-joao",
-            title: "Contrato João Silva",
-            icon: "FileText",
-            status: "Ativo",
-            statusVariant: "primary",
-            step: "Gestão de Documentos RH • Validação Documentos",
-            alterations: "7 alterações no total",
-            workflowsCount: 2,
-            workflows: [
-                {
-                    id: "wf-rh-1",
-                    name: "Gestão de Documentos RH",
-                    stage: "Validação Documentos",
-                    eventsCount: 4,
-                    lastAction: "Perguntar ao documento por Luciana Melo",
-                    lastActionTimestamp: "2024-02-12 10:45:00",
-                },
-                {
-                    id: "wf-juridico-1",
-                    name: "Análise Jurídica de Contratos",
-                    stage: "Análise Jurídica",
-                    eventsCount: 3,
-                    lastAction: "Perguntar ao documento por Dra. Mariana Costa",
-                    lastActionTimestamp: "2024-02-12 15:00:00",
-                },
-            ],
-        },
-        {
-            id: "atestado-102",
-            title: "Atestado Médico #102",
-            icon: "FileText",
-            status: "Finalizado",
-            statusVariant: "success",
-            step: "Gestão de Documentos RH • Validação Documentos",
-            alterations: "3 alterações",
-            workflowsCount: null,
-        },
-        {
-            id: "contrato-techcorp",
-            title: "Contrato Fornecedor TechCorp",
-            icon: "FileText",
-            status: "Ativo",
-            statusVariant: "primary",
-            step: "Análise Jurídica de Contratos • Protocolo",
-            alterations: "9 alterações + 2 esteiras",
-            workflowsCount: 2,
-        },
-        {
-            id: "aditivo-45",
-            title: "Aditivo Contratual #45",
-            icon: "FileText",
-            status: "Ativo",
-            statusVariant: "primary",
-            step: "Análise Jurídica de Contratos • Protocolo",
-            alterations: "4 alterações + 2 esteiras",
-            workflowsCount: 2,
-        },
-        {
-            id: "doc-extra-1",
-            title: "Documento #1001",
-            icon: "FileText",
-            status: "Ativo",
-            statusVariant: "primary",
-            step: "Análise Jurídica • Protocolo",
-            alterations: "2 alterações",
-            workflowsCount: null,
-        },
-        {
-            id: "doc-extra-2",
-            title: "Documento #1002",
-            icon: "FileText",
-            status: "Finalizado",
-            statusVariant: "success",
-            step: "Processamento • Concluído",
-            alterations: "8 alterações",
-            workflowsCount: null,
-        },
-        {
-            id: "doc-extra-3",
-            title: "Documento #1003",
-            icon: "FileText",
-            status: "Ativo",
-            statusVariant: "primary",
-            step: "Gestão RH • Validação",
-            alterations: "1 alteração",
-            workflowsCount: null,
-        },
-        {
-            id: "doc-extra-4",
-            title: "Documento #1004",
-            icon: "FileText",
-            status: "Finalizado",
-            statusVariant: "success",
-            step: "Análise Jurídica • Protocolo",
-            alterations: "6 alterações",
-            workflowsCount: null,
-        },
-        {
-            id: "doc-extra-5",
-            title: "Documento #1005",
-            icon: "FileText",
-            status: "Ativo",
-            statusVariant: "primary",
-            step: "Processamento • Em análise",
-            alterations: "3 alterações",
-            workflowsCount: 1,
-        },
-    ];
+    import AuditorsService from "@/services/auditors/AuditorsService";
 
     export default {
         name: "AuditorCardSummary",
@@ -232,23 +112,29 @@
         emits: ["select-document"],
         data() {
             return {
-                loading: false,
-                auditItems: [],
+                isLoading: false,
+                auditCardList: [],
                 displayedLimit: 10,
             };
         },
         computed: {
             filteredAuditItems() {
+                const list = this.auditCardList ?? [];
                 const search = (this.filterParams?.search || "").toLowerCase().trim();
                 const statusId = this.filterParams?.statusId || "";
-                return this.auditItems.filter((item) => {
+                return list.filter((item) => {
+                    const cardIdStr = item.cardId != null ? String(item.cardId) : "";
+                    const cardName = (item.cardName || "").toLowerCase();
+                    const workflowNames = (item.workflows || [])
+                        .map((w) => (w.name || "").toLowerCase())
+                        .join(" ");
                     const matchesSearch =
                         !search ||
-                        (item.id && item.id.toLowerCase().includes(search)) ||
-                        (item.title && item.title.toLowerCase().includes(search)) ||
-                        (item.step && item.step.toLowerCase().includes(search));
-                    const matchesStatus =
-                        !statusId || (item.status && item.status.toLowerCase() === statusId);
+                        cardIdStr.toLowerCase().includes(search) ||
+                        cardName.includes(search) ||
+                        workflowNames.includes(search);
+                    const statusName = (item.statusName || "").toLowerCase();
+                    const matchesStatus = !statusId || statusName === statusId.toLowerCase();
                     return matchesSearch && matchesStatus;
                 });
             },
@@ -263,15 +149,38 @@
             },
         },
         methods: {
-            async getData() {
-                this.loading = true;
+            workflowsCount(item) {
+                return item.workflows.length;
+            },
+            workflowsLabel(item) {
+                const w = item.workflows;
+                if (!Array.isArray(w) || w.length === 0) return "—";
+                return w
+                    .map((x) => x.name)
+                    .filter(Boolean)
+                    .join(", ");
+            },
+            async getAuditCardsSummary() {
+                this.isLoading = true;
                 try {
                     const params = this.filterParams || {};
-                    // TODO: replace with real API call (e.g. audit/documents list), pass params
-                    await new Promise((r) => setTimeout(r, 400));
-                    this.auditItems = [...MOCK_AUDIT_ITEMS];
+                    const response = await AuditorsService.getCardsAuditSummary(params);
+                    console.log(response);
+                    if (response.error) {
+                        return this.$notify({
+                            title: "audit-cards.title",
+                            message: response.error.response.data.detail,
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    }
+                    this.auditCardList = Array.isArray(response)
+                        ? response
+                        : Array.isArray(response?.data)
+                          ? response.data
+                          : [];
                 } finally {
-                    this.loading = false;
+                    this.isLoading = false;
                 }
             },
             loadMore() {
@@ -281,8 +190,8 @@
                 );
             },
         },
-        mounted() {
-            this.getData();
+        async created() {
+            await this.getAuditCardsSummary();
         },
     };
 </script>
