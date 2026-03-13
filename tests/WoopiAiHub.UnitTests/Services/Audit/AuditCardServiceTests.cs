@@ -48,7 +48,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _service.CreateAndSaveAsync(1, 1, AuditCardActionType.Assign));
 
-            Assert.Equal("Current user is required to create an audit log.", exception.Message);
+            Assert.Equal("Current user is required to create an audit log. When running in automation context, provide the user email from the automation DTO.", exception.Message);
             _auditCardRepositoryMock.Verify(r => r.AddAsync(It.IsAny<AuditCard>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -62,7 +62,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _service.CreateAndSaveAsync(1, 1, AuditCardActionType.Assign));
 
-            Assert.Equal("Current user is required to create an audit log.", exception.Message);
+            Assert.Equal("Current user is required to create an audit log. When running in automation context, provide the user email from the automation DTO.", exception.Message);
             _auditCardRepositoryMock.Verify(r => r.AddAsync(It.IsAny<AuditCard>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -96,7 +96,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             _auditCardRepositoryMock.Setup(r => r.AddAsync(It.IsAny<AuditCard>(), token))
                 .Returns(Task.CompletedTask);
 
-            await _service.CreateAndSaveAsync(1, 1, AuditCardActionType.Assign, token);
+            await _service.CreateAndSaveAsync(1, 1, AuditCardActionType.Assign, cancellationToken: token);
 
             _auditCardRepositoryMock.Verify(r => r.AddAsync(It.IsAny<AuditCard>(), token), Times.Once);
         }
@@ -138,7 +138,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _service.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign));
 
-            Assert.Equal("Current user is required to create an audit log.", exception.Message);
+            Assert.Equal("Current user is required to create an audit log. When running in automation context, provide the user email from the automation DTO.", exception.Message);
             _auditCardRepositoryMock.Verify(r => r.AddRangeAsync(It.IsAny<IEnumerable<AuditCard>>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -174,7 +174,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 .Returns(Task.CompletedTask);
             var cardWorkflows = new List<(int, int)> { (1, 1) };
 
-            await _service.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, token);
+            await _service.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, cancellationToken: token);
 
             _auditCardRepositoryMock.Verify(r => r.AddRangeAsync(It.IsAny<IEnumerable<AuditCard>>(), token), Times.Once);
         }
