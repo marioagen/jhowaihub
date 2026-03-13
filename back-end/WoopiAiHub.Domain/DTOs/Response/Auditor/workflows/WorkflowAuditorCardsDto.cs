@@ -3,7 +3,7 @@ namespace WoopiAiHub.Domain.DTOs.Response.Auditor
     /// <summary>
     /// One audit row for a card in a workflow audit: CardId, CardName, CardStatus, StepId, StepName, UserId, UserName, ActionType, Created.
     /// </summary>
-    public record WorkflowAuditCardResponseDto
+    public record WorkflowAuditorCardsDto
     {
         public int CardId { get; init; }
         public string CardName { get; init; } = string.Empty;

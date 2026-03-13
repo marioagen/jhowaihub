@@ -7,10 +7,10 @@ namespace WoopiAiHub.Domain.DTOs.Response.Auditor
     {
         public Guid UserId { get; init; }
         public string UserName { get; init; } = string.Empty;
-        public ICollection<AuditorTeamItemDto> Teams { get; init; } = new List<AuditorTeamItemDto>();
-        public ICollection<AuditorProfileItemDto> Profiles { get; init; } = new List<AuditorProfileItemDto>();
+        public ICollection<UsersAuditorTeamsDto> Teams { get; init; } = new List<UsersAuditorTeamsDto>();
+        public ICollection<UsersAuditorProfilesDto> Profiles { get; init; } = new List<UsersAuditorProfilesDto>();
         public int LogCountTotal { get; init; }
-        public ICollection<UserAuditorActionTypeCountDto> LogCountByActionType { get; init; } = new List<UserAuditorActionTypeCountDto>();
-        public ICollection<UserAuditorActionDto> Actions { get; init; } = new List<UserAuditorActionDto>();
+        public ICollection<UsersAuditorActionTypeCountsDto> LogCountByActionType { get; init; } = new List<UsersAuditorActionTypeCountsDto>();
+        public ICollection<UsersAuditorActionsDto> Actions { get; init; } = new List<UsersAuditorActionsDto>();
     }
 }

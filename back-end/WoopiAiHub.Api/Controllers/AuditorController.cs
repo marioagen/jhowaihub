@@ -69,7 +69,7 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         [HttpGet("Workflows")]
         [SwaggerOperation("Returns workflow audit list for the auditor")]
-        [ProducesResponseType(typeof(ICollection<AuditorWorkflowListItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ICollection<WorkflowAuditorSummaryDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindWorkflowAuditSummary()
         {
             var result = await _auditorServices.FindWorkflowAuditSummaryAsync();
@@ -81,7 +81,7 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         [HttpGet("Workflow/{id:int}")]
         [SwaggerOperation("Returns audit data for a workflow by id")]
-        [ProducesResponseType(typeof(AuditorWorkflowResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(WorkflowAuditorDetailsDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> FindWorkflowAuditDetails(int id)
         {

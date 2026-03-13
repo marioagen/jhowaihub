@@ -7,8 +7,8 @@ namespace WoopiAiHub.Domain.DTOs.Response.Auditor
     {
         public Guid UserId { get; init; }
         public string UserName { get; init; } = string.Empty;
-        public ICollection<AuditorTeamItemDto> Teams { get; init; } = new List<AuditorTeamItemDto>();
-        public ICollection<AuditorProfileItemDto> Profiles { get; init; } = new List<AuditorProfileItemDto>();
+        public ICollection<UsersAuditorTeamsDto> Teams { get; init; } = new List<UsersAuditorTeamsDto>();
+        public ICollection<UsersAuditorProfilesDto> Profiles { get; init; } = new List<UsersAuditorProfilesDto>();
         public int WorkflowCount { get; init; }
         public int LogCount { get; init; }
     }

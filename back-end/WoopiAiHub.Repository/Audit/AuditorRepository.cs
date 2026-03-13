@@ -110,7 +110,7 @@ namespace WoopiAiHub.Repository.Audit
         /// <summary>
         /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, and Profile. Limited to the 10 most recently audited workflows.
         /// </summary>
-        public async Task<ICollection<AuditorWorkflowListItemDto>> FindWorkflowAuditSummaryAsync()
+        public async Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync()
         {
             const int take = 10;
             var workflowList = await _context.AuditCards
@@ -121,7 +121,7 @@ namespace WoopiAiHub.Repository.Audit
                 .ToListAsync();
 
             if (workflowList.Count == 0)
-                return new List<AuditorWorkflowListItemDto>();
+                return new List<WorkflowAuditorSummaryDto>();
 
             var auditRows = await _context.AuditCards
                 .AsNoTracking()
@@ -154,7 +154,7 @@ namespace WoopiAiHub.Repository.Audit
             return AuditorByWorkflow.Select(g =>
             {
                 var first = g.First();
-                return new AuditorWorkflowListItemDto
+                return new WorkflowAuditorSummaryDto
                 {
                     WorkflowId = g.Key,
                     WorkflowName = first.WorkflowName,
@@ -171,7 +171,7 @@ namespace WoopiAiHub.Repository.Audit
         /// <summary>
         /// Returns audit data for a workflow: WorkflowId, WorkflowName, LogCount, StepsCount, CardStatusCount, Cards. Returns null when no audit entries exist for the workflow.
         /// </summary>
-        public async Task<AuditorWorkflowResponseDto?> FindWorkflowAuditDetailsAsync(int workflowId)
+        public async Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId)
         {
             var auditRows = await _context.AuditCards
                 .AsNoTracking()
@@ -200,7 +200,7 @@ namespace WoopiAiHub.Repository.Audit
             var distinctCardIds = auditRows.Select(a => a.CardId).Distinct().ToList();
 
             var cards = auditRows
-                .Select(a => new WorkflowAuditCardResponseDto
+                .Select(a => new WorkflowAuditorCardsDto
                 {
                     CardId = a.CardId,
                     CardName = a.CardName,
@@ -216,7 +216,7 @@ namespace WoopiAiHub.Repository.Audit
 
             var stepsCount = auditRows
                 .GroupBy(a => new { a.StepId, a.StepName })
-                .Select(g => new StepsCountResponseDto
+                .Select(g => new WorkflowAuditorStepCountsDto
                 {
                     StepId = g.Key.StepId,
                     StepName = g.Key.StepName,
@@ -237,14 +237,14 @@ namespace WoopiAiHub.Repository.Audit
                 rejected = cardStatuses.Count(s => s.StatusName == StatusNames.Rejected);
             }
 
-            var cardStatusCount = new WorkflowAuditCardStatusCountResponseDto
+            var cardStatusCount = new WorkflowAuditorCardStatusCountDto
             {
                 TotalCards = distinctCardIds.Count,
                 Finalized = finalized,
                 Rejected = rejected
             };
 
-            return new AuditorWorkflowResponseDto
+            return new WorkflowAuditorDetailsDto
             {
                 WorkflowId = first.WorkflowId,
                 WorkflowName = first.WorkflowName,
@@ -294,8 +294,8 @@ namespace WoopiAiHub.Repository.Audit
                     UserName = a.User != null ? a.User.Name : string.Empty,
                     a.WorkflowId,
                     Teams = a.Workflow != null && a.Workflow.Teams != null
-                        ? a.Workflow.Teams.Select(t => new AuditorTeamItemDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
-                        : (IEnumerable<AuditorTeamItemDto>)new List<AuditorTeamItemDto>(),
+                        ? a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
+                        : (IEnumerable<UsersAuditorTeamsDto>)new List<UsersAuditorTeamsDto>(),
                     ProfileId = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
                         ? (int?)a.Card.Step.Profile.Id
                         : (int?)null,
@@ -320,7 +320,7 @@ namespace WoopiAiHub.Repository.Audit
                     .ToList();
                 var distinctProfiles = g
                     .Where(a => a.ProfileId.HasValue)
-                    .Select(a => new AuditorProfileItemDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
+                    .Select(a => new UsersAuditorProfilesDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
                     .GroupBy(p => new { p.ProfileId, p.ProfileName })
                     .Select(x => x.First())
                     .ToList();
@@ -357,8 +357,8 @@ namespace WoopiAiHub.Repository.Audit
                     a.WorkflowId,
                     WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
                     Teams = a.Workflow != null && a.Workflow.Teams != null
-                        ? a.Workflow.Teams.Select(t => new AuditorTeamItemDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
-                        : (IEnumerable<AuditorTeamItemDto>)new List<AuditorTeamItemDto>(),
+                        ? a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
+                        : (IEnumerable<UsersAuditorTeamsDto>)new List<UsersAuditorTeamsDto>(),
                     ProfileId = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
                         ? (int?)a.Card.Step.Profile.Id
                         : (int?)null,
@@ -387,17 +387,17 @@ namespace WoopiAiHub.Repository.Audit
                 .ToList();
             var distinctProfiles = auditRows
                 .Where(a => a.ProfileId.HasValue)
-                .Select(a => new AuditorProfileItemDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
+                .Select(a => new UsersAuditorProfilesDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
                 .GroupBy(p => new { p.ProfileId, p.ProfileName })
                 .Select(x => x.First())
                 .ToList();
             var countByActionType = auditRows
                 .GroupBy(a => (int)a.ActionType)
-                .Select(g => new UserAuditorActionTypeCountDto { ActionTypeCode = g.Key, Count = g.Count() })
+                .Select(g => new UsersAuditorActionTypeCountsDto { ActionTypeCode = g.Key, Count = g.Count() })
                 .OrderBy(x => x.ActionTypeCode)
                 .ToList();
             var actions = auditRows
-                .Select(a => new UserAuditorActionDto
+                .Select(a => new UsersAuditorActionsDto
                 {
                     CardId = a.CardId,
                     CardName = a.CardName,

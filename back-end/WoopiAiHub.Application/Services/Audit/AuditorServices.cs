@@ -35,13 +35,13 @@ namespace WoopiAiHub.Application.Services.Audit
         /// <summary>
         /// Returns workflow-based audit entries (one per workflow) with card count, logs count, team, and profile. Limited to the 10 most recently audited workflows.
         /// </summary>
-        public Task<ICollection<AuditorWorkflowListItemDto>> FindWorkflowAuditSummaryAsync()
+        public Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync()
             => _auditorRepository.FindWorkflowAuditSummaryAsync();
 
         /// <summary>
         /// Returns full audit data for a workflow (logs, steps, card status counts, and card list). Returns null when the workflow has no audit entries.
         /// </summary>
-        public Task<AuditorWorkflowResponseDto?> FindWorkflowAuditDetailsAsync(int workflowId)
+        public Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId)
             => _auditorRepository.FindWorkflowAuditDetailsAsync(workflowId);
 
         /// <summary>
