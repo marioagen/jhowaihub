@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.CodeAnalysis;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
@@ -27,8 +27,8 @@ namespace WoopiAiHub.Api.Hubs
         /// <param name="cardId">The unique identifier of the card whose progress has changed.</param>
         /// <param name="percentage">The progress percentage of the card execution. Must be a value between 0.0 and 100.0.</param>
         /// <returns></returns>
-        public async Task CardProgessAsync(string userEmail, 
-                                           int cardId, 
+        public async Task CardProgessAsync(string userEmail,
+                                           int cardId,
                                            double percentage,
                                            int stepId,
                                            string toolName)

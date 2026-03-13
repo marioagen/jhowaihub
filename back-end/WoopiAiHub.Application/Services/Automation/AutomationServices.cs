@@ -36,6 +36,8 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IHubNotifier _hubNotifier;
         private readonly IEncryptionService _encryptionService;
         private readonly IUsageDailyServices _usageDailyServices;
+        private readonly IExecutionServices _executionServices;
+        private readonly IWorkflowRepository _workflowRepository;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -51,7 +53,9 @@ namespace WoopiAiHub.Application.Services.Automation
                                   IStepRepository stepRepository,
                                   IHubNotifier hubNotifier,
                                   IEncryptionService encryptionService,
-                                  IUsageDailyServices usageDailyServices)
+                                  IUsageDailyServices usageDailyServices,
+                                  IExecutionServices executionServices,
+                                  IWorkflowRepository workflowRepository)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -68,6 +72,8 @@ namespace WoopiAiHub.Application.Services.Automation
             _hubNotifier = hubNotifier;
             _encryptionService = encryptionService;
             _usageDailyServices = usageDailyServices;
+            _executionServices = executionServices;
+            _workflowRepository = workflowRepository;
         }
 
         /// <summary>
@@ -220,8 +226,25 @@ namespace WoopiAiHub.Application.Services.Automation
         public async Task StartExecutionByCardAsync(AutomationServicesDto automationServicesDto)
         {
             var stepTool = await _stepToolRepository.FindByStepIdAndOrderAsync(automationServicesDto.StepId.GetValueOrDefault(), 1);
+
             if (stepTool != null)
+            {
+                var tool = await _workflowRepository.FindToolByStepToolId(stepTool.Id);
+                var toolName = tool?.Name ?? string.Empty;
+
+                await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 0.0, automationServicesDto.StepId.GetValueOrDefault(), toolName);
                 await RunStepToolExecutionAsync(stepTool, automationServicesDto, 0);
+            }
+            else
+            {
+                var step = await _stepRepository.FindByIdWithTools(automationServicesDto.StepId.GetValueOrDefault());
+                var hasTools = step?.StepTools?.Count > 0;
+
+                if (!hasTools)
+                {
+                    await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, automationServicesDto.StepId.GetValueOrDefault(), string.Empty);
+                }
+            }
         }
 
         /// <summary>
@@ -288,7 +311,7 @@ namespace WoopiAiHub.Application.Services.Automation
                 return await handler.BuildPayload(automationServicesDto, input, outputs, execution);
             }
             else
-            {   
+            {
                 var output = new List<StepToolOutput>();
                 if (stepTool.DependsOnStepToolId.HasValue)
                     output = await _stepToolOutputRepository.FindAllByStepToolListIdsAsync([stepTool.DependsOnStepToolId.Value], cardId);
@@ -333,9 +356,18 @@ namespace WoopiAiHub.Application.Services.Automation
             if (card != null && card.IsRejected())
                 return;
 
+            var currentExecution = await _stepToolExecutionRepository
+                .FindByStepToolIdAndCardIdAsync(automationServicesDto.StepToolId, automationServicesDto.CardId);
+
+            if (currentExecution != null)
+            {
+                currentExecution.UpdateStatusExecution(StatusExecution.Ready);
+                await _stepToolExecutionRepository.UpdateAsync(currentExecution);
+            }
+
             var stepTool = await _stepToolRepository.FindById(automationServicesDto.StepToolId);
             var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
-            
+
             if (dependentStepTool == null ||
                 stepTool!.Step!.Order.Equals(dependentStepTool!.Step!.Order) is false)
             {
@@ -350,6 +382,11 @@ namespace WoopiAiHub.Application.Services.Automation
 
             execution.UpdateStatusExecution(StatusExecution.Running);
             await _stepToolExecutionRepository.UpdateAsync(execution);
+
+            if (currentExecution != null)
+            {
+                await _executionServices.HandleExecutionProgress(currentExecution, automationServicesDto.Email);
+            }
             var input = _stepToolParameterRepository.FindByStepToolId(dependentStepTool.Id);
             var nextAutomationDto = automationServicesDto with { StepToolId = dependentStepTool.Id };
 
@@ -378,8 +415,8 @@ namespace WoopiAiHub.Application.Services.Automation
                 throw new AppException(ErrorCode.NotFound, "Tool connector api-key not found", null);
             }
 
-            var api = _apiClientFactory.Create(tool.ConnectorUrl!);    
-            
+            var api = _apiClientFactory.Create(tool.ConnectorUrl!);
+
             var response = await api.FindWorkflows(apiKey);
 
             if (!response.IsSuccessStatusCode)
@@ -409,7 +446,7 @@ namespace WoopiAiHub.Application.Services.Automation
 
             if (!response.IsSuccessStatusCode)
                 throw new AppException(ErrorCode.RefitApiError, "Connector fails listing workflows", null);
-            
+
             return JsonSchemaToFormMapper.MapToFormFields(response.Content!);
         }
 
@@ -420,7 +457,8 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns></returns>
         private static ICollection<ConnectorDto> MapToConnectorDtos(WebhookDataDto? root)
         {
-            if (root?.Data == null) return Array.Empty<ConnectorDto>();
+            if (root?.Data == null)
+                return Array.Empty<ConnectorDto>();
 
             return root.Data
                 .Select(w => new
@@ -463,13 +501,11 @@ namespace WoopiAiHub.Application.Services.Automation
 
             card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
             var cardWorkflows = new List<(int cardId, int workflowId)> { (card.Id, card.Step!.WorkflowId) };
-            await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement);
+            await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, automationServicesDto.Email);
             var updated = _cardRepository.Update(card);
 
             if (updated)
             {
-                await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, nextStep.Id, string.Empty);
-                
                 if (dependentStepTool != null)
                 {
                     var nextStepDto = automationServicesDto with
@@ -479,8 +515,16 @@ namespace WoopiAiHub.Application.Services.Automation
                     };
                     await StartExecutionByCardAsync(nextStepDto);
                 }
+                else
+                {
+                    var nextStepDto = automationServicesDto with
+                    {
+                        StepId = nextStep.Id,
+                        StepToolId = 0
+                    };
+                    await StartExecutionByCardAsync(nextStepDto);
+                }
             }
         }
     }
 }
-
