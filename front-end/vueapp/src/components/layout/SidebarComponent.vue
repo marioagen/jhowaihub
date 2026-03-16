@@ -201,7 +201,7 @@
                 return theme === "css-theme-dark";
             },
             logoSrc() {
-                return this.isDarkMode ? logoDark : logoLight;
+                return this.isDarkMode ? logoLight : logoDark;
             },
             filteredMenuItems() {
                 return this.menuItems.filter((item) => {
