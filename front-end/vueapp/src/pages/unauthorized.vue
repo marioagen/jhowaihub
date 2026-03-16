@@ -4,7 +4,7 @@
             <div class="row">
                 <div class="col-auto col-fix">
                     <form @submit="returnToPreviousPage" style="text-align: center">
-                        <img src="../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px" width="200"
+                        <img :src="logoSrc" style="padding-bottom: 10px" width="200"
                             height="60" alt="WOOPI AI" />
 
                         <h5 class="fw-bold">{{ $t("unauthorized.title") }}</h5>
@@ -22,6 +22,14 @@
 <script>
 export default {
     name: "UnauthorizedPage",
+    computed: {
+        logoSrc() {
+            const theme = this.$store.state.theme || localStorage.getItem("theme") || "css-theme-light";
+            return theme === "css-theme-dark"
+                ? require("@/assets/img/woopiai-logo-dark.png")
+                : require("@/assets/img/woopiai-logo-light.png");
+        },
+    },
     methods: {
         returnToPreviousPage() {
             this.$router.push({ name: 'Home' });

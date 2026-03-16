@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 
 export default new Vuex.Store({
     state: {
+        theme: null, 
         tenantInitialized: false,
         userProfile: {
             language: "pt",
@@ -31,6 +32,9 @@ export default new Vuex.Store({
         },
     },
     mutations: {
+        setTheme(state, themeName) {
+            state.theme = themeName;
+        },
         updateUserProfile(state, payload) {
             state.userProfile = payload.amount;
         },
@@ -92,6 +96,10 @@ export default new Vuex.Store({
                 getItem: (key) => Cookies.get(key),
                 setItem: (key, value) => Cookies.set(key, value, { expires: 3, secure: true }),
                 removeItem: (key) => Cookies.remove(key),
+            },
+            reducer(state) {
+                const { theme, ...rest } = state;
+                return rest; 
             },
         }),
     ],

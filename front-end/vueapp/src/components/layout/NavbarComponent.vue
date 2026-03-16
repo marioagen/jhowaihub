@@ -178,6 +178,7 @@ export default {
             localStorage.setItem("theme", themeName);
             document.documentElement.className = themeName;
             this.currentTheme = themeName;
+            this.$store.commit("setTheme", themeName);
         },
     },
     computed: {
