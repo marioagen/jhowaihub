@@ -136,10 +136,16 @@
             async getAuditUsersSummary() {
                 this.isLoading = true;
                 try {
+                    const search = (this.filters.search || "").trim() || undefined;
+                    const teamIdRaw = this.filters.teamId
+                        ? parseInt(this.filters.teamId, 10)
+                        : undefined;
+                    const teamId =
+                        teamIdRaw !== undefined && !Number.isNaN(teamIdRaw) ? teamIdRaw : undefined;
                     const params = {
                         take: this.displayedLimit,
-                        userName: this.filters.search || undefined,
-                        teamId: this.filters.teamId ? parseInt(this.filters.teamId, 10) : undefined,
+                        ...(search && { userName: search }),
+                        ...(teamId !== undefined && { teamId }),
                     };
                     const response = await AuditorsService.getUserAuditSummary(params);
                     if (response.error) {

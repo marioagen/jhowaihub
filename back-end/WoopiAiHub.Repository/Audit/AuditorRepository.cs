@@ -26,9 +26,9 @@ namespace WoopiAiHub.Repository.Audit
 
         /// <summary>
         /// Returns the first N cards for the auditor (load-more pattern: take 10, then 20, 30…). One row per card with CardId, CardName, Workflows, ActionsCount, IsFinalized (from DB status).
-        /// Optional filter: search (matches CardId when numeric, or CardName/WorkflowName by contains).
+        /// Optional filters: search (CardId when numeric, or CardName/WorkflowName contains), isFinalized (true = finalized only, false = non-finalized only).
         /// </summary>
-        public async Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search)
+        public async Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, bool? isFinalized = null)
         {
             const int defaultTake = 10;
             if (take <= 0) take = defaultTake;
@@ -48,6 +48,14 @@ namespace WoopiAiHub.Repository.Audit
                     || (c.Step != null && c.Step.Workflow != null && c.Step.Workflow.Name.Contains(searchTerm)));
             }
 
+            if (isFinalized.HasValue)
+            {
+                if (isFinalized.Value)
+                    query = query.Where(c => c.Status != null && c.Status.Name == StatusNames.Finalize);
+                else
+                    query = query.Where(c => c.Status == null || c.Status.Name != StatusNames.Finalize);
+            }
+
             return await query
                 .OrderBy(c => c.Id)
                 .Take(take)
@@ -65,15 +73,25 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns up to N audit rows for a card and workflow (load-more pattern). Optional filters: userId, actionType, stepId. Order by Created desc or asc.
+        /// Returns up to N audit rows for a card and workflow (load-more pattern). Optional filters: search (UserName, CardName, ActionType, StepName), userId, actionType, stepId. Order by Created desc or asc.
         /// </summary>
-        public async Task<ICollection<CardAuditorDetailDto>> FindCardAuditDetailsAsync(int cardId, int workflowId, int take, Guid? userId, int? actionType, int? stepId, bool orderDescending = true)
+        public async Task<ICollection<CardAuditorDetailDto>> FindCardAuditDetailsAsync(int cardId, int workflowId, int take, string? search = null, Guid? userId = null, int? actionType = null, int? stepId = null, bool orderDescending = true)
         {
             const int defaultTake = 10;
             if (take <= 0) take = defaultTake;
 
             var query = _context.AuditCards.AsNoTracking()
                 .Where(a => a.CardId == cardId && a.WorkflowId == workflowId);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchTerm = search!.Trim();
+                query = query.Where(a =>
+                    (a.User != null && a.User.Name != null && a.User.Name.Contains(searchTerm))
+                    || (a.Card != null && a.Card.Name != null && a.Card.Name.Contains(searchTerm))
+                    || a.ActionType.ToString().Contains(searchTerm)
+                    || (a.Card != null && a.Card.Step != null && a.Card.Step.Name != null && a.Card.Step.Name.Contains(searchTerm)));
+            }
 
             if (userId.HasValue)
                 query = query.Where(a => a.UserId == userId.Value);
@@ -107,14 +125,24 @@ namespace WoopiAiHub.Repository.Audit
         /// <summary>
         /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, and Profile.
         /// Load-more pattern: take 10, then 20, 30, … (first N most recently audited workflows).
+        /// Optional search: filters by WorkflowName or TeamName (contains).
         /// </summary>
-        public async Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync(int take = 10)
+        public async Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync(int take = 10, string? search = null)
         {
             const int defaultTake = 10;
             if (take <= 0) take = defaultTake;
 
-            var workflowList = await _context.AuditCards
-                .AsNoTracking()
+            var query = _context.AuditCards.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchTerm = search!.Trim();
+                query = query.Where(a =>
+                    (a.Workflow != null && a.Workflow.Name != null && a.Workflow.Name.Contains(searchTerm))
+                    || (a.Workflow != null && a.Workflow.Teams.Any() && a.Workflow.Teams.Any(t => t.Name != null && t.Name.Contains(searchTerm))));
+            }
+
+            var workflowList = await query
                 .OrderByDescending(a => a.Created)
                 .Select(a => a.WorkflowId)
                 .Take(take)
@@ -170,12 +198,31 @@ namespace WoopiAiHub.Repository.Audit
 
         /// <summary>
         /// Returns audit data for a workflow: WorkflowId, WorkflowName, LogCount, StepsCount, CardStatusCount, Cards. Returns null when no audit entries exist for the workflow.
+        /// Optional filters: search (UserName, CardName, StepName, ActionType contains), stepId, actionType (AuditCardActionType enum value).
         /// </summary>
-        public async Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId)
+        public async Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId, string? search = null, int? stepId = null, int? actionType = null)
         {
-            var auditRows = await _context.AuditCards
+            var query = _context.AuditCards
                 .AsNoTracking()
-                .Where(a => a.WorkflowId == workflowId)
+                .Where(a => a.WorkflowId == workflowId);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchTerm = search!.Trim();
+                query = query.Where(a =>
+                    (a.User != null && a.User.Name != null && a.User.Name.Contains(searchTerm))
+                    || (a.Card != null && a.Card.Name != null && a.Card.Name.Contains(searchTerm))
+                    || (a.Card != null && a.Card.Step != null && a.Card.Step.Name != null && a.Card.Step.Name.Contains(searchTerm))
+                    || a.ActionType.ToString().Contains(searchTerm));
+            }
+
+            if (stepId.HasValue)
+                query = query.Where(a => a.Card != null && a.Card.StepId == stepId.Value);
+
+            if (actionType.HasValue)
+                query = query.Where(a => (int)a.ActionType == actionType.Value);
+
+            var auditRows = await query
                 .Select(a => new
                 {
                     a.Id,
@@ -340,13 +387,22 @@ namespace WoopiAiHub.Repository.Audit
 
         /// <summary>
         /// Returns full audit details for a single user by userId: UserId, UserName, Teams, Profiles, LogCountTotal, LogCountByActionType, and Actions list.
-        /// Returns null when the user has no audit entries. Optional: filter by action type code; order by Created desc (newest first) or asc.
+        /// Returns null when the user has no audit entries. Optional: search (CardName, WorkflowName, ActionType contains), action type code; order by Created desc or asc.
         /// </summary>
-        public async Task<UserAuditorDetailsDto?> FindUserAuditDetailsAsync(Guid userId, int? actionTypeCode = null, bool orderDescending = true)
+        public async Task<UserAuditorDetailsDto?> FindUserAuditDetailsAsync(Guid userId, string? search = null, int? actionTypeCode = null, bool orderDescending = true)
         {
             var query = _context.AuditCards
                 .AsNoTracking()
                 .Where(a => a.UserId == userId);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchTerm = search!.Trim();
+                query = query.Where(a =>
+                    (a.Card != null && a.Card.Name != null && a.Card.Name.Contains(searchTerm))
+                    || (a.Workflow != null && a.Workflow.Name != null && a.Workflow.Name.Contains(searchTerm))
+                    || a.ActionType.ToString().Contains(searchTerm));
+            }
 
             if (actionTypeCode.HasValue)
                 query = query.Where(a => (int)a.ActionType == actionTypeCode.Value);

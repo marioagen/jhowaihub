@@ -131,9 +131,17 @@
             async getAuditCardsSummary() {
                 this.isLoading = true;
                 try {
+                    const search = (this.filters.search || "").trim() || undefined;
+                    const isFinalized =
+                        this.filters.statusId === "finalizado"
+                            ? true
+                            : this.filters.statusId === "ativo"
+                              ? false
+                              : undefined;
                     const params = {
-                        search: this.filters.search || undefined,
                         take: this.displayedLimit,
+                        ...(search && { search }),
+                        ...(isFinalized !== undefined && { isFinalized }),
                     };
                     const response = await AuditorsService.getCardsAuditSummary(params);
                     if (response.error) {

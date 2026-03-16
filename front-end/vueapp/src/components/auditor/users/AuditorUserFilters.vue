@@ -71,17 +71,14 @@
     </div>
 </template>
 <script>
+    import TeamsService from "@/services/teams/TeamsService";
+
     export default {
         name: "AuditorUserFilters",
         emits: ["filter"],
         data() {
             return {
-                teamList: [
-                    { value: "", label: "Todos os times" },
-                    { value: "juridico", label: "Time Jurídico" },
-                    { value: "financeiro", label: "Time Financeiro" },
-                    { value: "rh", label: "Time RH" },
-                ],
+                teamList: [{ value: "", label: "Todos os times" }],
                 filters: {
                     search: "",
                     teamId: "",
@@ -101,6 +98,21 @@
                 this.filters.search = "";
                 this.$emit("filter", this.filters);
             },
+            loadTeams() {
+                TeamsService.getTeamListSimple()
+                    .then((data) => {
+                        if (data?.error || !Array.isArray(data)) return;
+                        const options = data.map((t) => ({
+                            value: String(t.id),
+                            label: t.name || "",
+                        }));
+                        this.teamList = [{ value: "", label: "Todos os times" }, ...options];
+                    })
+                    .catch(() => {});
+            },
+        },
+        created() {
+            this.loadTeams();
         },
     };
 </script>

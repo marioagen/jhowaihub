@@ -151,8 +151,10 @@
             async getWorkflowAuditSummary() {
                 this.isLoading = true;
                 try {
+                    const search = (this.filters.search || "").trim() || undefined;
                     const response = await AuditorsService.getWorkflowAuditSummary({
                         take: this.displayedLimit,
+                        ...(search && { search }),
                     });
                     if (response.error) {
                         return this.$notify({

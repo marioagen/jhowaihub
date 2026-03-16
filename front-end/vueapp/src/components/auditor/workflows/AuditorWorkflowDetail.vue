@@ -340,6 +340,15 @@
         }));
     }
 
+    /** Maps UI action slug to AuditCardActionType enum value for the API. */
+    const ACTION_SLUG_TO_TYPE = {
+        avancar: 3,
+        editar: 4,
+        perguntar: 12,
+        atribuir: 1,
+        upload: 0,
+    };
+
     export default {
         name: "AuditorWorkflowDetail",
         components: { BadgeComponent, LoadingComponent },
@@ -436,12 +445,20 @@
                     return;
                 }
                 this.timelineDisplayedLimit = 10;
-                this.selectedStageId = "";
-                this.selectedActionId = "";
                 this.isLoading = true;
+                const search = (this.timelineSearch || "").trim() || undefined;
+                const stepId = this.selectedStageId ? Number(this.selectedStageId) : undefined;
+                const actionType = this.selectedActionId
+                    ? ACTION_SLUG_TO_TYPE[this.selectedActionId]
+                    : undefined;
+                const params = {};
+                if (search !== undefined) params.search = search;
+                if (stepId !== undefined && !Number.isNaN(stepId)) params.stepId = stepId;
+                if (actionType !== undefined) params.actionType = actionType;
                 try {
                     const response = await AuditorsService.getWorkflowAuditDetails(
-                        this.selectedWorkflow.workflowId
+                        this.selectedWorkflow.workflowId,
+                        params
                     );
                     if (response.error) {
                         this.$notify({
@@ -461,20 +478,6 @@
                 } finally {
                     this.isLoading = false;
                 }
-            },
-        },
-        watch: {
-            selectedWorkflow: {
-                handler(w) {
-                    this.workflowDetail = null;
-                    this.timelineDisplayedLimit = 10;
-                    this.selectedStageId = "";
-                    this.selectedActionId = "";
-                    if (w?.workflowId != null) {
-                        this.refreshWithCurrentDocument();
-                    }
-                },
-                immediate: true,
             },
         },
     };

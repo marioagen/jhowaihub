@@ -25,14 +25,16 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="take">Maximum number of cards to return (default 10).</param>
         /// <param name="search">Optional. Matches CardId when numeric, or CardName/WorkflowName by contains.</param>
+        /// <param name="isFinalized">Optional. When true, only finalized cards; when false, only non-finalized; when null, all.</param>
         [HttpGet("Cards")]
-        [SwaggerOperation("Returns cards for the auditor with optional search")]
+        [SwaggerOperation("Returns cards for the auditor with optional search and status filter")]
         [ProducesResponseType(typeof(ICollection<CardAuditorSummaryDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindCardsAuditSummary(
             [FromQuery] int take = 10,
-            [FromQuery] string? search = null)
+            [FromQuery] string? search = null,
+            [FromQuery] bool? isFinalized = null)
         {
-            var result = await _auditorServices.FindCardsAuditSummaryAsync(take, search);
+            var result = await _auditorServices.FindCardsAuditSummaryAsync(take, search, isFinalized);
             return Ok(result);
         }
 
@@ -42,6 +44,7 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="cardId">Card identifier.</param>
         /// <param name="workflowId">Workflow identifier.</param>
         /// <param name="take">Maximum number of audit rows to return (default 10).</param>
+        /// <param name="search">Optional. Matches UserName, CardName, ActionType, or StepName by contains.</param>
         /// <param name="userId">Optional. Filter by user who performed the action.</param>
         /// <param name="action">Optional. Filter by action type (AuditCardActionType enum value).</param>
         /// <param name="step">Optional. Filter by step id.</param>
@@ -53,12 +56,13 @@ namespace WoopiAiHub.Api.Controllers
             int cardId,
             int workflowId,
             [FromQuery] int take = 10,
+            [FromQuery] string? search = null,
             [FromQuery] Guid? userId = null,
             [FromQuery] int? action = null,
             [FromQuery] int? step = null,
             [FromQuery] bool orderDescending = true)
         {
-            var result = await _auditorServices.FindCardAuditDetailsAsync(cardId, workflowId, take, userId, action, step, orderDescending);
+            var result = await _auditorServices.FindCardAuditDetailsAsync(cardId, workflowId, take, search, userId, action, step, orderDescending);
             return Ok(result);
         }
 
@@ -66,25 +70,34 @@ namespace WoopiAiHub.Api.Controllers
         /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, Profile. Load-more pattern: take 10, 20, 30, …
         /// </summary>
         /// <param name="take">Maximum number of workflows to return (default 10).</param>
+        /// <param name="search">Optional. Matches WorkflowName or TeamName by contains.</param>
         [HttpGet("Workflows")]
-        [SwaggerOperation("Returns workflow audit list for the auditor")]
+        [SwaggerOperation("Returns workflow audit list for the auditor with optional search")]
         [ProducesResponseType(typeof(ICollection<WorkflowAuditorSummaryDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindWorkflowAuditSummary([FromQuery] int take = 10)
+        public async Task<IActionResult> FindWorkflowAuditSummary([FromQuery] int take = 10, [FromQuery] string? search = null)
         {
-            var result = await _auditorServices.FindWorkflowAuditSummaryAsync(take);
+            var result = await _auditorServices.FindWorkflowAuditSummaryAsync(take, search);
             return Ok(result);
         }
 
         /// <summary>
         /// Returns audit data for a workflow by id: WorkflowId, WorkflowName, LogCount, StepsCount, CardStatusCount, Cards. Returns 404 when no audit entries exist for the workflow.
         /// </summary>
+        /// <param name="id">Workflow id.</param>
+        /// <param name="search">Optional. Matches UserName, CardName, StepName, or ActionType by contains.</param>
+        /// <param name="stepId">Optional. Filter by step id.</param>
+        /// <param name="actionType">Optional. Filter by action type (AuditCardActionType enum value as int).</param>
         [HttpGet("Workflow/{id:int}")]
-        [SwaggerOperation("Returns audit data for a workflow by id")]
+        [SwaggerOperation("Returns audit data for a workflow by id with optional filters")]
         [ProducesResponseType(typeof(WorkflowAuditorDetailsDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> FindWorkflowAuditDetails(int id)
+        public async Task<IActionResult> FindWorkflowAuditDetails(
+            int id,
+            [FromQuery] string? search = null,
+            [FromQuery] int? stepId = null,
+            [FromQuery] int? actionType = null)
         {
-            var result = await _auditorServices.FindWorkflowAuditDetailsAsync(id);
+            var result = await _auditorServices.FindWorkflowAuditDetailsAsync(id, search, stepId, actionType);
             if (result is null)
                 return NotFound();
             return Ok(result);
@@ -109,15 +122,16 @@ namespace WoopiAiHub.Api.Controllers
         /// Returns full audit details for a user: UserId, UserName, Teams, Profiles, log counts (total and by action type), and list of actions. Returns 404 when the user has no audit entries.
         /// </summary>
         /// <param name="userId">User id.</param>
+        /// <param name="search">Optional. Matches CardName, WorkflowName, or ActionType by contains.</param>
         /// <param name="actionTypeCode">Optional. Filter by action type (AuditCardActionType enum value as int).</param>
         /// <param name="orderDescending">Order by Created: true = newest first (default), false = oldest first.</param>
         [HttpGet("User/{userId:guid}")]
         [SwaggerOperation("Returns user audit details by user id with optional filters and sort")]
         [ProducesResponseType(typeof(UserAuditorDetailsDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> FindUserAuditDetails(Guid userId, [FromQuery] int? actionTypeCode = null, [FromQuery] bool orderDescending = true)
+        public async Task<IActionResult> FindUserAuditDetails(Guid userId, [FromQuery] string? search = null, [FromQuery] int? actionTypeCode = null, [FromQuery] bool orderDescending = true)
         {
-            var result = await _auditorServices.FindUserAuditDetailsAsync(userId, actionTypeCode, orderDescending);
+            var result = await _auditorServices.FindUserAuditDetailsAsync(userId, search, actionTypeCode, orderDescending);
             if (result is null)
                 return NotFound();
             return Ok(result);

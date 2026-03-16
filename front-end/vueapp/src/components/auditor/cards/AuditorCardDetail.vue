@@ -145,7 +145,7 @@
                                             ? 'btn-primary'
                                             : 'btn-light'
                                     "
-                                    @click="$emit('update:selectedStageId', stage.value)"
+                                    @click="setStageAndRefresh(stage.value)"
                                 >
                                     {{ stage.label }}
                                 </button>
@@ -153,13 +153,15 @@
                             <div class="d-flex align-items-center gap-2 flex-wrap">
                                 <button
                                     type="button"
-                                    class="btn btn-light btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1"
+                                    class="btn btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1"
+                                    :class="orderDescending ? 'btn-primary' : 'btn-light'"
+                                    @click="toggleOrderAndRefresh"
                                 >
                                     <LucideIcon
                                         icon="ArrowUpDown"
                                         :size="12"
                                     />
-                                    Mais recentes
+                                    {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
                                 </button>
                                 <div class="dropdown">
                                     <button
@@ -172,43 +174,23 @@
                                             icon="Filter"
                                             :size="12"
                                         />
-                                        Todas as ações
+                                        {{ selectedActionLabel }}
                                         <LucideIcon
                                             icon="ChevronDown"
                                             :size="12"
                                         />
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-start">
-                                        <li>
+                                        <li
+                                            v-for="opt in actionFilterOptions"
+                                            :key="opt.value == null ? 'all' : opt.value"
+                                        >
                                             <a
                                                 class="dropdown-item"
                                                 href="#"
+                                                @click.prevent="setActionAndRefresh(opt.value)"
                                             >
-                                                Todas as ações
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                class="dropdown-item"
-                                                href="#"
-                                            >
-                                                Upload
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                class="dropdown-item"
-                                                href="#"
-                                            >
-                                                Deletar
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                class="dropdown-item"
-                                                href="#"
-                                            >
-                                                Protocolo
+                                                {{ opt.label }}
                                             </a>
                                         </li>
                                     </ul>
@@ -227,8 +209,7 @@
                                 class="form-control form-control-sm border-start-0 py-1"
                                 placeholder="Buscar por usuário, detalhes, ação, etapa..."
                                 aria-label="Buscar no histórico"
-                                :value="historySearchInput"
-                                @input="$emit('update:historySearchInput', $event.target.value)"
+                                v-model="historySearchInput"
                             />
                         </div>
                     </div>
@@ -347,7 +328,7 @@
                                             ? 'btn-primary'
                                             : 'btn-light'
                                     "
-                                    @click="$emit('update:selectedStageId', stage.value)"
+                                    @click="setStageAndRefresh(stage.value)"
                                 >
                                     {{ stage.label }}
                                 </button>
@@ -355,13 +336,15 @@
                             <div class="d-flex align-items-center gap-2 flex-wrap">
                                 <button
                                     type="button"
-                                    class="btn btn-light btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1"
+                                    class="btn btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1"
+                                    :class="orderDescending ? 'btn-primary' : 'btn-light'"
+                                    @click="toggleOrderAndRefresh"
                                 >
                                     <LucideIcon
                                         icon="ArrowUpDown"
                                         :size="12"
                                     />
-                                    Mais recentes
+                                    {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
                                 </button>
                                 <div class="dropdown">
                                     <button
@@ -374,43 +357,23 @@
                                             icon="Filter"
                                             :size="12"
                                         />
-                                        Todas as ações
+                                        {{ selectedActionLabel }}
                                         <LucideIcon
                                             icon="ChevronDown"
                                             :size="12"
                                         />
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-start">
-                                        <li>
+                                        <li
+                                            v-for="opt in actionFilterOptions"
+                                            :key="opt.value == null ? 'all' : opt.value"
+                                        >
                                             <a
                                                 class="dropdown-item"
                                                 href="#"
+                                                @click.prevent="setActionAndRefresh(opt.value)"
                                             >
-                                                Todas as ações
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                class="dropdown-item"
-                                                href="#"
-                                            >
-                                                Upload
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                class="dropdown-item"
-                                                href="#"
-                                            >
-                                                Deletar
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a
-                                                class="dropdown-item"
-                                                href="#"
-                                            >
-                                                Protocolo
+                                                {{ opt.label }}
                                             </a>
                                         </li>
                                     </ul>
@@ -429,8 +392,7 @@
                                 class="form-control form-control-sm border-start-0 py-1"
                                 placeholder="Buscar por usuário, detalhes, ação, etapa..."
                                 aria-label="Buscar no histórico"
-                                :value="historySearchInput"
-                                @input="$emit('update:historySearchInput', $event.target.value)"
+                                v-model="historySearchInput"
                             />
                         </div>
                     </div>
@@ -558,9 +520,22 @@
                 stageFilterOptions: [],
                 selectedStageId: "0",
                 historySearchInput: "",
+                selectedActionCode: null,
+                orderDescending: true,
+                actionFilterOptions: [
+                    { value: null, label: "Todas as ações" },
+                    { value: 0, label: "Upload" },
+                    { value: 8, label: "Deletar" },
+                ],
             };
         },
         computed: {
+            selectedActionLabel() {
+                const opt = this.actionFilterOptions.find(
+                    (o) => o.value === this.selectedActionCode
+                );
+                return opt ? opt.label : "Todas as ações";
+            },
             hasMultipleWorkflows() {
                 return (this.selectedDocumentWorkflows || []).length > 1;
             },
@@ -583,6 +558,10 @@
                 this.displayedLimit = 10;
                 this.selectedWorkflowId = null;
                 this.auditCardDetails = null;
+                this.selectedStageId = "0";
+                this.historySearchInput = "";
+                this.selectedActionCode = null;
+                this.orderDescending = true;
 
                 const workflowsCount = (this.selectedDocumentWorkflows || []).length;
                 if (workflowsCount === 0) return;
@@ -604,6 +583,18 @@
                 this.selectedWorkflowId = null;
                 this.auditCardDetails = null;
             },
+            setStageAndRefresh(stageValue) {
+                this.selectedStageId = stageValue;
+                this.getAuditCardDetails();
+            },
+            setActionAndRefresh(value) {
+                this.selectedActionCode = value;
+                this.getAuditCardDetails();
+            },
+            toggleOrderAndRefresh() {
+                this.orderDescending = !this.orderDescending;
+                this.getAuditCardDetails();
+            },
             loadMoreHistory() {
                 this.displayedLimit += 10;
             },
@@ -620,8 +611,22 @@
                 if (workflowId == null) return;
 
                 this.isLoading = true;
+                const search = (this.historySearchInput || "").trim() || undefined;
+                const stepRaw = this.selectedStageId
+                    ? parseInt(this.selectedStageId, 10)
+                    : undefined;
+                const step =
+                    stepRaw !== undefined && !Number.isNaN(stepRaw) && stepRaw !== 0
+                        ? stepRaw
+                        : undefined;
+                const params = {
+                    take: this.displayedLimit,
+                    ...(search && { search }),
+                    ...(step !== undefined && { step }),
+                    ...(this.selectedActionCode != null && { action: this.selectedActionCode }),
+                    orderDescending: this.orderDescending,
+                };
                 try {
-                    const params = { take: this.displayedLimit };
                     const response = await AuditorsService.getCardAuditDetails(
                         this.selectedDocument.cardId,
                         workflowId,

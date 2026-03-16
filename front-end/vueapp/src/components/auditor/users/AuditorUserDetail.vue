@@ -236,12 +236,6 @@
                                                     />
                                                     {{ entry.workflowName }}
                                                 </template>
-                                                <span
-                                                    v-if="isProtocolAction(entry.actionType)"
-                                                    class="user-activity-protocol"
-                                                >
-                                                    Protocolo
-                                                </span>
                                             </span>
                                         </div>
                                     </div>
@@ -293,7 +287,6 @@
                     { value: null, label: "Todas as ações" },
                     { value: 0, label: "Upload" },
                     { value: 1, label: "Deletar" },
-                    { value: 2, label: "Protocolo" },
                 ],
             };
         },
@@ -384,11 +377,6 @@
                 if (action.includes("inputquestionnaire")) return "Questionário preenchido";
                 return `${name} — ${entry.actionType || "Ação"}`;
             },
-            isProtocolAction(actionType) {
-                if (!actionType) return false;
-                const t = actionType.toLowerCase();
-                return t.includes("protocol") || t === "advancement" || t === "finalize";
-            },
             toggleOrderAndRefresh() {
                 this.orderDescending = !this.orderDescending;
                 this.refreshWithCurrentDocument();
@@ -404,11 +392,15 @@
                 }
                 this.activityDisplayedLimit = 10;
                 this.isLoading = true;
+                const search = (this.activitySearch || "").trim() || undefined;
+                const params = {
+                    ...(search && { search }),
+                    ...(this.selectedActionCode != null && {
+                        actionTypeCode: this.selectedActionCode,
+                    }),
+                    orderDescending: this.orderDescending,
+                };
                 try {
-                    const params = {
-                        actionTypeCode: this.selectedActionCode ?? undefined,
-                        orderDescending: this.orderDescending,
-                    };
                     const response = await AuditorsService.getUserAuditDetails(
                         this.selectedUser.userId,
                         params

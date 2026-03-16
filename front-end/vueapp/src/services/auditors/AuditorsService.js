@@ -37,9 +37,9 @@ export default {
                 };
             });
     },
-    getWorkflowAuditDetails(id) {
+    getWorkflowAuditDetails(id, params = {}) {
         return api
-            .get(`/Auditor/Workflow/${id}`)
+            .get(`/Auditor/Workflow/${id}`, { params })
             .then(({ data }) => {
                 return data;
             })
