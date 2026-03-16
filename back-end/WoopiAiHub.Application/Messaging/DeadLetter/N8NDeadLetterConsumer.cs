@@ -35,7 +35,7 @@ namespace WoopiAiHub.Application.Messaging.DeadLetter
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Error to process N8N DeadLetter: {message}", ex.Message);
+                    _logger.LogError(ex, "Error to process N8N DeadLetter: {Message}", ex.Message);
                     throw;
                 }
             });
