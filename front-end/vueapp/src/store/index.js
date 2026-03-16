@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 
 export default new Vuex.Store({
     state: {
-        theme: null, // "css-theme-light" | "css-theme-dark", synced from localStorage
+        theme: null, 
         tenantInitialized: false,
         userProfile: {
             language: "pt",
@@ -99,7 +99,7 @@ export default new Vuex.Store({
             },
             reducer(state) {
                 const { theme, ...rest } = state;
-                return rest; // do not persist theme (uses localStorage)
+                return rest; 
             },
         }),
     ],
