@@ -3,11 +3,10 @@
         <div class="col-4">
             <div class="card rounded-3 auditor-summary-card">
                 <div class="card-body d-flex flex-column auditor-summary-card-body">
-                    <AuditorWorkflowFilters v-model:search="search" />
+                    <AuditorWorkflowFilters @filter="filterData" />
                     <AuditorWorkflowSummary
-                        ref="summaryRef"
-                        :selected-workflow="selectedWorkflow"
-                        :search="search"
+                        ref="AuditorWorkflowSummary"
+                        :filters="filterParams"
                         @select-workflow="onSelectWorkflow"
                     />
                 </div>
@@ -15,7 +14,10 @@
         </div>
         <div class="col-8">
             <div class="card rounded-3 auditor-detail-card">
-                <AuditorWorkflowDetail :selected-workflow="selectedWorkflow" />
+                <AuditorWorkflowDetail
+                    ref="AuditorWorkflowDetail"
+                    :selected-workflow="selectedWorkflow"
+                />
             </div>
         </div>
     </div>
@@ -34,13 +36,22 @@
         },
         data() {
             return {
-                search: "",
+                filterParams: {
+                    search: "",
+                },
                 selectedWorkflow: null,
             };
         },
         methods: {
+            filterData(filters) {
+                this.filterParams = filters;
+                this.$refs.AuditorWorkflowSummary?.refreshWithCurrentFilters();
+            },
             onSelectWorkflow(workflow) {
                 this.selectedWorkflow = workflow;
+                this.$nextTick(() => {
+                    this.$refs.AuditorWorkflowDetail?.refreshWithCurrentDocument();
+                });
             },
         },
     };

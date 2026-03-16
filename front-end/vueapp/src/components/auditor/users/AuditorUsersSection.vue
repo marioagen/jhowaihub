@@ -3,16 +3,10 @@
         <div class="col-4">
             <div class="card rounded-3 auditor-summary-card">
                 <div class="card-body d-flex flex-column auditor-summary-card-body">
-                    <AuditorUserFilters
-                        v-model:search="search"
-                        v-model:team-id="teamId"
-                        :team-options="teamOptions"
-                    />
+                    <AuditorUserFilters @filter="filterData" />
                     <AuditorUserSummary
-                        ref="summaryRef"
-                        :selected-user="selectedUser"
-                        :search="search"
-                        :team-id="teamId"
+                        ref="AuditorUserSummary"
+                        :filters="filterParams"
                         @select-user="onSelectUser"
                     />
                 </div>
@@ -20,7 +14,10 @@
         </div>
         <div class="col-8">
             <div class="card rounded-3 auditor-detail-card">
-                <AuditorUserDetail :selected-user="selectedUser" />
+                <AuditorUserDetail
+                    ref="AuditorUserDetail"
+                    :selected-user="selectedUser"
+                />
             </div>
         </div>
     </div>
@@ -39,20 +36,23 @@
         },
         data() {
             return {
-                search: "",
-                teamId: "",
-                teamOptions: [
-                    { value: "", label: "Todos os times" },
-                    { value: "juridico", label: "Time Juridico" },
-                    { value: "financeiro", label: "Time Financeiro" },
-                    { value: "rh", label: "Time RH" },
-                ],
+                filterParams: {
+                    search: "",
+                    teamId: "",
+                },
                 selectedUser: null,
             };
         },
         methods: {
+            filterData(filters) {
+                this.filterParams = filters;
+                this.$refs.AuditorUserSummary?.refreshWithCurrentFilters();
+            },
             onSelectUser(user) {
                 this.selectedUser = user;
+                this.$nextTick(() => {
+                    this.$refs.AuditorUserDetail?.refreshWithCurrentDocument();
+                });
             },
         },
     };

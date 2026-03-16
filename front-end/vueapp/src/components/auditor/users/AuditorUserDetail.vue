@@ -17,308 +17,242 @@
             </div>
         </template>
         <template v-else>
-            <div class="user-detail-content p-3 d-flex flex-column flex-grow-1 min-h-0">
-                <!-- 1. User profile card -->
-                <div class="user-detail-profile-card rounded-2 p-2 mb-3 border">
-                    <div class="d-flex align-items-start gap-2">
-                        <span
-                            class="user-detail-profile-icon d-inline-flex align-items-center justify-content-center flex-shrink-0"
-                        >
-                            <LucideIcon
-                                icon="User"
-                                :size="24"
-                            />
-                        </span>
-                        <div class="min-w-0 flex-grow-1">
-                            <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
-                                <span class="user-detail-name fw-bold">
-                                    {{ selectedUser.name }}
-                                </span>
-                                <BadgeComponent
-                                    :text="selectedUser.teamName"
-                                    :variant="selectedUser.teamVariant"
-                                    size="sm"
-                                    :clickable="false"
-                                />
-                            </div>
-                            <div class="small text-primary">
-                                {{ selectedUser.primaryWorkflowLabel }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. Summary stat cards -->
-                <div class="row g-2 mb-3">
-                    <div class="col-6 col-md-3">
-                        <div
-                            class="user-detail-stat-card rounded-2 p-2 border d-flex flex-column align-items-center text-center"
-                        >
-                            <span class="user-detail-stat-value fw-bold">
-                                {{ summary.totalActions }}
-                            </span>
-                            <span class="small text-muted">Total de Ações</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div
-                            class="user-detail-stat-card rounded-2 p-2 border d-flex flex-column align-items-center text-center"
-                        >
-                            <span class="user-detail-stat-value fw-bold">
-                                {{ summary.workflows }}
-                            </span>
-                            <span class="small text-muted">Esteiras</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div
-                            class="user-detail-stat-card rounded-2 p-2 border d-flex flex-column align-items-center text-center"
-                        >
-                            <span class="user-detail-stat-value fw-bold">
-                                {{ summary.avancar }}
-                            </span>
-                            <span class="small text-muted">Avançar</span>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div
-                            class="user-detail-stat-card rounded-2 p-2 border d-flex flex-column align-items-center text-center"
-                        >
-                            <span class="user-detail-stat-value fw-bold">
-                                {{ summary.perguntarDocumento }}
-                            </span>
-                            <span class="small text-muted">Perguntar ao documento</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Activity history -->
-                <div class="user-detail-activity-section d-flex flex-column flex-grow-1 min-h-0">
-                    <div class="mb-2">
-                        <h6
-                            class="mb-0 fw-bold d-flex align-items-center gap-1 user-detail-heading"
-                        >
-                            <LucideIcon
-                                icon="History"
-                                :size="18"
-                            />
-                            Histórico de Atividade
-                            <BadgeComponent
-                                :text="filteredActivityEntries.length"
-                                variant="secondary"
-                                size="sm"
-                                :clickable="false"
-                            />
-                        </h6>
-                    </div>
-                    <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-                        <div
-                            class="input-group input-group-sm user-detail-filter flex-grow-1 flex-md-grow-0"
-                        >
-                            <span class="input-group-text border-end-0 py-1">
-                                <LucideIcon
-                                    icon="Search"
-                                    :size="14"
-                                />
-                            </span>
-                            <input
-                                v-model="activitySearch"
-                                type="text"
-                                class="form-control form-control-sm border-start-0 py-1"
-                                placeholder="Buscar por documento, detalhes, esteira, etapa..."
-                                aria-label="Buscar no histórico"
-                            />
-                        </div>
-                        <button
-                            type="button"
-                            class="btn btn-light btn-sm border py-1 px-2 user-detail-filter d-flex align-items-center gap-1"
-                        >
-                            <LucideIcon
-                                icon="ArrowUpDown"
-                                :size="12"
-                            />
-                            Mais recentes
-                        </button>
-                        <div class="dropdown">
-                            <button
-                                class="btn btn-light btn-sm border py-1 px-2 user-detail-filter d-flex align-items-center gap-1 dropdown-toggle"
-                                type="button"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
+            <div
+                v-if="isLoading"
+                class="d-flex align-items-center justify-content-center flex-grow-1 min-vh-50 p-5"
+            >
+                <LoadingComponent />
+            </div>
+            <template v-else>
+                <div class="user-detail-content p-3 d-flex flex-column flex-grow-1 min-h-0">
+                    <!-- 1. User profile card -->
+                    <div class="user-detail-profile-card rounded-2 p-2 mb-3 border">
+                        <div class="d-flex align-items-start gap-2">
+                            <span
+                                class="user-detail-profile-icon d-inline-flex align-items-center justify-content-center flex-shrink-0"
                             >
                                 <LucideIcon
-                                    icon="Filter"
-                                    :size="12"
+                                    icon="User"
+                                    :size="24"
                                 />
-                                {{ selectedActionLabel }}
-                                <LucideIcon
-                                    icon="ChevronDown"
-                                    :size="12"
-                                />
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-start">
-                                <li
-                                    v-for="opt in actionFilterOptions"
-                                    :key="opt.value"
-                                >
-                                    <a
-                                        class="dropdown-item"
-                                        href="#"
-                                        @click.prevent="selectedActionId = opt.value"
-                                    >
-                                        {{ opt.label }}
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div
-                        class="user-detail-activity-list overflow-auto flex-grow-1 min-h-0 d-flex flex-column"
-                    >
-                        <div
-                            v-for="entry in displayedActivityEntries"
-                            :key="entry.id"
-                            class="user-activity-card rounded-2 p-2 mb-2 border"
-                        >
-                            <div class="d-flex align-items-start gap-2 flex-wrap">
-                                <span
-                                    class="user-activity-doc-icon d-inline-flex align-items-center justify-content-center flex-shrink-0"
-                                >
-                                    <LucideIcon
-                                        icon="FileText"
-                                        :size="16"
+                            </span>
+                            <div class="min-w-0 flex-grow-1">
+                                <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                                    <span class="user-detail-name fw-bold">
+                                        {{ userDetail?.userName ?? selectedUser.userName }}
+                                    </span>
+                                    <BadgeComponent
+                                        v-if="teamLabel"
+                                        :text="teamLabel"
+                                        variant="secondary"
+                                        size="sm"
+                                        :clickable="false"
                                     />
-                                </span>
-                                <div class="min-w-0 flex-grow-1 user-activity-card-content">
-                                    <div class="d-flex align-items-center flex-wrap gap-1 mb-1">
-                                        <span class="user-activity-doc-title small fw-bold">
-                                            {{ entry.documentTitle }}
-                                        </span>
-                                        <BadgeComponent
-                                            v-for="tag in entry.actionTags"
-                                            :key="tag.label"
-                                            :text="tag.label"
-                                            :variant="tag.variant"
-                                            size="sm"
-                                            :clickable="false"
-                                        />
-                                    </div>
-                                    <p class="small text-muted mb-1">{{ entry.description }}</p>
-                                    <div
-                                        class="small text-muted d-flex align-items-center gap-1 mb-1"
-                                    >
-                                        <LucideIcon
-                                            icon="Clock"
-                                            :size="12"
-                                        />
-                                        {{ entry.timestamp }}
-                                    </div>
-                                    <div
-                                        v-if="entry.workflowContext"
-                                        class="small text-muted d-flex align-items-center gap-1"
-                                    >
-                                        <LucideIcon
-                                            icon="Percent"
-                                            :size="12"
-                                        />
-                                        {{ entry.workflowContext }}
-                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- 2. Summary stat cards -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6 col-md-3">
+                            <div
+                                class="user-detail-stat-card rounded-2 p-2 border d-flex flex-column align-items-center text-center"
+                            >
+                                <span class="user-detail-stat-value fw-bold">
+                                    {{ userDetail?.logCountTotal ?? 0 }}
+                                </span>
+                                <span class="small text-muted">Total de Ações</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div
+                                class="user-detail-stat-card rounded-2 p-2 border d-flex flex-column align-items-center text-center"
+                            >
+                                <span class="user-detail-stat-value fw-bold">
+                                    {{ selectedUser.workflowCount ?? 0 }}
+                                </span>
+                                <span class="small text-muted">Esteiras</span>
+                            </div>
+                        </div>
                         <div
-                            v-if="showActivityLoadMore"
-                            class="mt-2 mb-3 text-center"
+                            v-for="act in (userDetail?.logCountByActionType ?? []).slice(0, 2)"
+                            :key="act.actionTypeCode"
+                            class="col-6 col-md-3"
                         >
+                            <div
+                                class="user-detail-stat-card rounded-2 p-2 border d-flex flex-column align-items-center text-center"
+                            >
+                                <span class="user-detail-stat-value fw-bold">{{ act.count }}</span>
+                                <span class="small text-muted">Tipo {{ act.actionTypeCode }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Activity history -->
+                    <div
+                        class="user-detail-activity-section d-flex flex-column flex-grow-1 min-h-0"
+                    >
+                        <div class="mb-2">
+                            <h6
+                                class="mb-0 fw-bold d-flex align-items-center gap-1 user-detail-heading"
+                            >
+                                <LucideIcon
+                                    icon="History"
+                                    :size="18"
+                                />
+                                Histórico de Atividade
+                                <BadgeComponent
+                                    :text="(userDetail?.actions ?? []).length"
+                                    variant="secondary"
+                                    size="sm"
+                                    :clickable="false"
+                                />
+                            </h6>
+                        </div>
+                        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                            <div
+                                class="input-group input-group-sm user-detail-filter flex-grow-1 flex-md-grow-0"
+                            >
+                                <span class="input-group-text border-end-0 py-1">
+                                    <LucideIcon
+                                        icon="Search"
+                                        :size="14"
+                                    />
+                                </span>
+                                <input
+                                    v-model="activitySearch"
+                                    type="text"
+                                    class="form-control form-control-sm border-start-0 py-1"
+                                    placeholder="Buscar por documento, esteira..."
+                                    aria-label="Buscar no histórico"
+                                />
+                            </div>
                             <button
                                 type="button"
-                                class="btn btn-outline-primary btn-sm"
-                                @click="loadMoreActivity"
+                                class="btn btn-light btn-sm border py-1 px-2 user-detail-filter d-flex align-items-center gap-1"
+                                :class="orderDescending ? 'btn-primary' : ''"
+                                @click="toggleOrderAndRefresh"
                             >
-                                Carregar mais
+                                <LucideIcon
+                                    icon="ArrowUpDown"
+                                    :size="12"
+                                />
+                                {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
                             </button>
+                            <div class="dropdown">
+                                <button
+                                    class="btn btn-light btn-sm border py-1 px-2 user-detail-filter d-flex align-items-center gap-1 dropdown-toggle"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <LucideIcon
+                                        icon="Filter"
+                                        :size="12"
+                                    />
+                                    {{ selectedActionLabel }}
+                                    <LucideIcon
+                                        icon="ChevronDown"
+                                        :size="12"
+                                    />
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-start">
+                                    <li
+                                        v-for="opt in actionFilterOptions"
+                                        :key="opt.value"
+                                    >
+                                        <a
+                                            class="dropdown-item"
+                                            href="#"
+                                            @click.prevent="setActionFilter(opt.value)"
+                                        >
+                                            {{ opt.label }}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div
+                            class="user-detail-activity-list overflow-auto flex-grow-1 min-h-0 d-flex flex-column"
+                        >
+                            <div
+                                v-for="(entry, index) in displayedActivityEntries"
+                                :key="entry.cardId + '-' + index"
+                                class="user-activity-card rounded-2 p-2 mb-2 border"
+                            >
+                                <div class="d-flex align-items-start gap-2 flex-wrap">
+                                    <span
+                                        class="user-activity-doc-icon d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                                    >
+                                        <LucideIcon
+                                            icon="FileText"
+                                            :size="16"
+                                        />
+                                    </span>
+                                    <div class="min-w-0 flex-grow-1 user-activity-card-content">
+                                        <div class="d-flex align-items-center flex-wrap gap-1 mb-1">
+                                            <span class="user-activity-doc-title small fw-bold">
+                                                {{ entry.cardName }}
+                                            </span>
+                                            <BadgeComponent
+                                                :text="entry.actionType"
+                                                variant="primary"
+                                                size="sm"
+                                                :clickable="false"
+                                            />
+                                            <span
+                                                v-if="entry.workflowName"
+                                                class="small text-muted d-inline-flex align-items-center gap-1"
+                                            >
+                                                <LucideIcon
+                                                    icon="Workflow"
+                                                    :size="12"
+                                                />
+                                                {{ entry.workflowName }}
+                                            </span>
+                                        </div>
+                                        <div
+                                            class="small text-muted d-flex align-items-center gap-1 mb-1"
+                                        >
+                                            <LucideIcon
+                                                icon="Clock"
+                                                :size="12"
+                                            />
+                                            {{ formatDateWithTime(entry.created) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div
+                                v-if="showActivityLoadMore"
+                                class="mt-2 mb-3 text-center"
+                            >
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-primary btn-sm"
+                                    @click="activityDisplayedLimit += 10"
+                                >
+                                    Carregar mais
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </template>
         </template>
     </div>
 </template>
 <script>
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
-
-    const MOCK_ACTIVITY_BY_USER = {
-        "user-1": [
-            {
-                id: "ua1",
-                documentTitle: "Contrato João Silva",
-                actionTags: [{ label: "Perguntar ao documento", variant: "primary" }],
-                description: "Pergunta: 'Existem cláusulas de não-competição?'",
-                timestamp: "2024-02-12 15:00:00",
-                workflowContext: "Análise Juridica de Contratos . Análise Juridica",
-                actionId: "perguntar",
-            },
-            {
-                id: "ua2",
-                documentTitle: "Contrato Fornecedor TechCorp",
-                actionTags: [{ label: "Avançar", variant: "success" }],
-                description: "Documento avançado para 'Análise Juridica'",
-                timestamp: "2024-02-12 14:30:00",
-                workflowContext: "Análise Juridica de Contratos . Protocolo",
-                actionId: "avancar",
-            },
-            {
-                id: "ua3",
-                documentTitle: "Aditivo Contratual #45",
-                actionTags: [{ label: "Editar resposta", variant: "warning" }],
-                description: "Campo 'Cláusulas de Risco' atualizado com 3 itens",
-                timestamp: "2024-02-12 11:20:00",
-                workflowContext: "Análise Juridica de Contratos . Análise Juridica",
-                actionId: "editar",
-            },
-            {
-                id: "ua4",
-                documentTitle: "Contrato João Silva",
-                actionTags: [{ label: "Perguntar ao documento", variant: "primary" }],
-                description: "Pergunta: 'Qual o prazo de vigência?'",
-                timestamp: "2024-02-11 16:00:00",
-                workflowContext: "Análise Juridica de Contratos . Protocolo",
-                actionId: "perguntar",
-            },
-            {
-                id: "ua5",
-                documentTitle: "Contrato Fornecedor TechCorp",
-                actionTags: [{ label: "Avançar", variant: "success" }],
-                description: "Documento avançado para 'Protocolo'",
-                timestamp: "2024-02-11 10:15:00",
-                workflowContext: "Análise Juridica de Contratos . Análise Juridica",
-                actionId: "avancar",
-            },
-            {
-                id: "ua6",
-                documentTitle: "Contrato João Silva",
-                actionTags: [{ label: "Avançar", variant: "success" }],
-                description: "Documento avançado para 'Análise Juridica'",
-                timestamp: "2024-02-10 14:00:00",
-                workflowContext: "Análise Juridica de Contratos . Protocolo",
-                actionId: "avancar",
-            },
-            {
-                id: "ua7",
-                documentTitle: "Aditivo Contratual #45",
-                actionTags: [{ label: "Avançar", variant: "success" }],
-                description: "Documento recebido e protocolado",
-                timestamp: "2024-02-10 09:00:00",
-                workflowContext: "Análise Juridica de Contratos . Protocolo",
-                actionId: "avancar",
-            },
-        ],
-    };
+    import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import AuditorsService from "@/services/auditors/AuditorsService";
+    import dateHelper from "@/helpers/date.js";
 
     export default {
         name: "AuditorUserDetail",
-        components: { BadgeComponent },
+        components: { BadgeComponent, LoadingComponent },
         props: {
             selectedUser: {
                 type: Object,
@@ -327,35 +261,31 @@
         },
         data() {
             return {
+                isLoading: false,
+                userDetail: null,
                 activitySearch: "",
-                selectedActionId: "",
+                selectedActionCode: null,
+                orderDescending: true,
                 activityDisplayedLimit: 10,
                 actionFilterOptions: [
-                    { value: "", label: "Todas as ações" },
-                    { value: "avancar", label: "Avançar" },
-                    { value: "perguntar", label: "Perguntar ao documento" },
-                    { value: "editar", label: "Editar resposta" },
+                    { value: null, label: "Todas as ações" },
+                    { value: 0, label: "Upload" },
+                    { value: 1, label: "Deletar" },
+                    { value: 2, label: "Protocolo" },
                 ],
             };
         },
         computed: {
-            summary() {
-                const u = this.selectedUser;
-                if (!u) return { totalActions: 0, workflows: 0, avancar: 0, perguntarDocumento: 0 };
-                const entries = this.activityEntries;
-                const avancar = entries.filter((e) => e.actionId === "avancar").length;
-                const perguntar = entries.filter((e) => e.actionId === "perguntar").length;
-                return {
-                    totalActions: u.actionsCount ?? entries.length,
-                    workflows: u.workflowsCount ?? 1,
-                    avancar,
-                    perguntarDocumento: perguntar,
-                };
+            teamLabel() {
+                const teams = this.userDetail?.teams ?? this.selectedUser?.teams;
+                if (!Array.isArray(teams) || teams.length === 0) return null;
+                return teams
+                    .map((t) => t.teamName)
+                    .filter(Boolean)
+                    .join(", ");
             },
             activityEntries() {
-                if (!this.selectedUser?.id) return [];
-                const list = MOCK_ACTIVITY_BY_USER[this.selectedUser.id];
-                return list ? [...list] : [];
+                return this.userDetail?.actions ?? [];
             },
             filteredActivityEntries() {
                 let list = this.activityEntries;
@@ -363,17 +293,11 @@
                 if (q) {
                     list = list.filter(
                         (e) =>
-                            (e.documentTitle && e.documentTitle.toLowerCase().includes(q)) ||
-                            (e.description && e.description.toLowerCase().includes(q)) ||
-                            (e.workflowContext && e.workflowContext.toLowerCase().includes(q))
+                            (e.cardName && e.cardName.toLowerCase().includes(q)) ||
+                            (e.workflowName && e.workflowName.toLowerCase().includes(q))
                     );
                 }
-                if (this.selectedActionId) {
-                    list = list.filter((e) => e.actionId === this.selectedActionId);
-                }
-                return [...list].sort((a, b) =>
-                    (b.timestamp || "").localeCompare(a.timestamp || "")
-                );
+                return [...list];
             },
             displayedActivityEntries() {
                 return this.filteredActivityEntries.slice(0, this.activityDisplayedLimit);
@@ -383,21 +307,70 @@
                 return total > 10 && this.activityDisplayedLimit < total;
             },
             selectedActionLabel() {
-                const opt = this.actionFilterOptions.find((o) => o.value === this.selectedActionId);
+                const opt = this.actionFilterOptions.find(
+                    (o) => o.value === this.selectedActionCode
+                );
                 return opt ? opt.label : "Todas as ações";
             },
         },
         methods: {
-            loadMoreActivity() {
-                this.activityDisplayedLimit += 10;
+            formatDateWithTime(date) {
+                return dateHelper.formatDateWithTime(date) || "—";
+            },
+            toggleOrderAndRefresh() {
+                this.orderDescending = !this.orderDescending;
+                this.refreshWithCurrentDocument();
+            },
+            setActionFilter(value) {
+                this.selectedActionCode = value;
+                this.refreshWithCurrentDocument();
+            },
+            async refreshWithCurrentDocument() {
+                if (this.selectedUser?.userId == null) {
+                    this.userDetail = null;
+                    return;
+                }
+                this.activityDisplayedLimit = 10;
+                this.isLoading = true;
+                try {
+                    const params = {
+                        actionTypeCode: this.selectedActionCode ?? undefined,
+                        orderDescending: this.orderDescending,
+                    };
+                    const response = await AuditorsService.getUserAuditDetails(
+                        this.selectedUser.userId,
+                        params
+                    );
+                    if (response.error) {
+                        this.$notify({
+                            title: "audit-users.title",
+                            message:
+                                response.error.response?.data?.detail ?? response.error.message,
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                        this.userDetail = null;
+                        return;
+                    }
+                    this.userDetail =
+                        response && typeof response === "object" && !Array.isArray(response)
+                            ? response
+                            : (response?.data ?? null);
+                } finally {
+                    this.isLoading = false;
+                }
             },
         },
         watch: {
             selectedUser: {
                 handler() {
                     this.activitySearch = "";
-                    this.selectedActionId = "";
+                    this.selectedActionCode = null;
                     this.activityDisplayedLimit = 10;
+                    this.userDetail = null;
+                    if (this.selectedUser?.userId != null) {
+                        this.refreshWithCurrentDocument();
+                    }
                 },
                 immediate: true,
             },

@@ -219,6 +219,7 @@ namespace WoopiAiHub.Repository.Audit
                     StepName = g.Key.StepName,
                     CardCount = g.Select(a => a.CardId).Distinct().Count()
                 })
+                .OrderBy(s => s.StepId)
                 .ToList();
 
             int finalized = 0;

@@ -1,24 +1,33 @@
 <template>
     <div>
         <div
-            v-if="loading"
+            v-if="isLoading"
             class="audit-list-wrapper d-flex flex-column flex-grow-1 min-h-0 align-items-center justify-content-center py-5"
         >
             <LoadingComponent />
         </div>
         <template v-else>
             <div class="audit-list-wrapper d-flex flex-column flex-grow-1 min-h-0">
-                <div class="audit-list overflow-auto flex-grow-1 min-h-0">
+                <div
+                    v-if="auditUserList.length === 0"
+                    class="audit-list-empty text-muted small text-center py-5"
+                >
+                    No audit users to show.
+                </div>
+                <div
+                    v-else
+                    class="audit-list overflow-auto flex-grow-1 min-h-0"
+                >
                     <div
-                        v-for="user in displayedUserItems"
-                        :key="user.id"
+                        v-for="item in auditUserList"
+                        :key="item.userId"
                         class="audit-list-item user-card-item rounded-2 p-2 mb-2 cursor-pointer"
                         :class="{
                             'audit-list-item-selected border-start border-primary border-3':
-                                selectedUser && selectedUser.id === user.id,
-                            border: !selectedUser || selectedUser.id !== user.id,
+                                selectedUser && selectedUser.userId === item.userId,
+                            border: !selectedUser || selectedUser.userId !== item.userId,
                         }"
-                        @click="$emit('select-user', user)"
+                        @click="selectUser(item)"
                     >
                         <div class="d-flex align-items-start gap-2">
                             <span
@@ -31,20 +40,15 @@
                             </span>
                             <div class="min-w-0 flex-grow-1">
                                 <div class="user-card-name fw-semibold small text-break mb-1">
-                                    {{ user.name }}
+                                    {{ item.userName }}
                                 </div>
-                                <div class="d-flex flex-wrap gap-1 mb-1">
+                                <div
+                                    v-if="teamLabel(item)"
+                                    class="d-flex flex-wrap gap-1 mb-1"
+                                >
                                     <BadgeComponent
-                                        :text="user.teamName"
-                                        :variant="user.teamVariant"
-                                        size="sm"
-                                        :clickable="false"
-                                    />
-                                </div>
-                                <div class="d-flex flex-wrap gap-1 mb-1">
-                                    <BadgeComponent
-                                        :text="user.primaryWorkflowLabel"
-                                        variant="info"
+                                        :text="teamLabel(item)"
+                                        variant="secondary"
                                         size="sm"
                                         :clickable="false"
                                     />
@@ -57,15 +61,15 @@
                                             icon="Zap"
                                             :size="12"
                                         />
-                                        {{ user.actionsCount }} ações
+                                        {{ item.logCount }} ação(ões)
                                     </span>
                                     <span class="d-inline-flex align-items-center gap-1">
                                         <LucideIcon
                                             icon="Workflow"
                                             :size="12"
                                         />
-                                        {{ user.workflowsCount }} esteira{{
-                                            user.workflowsCount !== 1 ? "s" : ""
+                                        {{ item.workflowCount }} esteira{{
+                                            item.workflowCount !== 1 ? "s" : ""
                                         }}
                                     </span>
                                 </div>
@@ -92,119 +96,9 @@
 <script>
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import AuditorsService from "@/services/auditors/AuditorsService";
 
-    const MOCK_USER_ITEMS = [
-        {
-            id: "user-1",
-            name: "Dra. Mariana Costa",
-            teamId: "juridico",
-            teamName: "Time Juridico",
-            teamVariant: "secondary",
-            primaryWorkflowLabel: "Análise Juridica de...",
-            actionsCount: 7,
-            workflowsCount: 1,
-        },
-        {
-            id: "user-2",
-            name: "João Ferreira",
-            teamId: "juridico",
-            teamName: "Time Juridico",
-            teamVariant: "secondary",
-            primaryWorkflowLabel: "Análise Juridica de...",
-            actionsCount: 5,
-            workflowsCount: 2,
-        },
-        {
-            id: "user-3",
-            name: "Ana Costa",
-            teamId: "financeiro",
-            teamName: "Time Financeiro",
-            teamVariant: "danger",
-            primaryWorkflowLabel: "Processamento de Not...",
-            actionsCount: 12,
-            workflowsCount: 1,
-        },
-        {
-            id: "user-4",
-            name: "Carlos Silva",
-            teamId: "financeiro",
-            teamName: "Time Financeiro",
-            teamVariant: "danger",
-            primaryWorkflowLabel: "Processamento de Not...",
-            actionsCount: 9,
-            workflowsCount: 2,
-        },
-        {
-            id: "user-5",
-            name: "Roberto Lima",
-            teamId: "financeiro",
-            teamName: "Time Financeiro",
-            teamVariant: "danger",
-            primaryWorkflowLabel: "Conciliação Bancária",
-            actionsCount: 15,
-            workflowsCount: 1,
-        },
-        {
-            id: "user-6",
-            name: "Fernanda Alves",
-            teamId: "rh",
-            teamName: "Time RH",
-            teamVariant: "info",
-            primaryWorkflowLabel: "Gestão de Documentos..",
-            actionsCount: 8,
-            workflowsCount: 2,
-        },
-        {
-            id: "user-7",
-            name: "Luciana Melo",
-            teamId: "rh",
-            teamName: "Time RH",
-            teamVariant: "info",
-            primaryWorkflowLabel: "Gestão de Documentos..",
-            actionsCount: 6,
-            workflowsCount: 1,
-        },
-        {
-            id: "user-8",
-            name: "Paula Santos",
-            teamId: "juridico",
-            teamName: "Time Juridico",
-            teamVariant: "secondary",
-            primaryWorkflowLabel: "Due Diligence Contratual",
-            actionsCount: 4,
-            workflowsCount: 1,
-        },
-        {
-            id: "user-9",
-            name: "Ricardo Oliveira",
-            teamId: "financeiro",
-            teamName: "Time Financeiro",
-            teamVariant: "danger",
-            primaryWorkflowLabel: "Fechamento Mensal",
-            actionsCount: 11,
-            workflowsCount: 2,
-        },
-        {
-            id: "user-10",
-            name: "Carla Mendes",
-            teamId: "rh",
-            teamName: "Time RH",
-            teamVariant: "info",
-            primaryWorkflowLabel: "Onboarding de Colaboradores",
-            actionsCount: 10,
-            workflowsCount: 1,
-        },
-        {
-            id: "user-11",
-            name: "Eduardo Souza",
-            teamId: "juridico",
-            teamName: "Time Juridico",
-            teamVariant: "secondary",
-            primaryWorkflowLabel: "Renovação de Contratos",
-            actionsCount: 3,
-            workflowsCount: 1,
-        },
-    ];
+    const PAGE_SIZE = 10;
 
     export default {
         name: "AuditorUserSummary",
@@ -213,66 +107,82 @@
             LoadingComponent,
         },
         props: {
-            selectedUser: {
+            filters: {
                 type: Object,
-                default: null,
-            },
-            search: {
-                type: String,
-                default: "",
-            },
-            teamId: {
-                type: String,
-                default: "",
+                default: () => ({ search: "", teamId: "" }),
             },
         },
         emits: ["select-user"],
         data() {
             return {
-                loading: false,
-                userItems: [],
-                displayedLimit: 10,
+                isLoading: false,
+                selectedUser: null,
+                auditUserList: [],
+                skip: 0,
             };
         },
-        computed: {
-            filteredUserItems() {
-                const q = (this.search || "").toLowerCase().trim();
-                const tid = this.teamId;
-                return this.userItems.filter((item) => {
-                    const matchesSearch = !q || (item.name && item.name.toLowerCase().includes(q));
-                    const matchesTeam = !tid || (item.teamId && item.teamId === tid);
-                    return matchesSearch && matchesTeam;
-                });
-            },
-            displayedUserItems() {
-                return this.filteredUserItems.slice(0, this.displayedLimit);
-            },
-            showLoadMoreButton() {
-                return (
-                    this.filteredUserItems.length > 10 &&
-                    this.displayedLimit < this.filteredUserItems.length
-                );
-            },
-        },
         methods: {
-            async getData() {
-                this.loading = true;
+            teamLabel(item) {
+                const teams = item.teams;
+                if (!Array.isArray(teams) || teams.length === 0) return null;
+                return teams
+                    .map((t) => t.teamName)
+                    .filter(Boolean)
+                    .join(", ");
+            },
+            selectUser(item) {
+                this.selectedUser = item;
+                this.$emit("select-user", item);
+            },
+            async getAuditUsersSummary() {
+                this.isLoading = true;
                 try {
-                    await new Promise((r) => setTimeout(r, 400));
-                    this.userItems = [...MOCK_USER_ITEMS];
+                    const params = {
+                        skip: this.skip,
+                        userName: this.filters.search || undefined,
+                        teamId: this.filters.teamId ? parseInt(this.filters.teamId, 10) : undefined,
+                    };
+                    if (Number.isNaN(params.teamId)) delete params.teamId;
+                    const response = await AuditorsService.getUserAuditSummary(params);
+                    if (response.error) {
+                        return this.$notify({
+                            title: "audit-users.title",
+                            message:
+                                response.error.response?.data?.detail ?? response.error.message,
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    }
+                    const list = Array.isArray(response)
+                        ? response
+                        : Array.isArray(response?.data)
+                          ? response.data
+                          : [];
+                    if (this.skip === 0) {
+                        this.auditUserList = list;
+                    } else {
+                        this.auditUserList = [...this.auditUserList, ...list];
+                    }
                 } finally {
-                    this.loading = false;
+                    this.isLoading = false;
                 }
             },
             loadMore() {
-                this.displayedLimit = Math.min(
-                    this.displayedLimit + 10,
-                    this.filteredUserItems.length
-                );
+                this.skip += PAGE_SIZE;
+                this.getAuditUsersSummary();
+            },
+            refreshWithCurrentFilters() {
+                this.skip = 0;
+                this.getAuditUsersSummary();
             },
         },
-        mounted() {
-            this.getData();
+        computed: {
+            showLoadMoreButton() {
+                return this.auditUserList.length > 0 && this.auditUserList.length % PAGE_SIZE === 0;
+            },
+        },
+        async created() {
+            await this.getAuditUsersSummary();
         },
     };
 </script>
@@ -298,7 +208,7 @@
     }
     .audit-list-wrapper {
         min-height: 0;
-        max-height: calc(100vh - 450px);
+        max-height: calc(100vh - 430px);
     }
     .audit-list-wrapper .audit-list {
         min-height: 0;
