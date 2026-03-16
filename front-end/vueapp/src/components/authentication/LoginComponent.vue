@@ -3,7 +3,7 @@
         <div class="container" style="padding: 0">
             <div class="row justify-content-center">
                 <div class="text-center">
-                    <img :src="logoSrc" style="padding-bottom: 10px; height: 50px;"
+                    <img :src="logoSrc" style="padding-bottom: 10px; height: 60px;"
                         alt="WOOPI AI" />
                 </div>
                 <div class="card mb-3" style="max-width: 25rem;">
@@ -379,5 +379,9 @@ h5 {
 
 .is-invalid {
     border-color: red;
+}
+
+main {
+    background-color: var(--color-bg-body-content) !important;
 }
 </style>

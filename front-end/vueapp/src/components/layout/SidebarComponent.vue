@@ -14,14 +14,14 @@
                     v-if="isCollapsed"
                     :src="logoSrc"
                     :title="$t('common.home')"
-                    width="30"
-                    height="30"
+                    width="35"
+                    height="35"
                 />
                 <img
                     v-else
                     :src="logoSrc"
                     :title="$t('common.home')"
-                    height="23"
+                    height="28"
                     alt="WOOPI AI"
                     style="margin-left: 0px"
                 />
