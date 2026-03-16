@@ -571,6 +571,8 @@
         align-items: center;
         justify-content: space-between;
         gap: 0.5rem;
+        padding-left: 0;
+        padding-right: 0;
     }
 
     .owner-info {
