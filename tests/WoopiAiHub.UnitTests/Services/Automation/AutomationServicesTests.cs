@@ -592,7 +592,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             cardRepositoryMock.Setup(r => r.FindByIdWithStepAndProfile(It.IsAny<int>())).ReturnsAsync(card);
             stepRepositoryMock.Setup(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId)).ReturnsAsync(nextStep);
             cardRepositoryMock.Setup(r => r.Update(It.IsAny<Domain.Models.Card>())).Returns(true);
-            hubNotifierMock.Setup(h => h.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+            hubNotifierMock.Setup(h => h.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(Task.CompletedTask);
 
             // Act
             await _service.ContinueExecution(automationDto);
@@ -602,7 +602,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             cardRepositoryMock.Verify(r => r.FindByIdWithStepAndProfile(It.IsAny<int>()), Times.Once);
             stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(2, currentStep.WorkflowId), Times.Once);
             cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Once);
-            hubNotifierMock.Verify(h => h.CardProgessAsync(automationDto.Email, automationDto.CardId, 100.0, nextStep.Id, It.IsAny<string>()), Times.Once);
+            hubNotifierMock.Verify(h => h.CardProgessAsync(automationDto.Email, automationDto.CardId, 100.0, nextStep.Id, It.IsAny<string>(), It.IsAny<bool>()), Times.Once);
         }
 
         [Fact(DisplayName = "ContinueExecution should not advance step when card has non-AI profile")]
