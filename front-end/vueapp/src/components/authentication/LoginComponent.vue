@@ -2,10 +2,10 @@
     <main class="d-flex justify-content-center align-items-center min-vh-100">
         <div class="container" style="padding: 0">
             <div class="row justify-content-center">
-                <div class="login-wrapper">
-                <div class="logo-header text-center">
-                    <img :src="logoSrc" style="height: 60px;" alt="WOOPI AI" />
+                <div class="text-center logo-header">
+                    <img :src="logoSrc" style="padding-bottom: 10px; height: 60px;" alt="WOOPI AI" />
                 </div>
+                <div class="login-wrapper">
                 <div class="card mb-3">
                     <div class="text-center mt-3">
                         <h6 class="fw-bold">
@@ -393,13 +393,7 @@ main {
 }
 
 .logo-header {
-    background-color: var(--color-card-content);
-    border-radius: 0.375rem 0.375rem 0 0;
-    padding: 1rem 1rem 0.75rem;
-}
-
-.login-wrapper .card {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+    width: 25rem;
+    max-width: 100%;
 }
 </style>
