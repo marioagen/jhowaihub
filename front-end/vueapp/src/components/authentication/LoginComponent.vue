@@ -96,6 +96,8 @@ import { getJWTPermissions } from "@/utils/permissions";
 import AuthService from "@/services/authenticate/AuthService";
 import { scheduleTokenRefresh } from "@/services/api";
 import TenantModal from "@/components/authentication/TenantModal.vue";
+import logoDark from "@/assets/img/woopiai-logo-dark.png";
+import logoLight from "@/assets/img/woopiai-logo-light.png";
 
 export default {
     name: "LoginIndex",
@@ -132,9 +134,7 @@ export default {
     computed: {
         logoSrc() {
             const theme = this.$store.state.theme || localStorage.getItem("theme") || "css-theme-light";
-            return theme === "css-theme-dark"
-                ? require("@/assets/img/woopiai-logo-dark.png")
-                : require("@/assets/img/woopiai-logo-light.png");
+            return theme === "css-theme-dark" ? logoLight : logoDark;
         },
     },
     methods: {
