@@ -12,16 +12,16 @@
             >
                 <img
                     v-if="isCollapsed"
-                    src="./../../assets/img/woopiai-hub-small-logo.png"
+                    :src="logoSrc"
                     :title="$t('common.home')"
-                    width="30"
-                    height="30"
+                    width="35"
+                    height="35"
                 />
                 <img
                     v-else
-                    src="./../../assets/img/woopiai-hub-logo.png"
+                    :src="logoSrc"
                     :title="$t('common.home')"
-                    height="23"
+                    height="35"
                     alt="WOOPI AI"
                     style="margin-left: 0px"
                 />
@@ -84,6 +84,8 @@
 </template>
 <script>
     import { hasPermission } from "@/utils/permissions";
+    import logoDark from "@/assets/img/woopiai-logo-dark.png";
+    import logoLight from "@/assets/img/woopiai-logo-light.png";
     export default {
         name: "SideBar",
         props: {
@@ -194,6 +196,13 @@
             };
         },
         computed: {
+            isDarkMode() {
+                const theme = this.$store.state.theme || localStorage.getItem("theme") || "css-theme-light";
+                return theme === "css-theme-dark";
+            },
+            logoSrc() {
+                return this.isDarkMode ? logoLight : logoDark;
+            },
             filteredMenuItems() {
                 return this.menuItems.filter((item) => {
                     if (!item.permission) {
