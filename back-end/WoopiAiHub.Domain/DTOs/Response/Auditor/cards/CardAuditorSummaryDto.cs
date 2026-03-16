@@ -1,7 +1,7 @@
 namespace WoopiAiHub.Domain.DTOs.Response.Auditor
 {
     /// <summary>
-    /// Audit view item: card id, card name, workflows, actions count, and status name per card.
+    /// Audit view item: card id, card name, workflows, actions count, and isFinalized per card.
     /// </summary>
     public record CardAuditorSummaryDto
     {
@@ -9,6 +9,6 @@ namespace WoopiAiHub.Domain.DTOs.Response.Auditor
         public string CardName { get; init; } = string.Empty;
         public IReadOnlyList<CardAuditorWorkflowsDto> Workflows { get; init; } = [];
         public int ActionsCount { get; init; }
-        public string StatusName { get; init; } = string.Empty;
+        public bool IsFinalized { get; init; }
     }
 }

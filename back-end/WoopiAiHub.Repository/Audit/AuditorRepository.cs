@@ -25,10 +25,10 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns the first N cards for the auditor (load-more pattern: take 10, then 20, 30…). One row per card with CardId, CardName, Workflows, ActionsCount, StatusName.
-        /// Optional filters: search (matches CardId when numeric, or CardName/WorkflowName by contains), and statusId (exact match on StatusId).
+        /// Returns the first N cards for the auditor (load-more pattern: take 10, then 20, 30…). One row per card with CardId, CardName, Workflows, ActionsCount, IsFinalized (from DB status).
+        /// Optional filter: search (matches CardId when numeric, or CardName/WorkflowName by contains).
         /// </summary>
-        public async Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, int? statusId)
+        public async Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search)
         {
             const int defaultTake = 10;
             if (take <= 0) take = defaultTake;
@@ -48,9 +48,6 @@ namespace WoopiAiHub.Repository.Audit
                     || (c.Step != null && c.Step.Workflow != null && c.Step.Workflow.Name.Contains(searchTerm)));
             }
 
-            if (statusId.HasValue)
-                query = query.Where(c => c.StatusId == statusId.Value);
-
             return await query
                 .OrderBy(c => c.Id)
                 .Take(take)
@@ -62,7 +59,7 @@ namespace WoopiAiHub.Repository.Audit
                         ? new List<CardAuditorWorkflowsDto> { new() { Id = c.Step.Workflow.Id, Name = c.Step.Workflow.Name } }
                         : new List<CardAuditorWorkflowsDto>(),
                     ActionsCount = _context.AuditCards.Count(a => a.CardId == c.Id),
-                    StatusName = c.Status != null ? c.Status.Name : string.Empty
+                    IsFinalized = c.Status != null && c.Status.Name == StatusNames.Finalize
                 })
                 .ToListAsync();
         }

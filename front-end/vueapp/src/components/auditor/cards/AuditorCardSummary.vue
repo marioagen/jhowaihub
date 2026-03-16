@@ -41,8 +41,8 @@
                                         {{ item.cardName }}
                                     </span>
                                     <BadgeComponent
-                                        :text="item.statusName"
-                                        variant="secondary"
+                                        :text="item.isFinalized ? 'Finalized' : 'Active'"
+                                        :variant="item.isFinalized ? 'success' : 'primary'"
                                         size="sm"
                                         :clickable="false"
                                     />
@@ -132,7 +132,7 @@
                 this.isLoading = true;
                 try {
                     const params = {
-                        ...this.filters,
+                        search: this.filters.search || undefined,
                         take: this.displayedLimit,
                     };
                     const response = await AuditorsService.getCardsAuditSummary(params);

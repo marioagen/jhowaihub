@@ -241,14 +241,17 @@
                             class="audit-history-card rounded-2 p-2 mt-2 mb-2 border"
                         >
                             <div class="d-flex align-items-start gap-2 flex-wrap">
-                                <span
-                                    class="audit-user-badge d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                                <BadgeComponent
+                                    variant="secondary"
+                                    size="sm"
+                                    :clickable="false"
+                                    icon-only
                                 >
                                     <LucideIcon
                                         icon="User"
                                         :size="12"
                                     />
-                                </span>
+                                </BadgeComponent>
                                 <span class="small fw-semibold align-self-center">
                                     {{ entry.userName }}
                                 </span>
@@ -284,7 +287,7 @@
                                             icon="Clock"
                                             :size="12"
                                         />
-                                        {{ formatDate(entry.created) }}
+                                        {{ formatDateWithTime(entry.created) }}
                                     </div>
                                 </div>
                             </div>
@@ -440,50 +443,52 @@
                             class="audit-history-card rounded-2 p-2 mt-2 mb-2 border"
                         >
                             <div class="d-flex align-items-start gap-2 flex-wrap">
-                                <span
-                                    class="audit-user-badge d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                                <BadgeComponent
+                                    variant="primary"
+                                    size="sm"
+                                    :clickable="false"
+                                    icon-only
                                 >
                                     <LucideIcon
                                         icon="User"
                                         :size="12"
                                     />
-                                </span>
-                                <span class="small fw-semibold align-self-center">
-                                    {{ entry.userName }}
-                                </span>
-                                <div class="min-w-0 flex-grow-1 audit-history-card-content">
-                                    <div class="d-flex align-items-center flex-wrap gap-1 mb-1">
-                                        <BadgeComponent
-                                            v-if="entry.actionName"
-                                            :text="entry.actionName"
-                                            variant="primary"
-                                            size="sm"
-                                            :clickable="false"
-                                        />
-                                        <BadgeComponent
-                                            v-if="entry.stepName"
-                                            :text="entry.stepName"
-                                            variant="secondary"
-                                            size="sm"
-                                            :clickable="false"
-                                        />
-                                    </div>
-                                    <p
-                                        v-if="entry.actionName || entry.stepName"
-                                        class="small text-muted mb-1"
+                                </BadgeComponent>
+                                <div
+                                    class="d-flex align-items-center flex-wrap gap-1 gap-xl-2 align-self-center"
+                                >
+                                    <span class="small fw-semibold">{{ entry.userName }}</span>
+                                    <BadgeComponent
+                                        v-if="entry.actionName"
+                                        :text="entry.actionName"
+                                        variant="secondary"
+                                        size="sm"
+                                        :clickable="false"
+                                    />
+                                    <span
+                                        v-if="entry.stepName"
+                                        class="small d-inline-flex align-items-center gap-1"
                                     >
-                                        {{
-                                            entry.stepName
-                                                ? entry.actionName + " · " + entry.stepName
-                                                : entry.actionName
-                                        }}
-                                    </p>
+                                        <LucideIcon
+                                            icon="Workflow"
+                                            :size="12"
+                                        />
+                                        {{ entry.stepName }}
+                                    </span>
+                                </div>
+                                <div class="min-w-0 flex-grow-1 audit-history-card-content">
+                                    <div
+                                        v-if="entry.actionName"
+                                        class="small mb-1"
+                                    >
+                                        {{ entry.actionName }}
+                                    </div>
                                     <div class="small text-muted d-flex align-items-center gap-1">
                                         <LucideIcon
                                             icon="Clock"
                                             :size="12"
                                         />
-                                        {{ formatDate(entry.created) }}
+                                        {{ formatDateWithTime(entry.created) }}
                                     </div>
                                 </div>
                             </div>
@@ -607,6 +612,9 @@
             formatDate(date) {
                 return dateHelper.formatDate(date) || "—";
             },
+            formatDateWithTime(date) {
+                return dateHelper.formatDateWithTime(date) || "—";
+            },
             async getAuditCardDetails() {
                 if (this.selectedDocument?.cardId == null) return;
                 const workflowId =
@@ -663,14 +671,6 @@
     }
     .audit-history-card {
         background-color: transparent;
-    }
-    .audit-user-badge {
-        background-color: var(--bs-secondary-bg, #ececec);
-        color: var(--bs-secondary-color, #6c757d);
-        border-radius: 999px;
-        width: 24px;
-        height: 24px;
-        font-size: 0;
     }
     .audit-history-card-content {
         flex: 1 1 100%;

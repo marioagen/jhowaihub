@@ -21,20 +21,18 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns the first N cards for the auditor (load-more pattern). One row per card with CardId, CardName, Workflows, ActionsCount, StatusName.
+        /// Returns the first N cards for the auditor (load-more pattern). One row per card with CardId, CardName, Workflows, ActionsCount, IsFinalized (from DB).
         /// </summary>
         /// <param name="take">Maximum number of cards to return (default 10).</param>
         /// <param name="search">Optional. Matches CardId when numeric, or CardName/WorkflowName by contains.</param>
-        /// <param name="statusId">Optional. Exact match on card status.</param>
         [HttpGet("Cards")]
-        [SwaggerOperation("Returns cards for the auditor with optional search and status filter")]
+        [SwaggerOperation("Returns cards for the auditor with optional search")]
         [ProducesResponseType(typeof(ICollection<CardAuditorSummaryDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindCardsAuditSummary(
             [FromQuery] int take = 10,
-            [FromQuery] string? search = null,
-            [FromQuery] int? statusId = null)
+            [FromQuery] string? search = null)
         {
-            var result = await _auditorServices.FindCardsAuditSummaryAsync(take, search, statusId);
+            var result = await _auditorServices.FindCardsAuditSummaryAsync(take, search);
             return Ok(result);
         }
 

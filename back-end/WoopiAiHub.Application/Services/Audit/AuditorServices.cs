@@ -21,10 +21,10 @@ namespace WoopiAiHub.Application.Services.Audit
         }
 
         /// <summary>
-        /// Returns a paged list of cards with audit summary (card name, workflows, actions count, status). Supports optional search and status filters.
+        /// Returns a paged list of cards with audit summary (card name, workflows, actions count, Finalized/Not Finalized from DB). Supports optional search.
         /// </summary>
-        public Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, int? statusId)
-            => _auditorRepository.FindCardsAuditSummaryAsync(take, search, statusId);
+        public Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search)
+            => _auditorRepository.FindCardsAuditSummaryAsync(take, search);
 
         /// <summary>
         /// Returns audit detail rows for a specific card and workflow, with optional filters for user, action type, and step. Supports load-more and sort order.
