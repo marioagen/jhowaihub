@@ -129,5 +129,24 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _cardServices.FindCardsByDocumentBatchId(documentBatchId);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Initiates a reprocessing operation for the specified card.
+        /// </summary>
+        /// <remarks>This endpoint requires valid tenant and creator email information in the request
+        /// headers. The operation returns <see langword="true"/> if the card was successfully reprocessed; otherwise,
+        /// <see langword="false"/>.</remarks>
+        /// <param name="id">The unique identifier of the card to reprocess.</param>
+        /// <param name="headersDto">The headers containing tenant and creator email information required for authorization and auditing.</param>
+        /// <returns>An <see cref="IActionResult"/> containing a boolean value indicating whether the reprocessing operation was
+        /// successful.</returns>
+        [HttpPut("{id}/Reprocess")]
+        [SwaggerOperation("Initiates a reprocessing operation for the specified card.")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ReprocessCard(int id, [FromHeader] HeadersDto headersDto)
+        {
+            var result = await _cardServices.ReprocessCard(id, headersDto.Tenant, headersDto.EmailCreator);
+            return Ok(result);
+        }
     }
 }

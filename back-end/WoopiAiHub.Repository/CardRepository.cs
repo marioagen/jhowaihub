@@ -329,5 +329,36 @@ namespace WoopiAiHub.Repository
                 return await FindByDocumentBatchId(card.DocumentBatchId.Value);
             return [card];
         }
+
+        /// <summary>
+        /// Retrieves a card by its identifier, including its associated executions.
+        /// </summary>
+        /// <remarks>The returned card includes its related executions loaded from the database. This
+        /// method performs a single query and may return null if no card with the specified ID exists.</remarks>
+        /// <param name="cardId">The unique identifier of the card to retrieve. Must be a valid card ID.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the card with its executions if
+        /// found; otherwise, null.</returns>
+        public async Task<Card?> FindByIdWithExecutions(int cardId)
+        {
+            return await _context.Cards
+                .Include(c => c.Executions)
+                .FirstOrDefaultAsync(c => c.Id == cardId);
+        }
+
+        /// <summary>
+        /// Retrieves a card by its identifier, including its associated document and step entities.
+        /// </summary>
+        /// <remarks>The returned card will have its Document and Step navigation properties populated.
+        /// This method performs a database query and may return null if no card with the specified ID exists.</remarks>
+        /// <param name="cardId">The unique identifier of the card to retrieve. Must be a valid card ID.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the card with its document and
+        /// step included if found; otherwise, null.</returns>
+        public async Task<Card?> FindByIdWithDocumentAndStep(int cardId)
+        {
+            return await _context.Cards
+                .Include(c => c.Document)
+                .Include(c => c.Step)
+                .FirstOrDefaultAsync(c => c.Id == cardId);
+        }
     }
 }
