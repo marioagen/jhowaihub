@@ -596,6 +596,10 @@
         color: #ffffff !important;
     }
 
+    .owner-avatar-wrapper :deep(.me-3) {
+        margin-right: 0.25rem !important;
+    }
+
     .owner-avatar-placeholder {
         font-size: 0.9rem;
         color: var(--color-body-content);
