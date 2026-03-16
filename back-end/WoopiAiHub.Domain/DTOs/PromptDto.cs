@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Domain.DTOs
+namespace WoopiAiHub.Domain.DTOs
 {
     public record PromptDto
     {
@@ -11,5 +11,7 @@
         public DateTime Created { get; set; }
         public bool IsEdited { get; set; }
         public bool IsImported { get; set; }
+        public string OwnerName { get; set; } = string.Empty;
+        public string OwnerEmail { get; set; } = string.Empty;
     }
 }
