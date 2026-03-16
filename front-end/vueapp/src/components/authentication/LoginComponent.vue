@@ -3,12 +3,10 @@
         <div class="container" style="padding: 0">
             <div class="row justify-content-center">
                 <div class="login-wrapper">
-                <div class="text-center">
-                    <img :src="logoSrc" style="padding-bottom: 10px; height: 60px;"
-                        alt="WOOPI AI" />
-                </div>
                 <div class="card mb-3">
                     <div class="text-center mt-3">
+                        <img :src="logoSrc" style="padding-bottom: 10px; height: 60px;"
+                            alt="WOOPI AI" />
                         <h6 class="fw-bold">
                             {{ $t("login.title") }}
                         </h6>
