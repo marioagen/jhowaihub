@@ -388,6 +388,6 @@ main {
 }
 
 .logo-image {
-    height: 60px;
+    height: 55px;
 }
 </style>
