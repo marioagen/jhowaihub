@@ -443,7 +443,6 @@
                     const response = await AuditorsService.getWorkflowAuditDetails(
                         this.selectedWorkflow.workflowId
                     );
-                    console.log("response", response);
                     if (response.error) {
                         this.$notify({
                             title: "audit-workflows.title",

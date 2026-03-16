@@ -368,7 +368,6 @@
                 this.output = "";
             },
             openQuestionsHistoryModal() {
-                console.log("Temp button clicked");
                 this.$refs.QuestionsHistoryModal.open(this.documentId);
             },
         },

@@ -26,8 +26,10 @@
             <template v-else>
                 <div class="user-detail-content p-3 d-flex flex-column flex-grow-1 min-h-0">
                     <!-- 1. User profile card -->
-                    <div class="user-detail-profile-card rounded-2 p-2 mb-3 border">
-                        <div class="d-flex align-items-start gap-2">
+                    <div
+                        class="user-detail-profile-card rounded-2 p-3 mb-3 border d-flex align-items-center"
+                    >
+                        <div class="d-flex align-items-center flex-wrap gap-2 w-100">
                             <span
                                 class="user-detail-profile-icon d-inline-flex align-items-center justify-content-center flex-shrink-0"
                             >
@@ -36,20 +38,21 @@
                                     :size="24"
                                 />
                             </span>
-                            <div class="min-w-0 flex-grow-1">
-                                <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
-                                    <span class="user-detail-name fw-bold">
-                                        {{ userDetail?.userName ?? selectedUser.userName }}
-                                    </span>
-                                    <BadgeComponent
-                                        v-if="teamLabel"
-                                        :text="teamLabel"
-                                        variant="secondary"
-                                        size="sm"
-                                        :clickable="false"
-                                    />
-                                </div>
-                            </div>
+                            <span class="user-detail-name fw-bold flex-grow-1">
+                                {{ userDetail?.userName ?? selectedUser.userName }}
+                            </span>
+                            <template
+                                v-for="(team, idx) in teamsList"
+                                :key="team.teamId ?? idx"
+                            >
+                                <BadgeComponent
+                                    v-if="team.teamName"
+                                    :text="team.teamName"
+                                    variant="secondary"
+                                    size="sm"
+                                    :clickable="false"
+                                />
+                            </template>
                         </div>
                     </div>
 
@@ -93,7 +96,10 @@
                     <div
                         class="user-detail-activity-section d-flex flex-column flex-grow-1 min-h-0"
                     >
-                        <div class="mb-2">
+                        <!-- Header row: title + count on left, filters on right -->
+                        <div
+                            class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2"
+                        >
                             <h6
                                 class="mb-0 fw-bold d-flex align-items-center gap-1 user-detail-heading"
                             >
@@ -109,11 +115,56 @@
                                     :clickable="false"
                                 />
                             </h6>
+                            <div class="d-flex align-items-center gap-2">
+                                <button
+                                    type="button"
+                                    class="btn btn-light btn-sm border py-1 px-2 user-detail-filter d-flex align-items-center gap-1"
+                                    :class="orderDescending ? 'btn-primary' : ''"
+                                    @click="toggleOrderAndRefresh"
+                                >
+                                    <LucideIcon
+                                        icon="ArrowUpDown"
+                                        :size="12"
+                                    />
+                                    {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
+                                </button>
+                                <div class="dropdown">
+                                    <button
+                                        class="btn btn-light btn-sm border py-1 px-2 user-detail-filter d-flex align-items-center gap-1 dropdown-toggle"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                    >
+                                        <LucideIcon
+                                            icon="Filter"
+                                            :size="12"
+                                        />
+                                        {{ selectedActionLabel }}
+                                        <LucideIcon
+                                            icon="ChevronDown"
+                                            :size="12"
+                                        />
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-start">
+                                        <li
+                                            v-for="opt in actionFilterOptions"
+                                            :key="opt.value"
+                                        >
+                                            <a
+                                                class="dropdown-item"
+                                                href="#"
+                                                @click.prevent="setActionFilter(opt.value)"
+                                            >
+                                                {{ opt.label }}
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
-                        <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-                            <div
-                                class="input-group input-group-sm user-detail-filter flex-grow-1 flex-md-grow-0"
-                            >
+                        <!-- Search row -->
+                        <div class="mb-2">
+                            <div class="input-group input-group-sm user-detail-filter">
                                 <span class="input-group-text border-end-0 py-1">
                                     <LucideIcon
                                         icon="Search"
@@ -124,53 +175,9 @@
                                     v-model="activitySearch"
                                     type="text"
                                     class="form-control form-control-sm border-start-0 py-1"
-                                    placeholder="Buscar por documento, esteira..."
+                                    placeholder="Buscar por documento, detalhes, esteira, etapa..."
                                     aria-label="Buscar no histórico"
                                 />
-                            </div>
-                            <button
-                                type="button"
-                                class="btn btn-light btn-sm border py-1 px-2 user-detail-filter d-flex align-items-center gap-1"
-                                :class="orderDescending ? 'btn-primary' : ''"
-                                @click="toggleOrderAndRefresh"
-                            >
-                                <LucideIcon
-                                    icon="ArrowUpDown"
-                                    :size="12"
-                                />
-                                {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
-                            </button>
-                            <div class="dropdown">
-                                <button
-                                    class="btn btn-light btn-sm border py-1 px-2 user-detail-filter d-flex align-items-center gap-1 dropdown-toggle"
-                                    type="button"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                >
-                                    <LucideIcon
-                                        icon="Filter"
-                                        :size="12"
-                                    />
-                                    {{ selectedActionLabel }}
-                                    <LucideIcon
-                                        icon="ChevronDown"
-                                        :size="12"
-                                    />
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-start">
-                                    <li
-                                        v-for="opt in actionFilterOptions"
-                                        :key="opt.value"
-                                    >
-                                        <a
-                                            class="dropdown-item"
-                                            href="#"
-                                            @click.prevent="setActionFilter(opt.value)"
-                                        >
-                                            {{ opt.label }}
-                                        </a>
-                                    </li>
-                                </ul>
                             </div>
                         </div>
 
@@ -182,7 +189,7 @@
                                 :key="entry.cardId + '-' + index"
                                 class="user-activity-card rounded-2 p-2 mb-2 border"
                             >
-                                <div class="d-flex align-items-start gap-2 flex-wrap">
+                                <div class="d-flex align-items-start gap-2">
                                     <span
                                         class="user-activity-doc-icon d-inline-flex align-items-center justify-content-center flex-shrink-0"
                                     >
@@ -192,35 +199,50 @@
                                         />
                                     </span>
                                     <div class="min-w-0 flex-grow-1 user-activity-card-content">
+                                        <!-- Line 1: document name + action tag -->
                                         <div class="d-flex align-items-center flex-wrap gap-1 mb-1">
                                             <span class="user-activity-doc-title small fw-bold">
                                                 {{ entry.cardName }}
                                             </span>
                                             <BadgeComponent
                                                 :text="entry.actionType"
-                                                variant="primary"
+                                                :variant="actionBadgeVariant(entry.actionType)"
                                                 size="sm"
                                                 :clickable="false"
                                             />
-                                            <span
-                                                v-if="entry.workflowName"
-                                                class="small text-muted d-inline-flex align-items-center gap-1"
-                                            >
+                                        </div>
+                                        <!-- Line 2: description -->
+                                        <div
+                                            class="small text-muted mb-1 user-activity-description"
+                                        >
+                                            {{ activityDescription(entry) }}
+                                        </div>
+                                        <!-- Line 3: timestamp (left) | workflow + optional context (right) -->
+                                        <div
+                                            class="d-flex align-items-center justify-content-between flex-wrap gap-2 small text-muted"
+                                        >
+                                            <span class="d-inline-flex align-items-center gap-1">
                                                 <LucideIcon
-                                                    icon="Workflow"
+                                                    icon="Clock"
                                                     :size="12"
                                                 />
-                                                {{ entry.workflowName }}
+                                                {{ formatDateWithTime(entry.created) }}
                                             </span>
-                                        </div>
-                                        <div
-                                            class="small text-muted d-flex align-items-center gap-1 mb-1"
-                                        >
-                                            <LucideIcon
-                                                icon="Clock"
-                                                :size="12"
-                                            />
-                                            {{ formatDateWithTime(entry.created) }}
+                                            <span class="d-inline-flex align-items-center gap-1">
+                                                <template v-if="entry.workflowName">
+                                                    <LucideIcon
+                                                        icon="Workflow"
+                                                        :size="12"
+                                                    />
+                                                    {{ entry.workflowName }}
+                                                </template>
+                                                <span
+                                                    v-if="isProtocolAction(entry.actionType)"
+                                                    class="user-activity-protocol"
+                                                >
+                                                    Protocolo
+                                                </span>
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -276,13 +298,10 @@
             };
         },
         computed: {
-            teamLabel() {
+            teamsList() {
                 const teams = this.userDetail?.teams ?? this.selectedUser?.teams;
-                if (!Array.isArray(teams) || teams.length === 0) return null;
-                return teams
-                    .map((t) => t.teamName)
-                    .filter(Boolean)
-                    .join(", ");
+                if (!Array.isArray(teams)) return [];
+                return teams.filter((t) => t && t.teamName);
             },
             activityEntries() {
                 return this.userDetail?.actions ?? [];
@@ -291,11 +310,14 @@
                 let list = this.activityEntries;
                 const q = (this.activitySearch || "").toLowerCase().trim();
                 if (q) {
-                    list = list.filter(
-                        (e) =>
+                    list = list.filter((e) => {
+                        const desc = this.activityDescription(e).toLowerCase();
+                        return (
                             (e.cardName && e.cardName.toLowerCase().includes(q)) ||
-                            (e.workflowName && e.workflowName.toLowerCase().includes(q))
-                    );
+                            (e.workflowName && e.workflowName.toLowerCase().includes(q)) ||
+                            desc.includes(q)
+                        );
+                    });
                 }
                 return [...list];
             },
@@ -316,6 +338,56 @@
         methods: {
             formatDateWithTime(date) {
                 return dateHelper.formatDateWithTime(date) || "—";
+            },
+            actionBadgeVariant(actionType) {
+                if (!actionType) return "secondary";
+                const t = actionType.toLowerCase();
+                if (t.includes("delet") || t.includes("removed") || t.includes("rejection"))
+                    return "danger";
+                if (t.includes("upload") || t.includes("documentcreated") || t.includes("input"))
+                    return "info";
+                if (
+                    t.includes("assign") ||
+                    t.includes("atribuir") ||
+                    t.includes("advancement") ||
+                    t.includes("finalize") ||
+                    t.includes("approval")
+                )
+                    return "primary";
+                return "secondary";
+            },
+            activityDescription(entry) {
+                const name = entry.cardName || "Documento";
+                const workflow = entry.workflowName;
+                const action = (entry.actionType || "").toLowerCase();
+                if (
+                    action.includes("upload") ||
+                    action.includes("documentcreated") ||
+                    action.includes("inputdocument")
+                )
+                    return "Documento carregado no sistema";
+                if (action.includes("assign") || action.includes("atribuir"))
+                    return workflow
+                        ? `Documento atribuído para ${workflow}`
+                        : "Documento atribuído";
+                if (action.includes("delet") || action.includes("removed"))
+                    return "Documento deletado";
+                if (action.includes("advancement"))
+                    return workflow
+                        ? `Documento encaminhado para ${workflow}`
+                        : "Documento encaminhado";
+                if (action.includes("finalize")) return "Documento finalizado";
+                if (action.includes("approval")) return "Documento aprovado";
+                if (action.includes("rejection")) return "Documento rejeitado";
+                if (action.includes("unassign")) return "Atribuição removida";
+                if (action.includes("editanswer")) return "Resposta editada";
+                if (action.includes("inputquestionnaire")) return "Questionário preenchido";
+                return `${name} — ${entry.actionType || "Ação"}`;
+            },
+            isProtocolAction(actionType) {
+                if (!actionType) return false;
+                const t = actionType.toLowerCase();
+                return t.includes("protocol") || t === "advancement" || t === "finalize";
             },
             toggleOrderAndRefresh() {
                 this.orderDescending = !this.orderDescending;
@@ -444,5 +516,15 @@
     .user-activity-card-content {
         flex: 1 1 100%;
         min-width: 0;
+    }
+    .user-activity-doc-title {
+        color: var(--bs-primary);
+    }
+    .user-activity-description {
+        color: var(--bs-secondary-color);
+    }
+    .user-activity-protocol {
+        font-size: 0.7rem;
+        color: var(--bs-secondary);
     }
 </style>

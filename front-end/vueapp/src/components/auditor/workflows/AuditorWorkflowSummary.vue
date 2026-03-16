@@ -134,12 +134,12 @@
                 );
             },
             displayedWorkflowItems() {
-                return this.filteredWorkflowItems.slice(0, this.displayedLimit);
+                return this.filteredWorkflowItems;
             },
             showLoadMoreButton() {
                 return (
-                    this.filteredWorkflowItems.length > 10 &&
-                    this.displayedLimit < this.filteredWorkflowItems.length
+                    this.workflowItems.length > 0 &&
+                    this.workflowItems.length >= this.displayedLimit
                 );
             },
         },
@@ -151,7 +151,9 @@
             async getWorkflowAuditSummary() {
                 this.isLoading = true;
                 try {
-                    const response = await AuditorsService.getWorkflowAuditSummary();
+                    const response = await AuditorsService.getWorkflowAuditSummary({
+                        take: this.displayedLimit,
+                    });
                     if (response.error) {
                         return this.$notify({
                             title: "audit-workflows.title",
@@ -171,10 +173,8 @@
                 }
             },
             loadMore() {
-                this.displayedLimit = Math.min(
-                    this.displayedLimit + 10,
-                    this.filteredWorkflowItems.length
-                );
+                this.displayedLimit += 10;
+                this.getWorkflowAuditSummary();
             },
             refreshWithCurrentFilters() {
                 this.displayedLimit = 10;

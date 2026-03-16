@@ -63,14 +63,15 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns workflow-based audit entries (one row per workflow) with CardCount, CardsByStatus, LogsCount, Team, Profile. Limited to 10 entries. Filters and take to be added later.
+        /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, Profile. Load-more pattern: take 10, 20, 30, …
         /// </summary>
+        /// <param name="take">Maximum number of workflows to return (default 10).</param>
         [HttpGet("Workflows")]
         [SwaggerOperation("Returns workflow audit list for the auditor")]
         [ProducesResponseType(typeof(ICollection<WorkflowAuditorSummaryDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindWorkflowAuditSummary()
+        public async Task<IActionResult> FindWorkflowAuditSummary([FromQuery] int take = 10)
         {
-            var result = await _auditorServices.FindWorkflowAuditSummaryAsync();
+            var result = await _auditorServices.FindWorkflowAuditSummaryAsync(take);
             return Ok(result);
         }
 
@@ -90,17 +91,17 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns user-based audit entries (one row per user) with UserId, UserName, Teams, Profiles, WorkflowCount, LogCount. Load-more pattern: skip 0 = first 10 users, skip 10 = next 10, etc.
+        /// Returns user-based audit entries (one row per user) with UserId, UserName, Teams, Profiles, WorkflowCount, LogCount. Load-more pattern: take 10, 20, 30, …
         /// </summary>
-        /// <param name="skip">Number of users to skip (default 0). Use for load-more: 0, 10, 20, ...</param>
+        /// <param name="take">Maximum number of users to return (default 10).</param>
         /// <param name="userName">Optional. Filter by user name (contains, case-sensitive).</param>
         /// <param name="teamId">Optional. Filter to users that have at least one audit entry in a workflow with this team.</param>
         [HttpGet("Users")]
         [SwaggerOperation("Returns user audit list for the auditor with load-more and filters")]
         [ProducesResponseType(typeof(ICollection<UserAuditorSummaryDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindUserAuditSummary([FromQuery] int skip = 0, [FromQuery] string? userName = null, [FromQuery] int? teamId = null)
+        public async Task<IActionResult> FindUserAuditSummary([FromQuery] int take = 10, [FromQuery] string? userName = null, [FromQuery] int? teamId = null)
         {
-            var result = await _auditorServices.FindUserAuditSummaryAsync(skip, userName, teamId);
+            var result = await _auditorServices.FindUserAuditSummaryAsync(take, userName, teamId);
             return Ok(result);
         }
 

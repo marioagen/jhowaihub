@@ -105,11 +105,14 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, and Profile. Limited to the 10 most recently audited workflows.
+        /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, and Profile.
+        /// Load-more pattern: take 10, then 20, 30, … (first N most recently audited workflows).
         /// </summary>
-        public async Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync()
+        public async Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync(int take = 10)
         {
-            const int take = 10;
+            const int defaultTake = 10;
+            if (take <= 0) take = defaultTake;
+
             var workflowList = await _context.AuditCards
                 .AsNoTracking()
                 .OrderByDescending(a => a.Created)
@@ -255,12 +258,14 @@ namespace WoopiAiHub.Repository.Audit
 
         /// <summary>
         /// Returns user-based audit entries (one row per user) with UserId, UserName, Teams, Profiles, WorkflowCount, LogCount.
-        /// Source: AuditCards grouped by UserId. Load-more pattern: skip 0 = first 10 users, skip 10 = next 10, etc.
+        /// Source: AuditCards grouped by UserId. Load-more pattern: take 10, then 20, 30, … (first N users).
         /// Optional filters: userName (contains on User.Name), teamId (user has at least one audit entry in a workflow with that team).
         /// </summary>
-        public async Task<ICollection<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int skip = 0, string? userName = null, int? teamId = null)
+        public async Task<ICollection<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int take = 10, string? userName = null, int? teamId = null)
         {
-            const int take = 10;
+            const int defaultTake = 10;
+            if (take <= 0) take = defaultTake;
+
             var query = _context.AuditCards.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(userName))
@@ -276,7 +281,6 @@ namespace WoopiAiHub.Repository.Audit
                 .Select(a => a.UserId)
                 .Distinct()
                 .OrderBy(id => id)
-                .Skip(skip)
                 .Take(take)
                 .ToListAsync();
 
@@ -293,7 +297,7 @@ namespace WoopiAiHub.Repository.Audit
                     a.WorkflowId,
                     Teams = a.Workflow != null && a.Workflow.Teams != null
                         ? a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
-                        : (IEnumerable<UsersAuditorTeamsDto>)new List<UsersAuditorTeamsDto>(),
+                        : null,
                     ProfileId = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
                         ? (int?)a.Card.Step.Profile.Id
                         : (int?)null,
@@ -311,7 +315,7 @@ namespace WoopiAiHub.Repository.Audit
             return groupedByUser.Select(g =>
             {
                 var first = g.First();
-                var allTeams = g.SelectMany(a => a.Teams);
+                var allTeams = g.SelectMany(a => a.Teams ?? Enumerable.Empty<UsersAuditorTeamsDto>());
                 var distinctTeams = allTeams
                     .GroupBy(t => new { t.TeamId, t.TeamName })
                     .Select(x => x.First())
@@ -356,7 +360,7 @@ namespace WoopiAiHub.Repository.Audit
                     WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
                     Teams = a.Workflow != null && a.Workflow.Teams != null
                         ? a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
-                        : (IEnumerable<UsersAuditorTeamsDto>)new List<UsersAuditorTeamsDto>(),
+                        : null,
                     ProfileId = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
                         ? (int?)a.Card.Step.Profile.Id
                         : (int?)null,
@@ -379,7 +383,7 @@ namespace WoopiAiHub.Repository.Audit
 
             var first = auditRows.First();
             var distinctTeams = auditRows
-                .SelectMany(a => a.Teams)
+                .SelectMany(a => a.Teams ?? Enumerable.Empty<UsersAuditorTeamsDto>())
                 .GroupBy(t => new { t.TeamId, t.TeamName })
                 .Select(x => x.First())
                 .ToList();

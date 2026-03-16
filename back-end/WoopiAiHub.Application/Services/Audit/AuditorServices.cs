@@ -33,10 +33,10 @@ namespace WoopiAiHub.Application.Services.Audit
             => _auditorRepository.FindCardAuditDetailsAsync(cardId, workflowId, take, userId, actionType, stepId, orderDescending);
 
         /// <summary>
-        /// Returns workflow-based audit entries (one per workflow) with card count, logs count, team, and profile. Limited to the 10 most recently audited workflows.
+        /// Returns workflow-based audit entries (one per workflow) with card count, logs count, team, and profile. Load-more pattern: take 10, 20, 30, …
         /// </summary>
-        public Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync()
-            => _auditorRepository.FindWorkflowAuditSummaryAsync();
+        public Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync(int take = 10)
+            => _auditorRepository.FindWorkflowAuditSummaryAsync(take);
 
         /// <summary>
         /// Returns full audit data for a workflow (logs, steps, card status counts, and card list). Returns null when the workflow has no audit entries.
@@ -45,10 +45,10 @@ namespace WoopiAiHub.Application.Services.Audit
             => _auditorRepository.FindWorkflowAuditDetailsAsync(workflowId);
 
         /// <summary>
-        /// Returns user-based audit summaries (one per user) with teams, profiles, workflow count, and log count. Supports pagination and optional filters by user name and team.
+        /// Returns user-based audit summaries (one per user) with teams, profiles, workflow count, and log count. Load-more pattern: take 10, 20, 30, … Optional filters by user name and team.
         /// </summary>
-        public Task<ICollection<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int skip = 0, string? userName = null, int? teamId = null)
-            => _auditorRepository.FindUserAuditSummaryAsync(skip, userName, teamId);
+        public Task<ICollection<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int take = 10, string? userName = null, int? teamId = null)
+            => _auditorRepository.FindUserAuditSummaryAsync(take, userName, teamId);
 
         /// <summary>
         /// Returns full audit details for a user (teams, profiles, action counts, and action list). Returns null when the user has no audit entries. Optional filter by action type and sort order.

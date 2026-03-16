@@ -43,11 +43,13 @@
                                     {{ item.userName }}
                                 </div>
                                 <div
-                                    v-if="teamLabel(item)"
+                                    v-if="getItemTeams(item).length > 0"
                                     class="d-flex flex-wrap gap-1 mb-1"
                                 >
                                     <BadgeComponent
-                                        :text="teamLabel(item)"
+                                        v-for="(team, idx) in getItemTeams(item)"
+                                        :key="team.teamId ?? `${item.userId}-${idx}`"
+                                        :text="team.teamName"
                                         variant="secondary"
                                         size="sm"
                                         :clickable="false"
@@ -118,17 +120,14 @@
                 isLoading: false,
                 selectedUser: null,
                 auditUserList: [],
-                skip: 0,
+                displayedLimit: 10,
             };
         },
         methods: {
-            teamLabel(item) {
-                const teams = item.teams;
-                if (!Array.isArray(teams) || teams.length === 0) return null;
-                return teams
-                    .map((t) => t.teamName)
-                    .filter(Boolean)
-                    .join(", ");
+            getItemTeams(item) {
+                const teams = item?.teams;
+                if (!Array.isArray(teams)) return [];
+                return teams.filter((t) => t && t.teamName);
             },
             selectUser(item) {
                 this.selectedUser = item;
@@ -138,11 +137,10 @@
                 this.isLoading = true;
                 try {
                     const params = {
-                        skip: this.skip,
+                        take: this.displayedLimit,
                         userName: this.filters.search || undefined,
                         teamId: this.filters.teamId ? parseInt(this.filters.teamId, 10) : undefined,
                     };
-                    if (Number.isNaN(params.teamId)) delete params.teamId;
                     const response = await AuditorsService.getUserAuditSummary(params);
                     if (response.error) {
                         return this.$notify({
@@ -158,27 +156,26 @@
                         : Array.isArray(response?.data)
                           ? response.data
                           : [];
-                    if (this.skip === 0) {
-                        this.auditUserList = list;
-                    } else {
-                        this.auditUserList = [...this.auditUserList, ...list];
-                    }
+                    this.auditUserList = list;
                 } finally {
                     this.isLoading = false;
                 }
             },
             loadMore() {
-                this.skip += PAGE_SIZE;
+                this.displayedLimit += PAGE_SIZE;
                 this.getAuditUsersSummary();
             },
             refreshWithCurrentFilters() {
-                this.skip = 0;
+                this.displayedLimit = 10;
                 this.getAuditUsersSummary();
             },
         },
         computed: {
             showLoadMoreButton() {
-                return this.auditUserList.length > 0 && this.auditUserList.length % PAGE_SIZE === 0;
+                return (
+                    this.auditUserList.length > 0 &&
+                    this.auditUserList.length >= this.displayedLimit
+                );
             },
         },
         async created() {

@@ -25,9 +25,9 @@ export default {
                 };
             });
     },
-    getWorkflowAuditSummary() {
+    getWorkflowAuditSummary(params = {}) {
         return api
-            .get("/Auditor/Workflows")
+            .get("/Auditor/Workflows", { params })
             .then(({ data }) => {
                 return data;
             })

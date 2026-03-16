@@ -578,8 +578,6 @@
         },
         methods: {
             async refreshWithCurrentDocument() {
-                console.log("selectedDocument", this.selectedDocument);
-                console.log("selectedDocumentWorkflows", this.selectedDocumentWorkflows);
                 if (this.selectedDocument == null) return;
 
                 this.displayedLimit = 10;
@@ -629,7 +627,6 @@
                         workflowId,
                         params
                     );
-                    console.log("response", response);
                     if (response.error) {
                         return this.$notify({
                             title: "audit-cards.title",
