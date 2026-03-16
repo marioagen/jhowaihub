@@ -157,6 +157,13 @@
                 </p>
             </div>
             <div class="card-footer">
+                <div class="date-info">
+                    <i class="far fa-clock mt-1"></i>
+                    <span>
+                        &ensp;{{ $t("dashboard.created") }}
+                        {{ this.formatDate(item.created) }}
+                    </span>
+                </div>
                 <div class="owner-info d-flex align-items-center">
                     <span class="owner-label">{{ $t("common.owner") }}:</span>
                     <span
@@ -166,7 +173,7 @@
                     >
                         <AvatarComponent
                             :name="item.ownerName || item.ownerEmail || ''"
-                            variant="secondary"
+                            variant="primary"
                             :size="28"
                         />
                     </span>
@@ -176,13 +183,6 @@
                         v-tooltip="'-'"
                     >
                         —
-                    </span>
-                </div>
-                <div class="date-info float-end">
-                    <i class="far fa-clock mt-1"></i>
-                    <span>
-                        &ensp;{{ $t("dashboard.created") }}
-                        {{ this.formatDate(item.created) }}
                     </span>
                 </div>
             </div>
@@ -559,8 +559,7 @@
 
     .date-info {
         display: flex;
-        bottom: 8px;
-        position: relative;
+        align-items: center;
         color: #0073ea !important;
     }
 
@@ -587,6 +586,12 @@
     .owner-avatar-wrapper {
         display: inline-flex;
         cursor: default;
+    }
+
+    .owner-avatar-wrapper :deep(.btn-primary) {
+        background-color: #0073ea !important;
+        border-color: #0073ea !important;
+        color: #ffffff !important;
     }
 
     .owner-avatar-placeholder {
