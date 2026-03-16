@@ -2,7 +2,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
@@ -32,7 +34,7 @@ namespace WoopiAiHub.Application.Messaging.DeadLetter
                 {
                     if(message.DocumentEmbeddings.Count <= 0)
                     {
-                        throw new Exception("No documents identified");
+                        throw new AppException(ErrorCode.NotFound, "No documents identified", null);
                     }
 
                     var cardServices = scope.ServiceProvider.GetRequiredService<ICardServices>();
@@ -40,7 +42,7 @@ namespace WoopiAiHub.Application.Messaging.DeadLetter
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Error to process Embeddings DeadLetter: {ex.Message}");
+                    _logger.LogError("Error to process Embeddings DeadLetter: {message}", ex.Message);
                     throw;
                 }
             });

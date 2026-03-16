@@ -69,7 +69,6 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
         public async Task ExecuteAsync_ValidMessage_CallsSetFailingCard()
         {
             // Arrange
-            var cardId = 1;
             var email = "test@example.com";
             var automationInputDto = new AutomationInputDto { Email = email };
 

@@ -38,7 +38,7 @@ namespace WoopiAiHub.Application.Messaging.DeadLetter
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Error to process Quiz DeadLetter: {ex.Message}");
+                    _logger.LogError("Error to process Quiz DeadLetter: {message}", ex.Message);
                     throw;
                 }
             });

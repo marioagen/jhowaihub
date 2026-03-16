@@ -100,11 +100,11 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
         {
             // Arrange
             var cardId = 2;
-            string? email = null;
+            string email = string.Empty;
             var metaData = new MetaDataAutomationDto(cardId, 0);
             var processOcrDto = new ProcessOcrDto { Data = metaData, Email = email };
 
-            _cardServicesMock.Setup(s => s.SetFailingCard(cardId, null))
+            _cardServicesMock.Setup(s => s.SetFailingCard(cardId, email))
                 .Returns(Task.CompletedTask);
 
             _consumerMock.Setup(c => c.ConsumerAsync(
@@ -122,7 +122,7 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
             await consumer.StartAsync(CancellationToken.None);
 
             // Assert
-            _cardServicesMock.Verify(s => s.SetFailingCard(cardId, null), Times.Once);
+            _cardServicesMock.Verify(s => s.SetFailingCard(cardId, email), Times.Once);
         }
 
         [Fact(DisplayName = "ExecuteAsync should log error when SetFailingCard throws exception")]

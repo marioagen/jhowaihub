@@ -35,7 +35,7 @@ namespace WoopiAiHub.Application.Messaging.DeadLetter
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Error to process OCR DeadLetter: {ex.Message}");
+                    _logger.LogError("Error to process OCR DeadLetter: {message}", ex.Message);
                     throw;
                 }
             });
