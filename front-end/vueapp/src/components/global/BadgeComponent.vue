@@ -1,13 +1,18 @@
 <template>
     <span
         class="badge-number"
-        :class="[`badge-${variant}`, size !== 'md' && `badge-number-${size}`]"
+        :class="[
+            `badge-${variant}`,
+            size !== 'md' && `badge-number-${size}`,
+            iconOnly && 'badge-number-icon-only',
+        ]"
         @click="handleClick"
         :style="clickable ? 'cursor: pointer;' : ''"
         role="button"
         tabindex="0"
     >
-        {{ typeof text === "string" ? $t(text) : text }}
+        <slot v-if="$slots.default" />
+        <template v-else>{{ typeof text === "string" ? $t(text) : text }}</template>
     </span>
 </template>
 <script>
@@ -16,7 +21,7 @@
         props: {
             text: {
                 type: [Number, String],
-                required: true,
+                required: false,
             },
             variant: {
                 type: String,
@@ -33,6 +38,10 @@
             size: {
                 type: String,
                 default: "md",
+            },
+            iconOnly: {
+                type: Boolean,
+                default: false,
             },
         },
         methods: {
@@ -60,6 +69,12 @@
         font-size: 11px;
         padding: 0 0.35rem;
         min-height: 18px;
+    }
+    .badge-number-icon-only {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        font-size: 0;
     }
 
     .badge-primary {
