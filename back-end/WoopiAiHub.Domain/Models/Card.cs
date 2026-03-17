@@ -51,6 +51,11 @@ namespace WoopiAiHub.Domain.Models
 
         private Card(int id, DateTime created) : base(id, created) { }
 
+        public void UpdateStatus(int statusId)
+        {
+            StatusId = statusId;
+        }
+
         public void UpdateStepAndStatus(int stepId, int statusId)
         {
             StepId = stepId;

@@ -1,5 +1,6 @@
-using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository
 {
@@ -24,5 +25,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<List<Card>> FindByDocumentBatchId(int documentBatchId);
         Task<List<Card>?> FindCardOrBatchWithStepWorkflowAsync(int cardId);
         Task<List<Card>?> FindCardOrBatchWithDocumentAsync(int cardId);
+        Task<Card?> FindByIdWithExecutions(int cardId);
+        Task<Card?> FindByIdWithDocumentAndStep(int cardId);
     }
 }

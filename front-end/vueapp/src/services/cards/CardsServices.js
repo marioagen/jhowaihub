@@ -85,4 +85,16 @@ export default {
                 };
             });
     },
+    reprocessCard(cardId) {
+        return api
+            .put(`/Card/${cardId}/Reprocess`)
+            .then((result) => {
+                return result.data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
 };

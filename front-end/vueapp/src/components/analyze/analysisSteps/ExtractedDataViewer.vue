@@ -1,166 +1,168 @@
 <template>
     <div class="extracted-fields-container">
-        <h6 class="section-title">
-            <i class="fas fa-database"></i>
-            {{ title }}
-        </h6>
+        <div>
+            <h6 class="section-title">
+                <i class="fas fa-database"></i>
+                {{ title }}
+            </h6>
 
-        <div
-            v-if="fields.length === 0"
-            class="no-data-message"
-        >
-            <i class="fas fa-info-circle"></i>
-            {{ $t("analyze.noDataInDocument") }}
-        </div>
-
-        <div
-            v-else
-            class="fields-list"
-        >
             <div
-                v-for="(field, index) in fields"
-                :key="index"
-                class="field-item"
+                v-if="fields.length === 0"
+                class="no-data-message"
+            >
+                <i class="fas fa-info-circle"></i>
+                {{ $t("analyze.noDataInDocument") }}
+            </div>
+
+            <div
+                v-else
+                class="fields-list"
             >
                 <div
-                    v-if="field.outputType != 'API'"
-                    class="field-header"
+                    v-for="(field, index) in fields"
+                    :key="index"
+                    class="field-item"
                 >
-                    <label class="field-label">
-                        {{ field.label }}
-                    </label>
-                    <span
-                        v-if="field.isEdited"
-                        class="edited-badge"
-                    >
-                        <i class="fas fa-pen"></i>
-                        {{ $t("common.edited") }}
-                    </span>
-                    <span
-                        v-if="field.outputType !== 'Quiz'"
-                        @click="open(fields[index].value, field.label, index)"
-                    >
-                        <LucideIcon
-                            icon="Eye"
-                            :size="16"
-                        />
-                    </span>
-                </div>
-                <div
-                    class="field-value-container"
-                    v-if="field.outputType == 'N8N'"
-                >
-                    <input
-                        type="text"
-                        class="field-value"
-                        @input="(e) => handleFieldEdit(index, e.target.value)"
-                        :readonly="!isEditing[index]"
-                        v-model="fields[index].value"
-                    />
-                    <button
-                        v-if="!isEditing[index]"
-                        class="edit-button mb-2"
-                        @click="startEditing(index)"
-                        :title="$t('common.edit')"
-                    >
-                        <i class="fas fa-pen"></i>
-                    </button>
                     <div
-                        v-else
-                        class="edit-actions"
+                        v-if="field.outputType != 'API'"
+                        class="field-header"
                     >
-                        <button
-                            class="save-button"
-                            @click="saveEdit(index, field.outputId)"
-                            :title="$t('common.save')"
-                        >
-                            <i class="fas fa-check"></i>
-                        </button>
-                        <button
-                            class="cancel-button"
-                            @click="cancelEdit(index)"
-                            :title="$t('common.cancel')"
-                        >
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div v-if="field.outputType == 'Prompt'">
-                    <textarea
-                        type="text"
-                        class="form-control mb-2"
-                        @input="(e) => handleFieldEdit(index, e.target.value)"
-                        :readonly="!isEditing[index]"
-                        v-model="fields[index].value"
-                        rows="5"
-                    ></textarea>
-                    <button
-                        v-if="!isEditing[index]"
-                        class="edit-button mb-2"
-                        @click="startEditing(index)"
-                        :title="$t('common.edit')"
-                    >
-                        <i class="fas fa-pen"></i>
-                    </button>
-                    <div
-                        v-else
-                        class="edit-actions"
-                    >
-                        <button
-                            class="save-button"
-                            @click="saveEdit(index, field.outputId)"
-                            :title="$t('common.save')"
-                        >
-                            <i class="fas fa-check"></i>
-                        </button>
-                        <button
-                            class="cancel-button"
-                            @click="cancelEdit(index)"
-                            :title="$t('common.cancel')"
-                        >
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div v-if="field.outputType == 'API'">
-                    <div
-                        v-if="field.label == 'TemplateName'"
-                        :class="index == 0 ? 'field-header' : 'field-header border-top pt-4'"
-                    >
-                        <h6 class="fw-bold mb-0">
-                            {{ field.value }}
-                        </h6>
-                    </div>
-                    <div v-else>
                         <label class="field-label">
                             {{ field.label }}
                         </label>
+                        <span
+                            v-if="field.isEdited"
+                            class="edited-badge"
+                        >
+                            <i class="fas fa-pen"></i>
+                            {{ $t("common.edited") }}
+                        </span>
+                        <span
+                            v-if="field.outputType !== 'Quiz'"
+                            @click="open(fields[index].value, field.label, index)"
+                        >
+                            <LucideIcon
+                                icon="Eye"
+                                :size="16"
+                            />
+                        </span>
+                    </div>
+                    <div
+                        class="field-value-container"
+                        v-if="field.outputType == 'N8N'"
+                    >
                         <input
-                            v-if="field.label == 'StatusCode'"
                             type="text"
-                            class="field-value form-control mt-2"
-                            readonly
+                            class="field-value"
+                            @input="(e) => handleFieldEdit(index, e.target.value)"
+                            :readonly="!isEditing[index]"
                             v-model="fields[index].value"
                         />
-                        <textarea
+                        <button
+                            v-if="!isEditing[index]"
+                            class="edit-button mb-2"
+                            @click="startEditing(index)"
+                            :title="$t('common.edit')"
+                        >
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <div
                             v-else
-                            type="text"
-                            class="form-control mt-2"
-                            readonly
-                            v-model="fields[index].value"
-                            rows="9"
-                        ></textarea>
+                            class="edit-actions"
+                        >
+                            <button
+                                class="save-button"
+                                @click="saveEdit(index, field.outputId)"
+                                :title="$t('common.save')"
+                            >
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button
+                                class="cancel-button"
+                                @click="cancelEdit(index)"
+                                :title="$t('common.cancel')"
+                            >
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <div v-if="field.outputType == 'Quiz'">
-                    <div
-                        v-for="item in getTheValues(field)"
-                        :key="item.outputId"
-                        class="block"
-                    >
-                        <div class="question">
-                            <label class="field-label">{{ item.Question }}</label>
-                            <p>{{ item.Answer }}</p>
+                    <div v-if="field.outputType == 'Prompt'">
+                        <textarea
+                            type="text"
+                            class="form-control mb-2"
+                            @input="(e) => handleFieldEdit(index, e.target.value)"
+                            :readonly="!isEditing[index]"
+                            v-model="fields[index].value"
+                            rows="5"
+                        ></textarea>
+                        <button
+                            v-if="!isEditing[index]"
+                            class="edit-button mb-2"
+                            @click="startEditing(index)"
+                            :title="$t('common.edit')"
+                        >
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <div
+                            v-else
+                            class="edit-actions"
+                        >
+                            <button
+                                class="save-button"
+                                @click="saveEdit(index, field.outputId)"
+                                :title="$t('common.save')"
+                            >
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button
+                                class="cancel-button"
+                                @click="cancelEdit(index)"
+                                :title="$t('common.cancel')"
+                            >
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div v-if="field.outputType == 'API'">
+                        <div
+                            v-if="field.label == 'TemplateName'"
+                            :class="index == 0 ? 'field-header' : 'field-header border-top pt-4'"
+                        >
+                            <h6 class="fw-bold mb-0">
+                                {{ field.value }}
+                            </h6>
+                        </div>
+                        <div v-else>
+                            <label class="field-label">
+                                {{ field.label }}
+                            </label>
+                            <input
+                                v-if="field.label == 'StatusCode'"
+                                type="text"
+                                class="field-value form-control mt-2"
+                                readonly
+                                v-model="fields[index].value"
+                            />
+                            <textarea
+                                v-else
+                                type="text"
+                                class="form-control mt-2"
+                                readonly
+                                v-model="fields[index].value"
+                                rows="9"
+                            ></textarea>
+                        </div>
+                    </div>
+                    <div v-if="field.outputType == 'Quiz'">
+                        <div
+                            v-for="item in getTheValues(field)"
+                            :key="item.outputId"
+                            class="block"
+                        >
+                            <div class="question">
+                                <label class="field-label">{{ item.Question }}</label>
+                                <p>{{ item.Answer }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -309,6 +311,8 @@
         padding: 1rem;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         height: 100%;
+        max-height: calc(100vh - 400px);
+        overflow-y: auto;
     }
 
     .section-title {

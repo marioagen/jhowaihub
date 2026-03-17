@@ -17,5 +17,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<CardHeaderDto> FindHeaderInfoAsync(int cardId);
         Task<IReadOnlyList<Card>> FindCardsByDocumentIdWithStepWorkflowAsync(int documentId);
         Task<ICollection<CardBatchDto>?> FindCardsByDocumentBatchId(int documentBatchId);
+        Task SetFailingCard(int cardId, string? email);
+        Task<bool> ReprocessCard(int cardId, string tenant, string email);
     }
 }
