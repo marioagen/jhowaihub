@@ -5,7 +5,7 @@
                 <div class="mb-3">
                     <h5 class="mb-0 fw-bold">
                         <LucideIcon
-                            icon="FileCheck"
+                            icon="ShieldUser"
                             :size="22"
                             class="align-text-bottom me-1"
                         />

@@ -57,14 +57,32 @@
                                         :clickable="false"
                                     />
                                 </div>
-                                <div
-                                    class="small text-primary d-flex align-items-center gap-1 mb-0"
-                                >
-                                    <LucideIcon
-                                        icon="Workflow"
-                                        :size="12"
-                                    />
-                                    {{ workflowsLabel(item) }}
+                                <div class="small text-primary mb-0">
+                                    <template v-if="topWorkflows(item).length > 0">
+                                        <div
+                                            v-for="wf in topWorkflows(item)"
+                                            :key="wf.id ?? wf.name"
+                                            class="d-flex align-items-center gap-1"
+                                        >
+                                            <LucideIcon
+                                                icon="Workflow"
+                                                :size="12"
+                                                class="flex-shrink-0"
+                                            />
+                                            <span class="text-break">{{ wf.name || "—" }}</span>
+                                        </div>
+                                    </template>
+                                    <div
+                                        v-else
+                                        class="d-flex align-items-center gap-1"
+                                    >
+                                        <LucideIcon
+                                            icon="Workflow"
+                                            :size="12"
+                                            class="flex-shrink-0"
+                                        />
+                                        <span>—</span>
+                                    </div>
                                 </div>
                                 <div class="small text-muted">
                                     {{ item.actionsCount }} action(s)
@@ -119,13 +137,10 @@
             workflowsCount(item) {
                 return item.workflows.length;
             },
-            workflowsLabel(item) {
+            topWorkflows(item) {
                 const workflows = item.workflows;
-                if (!Array.isArray(workflows) || workflows.length === 0) return "—";
-                return workflows
-                    .map((workflow) => workflow.name)
-                    .filter(Boolean)
-                    .join(", ");
+                if (!Array.isArray(workflows)) return [];
+                return workflows.slice(0, 3);
             },
             selectDocument(item) {
                 this.selectedDocument = item;

@@ -236,9 +236,11 @@ namespace WoopiAiHub.Repository.Audit
             }
 
             var workflowList = await query
-                .OrderByDescending(a => a.Created)
-                .Select(a => a.WorkflowId)
+                .GroupBy(a => a.WorkflowId)
+                .Select(g => new { WorkflowId = g.Key, MaxCreated = g.Max(a => a.Created) })
+                .OrderByDescending(x => x.MaxCreated)
                 .Take(take)
+                .Select(x => x.WorkflowId)
                 .ToListAsync();
 
             if (workflowList.Count == 0)

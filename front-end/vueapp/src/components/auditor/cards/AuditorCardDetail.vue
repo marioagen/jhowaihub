@@ -116,92 +116,97 @@
                                 Voltar
                             </button>
                         </div>
-                        <div class="mb-2">
-                            <div class="d-flex align-items-center gap-1">
-                                <LucideIcon
-                                    icon="FileText"
-                                    :size="18"
-                                />
-                                {{ documentDisplayName }}
-                            </div>
-                            <div class="d-flex align-items-center gap-1 small text-muted">
-                                {{ workflowDisplayName }}
-                                <BadgeComponent
-                                    variant="warning"
-                                    size="sm"
-                                    :clickable="false"
-                                >
-                                    <LucideIcon
-                                        icon="ListOrdered"
-                                        :size="12"
-                                    />
-                                    {{ documentHistory.length }}
-                                </BadgeComponent>
-                            </div>
-                        </div>
                         <div
-                            class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2"
+                            class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2"
                         >
-                            <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <button
-                                    v-for="stage in stageFilterOptions"
-                                    :key="stage.value"
-                                    type="button"
-                                    class="btn btn-sm rounded-pill border py-1 px-2 auditor-filter-sm"
-                                    :class="
-                                        selectedStageId === stage.value
-                                            ? 'btn-primary'
-                                            : 'btn-light'
-                                    "
-                                    @click="setStageAndRefresh(stage.value)"
-                                >
-                                    {{ stage.label }}
-                                </button>
-                            </div>
-                            <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <button
-                                    type="button"
-                                    class="btn btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1"
-                                    :class="orderDescending ? 'btn-primary' : 'btn-light'"
-                                    @click="toggleOrderAndRefresh"
-                                >
+                            <div class="min-w-0">
+                                <div class="d-flex align-items-center gap-1">
                                     <LucideIcon
-                                        icon="ArrowUpDown"
-                                        :size="12"
+                                        icon="FileText"
+                                        :size="18"
+                                        class="flex-shrink-0"
                                     />
-                                    {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
-                                </button>
-                                <div class="dropdown">
-                                    <button
-                                        class="btn btn-light btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1 dropdown-toggle"
-                                        type="button"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false"
+                                    <span class="text-break">{{ documentDisplayName }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-1 small text-muted">
+                                    {{ workflowDisplayName }}
+                                    <BadgeComponent
+                                        variant="warning"
+                                        size="sm"
+                                        :clickable="false"
                                     >
                                         <LucideIcon
-                                            icon="Filter"
+                                            icon="ListOrdered"
                                             :size="12"
                                         />
-                                        {{ selectedActionLabel }}
-                                        <LucideIcon
-                                            icon="ChevronDown"
-                                            :size="12"
-                                        />
+                                        {{ documentHistory.length }}
+                                    </BadgeComponent>
+                                </div>
+                            </div>
+                            <div
+                                class="d-flex align-items-center gap-2 flex-wrap justify-content-end"
+                            >
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <button
+                                        v-for="stage in stageFilterOptions"
+                                        :key="stage.value"
+                                        type="button"
+                                        class="btn btn-sm rounded-pill border py-1 px-2 auditor-filter-sm"
+                                        :class="
+                                            selectedStageId === stage.value
+                                                ? 'btn-primary'
+                                                : 'btn-light'
+                                        "
+                                        @click="setStageAndRefresh(stage.value)"
+                                    >
+                                        {{ stage.label }}
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-start">
-                                        <li
-                                            v-for="opt in actionFilterOptions"
-                                            :key="opt.value == null ? 'all' : opt.value"
+                                </div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1"
+                                        :class="orderDescending ? 'btn-primary' : 'btn-light'"
+                                        @click="toggleOrderAndRefresh"
+                                    >
+                                        <LucideIcon
+                                            icon="ArrowUpDown"
+                                            :size="12"
+                                        />
+                                        {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
+                                    </button>
+                                    <div class="dropdown">
+                                        <button
+                                            class="btn btn-light btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1 dropdown-toggle"
+                                            type="button"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false"
                                         >
-                                            <a
-                                                class="dropdown-item"
-                                                href="#"
-                                                @click.prevent="setActionAndRefresh(opt.value)"
+                                            <LucideIcon
+                                                icon="Filter"
+                                                :size="12"
+                                            />
+                                            {{ selectedActionLabel }}
+                                            <LucideIcon
+                                                icon="ChevronDown"
+                                                :size="12"
+                                            />
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-start">
+                                            <li
+                                                v-for="opt in actionFilterOptions"
+                                                :key="opt.value == null ? 'all' : opt.value"
                                             >
-                                                {{ opt.label }}
-                                            </a>
-                                        </li>
-                                    </ul>
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    @click.prevent="setActionAndRefresh(opt.value)"
+                                                >
+                                                    {{ opt.label }}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -304,92 +309,97 @@
                 </div>
                 <template v-else>
                     <div class="p-3 border-bottom">
-                        <div class="mb-2">
-                            <div class="d-flex align-items-center gap-1">
-                                <LucideIcon
-                                    icon="FileText"
-                                    :size="18"
-                                />
-                                {{ documentDisplayName }}
-                            </div>
-                            <div class="d-flex align-items-center gap-1 small text-muted">
-                                {{ workflowDisplayName }}
-                                <BadgeComponent
-                                    variant="warning"
-                                    size="sm"
-                                    :clickable="false"
-                                >
-                                    <LucideIcon
-                                        icon="ListOrdered"
-                                        :size="12"
-                                    />
-                                    {{ documentHistory.length }}
-                                </BadgeComponent>
-                            </div>
-                        </div>
                         <div
-                            class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2"
+                            class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2"
                         >
-                            <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <button
-                                    v-for="stage in stageFilterOptions"
-                                    :key="stage.value"
-                                    type="button"
-                                    class="btn btn-sm rounded-pill border py-1 px-2 auditor-filter-sm"
-                                    :class="
-                                        selectedStageId === stage.value
-                                            ? 'btn-primary'
-                                            : 'btn-light'
-                                    "
-                                    @click="setStageAndRefresh(stage.value)"
-                                >
-                                    {{ stage.label }}
-                                </button>
-                            </div>
-                            <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <button
-                                    type="button"
-                                    class="btn btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1"
-                                    :class="orderDescending ? 'btn-primary' : 'btn-light'"
-                                    @click="toggleOrderAndRefresh"
-                                >
+                            <div class="min-w-0">
+                                <div class="d-flex align-items-center gap-1">
                                     <LucideIcon
-                                        icon="ArrowUpDown"
-                                        :size="12"
+                                        icon="FileText"
+                                        :size="18"
+                                        class="flex-shrink-0"
                                     />
-                                    {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
-                                </button>
-                                <div class="dropdown">
-                                    <button
-                                        class="btn btn-light btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1 dropdown-toggle"
-                                        type="button"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false"
+                                    <span class="text-break">{{ documentDisplayName }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-1 small text-muted">
+                                    {{ workflowDisplayName }}
+                                    <BadgeComponent
+                                        variant="warning"
+                                        size="sm"
+                                        :clickable="false"
                                     >
                                         <LucideIcon
-                                            icon="Filter"
+                                            icon="ListOrdered"
                                             :size="12"
                                         />
-                                        {{ selectedActionLabel }}
-                                        <LucideIcon
-                                            icon="ChevronDown"
-                                            :size="12"
-                                        />
+                                        {{ documentHistory.length }}
+                                    </BadgeComponent>
+                                </div>
+                            </div>
+                            <div
+                                class="d-flex align-items-center gap-2 flex-wrap justify-content-end"
+                            >
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <button
+                                        v-for="stage in stageFilterOptions"
+                                        :key="stage.value"
+                                        type="button"
+                                        class="btn btn-sm rounded-pill border py-1 px-2 auditor-filter-sm"
+                                        :class="
+                                            selectedStageId === stage.value
+                                                ? 'btn-primary'
+                                                : 'btn-light'
+                                        "
+                                        @click="setStageAndRefresh(stage.value)"
+                                    >
+                                        {{ stage.label }}
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-start">
-                                        <li
-                                            v-for="opt in actionFilterOptions"
-                                            :key="opt.value == null ? 'all' : opt.value"
+                                </div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1"
+                                        :class="orderDescending ? 'btn-primary' : 'btn-light'"
+                                        @click="toggleOrderAndRefresh"
+                                    >
+                                        <LucideIcon
+                                            icon="ArrowUpDown"
+                                            :size="12"
+                                        />
+                                        {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
+                                    </button>
+                                    <div class="dropdown">
+                                        <button
+                                            class="btn btn-light btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1 dropdown-toggle"
+                                            type="button"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false"
                                         >
-                                            <a
-                                                class="dropdown-item"
-                                                href="#"
-                                                @click.prevent="setActionAndRefresh(opt.value)"
+                                            <LucideIcon
+                                                icon="Filter"
+                                                :size="12"
+                                            />
+                                            {{ selectedActionLabel }}
+                                            <LucideIcon
+                                                icon="ChevronDown"
+                                                :size="12"
+                                            />
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-start">
+                                            <li
+                                                v-for="opt in actionFilterOptions"
+                                                :key="opt.value == null ? 'all' : opt.value"
                                             >
-                                                {{ opt.label }}
-                                            </a>
-                                        </li>
-                                    </ul>
+                                                <a
+                                                    class="dropdown-item"
+                                                    href="#"
+                                                    @click.prevent="setActionAndRefresh(opt.value)"
+                                                >
+                                                    {{ opt.label }}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
