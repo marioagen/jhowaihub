@@ -115,10 +115,11 @@
                     <div
                         class="d-flex align-items-center flex-wrap justify-content-between gap-2 mb-2"
                     >
-                        <h6 class="mb-0 fw-bold d-flex align-items-center gap-1">
+                        <h6 class="mb-0 small fw-normal d-flex align-items-center gap-1">
                             <LucideIcon
                                 icon="TrendingUp"
-                                :size="18"
+                                :size="14"
+                                class="text-primary"
                             />
                             Timeline Processual
                             <BadgeComponent

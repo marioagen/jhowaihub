@@ -101,11 +101,12 @@
                             class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2"
                         >
                             <h6
-                                class="mb-0 fw-bold d-flex align-items-center gap-1 user-detail-heading"
+                                class="mb-0 small fw-normal d-flex align-items-center gap-1 user-detail-heading"
                             >
                                 <LucideIcon
                                     icon="History"
-                                    :size="18"
+                                    :size="14"
+                                    class="text-primary"
                                 />
                                 Histórico de Atividade
                                 <BadgeComponent
