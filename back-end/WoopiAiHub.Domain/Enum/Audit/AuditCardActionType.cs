@@ -15,6 +15,7 @@ namespace WoopiAiHub.Domain.Enum.Audit
         DocumentDeleted = 10,
         Rejection = 11,
         InputQuestionnaire = 12,
-        InputDocument = 13
+        InputDocument = 13,
+        Failed = 14
     }
 }
