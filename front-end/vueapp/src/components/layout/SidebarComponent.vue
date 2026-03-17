@@ -12,7 +12,7 @@
             >
                 <img
                     v-if="isCollapsed"
-                    :src="logoSrc"
+                    :src="logoSmallSrc"
                     :title="$t('common.home')"
                     width="35"
                     height="35"
@@ -86,6 +86,7 @@
     import { hasPermission } from "@/utils/permissions";
     import logoDark from "@/assets/img/woopiai-logo-dark.png";
     import logoLight from "@/assets/img/woopiai-logo-light.png";
+    import logoSmall from "@/assets/img/woopiai-hub-small-logo.png";
     export default {
         name: "SideBar",
         props: {
@@ -202,6 +203,9 @@
             },
             logoSrc() {
                 return this.isDarkMode ? logoLight : logoDark;
+            },
+            logoSmallSrc() {
+                return logoSmall;
             },
             filteredMenuItems() {
                 return this.menuItems.filter((item) => {
