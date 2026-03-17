@@ -497,20 +497,26 @@
         opacity: 0.6;
     }
     .workflow-summary-card {
-        background-color: var(--bs-secondary-bg, #f8f9fa);
+        background-color: transparent;
+    }
+    .workflow-summary-card .fw-bold {
+        color: var(--bs-body-color);
     }
     .workflow-stages-bar {
-        background-color: var(--bs-secondary-bg, #f8f9fa);
+        background-color: transparent;
     }
     .workflow-stage-block {
         background-color: rgba(13, 110, 253, 0.12);
         min-width: 0;
     }
+    .workflow-stage-block .small.fw-bold {
+        color: var(--bs-emphasis-color);
+    }
     .workflow-stage-block-terminal {
         background-color: rgba(25, 135, 84, 0.15);
     }
     .workflow-stage-arrow {
-        background-color: var(--bs-secondary-bg, #f8f9fa);
+        background-color: transparent;
     }
     .workflow-detail-content {
         flex: 1 1 0;
