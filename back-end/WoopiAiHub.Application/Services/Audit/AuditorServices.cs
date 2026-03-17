@@ -9,7 +9,7 @@ using WoopiAiHub.Domain.Utils;
 namespace WoopiAiHub.Application.Services.Audit
 {
     /// <summary>
-    /// Service for auditor endpoints. Fetches raw audit data from the repository and builds card, workflow, and user audit DTOs.
+    /// Service for auditor endpoints. Fetches raw audit data from the repository and builds document, workflow, and user audit DTOs.
     /// </summary>
     public class AuditorServices : IAuditorServices
     {
@@ -26,24 +26,24 @@ namespace WoopiAiHub.Application.Services.Audit
         }
 
         /// <summary>
-        /// Returns up to <paramref name="take"/> documents with card audit summary: DocumentId, DocumentName, Workflows (id, name, step), ActionsCount, IsFinalized. Optional search (document/card name, workflow name, or numeric id) and isFinalized filter. Ordered by most recent audit activity.
+        /// Returns up to <paramref name="take"/> documents with document audit summary: DocumentId, DocumentName, Workflows (id, name, step), ActionsCount, IsFinalized. Optional search (document name, workflow name, or numeric id) and isFinalized filter. Ordered by most recent audit activity.
         /// </summary>
-        public async Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, bool? isFinalized = null)
+        public async Task<ICollection<DocumentAuditorSummaryDto>> FindDocumentsAuditSummaryAsync(int take, string? search, bool? isFinalized = null)
         {
             try
             {
-                var documentIds = await _auditorRepository.FindDocumentIdsForCardsSummaryAsync(take, search, isFinalized);
+                var documentIds = await _auditorRepository.FindDocumentIdsForDocumentsSummaryAsync(take, search, isFinalized);
                 if (documentIds.Count == 0)
-                    return new List<CardAuditorSummaryDto>();
+                    return new List<DocumentAuditorSummaryDto>();
 
-                var auditRows = await _auditorRepository.FindAuditRowsForCardsSummaryAsync(documentIds, search, isFinalized);
+                var auditRows = await _auditorRepository.FindAuditRowsForDocumentsSummaryAsync(documentIds, search, isFinalized);
 
                 var isFinalizedByDocument = auditRows
                     .GroupBy(a => a.DocumentId)
                     .ToDictionary(g => g.Key, g =>
                     {
-                        var cardsInDoc = g.GroupBy(x => x.CardId).Select(x => x.First().CardStatusName).ToList();
-                        return cardsInDoc.Count > 0 && cardsInDoc.All(s => s == StatusNames.Finalize);
+                        var statusesInDoc = g.GroupBy(x => x.CardId).Select(x => x.First().CardStatusName).ToList();
+                        return statusesInDoc.Count > 0 && statusesInDoc.All(s => s == StatusNames.Finalize);
                     });
 
                 var groupedByDocument = auditRows
@@ -59,7 +59,7 @@ namespace WoopiAiHub.Application.Services.Audit
                         .Select(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName, x.DocumentId })
                         .GroupBy(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName })
                         .Select(x => x.First())
-                        .Select(x => new CardAuditorWorkflowsDto
+                        .Select(x => new DocumentAuditorWorkflowsDto
                         {
                             Id = x.WorkflowId,
                             Name = x.WorkflowName,
@@ -68,7 +68,7 @@ namespace WoopiAiHub.Application.Services.Audit
                             DocumentId = x.DocumentId
                         })
                         .ToList();
-                    return new CardAuditorSummaryDto
+                    return new DocumentAuditorSummaryDto
                     {
                         DocumentId = g.Key,
                         DocumentName = first.DocumentName,
@@ -80,19 +80,19 @@ namespace WoopiAiHub.Application.Services.Audit
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(AuditorServices)} in the {nameof(FindCardsAuditSummaryAsync)} method");
+                _logger.LogError(ex, $"An exception occurred in the {nameof(AuditorServices)} in the {nameof(FindDocumentsAuditSummaryAsync)} method");
                 throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }
 
         /// <summary>
-        /// Returns card audit detail for a document and workflow: DocumentId, DocumentName, WorkflowId, WorkflowName, DocumentHistory (user, action, step, created). Optional filters: search (user/document/card/action/step name), userId, actionType, stepId; limited by <paramref name="take"/>. Returns null when no audit rows exist.
+        /// Returns document audit detail for a document and workflow: DocumentId, DocumentName, WorkflowId, WorkflowName, DocumentHistory (user, action, step, created). Optional filters: search (user/document/action/step name), userId, actionType, stepId; limited by <paramref name="take"/>. Returns null when no audit rows exist.
         /// </summary>
-        public async Task<CardAuditorDetailDto?> FindCardAuditDetailsAsync(int documentId, int workflowId, int take, string? search = null, Guid? userId = null, int? actionType = null, int? stepId = null, bool orderDescending = true)
+        public async Task<DocumentAuditorDetailDto?> FindDocumentAuditDetailsAsync(int documentId, int workflowId, int take, string? search = null, Guid? userId = null, int? actionType = null, int? stepId = null, bool orderDescending = true)
         {
             try
             {
-                var rows = await _auditorRepository.FindAuditRowsForCardDetailAsync(documentId, workflowId, take, search, userId, actionType, stepId, orderDescending);
+                var rows = await _auditorRepository.FindAuditRowsForDocumentDetailAsync(documentId, workflowId, take, search, userId, actionType, stepId, orderDescending);
                 if (rows.Count == 0)
                     return null;
 
@@ -107,7 +107,7 @@ namespace WoopiAiHub.Application.Services.Audit
                     Created = a.Created
                 }).ToList();
 
-                return new CardAuditorDetailDto
+                return new DocumentAuditorDetailDto
                 {
                     DocumentId = documentId,
                     DocumentName = first.DocumentName,
@@ -118,7 +118,7 @@ namespace WoopiAiHub.Application.Services.Audit
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(AuditorServices)} in the {nameof(FindCardAuditDetailsAsync)} method");
+                _logger.LogError(ex, $"An exception occurred in the {nameof(AuditorServices)} in the {nameof(FindDocumentAuditDetailsAsync)} method");
                 throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
         }

@@ -24,17 +24,17 @@ namespace WoopiAiHub.Api.Controllers
         /// Returns the first N documents for the auditor (load-more pattern). One row per document with DocumentId, DocumentName, Workflows (with DocumentId), ActionsCount, IsFinalized (from DB).
         /// </summary>
         /// <param name="take">Maximum number of documents to return (default 10).</param>
-        /// <param name="search">Optional. Matches DocumentId/CardId when numeric, or DocumentName/CardName/WorkflowName by contains.</param>
-        /// <param name="isFinalized">Optional. When true, only finalized documents (all cards finalized); when false, only non-finalized; when null, all.</param>
-        [HttpGet("Cards")]
-        [SwaggerOperation("Returns cards for the auditor with optional search and status filter")]
-        [ProducesResponseType(typeof(ICollection<CardAuditorSummaryDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindCardsAuditSummary(
+        /// <param name="search">Optional. Matches DocumentId when numeric, or DocumentName/WorkflowName by contains.</param>
+        /// <param name="isFinalized">Optional. When true, only finalized documents; when false, only non-finalized; when null, all.</param>
+        [HttpGet("Documents")]
+        [SwaggerOperation("Returns documents for the auditor with optional search and status filter")]
+        [ProducesResponseType(typeof(ICollection<DocumentAuditorSummaryDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindDocumentsAuditSummary(
             [FromQuery] int take = 10,
             [FromQuery] string? search = null,
             [FromQuery] bool? isFinalized = null)
         {
-            var result = await _auditorServices.FindCardsAuditSummaryAsync(take, search, isFinalized);
+            var result = await _auditorServices.FindDocumentsAuditSummaryAsync(take, search, isFinalized);
             return Ok(result);
         }
 
@@ -44,16 +44,16 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="documentId">Document identifier.</param>
         /// <param name="workflowId">Workflow identifier.</param>
         /// <param name="take">Maximum number of audit entries to return in DocumentHistory (default 10).</param>
-        /// <param name="search">Optional. Matches UserName, DocumentName, CardName, ActionType, or StepName by contains.</param>
+        /// <param name="search">Optional. Matches UserName, DocumentName, ActionType, or StepName by contains.</param>
         /// <param name="userId">Optional. Filter by user who performed the action.</param>
         /// <param name="action">Optional. Filter by action type (AuditCardActionType enum value).</param>
         /// <param name="step">Optional. Filter by step id.</param>
         /// <param name="orderDescending">Order by Created descending when true (default), ascending when false.</param>
         [HttpGet("Documents/{documentId:int}/Workflows/{workflowId:int}")]
         [SwaggerOperation("Returns document audit detail for a document and workflow with optional filters and sort")]
-        [ProducesResponseType(typeof(CardAuditorDetailDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(DocumentAuditorDetailDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> FindCardAuditDetails(
+        public async Task<IActionResult> FindDocumentAuditDetails(
             int documentId,
             int workflowId,
             [FromQuery] int take = 10,
@@ -63,7 +63,7 @@ namespace WoopiAiHub.Api.Controllers
             [FromQuery] int? step = null,
             [FromQuery] bool orderDescending = true)
         {
-            var result = await _auditorServices.FindCardAuditDetailsAsync(documentId, workflowId, take, search, userId, action, step, orderDescending);
+            var result = await _auditorServices.FindDocumentAuditDetailsAsync(documentId, workflowId, take, search, userId, action, step, orderDescending);
             if (result is null)
                 return NotFound();
             return Ok(result);

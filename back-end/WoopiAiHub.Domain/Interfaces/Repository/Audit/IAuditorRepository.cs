@@ -8,10 +8,10 @@ namespace WoopiAiHub.Domain.Interfaces.Repository.Audit
     /// </summary>
     public interface IAuditorRepository
     {
-        Task<List<int>> FindDocumentIdsForCardsSummaryAsync(int take, string? search, bool? isFinalized = null);
-        Task<List<CardAuditorSummaryRowDto>> FindAuditRowsForCardsSummaryAsync(IReadOnlyList<int> documentIds, string? search, bool? isFinalized = null);
+        Task<List<int>> FindDocumentIdsForDocumentsSummaryAsync(int take, string? search, bool? isFinalized = null);
+        Task<List<DocumentAuditorSummaryRowDto>> FindAuditRowsForDocumentsSummaryAsync(IReadOnlyList<int> documentIds, string? search, bool? isFinalized = null);
 
-        Task<List<CardAuditorDetailRowDto>> FindAuditRowsForCardDetailAsync(int documentId, int workflowId, int take, string? search, Guid? userId, int? actionType, int? stepId, bool orderDescending);
+        Task<List<DocumentAuditorDetailRowDto>> FindAuditRowsForDocumentDetailAsync(int documentId, int workflowId, int take, string? search, Guid? userId, int? actionType, int? stepId, bool orderDescending);
 
         Task<List<int>> FindWorkflowIdsForWorkflowSummaryAsync(int take, string? search);
         Task<List<WorkflowAuditorSummaryRowDto>> FindAuditRowsForWorkflowSummaryAsync(IReadOnlyList<int> workflowIds);

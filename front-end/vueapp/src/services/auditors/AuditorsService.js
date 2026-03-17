@@ -1,9 +1,9 @@
 import api from "@/services/api";
 
 export default {
-    getCardsAuditSummary(params = {}) {
+    getDocumentsAuditSummary(params = {}) {
         return api
-            .get("/Auditor/Cards", { params })
+            .get("/Auditor/Documents", { params })
             .then(({ data }) => {
                 return data;
             })

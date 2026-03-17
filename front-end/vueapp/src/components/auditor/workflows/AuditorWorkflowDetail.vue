@@ -117,7 +117,7 @@
                     >
                         <h6 class="mb-0 fw-bold d-flex align-items-center gap-1">
                             <LucideIcon
-                                icon="History"
+                                icon="TrendingUp"
                                 :size="18"
                             />
                             Timeline Processual

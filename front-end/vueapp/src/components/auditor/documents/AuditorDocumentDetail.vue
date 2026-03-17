@@ -11,7 +11,7 @@
                             class="workflow-select-heading mb-2 fw-bold d-flex align-items-center gap-2"
                         >
                             <LucideIcon
-                                icon="GitBranch"
+                                icon="Layers"
                                 :size="20"
                                 class="text-warning"
                             />
@@ -36,9 +36,6 @@
                                 <div class="min-w-0 flex-grow-1">
                                     <div class="workflow-select-card-title fw-semibold">
                                         {{ selectedDocument.documentName }}
-                                    </div>
-                                    <div class="small text-muted">
-                                        #{{ selectedDocument.documentId }}
                                     </div>
                                     <div class="small text-muted">
                                         {{
@@ -742,7 +739,13 @@
     .workflow-select-card-title {
         color: var(--bs-body-color);
     }
-    .workflow-select-card {
+    .workflow-select-card:not(.workflow-select-card-clickable) {
+        background-color: rgba(13, 110, 253, 0.08);
+    }
+    :global(.css-theme-dark) .workflow-select-card:not(.workflow-select-card-clickable) {
+        background-color: rgba(66, 133, 244, 0.18);
+    }
+    .workflow-select-card-clickable {
         background-color: var(--bs-secondary-bg, transparent);
     }
     .workflow-select-card-clickable:hover {

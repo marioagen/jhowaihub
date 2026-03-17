@@ -1,9 +1,9 @@
 namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Rows
 {
     /// <summary>
-    /// Raw audit row for cards summary. Used by repository and service to build CardAuditorSummaryDto.
+    /// Raw audit row for documents summary. Used by repository and service to build DocumentAuditorSummaryDto.
     /// </summary>
-    public record CardAuditorSummaryRowDto
+    public record DocumentAuditorSummaryRowDto
     {
         public int DocumentId { get; init; }
         public string DocumentName { get; init; } = string.Empty;

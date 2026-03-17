@@ -3,7 +3,7 @@ namespace WoopiAiHub.Domain.DTOs.Response.Auditor
     /// <summary>
     /// Workflow id, name, step (id and name), and document id for auditor document view.
     /// </summary>
-    public record CardAuditorWorkflowsDto
+    public record DocumentAuditorWorkflowsDto
     {
         public int Id { get; init; }
         public string Name { get; init; } = string.Empty;

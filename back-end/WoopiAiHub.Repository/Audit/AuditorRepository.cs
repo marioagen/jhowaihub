@@ -10,7 +10,7 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Audit
 {
     /// <summary>
-    /// Repository for audit data. Reads from AuditCards and related entities to support card, workflow, and user audit summaries and details.
+    /// Repository for audit data. Reads from AuditCards and related entities to support document, workflow, and user audit summaries and details.
     /// </summary>
     public class AuditorRepository : IAuditorRepository
     {
@@ -30,9 +30,9 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns up to <paramref name="take"/> distinct document IDs ordered by most recent audit activity. Optional search (document/card name, workflow name, or numeric document/card id) and isFinalized filter.
+        /// Returns up to <paramref name="take"/> distinct document IDs ordered by most recent audit activity. Optional search (document name, workflow name, or numeric document id) and isFinalized filter.
         /// </summary>
-        public async Task<List<int>> FindDocumentIdsForCardsSummaryAsync(int take, string? search, bool? isFinalized = null)
+        public async Task<List<int>> FindDocumentIdsForDocumentsSummaryAsync(int take, string? search, bool? isFinalized = null)
         {
             if (take <= 0) take = DefaultTake;
 
@@ -40,7 +40,7 @@ namespace WoopiAiHub.Repository.Audit
             if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
                 searchAsId = parsedId;
 
-            var auditQuery = ApplyCardsSummaryFilters(_context.AuditCards.AsNoTracking(), search, searchAsId, isFinalized);
+            var auditQuery = ApplyDocumentsSummaryFilters(_context.AuditCards.AsNoTracking(), search, searchAsId, isFinalized);
 
             var documentIdList = await auditQuery
                 .OrderByDescending(a => a.Created)
@@ -51,12 +51,12 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns audit rows for the given document IDs, applying the same search and isFinalized filter as the cards summary. Projects to CardAuditorSummaryRowDto (document, workflow, step, card, status).
+        /// Returns audit rows for the given document IDs, applying the same search and isFinalized filter as the documents summary. Projects to DocumentAuditorSummaryRowDto (document, workflow, step, card, status).
         /// </summary>
-        public async Task<List<CardAuditorSummaryRowDto>> FindAuditRowsForCardsSummaryAsync(IReadOnlyList<int> documentIds, string? search, bool? isFinalized = null)
+        public async Task<List<DocumentAuditorSummaryRowDto>> FindAuditRowsForDocumentsSummaryAsync(IReadOnlyList<int> documentIds, string? search, bool? isFinalized = null)
         {
             if (documentIds.Count == 0)
-                return new List<CardAuditorSummaryRowDto>();
+                return new List<DocumentAuditorSummaryRowDto>();
 
             int? searchAsId = null;
             if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
@@ -64,10 +64,10 @@ namespace WoopiAiHub.Repository.Audit
 
             var auditRowsQuery = _context.AuditCards.AsNoTracking()
                 .Where(a => documentIds.Contains(a.DocumentId));
-            auditRowsQuery = ApplyCardsSummaryFilters(auditRowsQuery, search, searchAsId, isFinalized);
+            auditRowsQuery = ApplyDocumentsSummaryFilters(auditRowsQuery, search, searchAsId, isFinalized);
 
             return await auditRowsQuery
-                .Select(a => new CardAuditorSummaryRowDto
+                .Select(a => new DocumentAuditorSummaryRowDto
                 {
                     DocumentId = a.DocumentId,
                     DocumentName = a.Document != null ? a.Document.Name : string.Empty,
@@ -82,9 +82,9 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Applies search (document/card/workflow name or numeric id) and isFinalized filters to an AuditCards query.
+        /// Applies search (document/workflow name or numeric id) and isFinalized filters to an AuditCards query.
         /// </summary>
-        private static IQueryable<AuditCard> ApplyCardsSummaryFilters(
+        private static IQueryable<AuditCard> ApplyDocumentsSummaryFilters(
             IQueryable<AuditCard> query,
             string? search,
             int? searchAsId,
@@ -112,9 +112,9 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns up to <paramref name="take"/> audit rows for the given document and workflow. Optional filters: search (user/document/card/action/step name), userId, actionType, stepId. Ordered by Created (asc or desc).
+        /// Returns up to <paramref name="take"/> audit rows for the given document and workflow. Optional filters: search (user/document/action/step name), userId, actionType, stepId. Ordered by Created (asc or desc).
         /// </summary>
-        public async Task<List<CardAuditorDetailRowDto>> FindAuditRowsForCardDetailAsync(int documentId, int workflowId, int take, string? search, Guid? userId, int? actionType, int? stepId, bool orderDescending)
+        public async Task<List<DocumentAuditorDetailRowDto>> FindAuditRowsForDocumentDetailAsync(int documentId, int workflowId, int take, string? search, Guid? userId, int? actionType, int? stepId, bool orderDescending)
         {
             if (take <= 0) take = DefaultTake;
 
@@ -145,7 +145,7 @@ namespace WoopiAiHub.Repository.Audit
 
             return await ordered
                 .Take(take)
-                .Select(a => new CardAuditorDetailRowDto
+                .Select(a => new DocumentAuditorDetailRowDto
                 {
                     DocumentName = a.Document != null ? a.Document.Name : string.Empty,
                     WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,

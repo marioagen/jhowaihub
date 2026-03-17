@@ -173,7 +173,7 @@
                         ...(search && { search }),
                         ...(isFinalized !== undefined && { isFinalized }),
                     };
-                    const response = await AuditorsService.getCardsAuditSummary(params);
+                    const response = await AuditorsService.getDocumentsAuditSummary(params);
                     if (response.error) {
                         return this.$notify({
                             title: "audit-cards.title",
