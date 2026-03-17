@@ -14,5 +14,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services.Audit
         Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId, string? search = null, int? stepId = null, int? actionType = null, bool orderDescending = true);
         Task<ICollection<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int take = 10, string? userName = null, int? teamId = null);
         Task<UserAuditorDetailsDto?> FindUserAuditDetailsAsync(Guid userId, string? search = null, int? actionTypeCode = null, bool orderDescending = true);
+        Task<ICollection<AuditorActionTypeDto>> FindActionTypesAsync();
     }
 }

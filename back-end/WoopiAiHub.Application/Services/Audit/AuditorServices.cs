@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Response.Auditor;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services.Audit;
 using WoopiAiHub.Domain.Utils;
@@ -23,6 +24,18 @@ namespace WoopiAiHub.Application.Services.Audit
         {
             _auditorRepository = auditorRepository;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Returns all audit card action types as code and name for use in filters and dropdowns.
+        /// </summary>
+        public Task<ICollection<AuditorActionTypeDto>> FindActionTypesAsync()
+        {
+            var result = Enum.GetValues<AuditCardActionType>()
+                .Select(e => new AuditorActionTypeDto { Code = (int)e, Name = e.ToString() })
+                .OrderBy(x => x.Code)
+                .ToList();
+            return Task.FromResult<ICollection<AuditorActionTypeDto>>(result);
         }
 
         /// <summary>

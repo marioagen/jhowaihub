@@ -21,6 +21,18 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
+        /// Returns all audit card action types as code and name for use in filters and dropdowns.
+        /// </summary>
+        [HttpGet("ActionTypes")]
+        [SwaggerOperation("Returns audit action type enum values as code and name")]
+        [ProducesResponseType(typeof(ICollection<AuditorActionTypeDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindActionTypes()
+        {
+            var result = await _auditorServices.FindActionTypesAsync();
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Returns the first N documents for the auditor (load-more pattern). One row per document with DocumentId, DocumentName, Workflows (with DocumentId), ActionsCount, IsFinalized (from DB).
         /// </summary>
         /// <param name="take">Maximum number of documents to return (default 10).</param>

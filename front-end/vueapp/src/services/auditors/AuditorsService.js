@@ -1,6 +1,18 @@
 import api from "@/services/api";
 
 export default {
+    getActionTypes() {
+        return api
+            .get("/Auditor/ActionTypes")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
     getDocumentsAuditSummary(params = {}) {
         return api
             .get("/Auditor/Documents", { params })
