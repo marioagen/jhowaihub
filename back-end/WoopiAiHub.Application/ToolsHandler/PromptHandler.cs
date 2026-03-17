@@ -35,11 +35,11 @@ public class PromptHandler : IToolHandler
 
     /// <summary>
     /// Builds an execution payload for processing prompt tasks with multiple outputs from dependent StepTools.
-    /// This allows combining multiple document embeddings from different sources.
+    /// Dependencies can be OCR (document embeddings) or another Prompt (previous prompt response); the combined text is sent to the AI Gateway.
     /// </summary>
     /// <param name="automationServicesDto"></param>
     /// <param name="input"></param>
-    /// <param name="outputs">Collection of outputs from dependent StepTools</param>
+    /// <param name="outputs">Collection of outputs from dependent StepTools (OCR and/or Prompt)</param>
     /// <param name="execution"></param>
     /// <returns></returns>
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
@@ -53,12 +53,14 @@ public class PromptHandler : IToolHandler
             throw new ArgumentException("AiGateway ApplicationId not found");
         }
 
-        var output = outputs.FirstOrDefault()?.Value ?? throw new AppException(ErrorCode.RequiredField, "The prompt tool requires a OCR dependency", ToolLabel.OcrDependencyRequired);
+        var fullText = ExtractFullTextFromOutputs(outputs);
+        if (string.IsNullOrWhiteSpace(fullText))
+        {
+            throw new AppException(ErrorCode.RequiredField, "The prompt tool requires an OCR or Prompt dependency with output", ToolLabel.OcrOrPromptDependencyRequired);
+        }
+
         var promptId = int.Parse(input!.Value);
         var promptDto = _promptServices.FindById(promptId);
-        var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
-        var fullText = string.Join("\n", documents!.DocumentEmbeddings.Select(d => d.Text));
-
 
         return new ExecutionMessageDto
         {
@@ -89,5 +91,60 @@ public class PromptHandler : IToolHandler
                 Email = automationServicesDto.Email
             }
         };
+    }
+
+    /// <summary>
+    /// Extracts and concatenates text from dependency outputs. OCR output is parsed from DocumentEmbeddings; Prompt output is used as plain text.
+    /// When StepTool/ToolType is not available (e.g. tests), tries OCR format first, then falls back to plain text.
+    /// </summary>
+    private static string ExtractFullTextFromOutputs(ICollection<StepToolOutput> outputs)
+    {
+        if (outputs == null || outputs.Count == 0) return string.Empty;
+
+        var parts = new List<string>();
+        foreach (var output in outputs)
+        {
+            var value = output.Value;
+            if (string.IsNullOrWhiteSpace(value)) continue;
+
+            var toolType = output.StepTool?.Tool?.ToolType?.Name;
+            if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
+            {
+                TryAddOcrText(value, parts);
+            }
+            else if (string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase))
+            {
+                parts.Add(value.Trim());
+            }
+            else
+            {
+                // Unknown or missing tool type: try OCR format first (backward compatibility), then plain text
+                if (!TryAddOcrText(value, parts))
+                {
+                    parts.Add(value.Trim());
+                }
+            }
+        }
+
+        return string.Join("\n\n", parts);
+    }
+
+    private static bool TryAddOcrText(string value, List<string> parts)
+    {
+        try
+        {
+            var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(value);
+            if (documents?.DocumentEmbeddings != null && documents.DocumentEmbeddings.Count > 0)
+            {
+                parts.Add(string.Join("\n", documents.DocumentEmbeddings.Select(d => d.Text)));
+                return true;
+            }
+        }
+        catch
+        {
+            // Not valid OCR JSON
+        }
+
+        return false;
     }
 }

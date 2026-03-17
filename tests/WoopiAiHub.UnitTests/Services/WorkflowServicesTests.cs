@@ -1454,6 +1454,85 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
         }
 
+        [Fact(DisplayName = "UpdatePhase3 should succeed when Prompt tool has another Prompt as dependency")]
+        [Trait("UpdatePhase3", "Success")]
+        public async Task UpdatePhase3_PromptToolWithPromptDependency_UpdatesSuccessfully()
+        {
+            // Arrange: Step 1 = Prompt A, Step 2 = Prompt B depending on Prompt A
+            var stepId = 1;
+            var stepOrder = 1;
+
+            var firstPromptStepToolDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 998,
+                Order = 1,
+                PositionX = 1,
+                PositionY = 1,
+                Parameters = new List<StepToolParameterUpdateDto>()
+            };
+
+            var secondPromptStepToolDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 999,
+                Order = 2,
+                PositionX = 2,
+                PositionY = 2,
+                Parameters = new List<StepToolParameterUpdateDto> { new StepToolParameterUpdateDto { Value = "value1" } },
+                Dependencies = new List<StepToolOutputDependencyDto>
+                {
+                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
+                }
+            };
+
+            var stepToolsList = new List<StepToolUpdateDto> { firstPromptStepToolDto, secondPromptStepToolDto };
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase3Dto { Id = stepId, Order = stepOrder, StepTools = stepToolsList } }
+            };
+
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Workflow");
+            var step = new Step(stepId, DateTime.UtcNow, 1, "Step 1", stepOrder, 1, 1);
+            workflow.Steps.Add(step);
+            step.Workflow = workflow;
+
+            var firstPromptStepTool = new StepTool(10, DateTime.UtcNow, stepId, 998, 1, 1, 1);
+            firstPromptStepTool.Step = step;
+            step.StepTools.Add(firstPromptStepTool);
+
+            var secondPromptStepTool = new StepTool(20, DateTime.UtcNow, stepId, 999, 2, 2, 2);
+            secondPromptStepTool.Step = step;
+            step.StepTools.Add(secondPromptStepTool);
+
+            var promptToolA = WorkflowFixture.CreateToolModel(998, "Prompt A", "Prompt");
+            var promptToolB = WorkflowFixture.CreateToolModel(999, "Prompt B", "Prompt");
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
+                .ReturnsAsync(workflow);
+
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync((int id) => id == 998 ? promptToolA : id == 999 ? promptToolB : promptToolA);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+
+            // Assert
+            Assert.True(result);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+        }
+
         [Fact(DisplayName = "UpdatePhase3 should throw AppException when ToolId is invalid")]
         [Trait("UpdatePhase3", "Fail")]
         public async Task UpdatePhase3_InvalidToolId_ThrowsAppException()
@@ -1920,8 +1999,8 @@ namespace WoopiAiHub.UnitTests.Services
             var exception =
                 await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Prompt tool must have at least one OCR dependency", exception.Message);
-            Assert.Equal(ToolLabel.OcrDependencyRequired, exception.LabelError);
+            Assert.Equal("Prompt tool must have at least one OCR or Prompt dependency", exception.Message);
+            Assert.Equal(ToolLabel.OcrOrPromptDependencyRequired, exception.LabelError);
 
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
@@ -2125,8 +2204,8 @@ namespace WoopiAiHub.UnitTests.Services
             var exception =
                 await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Prompt tool must have at least one OCR dependency", exception.Message);
-            Assert.Equal(ToolLabel.OcrDependencyRequired, exception.LabelError);
+            Assert.Equal("Prompt tool must have at least one OCR or Prompt dependency", exception.Message);
+            Assert.Equal(ToolLabel.OcrOrPromptDependencyRequired, exception.LabelError);
 
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);

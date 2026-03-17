@@ -899,6 +899,7 @@ const english = {
         index: "Tools",
         notFound: "No tools registered",
         ocrDependencyRequired: "Agent tool requires a dependency on a Digitizer Agent tool",
+        ocrOrPromptDependencyRequired: "Agent tool requires a dependency on a Digitizer Agent (OCR) or another Agent (Prompt)",
         removeError: "Error removing tool",
         removeSuccess: "Tool removed successfully",
         removeTitle: "You are about to delete a tool from the system",

@@ -900,6 +900,8 @@ const spanish = {
         notFound: "No hay herramientas registradas",
         ocrDependencyRequired:
             "La herramienta de Agente requiere una dependencia de una herramienta de Agente Digitalizador",
+        ocrOrPromptDependencyRequired:
+            "La herramienta de Agente requiere una dependencia de Agente Digitalizador (OCR) u otro Agente (Prompt)",
         removeError: "Error al eliminar la herramienta",
         removeSuccess: "Herramienta eliminada con éxito",
         removeTitle: "Estás a punto de eliminar una herramienta del sistema",

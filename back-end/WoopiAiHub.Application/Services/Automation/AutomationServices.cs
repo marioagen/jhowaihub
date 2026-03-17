@@ -304,20 +304,28 @@ namespace WoopiAiHub.Application.Services.Automation
         {
             var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!.Name);
 
-            if (stepTool.Dependencies != null && stepTool.Dependencies.Count > 0)
-            {
-                var ids = stepTool.Dependencies.Select(d => d.DependsOnStepToolId).ToList();
-                var outputs = await _stepToolOutputRepository.FindAllByStepToolListIdsAsync(ids, cardId);
-                return await handler.BuildPayload(automationServicesDto, input, outputs, execution);
-            }
-            else
-            {   
-                var output = new List<StepToolOutput>();
-                if (stepTool.DependsOnStepToolId.HasValue)
-                    output = await _stepToolOutputRepository.FindAllByStepToolListIdsAsync([stepTool.DependsOnStepToolId.Value], cardId);
+            var dependencyIds = GetDependencyStepToolIds(stepTool);
+            var outputs = dependencyIds.Count > 0
+                ? await _stepToolOutputRepository.FindAllByStepToolListIdsAsync(dependencyIds, cardId)
+                : new List<StepToolOutput>();
 
-                return await handler.BuildPayload(automationServicesDto, input, output, execution);
+            return await handler.BuildPayload(automationServicesDto, input, outputs, execution);
+        }
+
+        /// <summary>
+        /// Collects all dependency step tool IDs from both the Dependencies collection and DependsOnStepToolId (legacy), without duplicates.
+        /// </summary>
+        private static List<int> GetDependencyStepToolIds(StepTool stepTool)
+        {
+            var ids = new HashSet<int>();
+            if (stepTool.Dependencies != null)
+            {
+                foreach (var d in stepTool.Dependencies)
+                    ids.Add(d.DependsOnStepToolId);
             }
+            if (stepTool.DependsOnStepToolId.HasValue)
+                ids.Add(stepTool.DependsOnStepToolId.Value);
+            return ids.ToList();
         }
 
         /// <summary>
