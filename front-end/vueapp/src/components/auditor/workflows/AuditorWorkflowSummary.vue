@@ -52,12 +52,6 @@
                                         :size="12"
                                     />
                                     {{ item.teamName || "—" }}
-                                    <BadgeComponent
-                                        text="Ativa"
-                                        variant="success"
-                                        size="sm"
-                                        :clickable="false"
-                                    />
                                 </div>
                                 <div
                                     class="small text-muted d-flex align-items-center flex-wrap gap-2"
