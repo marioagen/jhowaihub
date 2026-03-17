@@ -20,12 +20,14 @@
                 >
                     <div
                         v-for="item in auditCardList"
-                        :key="item.cardId"
+                        :key="item.documentId"
                         class="audit-list-item rounded-2 p-2 mb-2 cursor-pointer"
                         :class="{
                             'audit-list-item-selected border-start border-primary border-3':
-                                selectedDocument && selectedDocument.cardId === item.cardId,
-                            border: !selectedDocument || selectedDocument.cardId !== item.cardId,
+                                selectedDocument && selectedDocument.documentId === item.documentId,
+                            border:
+                                !selectedDocument ||
+                                selectedDocument.documentId !== item.documentId,
                         }"
                         @click="selectDocument(item)"
                     >
@@ -38,8 +40,9 @@
                             <div class="min-w-0 flex-grow-1">
                                 <div class="d-flex align-items-center flex-wrap gap-1 mb-1">
                                     <span class="fw-semibold small text-break">
-                                        {{ item.cardName }}
+                                        {{ item.documentName }}
                                     </span>
+                                    <span class="small text-muted">#{{ item.documentId }}</span>
                                     <BadgeComponent
                                         :text="item.isFinalized ? 'Finalized' : 'Active'"
                                         :variant="item.isFinalized ? 'success' : 'primary'"

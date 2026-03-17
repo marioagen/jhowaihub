@@ -27,10 +27,10 @@ namespace WoopiAiHub.Application.Services.Audit
             => _auditorRepository.FindCardsAuditSummaryAsync(take, search, isFinalized);
 
         /// <summary>
-        /// Returns audit detail rows for a specific card and workflow, with optional filters for search, user, action type, and step. Supports load-more and sort order.
+        /// Returns document audit detail for a document and workflow (DocumentId, DocumentName, WorkflowId, WorkflowName, DocumentHistory), with optional filters. Returns null when no audit rows exist.
         /// </summary>
-        public Task<ICollection<CardAuditorDetailDto>> FindCardAuditDetailsAsync(int cardId, int workflowId, int take, string? search = null, Guid? userId = null, int? actionType = null, int? stepId = null, bool orderDescending = true)
-            => _auditorRepository.FindCardAuditDetailsAsync(cardId, workflowId, take, search, userId, actionType, stepId, orderDescending);
+        public Task<CardAuditorDetailDto?> FindCardAuditDetailsAsync(int documentId, int workflowId, int take, string? search = null, Guid? userId = null, int? actionType = null, int? stepId = null, bool orderDescending = true)
+            => _auditorRepository.FindCardAuditDetailsAsync(documentId, workflowId, take, search, userId, actionType, stepId, orderDescending);
 
         /// <summary>
         /// Returns workflow-based audit entries (one per workflow) with card count, logs count, team, and profile. Load-more pattern: take 10, 20, 30, … Optional search by workflow or team name.

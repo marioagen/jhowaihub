@@ -13,9 +13,9 @@ export default {
                 };
             });
     },
-    getCardAuditDetails(cardId, workflowId, params = {}) {
+    getDocumentAuditDetails(documentId, workflowId, params = {}) {
         return api
-            .get(`/Auditor/Cards/${cardId}/Workflows/${workflowId}`, { params })
+            .get(`/Auditor/Documents/${documentId}/Workflows/${workflowId}`, { params })
             .then(({ data }) => {
                 return data;
             })

@@ -39,21 +39,22 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns up to N audit rows for the given card and workflow (load-more pattern).
+        /// Returns document audit detail for the given document and workflow: DocumentId, DocumentName, WorkflowId, WorkflowName, and DocumentHistory (up to N audit entries). Load-more pattern.
         /// </summary>
-        /// <param name="cardId">Card identifier.</param>
+        /// <param name="documentId">Document identifier.</param>
         /// <param name="workflowId">Workflow identifier.</param>
-        /// <param name="take">Maximum number of audit rows to return (default 10).</param>
-        /// <param name="search">Optional. Matches UserName, CardName, ActionType, or StepName by contains.</param>
+        /// <param name="take">Maximum number of audit entries to return in DocumentHistory (default 10).</param>
+        /// <param name="search">Optional. Matches UserName, DocumentName, CardName, ActionType, or StepName by contains.</param>
         /// <param name="userId">Optional. Filter by user who performed the action.</param>
         /// <param name="action">Optional. Filter by action type (AuditCardActionType enum value).</param>
         /// <param name="step">Optional. Filter by step id.</param>
         /// <param name="orderDescending">Order by Created descending when true (default), ascending when false.</param>
-        [HttpGet("Cards/{cardId:int}/Workflows/{workflowId:int}")]
-        [SwaggerOperation("Returns audit rows for a card and workflow with optional filters and sort")]
-        [ProducesResponseType(typeof(ICollection<CardAuditorDetailDto>), StatusCodes.Status200OK)]
+        [HttpGet("Documents/{documentId:int}/Workflows/{workflowId:int}")]
+        [SwaggerOperation("Returns document audit detail for a document and workflow with optional filters and sort")]
+        [ProducesResponseType(typeof(CardAuditorDetailDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> FindCardAuditDetails(
-            int cardId,
+            int documentId,
             int workflowId,
             [FromQuery] int take = 10,
             [FromQuery] string? search = null,
@@ -62,7 +63,9 @@ namespace WoopiAiHub.Api.Controllers
             [FromQuery] int? step = null,
             [FromQuery] bool orderDescending = true)
         {
-            var result = await _auditorServices.FindCardAuditDetailsAsync(cardId, workflowId, take, search, userId, action, step, orderDescending);
+            var result = await _auditorServices.FindCardAuditDetailsAsync(documentId, workflowId, take, search, userId, action, step, orderDescending);
+            if (result is null)
+                return NotFound();
             return Ok(result);
         }
 

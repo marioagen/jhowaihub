@@ -25,69 +25,141 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns the first N cards for the auditor (load-more pattern: take 10, then 20, 30…). One row per card with CardId, CardName, Workflows, ActionsCount, IsFinalized (from DB status).
-        /// Optional filters: search (CardId when numeric, or CardName/WorkflowName contains), isFinalized (true = finalized only, false = non-finalized only).
+        /// Returns documents for the auditor driven by the top N documentIds (by most recent audit activity). Load-more pattern: take 10, then 20, 30… One row per document with DocumentId, DocumentName, Workflows (with step), ActionsCount (audit rows for that document), IsFinalized (all cards of document finalized).
+        /// Optional filters: search (DocumentId/CardId when numeric, or DocumentName/CardName/WorkflowName contains), isFinalized (true = finalized only, false = non-finalized only).
         /// </summary>
         public async Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, bool? isFinalized = null)
         {
             const int defaultTake = 10;
             if (take <= 0) take = defaultTake;
 
-            int? searchAsCardId = null;
+            int? searchAsId = null;
             if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
-                searchAsCardId = parsedId;
+                searchAsId = parsedId;
 
-            var query = _context.Cards.AsNoTracking();
+            var auditQuery = _context.AuditCards.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchTerm = search!.Trim();
-                query = query.Where(c =>
-                    (searchAsCardId != null && c.Id == searchAsCardId.Value)
-                    || c.Name.Contains(searchTerm)
-                    || (c.Step != null && c.Step.Workflow != null && c.Step.Workflow.Name.Contains(searchTerm)));
+                auditQuery = auditQuery.Where(a =>
+                    (searchAsId != null && (a.DocumentId == searchAsId.Value || a.CardId == searchAsId.Value))
+                    || (a.Document != null && a.Document.Name.Contains(searchTerm))
+                    || (a.Card != null && a.Card.Name.Contains(searchTerm))
+                    || (a.Card != null && a.Card.Step != null && a.Card.Step.Workflow != null && a.Card.Step.Workflow.Name.Contains(searchTerm)));
             }
 
             if (isFinalized.HasValue)
             {
                 if (isFinalized.Value)
-                    query = query.Where(c => c.Status != null && c.Status.Name == StatusNames.Finalize);
+                    auditQuery = auditQuery.Where(a => a.Card != null && a.Card.Status != null && a.Card.Status.Name == StatusNames.Finalize);
                 else
-                    query = query.Where(c => c.Status == null || c.Status.Name != StatusNames.Finalize);
+                    auditQuery = auditQuery.Where(a => a.Card == null || a.Card.Status == null || a.Card.Status.Name != StatusNames.Finalize);
             }
 
-            return await query
-                .OrderBy(c => c.Id)
+            var documentIdList = await auditQuery
+                .OrderByDescending(a => a.Created)
+                .Select(a => a.DocumentId)
                 .Take(take)
-                .Select(c => new CardAuditorSummaryDto
+                .ToListAsync();
+            var documentIds = documentIdList.Distinct().ToList();
+
+            if (documentIds.Count == 0)
+                return new List<CardAuditorSummaryDto>();
+
+            var auditRowsQuery = _context.AuditCards.AsNoTracking()
+                .Where(a => documentIds.Contains(a.DocumentId));
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchTerm = search!.Trim();
+                auditRowsQuery = auditRowsQuery.Where(a =>
+                    (searchAsId != null && (a.DocumentId == searchAsId.Value || a.CardId == searchAsId.Value))
+                    || (a.Document != null && a.Document.Name.Contains(searchTerm))
+                    || (a.Card != null && a.Card.Name.Contains(searchTerm))
+                    || (a.Card != null && a.Card.Step != null && a.Card.Step.Workflow != null && a.Card.Step.Workflow.Name.Contains(searchTerm)));
+            }
+
+            if (isFinalized.HasValue)
+            {
+                if (isFinalized.Value)
+                    auditRowsQuery = auditRowsQuery.Where(a => a.Card != null && a.Card.Status != null && a.Card.Status.Name == StatusNames.Finalize);
+                else
+                    auditRowsQuery = auditRowsQuery.Where(a => a.Card == null || a.Card.Status == null || a.Card.Status.Name != StatusNames.Finalize);
+            }
+
+            var auditRows = await auditRowsQuery
+                .Select(a => new
                 {
-                    CardId = c.Id,
-                    CardName = c.Name,
-                    Workflows = c.Step != null && c.Step.Workflow != null
-                        ? new List<CardAuditorWorkflowsDto> { new() { Id = c.Step.Workflow.Id, Name = c.Step.Workflow.Name } }
-                        : new List<CardAuditorWorkflowsDto>(),
-                    ActionsCount = _context.AuditCards.Count(a => a.CardId == c.Id),
-                    IsFinalized = c.Status != null && c.Status.Name == StatusNames.Finalize
+                    a.DocumentId,
+                    DocumentName = a.Document != null ? a.Document.Name : string.Empty,
+                    a.WorkflowId,
+                    WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
+                    StepId = a.Card != null ? a.Card.StepId : 0,
+                    StepName = a.Card != null && a.Card.Step != null ? a.Card.Step.Name : string.Empty,
+                    a.CardId,
+                    CardStatusName = a.Card != null && a.Card.Status != null ? a.Card.Status.Name : string.Empty
                 })
                 .ToListAsync();
+
+            var isFinalizedByDocument = auditRows
+                .GroupBy(a => a.DocumentId)
+                .ToDictionary(g => g.Key, g =>
+                {
+                    var cardsInDoc = g.GroupBy(x => x.CardId).Select(x => x.First().CardStatusName).ToList();
+                    return cardsInDoc.Count > 0 && cardsInDoc.All(s => s == StatusNames.Finalize);
+                });
+
+            var groupedByDocument = auditRows
+                .GroupBy(a => a.DocumentId)
+                .OrderBy(g => g.Key)
+                .ToList();
+
+            return groupedByDocument.Select(g =>
+            {
+                var first = g.First();
+                var workflows = g
+                    .Where(x => x.WorkflowId != 0)
+                    .Select(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName, x.CardId })
+                    .GroupBy(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName })
+                    .Select(x => x.First())
+                    .Select(x => new CardAuditorWorkflowsDto
+                    {
+                        Id = x.WorkflowId,
+                        Name = x.WorkflowName,
+                        StepId = x.StepId,
+                        StepName = x.StepName,
+                        CardId = x.CardId
+                    })
+                    .ToList();
+                return new CardAuditorSummaryDto
+                {
+                    DocumentId = g.Key,
+                    DocumentName = first.DocumentName,
+                    Workflows = workflows,
+                    ActionsCount = g.Count(),
+                    IsFinalized = isFinalizedByDocument.TryGetValue(g.Key, out var finalized) && finalized
+                };
+            }).ToList();
         }
 
         /// <summary>
-        /// Returns up to N audit rows for a card and workflow (load-more pattern). Optional filters: search (UserName, CardName, ActionType, StepName), userId, actionType, stepId. Order by Created desc or asc.
+        /// Returns document audit detail for a document and workflow: DocumentId, DocumentName, WorkflowId, WorkflowName, and DocumentHistory (up to N audit entries). Optional filters: search (UserName, DocumentName, CardName, ActionType, StepName), userId, actionType, stepId. Order by Created desc or asc. Returns null when no audit rows exist.
         /// </summary>
-        public async Task<ICollection<CardAuditorDetailDto>> FindCardAuditDetailsAsync(int cardId, int workflowId, int take, string? search = null, Guid? userId = null, int? actionType = null, int? stepId = null, bool orderDescending = true)
+        public async Task<CardAuditorDetailDto?> FindCardAuditDetailsAsync(int documentId, int workflowId, int take, string? search = null, Guid? userId = null, int? actionType = null, int? stepId = null, bool orderDescending = true)
         {
             const int defaultTake = 10;
             if (take <= 0) take = defaultTake;
 
             var query = _context.AuditCards.AsNoTracking()
-                .Where(a => a.CardId == cardId && a.WorkflowId == workflowId);
+                .Where(a => a.DocumentId == documentId && a.WorkflowId == workflowId);
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchTerm = search!.Trim();
                 query = query.Where(a =>
                     (a.User != null && a.User.Name != null && a.User.Name.Contains(searchTerm))
+                    || (a.Document != null && a.Document.Name != null && a.Document.Name.Contains(searchTerm))
                     || (a.Card != null && a.Card.Name != null && a.Card.Name.Contains(searchTerm))
                     || a.ActionType.ToString().Contains(searchTerm)
                     || (a.Card != null && a.Card.Step != null && a.Card.Step.Name != null && a.Card.Step.Name.Contains(searchTerm)));
@@ -104,22 +176,43 @@ namespace WoopiAiHub.Repository.Audit
                 ? query.OrderByDescending(a => a.Created)
                 : query.OrderBy(a => a.Created);
 
-            return await ordered
+            var rows = await ordered
                 .Take(take)
-                .Select(a => new CardAuditorDetailDto
+                .Select(a => new
                 {
-                    CardId = a.CardId,
-                    CardName = a.Card != null ? a.Card.Name : string.Empty,
-                    Created = a.Created,
-                    WorkflowId = a.WorkflowId,
+                    DocumentName = a.Document != null ? a.Document.Name : string.Empty,
                     WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
-                    UserId = a.UserId,
+                    a.UserId,
                     UserName = a.User != null ? a.User.Name : string.Empty,
                     ActionName = a.ActionType.ToString(),
                     StepId = a.Card != null ? a.Card.StepId : 0,
-                    StepName = a.Card != null && a.Card.Step != null ? a.Card.Step.Name : string.Empty
+                    StepName = a.Card != null && a.Card.Step != null ? a.Card.Step.Name : string.Empty,
+                    a.Created
                 })
                 .ToListAsync();
+
+            if (rows.Count == 0)
+                return null;
+
+            var first = rows.First();
+            var documentHistory = rows.Select(a => new DocumentAuditorHistoryEntryDto
+            {
+                UserId = a.UserId,
+                UserName = a.UserName,
+                ActionName = a.ActionName,
+                StepId = a.StepId,
+                StepName = a.StepName,
+                Created = a.Created
+            }).ToList();
+
+            return new CardAuditorDetailDto
+            {
+                DocumentId = documentId,
+                DocumentName = first.DocumentName,
+                WorkflowId = workflowId,
+                WorkflowName = first.WorkflowName,
+                DocumentHistory = documentHistory
+            };
         }
 
         /// <summary>
