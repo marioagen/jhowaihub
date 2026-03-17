@@ -408,6 +408,7 @@ const spanish = {
             prompts: "Agentes",
             promptRequired: "Seleccione al menos un agente",
             selectPrompt: "Seleccione un agente",
+            remoteAccess: "Acceso remoto",
         },
         hideTools: "Ocultar Herramientas",
         showTools: "Agregar Herramientas",

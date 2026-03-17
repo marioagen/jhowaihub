@@ -406,6 +406,7 @@ const portuguese = {
             prompts: "Agentes",
             promptRequired: "Selecione ao menos um agente",
             selectPrompt: "Selecione um agente",
+            remoteAccess: "Acesso remoto",
         },
         hideTools: "Ocultar Ferramentas",
         save: "Salvar",
