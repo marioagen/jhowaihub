@@ -25,14 +25,14 @@ namespace WoopiAiHub.Application.Services.Audit
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="actionType"/> is not a defined value of <see cref="AuditCardActionType"/>.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the current user is not authenticated or has no user Id, and no valid <paramref name="automationUserEmail"/> is provided.</exception>
-        public async Task CreateAndSaveAsync(int cardId, int workflowId, AuditCardActionType actionType, string? automationUserEmail = null, CancellationToken cancellationToken = default)
+        public async Task CreateAndSaveAsync(int cardId, int workflowId, int documentId, AuditCardActionType actionType, string? automationUserEmail = null, CancellationToken cancellationToken = default)
         {
             if (!Enum.IsDefined(typeof(AuditCardActionType), actionType))
                 throw new ArgumentOutOfRangeException(nameof(actionType), actionType, $"Action type must be a defined value of {nameof(AuditCardActionType)}.");
 
             var userId = await ResolveUserIdAsync(automationUserEmail);
 
-            var auditCard = new AuditCard(0, DateTime.UtcNow, cardId, workflowId, actionType, userId);
+            var auditCard = new AuditCard(0, DateTime.UtcNow, cardId, workflowId, documentId, actionType, userId);
             await _auditCardRepository.AddAsync(auditCard, cancellationToken);
         }
 
@@ -41,7 +41,7 @@ namespace WoopiAiHub.Application.Services.Audit
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="actionType"/> is not a defined value of <see cref="AuditCardActionType"/>.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the current user is not authenticated or has no user Id, and no valid <paramref name="automationUserEmail"/> is provided.</exception>
-        public async Task CreateBatchAndSaveAsync(IReadOnlyList<(int cardId, int workflowId)> cardWorkflows, AuditCardActionType actionType, string? automationUserEmail = null, CancellationToken cancellationToken = default)
+        public async Task CreateBatchAndSaveAsync(IReadOnlyList<(int cardId, int workflowId, int documentId)> cardWorkflows, AuditCardActionType actionType, string? automationUserEmail = null, CancellationToken cancellationToken = default)
         {
             if (cardWorkflows.Count == 0)
                 return;
@@ -53,8 +53,8 @@ namespace WoopiAiHub.Application.Services.Audit
 
             var now = DateTime.UtcNow;
             var auditCards = new List<AuditCard>(cardWorkflows.Count);
-            foreach (var (cardId, workflowId) in cardWorkflows)
-                auditCards.Add(new AuditCard(0, now, cardId, workflowId, actionType, userId));
+            foreach (var (cardId, workflowId, documentId) in cardWorkflows)
+                auditCards.Add(new AuditCard(0, now, cardId, workflowId, documentId, actionType, userId));
 
             await _auditCardRepository.AddRangeAsync(auditCards, cancellationToken);
         }

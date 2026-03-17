@@ -33,7 +33,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             _currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
 
             var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-                _service.CreateAndSaveAsync(1, 1, invalidActionType));
+                _service.CreateAndSaveAsync(1, 1, 10, invalidActionType));
 
             Assert.Equal("actionType", exception.ParamName);
             _auditCardRepositoryMock.Verify(r => r.AddAsync(It.IsAny<AuditCard>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -46,7 +46,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             _currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(false);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _service.CreateAndSaveAsync(1, 1, AuditCardActionType.Assign));
+                _service.CreateAndSaveAsync(1, 1, 10, AuditCardActionType.Assign));
 
             Assert.Equal("Current user is required to create an audit log. When running in automation context, provide the user email from the automation DTO.", exception.Message);
             _auditCardRepositoryMock.Verify(r => r.AddAsync(It.IsAny<AuditCard>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -60,7 +60,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             _currentUserServiceMock.Setup(s => s.Id).Returns((Guid?)null);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _service.CreateAndSaveAsync(1, 1, AuditCardActionType.Assign));
+                _service.CreateAndSaveAsync(1, 1, 10, AuditCardActionType.Assign));
 
             Assert.Equal("Current user is required to create an audit log. When running in automation context, provide the user email from the automation DTO.", exception.Message);
             _auditCardRepositoryMock.Verify(r => r.AddAsync(It.IsAny<AuditCard>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -76,11 +76,12 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             _auditCardRepositoryMock.Setup(r => r.AddAsync(It.IsAny<AuditCard>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            await _service.CreateAndSaveAsync(cardId: 2, workflowId: 3, AuditCardActionType.Advancement);
+            await _service.CreateAndSaveAsync(cardId: 2, workflowId: 3, documentId: 10, AuditCardActionType.Advancement);
 
             _auditCardRepositoryMock.Verify(r => r.AddAsync(It.Is<AuditCard>(a =>
                 a.CardId == 2 &&
                 a.WorkflowId == 3 &&
+                a.DocumentId == 10 &&
                 a.ActionType == AuditCardActionType.Advancement &&
                 a.UserId == userId), It.IsAny<CancellationToken>()), Times.Once);
         }
@@ -96,7 +97,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             _auditCardRepositoryMock.Setup(r => r.AddAsync(It.IsAny<AuditCard>(), token))
                 .Returns(Task.CompletedTask);
 
-            await _service.CreateAndSaveAsync(1, 1, AuditCardActionType.Assign, cancellationToken: token);
+            await _service.CreateAndSaveAsync(1, 1, 10, AuditCardActionType.Assign, cancellationToken: token);
 
             _auditCardRepositoryMock.Verify(r => r.AddAsync(It.IsAny<AuditCard>(), token), Times.Once);
         }
@@ -105,7 +106,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
         [Trait("AuditCardService", "CreateBatchAndSaveAsync")]
         public async Task CreateBatchAndSaveAsync_EmptyList_DoesNotCallRepository()
         {
-            var cardWorkflows = Array.Empty<(int cardId, int workflowId)>().ToList();
+            var cardWorkflows = Array.Empty<(int cardId, int workflowId, int documentId)>().ToList();
 
             await _service.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
 
@@ -119,7 +120,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             var invalidActionType = (AuditCardActionType)(-1);
             _currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
             _currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
-            var cardWorkflows = new List<(int, int)> { (1, 1) };
+            var cardWorkflows = new List<(int, int, int)> { (1, 1, 10) };
 
             var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
                 _service.CreateBatchAndSaveAsync(cardWorkflows, invalidActionType));
@@ -133,7 +134,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
         public async Task CreateBatchAndSaveAsync_UserNotAuthenticated_ThrowsInvalidOperationException()
         {
             _currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(false);
-            var cardWorkflows = new List<(int, int)> { (1, 1) };
+            var cardWorkflows = new List<(int, int, int)> { (1, 1, 10) };
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _service.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign));
@@ -151,13 +152,13 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             _currentUserServiceMock.Setup(s => s.Id).Returns(userId);
             _auditCardRepositoryMock.Setup(r => r.AddRangeAsync(It.IsAny<IEnumerable<AuditCard>>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
-            var cardWorkflows = new List<(int cardId, int workflowId)> { (1, 10), (2, 10) };
+            var cardWorkflows = new List<(int cardId, int workflowId, int documentId)> { (1, 10, 10), (2, 10, 10) };
 
             await _service.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
 
             _auditCardRepositoryMock.Verify(r => r.AddRangeAsync(It.Is<IEnumerable<AuditCard>>(e =>
                 e.Count() == 2 &&
-                e.All(a => a.ActionType == AuditCardActionType.Assign && a.UserId == userId) &&
+                e.All(a => a.ActionType == AuditCardActionType.Assign && a.UserId == userId && a.DocumentId == 10) &&
                 e.Any(a => a.CardId == 1 && a.WorkflowId == 10) &&
                 e.Any(a => a.CardId == 2 && a.WorkflowId == 10)), It.IsAny<CancellationToken>()), Times.Once);
         }
@@ -172,7 +173,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             _currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
             _auditCardRepositoryMock.Setup(r => r.AddRangeAsync(It.IsAny<IEnumerable<AuditCard>>(), token))
                 .Returns(Task.CompletedTask);
-            var cardWorkflows = new List<(int, int)> { (1, 1) };
+            var cardWorkflows = new List<(int, int, int)> { (1, 1, 10) };
 
             await _service.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, cancellationToken: token);
 

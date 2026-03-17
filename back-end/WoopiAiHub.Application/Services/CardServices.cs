@@ -72,7 +72,7 @@ namespace WoopiAiHub.Application.Services
 
             Card.UpdateAssignedUser(cards, updateAssingnedUserDto.UserId);
 
-            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
+            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
             if (cardWorkflows.Count > 0)
             {
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
@@ -95,7 +95,7 @@ namespace WoopiAiHub.Application.Services
 
             Card.UpdateAssignedUser(cards, null);
 
-            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
+            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
             if (cardWorkflows.Count > 0)
             {
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign);
@@ -131,7 +131,7 @@ namespace WoopiAiHub.Application.Services
 
             Card.UpdateStepAndStatus(cards, step.Id, card => card.IsRejected() ? previousStatusId : step.StatusId);
 
-            var cardWorkflows = cards.Select(card => (card.Id, updateCardStepStatusDto.WorkflowId)).ToList();
+            var cardWorkflows = cards.Select(card => (card.Id, updateCardStepStatusDto.WorkflowId, card.DocumentId)).ToList();
             if (cardWorkflows.Count > 0)
             {
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement);
@@ -183,7 +183,7 @@ namespace WoopiAiHub.Application.Services
             foreach (var card in cards)
                 card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
 
-            var cardWorkflows = cards.Where(card => card.Step != null).Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
+            var cardWorkflows = cards.Where(card => card.Step != null).Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
             if (cardWorkflows.Count > 0)
             {
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Finalize);

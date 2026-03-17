@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Models.Audit;
 
 namespace WoopiAiHub.Repository.Mappings
@@ -31,6 +32,15 @@ namespace WoopiAiHub.Repository.Mappings
                 .HasForeignKey(a => a.WorkflowId)
                 .IsRequired();
 
+            builder.Property(a => a.DocumentId)
+                .HasColumnType("int")
+                .IsRequired();
+
+            builder.HasOne(a => a.Document)
+                .WithMany()
+                .HasForeignKey(a => a.DocumentId)
+                .IsRequired();
+
             builder.HasOne(a => a.User)
                 .WithMany()
                 .HasForeignKey(a => a.UserId)
@@ -38,6 +48,7 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.HasIndex(c => c.CardId);
             builder.HasIndex(c => c.WorkflowId);
+            builder.HasIndex(c => c.DocumentId);
             builder.HasIndex(c => c.UserId);
             builder.HasIndex(c => c.ActionType);
             builder.HasIndex(c => c.Created);

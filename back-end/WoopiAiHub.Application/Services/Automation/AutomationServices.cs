@@ -499,7 +499,7 @@ namespace WoopiAiHub.Application.Services.Automation
             }
 
             card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
-            var cardWorkflows = new List<(int cardId, int workflowId)> { (card.Id, card.Step!.WorkflowId) };
+            var cardWorkflows = new List<(int cardId, int workflowId, int documentId)> { (card.Id, card.Step!.WorkflowId, card.DocumentId) };
             await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, automationServicesDto.Email);
             var updated = _cardRepository.Update(card);
 
