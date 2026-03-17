@@ -63,7 +63,7 @@
                                 class="user-detail-stat-card rounded-2 p-2 border d-flex flex-column align-items-center text-center"
                             >
                                 <span class="user-detail-stat-value fw-bold">
-                                    {{ userDetail?.logCountTotal ?? 0 }}
+                                    {{ totalActions3And13 }}
                                 </span>
                                 <span class="small text-muted">Total de Ações</span>
                             </div>
@@ -79,7 +79,7 @@
                             </div>
                         </div>
                         <div
-                            v-for="act in (userDetail?.logCountByActionType ?? []).slice(0, 2)"
+                            v-for="act in logCountOnly3And13"
                             :key="act.actionTypeCode"
                             class="col-6 col-md-3"
                         >
@@ -87,7 +87,7 @@
                                 class="user-detail-stat-card rounded-2 p-2 border d-flex flex-column align-items-center text-center"
                             >
                                 <span class="user-detail-stat-value fw-bold">{{ act.count }}</span>
-                                <span class="small text-muted">Tipo {{ act.actionTypeCode }}</span>
+                                <span class="small text-muted">{{ act.label }}</span>
                             </div>
                         </div>
                     </div>
@@ -110,7 +110,7 @@
                                 />
                                 Histórico de Atividade
                                 <BadgeComponent
-                                    :text="(userDetail?.actions ?? []).length"
+                                    :text="activityEntries.length"
                                     variant="secondary"
                                     size="sm"
                                     :clickable="false"
@@ -286,19 +286,41 @@
                 activityDisplayedLimit: 10,
                 actionFilterOptions: [
                     { value: null, label: "Todas as ações" },
-                    { value: 0, label: "Upload" },
-                    { value: 1, label: "Deletar" },
+                    { value: 3, label: "Avançar" },
+                    { value: 13, label: "Documento de entrada" },
                 ],
             };
         },
         computed: {
+            /** Action type codes we show in user details: 3 = Advancement, 13 = InputDocument */
+            ACTION_CODES_USER_DETAIL: () => [3, 13],
+            ACTION_TYPE_NAMES_USER_DETAIL: () => ["Advancement", "InputDocument"],
+            logCountOnly3And13() {
+                const list = this.userDetail?.logCountByActionType ?? [];
+                const labels = { 3: "Avançar", 13: "Documento de entrada" };
+                return this.ACTION_CODES_USER_DETAIL.map((code) => {
+                    const item = list.find((a) => a.actionTypeCode === code);
+                    return {
+                        actionTypeCode: code,
+                        count: item?.count ?? 0,
+                        label: labels[code] ?? `Tipo ${code}`,
+                    };
+                });
+            },
+            totalActions3And13() {
+                return this.logCountOnly3And13.reduce((sum, a) => sum + a.count, 0);
+            },
             teamsList() {
                 const teams = this.userDetail?.teams ?? this.selectedUser?.teams;
                 if (!Array.isArray(teams)) return [];
                 return teams.filter((t) => t && t.teamName);
             },
             activityEntries() {
-                return this.userDetail?.actions ?? [];
+                const actions = this.userDetail?.actions ?? [];
+                if (this.selectedActionCode != null) return actions;
+                return actions.filter((a) =>
+                    this.ACTION_TYPE_NAMES_USER_DETAIL.includes(a.actionType)
+                );
             },
             filteredActivityEntries() {
                 let list = this.activityEntries;
