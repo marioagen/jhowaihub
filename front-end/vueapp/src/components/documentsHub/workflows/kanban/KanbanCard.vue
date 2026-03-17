@@ -14,7 +14,7 @@
                     />
                     {{ truncateText(dataCard.name) }}
                     <div
-                        v-if="isCardRejected"
+                        v-if="isCardRejected || isCardFailed"
                         class="badge fr flex-shrink-1 mt-1"
                         :style="badgeStyle(dataCard.status.color)"
                     >
@@ -100,7 +100,7 @@
             >
                 <div
                     class="mb-2 d-flex justify-content-between align-items-center flex-wrap"
-                    v-if="!showLoading"
+                    v-if="!showLoading && !isCardFailed"
                 >
                     <div class="d-flex align-items-center gap-2">
                         <button
@@ -237,6 +237,32 @@
                             </button>
                         </div>
                     </div>
+                </div>
+                <div
+                    class="mb-2 d-flex justify-content-between align-items-center flex-wrap"
+                    v-if="!showLoading && isCardFailed"
+                >
+                    <div class="d-flex align-items-center gap-1">
+                        <LucideIcon
+                            icon="XCircle"
+                            :size="16"
+                            class="text-danger"
+                        />
+                        <span class="text-danger fw-bold">
+                            {{ $t("card.executionFailed") }}
+                        </span>
+                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-primary"
+                        @click.stop="reprocessCard"
+                    >
+                        <LucideIcon
+                            icon="RefreshCcwDot"
+                            :size="16"
+                        />
+                        {{ $t("card.reprocess") }}
+                    </button>
                 </div>
                 <div
                     class="cover"
@@ -499,6 +525,10 @@
                 if (!text) return "";
                 return text.length > 25 ? text.substring(0, 25) + "..." : text;
             },
+            async reprocessCard() {
+                await CardsServices.reprocessCard(this.dataCard.id);
+                this.reloadList();
+            },
         },
         async mounted() {
             this.setUsers();
@@ -512,7 +542,7 @@
         },
         computed: {
             showLoading() {
-                return this.dataCard.percentage < 100;
+                return !this.isCardFailed && this.dataCard.percentage < 100;
             },
             isAdmin() {
                 return this.$store.state.userProfile.isAdmin;
@@ -530,6 +560,9 @@
             },
             isCardRejected() {
                 return this.dataCard.status.name.toLowerCase() === "rejected";
+            },
+            isCardFailed() {
+                return this.dataCard.status.name.toLowerCase() === "fail";
             },
         },
     };

@@ -352,6 +352,42 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("Duplicated user", ex.Message);
         }
 
+        [Fact(DisplayName = "Update should throw when user name already exists (ExistsUserNameAsync)")]
+        [Trait("Update", "Fail")]
+        public async Task Update_ShouldThrowAppException_WhenUserNameAlreadyExists()
+        {
+            // Arrange - same user by email, but new name is already used by another user
+            var userId = Guid.NewGuid();
+            var userUpdateDto = new UserUpdateDto
+            {
+                Id = userId,
+                Name = "NameAlreadyInUse",
+                Email = "myemail@email.com",
+                Password = "Password123",
+                TeamIds = new List<int> { 1 },
+                ProfileIds = new List<int> { 1 }
+            };
+            var headersDto = new HeadersDto { Tenant = "tenant" };
+            var user = new User(userId, "Old Name", "myemail@email.com", true, DateTime.Now);
+
+            _marketPlaceApiMock
+                .Setup(api => api.AssignLicensesByHub(It.IsAny<string>(), It.IsAny<RequestAssignLicensesByHub>()))
+                .ReturnsAsync(userId);
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByEmailAsync(userUpdateDto.Email))
+                .ReturnsAsync(user);
+
+            _userRepositoryMock
+                .Setup(repo => repo.ExistsUserNameAsync(userUpdateDto.Name, userUpdateDto.Id))
+                .ReturnsAsync(true);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<AppException>(() => _userServices.Update(userUpdateDto, headersDto));
+            Assert.Equal("Duplicated user name", ex.Message);
+            _userRepositoryMock.Verify(repo => repo.ExistsUserNameAsync(userUpdateDto.Name, userUpdateDto.Id), Times.Once);
+        }
+
         [Theory(DisplayName = "Create should throw when required fields are missing")]
         [Trait("CreateUser", "Validation")]
         [InlineData("", "valid@email.com")]
@@ -421,6 +457,30 @@ namespace WoopiAiHub.UnitTests.Services
                 _userServices.Create(dto, headers));
 
             Assert.Equal("Duplicated user", exception.Message);
+        }
+
+        [Fact(DisplayName = "Create should throw when user name already exists (ExistsUserNameAsync)")]
+        [Trait("CreateUser", "Fail")]
+        public async Task Create_ShouldThrowAppException_WhenUserNameAlreadyExists()
+        {
+            // Arrange - new email (no user by email), but name already in use
+            var dto = new UserCreateDto { Name = "ExistingUserName", Email = "newuser@email.com", Password = "Password123", TeamIds = [] };
+            var headers = new HeadersDto { Tenant = "tenant" };
+
+            _userRepositoryMock
+                .Setup(repo => repo.FindByEmailAsync(dto.Email))
+                .ReturnsAsync((User?)null);
+
+            _userRepositoryMock
+                .Setup(repo => repo.ExistsUserNameAsync(dto.Name, null))
+                .ReturnsAsync(true);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _userServices.Create(dto, headers));
+
+            Assert.Equal("Duplicated user name", exception.Message);
+            _userRepositoryMock.Verify(repo => repo.ExistsUserNameAsync(dto.Name, null), Times.Once);
         }
 
         [Fact(DisplayName = "Create should assign teams when TeamIds are present")]

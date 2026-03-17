@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Repository.Context;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -88,7 +88,9 @@ namespace WoopiAiHub.Repository
                     IdUser = p.IdUser,
                     IsEdited = p.IsEdited,
                     IsImported = p.IsImported,
-                    EnableAccessToMcp= p.EnableAccessToMcp
+                    EnableAccessToMcp = p.EnableAccessToMcp,
+                    OwnerName = p.User != null ? p.User.Name : string.Empty,
+                    OwnerEmail = p.User != null ? p.User.Email : string.Empty
                 }).AsNoTracking();
 
             return query;
@@ -131,7 +133,9 @@ namespace WoopiAiHub.Repository
                     IsOwner = true,
                     IdUser = p.IdUser,
                     IsEdited = p.IsEdited,
-                    IsImported = p.IsImported
+                    IsImported = p.IsImported,
+                    OwnerName = p.User != null ? p.User.Name : string.Empty,
+                    OwnerEmail = p.User != null ? p.User.Email : string.Empty
                 });
 
             return query;
@@ -162,6 +166,8 @@ namespace WoopiAiHub.Repository
                     IsEdited = p.IsEdited,
                     IsImported = p.IsImported,
                     EnableAccessToMcp = p.EnableAccessToMcp,
+                    OwnerName = p.User != null ? p.User.Name : string.Empty,
+                    OwnerEmail = p.User != null ? p.User.Email : string.Empty,
                     PromptApiTemplates = p.PromptApiTemplates.Select(x => new PromptApiTemplateDTO
                     {
                         ApiTemplateId = x.ApiTemplateId,

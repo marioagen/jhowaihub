@@ -4,7 +4,7 @@ namespace WoopiAiHub.Domain.Models
 {
     public class Prompt : BaseEntity
     {
-        [Column("Name", TypeName = "varchar(50)")]
+        [Column("Name", TypeName = "varchar(100)")]
         public string Name { get; private set; } = string.Empty;
 
         [Column("Description", TypeName = "nvarchar(500)")]

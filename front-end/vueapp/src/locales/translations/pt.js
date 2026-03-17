@@ -86,6 +86,8 @@ const portuguese = {
         unassignInfo: "Desatribuir documento",
         userApplicant: "Solicitante",
         userAssigned: "Responsável",
+        executionFailed: "Falha ao processar",
+        reprocess: "Reprocessar",
     },
     common: {
         action: "Ação",
@@ -495,6 +497,7 @@ const portuguese = {
             errors: {
                 addError: "Erro ao criar perfil",
                 deleteError: "Erro ao deletar perfil",
+                duplicated: "Perfil já cadastrado",
                 editError: "Erro ao editar perfil",
                 editProfileError: "Erro ao editar perfil",
                 invalid: "Perfil inválido",
@@ -575,6 +578,7 @@ const portuguese = {
                 emailDuplicated: "Email já cadastrado",
                 invalid: "Usuário inválido",
                 saveError: "Erro ao salvar usuário",
+                duplicated: "Usuário duplicado",
             },
             manageUsers: "Gestão de usuários",
             newTeamUserMessage: "Crie um novo usuário que será automaticamente selecionado",
@@ -862,6 +866,9 @@ const portuguese = {
             subtitle: "Selecione e configure um template de API",
             savedSuccessfully: "Configuração do template salva com sucesso",
             saveError: "Erro ao salvar configuração do template",
+            leaveMessage: "Existem diferenças no corpo da requisição e nas dependências.",
+            saveAndExit: "Salvar e sair",
+            keepEditing: "Continuar editando",
         },
     },
     tools: {
@@ -1059,6 +1066,7 @@ const portuguese = {
             finalize: "Finalizado",
             waitingforapproval: "Esperando Aprovação",
             rejected: "Reprovado",
+            fail: "Falha",
         },
         stepFlow: "Automação de documentos",
         stepNamePlaceholder: "Nome da etapa",

@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
@@ -160,9 +160,10 @@ namespace WoopiAiHub.UnitTests.Services
             var permission = new Permission("Perm", "permName", "screen", 1, DateTime.Now);
             _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds))
                 .ReturnsAsync(new List<Permission> { permission });
+            _profileRepoMock.Setup(r => r.ExistsProfileByNameExceptId(dto.Name, 0)).Returns(true);
             _profileRepoMock.Setup(r => r.CreateUniqueProfile(It.IsAny<Profile>())).Returns(false);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _profileServices.CreateUniqueProfile(dto));
+            await Assert.ThrowsAsync<AppException>(() => _profileServices.CreateUniqueProfile(dto));
         }
 
         [Fact(DisplayName = "Test Update and return false when profile is not found")]
@@ -177,7 +178,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.False(result);
         }
 
-        [Fact(DisplayName = "Test Update and return false when profile is duplicated")]
+        [Fact(DisplayName = "Test Update and return exception when profile is duplicated")]
         [Trait("Update", "Fail")]
         public async Task Update_Throws_WhenDuplicated()
         {
@@ -187,10 +188,11 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionRepoMock.Setup(r => r.FindByIdsAsync(dto.PermissionsIds))
                 .ReturnsAsync(new List<Permission> { permission });
+            _profileRepoMock.Setup(r => r.ExistsProfileByNameExceptId(dto.Name, It.IsAny<int>())).Returns(true);
             _profileRepoMock.Setup(r => r.FindByIdReturnModel(dto.Id)).Returns(profile);
             _profileRepoMock.Setup(r => r.Update(profile)).Returns(false);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _profileServices.Update(dto));
+            await Assert.ThrowsAsync<AppException>(() => _profileServices.Update(dto));
         }
 
         [Fact(DisplayName = "Test FindAll and return all profiles")]

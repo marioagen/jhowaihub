@@ -163,11 +163,32 @@
                 </p>
             </div>
             <div class="card-footer">
-                <div class="date-info float-end">
+                <div class="date-info">
                     <i class="far fa-clock mt-1"></i>
                     <span>
                         &ensp;{{ $t("dashboard.created") }}
                         {{ this.formatDate(item.created) }}
+                    </span>
+                </div>
+                <div class="owner-info d-flex align-items-center">
+                    <span class="owner-label">{{ $t("common.owner") }}:</span>
+                    <span
+                        v-if="item.ownerName || item.ownerEmail"
+                        class="owner-avatar-wrapper"
+                        v-tooltip="ownerTooltip(item)"
+                    >
+                        <AvatarComponent
+                            :name="item.ownerName || item.ownerEmail || ''"
+                            variant="primary"
+                            :size="28"
+                        />
+                    </span>
+                    <span
+                        v-else
+                        class="owner-avatar-placeholder"
+                        v-tooltip="'-'"
+                    >
+                        —
                     </span>
                 </div>
             </div>
@@ -203,6 +224,7 @@
 </template>
 <script>
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import AvatarComponent from "@/components/global/AvatarComponent.vue";
     import PromptService from "@/services/prompts/PromptsService";
     export default {
         name: "PromptComponent",
@@ -239,8 +261,16 @@
         },
         components: {
             ConfirmModal,
+            AvatarComponent,
         },
         methods: {
+            ownerTooltip(item) {
+                if (!item.ownerName && !item.ownerEmail) return "-";
+                const parts = [];
+                if (item.ownerName) parts.push(item.ownerName);
+                if (item.ownerEmail) parts.push(item.ownerEmail);
+                return parts.join("\n");
+            },
             checkAll(event) {
                 const checkboxes = document.querySelectorAll(".checkbox");
                 let checkboxIds = [];
@@ -535,14 +565,51 @@
 
     .date-info {
         display: flex;
-        bottom: 8px;
-        position: relative;
+        align-items: center;
         color: #0073ea !important;
     }
 
     .card-footer {
         background-color: initial;
         border-top: none;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .owner-info {
+        flex-shrink: 0;
+    }
+
+    .owner-label {
+        font-size: 0.85rem;
+        color: var(--color-body-content);
+        margin-right: 0.35rem;
+    }
+
+    .owner-avatar-wrapper {
+        display: inline-flex;
+        cursor: default;
+    }
+
+    .owner-avatar-wrapper :deep(.btn-primary) {
+        background-color: #0073ea !important;
+        border-color: #0073ea !important;
+        color: #ffffff !important;
+    }
+
+    .owner-avatar-wrapper :deep(.me-3) {
+        margin-right: 0.25rem !important;
+    }
+
+    .owner-avatar-placeholder {
+        font-size: 0.9rem;
+        color: var(--color-body-content);
+        opacity: 0.7;
     }
 
     .card-list {

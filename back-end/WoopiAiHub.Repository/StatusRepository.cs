@@ -56,7 +56,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Status
                 .AsNoTracking()
-                .Where(w => w.Name != StatusNames.Finalize && w.Name != StatusNames.Rejected)
+                .Where(w => w.Name != StatusNames.Finalize && w.Name != StatusNames.Rejected && w.Name != StatusNames.Fail)
                 .Select(status => new StatusDto
                 {
                     Id = status.Id,

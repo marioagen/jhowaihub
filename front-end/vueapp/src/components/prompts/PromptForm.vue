@@ -43,10 +43,20 @@
                                 <label for="inputNamePrompt" class="form-label">
                                     {{ $t("prompts.namePrompt") }}
                                 </label>
-                                <Field name="name" :rules="'required|max:50'" v-slot="{ field, errorMessage }">
-                                    <input v-bind="field" type="text" class="form-control"
-                                        :placeholder="$t('prompts.placeholderNamePrompt')" id="inputNamePrompt"
-                                        aria-describedby="" name="name" :class="{
+                                <Field
+                                    name="name"
+                                    :rules="'required|max:100'"
+                                    v-slot="{ field, errorMessage }"
+                                >
+                                    <input
+                                        v-bind="field"
+                                        type="text"
+                                        class="form-control"
+                                        :placeholder="$t('prompts.placeholderNamePrompt')"
+                                        id="inputNamePrompt"
+                                        aria-describedby=""
+                                        name="name"
+                                        :class="{
                                             'is-invalid': errorMessage,
                                         }" />
                                     <span class="validation-message text-danger" v-if="errorMessage">
@@ -751,6 +761,10 @@ export default {
 
     .container-fluid {
         padding: 0 13px;
+    }
+
+    .btn-back {
+        color: var(--color-body-content) !important;
     }
 
     #descId {

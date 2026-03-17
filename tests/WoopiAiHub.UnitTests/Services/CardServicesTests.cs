@@ -943,5 +943,235 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             _cardRepositoryMock.Verify(repo => repo.FindCardOrBatchWithStepWorkflowAsync(cardId), Times.Once);
         }
+
+        [Fact(DisplayName = "SetFailingCard should throw AppException when card not found")]
+        [Trait("SetFailingCard", "Failure")]
+        public async Task SetFailingCard_CardNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var cardId = 1;
+            var email = "test@example.com";
+
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithExecutions(cardId))
+                .ReturnsAsync((Card?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => 
+                _cardServices.SetFailingCard(cardId, email));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "SetFailingCard should throw AppException when fail status not found")]
+        [Trait("SetFailingCard", "Failure")]
+        public async Task SetFailingCard_FailStatusNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var cardId = 1;
+            var email = "test@example.com";
+            var card = CardFixture.FindValidCard();
+
+            var statusRepositoryMock = _mocker.GetMock<IStatusRepository>();
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithExecutions(cardId))
+                .ReturnsAsync(card);
+            statusRepositoryMock.Setup(repo => repo.FindByName(It.IsAny<string>()))
+                .ReturnsAsync((Status?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => 
+                _cardServices.SetFailingCard(cardId, email));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+        }
+
+        [Fact(DisplayName = "SetFailingCard should update card status to fail")]
+        [Trait("SetFailingCard", "Success")]
+        public async Task SetFailingCard_Success_UpdatesCardStatusToFail()
+        {
+            // Arrange
+            var cardId = 1;
+            var email = "test@example.com";
+            var card = CardFixture.FindValidCard();
+            var failStatus = new Status("Fail", "#FF0000", 1, DateTime.Now);
+
+            var statusRepositoryMock = _mocker.GetMock<IStatusRepository>();
+            var unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
+
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithExecutions(cardId))
+                .ReturnsAsync(card);
+            statusRepositoryMock.Setup(repo => repo.FindByName(It.IsAny<string>()))
+                .ReturnsAsync(failStatus);
+            unitOfWorkMock.Setup(u => u.BeginTransaction()).Callback(() => { });
+            unitOfWorkMock.Setup(u => u.Commit()).Callback(() => { });
+            _cardRepositoryMock.Setup(repo => repo.Update(It.IsAny<Card>())).Returns(true);
+
+            // Act
+            await _cardServices.SetFailingCard(cardId, email);
+
+            // Assert
+            _cardRepositoryMock.Verify(repo => repo.Update(It.IsAny<Card>()), Times.Once);
+            unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
+            unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+        }
+
+        [Fact(DisplayName = "SetFailingCard should handle null email gracefully")]
+        [Trait("SetFailingCard", "Success")]
+        public async Task SetFailingCard_NullEmail_SucceedsWithoutNotification()
+        {
+            // Arrange
+            var cardId = 1;
+            string? email = null;
+            var card = CardFixture.FindValidCard();
+            var failStatus = new Status("Fail", "#FF0000", 1, DateTime.Now);
+
+            var statusRepositoryMock = _mocker.GetMock<IStatusRepository>();
+            var unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
+
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithExecutions(cardId))
+                .ReturnsAsync(card);
+            statusRepositoryMock.Setup(repo => repo.FindByName(It.IsAny<string>()))
+                .ReturnsAsync(failStatus);
+            unitOfWorkMock.Setup(u => u.BeginTransaction()).Callback(() => { });
+            unitOfWorkMock.Setup(u => u.Commit()).Callback(() => { });
+            _cardRepositoryMock.Setup(repo => repo.Update(It.IsAny<Card>())).Returns(true);
+
+            // Act
+            await _cardServices.SetFailingCard(cardId, email);
+
+            // Assert
+            _cardRepositoryMock.Verify(repo => repo.Update(It.IsAny<Card>()), Times.Once);
+            unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
+        }
+
+        [Fact(DisplayName = "SetFailingCard should rollback transaction on error")]
+        [Trait("SetFailingCard", "Failure")]
+        public async Task SetFailingCard_OnError_RollsBackTransaction()
+        {
+            // Arrange
+            var cardId = 1;
+            var email = "test@example.com";
+            var card = CardFixture.FindValidCard();
+            var failStatus = new Status("Fail", "#FF0000", 1, DateTime.Now);
+
+            var statusRepositoryMock = _mocker.GetMock<IStatusRepository>();
+            var unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
+
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithExecutions(cardId))
+                .ReturnsAsync(card);
+            statusRepositoryMock.Setup(repo => repo.FindByName(It.IsAny<string>()))
+                .ReturnsAsync(failStatus);
+            unitOfWorkMock.Setup(u => u.BeginTransaction()).Callback(() => { });
+            unitOfWorkMock.Setup(u => u.Rollback()).Callback(() => { });
+
+            // Simulate error during update
+            _cardRepositoryMock.Setup(repo => repo.Update(It.IsAny<Card>()))
+                .Throws(new Exception("Database error"));
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => 
+                _cardServices.SetFailingCard(cardId, email));
+
+            unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
+            unitOfWorkMock.Verify(u => u.Rollback(), Times.Once);
+            unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+        }
+
+        [Fact(DisplayName = "ReprocessCard should throw AppException when card not found")]
+        [Trait("ReprocessCard", "Failure")]
+        public async Task ReprocessCard_CardNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var cardId = 1;
+            var tenant = "test-tenant";
+            var email = "test@example.com";
+
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithDocumentAndStep(cardId))
+                .ReturnsAsync((Card?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => 
+                _cardServices.ReprocessCard(cardId, tenant, email));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "ReprocessCard should update card status and trigger automation")]
+        [Trait("ReprocessCard", "Success")]
+        public async Task ReprocessCard_Success_UpdatesStatusAndTriggersAutomation()
+        {
+            // Arrange
+            var cardId = 1;
+            var tenant = "test-tenant";
+            var email = "test@example.com";
+            var card = CardFixture.FindValidCard();
+            var step = CardFixture.FindValidStep();
+            card.Step = step;
+
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithDocumentAndStep(cardId))
+                .ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.Update(It.IsAny<Card>()))
+                .Returns(true);
+            _automationServices.Setup(s => s.ReprocessStepTool(It.IsAny<AutomationServicesDto>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _cardServices.ReprocessCard(cardId, tenant, email);
+
+            // Assert
+            Assert.True(result);
+            _cardRepositoryMock.Verify(repo => repo.Update(It.IsAny<Card>()), Times.Once);
+            _automationServices.Verify(s => s.ReprocessStepTool(It.IsAny<AutomationServicesDto>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "ReprocessCard should return true on success")]
+        [Trait("ReprocessCard", "Success")]
+        public async Task ReprocessCard_ReturnsTrue()
+        {
+            // Arrange
+            var cardId = 1;
+            var tenant = "test-tenant";
+            var email = "test@example.com";
+            var card = CardFixture.FindValidCard();
+            var step = CardFixture.FindValidStep();
+            card.Step = step;
+
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithDocumentAndStep(cardId))
+                .ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.Update(It.IsAny<Card>()))
+                .Returns(true);
+            _automationServices.Setup(s => s.ReprocessStepTool(It.IsAny<AutomationServicesDto>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _cardServices.ReprocessCard(cardId, tenant, email);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact(DisplayName = "ReprocessCard should handle automation service exceptions")]
+        [Trait("ReprocessCard", "Failure")]
+        public async Task ReprocessCard_AutomationServiceThrowsException_ThrowsException()
+        {
+            // Arrange
+            var cardId = 1;
+            var tenant = "test-tenant";
+            var email = "test@example.com";
+            var card = CardFixture.FindValidCard();
+            var step = CardFixture.FindValidStep();
+            card.Step = step;
+
+            _cardRepositoryMock.Setup(repo => repo.FindByIdWithDocumentAndStep(cardId))
+                .ReturnsAsync(card);
+            _cardRepositoryMock.Setup(repo => repo.Update(It.IsAny<Card>()))
+                .Returns(true);
+            _automationServices.Setup(s => s.ReprocessStepTool(It.IsAny<AutomationServicesDto>()))
+                .ThrowsAsync(new Exception("Automation service error"));
+
+            // Act & Assert
+            await Assert.ThrowsAsync<Exception>(() => 
+                _cardServices.ReprocessCard(cardId, tenant, email));
+
+            _cardRepositoryMock.Verify(repo => repo.Update(It.IsAny<Card>()), Times.Once);
+        }
     }
 }

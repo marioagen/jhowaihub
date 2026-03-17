@@ -87,6 +87,8 @@ const spanish = {
         unassignInfo: "Desasignar documento",
         userApplicant: "Solicitante",
         userAssigned: "Responsable",
+        executionFailed: "Falló al procesar",
+        reprocess: "Reprocesar",
     },
     common: {
         action: "Acción",
@@ -495,6 +497,7 @@ const spanish = {
             errors: {
                 addError: "Erro al crear perfil",
                 deleteError: "Error al eliminar el perfil",
+                duplicated: "Perfil ya registrado",
                 editError: "Error al actualizar el perfil",
                 editProfileError: "Erro al actualizar perfil",
                 invalid: "Perfil inválido",
@@ -575,6 +578,7 @@ const spanish = {
                 emailDuplicated: "Correo electrónico ya registrado",
                 invalid: "Usuario inválido",
                 saveError: "Error al guardar el usuario",
+                duplicated: "Usuario duplicado",
             },
             manageUsers: "Gestión de usuarios",
             newTeamUserMessage: "Crea un nuevo usuario que será seleccionado automáticamente",
@@ -850,6 +854,15 @@ const spanish = {
         variablesPrompt: "Agente",
         variablesTip:
             "Consejo: Use variables como [ocr] o [prompt] que serán reemplazadas en el momento de la ejecución.",
+        configuration: {
+            title: "Configurar Plantilla de API",
+            subtitle: "Seleccione y configure una plantilla de API",
+            savedSuccessfully: "Configuración de plantilla guardada exitosamente",
+            saveError: "Error al guardar la configuración de la plantilla",
+            leaveMessage: "Existen diferencias en el cuerpo de la solicitud y en las dependencias.",
+            saveAndExit: "Guardar y salir",
+            keepEditing: "Seguir editando",
+        },
     },
     tools: {
         createBtn: "Nueva Herramienta",
@@ -1046,6 +1059,7 @@ const spanish = {
             finalize: "Terminado",
             waitingforapproval: "En espera de aprobación",
             rejected: "Rechazado",
+            fail: "Fallido",
         },
         stepFlow: "Automatización de documentos",
         stepNamePlaceholder: "Nombre del paso",
