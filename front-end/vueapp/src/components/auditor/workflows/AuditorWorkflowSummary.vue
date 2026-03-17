@@ -33,7 +33,7 @@
                     >
                         <div class="d-flex align-items-start gap-2">
                             <span
-                                class="workflow-card-icon d-inline-flex align-items-center justify-content-center flex-shrink-0 text-muted"
+                                class="workflow-card-icon d-inline-flex align-items-center justify-content-center flex-shrink-0 text-primary"
                             >
                                 <LucideIcon
                                     icon="Workflow"

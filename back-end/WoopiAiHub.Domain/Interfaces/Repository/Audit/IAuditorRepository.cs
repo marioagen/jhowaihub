@@ -1,18 +1,26 @@
-using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.DTOs.Response.Auditor;
+using WoopiAiHub.Domain.DTOs.Response.Auditor.Rows;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository.Audit
 {
     /// <summary>
     /// Repository for auditor-related queries. Used to list and retrieve documents, workflows, and users for auditing.
+    /// Returns raw/projection data; service layer performs validation and DTO assembly.
     /// </summary>
     public interface IAuditorRepository
     {
-        Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, bool? isFinalized = null);
-        Task<CardAuditorDetailDto?> FindCardAuditDetailsAsync(int documentId, int workflowId, int take, string? search = null, Guid? userId = null, int? actionType = null, int? stepId = null, bool orderDescending = true);
-        Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync(int take = 10, string? search = null);
-        Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId, string? search = null, int? stepId = null, int? actionType = null, bool orderDescending = true);
-        Task<ICollection<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int take = 10, string? userName = null, int? teamId = null);
-        Task<UserAuditorDetailsDto?> FindUserAuditDetailsAsync(Guid userId, string? search = null, int? actionTypeCode = null, bool orderDescending = true);
+        Task<List<int>> FindDocumentIdsForCardsSummaryAsync(int take, string? search, bool? isFinalized = null);
+        Task<List<CardAuditorSummaryRowDto>> FindAuditRowsForCardsSummaryAsync(IReadOnlyList<int> documentIds, string? search, bool? isFinalized = null);
+
+        Task<List<CardAuditorDetailRowDto>> FindAuditRowsForCardDetailAsync(int documentId, int workflowId, int take, string? search, Guid? userId, int? actionType, int? stepId, bool orderDescending);
+
+        Task<List<int>> FindWorkflowIdsForWorkflowSummaryAsync(int take, string? search);
+        Task<List<WorkflowAuditorSummaryRowDto>> FindAuditRowsForWorkflowSummaryAsync(IReadOnlyList<int> workflowIds);
+
+        Task<List<WorkflowAuditorDetailsRowDto>> FindAuditRowsForWorkflowDetailsAsync(int workflowId, string? search, int? stepId, int? actionType, bool orderDescending);
+
+        Task<List<Guid>> FindUserIdsForUserSummaryAsync(int take, string? userName, int? teamId);
+        Task<List<UserAuditorSummaryRowDto>> FindAuditRowsForUserSummaryAsync(IReadOnlyList<Guid> userIds);
+
+        Task<List<UserAuditorDetailsRowDto>> FindAuditRowsForUserDetailsAsync(Guid userId, string? search, int? actionTypeCode, bool orderDescending);
     }
 }

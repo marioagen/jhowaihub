@@ -1,15 +1,20 @@
 using Microsoft.EntityFrameworkCore;
-using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Response.Auditor;
+using WoopiAiHub.Domain.DTOs.Response.Auditor.Rows;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
+using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository.Audit
 {
+    /// <summary>
+    /// Repository for audit data. Reads from AuditCards and related entities to support card, workflow, and user audit summaries and details.
+    /// </summary>
     public class AuditorRepository : IAuditorRepository
     {
+        private const int DefaultTake = 10;
         private readonly ApplicationDbContext _context;
         private readonly IUserRepository _userRepository;
 
@@ -25,55 +30,70 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns documents for the auditor driven by the top N documentIds (by most recent audit activity). Load-more pattern: take 10, then 20, 30… One row per document with DocumentId, DocumentName, Workflows (with step and DocumentId), ActionsCount (audit rows for that document), IsFinalized (all cards of document finalized).
-        /// Optional filters: search (DocumentId/CardId when numeric, or DocumentName/CardName/WorkflowName contains), isFinalized (true = finalized only, false = non-finalized only).
+        /// Returns up to <paramref name="take"/> distinct document IDs ordered by most recent audit activity. Optional search (document/card name, workflow name, or numeric document/card id) and isFinalized filter.
         /// </summary>
-        public async Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, bool? isFinalized = null)
+        public async Task<List<int>> FindDocumentIdsForCardsSummaryAsync(int take, string? search, bool? isFinalized = null)
         {
-            const int defaultTake = 10;
-            if (take <= 0) take = defaultTake;
+            if (take <= 0) take = DefaultTake;
 
             int? searchAsId = null;
             if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
                 searchAsId = parsedId;
 
-            var auditQuery = _context.AuditCards.AsNoTracking();
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                var searchTerm = search!.Trim();
-                auditQuery = auditQuery.Where(a =>
-                    (searchAsId != null && (a.DocumentId == searchAsId.Value || a.CardId == searchAsId.Value))
-                    || (a.Document != null && a.Document.Name.Contains(searchTerm))
-                    || (a.Card != null && a.Card.Name.Contains(searchTerm))
-                    || (a.Card != null && a.Card.Step != null && a.Card.Step.Workflow != null && a.Card.Step.Workflow.Name.Contains(searchTerm)));
-            }
-
-            if (isFinalized.HasValue)
-            {
-                if (isFinalized.Value)
-                    auditQuery = auditQuery.Where(a => a.Card != null && a.Card.Status != null && a.Card.Status.Name == StatusNames.Finalize);
-                else
-                    auditQuery = auditQuery.Where(a => a.Card == null || a.Card.Status == null || a.Card.Status.Name != StatusNames.Finalize);
-            }
+            var auditQuery = ApplyCardsSummaryFilters(_context.AuditCards.AsNoTracking(), search, searchAsId, isFinalized);
 
             var documentIdList = await auditQuery
                 .OrderByDescending(a => a.Created)
                 .Select(a => a.DocumentId)
                 .Take(take)
                 .ToListAsync();
-            var documentIds = documentIdList.Distinct().ToList();
+            return documentIdList.Distinct().ToList();
+        }
 
+        /// <summary>
+        /// Returns audit rows for the given document IDs, applying the same search and isFinalized filter as the cards summary. Projects to CardAuditorSummaryRowDto (document, workflow, step, card, status).
+        /// </summary>
+        public async Task<List<CardAuditorSummaryRowDto>> FindAuditRowsForCardsSummaryAsync(IReadOnlyList<int> documentIds, string? search, bool? isFinalized = null)
+        {
             if (documentIds.Count == 0)
-                return new List<CardAuditorSummaryDto>();
+                return new List<CardAuditorSummaryRowDto>();
+
+            int? searchAsId = null;
+            if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
+                searchAsId = parsedId;
 
             var auditRowsQuery = _context.AuditCards.AsNoTracking()
                 .Where(a => documentIds.Contains(a.DocumentId));
+            auditRowsQuery = ApplyCardsSummaryFilters(auditRowsQuery, search, searchAsId, isFinalized);
 
+            return await auditRowsQuery
+                .Select(a => new CardAuditorSummaryRowDto
+                {
+                    DocumentId = a.DocumentId,
+                    DocumentName = a.Document != null ? a.Document.Name : string.Empty,
+                    WorkflowId = a.WorkflowId,
+                    WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
+                    StepId = a.Card != null ? a.Card.StepId : 0,
+                    StepName = a.Card != null && a.Card.Step != null ? a.Card.Step.Name : string.Empty,
+                    CardId = a.CardId,
+                    CardStatusName = a.Card != null && a.Card.Status != null ? a.Card.Status.Name : string.Empty
+                })
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Applies search (document/card/workflow name or numeric id) and isFinalized filters to an AuditCards query.
+        /// </summary>
+        private static IQueryable<AuditCard> ApplyCardsSummaryFilters(
+            IQueryable<AuditCard> query,
+            string? search,
+            int? searchAsId,
+            bool? isFinalized)
+        {
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchTerm = search!.Trim();
-                auditRowsQuery = auditRowsQuery.Where(a =>
+                query = query.Where(a =>
                     (searchAsId != null && (a.DocumentId == searchAsId.Value || a.CardId == searchAsId.Value))
                     || (a.Document != null && a.Document.Name.Contains(searchTerm))
                     || (a.Card != null && a.Card.Name.Contains(searchTerm))
@@ -83,73 +103,20 @@ namespace WoopiAiHub.Repository.Audit
             if (isFinalized.HasValue)
             {
                 if (isFinalized.Value)
-                    auditRowsQuery = auditRowsQuery.Where(a => a.Card != null && a.Card.Status != null && a.Card.Status.Name == StatusNames.Finalize);
+                    query = query.Where(a => a.Card != null && a.Card.Status != null && a.Card.Status.Name == StatusNames.Finalize);
                 else
-                    auditRowsQuery = auditRowsQuery.Where(a => a.Card == null || a.Card.Status == null || a.Card.Status.Name != StatusNames.Finalize);
+                    query = query.Where(a => a.Card == null || a.Card.Status == null || a.Card.Status.Name != StatusNames.Finalize);
             }
 
-            var auditRows = await auditRowsQuery
-                .Select(a => new
-                {
-                    a.DocumentId,
-                    DocumentName = a.Document != null ? a.Document.Name : string.Empty,
-                    a.WorkflowId,
-                    WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
-                    StepId = a.Card != null ? a.Card.StepId : 0,
-                    StepName = a.Card != null && a.Card.Step != null ? a.Card.Step.Name : string.Empty,
-                    a.CardId,
-                    CardStatusName = a.Card != null && a.Card.Status != null ? a.Card.Status.Name : string.Empty
-                })
-                .ToListAsync();
-
-            var isFinalizedByDocument = auditRows
-                .GroupBy(a => a.DocumentId)
-                .ToDictionary(g => g.Key, g =>
-                {
-                    var cardsInDoc = g.GroupBy(x => x.CardId).Select(x => x.First().CardStatusName).ToList();
-                    return cardsInDoc.Count > 0 && cardsInDoc.All(s => s == StatusNames.Finalize);
-                });
-
-            var groupedByDocument = auditRows
-                .GroupBy(a => a.DocumentId)
-                .OrderBy(g => g.Key)
-                .ToList();
-
-            return groupedByDocument.Select(g =>
-            {
-                var first = g.First();
-                var workflows = g
-                    .Where(x => x.WorkflowId != 0)
-                    .Select(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName, x.DocumentId })
-                    .GroupBy(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName })
-                    .Select(x => x.First())
-                    .Select(x => new CardAuditorWorkflowsDto
-                    {
-                        Id = x.WorkflowId,
-                        Name = x.WorkflowName,
-                        StepId = x.StepId,
-                        StepName = x.StepName,
-                        DocumentId = x.DocumentId
-                    })
-                    .ToList();
-                return new CardAuditorSummaryDto
-                {
-                    DocumentId = g.Key,
-                    DocumentName = first.DocumentName,
-                    Workflows = workflows,
-                    ActionsCount = g.Count(),
-                    IsFinalized = isFinalizedByDocument.TryGetValue(g.Key, out var finalized) && finalized
-                };
-            }).ToList();
+            return query;
         }
 
         /// <summary>
-        /// Returns document audit detail for a document and workflow: DocumentId, DocumentName, WorkflowId, WorkflowName, and DocumentHistory (up to N audit entries). Optional filters: search (UserName, DocumentName, CardName, ActionType, StepName), userId, actionType, stepId. Order by Created desc or asc. Returns null when no audit rows exist.
+        /// Returns up to <paramref name="take"/> audit rows for the given document and workflow. Optional filters: search (user/document/card/action/step name), userId, actionType, stepId. Ordered by Created (asc or desc).
         /// </summary>
-        public async Task<CardAuditorDetailDto?> FindCardAuditDetailsAsync(int documentId, int workflowId, int take, string? search = null, Guid? userId = null, int? actionType = null, int? stepId = null, bool orderDescending = true)
+        public async Task<List<CardAuditorDetailRowDto>> FindAuditRowsForCardDetailAsync(int documentId, int workflowId, int take, string? search, Guid? userId, int? actionType, int? stepId, bool orderDescending)
         {
-            const int defaultTake = 10;
-            if (take <= 0) take = defaultTake;
+            if (take <= 0) take = DefaultTake;
 
             var query = _context.AuditCards.AsNoTracking()
                 .Where(a => a.DocumentId == documentId && a.WorkflowId == workflowId);
@@ -176,54 +143,28 @@ namespace WoopiAiHub.Repository.Audit
                 ? query.OrderByDescending(a => a.Created)
                 : query.OrderBy(a => a.Created);
 
-            var rows = await ordered
+            return await ordered
                 .Take(take)
-                .Select(a => new
+                .Select(a => new CardAuditorDetailRowDto
                 {
                     DocumentName = a.Document != null ? a.Document.Name : string.Empty,
                     WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
-                    a.UserId,
+                    UserId = a.UserId,
                     UserName = a.User != null ? a.User.Name : string.Empty,
                     ActionName = a.ActionType.ToString(),
                     StepId = a.Card != null ? a.Card.StepId : 0,
                     StepName = a.Card != null && a.Card.Step != null ? a.Card.Step.Name : string.Empty,
-                    a.Created
+                    Created = a.Created
                 })
                 .ToListAsync();
-
-            if (rows.Count == 0)
-                return null;
-
-            var first = rows.First();
-            var documentHistory = rows.Select(a => new DocumentAuditorHistoryEntryDto
-            {
-                UserId = a.UserId,
-                UserName = a.UserName,
-                ActionName = a.ActionName,
-                StepId = a.StepId,
-                StepName = a.StepName,
-                Created = a.Created
-            }).ToList();
-
-            return new CardAuditorDetailDto
-            {
-                DocumentId = documentId,
-                DocumentName = first.DocumentName,
-                WorkflowId = workflowId,
-                WorkflowName = first.WorkflowName,
-                DocumentHistory = documentHistory
-            };
         }
 
         /// <summary>
-        /// Returns workflow-based audit entries (one row per workflow) with DocumentCount, LogsCount, Team, and Profile.
-        /// Load-more pattern: take 10, then 20, 30, … (first N most recently audited workflows).
-        /// Optional search: filters by WorkflowName or TeamName (contains).
+        /// Returns up to <paramref name="take"/> workflow IDs ordered by most recent audit activity. Optional search by workflow name or team name.
         /// </summary>
-        public async Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync(int take = 10, string? search = null)
+        public async Task<List<int>> FindWorkflowIdsForWorkflowSummaryAsync(int take, string? search)
         {
-            const int defaultTake = 10;
-            if (take <= 0) take = defaultTake;
+            if (take <= 0) take = DefaultTake;
 
             var query = _context.AuditCards.AsNoTracking();
 
@@ -235,24 +176,30 @@ namespace WoopiAiHub.Repository.Audit
                     || (a.Workflow != null && a.Workflow.Teams.Any() && a.Workflow.Teams.Any(t => t.Name != null && t.Name.Contains(searchTerm))));
             }
 
-            var workflowList = await query
+            return await query
                 .GroupBy(a => a.WorkflowId)
                 .Select(g => new { WorkflowId = g.Key, MaxCreated = g.Max(a => a.Created) })
                 .OrderByDescending(x => x.MaxCreated)
                 .Take(take)
                 .Select(x => x.WorkflowId)
                 .ToListAsync();
+        }
 
-            if (workflowList.Count == 0)
-                return new List<WorkflowAuditorSummaryDto>();
+        /// <summary>
+        /// Returns all audit rows for the given workflow IDs, projected to WorkflowAuditorSummaryRowDto (workflow, document, team, profile).
+        /// </summary>
+        public async Task<List<WorkflowAuditorSummaryRowDto>> FindAuditRowsForWorkflowSummaryAsync(IReadOnlyList<int> workflowIds)
+        {
+            if (workflowIds.Count == 0)
+                return new List<WorkflowAuditorSummaryRowDto>();
 
-            var auditRows = await _context.AuditCards
+            return await _context.AuditCards
                 .AsNoTracking()
-                .Where(a => workflowList.Contains(a.WorkflowId))
-                .Select(a => new
+                .Where(a => workflowIds.Contains(a.WorkflowId))
+                .Select(a => new WorkflowAuditorSummaryRowDto
                 {
-                    a.WorkflowId,
-                    a.DocumentId,
+                    WorkflowId = a.WorkflowId,
+                    DocumentId = a.DocumentId,
                     WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
                     TeamId = a.Workflow != null && a.Workflow.Teams.Any()
                         ? (int?)a.Workflow.Teams.OrderBy(t => t.Id).Select(t => t.Id).FirstOrDefault()
@@ -268,34 +215,12 @@ namespace WoopiAiHub.Repository.Audit
                         : string.Empty
                 })
                 .ToListAsync();
-
-            var AuditorByWorkflow = auditRows
-                .GroupBy(a => a.WorkflowId)
-                .OrderBy(g => g.Key)
-                .ToList();
-
-            return AuditorByWorkflow.Select(g =>
-            {
-                var first = g.First();
-                return new WorkflowAuditorSummaryDto
-                {
-                    WorkflowId = g.Key,
-                    WorkflowName = first.WorkflowName,
-                    DocumentCount = g.Select(a => a.DocumentId).Distinct().Count(),
-                    LogsCount = g.Count(),
-                    TeamId = first.TeamId,
-                    TeamName = first.TeamName,
-                    ProfileId = first.ProfileId,
-                    ProfileName = first.ProfileName
-                };
-            }).ToList();
         }
 
         /// <summary>
-        /// Returns audit data for a workflow: WorkflowId, WorkflowName, LogCount, StepsCount (DocumentCount per step), document-level status counts (TotalDocuments, Finalized, Rejected), Cards (audit history). Returns null when no audit entries exist for the workflow.
-        /// Optional filters: search (UserName, CardName, StepName, ActionType contains), stepId, actionType (AuditCardActionType enum value). Order: orderDescending (default true) by Created.
+        /// Returns all audit rows for the given workflow. Optional filters: search (user/card/step/action name), stepId, actionType. Ordered by Created (asc or desc). Projects to WorkflowAuditorDetailsRowDto.
         /// </summary>
-        public async Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId, string? search = null, int? stepId = null, int? actionType = null, bool orderDescending = true)
+        public async Task<List<WorkflowAuditorDetailsRowDto>> FindAuditRowsForWorkflowDetailsAsync(int workflowId, string? search, int? stepId, int? actionType, bool orderDescending)
         {
             var query = _context.AuditCards
                 .AsNoTracking()
@@ -321,174 +246,85 @@ namespace WoopiAiHub.Repository.Audit
                 ? query.OrderByDescending(a => a.Created)
                 : query.OrderBy(a => a.Created);
 
-            var auditRows = await ordered
-                .Select(a => new
+            return await ordered
+                .Select(a => new WorkflowAuditorDetailsRowDto
                 {
-                    a.Id,
-                    a.CardId,
-                    a.DocumentId,
-                    a.WorkflowId,
+                    Id = a.Id,
+                    CardId = a.CardId,
+                    DocumentId = a.DocumentId,
+                    WorkflowId = a.WorkflowId,
                     WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
-                    a.Created,
-                    a.UserId,
+                    Created = a.Created,
+                    UserId = a.UserId,
                     UserName = a.User != null ? a.User.Name : string.Empty,
-                    a.ActionType,
+                    ActionType = a.ActionType,
                     CardName = a.Card != null ? a.Card.Name : string.Empty,
                     CardStatus = a.Card != null && a.Card.Status != null ? a.Card.Status.Name : string.Empty,
                     StepId = a.Card != null ? a.Card.StepId : 0,
                     StepName = a.Card != null && a.Card.Step != null ? a.Card.Step.Name : string.Empty
                 })
                 .ToListAsync();
-
-            if (auditRows.Count == 0)
-                return null;
-
-            var first = auditRows.First();
-            var distinctDocumentIds = auditRows.Select(a => a.DocumentId).Distinct().ToList();
-
-            var cards = auditRows
-                .Select(a => new WorkflowAuditorCardsDto
-                {
-                    CardId = a.CardId,
-                    CardName = a.CardName,
-                    CardStatus = a.CardStatus,
-                    StepId = a.StepId,
-                    StepName = a.StepName,
-                    UserId = a.UserId,
-                    UserName = a.UserName,
-                    ActionType = a.ActionType.ToString(),
-                    Created = a.Created
-                })
-                .ToList();
-
-            var stepsCount = auditRows
-                .GroupBy(a => new { a.StepId, a.StepName })
-                .Select(g => new WorkflowAuditorStepCountsDto
-                {
-                    StepId = g.Key.StepId,
-                    StepName = g.Key.StepName,
-                    DocumentCount = g.Select(a => a.DocumentId).Distinct().Count()
-                })
-                .OrderBy(s => s.StepId)
-                .ToList();
-
-            // Derive document-level status from AuditCards only: latest audit row per (DocumentId, CardId) gives that card's status in this workflow
-            var latestStatusPerCard = auditRows
-                .GroupBy(a => new { a.DocumentId, a.CardId })
-                .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.Created).First().CardStatus);
-            var statusesByDocument = auditRows
-                .Select(a => new { a.DocumentId, a.CardId })
-                .Distinct()
-                .GroupBy(x => x.DocumentId)
-                .ToDictionary(g => g.Key, g => g.Select(x => latestStatusPerCard[new { x.DocumentId, x.CardId }]).ToList());
-            var finalized = statusesByDocument.Count(kv => kv.Value.Count > 0 && kv.Value.All(s => s == StatusNames.Finalize));
-            var rejected = statusesByDocument.Count(kv => kv.Value.Any(s => s == StatusNames.Rejected));
-
-            var documentStatusCount = new WorkflowAuditorDocumentStatusCountDto
-            {
-                TotalDocuments = distinctDocumentIds.Count,
-                Finalized = finalized,
-                Rejected = rejected
-            };
-
-            return new WorkflowAuditorDetailsDto
-            {
-                WorkflowId = first.WorkflowId,
-                WorkflowName = first.WorkflowName,
-                LogCount = auditRows.Count,
-                StepsCount = stepsCount,
-                DocumentStatusCount = documentStatusCount,
-                Cards = cards
-            };
         }
 
         /// <summary>
-        /// Returns user-based audit entries (one row per user) with UserId, UserName, Teams, Profiles, WorkflowCount, LogCount.
-        /// Source: AuditCards grouped by UserId. Load-more pattern: take 10, then 20, 30, … (first N users).
-        /// Optional filters: userName (contains on User.Name), teamId (user has at least one audit entry in a workflow with that team).
+        /// Returns up to <paramref name="take"/> distinct user IDs (ordered by id) that have audit entries. Optional filters: userName (contains), teamId.
         /// </summary>
-        public async Task<ICollection<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int take = 10, string? userName = null, int? teamId = null)
+        public async Task<List<Guid>> FindUserIdsForUserSummaryAsync(int take, string? userName, int? teamId)
         {
-            const int defaultTake = 10;
-            if (take <= 0) take = defaultTake;
+            if (take <= 0) take = DefaultTake;
 
             var query = _context.AuditCards.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(userName))
             {
                 var nameTerm = userName.Trim();
-                query = query.Where(a => a.User != null && a.User.Name.Contains(nameTerm));
+                query = query.Where(a => a.User != null && a.User.Name != null && a.User.Name.Contains(nameTerm));
             }
 
             if (teamId.HasValue)
                 query = query.Where(a => a.Workflow != null && a.Workflow.Teams.Any(t => t.Id == teamId.Value));
 
-            var userIds = await query
+            return await query
                 .Select(a => a.UserId)
                 .Distinct()
                 .OrderBy(id => id)
                 .Take(take)
                 .ToListAsync();
+        }
 
+        /// <summary>
+        /// Returns all audit rows for the given user IDs, projected to UserAuditorSummaryRowDto (user, workflow, teams, profile).
+        /// </summary>
+        public async Task<List<UserAuditorSummaryRowDto>> FindAuditRowsForUserSummaryAsync(IReadOnlyList<Guid> userIds)
+        {
             if (userIds.Count == 0)
-                return new List<UserAuditorSummaryDto>();
+                return new List<UserAuditorSummaryRowDto>();
 
-            var auditRows = await _context.AuditCards
+            return await _context.AuditCards
                 .AsNoTracking()
                 .Where(a => userIds.Contains(a.UserId))
-                .Select(a => new
+                .Select(a => new UserAuditorSummaryRowDto
                 {
-                    a.UserId,
+                    UserId = a.UserId,
                     UserName = a.User != null ? a.User.Name : string.Empty,
-                    a.WorkflowId,
+                    WorkflowId = a.WorkflowId,
                     Teams = a.Workflow != null && a.Workflow.Teams != null
                         ? a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
                         : null,
                     ProfileId = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
                         ? (int?)a.Card.Step.Profile.Id
-                        : (int?)null,
+                        : null,
                     ProfileName = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
                         ? a.Card.Step.Profile.Name ?? string.Empty
                         : string.Empty
                 })
                 .ToListAsync();
-
-            var groupedByUser = auditRows
-                .GroupBy(a => a.UserId)
-                .OrderBy(g => g.Key)
-                .ToList();
-
-            return groupedByUser.Select(g =>
-            {
-                var first = g.First();
-                var allTeams = g.SelectMany(a => a.Teams ?? Enumerable.Empty<UsersAuditorTeamsDto>());
-                var distinctTeams = allTeams
-                    .GroupBy(t => new { t.TeamId, t.TeamName })
-                    .Select(x => x.First())
-                    .ToList();
-                var distinctProfiles = g
-                    .Where(a => a.ProfileId.HasValue)
-                    .Select(a => new UsersAuditorProfilesDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
-                    .GroupBy(p => new { p.ProfileId, p.ProfileName })
-                    .Select(x => x.First())
-                    .ToList();
-                return new UserAuditorSummaryDto
-                {
-                    UserId = g.Key,
-                    UserName = first.UserName,
-                    Teams = distinctTeams,
-                    Profiles = distinctProfiles,
-                    WorkflowCount = g.Select(a => a.WorkflowId).Distinct().Count(),
-                    LogCount = g.Count()
-                };
-            }).ToList();
         }
 
         /// <summary>
-        /// Returns full audit details for a single user by userId: UserId, UserName, Teams, Profiles, LogCountTotal, LogCountByActionType, and Actions list.
-        /// Returns null when the user has no audit entries. Optional: search (CardName, WorkflowName, ActionType contains), action type code; order by Created desc or asc.
+        /// Returns all audit rows for the given user. Optional filters: search (card/workflow/action name), actionTypeCode. Ordered by Created (asc or desc). Projects to UserAuditorDetailsRowDto.
         /// </summary>
-        public async Task<UserAuditorDetailsDto?> FindUserAuditDetailsAsync(Guid userId, string? search = null, int? actionTypeCode = null, bool orderDescending = true)
+        public async Task<List<UserAuditorDetailsRowDto>> FindAuditRowsForUserDetailsAsync(Guid userId, string? search, int? actionTypeCode, bool orderDescending)
         {
             var query = _context.AuditCards
                 .AsNoTracking()
@@ -507,74 +343,31 @@ namespace WoopiAiHub.Repository.Audit
                 query = query.Where(a => (int)a.ActionType == actionTypeCode.Value);
 
             var projected = query
-                .Select(a => new
+                .Select(a => new UserAuditorDetailsRowDto
                 {
-                    a.UserId,
+                    UserId = a.UserId,
                     UserName = a.User != null ? a.User.Name : string.Empty,
-                    a.WorkflowId,
+                    WorkflowId = a.WorkflowId,
                     WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
                     Teams = a.Workflow != null && a.Workflow.Teams != null
                         ? a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
                         : null,
                     ProfileId = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
                         ? (int?)a.Card.Step.Profile.Id
-                        : (int?)null,
+                        : null,
                     ProfileName = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
                         ? a.Card.Step.Profile.Name ?? string.Empty
                         : string.Empty,
-                    a.ActionType,
-                    a.CardId,
+                    ActionType = a.ActionType,
+                    CardId = a.CardId,
                     CardName = a.Card != null ? a.Card.Name : string.Empty,
-                    a.Created
+                    Created = a.Created
                 });
 
-            var auditRows = await (orderDescending
+            return await (orderDescending
                 ? projected.OrderByDescending(a => a.Created)
                 : projected.OrderBy(a => a.Created))
                 .ToListAsync();
-
-            if (auditRows.Count == 0)
-                return null;
-
-            var first = auditRows.First();
-            var distinctTeams = auditRows
-                .SelectMany(a => a.Teams ?? Enumerable.Empty<UsersAuditorTeamsDto>())
-                .GroupBy(t => new { t.TeamId, t.TeamName })
-                .Select(x => x.First())
-                .ToList();
-            var distinctProfiles = auditRows
-                .Where(a => a.ProfileId.HasValue)
-                .Select(a => new UsersAuditorProfilesDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
-                .GroupBy(p => new { p.ProfileId, p.ProfileName })
-                .Select(x => x.First())
-                .ToList();
-            var countByActionType = auditRows
-                .GroupBy(a => (int)a.ActionType)
-                .Select(g => new UsersAuditorActionTypeCountsDto { ActionTypeCode = g.Key, Count = g.Count() })
-                .OrderBy(x => x.ActionTypeCode)
-                .ToList();
-            var actions = auditRows
-                .Select(a => new UsersAuditorActionsDto
-                {
-                    CardId = a.CardId,
-                    CardName = a.CardName,
-                    ActionType = a.ActionType.ToString(),
-                    WorkflowId = a.WorkflowId,
-                    WorkflowName = a.WorkflowName,
-                    Created = a.Created
-                })
-                .ToList();
-
-            return new UserAuditorDetailsDto
-            {
-                UserId = first.UserId,
-                UserName = first.UserName,
-                Teams = distinctTeams,
-                Profiles = distinctProfiles,
-                LogCountTotal = auditRows.Count,
-                LogCountByActionType = countByActionType,
-                Actions = actions
-            };
         }
     }
 }
