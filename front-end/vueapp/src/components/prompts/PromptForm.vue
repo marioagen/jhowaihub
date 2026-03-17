@@ -65,7 +65,7 @@
                                 </label>
                                 <Field
                                     name="name"
-                                    :rules="'required|max:50'"
+                                    :rules="'required|max:100'"
                                     v-slot="{ field, errorMessage }"
                                 >
                                     <input
@@ -465,7 +465,7 @@
             transform: rotate(360deg);
         }
     }
-    .btn-back{
-        color: var(--color-body-content) !important
+    .btn-back {
+        color: var(--color-body-content) !important;
     }
 </style>
