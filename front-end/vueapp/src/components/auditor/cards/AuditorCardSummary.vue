@@ -51,11 +51,21 @@
                                     />
                                     <BadgeComponent
                                         v-if="workflowsCount(item) > 1"
-                                        :text="workflowsCount(item)"
                                         variant="warning"
                                         size="sm"
                                         :clickable="false"
-                                    />
+                                    >
+                                        <span
+                                            class="d-inline-flex align-items-center gap-1 audit-badge-workflows-content"
+                                        >
+                                            <LucideIcon
+                                                icon="Layers"
+                                                :size="12"
+                                                class="flex-shrink-0"
+                                            />
+                                            {{ workflowsCount(item) }}
+                                        </span>
+                                    </BadgeComponent>
                                 </div>
                                 <div class="small text-primary mb-0">
                                     <template v-if="topWorkflows(item).length > 0">
@@ -110,6 +120,7 @@
 <script>
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import LucideIcon from "@/components/global/LucideIcon.vue";
     import AuditorsService from "@/services/auditors/AuditorsService";
 
     export default {
@@ -117,6 +128,7 @@
         components: {
             BadgeComponent,
             LoadingComponent,
+            LucideIcon,
         },
         props: {
             filters: {
@@ -199,6 +211,12 @@
     };
 </script>
 <style scoped>
+    .audit-badge-workflows-content {
+        color: #8b6914;
+    }
+    .audit-badge-workflows-content :deep(svg) {
+        color: inherit;
+    }
     .audit-list-item-selected {
         background-color: var(--bs-primary-bg-subtle, var(--bs-tertiary-bg, transparent));
     }
