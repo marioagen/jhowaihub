@@ -9,6 +9,7 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
@@ -246,7 +247,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="promptUpdateDto"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public bool Update(PromptUpdateDto promptUpdateDto, string emailCreator)
+        public async Task<bool> Update(PromptUpdateDto promptUpdateDto, string emailCreator)
         {
             _validatePrompt.ValidateOwnership(promptUpdateDto.Id,
                 emailCreator);
@@ -257,11 +258,11 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("Prompt not found");
             }
 
-            var prompt = GeneratePromptToUpdate(promptDto, promptUpdateDto);
+            (var prompt, var promptApiTemplateIds) = GeneratePromptToUpdate(promptDto, promptUpdateDto);
 
             _validatePrompt.ValidatePromptFields(prompt);
 
-            var promptUpdateResult = _promptRepository.Update(prompt);
+            var promptUpdateResult = await _promptRepository.UpdateAndRemovePromptApisFromPrompt(prompt, promptApiTemplateIds);
 
             if (!promptUpdateResult)
             {
@@ -434,7 +435,17 @@ namespace WoopiAiHub.Application.Services
                 promptCreateDto.Name,
                 promptCreateDto.Description,
                 promptCreateDto.Text,
-                idUser);
+                idUser,
+                enableAccessToMcp: promptCreateDto.EnableAccessToMcp);
+
+            prompt.PromptApiTemplates = promptCreateDto.ApiTemplatesSelected
+                .Select(x =>
+                {
+                    var promptApiTemplate = new PromptApiTemplate(0, DateTime.Now);
+                    promptApiTemplate.ApiTemplateId = x;
+                    return promptApiTemplate;
+                })
+                .ToList();
 
             return prompt;
         }
@@ -444,7 +455,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="promptDto"></param>
         /// <param name="promptUpdateDto"></param>
-        private static Prompt GeneratePromptToUpdate(PromptDto promptDto, PromptUpdateDto promptUpdateDto)
+        private static (Prompt, List<int> promptApiTemplateIds) GeneratePromptToUpdate(PromptDto promptDto, PromptUpdateDto promptUpdateDto)
         {
             var prompt = new Prompt(
                 promptDto.Id,
@@ -453,9 +464,20 @@ namespace WoopiAiHub.Application.Services
                 promptUpdateDto.Description,
                 promptUpdateDto.Text,
                 promptDto.IdUser,
-                true);
+                enableAccessToMcp: promptDto.EnableAccessToMcp);
 
-            return prompt;
+            var apiToDelete = promptDto.PromptApiTemplates.Where(x => !promptUpdateDto.ApiTemplatesSelected.Contains(x.ApiTemplateId)).Select(x =>x.Id).ToList();
+            var apiToCreate = promptUpdateDto.ApiTemplatesSelected.Where(x => !promptDto.PromptApiTemplates.Any(p => p.ApiTemplateId == x));
+            prompt.PromptApiTemplates = apiToCreate.Select(x =>
+                {
+                    var promptApiTemplate = new PromptApiTemplate(0, DateTime.Now);
+                    promptApiTemplate.ApiTemplateId = x;
+                    return promptApiTemplate;
+                })
+                .ToList();
+
+
+            return (prompt, apiToDelete);
         }
 
         /// <summary>

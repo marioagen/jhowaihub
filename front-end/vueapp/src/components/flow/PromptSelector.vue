@@ -61,7 +61,7 @@
                                     :key="prompt.id"
                                     :value="prompt.id"
                                 >
-                                    {{ prompt.name }}
+                                    {{ prompt.name }}<span v-if="prompt.enableAccessToMcp"> - [Acesso externo]</span>
                                 </option>
                             </select>
                         </div>
@@ -257,5 +257,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+
+    .color-acesso-externo {
+        color: blue !important;
     }
 </style>

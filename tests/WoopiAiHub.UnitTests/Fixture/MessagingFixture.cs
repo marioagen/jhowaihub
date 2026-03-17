@@ -1,11 +1,12 @@
-﻿using Azure.Storage.Blobs.Models;
-using Bogus;
+﻿using Bogus;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.DTOs.Response;
 using Xunit;
 using Newtonsoft.Json.Linq;
+using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
+using WoopiAiHub.Domain.Interfaces.Utils;
 
 namespace WoopiAiHub.UnitTests.Fixture
 {
@@ -145,6 +146,45 @@ namespace WoopiAiHub.UnitTests.Fixture
                         PromptTokens = f.Random.Int(1, 1000),
                         CompletionTokens = f.Random.Int(1, 1000),
                         TotalTokens = f.Random.Int(1, 2000)
+                    },
+                    Data = mockJObject
+                });
+            return faker;
+        }
+
+        public static OpenAiResponseConsumerResponseDto FindValidOpenAiResponseConsumerResponseDto()
+        {
+            JObject mockJObject = new JObject();
+            mockJObject.Add("CardId", 1);
+            mockJObject.Add("StepToolId", 30);
+
+            var faker = new Faker<OpenAiResponseConsumerResponseDto>("pt_BR")
+                .CustomInstantiator(f => new OpenAiResponseConsumerResponseDto
+                {
+                    ReferenceFile = f.Random.Guid().ToString(),
+                    Tenant = f.Random.String(),
+                    Email = f.Random.String(),
+                    Response = new ResponseOpenAiResponseDto {
+                        
+                        Usage = new ResponseOpenAiResponseUsageDto
+                        {
+                            InputTokens = f.Random.Int(1, 1000),
+                            OutputTokens = f.Random.Int(1, 1000),
+                            TotalTokens = f.Random.Int(1, 2000)
+                        },
+                        Output = new List<ResponseOpenAiResponseOutputDto> {
+                            new ResponseOpenAiResponseOutputDto {
+                                Output = f.Lorem.Paragraph(),
+                                Type = OpenAiResponsesTypes.Message,
+                                Arguments = f.Lorem.Paragraph(),
+                                Content = new List<ResponseOpenAiResponseOutputMessageContentDto> {
+                                    new ResponseOpenAiResponseOutputMessageContentDto {
+                                        Text  =  f.Lorem.Paragraph(),
+                                        Type = OpenAiResponseInputContentType.OutputText
+                                    }
+                                }
+                            }
+                        }
                     },
                     Data = mockJObject
                 });

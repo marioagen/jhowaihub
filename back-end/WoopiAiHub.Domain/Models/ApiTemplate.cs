@@ -27,7 +27,10 @@ namespace WoopiAiHub.Domain.Models
         public string? BodyTemplate { get; private set; }
 
         [Column("Description", TypeName = "varchar(max)")]
-        public string Description { get; private set; }
+        public string? Description { get; private set; }
+        [Column("EnableAccessFromMcp", TypeName = "bit")]
+        public bool EnableAccessFromMcp { get; private set; } = false;
+        public virtual ICollection<PromptApiTemplate> PromptApiTemplates { get; set; } = [];
 
 
         public void UpdateName(string name) => Name = name;
@@ -36,8 +39,18 @@ namespace WoopiAiHub.Domain.Models
         public void UpdateQueryTemplate(string? queryTemplate) => QueryTemplate = queryTemplate;
         public void UpdateHeaderTemplate(string? headerTemplate) => HeaderTemplate = headerTemplate;
         public void UpdateBodyTemplate(string? bodyTemplate) => BodyTemplate = bodyTemplate;
+        public void UpdateDescription(string? description) => Description = description;
+        public void UpdateEnableAccessFromMcp(bool enableAccessFromMcp) => EnableAccessFromMcp = enableAccessFromMcp;
 
-        public ApiTemplate(string name, string method, string url, string? queryTemplate, string? headerTemplate, string? bodyTemplate, string? description) 
+        public ApiTemplate(
+            string name,
+            string method,
+            string url,
+            string? queryTemplate,
+            string? headerTemplate,
+            string? bodyTemplate,
+            string? description,
+            bool enableAccessFromMcp = false)
             : base(0, DateTime.Now)
         {
             Name = name;
@@ -46,7 +59,8 @@ namespace WoopiAiHub.Domain.Models
             QueryTemplate = queryTemplate;
             HeaderTemplate = headerTemplate;
             BodyTemplate = bodyTemplate;
-            Description = description ?? string.Empty;
+            Description = description;
+            EnableAccessFromMcp = enableAccessFromMcp;
             Validate();
         }
 
@@ -64,8 +78,8 @@ namespace WoopiAiHub.Domain.Models
             {
                 throw new ArgumentException("Url cannot be null or empty.");
             }
-            if(
-                Method != HttpMethodConstants.GET && 
+            if (
+                Method != HttpMethodConstants.GET &&
                 Method != HttpMethodConstants.POST &&
                 Method != HttpMethodConstants.PUT &&
                 Method != HttpMethodConstants.DELETE &&

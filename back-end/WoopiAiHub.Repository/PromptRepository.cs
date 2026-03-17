@@ -87,7 +87,8 @@ namespace WoopiAiHub.Repository
                     IsOwner = p.IdUser.Equals(idUser),
                     IdUser = p.IdUser,
                     IsEdited = p.IsEdited,
-                    IsImported = p.IsImported
+                    IsImported = p.IsImported,
+                    EnableAccessToMcp= p.EnableAccessToMcp
                 }).AsNoTracking();
 
             return query;
@@ -143,7 +144,13 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public PromptDto? FindById(int id)
         {
+            var x = _context.Prompts
+                            .Include(x => x.PromptApiTemplates)
+                            .AsNoTracking()
+                            .FirstOrDefault(p => p.Id == id);
+
             return _context.Prompts
+                .Include(x => x.PromptApiTemplates)
                 .Select(p => new PromptDto
                 {
                     Id = p.Id,
@@ -153,7 +160,14 @@ namespace WoopiAiHub.Repository
                     Created = p.Created,
                     IdUser = p.IdUser,
                     IsEdited = p.IsEdited,
-                    IsImported = p.IsImported
+                    IsImported = p.IsImported,
+                    EnableAccessToMcp = p.EnableAccessToMcp,
+                    PromptApiTemplates = p.PromptApiTemplates.Select(x => new PromptApiTemplateDTO
+                    {
+                        ApiTemplateId = x.ApiTemplateId,
+                        PromptId = x.PromptId,
+                        Id = x.Id
+                    }).ToList()
                 }).FirstOrDefault(p => p.Id == id);
         }
 
@@ -174,6 +188,27 @@ namespace WoopiAiHub.Repository
             }
 
             return false;
+        }
+
+        public async Task<bool> UpdateAndRemovePromptApisFromPrompt(Prompt prompt, List<int> data)
+        {
+            var existPrompt = _context.Prompts.Any(p => p.Id == prompt.Id);
+            if (!existPrompt)
+            {
+                return false;
+            }
+
+            var existPromptApiTemplates = await _context.PromptApiTemplates.Where(p => data.Contains(p.Id)).ToListAsync();
+            if (data.Any() && !existPromptApiTemplates.Any())
+            {
+                return false;
+            }
+
+            _context.Prompts.Update(prompt);
+            _context.PromptApiTemplates.RemoveRange(existPromptApiTemplates);
+            _context.SaveChanges();
+
+            return true;
         }
     }
 }

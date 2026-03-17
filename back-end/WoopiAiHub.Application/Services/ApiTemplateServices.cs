@@ -103,7 +103,8 @@ namespace WoopiAiHub.Application.Services
                 templateCreateDto.QueryTemplate,
                 templateCreateDto.HeaderTemplate,
                 templateCreateDto.BodyTemplate,
-                templateCreateDto.Description
+                templateCreateDto.Description,
+                templateCreateDto.EnableAccessFromMcp
             );
 
             return await _templateRepository.CreateAsync(template);
@@ -125,6 +126,8 @@ namespace WoopiAiHub.Application.Services
             existingTemplate.UpdateQueryTemplate(templateUpdateDto.QueryTemplate);
             existingTemplate.UpdateHeaderTemplate(templateUpdateDto.HeaderTemplate);
             existingTemplate.UpdateBodyTemplate(templateUpdateDto.BodyTemplate);
+            existingTemplate.UpdateDescription(templateUpdateDto.Description);
+            existingTemplate.UpdateEnableAccessFromMcp(templateUpdateDto.EnableAccessFromMcp);
 
             existingTemplate.Validate();
 

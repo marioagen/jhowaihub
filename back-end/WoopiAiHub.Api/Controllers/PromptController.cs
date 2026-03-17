@@ -47,10 +47,10 @@ namespace WoopiAiPromptLibBackEnd.Api.Controllers
         [HttpPut]
         [SwaggerOperation("Endpoint that receives the request to update a Prompt in the database")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public IActionResult Update([FromBody] PromptUpdateDto promptUpdateDto,
+        public async Task<IActionResult> Update([FromBody] PromptUpdateDto promptUpdateDto,
                                     [FromHeader] HeadersDto headersDto)
         {
-            var result = _promptServices.Update(promptUpdateDto,
+            var result = await  _promptServices.Update(promptUpdateDto,
                 headersDto.EmailCreator);
             return Ok(result);
         }

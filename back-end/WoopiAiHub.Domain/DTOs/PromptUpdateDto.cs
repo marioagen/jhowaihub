@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WoopiAiHub.Domain.DTOs
+﻿namespace WoopiAiHub.Domain.DTOs
 {
     public record PromptUpdateDto
     {
@@ -12,5 +6,7 @@ namespace WoopiAiHub.Domain.DTOs
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Text { get; set; } = string.Empty;
+        public bool EnableAccessToMcp { get; private set; } = false;
+        public List<int> ApiTemplatesSelected { get; set; } = new ();
     }
 }

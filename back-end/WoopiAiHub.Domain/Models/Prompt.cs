@@ -21,11 +21,16 @@ namespace WoopiAiHub.Domain.Models
 
         [Column("IsImported", TypeName = "bit")]
         public bool IsImported { get; private set; } = false;
+        
+        [Column("EnableAccessToMcp", TypeName = "bit")]
+        public bool EnableAccessToMcp { get; private set; } = false;
+
+        public virtual ICollection<PromptApiTemplate> PromptApiTemplates { get; set; } = [];
 
         public virtual User User { get; set; }
 
         public Prompt(int id, DateTime created, string name, string description, string text, Guid idUser,
-            bool isEdited = false, bool isImported = false)
+            bool isEdited = false, bool isImported = false, bool enableAccessToMcp = false)
             : base(id, created)
         {
             Name = name;
@@ -34,6 +39,7 @@ namespace WoopiAiHub.Domain.Models
             IdUser = idUser;
             IsEdited = isEdited;
             IsImported = isImported;
+            EnableAccessToMcp = enableAccessToMcp;
         }
 
         /// <summary>

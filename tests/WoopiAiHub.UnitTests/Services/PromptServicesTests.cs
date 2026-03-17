@@ -14,9 +14,8 @@ using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
-using WoopiAiHub.Infrastructure.Messaging.Configuration;
-using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
+using WoopiAiHub.UnitTests.Fixture;
 
 namespace WoopiAiHub.UnitTests.Services
 {
@@ -110,7 +109,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "Create prompt success")]
         [Trait("Update", "Success")]
-        public void Update_Success()
+        public async Task Update_Success()
         {
             //Arrange
             var dto = new PromptUpdateDto { Id = 1, Name = "Novo", Description = "Desc", Text = "Texto" };
@@ -132,12 +131,12 @@ namespace WoopiAiHub.UnitTests.Services
             _validatePrompt.Setup(v => v.ValidateOwnership(1, email));
             _promptRepository.Setup(r => r.FindById(1)).Returns(promptDto);
             _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>()));
-            _promptRepository.Setup(r => r.Update(It.IsAny<Prompt>())).Returns(true);
+            _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(),It.IsAny<List<int>>())).ReturnsAsync(true);
             _unitOfWork.Setup(u => u.BeginTransaction());
             _unitOfWork.Setup(u => u.Commit());
 
             //Act
-            var result = _promptServices.Update(dto, email);
+            var result = await _promptServices.Update(dto, email);
 
             //Assert
             Assert.True(result);
@@ -145,7 +144,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "Update prompt should throw argumentException when is not found")]
         [Trait("Update", "Fail")]
-        public void Update_ShouldThrowArgumentException_PromptNotFound()
+        public async Task Update_ShouldThrowArgumentException_PromptNotFound()
         {
             //Arrange
             var dto = new PromptUpdateDto { Id = 1, Name = "Novo", Description = "Desc", Text = "Texto" };
@@ -157,7 +156,7 @@ namespace WoopiAiHub.UnitTests.Services
             _promptRepository.Setup(r => r.FindById(1)).Returns((PromptDto)null);
 
             //Act/Assert
-            Assert.Throws<ArgumentException>(() => _promptServices.Update(dto, email));
+            await Assert.ThrowsAsync<ArgumentException>(() =>  _promptServices.Update(dto, email));
         }
 
         [Fact(DisplayName = "Delete prompts by ids success")]

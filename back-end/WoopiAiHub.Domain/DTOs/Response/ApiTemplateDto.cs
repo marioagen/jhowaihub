@@ -11,5 +11,6 @@
         public string? HeaderTemplate { get; set; } = string.Empty;
         public string? BodyTemplate { get; set; } = string.Empty;
         public string? Description { get; set; } = string.Empty;
+        public bool EnableAccessFromMcp { get; set; } = false;
     }
 }

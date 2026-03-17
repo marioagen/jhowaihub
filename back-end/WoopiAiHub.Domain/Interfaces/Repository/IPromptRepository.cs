@@ -13,5 +13,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         IQueryable<PromptDto> FindAllWithOwnerStatus(Guid idUser);
         IQueryable<PromptDto> FindByIdUser(Guid idUser);
         Task<ICollection<PromptInternalDto>> FindAllInternal();
+        Task<bool> UpdateAndRemovePromptApisFromPrompt(Prompt prompt, List<int> data);
     }
 }

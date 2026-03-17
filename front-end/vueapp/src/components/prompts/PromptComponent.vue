@@ -89,6 +89,12 @@
                             :size="16"
                             class="text-primary mt-2"
                         />
+                        <LucideIcon
+                            v-else-if="item.enableAccessToMcp"
+                            icon="PlugZap"
+                            :size="16"
+                            class="text-primary mt-2"
+                        />
                         <span
                             v-else
                             class="dot mt-2 m-1"

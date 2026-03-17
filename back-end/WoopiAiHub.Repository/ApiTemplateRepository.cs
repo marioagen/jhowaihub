@@ -88,7 +88,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<ICollection<ApiTemplateDto>> FindAll(ApiTemplateFilterDto filter)
         {
-            var query = ApplyFilters(filter.Input, filter.Method, filter.OrderBy);
+            var query = ApplyFilters(filter.Input, filter.Method, filter.EnableAccessFromMcp, filter.OrderBy);
             var templates = await query.ToListAsync();
             return [.. templates.Select(item => new ApiTemplateDto
             {
@@ -111,7 +111,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public IQueryable<ApiTemplateDto> FindAllPaged(ApiTemplatePagedFilterDto filter)
         {
-            var query = ApplyFilters(filter.Input, filter.Method, filter.OrderBy);
+            var query = ApplyFilters(filter.Input, filter.Method, filter.EnableAccessFromMcp, filter.OrderBy);
 
             return query.Select(w => new ApiTemplateDto
             {
@@ -137,7 +137,7 @@ namespace WoopiAiHub.Repository
         /// <param name="orderBy">The ordering criteria to apply to the results. Supported values are "created asc", "created desc", "name
         /// asc", and "name desc" (case-insensitive). If null, empty, or unrecognized, no ordering is applied.</param>
         /// <returns></returns>
-        private IQueryable<ApiTemplate> ApplyFilters(string? input, string? method, string? orderBy)
+        private IQueryable<ApiTemplate> ApplyFilters(string? input, string? method, bool? enableAccessFromMcp, string? orderBy)
         {
             input = input?.ToLower();
             method = method?.ToLower();
@@ -151,11 +151,16 @@ namespace WoopiAiHub.Repository
                 query = query.Where(i =>
                     EF.Functions.Like(i.Name, $"%{input}%"));
             }
-
             if (!string.IsNullOrEmpty(method))
             {
                 query = query.Where(i => i.Method.ToLower().Equals(method));
             }
+
+            if (enableAccessFromMcp.HasValue)
+            {
+                query = query.Where(i => i.EnableAccessFromMcp == enableAccessFromMcp.Value);
+            }
+
 
             if (!string.IsNullOrWhiteSpace(orderBy))
             {
