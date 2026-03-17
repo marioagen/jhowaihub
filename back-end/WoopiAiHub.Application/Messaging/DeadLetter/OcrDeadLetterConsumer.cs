@@ -21,6 +21,14 @@ namespace WoopiAiHub.Application.Messaging.DeadLetter
         private readonly ILogger<OcrDeadLetterConsumer> _logger = logger;
         private readonly MessageQueues _queues = queues.Value;
 
+        /// <summary>
+        /// Executes the background processing logic for handling messages in the OCR dead-letter queue.
+        /// </summary>
+        /// <remarks>This method listens to the OCR dead-letter queue and processes failed card messages.
+        /// Processing stops when the cancellation token is triggered. Exceptions encountered during message handling
+        /// are logged and rethrown.</remarks>
+        /// <param name="stoppingToken">A cancellation token that can be used to signal the request to stop processing.</param>
+        /// <returns>A task that represents the asynchronous execution operation.</returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var deadLetterQueue = $"{_queues.OcrQueue}.dlq";
