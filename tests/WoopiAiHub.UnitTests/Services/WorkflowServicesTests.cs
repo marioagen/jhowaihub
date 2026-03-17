@@ -1458,35 +1458,49 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("UpdatePhase3", "Success")]
         public async Task UpdatePhase3_PromptToolWithPromptDependency_UpdatesSuccessfully()
         {
-            // Arrange: Step 1 = Prompt A, Step 2 = Prompt B depending on Prompt A
+            // Arrange: OCR (order 1), Prompt A (order 2, depends on OCR), Prompt B (order 3, depends on Prompt A)
             var stepId = 1;
             var stepOrder = 1;
 
-            var firstPromptStepToolDto = new StepToolUpdateDto
+            var ocrStepToolDto = new StepToolUpdateDto
             {
                 Id = 0,
-                ToolId = 998,
+                ToolId = 997,
                 Order = 1,
                 PositionX = 1,
                 PositionY = 1,
                 Parameters = new List<StepToolParameterUpdateDto>()
             };
 
-            var secondPromptStepToolDto = new StepToolUpdateDto
+            var firstPromptStepToolDto = new StepToolUpdateDto
             {
                 Id = 0,
-                ToolId = 999,
+                ToolId = 998,
                 Order = 2,
                 PositionX = 2,
                 PositionY = 2,
-                Parameters = new List<StepToolParameterUpdateDto> { new StepToolParameterUpdateDto { Value = "value1" } },
+                Parameters = new List<StepToolParameterUpdateDto>(),
                 Dependencies = new List<StepToolOutputDependencyDto>
                 {
                     new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
                 }
             };
 
-            var stepToolsList = new List<StepToolUpdateDto> { firstPromptStepToolDto, secondPromptStepToolDto };
+            var secondPromptStepToolDto = new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 999,
+                Order = 3,
+                PositionX = 3,
+                PositionY = 3,
+                Parameters = new List<StepToolParameterUpdateDto> { new StepToolParameterUpdateDto { Value = "value1" } },
+                Dependencies = new List<StepToolOutputDependencyDto>
+                {
+                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 2 }
+                }
+            };
+
+            var stepToolsList = new List<StepToolUpdateDto> { ocrStepToolDto, firstPromptStepToolDto, secondPromptStepToolDto };
             var workflowPhase3Dto = new WorkflowPhase3Dto
             {
                 WorkflowId = 1,
@@ -1498,28 +1512,37 @@ namespace WoopiAiHub.UnitTests.Services
             workflow.Steps.Add(step);
             step.Workflow = workflow;
 
-            var firstPromptStepTool = new StepTool(10, DateTime.UtcNow, stepId, 998, 1, 1, 1);
+            var ocrStepTool = new StepTool(10, DateTime.UtcNow, stepId, 997, 1, 1, 1);
+            ocrStepTool.Step = step;
+            step.StepTools.Add(ocrStepTool);
+
+            var firstPromptStepTool = new StepTool(20, DateTime.UtcNow, stepId, 998, 2, 2, 2);
             firstPromptStepTool.Step = step;
             step.StepTools.Add(firstPromptStepTool);
 
-            var secondPromptStepTool = new StepTool(20, DateTime.UtcNow, stepId, 999, 2, 2, 2);
+            var secondPromptStepTool = new StepTool(30, DateTime.UtcNow, stepId, 999, 3, 3, 3);
             secondPromptStepTool.Step = step;
             step.StepTools.Add(secondPromptStepTool);
 
+            var ocrTool = WorkflowFixture.CreateToolModel(997, "OCR Tool", "OCR");
             var promptToolA = WorkflowFixture.CreateToolModel(998, "Prompt A", "Prompt");
             var promptToolB = WorkflowFixture.CreateToolModel(999, "Prompt B", "Prompt");
 
             _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
                 .ReturnsAsync(workflow);
 
-            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+            var stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            stepToolDependencyRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
                 .Returns(Task.CompletedTask);
-            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+            stepToolDependencyRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
                 .Returns(Task.CompletedTask);
 
+            var stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            stepToolOutputRepositoryMock.Setup(x => x.HasOutputsByStepToolIds(It.IsAny<IEnumerable<int>>()))
+                .ReturnsAsync(false);
+
             _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync((int id) => id == 998 ? promptToolA : id == 999 ? promptToolB : promptToolA);
+                .ReturnsAsync((int id) => id == 997 ? ocrTool : id == 998 ? promptToolA : id == 999 ? promptToolB : ocrTool);
 
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
