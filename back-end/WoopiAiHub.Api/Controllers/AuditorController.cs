@@ -21,11 +21,11 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns the first N cards for the auditor (load-more pattern). One row per card with CardId, CardName, Workflows, ActionsCount, IsFinalized (from DB).
+        /// Returns the first N documents for the auditor (load-more pattern). One row per document with DocumentId, DocumentName, Workflows (with DocumentId), ActionsCount, IsFinalized (from DB).
         /// </summary>
-        /// <param name="take">Maximum number of cards to return (default 10).</param>
-        /// <param name="search">Optional. Matches CardId when numeric, or CardName/WorkflowName by contains.</param>
-        /// <param name="isFinalized">Optional. When true, only finalized cards; when false, only non-finalized; when null, all.</param>
+        /// <param name="take">Maximum number of documents to return (default 10).</param>
+        /// <param name="search">Optional. Matches DocumentId/CardId when numeric, or DocumentName/CardName/WorkflowName by contains.</param>
+        /// <param name="isFinalized">Optional. When true, only finalized documents (all cards finalized); when false, only non-finalized; when null, all.</param>
         [HttpGet("Cards")]
         [SwaggerOperation("Returns cards for the auditor with optional search and status filter")]
         [ProducesResponseType(typeof(ICollection<CardAuditorSummaryDto>), StatusCodes.Status200OK)]
@@ -70,7 +70,7 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, Profile. Load-more pattern: take 10, 20, 30, …
+        /// Returns workflow-based audit entries (one row per workflow) with DocumentCount, LogsCount, Team, Profile. Load-more pattern: take 10, 20, 30, …
         /// </summary>
         /// <param name="take">Maximum number of workflows to return (default 10).</param>
         /// <param name="search">Optional. Matches WorkflowName or TeamName by contains.</param>
@@ -84,12 +84,13 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns audit data for a workflow by id: WorkflowId, WorkflowName, LogCount, StepsCount, CardStatusCount, Cards. Returns 404 when no audit entries exist for the workflow.
+        /// Returns audit data for a workflow by id: WorkflowId, WorkflowName, LogCount, StepsCount (with DocumentCount per step), document-level status counts (TotalDocuments, Finalized, Rejected), and Cards (audit history). Returns 404 when no audit entries exist for the workflow.
         /// </summary>
         /// <param name="id">Workflow id.</param>
         /// <param name="search">Optional. Matches UserName, CardName, StepName, or ActionType by contains.</param>
         /// <param name="stepId">Optional. Filter by step id.</param>
         /// <param name="actionType">Optional. Filter by action type (AuditCardActionType enum value as int).</param>
+        /// <param name="orderDescending">Order cards by Created descending when true (default), ascending when false.</param>
         [HttpGet("Workflow/{id:int}")]
         [SwaggerOperation("Returns audit data for a workflow by id with optional filters")]
         [ProducesResponseType(typeof(WorkflowAuditorDetailsDto), StatusCodes.Status200OK)]
@@ -98,9 +99,10 @@ namespace WoopiAiHub.Api.Controllers
             int id,
             [FromQuery] string? search = null,
             [FromQuery] int? stepId = null,
-            [FromQuery] int? actionType = null)
+            [FromQuery] int? actionType = null,
+            [FromQuery] bool orderDescending = true)
         {
-            var result = await _auditorServices.FindWorkflowAuditDetailsAsync(id, search, stepId, actionType);
+            var result = await _auditorServices.FindWorkflowAuditDetailsAsync(id, search, stepId, actionType, orderDescending);
             if (result is null)
                 return NotFound();
             return Ok(result);

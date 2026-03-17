@@ -67,7 +67,7 @@
                                             icon="FileText"
                                             :size="12"
                                         />
-                                        {{ item.cardCount }} docs
+                                        {{ item.documentCount }} docs
                                     </span>
                                     <span class="d-inline-flex align-items-center gap-1">
                                         <LucideIcon

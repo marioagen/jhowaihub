@@ -25,7 +25,7 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns documents for the auditor driven by the top N documentIds (by most recent audit activity). Load-more pattern: take 10, then 20, 30… One row per document with DocumentId, DocumentName, Workflows (with step), ActionsCount (audit rows for that document), IsFinalized (all cards of document finalized).
+        /// Returns documents for the auditor driven by the top N documentIds (by most recent audit activity). Load-more pattern: take 10, then 20, 30… One row per document with DocumentId, DocumentName, Workflows (with step and DocumentId), ActionsCount (audit rows for that document), IsFinalized (all cards of document finalized).
         /// Optional filters: search (DocumentId/CardId when numeric, or DocumentName/CardName/WorkflowName contains), isFinalized (true = finalized only, false = non-finalized only).
         /// </summary>
         public async Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, bool? isFinalized = null)
@@ -120,7 +120,7 @@ namespace WoopiAiHub.Repository.Audit
                 var first = g.First();
                 var workflows = g
                     .Where(x => x.WorkflowId != 0)
-                    .Select(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName, x.CardId })
+                    .Select(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName, x.DocumentId })
                     .GroupBy(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName })
                     .Select(x => x.First())
                     .Select(x => new CardAuditorWorkflowsDto
@@ -129,7 +129,7 @@ namespace WoopiAiHub.Repository.Audit
                         Name = x.WorkflowName,
                         StepId = x.StepId,
                         StepName = x.StepName,
-                        CardId = x.CardId
+                        DocumentId = x.DocumentId
                     })
                     .ToList();
                 return new CardAuditorSummaryDto
@@ -216,7 +216,7 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns workflow-based audit entries (one row per workflow) with CardCount, LogsCount, Team, and Profile.
+        /// Returns workflow-based audit entries (one row per workflow) with DocumentCount, LogsCount, Team, and Profile.
         /// Load-more pattern: take 10, then 20, 30, … (first N most recently audited workflows).
         /// Optional search: filters by WorkflowName or TeamName (contains).
         /// </summary>
@@ -250,7 +250,7 @@ namespace WoopiAiHub.Repository.Audit
                 .Select(a => new
                 {
                     a.WorkflowId,
-                    a.CardId,
+                    a.DocumentId,
                     WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
                     TeamId = a.Workflow != null && a.Workflow.Teams.Any()
                         ? (int?)a.Workflow.Teams.OrderBy(t => t.Id).Select(t => t.Id).FirstOrDefault()
@@ -279,7 +279,7 @@ namespace WoopiAiHub.Repository.Audit
                 {
                     WorkflowId = g.Key,
                     WorkflowName = first.WorkflowName,
-                    CardCount = g.Select(a => a.CardId).Distinct().Count(),
+                    DocumentCount = g.Select(a => a.DocumentId).Distinct().Count(),
                     LogsCount = g.Count(),
                     TeamId = first.TeamId,
                     TeamName = first.TeamName,
@@ -290,10 +290,10 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns audit data for a workflow: WorkflowId, WorkflowName, LogCount, StepsCount, CardStatusCount, Cards. Returns null when no audit entries exist for the workflow.
-        /// Optional filters: search (UserName, CardName, StepName, ActionType contains), stepId, actionType (AuditCardActionType enum value).
+        /// Returns audit data for a workflow: WorkflowId, WorkflowName, LogCount, StepsCount (DocumentCount per step), document-level status counts (TotalDocuments, Finalized, Rejected), Cards (audit history). Returns null when no audit entries exist for the workflow.
+        /// Optional filters: search (UserName, CardName, StepName, ActionType contains), stepId, actionType (AuditCardActionType enum value). Order: orderDescending (default true) by Created.
         /// </summary>
-        public async Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId, string? search = null, int? stepId = null, int? actionType = null)
+        public async Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId, string? search = null, int? stepId = null, int? actionType = null, bool orderDescending = true)
         {
             var query = _context.AuditCards
                 .AsNoTracking()
@@ -315,11 +315,16 @@ namespace WoopiAiHub.Repository.Audit
             if (actionType.HasValue)
                 query = query.Where(a => (int)a.ActionType == actionType.Value);
 
-            var auditRows = await query
+            var ordered = orderDescending
+                ? query.OrderByDescending(a => a.Created)
+                : query.OrderBy(a => a.Created);
+
+            var auditRows = await ordered
                 .Select(a => new
                 {
                     a.Id,
                     a.CardId,
+                    a.DocumentId,
                     a.WorkflowId,
                     WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
                     a.Created,
@@ -337,7 +342,7 @@ namespace WoopiAiHub.Repository.Audit
                 return null;
 
             var first = auditRows.First();
-            var distinctCardIds = auditRows.Select(a => a.CardId).Distinct().ToList();
+            var distinctDocumentIds = auditRows.Select(a => a.DocumentId).Distinct().ToList();
 
             var cards = auditRows
                 .Select(a => new WorkflowAuditorCardsDto
@@ -360,27 +365,26 @@ namespace WoopiAiHub.Repository.Audit
                 {
                     StepId = g.Key.StepId,
                     StepName = g.Key.StepName,
-                    CardCount = g.Select(a => a.CardId).Distinct().Count()
+                    DocumentCount = g.Select(a => a.DocumentId).Distinct().Count()
                 })
                 .OrderBy(s => s.StepId)
                 .ToList();
 
-            int finalized = 0;
-            int rejected = 0;
-            if (distinctCardIds.Count > 0)
-            {
-                var cardStatuses = await _context.Cards
-                    .AsNoTracking()
-                    .Where(c => distinctCardIds.Contains(c.Id))
-                    .Select(c => new { c.Id, StatusName = c.Status != null ? c.Status.Name : string.Empty })
-                    .ToListAsync();
-                finalized = cardStatuses.Count(s => s.StatusName == StatusNames.Finalize);
-                rejected = cardStatuses.Count(s => s.StatusName == StatusNames.Rejected);
-            }
+            // Derive document-level status from AuditCards only: latest audit row per (DocumentId, CardId) gives that card's status in this workflow
+            var latestStatusPerCard = auditRows
+                .GroupBy(a => new { a.DocumentId, a.CardId })
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.Created).First().CardStatus);
+            var statusesByDocument = auditRows
+                .Select(a => new { a.DocumentId, a.CardId })
+                .Distinct()
+                .GroupBy(x => x.DocumentId)
+                .ToDictionary(g => g.Key, g => g.Select(x => latestStatusPerCard[new { x.DocumentId, x.CardId }]).ToList());
+            var finalized = statusesByDocument.Count(kv => kv.Value.Count > 0 && kv.Value.All(s => s == StatusNames.Finalize));
+            var rejected = statusesByDocument.Count(kv => kv.Value.Any(s => s == StatusNames.Rejected));
 
-            var cardStatusCount = new WorkflowAuditorCardStatusCountDto
+            var documentStatusCount = new WorkflowAuditorDocumentStatusCountDto
             {
-                TotalCards = distinctCardIds.Count,
+                TotalDocuments = distinctDocumentIds.Count,
                 Finalized = finalized,
                 Rejected = rejected
             };
@@ -391,7 +395,7 @@ namespace WoopiAiHub.Repository.Audit
                 WorkflowName = first.WorkflowName,
                 LogCount = auditRows.Count,
                 StepsCount = stepsCount,
-                CardStatusCount = cardStatusCount,
+                DocumentStatusCount = documentStatusCount,
                 Cards = cards
             };
         }

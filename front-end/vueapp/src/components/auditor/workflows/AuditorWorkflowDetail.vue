@@ -122,7 +122,7 @@
                             />
                             Timeline Processual
                             <BadgeComponent
-                                :text="filteredTimelineEntries.length + ' eventos'"
+                                :text="timelineEntries.length + ' eventos'"
                                 variant="secondary"
                                 size="sm"
                                 :clickable="false"
@@ -132,12 +132,13 @@
                             <button
                                 type="button"
                                 class="btn btn-light btn-sm border py-1 px-2 auditor-filter-sm d-flex align-items-center gap-1"
+                                @click="applyOrderAndRefresh"
                             >
                                 <LucideIcon
                                     icon="ArrowUpDown"
                                     :size="12"
                                 />
-                                Mais recentes
+                                {{ filter.orderDescending ? "Mais recentes" : "Mais antigos" }}
                             </button>
                             <div class="dropdown">
                                 <button
@@ -160,7 +161,7 @@
                                         <a
                                             class="dropdown-item"
                                             href="#"
-                                            @click.prevent="selectedStageId = opt.value"
+                                            @click.prevent="applyStepFilter(opt.value)"
                                         >
                                             {{ opt.label }}
                                         </a>
@@ -188,7 +189,7 @@
                                         <a
                                             class="dropdown-item"
                                             href="#"
-                                            @click.prevent="selectedActionId = opt.value"
+                                            @click.prevent="applyActionFilter(opt.value)"
                                         >
                                             {{ opt.label }}
                                         </a>
@@ -205,11 +206,12 @@
                             />
                         </span>
                         <input
-                            v-model="timelineSearch"
+                            v-model="filter.input"
                             type="text"
                             class="form-control form-control-sm border-start-0 py-1"
                             placeholder="Buscar por usuário, documento, detalhes, etapa..."
-                            aria-label="Buscar na timeline"
+                            aria-label="Filtro da timeline"
+                            @input="onFilterInput"
                         />
                     </div>
 
@@ -217,7 +219,7 @@
                         class="workflow-timeline-list overflow-auto flex-grow-1 min-h-0 d-flex flex-column"
                     >
                         <div
-                            v-for="entry in displayedTimelineEntries"
+                            v-for="entry in timelineEntriesDisplay"
                             :key="entry.id"
                             class="workflow-timeline-card rounded-2 p-2 mb-2 border"
                         >
@@ -335,7 +337,7 @@
         return stepsCount.map((s, i) => ({
             id: String(s.stepId ?? i),
             name: s.stepName ?? "",
-            count: s.cardCount ?? 0,
+            count: s.documentCount ?? 0,
             isTerminal: i === stepsCount.length - 1,
         }));
     }
@@ -362,9 +364,13 @@
             return {
                 isLoading: false,
                 workflowDetail: null,
-                timelineSearch: "",
-                selectedStageId: "",
-                selectedActionId: "",
+                filter: {
+                    input: "",
+                    orderDescending: true,
+                    stepId: "",
+                    actionType: "",
+                },
+                inputDebounceTimer: null,
                 timelineDisplayedLimit: 10,
                 actionFilterOptions: [
                     { value: "", label: "Todas as ações" },
@@ -378,10 +384,10 @@
         },
         computed: {
             summary() {
-                const sc = this.workflowDetail?.cardStatusCount;
+                const sc = this.workflowDetail?.documentStatusCount;
                 if (!sc) return { totalDocuments: 0, finalizados: 0, reprovados: 0 };
                 return {
-                    totalDocuments: sc.totalCards ?? 0,
+                    totalDocuments: sc.totalDocuments ?? 0,
                     finalizados: sc.finalized ?? 0,
                     reprovados: sc.rejected ?? 0,
                 };
@@ -397,47 +403,45 @@
                 return base.concat(this.stages.map((s) => ({ value: s.id, label: s.name })));
             },
             selectedStageLabel() {
-                const opt = this.stageFilterOptions.find((o) => o.value === this.selectedStageId);
+                const opt = this.stageFilterOptions.find((o) => o.value === this.filter.stepId);
                 return opt ? opt.label : "Todas as etapas";
             },
             selectedActionLabel() {
-                const opt = this.actionFilterOptions.find((o) => o.value === this.selectedActionId);
+                const opt = this.actionFilterOptions.find(
+                    (o) => o.value === this.filter.actionType
+                );
                 return opt ? opt.label : "Todas as ações";
             },
-            filteredTimelineEntries() {
-                let list = this.timelineEntries;
-                const q = (this.timelineSearch || "").toLowerCase().trim();
-                if (q) {
-                    list = list.filter(
-                        (e) =>
-                            (e.userName && e.userName.toLowerCase().includes(q)) ||
-                            (e.documentName && e.documentName.toLowerCase().includes(q)) ||
-                            (e.description && e.description.toLowerCase().includes(q)) ||
-                            (e.stageName && e.stageName.toLowerCase().includes(q)) ||
-                            e.actionTags?.some((t) => t.label.toLowerCase().includes(q))
-                    );
-                }
-                if (this.selectedStageId) {
-                    list = list.filter((e) => e.stageId === this.selectedStageId);
-                }
-                if (this.selectedActionId) {
-                    list = list.filter((e) => e.actionId === this.selectedActionId);
-                }
-                return [...list].sort((a, b) =>
-                    (b.timestamp || "").localeCompare(a.timestamp || "")
-                );
-            },
-            displayedTimelineEntries() {
-                return this.filteredTimelineEntries.slice(0, this.timelineDisplayedLimit);
+            timelineEntriesDisplay() {
+                return this.timelineEntries.slice(0, this.timelineDisplayedLimit);
             },
             showTimelineLoadMore() {
-                const total = this.filteredTimelineEntries.length;
+                const total = this.timelineEntries.length;
                 return total > 10 && this.timelineDisplayedLimit < total;
             },
         },
         methods: {
             loadMoreTimeline() {
                 this.timelineDisplayedLimit += 10;
+            },
+            onFilterInput() {
+                if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
+                this.inputDebounceTimer = setTimeout(() => {
+                    this.inputDebounceTimer = null;
+                    this.refreshWithCurrentDocument();
+                }, 300);
+            },
+            applyOrderAndRefresh() {
+                this.filter.orderDescending = !this.filter.orderDescending;
+                this.refreshWithCurrentDocument();
+            },
+            applyStepFilter(stepId) {
+                this.filter.stepId = stepId;
+                this.refreshWithCurrentDocument();
+            },
+            applyActionFilter(actionType) {
+                this.filter.actionType = actionType;
+                this.refreshWithCurrentDocument();
             },
             async refreshWithCurrentDocument() {
                 if (this.selectedWorkflow?.workflowId == null) {
@@ -446,14 +450,14 @@
                 }
                 this.timelineDisplayedLimit = 10;
                 this.isLoading = true;
-                const search = (this.timelineSearch || "").trim() || undefined;
-                const stepId = this.selectedStageId ? Number(this.selectedStageId) : undefined;
-                const actionType = this.selectedActionId
-                    ? ACTION_SLUG_TO_TYPE[this.selectedActionId]
+                const params = { orderDescending: this.filter.orderDescending };
+                const search = (this.filter.input || "").trim();
+                if (search) params.search = search;
+                const stepId = this.filter.stepId ? Number(this.filter.stepId) : NaN;
+                if (!Number.isNaN(stepId)) params.stepId = stepId;
+                const actionType = this.filter.actionType
+                    ? ACTION_SLUG_TO_TYPE[this.filter.actionType]
                     : undefined;
-                const params = {};
-                if (search !== undefined) params.search = search;
-                if (stepId !== undefined && !Number.isNaN(stepId)) params.stepId = stepId;
                 if (actionType !== undefined) params.actionType = actionType;
                 try {
                     const response = await AuditorsService.getWorkflowAuditDetails(

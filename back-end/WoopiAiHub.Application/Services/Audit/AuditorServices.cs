@@ -21,7 +21,7 @@ namespace WoopiAiHub.Application.Services.Audit
         }
 
         /// <summary>
-        /// Returns a paged list of cards with audit summary (card name, workflows, actions count, Finalized/Not Finalized from DB). Supports optional search and status filter.
+        /// Returns a paged list of documents with audit summary (DocumentId, DocumentName, Workflows with DocumentId, ActionsCount, IsFinalized). Supports optional search and status filter.
         /// </summary>
         public Task<ICollection<CardAuditorSummaryDto>> FindCardsAuditSummaryAsync(int take, string? search, bool? isFinalized = null)
             => _auditorRepository.FindCardsAuditSummaryAsync(take, search, isFinalized);
@@ -33,16 +33,16 @@ namespace WoopiAiHub.Application.Services.Audit
             => _auditorRepository.FindCardAuditDetailsAsync(documentId, workflowId, take, search, userId, actionType, stepId, orderDescending);
 
         /// <summary>
-        /// Returns workflow-based audit entries (one per workflow) with card count, logs count, team, and profile. Load-more pattern: take 10, 20, 30, … Optional search by workflow or team name.
+        /// Returns workflow-based audit entries (one per workflow) with document count, logs count, team, and profile. Load-more pattern: take 10, 20, 30, … Optional search by workflow or team name.
         /// </summary>
         public Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync(int take = 10, string? search = null)
             => _auditorRepository.FindWorkflowAuditSummaryAsync(take, search);
 
         /// <summary>
-        /// Returns full audit data for a workflow (logs, steps, card status counts, and card list). Returns null when the workflow has no audit entries. Optional filters: search, stepId, actionType.
+        /// Returns full audit data for a workflow (LogCount, StepsCount with DocumentCount per step, document-level status counts, and Cards audit history). Returns null when the workflow has no audit entries. Optional filters: search, stepId, actionType.
         /// </summary>
-        public Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId, string? search = null, int? stepId = null, int? actionType = null)
-            => _auditorRepository.FindWorkflowAuditDetailsAsync(workflowId, search, stepId, actionType);
+        public Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId, string? search = null, int? stepId = null, int? actionType = null, bool orderDescending = true)
+            => _auditorRepository.FindWorkflowAuditDetailsAsync(workflowId, search, stepId, actionType, orderDescending);
 
         /// <summary>
         /// Returns user-based audit summaries (one per user) with teams, profiles, workflow count, and log count. Load-more pattern: take 10, 20, 30, … Optional filters by user name and team.

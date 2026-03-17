@@ -1,7 +1,7 @@
 namespace WoopiAiHub.Domain.DTOs.Response.Auditor
 {
     /// <summary>
-    /// Composite audit response for a workflow: WorkflowId, WorkflowName, LogCount, StepsCount, CardStatusCount, Cards.
+    /// Composite audit response for a workflow: WorkflowId, WorkflowName, LogCount, StepsCount, DocumentStatusCount, Cards.
     /// </summary>
     public record WorkflowAuditorDetailsDto
     {
@@ -9,7 +9,7 @@ namespace WoopiAiHub.Domain.DTOs.Response.Auditor
         public string WorkflowName { get; init; } = string.Empty;
         public int LogCount { get; init; }
         public ICollection<WorkflowAuditorStepCountsDto> StepsCount { get; init; } = [];
-        public WorkflowAuditorCardStatusCountDto CardStatusCount { get; init; } = new();
+        public WorkflowAuditorDocumentStatusCountDto DocumentStatusCount { get; init; } = new();
         public ICollection<WorkflowAuditorCardsDto> Cards { get; init; } = [];
     }
 }
