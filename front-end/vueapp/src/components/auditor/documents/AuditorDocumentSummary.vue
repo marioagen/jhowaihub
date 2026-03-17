@@ -9,17 +9,17 @@
         <template v-else>
             <div class="audit-list-wrapper d-flex flex-column flex-grow-1 min-h-0">
                 <div
-                    v-if="auditCardList.length === 0"
+                    v-if="auditDocumentList.length === 0"
                     class="audit-list-empty text-muted small text-center py-5"
                 >
-                    No audit cards to show.
+                    No documents to show.
                 </div>
                 <div
                     v-else
                     class="audit-list overflow-auto flex-grow-1 min-h-0"
                 >
                     <div
-                        v-for="item in auditCardList"
+                        v-for="item in auditDocumentList"
                         :key="item.documentId"
                         class="audit-list-item rounded-2 p-2 mb-2 cursor-pointer"
                         :class="{
@@ -124,7 +124,7 @@
     import AuditorsService from "@/services/auditors/AuditorsService";
 
     export default {
-        name: "AuditorCardSummary",
+        name: "AuditorDocumentSummary",
         components: {
             BadgeComponent,
             LoadingComponent,
@@ -141,7 +141,7 @@
             return {
                 isLoading: false,
                 selectedDocument: null,
-                auditCardList: [],
+                auditDocumentList: [],
                 displayedLimit: 10,
             };
         },
@@ -158,7 +158,7 @@
                 this.selectedDocument = item;
                 this.$emit("select-document", item);
             },
-            async getAuditCardsSummary() {
+            async getAuditDocumentsSummary() {
                 this.isLoading = true;
                 try {
                     const search = (this.filters.search || "").trim() || undefined;
@@ -182,7 +182,7 @@
                             icon: "CircleX",
                         });
                     }
-                    this.auditCardList = Array.isArray(response)
+                    this.auditDocumentList = Array.isArray(response)
                         ? response
                         : Array.isArray(response?.data)
                           ? response.data
@@ -193,20 +193,20 @@
             },
             loadMore() {
                 this.displayedLimit += 10;
-                this.getAuditCardsSummary();
+                this.getAuditDocumentsSummary();
             },
             refreshWithCurrentFilters() {
                 this.displayedLimit = 10;
-                this.getAuditCardsSummary();
+                this.getAuditDocumentsSummary();
             },
         },
         computed: {
             showLoadMoreButton() {
-                return this.auditCardList.length === this.displayedLimit;
+                return this.auditDocumentList.length === this.displayedLimit;
             },
         },
         async created() {
-            await this.getAuditCardsSummary();
+            await this.getAuditDocumentsSummary();
         },
     };
 </script>

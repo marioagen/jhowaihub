@@ -3,9 +3,9 @@
         <div class="col-4">
             <div class="card rounded-3 auditor-summary-card">
                 <div class="card-body d-flex flex-column auditor-summary-card-body">
-                    <AuditorCardFilters @filter="filterData" />
-                    <AuditorCardSummary
-                        ref="AuditorCardSummary"
+                    <AuditorDocumentFilters @filter="filterData" />
+                    <AuditorDocumentSummary
+                        ref="AuditorDocumentSummary"
                         :filters="filterParams"
                         @select-document="onDocumentSelection"
                     />
@@ -14,26 +14,26 @@
         </div>
         <div class="col-8">
             <div class="card rounded-3 auditor-detail-card">
-                <AuditorCardDetail
+                <AuditorDocumentDetail
                     :selected-document="selectedDocument"
                     :selected-document-workflows="selectedDocument?.workflows ?? []"
-                    ref="AuditorCardDetail"
+                    ref="AuditorDocumentDetail"
                 />
             </div>
         </div>
     </div>
 </template>
 <script>
-    import AuditorCardFilters from "@/components/auditor/cards/AuditorCardFilters.vue";
-    import AuditorCardSummary from "@/components/auditor/cards/AuditorCardSummary.vue";
-    import AuditorCardDetail from "@/components/auditor/cards/AuditorCardDetail.vue";
+    import AuditorDocumentFilters from "@/components/auditor/documents/AuditorDocumentFilters.vue";
+    import AuditorDocumentSummary from "@/components/auditor/documents/AuditorDocumentSummary.vue";
+    import AuditorDocumentDetail from "@/components/auditor/documents/AuditorDocumentDetail.vue";
 
     export default {
-        name: "AuditorCardsSection",
+        name: "AuditorDocumentsSection",
         components: {
-            AuditorCardFilters,
-            AuditorCardSummary,
-            AuditorCardDetail,
+            AuditorDocumentFilters,
+            AuditorDocumentSummary,
+            AuditorDocumentDetail,
         },
         data() {
             return {
@@ -52,12 +52,12 @@
         methods: {
             filterData(filters) {
                 this.filterParams = filters;
-                this.$refs.AuditorCardSummary?.refreshWithCurrentFilters();
+                this.$refs.AuditorDocumentSummary?.refreshWithCurrentFilters();
             },
             onDocumentSelection(document) {
                 this.selectedDocument = document;
                 this.$nextTick(() => {
-                    this.$refs.AuditorCardDetail?.refreshWithCurrentDocument();
+                    this.$refs.AuditorDocumentDetail?.refreshWithCurrentDocument();
                 });
             },
         },

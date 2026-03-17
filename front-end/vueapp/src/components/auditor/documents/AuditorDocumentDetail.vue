@@ -512,6 +512,7 @@
 <script>
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import LucideIcon from "@/components/global/LucideIcon.vue";
     import AuditorsService from "@/services/auditors/AuditorsService";
     import dateHelper from "@/helpers/date.js";
 
@@ -520,6 +521,7 @@
         components: {
             BadgeComponent,
             LoadingComponent,
+            LucideIcon,
         },
         props: {
             selectedDocument: {

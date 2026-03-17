@@ -71,8 +71,13 @@
     </div>
 </template>
 <script>
+    import LucideIcon from "@/components/global/LucideIcon.vue";
+
     export default {
-        name: "AuditorCardFilters",
+        name: "AuditorDocumentFilters",
+        components: {
+            LucideIcon,
+        },
         emits: ["filter"],
         data() {
             return {

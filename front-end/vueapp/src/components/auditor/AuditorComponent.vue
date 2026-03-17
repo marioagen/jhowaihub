@@ -22,7 +22,7 @@
                     :compact="true"
                 >
                     <template #documents>
-                        <AuditorCardsSection />
+                        <AuditorDocumentsSection />
                     </template>
                     <template #workflows>
                         <AuditorWorkflowsSection />
@@ -37,7 +37,7 @@
 </template>
 <script>
     import TabsComponent from "@/components/global/TabsComponent.vue";
-    import AuditorCardsSection from "@/components/auditor/cards/AuditorCardsSection.vue";
+    import AuditorDocumentsSection from "@/components/auditor/documents/AuditorDocumentsSection.vue";
     import AuditorWorkflowsSection from "@/components/auditor/workflows/AuditorWorkflowsSection.vue";
     import AuditorUsersSection from "@/components/auditor/users/AuditorUsersSection.vue";
 
@@ -45,7 +45,7 @@
         name: "AuditorComponent",
         components: {
             TabsComponent,
-            AuditorCardsSection,
+            AuditorDocumentsSection,
             AuditorWorkflowsSection,
             AuditorUsersSection,
         },
