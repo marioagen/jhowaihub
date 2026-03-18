@@ -252,6 +252,9 @@ namespace WoopiAiHub.Application.Services.Audit
             };
         }
 
+        /// <summary>
+        /// Builds a dictionary mapping each document ID to whether all its cards are finalized (all card statuses equal Finalize).
+        /// </summary>
         private static Dictionary<int, bool> BuildIsFinalizedByDocument(IEnumerable<DocumentAuditorSummaryRowDto> auditRows)
         {
             return auditRows
@@ -263,6 +266,9 @@ namespace WoopiAiHub.Application.Services.Audit
                 });
         }
 
+        /// <summary>
+        /// Builds the list of document audit summary DTOs from grouped audit rows and the finalized-per-document map.
+        /// </summary>
         private static List<DocumentAuditorSummaryDto> BuildDocumentAuditorSummaryList(
             List<IGrouping<int, DocumentAuditorSummaryRowDto>> groupedByDocument,
             Dictionary<int, bool> isFinalizedByDocument)
@@ -295,6 +301,9 @@ namespace WoopiAiHub.Application.Services.Audit
             }).ToList();
         }
 
+        /// <summary>
+        /// Builds the list of workflow card audit DTOs from audit rows, limited by <paramref name="take"/> (or all if take &lt;= 0).
+        /// </summary>
         private static List<WorkflowAuditorCardsDto> BuildWorkflowAuditorCards(IEnumerable<WorkflowAuditorDetailsRowDto> auditRows, int take)
         {
             var limit = take <= 0 ? int.MaxValue : take;
@@ -315,6 +324,9 @@ namespace WoopiAiHub.Application.Services.Audit
                 .ToList();
         }
 
+        /// <summary>
+        /// Builds the list of step counts (step id, name, and distinct document count per step) from workflow audit rows.
+        /// </summary>
         private static List<WorkflowAuditorStepCountsDto> BuildWorkflowStepsCount(IEnumerable<WorkflowAuditorDetailsRowDto> auditRows)
         {
             return auditRows
@@ -329,6 +341,9 @@ namespace WoopiAiHub.Application.Services.Audit
                 .ToList();
         }
 
+        /// <summary>
+        /// Builds the document status count DTO (total, finalized, rejected) from workflow audit rows using the latest card status per document.
+        /// </summary>
         private static WorkflowAuditorDocumentStatusCountDto BuildWorkflowDocumentStatusCount(IEnumerable<WorkflowAuditorDetailsRowDto> auditRows)
         {
             var distinctDocumentIds = auditRows.Select(a => a.DocumentId).Distinct().ToList();

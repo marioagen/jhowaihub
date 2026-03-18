@@ -96,7 +96,6 @@ namespace WoopiAiHub.UnitTests.Services.Audit
         [Trait("AuditorServices", "FindDocumentsAuditSummaryAsync")]
         public async Task FindDocumentsAuditSummaryAsync_PassesParametersToRepository()
         {
-            // Service requests take+1 from repository to detect HasMore
             _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(6, 0, "test", true)).ReturnsAsync(new List<int>());
 
             await _service.FindDocumentsAuditSummaryAsync(5, 0, "test", true);
@@ -198,7 +197,6 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 new() { WorkflowId = 10, DocumentId = 2, WorkflowName = "WF1", TeamId = 5, TeamName = "Team1", ProfileId = 2, ProfileName = "Profile1" },
                 new() { WorkflowId = 10, DocumentId = 1, WorkflowName = "WF1", TeamId = 5, TeamName = "Team1", ProfileId = 2, ProfileName = "Profile1" }
             };
-            // Service requests take+1 from repository to detect HasMore
             _auditorRepositoryMock.Setup(r => r.FindWorkflowIdsForWorkflowSummaryAsync(11, 0, null)).ReturnsAsync(workflowIds);
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForWorkflowSummaryAsync(It.IsAny<IReadOnlyList<int>>())).ReturnsAsync(auditRows);
 
@@ -266,7 +264,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             Assert.Equal(2, result.LogCount);
             Assert.Equal(2, result.StepsCount.Count);
             Assert.Equal(1, result.DocumentStatusCount.TotalDocuments);
-            Assert.Equal(1, result.DocumentStatusCount.Finalized); // latest status per card is Finalize for doc 1
+            Assert.Equal(1, result.DocumentStatusCount.Finalized);
             Assert.Equal(2, result.Cards.Count);
         }
 
@@ -311,7 +309,6 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 new() { UserId = userId, UserName = "User1", WorkflowId = 10, Teams = teams, ProfileId = 2, ProfileName = "Profile1" },
                 new() { UserId = userId, UserName = "User1", WorkflowId = 20, Teams = teams, ProfileId = 2, ProfileName = "Profile1" }
             };
-            // Service requests take+1 from repository to detect HasMore
             _auditorRepositoryMock.Setup(r => r.FindUserIdsForUserSummaryAsync(11, 0, null, null)).ReturnsAsync(userIds);
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForUserSummaryAsync(It.IsAny<IReadOnlyList<Guid>>())).ReturnsAsync(auditRows);
 
