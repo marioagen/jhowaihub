@@ -41,6 +41,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
 
             var result = await _service.FindDocumentsAuditSummaryAsync(10, 0, null);
 
+            Assert.NotNull(result.Items);
             Assert.Empty(result.Items);
             _auditorRepositoryMock.Verify(r => r.FindAuditRowsForDocumentsSummaryAsync(It.IsAny<IReadOnlyList<int>>(), It.IsAny<string?>(), It.IsAny<bool?>()), Times.Never);
         }
@@ -60,14 +61,17 @@ namespace WoopiAiHub.UnitTests.Services.Audit
 
             var result = await _service.FindDocumentsAuditSummaryAsync(10, 0, null);
 
-            Assert.Single(result.Items);
-            Assert.Equal(1, result.Items.First().DocumentId);
-            Assert.Equal("Doc1", result.Items.First().DocumentName);
-            Assert.True(result.Items.First().IsFinalized);
-            Assert.Equal(2, result.Items.First().ActionsCount);
-            Assert.Single(result.Items.First().Workflows);
-            Assert.Equal(10, result.Items.First().Workflows.First().Id);
-            Assert.Equal("WF1", result.Items.First().Workflows.First().Name);
+            Assert.NotNull(result.Items);
+            var list = result.Items.ToList();
+            Assert.Single(list);
+            var item = list[0];
+            Assert.Equal(1, item.DocumentId);
+            Assert.Equal("Doc1", item.DocumentName);
+            Assert.True(item.IsFinalized);
+            Assert.Equal(2, item.ActionsCount);
+            Assert.Single(item.Workflows);
+            Assert.Equal(10, item.Workflows[0].Id);
+            Assert.Equal("WF1", item.Workflows[0].Name);
         }
 
         [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should set IsFinalized false when not all finalized")]
@@ -85,8 +89,10 @@ namespace WoopiAiHub.UnitTests.Services.Audit
 
             var result = await _service.FindDocumentsAuditSummaryAsync(10, 0, null);
 
-            Assert.Single(result.Items);
-            Assert.False(result.Items.First().IsFinalized);
+            Assert.NotNull(result.Items);
+            var list = result.Items.ToList();
+            Assert.Single(list);
+            Assert.False(list[0].IsFinalized);
         }
 
         [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should pass take+1, skip, search and isFinalized to repository")]
@@ -181,6 +187,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
 
             var result = await _service.FindWorkflowAuditSummaryAsync(10);
 
+            Assert.NotNull(result.Items);
             Assert.Empty(result.Items);
             _auditorRepositoryMock.Verify(r => r.FindAuditRowsForWorkflowSummaryAsync(It.IsAny<IReadOnlyList<int>>()), Times.Never);
         }
@@ -202,15 +209,18 @@ namespace WoopiAiHub.UnitTests.Services.Audit
 
             var result = await _service.FindWorkflowAuditSummaryAsync(10);
 
-            Assert.Single(result.Items);
-            Assert.Equal(10, result.Items.First().WorkflowId);
-            Assert.Equal("WF1", result.Items.First().WorkflowName);
-            Assert.Equal(2, result.Items.First().DocumentCount);
-            Assert.Equal(3, result.Items.First().LogsCount);
-            Assert.Equal(5, result.Items.First().TeamId);
-            Assert.Equal("Team1", result.Items.First().TeamName);
-            Assert.Equal(2, result.Items.First().ProfileId);
-            Assert.Equal("Profile1", result.Items.First().ProfileName);
+            Assert.NotNull(result.Items);
+            var list = result.Items.ToList();
+            Assert.Single(list);
+            var item = list[0];
+            Assert.Equal(10, item.WorkflowId);
+            Assert.Equal("WF1", item.WorkflowName);
+            Assert.Equal(2, item.DocumentCount);
+            Assert.Equal(3, item.LogsCount);
+            Assert.Equal(5, item.TeamId);
+            Assert.Equal("Team1", item.TeamName);
+            Assert.Equal(2, item.ProfileId);
+            Assert.Equal("Profile1", item.ProfileName);
         }
 
         [Fact(DisplayName = "FindWorkflowAuditSummaryAsync should throw AppException when repository throws")]
@@ -291,6 +301,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
 
             var result = await _service.FindUserAuditSummaryAsync(10);
 
+            Assert.NotNull(result.Items);
             Assert.Empty(result.Items);
             _auditorRepositoryMock.Verify(r => r.FindAuditRowsForUserSummaryAsync(It.IsAny<IReadOnlyList<Guid>>()), Times.Never);
         }
@@ -313,16 +324,21 @@ namespace WoopiAiHub.UnitTests.Services.Audit
 
             var result = await _service.FindUserAuditSummaryAsync(10);
 
-            Assert.Single(result.Items);
-            Assert.Equal(userId, result.Items.First().UserId);
-            Assert.Equal("User1", result.Items.First().UserName);
-            Assert.Single(result.Items.First().Teams);
-            Assert.Equal(5, result.Items.First().Teams!.First().TeamId);
-            Assert.Equal("Team1", result.Items.First().Teams!.First().TeamName);
-            Assert.Single(result.Items.First().Profiles);
-            Assert.Equal(2, result.Items.First().Profiles!.First().ProfileId);
-            Assert.Equal(2, result.Items.First().WorkflowCount);
-            Assert.Equal(2, result.Items.First().LogCount);
+            Assert.NotNull(result.Items);
+            var list = result.Items.ToList();
+            Assert.Single(list);
+            var item = list[0];
+            Assert.Equal(userId, item.UserId);
+            Assert.Equal("User1", item.UserName);
+            Assert.Single(item.Teams!);
+            var teamsList = item.Teams!.ToList();
+            Assert.Equal(5, teamsList[0].TeamId);
+            Assert.Equal("Team1", teamsList[0].TeamName);
+            Assert.Single(item.Profiles!);
+            var profilesList = item.Profiles!.ToList();
+            Assert.Equal(2, profilesList[0].ProfileId);
+            Assert.Equal(2, item.WorkflowCount);
+            Assert.Equal(2, item.LogCount);
         }
 
         [Fact(DisplayName = "FindUserAuditSummaryAsync should throw AppException when repository throws")]

@@ -3,7 +3,6 @@ using WoopiAiHub.Domain.DTOs.Response.Auditor;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Documents;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Users;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Workflows;
-using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
@@ -18,17 +17,13 @@ namespace WoopiAiHub.Repository.Audit
     {
         private const int DefaultTake = 10;
         private readonly ApplicationDbContext _context;
-        private readonly IUserRepository _userRepository;
 
         /// <summary>
-        /// Initializes the auditor repository with the application database context and user repository.
+        /// Initializes the auditor repository with the application database context.
         /// </summary>
-        public AuditorRepository(
-            ApplicationDbContext context,
-            IUserRepository userRepository)
+        public AuditorRepository(ApplicationDbContext context)
         {
             _context = context;
-            _userRepository = userRepository;
         }
 
         /// <summary>

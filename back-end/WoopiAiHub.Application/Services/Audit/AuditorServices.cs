@@ -115,7 +115,7 @@ namespace WoopiAiHub.Application.Services.Audit
                 if (rows.Count == 0)
                     return null;
 
-                var first = rows.First();
+                var first = rows[0];
                 var documentHistory = rows.Select(a => new DocumentAuditorHistoryEntryDto
                 {
                     UserId = a.UserId,
@@ -199,7 +199,7 @@ namespace WoopiAiHub.Application.Services.Audit
                 if (auditRows.Count == 0)
                     return null;
 
-                var first = auditRows.First();
+                var first = auditRows[0];
                 var distinctDocumentIds = auditRows.Select(a => a.DocumentId).Distinct().ToList();
 
                 var cards = auditRows
@@ -331,7 +331,7 @@ namespace WoopiAiHub.Application.Services.Audit
                 if (auditRows.Count == 0)
                     return null;
 
-                var first = auditRows.First();
+                var first = auditRows[0];
                 var distinctTeams = auditRows
                     .SelectMany(a => a.Teams ?? Enumerable.Empty<UsersAuditorTeamsDto>())
                     .GroupBy(t => new { t.TeamId, t.TeamName })
