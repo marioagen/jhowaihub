@@ -727,7 +727,6 @@
         min-height: 400px;
     }
 
-    /* Phase Navigation Styles */
     .phase-nav {
         position: relative;
     }
@@ -746,8 +745,8 @@
     }
 
     .phase-item.phase-clickable:hover:not(.active) .phase-circle {
-        background-color: #e5eef7;
-        color: #2f80ed;
+        background-color: var(--color-bg-phase-circle-hover);
+        color: var(--color-bg-phase-circle-active);
         transform: scale(1.05);
     }
 
@@ -785,7 +784,7 @@
     }
 
     .phase-item.active .phase-label {
-        color: #2f80ed;
+        color: var(--color-bg-phase-circle-active);
         font-weight: 600;
     }
 

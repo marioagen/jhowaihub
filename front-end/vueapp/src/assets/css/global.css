@@ -149,6 +149,8 @@ body {
     --color-hover-transfer: #dee2e6;
     --color-selected-transfer: #d2f4ea;
     --color-bg-phase-circle: #e5e7eb;
+    --color-bg-phase-circle-active: #2f80ed;
+    --color-bg-phase-circle-hover: #e5eef7;
     --color-bg-phase-circle-success: #10b981;
     --color-bg-primary-badge: #dbeafe;
     --color-text-primary-badge: #193cb8;
@@ -256,6 +258,8 @@ body {
     --color-hover-transfer: #2d3354;
     --color-selected-transfer: #27447e;
     --color-bg-phase-circle: #364153;
+    --color-bg-phase-circle-active: #2f80ed;
+    --color-bg-phase-circle-hover: #e5eef7;
     --color-bg-phase-circle-success: #408264;
     --color-bg-primary-badge: rgba(30, 58, 138, 0.4);
     --color-selected-badge: #dee2e6;
