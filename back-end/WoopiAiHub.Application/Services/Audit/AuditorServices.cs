@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Response.Auditor;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Documents;
 using WoopiAiHub.Domain.Enum;
@@ -16,15 +14,13 @@ namespace WoopiAiHub.Application.Services.Audit
     public class AuditorServices : IAuditorServices
     {
         private readonly IAuditorRepository _auditorRepository;
-        private readonly ILogger<AuditorServices> _logger;
 
         /// <summary>
-        /// Initializes the auditor service with the auditor repository and logger.
+        /// Initializes the auditor service with the auditor repository.
         /// </summary>
-        public AuditorServices(IAuditorRepository auditorRepository, ILogger<AuditorServices> logger)
+        public AuditorServices(IAuditorRepository auditorRepository)
         {
             _auditorRepository = auditorRepository;
-            _logger = logger;
         }
 
         /// <summary>
@@ -44,31 +40,29 @@ namespace WoopiAiHub.Application.Services.Audit
         /// </summary>
         public async Task<AuditorLoadMoreResultDto<DocumentAuditorSummaryDto>> FindDocumentsAuditSummaryAsync(int take, int skip, string? search, bool? isFinalized = null)
         {
-            try
-            {
-                var documentIds = await _auditorRepository.FindDocumentIdsForDocumentsSummaryAsync(take + 1, skip, search, isFinalized);
-                if (documentIds.Count == 0)
-                    return new AuditorLoadMoreResultDto<DocumentAuditorSummaryDto> { Items = new List<DocumentAuditorSummaryDto>(), HasMore = false };
+            var documentIds = await _auditorRepository.FindDocumentIdsForDocumentsSummaryAsync(take + 1, skip, search, isFinalized);
+            if (documentIds.Count == 0)
+                return new AuditorLoadMoreResultDto<DocumentAuditorSummaryDto> { Items = new List<DocumentAuditorSummaryDto>(), HasMore = false };
 
-                var hasMore = documentIds.Count > take;
-                var idsToUse = hasMore ? documentIds.Take(take).ToList() : documentIds;
+            var hasMore = documentIds.Count > take;
+            var idsToUse = hasMore ? documentIds.Take(take).ToList() : documentIds;
 
-                var auditRows = await _auditorRepository.FindAuditRowsForDocumentsSummaryAsync(idsToUse, search, isFinalized);
+            var auditRows = await _auditorRepository.FindAuditRowsForDocumentsSummaryAsync(idsToUse, search, isFinalized);
 
-                var isFinalizedByDocument = auditRows
-                    .GroupBy(a => a.DocumentId)
-                    .ToDictionary(g => g.Key, g =>
-                    {
-                        var statusesInDoc = g.GroupBy(x => x.CardId).Select(x => x.First().CardStatusName).ToList();
-                        return statusesInDoc.Count > 0 && statusesInDoc.All(s => s == StatusNames.Finalize);
-                    });
+            var isFinalizedByDocument = auditRows
+                .GroupBy(a => a.DocumentId)
+                .ToDictionary(g => g.Key, g =>
+                {
+                    var statusesInDoc = g.GroupBy(x => x.CardId).Select(x => x.First().CardStatusName).ToList();
+                    return statusesInDoc.Count > 0 && statusesInDoc.All(s => s == StatusNames.Finalize);
+                });
 
-                var groupedByDocument = auditRows
-                    .GroupBy(a => a.DocumentId)
-                    .OrderBy(g => g.Key)
-                    .ToList();
+            var groupedByDocument = auditRows
+                .GroupBy(a => a.DocumentId)
+                .OrderBy(g => g.Key)
+                .ToList();
 
-                var list = groupedByDocument.Select(g =>
+            var list = groupedByDocument.Select(g =>
                 {
                     var first = g.First();
                     var workflows = g
@@ -92,16 +86,10 @@ namespace WoopiAiHub.Application.Services.Audit
                         Workflows = workflows,
                         ActionsCount = g.Count(),
                         IsFinalized = isFinalizedByDocument.TryGetValue(g.Key, out var finalized) && finalized
-                    };
-                }).ToList();
+                };
+            }).ToList();
 
-                return new AuditorLoadMoreResultDto<DocumentAuditorSummaryDto> { Items = list, HasMore = hasMore };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(AuditorServices)} in the {nameof(FindDocumentsAuditSummaryAsync)} method");
-                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
-            }
+            return new AuditorLoadMoreResultDto<DocumentAuditorSummaryDto> { Items = list, HasMore = hasMore };
         }
 
         /// <summary>
@@ -109,37 +97,29 @@ namespace WoopiAiHub.Application.Services.Audit
         /// </summary>
         public async Task<DocumentAuditorDetailDto?> FindDocumentAuditDetailsAsync(int documentId, int workflowId, int take, string? search = null, Guid? userId = null, int? actionType = null, int? stepId = null, bool orderDescending = true)
         {
-            try
-            {
-                var rows = await _auditorRepository.FindAuditRowsForDocumentDetailAsync(documentId, workflowId, take, search, userId, actionType, stepId, orderDescending);
-                if (rows.Count == 0)
-                    return null;
+            var rows = await _auditorRepository.FindAuditRowsForDocumentDetailAsync(documentId, workflowId, take, search, userId, actionType, stepId, orderDescending);
+            if (rows.Count == 0)
+                return null;
 
-                var first = rows[0];
-                var documentHistory = rows.Select(a => new DocumentAuditorHistoryEntryDto
-                {
-                    UserId = a.UserId,
-                    UserName = a.UserName,
-                    ActionName = a.ActionName,
-                    StepId = a.StepId,
-                    StepName = a.StepName,
-                    Created = a.Created
-                }).ToList();
-
-                return new DocumentAuditorDetailDto
-                {
-                    DocumentId = documentId,
-                    DocumentName = first.DocumentName,
-                    WorkflowId = workflowId,
-                    WorkflowName = first.WorkflowName,
-                    DocumentHistory = documentHistory
-                };
-            }
-            catch (Exception ex)
+            var first = rows[0];
+            var documentHistory = rows.Select(a => new DocumentAuditorHistoryEntryDto
             {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(AuditorServices)} in the {nameof(FindDocumentAuditDetailsAsync)} method");
-                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
-            }
+                UserId = a.UserId,
+                UserName = a.UserName,
+                ActionName = a.ActionName,
+                StepId = a.StepId,
+                StepName = a.StepName,
+                Created = a.Created
+            }).ToList();
+
+            return new DocumentAuditorDetailDto
+            {
+                DocumentId = documentId,
+                DocumentName = first.DocumentName,
+                WorkflowId = workflowId,
+                WorkflowName = first.WorkflowName,
+                DocumentHistory = documentHistory
+            };
         }
 
         /// <summary>
@@ -147,45 +127,37 @@ namespace WoopiAiHub.Application.Services.Audit
         /// </summary>
         public async Task<AuditorLoadMoreResultDto<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync(int take = 10, int skip = 0, string? search = null)
         {
-            try
+            var workflowIds = await _auditorRepository.FindWorkflowIdsForWorkflowSummaryAsync(take + 1, skip, search);
+            if (workflowIds.Count == 0)
+                return new AuditorLoadMoreResultDto<WorkflowAuditorSummaryDto> { Items = new List<WorkflowAuditorSummaryDto>(), HasMore = false };
+
+            var hasMore = workflowIds.Count > take;
+            var idsToUse = hasMore ? workflowIds.Take(take).ToList() : workflowIds;
+
+            var auditRows = await _auditorRepository.FindAuditRowsForWorkflowSummaryAsync(idsToUse);
+
+            var groupedByWorkflow = auditRows
+                .GroupBy(a => a.WorkflowId)
+                .OrderBy(g => g.Key)
+                .ToList();
+
+            var list = groupedByWorkflow.Select(g =>
             {
-                var workflowIds = await _auditorRepository.FindWorkflowIdsForWorkflowSummaryAsync(take + 1, skip, search);
-                if (workflowIds.Count == 0)
-                    return new AuditorLoadMoreResultDto<WorkflowAuditorSummaryDto> { Items = new List<WorkflowAuditorSummaryDto>(), HasMore = false };
-
-                var hasMore = workflowIds.Count > take;
-                var idsToUse = hasMore ? workflowIds.Take(take).ToList() : workflowIds;
-
-                var auditRows = await _auditorRepository.FindAuditRowsForWorkflowSummaryAsync(idsToUse);
-
-                var groupedByWorkflow = auditRows
-                    .GroupBy(a => a.WorkflowId)
-                    .OrderBy(g => g.Key)
-                    .ToList();
-
-                var list = groupedByWorkflow.Select(g =>
+                var first = g.First();
+                return new WorkflowAuditorSummaryDto
                 {
-                    var first = g.First();
-                    return new WorkflowAuditorSummaryDto
-                    {
-                        WorkflowId = g.Key,
-                        WorkflowName = first.WorkflowName,
-                        DocumentCount = g.Select(a => a.DocumentId).Distinct().Count(),
-                        LogsCount = g.Count(),
-                        TeamId = first.TeamId,
-                        TeamName = first.TeamName,
-                        ProfileId = first.ProfileId,
-                        ProfileName = first.ProfileName
-                    };
-                }).ToList();
+                    WorkflowId = g.Key,
+                    WorkflowName = first.WorkflowName,
+                    DocumentCount = g.Select(a => a.DocumentId).Distinct().Count(),
+                    LogsCount = g.Count(),
+                    TeamId = first.TeamId,
+                    TeamName = first.TeamName,
+                    ProfileId = first.ProfileId,
+                    ProfileName = first.ProfileName
+                };
+            }).ToList();
 
-                return new AuditorLoadMoreResultDto<WorkflowAuditorSummaryDto> { Items = list, HasMore = hasMore };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(AuditorServices)} in the {nameof(FindWorkflowAuditSummaryAsync)} method");
-                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
-            }
+            return new AuditorLoadMoreResultDto<WorkflowAuditorSummaryDto> { Items = list, HasMore = hasMore };
         }
 
         /// <summary>
@@ -193,76 +165,68 @@ namespace WoopiAiHub.Application.Services.Audit
         /// </summary>
         public async Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId, int take, string? search = null, int? stepId = null, int? actionType = null, bool orderDescending = true)
         {
-            try
-            {
-                var auditRows = await _auditorRepository.FindAuditRowsForWorkflowDetailsAsync(workflowId, search, stepId, actionType, orderDescending);
-                if (auditRows.Count == 0)
-                    return null;
+            var auditRows = await _auditorRepository.FindAuditRowsForWorkflowDetailsAsync(workflowId, search, stepId, actionType, orderDescending);
+            if (auditRows.Count == 0)
+                return null;
 
-                var first = auditRows[0];
-                var distinctDocumentIds = auditRows.Select(a => a.DocumentId).Distinct().ToList();
+            var first = auditRows[0];
+            var distinctDocumentIds = auditRows.Select(a => a.DocumentId).Distinct().ToList();
 
-                var cards = auditRows
-                    .Take(take <= 0 ? int.MaxValue : take)
-                    .Select(a => new WorkflowAuditorCardsDto
-                    {
-                        CardId = a.CardId,
-                        CardName = a.CardName,
-                        CardStatus = a.CardStatus,
-                        StepId = a.StepId,
-                        StepName = a.StepName,
-                        UserId = a.UserId,
-                        UserName = a.UserName,
-                        ActionType = a.ActionType.ToString(),
-                        Created = a.Created
-                    })
-                    .ToList();
-
-                var stepsCount = auditRows
-                    .GroupBy(a => new { a.StepId, a.StepName })
-                    .Select(g => new WorkflowAuditorStepCountsDto
-                    {
-                        StepId = g.Key.StepId,
-                        StepName = g.Key.StepName,
-                        DocumentCount = g.Select(a => a.DocumentId).Distinct().Count()
-                    })
-                    .OrderBy(s => s.StepId)
-                    .ToList();
-
-                var latestStatusPerCard = auditRows
-                    .GroupBy(a => new { a.DocumentId, a.CardId })
-                    .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.Created).First().CardStatus);
-
-                var statusesByDocument = auditRows
-                    .Select(a => new { a.DocumentId, a.CardId })
-                    .Distinct()
-                    .GroupBy(x => x.DocumentId)
-                    .ToDictionary(g => g.Key, g => g.Select(x => latestStatusPerCard[new { x.DocumentId, x.CardId }]).ToList());
-                var finalized = statusesByDocument.Count(kv => kv.Value.Count > 0 && kv.Value.All(s => s == StatusNames.Finalize));
-                var rejected = statusesByDocument.Count(kv => kv.Value.Any(s => s == StatusNames.Rejected));
-
-                var documentStatusCount = new WorkflowAuditorDocumentStatusCountDto
+            var cards = auditRows
+                .Take(take <= 0 ? int.MaxValue : take)
+                .Select(a => new WorkflowAuditorCardsDto
                 {
-                    TotalDocuments = distinctDocumentIds.Count,
-                    Finalized = finalized,
-                    Rejected = rejected
-                };
+                    CardId = a.CardId,
+                    CardName = a.CardName,
+                    CardStatus = a.CardStatus,
+                    StepId = a.StepId,
+                    StepName = a.StepName,
+                    UserId = a.UserId,
+                    UserName = a.UserName,
+                    ActionType = a.ActionType.ToString(),
+                    Created = a.Created
+                })
+                .ToList();
 
-                return new WorkflowAuditorDetailsDto
+            var stepsCount = auditRows
+                .GroupBy(a => new { a.StepId, a.StepName })
+                .Select(g => new WorkflowAuditorStepCountsDto
                 {
-                    WorkflowId = first.WorkflowId,
-                    WorkflowName = first.WorkflowName,
-                    LogCount = auditRows.Count,
-                    StepsCount = stepsCount,
-                    DocumentStatusCount = documentStatusCount,
-                    Cards = cards
-                };
-            }
-            catch (Exception ex)
+                    StepId = g.Key.StepId,
+                    StepName = g.Key.StepName,
+                    DocumentCount = g.Select(a => a.DocumentId).Distinct().Count()
+                })
+                .OrderBy(s => s.StepId)
+                .ToList();
+
+            var latestStatusPerCard = auditRows
+                .GroupBy(a => new { a.DocumentId, a.CardId })
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.Created).First().CardStatus);
+
+            var statusesByDocument = auditRows
+                .Select(a => new { a.DocumentId, a.CardId })
+                .Distinct()
+                .GroupBy(x => x.DocumentId)
+                .ToDictionary(g => g.Key, g => g.Select(x => latestStatusPerCard[new { x.DocumentId, x.CardId }]).ToList());
+            var finalized = statusesByDocument.Count(kv => kv.Value.Count > 0 && kv.Value.All(s => s == StatusNames.Finalize));
+            var rejected = statusesByDocument.Count(kv => kv.Value.Any(s => s == StatusNames.Rejected));
+
+            var documentStatusCount = new WorkflowAuditorDocumentStatusCountDto
             {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(AuditorServices)} in the {nameof(FindWorkflowAuditDetailsAsync)} method");
-                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
-            }
+                TotalDocuments = distinctDocumentIds.Count,
+                Finalized = finalized,
+                Rejected = rejected
+            };
+
+            return new WorkflowAuditorDetailsDto
+            {
+                WorkflowId = first.WorkflowId,
+                WorkflowName = first.WorkflowName,
+                LogCount = auditRows.Count,
+                StepsCount = stepsCount,
+                DocumentStatusCount = documentStatusCount,
+                Cards = cards
+            };
         }
 
         /// <summary>
@@ -270,54 +234,46 @@ namespace WoopiAiHub.Application.Services.Audit
         /// </summary>
         public async Task<AuditorLoadMoreResultDto<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int take = 10, int skip = 0, string? userName = null, int? teamId = null)
         {
-            try
+            var userIds = await _auditorRepository.FindUserIdsForUserSummaryAsync(take + 1, skip, userName, teamId);
+            if (userIds.Count == 0)
+                return new AuditorLoadMoreResultDto<UserAuditorSummaryDto> { Items = new List<UserAuditorSummaryDto>(), HasMore = false };
+
+            var hasMore = userIds.Count > take;
+            var idsToUse = hasMore ? userIds.Take(take).ToList() : userIds;
+
+            var auditRows = await _auditorRepository.FindAuditRowsForUserSummaryAsync(idsToUse);
+
+            var groupedByUser = auditRows
+                .GroupBy(a => a.UserId)
+                .OrderBy(g => g.Key)
+                .ToList();
+
+            var list = groupedByUser.Select(g =>
             {
-                var userIds = await _auditorRepository.FindUserIdsForUserSummaryAsync(take + 1, skip, userName, teamId);
-                if (userIds.Count == 0)
-                    return new AuditorLoadMoreResultDto<UserAuditorSummaryDto> { Items = new List<UserAuditorSummaryDto>(), HasMore = false };
-
-                var hasMore = userIds.Count > take;
-                var idsToUse = hasMore ? userIds.Take(take).ToList() : userIds;
-
-                var auditRows = await _auditorRepository.FindAuditRowsForUserSummaryAsync(idsToUse);
-
-                var groupedByUser = auditRows
-                    .GroupBy(a => a.UserId)
-                    .OrderBy(g => g.Key)
+                var first = g.First();
+                var allTeams = g.SelectMany(a => a.Teams ?? Enumerable.Empty<UsersAuditorTeamsDto>());
+                var distinctTeams = allTeams
+                    .GroupBy(t => new { t.TeamId, t.TeamName })
+                    .Select(x => x.First())
                     .ToList();
-
-                var list = groupedByUser.Select(g =>
+                var distinctProfiles = g
+                    .Where(a => a.ProfileId.HasValue)
+                    .Select(a => new UsersAuditorProfilesDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
+                    .GroupBy(p => new { p.ProfileId, p.ProfileName })
+                    .Select(x => x.First())
+                    .ToList();
+                return new UserAuditorSummaryDto
                 {
-                    var first = g.First();
-                    var allTeams = g.SelectMany(a => a.Teams ?? Enumerable.Empty<UsersAuditorTeamsDto>());
-                    var distinctTeams = allTeams
-                        .GroupBy(t => new { t.TeamId, t.TeamName })
-                        .Select(x => x.First())
-                        .ToList();
-                    var distinctProfiles = g
-                        .Where(a => a.ProfileId.HasValue)
-                        .Select(a => new UsersAuditorProfilesDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
-                        .GroupBy(p => new { p.ProfileId, p.ProfileName })
-                        .Select(x => x.First())
-                        .ToList();
-                    return new UserAuditorSummaryDto
-                    {
-                        UserId = g.Key,
-                        UserName = first.UserName,
-                        Teams = distinctTeams,
-                        Profiles = distinctProfiles,
-                        WorkflowCount = g.Select(a => a.WorkflowId).Distinct().Count(),
-                        LogCount = g.Count()
-                    };
-                }).ToList();
+                    UserId = g.Key,
+                    UserName = first.UserName,
+                    Teams = distinctTeams,
+                    Profiles = distinctProfiles,
+                    WorkflowCount = g.Select(a => a.WorkflowId).Distinct().Count(),
+                    LogCount = g.Count()
+                };
+            }).ToList();
 
-                return new AuditorLoadMoreResultDto<UserAuditorSummaryDto> { Items = list, HasMore = hasMore };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(AuditorServices)} in the {nameof(FindUserAuditSummaryAsync)} method");
-                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
-            }
+            return new AuditorLoadMoreResultDto<UserAuditorSummaryDto> { Items = list, HasMore = hasMore };
         }
 
         /// <summary>
@@ -325,57 +281,49 @@ namespace WoopiAiHub.Application.Services.Audit
         /// </summary>
         public async Task<UserAuditorDetailsDto?> FindUserAuditDetailsAsync(Guid userId, int take, string? search = null, int? actionTypeCode = null, bool orderDescending = true)
         {
-            try
-            {
-                var auditRows = await _auditorRepository.FindAuditRowsForUserDetailsAsync(userId, take, search, actionTypeCode, orderDescending);
-                if (auditRows.Count == 0)
-                    return null;
+            var auditRows = await _auditorRepository.FindAuditRowsForUserDetailsAsync(userId, take, search, actionTypeCode, orderDescending);
+            if (auditRows.Count == 0)
+                return null;
 
-                var first = auditRows[0];
-                var distinctTeams = auditRows
-                    .SelectMany(a => a.Teams ?? Enumerable.Empty<UsersAuditorTeamsDto>())
-                    .GroupBy(t => new { t.TeamId, t.TeamName })
-                    .Select(x => x.First())
-                    .ToList();
-                var distinctProfiles = auditRows
-                    .Where(a => a.ProfileId.HasValue)
-                    .Select(a => new UsersAuditorProfilesDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
-                    .GroupBy(p => new { p.ProfileId, p.ProfileName })
-                    .Select(x => x.First())
-                    .ToList();
-                var countByActionType = auditRows
-                    .GroupBy(a => (int)a.ActionType)
-                    .Select(g => new UsersAuditorActionTypeCountsDto { ActionTypeCode = g.Key, Count = g.Count() })
-                    .OrderBy(x => x.ActionTypeCode)
-                    .ToList();
-                var actions = auditRows
-                    .Select(a => new UsersAuditorActionsDto
-                    {
-                        CardId = a.CardId,
-                        CardName = a.CardName,
-                        ActionType = a.ActionType.ToString(),
-                        WorkflowId = a.WorkflowId,
-                        WorkflowName = a.WorkflowName,
-                        Created = a.Created
-                    })
-                    .ToList();
-
-                return new UserAuditorDetailsDto
+            var first = auditRows[0];
+            var distinctTeams = auditRows
+                .SelectMany(a => a.Teams ?? Enumerable.Empty<UsersAuditorTeamsDto>())
+                .GroupBy(t => new { t.TeamId, t.TeamName })
+                .Select(x => x.First())
+                .ToList();
+            var distinctProfiles = auditRows
+                .Where(a => a.ProfileId.HasValue)
+                .Select(a => new UsersAuditorProfilesDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
+                .GroupBy(p => new { p.ProfileId, p.ProfileName })
+                .Select(x => x.First())
+                .ToList();
+            var countByActionType = auditRows
+                .GroupBy(a => (int)a.ActionType)
+                .Select(g => new UsersAuditorActionTypeCountsDto { ActionTypeCode = g.Key, Count = g.Count() })
+                .OrderBy(x => x.ActionTypeCode)
+                .ToList();
+            var actions = auditRows
+                .Select(a => new UsersAuditorActionsDto
                 {
-                    UserId = first.UserId,
-                    UserName = first.UserName,
-                    Teams = distinctTeams,
-                    Profiles = distinctProfiles,
-                    LogCountTotal = auditRows.Count,
-                    LogCountByActionType = countByActionType,
-                    Actions = actions
-                };
-            }
-            catch (Exception ex)
+                    CardId = a.CardId,
+                    CardName = a.CardName,
+                    ActionType = a.ActionType.ToString(),
+                    WorkflowId = a.WorkflowId,
+                    WorkflowName = a.WorkflowName,
+                    Created = a.Created
+                })
+                .ToList();
+
+            return new UserAuditorDetailsDto
             {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(AuditorServices)} in the {nameof(FindUserAuditDetailsAsync)} method");
-                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
-            }
+                UserId = first.UserId,
+                UserName = first.UserName,
+                Teams = distinctTeams,
+                Profiles = distinctProfiles,
+                LogCountTotal = auditRows.Count,
+                LogCountByActionType = countByActionType,
+                Actions = actions
+            };
         }
     }
 }

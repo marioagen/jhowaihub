@@ -1,8 +1,6 @@
-using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services.Audit;
-using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Response.Auditor;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Documents;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Users;
@@ -25,7 +23,6 @@ namespace WoopiAiHub.UnitTests.Services.Audit
         {
             _mocker = new AutoMocker();
             _auditorRepositoryMock = _mocker.GetMock<IAuditorRepository>();
-            _mocker.GetMock<ILogger<AuditorServices>>(); // satisfy ctor, no setup needed
             _service = _mocker.CreateInstance<AuditorServices>();
         }
 
@@ -107,16 +104,15 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             _auditorRepositoryMock.Verify(r => r.FindDocumentIdsForDocumentsSummaryAsync(6, 0, "test", true), Times.Once);
         }
 
-        [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should throw AppException when repository throws")]
+        [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should propagate exception when repository throws")]
         [Trait("AuditorServices", "FindDocumentsAuditSummaryAsync")]
-        public async Task FindDocumentsAuditSummaryAsync_RepositoryThrows_WrapsInAppException()
+        public async Task FindDocumentsAuditSummaryAsync_RepositoryThrows_PropagatesException()
         {
             _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindDocumentsAuditSummaryAsync(10, 0, null));
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.FindDocumentsAuditSummaryAsync(10, 0, null));
 
-            Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
             Assert.Equal("Db error", ex.Message);
         }
 
@@ -162,16 +158,15 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             Assert.Equal("Advancement", result.DocumentHistory[0].ActionName);
         }
 
-        [Fact(DisplayName = "FindDocumentAuditDetailsAsync should throw AppException when repository throws")]
+        [Fact(DisplayName = "FindDocumentAuditDetailsAsync should propagate exception when repository throws")]
         [Trait("AuditorServices", "FindDocumentAuditDetailsAsync")]
-        public async Task FindDocumentAuditDetailsAsync_RepositoryThrows_WrapsInAppException()
+        public async Task FindDocumentAuditDetailsAsync_RepositoryThrows_PropagatesException()
         {
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForDocumentDetailAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<Guid?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<bool>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindDocumentAuditDetailsAsync(1, 10, 20));
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.FindDocumentAuditDetailsAsync(1, 10, 20));
 
-            Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
             Assert.Equal("Db error", ex.Message);
         }
 
@@ -223,16 +218,15 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             Assert.Equal("Profile1", item.ProfileName);
         }
 
-        [Fact(DisplayName = "FindWorkflowAuditSummaryAsync should throw AppException when repository throws")]
+        [Fact(DisplayName = "FindWorkflowAuditSummaryAsync should propagate exception when repository throws")]
         [Trait("AuditorServices", "FindWorkflowAuditSummaryAsync")]
-        public async Task FindWorkflowAuditSummaryAsync_RepositoryThrows_WrapsInAppException()
+        public async Task FindWorkflowAuditSummaryAsync_RepositoryThrows_PropagatesException()
         {
             _auditorRepositoryMock.Setup(r => r.FindWorkflowIdsForWorkflowSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindWorkflowAuditSummaryAsync(10));
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.FindWorkflowAuditSummaryAsync(10));
 
-            Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
             Assert.Equal("Db error", ex.Message);
         }
 
@@ -276,16 +270,15 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             Assert.Equal(2, result.Cards.Count);
         }
 
-        [Fact(DisplayName = "FindWorkflowAuditDetailsAsync should throw AppException when repository throws")]
+        [Fact(DisplayName = "FindWorkflowAuditDetailsAsync should propagate exception when repository throws")]
         [Trait("AuditorServices", "FindWorkflowAuditDetailsAsync")]
-        public async Task FindWorkflowAuditDetailsAsync_RepositoryThrows_WrapsInAppException()
+        public async Task FindWorkflowAuditDetailsAsync_RepositoryThrows_PropagatesException()
         {
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForWorkflowDetailsAsync(It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<bool>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindWorkflowAuditDetailsAsync(10, 10));
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.FindWorkflowAuditDetailsAsync(10, 10));
 
-            Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
             Assert.Equal("Db error", ex.Message);
         }
 
@@ -341,16 +334,15 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             Assert.Equal(2, item.LogCount);
         }
 
-        [Fact(DisplayName = "FindUserAuditSummaryAsync should throw AppException when repository throws")]
+        [Fact(DisplayName = "FindUserAuditSummaryAsync should propagate exception when repository throws")]
         [Trait("AuditorServices", "FindUserAuditSummaryAsync")]
-        public async Task FindUserAuditSummaryAsync_RepositoryThrows_WrapsInAppException()
+        public async Task FindUserAuditSummaryAsync_RepositoryThrows_PropagatesException()
         {
             _auditorRepositoryMock.Setup(r => r.FindUserIdsForUserSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<int?>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindUserAuditSummaryAsync(10));
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.FindUserAuditSummaryAsync(10));
 
-            Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
             Assert.Equal("Db error", ex.Message);
         }
 
@@ -398,17 +390,16 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             Assert.Equal(2, result.Actions.Count);
         }
 
-        [Fact(DisplayName = "FindUserAuditDetailsAsync should throw AppException when repository throws")]
+        [Fact(DisplayName = "FindUserAuditDetailsAsync should propagate exception when repository throws")]
         [Trait("AuditorServices", "FindUserAuditDetailsAsync")]
-        public async Task FindUserAuditDetailsAsync_RepositoryThrows_WrapsInAppException()
+        public async Task FindUserAuditDetailsAsync_RepositoryThrows_PropagatesException()
         {
             var userId = Guid.NewGuid();
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForUserDetailsAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<bool>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindUserAuditDetailsAsync(userId, 10));
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.FindUserAuditDetailsAsync(userId, 10));
 
-            Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
             Assert.Equal("Db error", ex.Message);
         }
 
