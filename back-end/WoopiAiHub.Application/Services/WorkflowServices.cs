@@ -965,7 +965,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Validates that a Prompt tool has at least one OCR dependency (direct or recursive).
+        /// Validates that a Prompt tool has at least one dependency that is OCR or another Prompt (direct or recursive).
         /// </summary>
         /// <param name="tool"></param>
         /// <param name="createdDependencies"></param>
@@ -985,10 +985,10 @@ namespace WoopiAiHub.Application.Services
             }
 
             var toolCache = new Dictionary<int, Tool> { { tool.Id, tool } };
-            var hasOcrDependency = await HasOcrDependency(createdDependencies, toolCache);
-            if (!hasOcrDependency)
+            var hasValidDependency = await HasOcrOrPromptDependency(createdDependencies, toolCache);
+            if (!hasValidDependency)
             {
-                throw new AppException(ErrorCode.RequiredField, "Prompt tool must have at least one OCR dependency", ToolLabel.OcrDependencyRequired);
+                throw new AppException(ErrorCode.RequiredField, "Prompt tool must have at least one OCR or Prompt dependency", ToolLabel.OcrOrPromptDependencyRequired);
             }
         }
 
@@ -1018,6 +1018,40 @@ namespace WoopiAiHub.Application.Services
             {
                 throw new AppException(ErrorCode.RequiredField, "Quiz tool must have at least one Embedding dependency", ToolLabel.EmbeddingDependencyRequired);
             }
+        }
+
+        /// <summary>
+        /// Determines whether any of the specified dependencies are OCR or Prompt tools (valid for chaining).
+        /// </summary>
+        /// <remarks>This method checks each dependency to determine if it is associated with a tool of
+        /// type OCR or Prompt. The <paramref name="toolCache"/> is used to avoid redundant lookups and may be populated with
+        /// additional tools as needed.</remarks>
+        /// <param name="dependencies">A list of <see cref="StepTool"/> objects representing the tool dependencies to check.</param>
+        /// <param name="toolCache">A dictionary that maps tool IDs to <see cref="Tool"/> instances, used to cache tool lookups and improve
+        /// performance. May be updated with additional entries during execution.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if at least one
+        /// dependency is OCR or Prompt; otherwise, <see langword="false"/>.</returns>
+        private async Task<bool> HasOcrOrPromptDependency(List<StepTool> dependencies, Dictionary<int, Tool> toolCache)
+        {
+            foreach (var dependency in dependencies)
+            {
+                if (!toolCache.TryGetValue(dependency.ToolId, out var dependencyTool))
+                {
+                    dependencyTool = await _toolRepository.FindModelByIdAsync(dependency.ToolId);
+                    if (dependencyTool != null)
+                    {
+                        toolCache[dependency.ToolId] = dependencyTool;
+                    }
+                }
+
+                var typeName = dependencyTool?.ToolType?.Name;
+                if (typeName == HandlersTypes.Ocr || typeName == HandlersTypes.Prompt)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
