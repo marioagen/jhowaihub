@@ -49,45 +49,14 @@ namespace WoopiAiHub.Application.Services.Audit
 
             var auditRows = await _auditorRepository.FindAuditRowsForDocumentsSummaryAsync(idsToUse, search, isFinalized);
 
-            var isFinalizedByDocument = auditRows
-                .GroupBy(a => a.DocumentId)
-                .ToDictionary(g => g.Key, g =>
-                {
-                    var statusesInDoc = g.GroupBy(x => x.CardId).Select(x => x.First().CardStatusName).ToList();
-                    return statusesInDoc.Count > 0 && statusesInDoc.All(s => s == StatusNames.Finalize);
-                });
+            var isFinalizedByDocument = BuildIsFinalizedByDocument(auditRows);
 
             var groupedByDocument = auditRows
                 .GroupBy(a => a.DocumentId)
                 .OrderBy(g => g.Key)
                 .ToList();
 
-            var list = groupedByDocument.Select(g =>
-                {
-                    var first = g.First();
-                    var workflows = g
-                        .Where(x => x.WorkflowId != 0)
-                        .Select(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName, x.DocumentId })
-                        .GroupBy(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName })
-                        .Select(x => x.First())
-                        .Select(x => new DocumentAuditorWorkflowsDto
-                        {
-                            Id = x.WorkflowId,
-                            Name = x.WorkflowName,
-                            StepId = x.StepId,
-                            StepName = x.StepName,
-                            DocumentId = x.DocumentId
-                        })
-                        .ToList();
-                    return new DocumentAuditorSummaryDto
-                    {
-                        DocumentId = g.Key,
-                        DocumentName = first.DocumentName,
-                        Workflows = workflows,
-                        ActionsCount = g.Count(),
-                        IsFinalized = isFinalizedByDocument.TryGetValue(g.Key, out var finalized) && finalized
-                };
-            }).ToList();
+            var list = BuildDocumentAuditorSummaryList(groupedByDocument, isFinalizedByDocument);
 
             return new AuditorLoadMoreResultDto<DocumentAuditorSummaryDto> { Items = list, HasMore = hasMore };
         }
@@ -170,53 +139,9 @@ namespace WoopiAiHub.Application.Services.Audit
                 return null;
 
             var first = auditRows[0];
-            var distinctDocumentIds = auditRows.Select(a => a.DocumentId).Distinct().ToList();
-
-            var cards = auditRows
-                .Take(take <= 0 ? int.MaxValue : take)
-                .Select(a => new WorkflowAuditorCardsDto
-                {
-                    CardId = a.CardId,
-                    CardName = a.CardName,
-                    CardStatus = a.CardStatus,
-                    StepId = a.StepId,
-                    StepName = a.StepName,
-                    UserId = a.UserId,
-                    UserName = a.UserName,
-                    ActionType = a.ActionType.ToString(),
-                    Created = a.Created
-                })
-                .ToList();
-
-            var stepsCount = auditRows
-                .GroupBy(a => new { a.StepId, a.StepName })
-                .Select(g => new WorkflowAuditorStepCountsDto
-                {
-                    StepId = g.Key.StepId,
-                    StepName = g.Key.StepName,
-                    DocumentCount = g.Select(a => a.DocumentId).Distinct().Count()
-                })
-                .OrderBy(s => s.StepId)
-                .ToList();
-
-            var latestStatusPerCard = auditRows
-                .GroupBy(a => new { a.DocumentId, a.CardId })
-                .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.Created).First().CardStatus);
-
-            var statusesByDocument = auditRows
-                .Select(a => new { a.DocumentId, a.CardId })
-                .Distinct()
-                .GroupBy(x => x.DocumentId)
-                .ToDictionary(g => g.Key, g => g.Select(x => latestStatusPerCard[new { x.DocumentId, x.CardId }]).ToList());
-            var finalized = statusesByDocument.Count(kv => kv.Value.Count > 0 && kv.Value.All(s => s == StatusNames.Finalize));
-            var rejected = statusesByDocument.Count(kv => kv.Value.Any(s => s == StatusNames.Rejected));
-
-            var documentStatusCount = new WorkflowAuditorDocumentStatusCountDto
-            {
-                TotalDocuments = distinctDocumentIds.Count,
-                Finalized = finalized,
-                Rejected = rejected
-            };
+            var cards = BuildWorkflowAuditorCards(auditRows, take);
+            var stepsCount = BuildWorkflowStepsCount(auditRows);
+            var documentStatusCount = BuildWorkflowDocumentStatusCount(auditRows);
 
             return new WorkflowAuditorDetailsDto
             {
@@ -323,6 +248,107 @@ namespace WoopiAiHub.Application.Services.Audit
                 LogCountTotal = auditRows.Count,
                 LogCountByActionType = countByActionType,
                 Actions = actions
+            };
+        }
+
+        private static Dictionary<int, bool> BuildIsFinalizedByDocument(IEnumerable<DocumentAuditorSummaryRowDto> auditRows)
+        {
+            return auditRows
+                .GroupBy(a => a.DocumentId)
+                .ToDictionary(g => g.Key, g =>
+                {
+                    var statusesInDoc = g.GroupBy(x => x.CardId).Select(x => x.First().CardStatusName).ToList();
+                    return statusesInDoc.Count > 0 && statusesInDoc.All(s => s == StatusNames.Finalize);
+                });
+        }
+
+        private static List<DocumentAuditorSummaryDto> BuildDocumentAuditorSummaryList(
+            List<IGrouping<int, DocumentAuditorSummaryRowDto>> groupedByDocument,
+            Dictionary<int, bool> isFinalizedByDocument)
+        {
+            return groupedByDocument.Select(g =>
+            {
+                var first = g.First();
+                var workflows = g
+                    .Where(x => x.WorkflowId != 0)
+                    .Select(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName, x.DocumentId })
+                    .GroupBy(x => new { x.WorkflowId, x.WorkflowName, x.StepId, x.StepName })
+                    .Select(x => x.First())
+                    .Select(x => new DocumentAuditorWorkflowsDto
+                    {
+                        Id = x.WorkflowId,
+                        Name = x.WorkflowName,
+                        StepId = x.StepId,
+                        StepName = x.StepName,
+                        DocumentId = x.DocumentId
+                    })
+                    .ToList();
+                return new DocumentAuditorSummaryDto
+                {
+                    DocumentId = g.Key,
+                    DocumentName = first.DocumentName,
+                    Workflows = workflows,
+                    ActionsCount = g.Count(),
+                    IsFinalized = isFinalizedByDocument.TryGetValue(g.Key, out var finalized) && finalized
+                };
+            }).ToList();
+        }
+
+        private static List<WorkflowAuditorCardsDto> BuildWorkflowAuditorCards(IEnumerable<WorkflowAuditorDetailsRowDto> auditRows, int take)
+        {
+            var limit = take <= 0 ? int.MaxValue : take;
+            return auditRows
+                .Take(limit)
+                .Select(a => new WorkflowAuditorCardsDto
+                {
+                    CardId = a.CardId,
+                    CardName = a.CardName,
+                    CardStatus = a.CardStatus,
+                    StepId = a.StepId,
+                    StepName = a.StepName,
+                    UserId = a.UserId,
+                    UserName = a.UserName,
+                    ActionType = a.ActionType.ToString(),
+                    Created = a.Created
+                })
+                .ToList();
+        }
+
+        private static List<WorkflowAuditorStepCountsDto> BuildWorkflowStepsCount(IEnumerable<WorkflowAuditorDetailsRowDto> auditRows)
+        {
+            return auditRows
+                .GroupBy(a => new { a.StepId, a.StepName })
+                .Select(g => new WorkflowAuditorStepCountsDto
+                {
+                    StepId = g.Key.StepId,
+                    StepName = g.Key.StepName,
+                    DocumentCount = g.Select(a => a.DocumentId).Distinct().Count()
+                })
+                .OrderBy(s => s.StepId)
+                .ToList();
+        }
+
+        private static WorkflowAuditorDocumentStatusCountDto BuildWorkflowDocumentStatusCount(IEnumerable<WorkflowAuditorDetailsRowDto> auditRows)
+        {
+            var distinctDocumentIds = auditRows.Select(a => a.DocumentId).Distinct().ToList();
+            var latestStatusPerCard = auditRows
+                .GroupBy(a => new { a.DocumentId, a.CardId })
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.Created).First().CardStatus);
+
+            var statusesByDocument = auditRows
+                .Select(a => new { a.DocumentId, a.CardId })
+                .Distinct()
+                .GroupBy(x => x.DocumentId)
+                .ToDictionary(g => g.Key, g => g.Select(x => latestStatusPerCard[new { x.DocumentId, x.CardId }]).ToList());
+
+            var finalized = statusesByDocument.Count(kv => kv.Value.Count > 0 && kv.Value.All(s => s == StatusNames.Finalize));
+            var rejected = statusesByDocument.Count(kv => kv.Value.Any(s => s == StatusNames.Rejected));
+
+            return new WorkflowAuditorDocumentStatusCountDto
+            {
+                TotalDocuments = distinctDocumentIds.Count,
+                Finalized = finalized,
+                Rejected = rejected
             };
         }
     }
