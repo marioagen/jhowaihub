@@ -145,6 +145,29 @@ namespace WoopiAiHub.UnitTests.Fixture
             };
         }
 
+        public static StepToolUpdateDto FindValidStepToolUpdateDtoWithDependencies()
+        {
+            return new StepToolUpdateDto
+            {
+                Id = 0,
+                ToolId = 1,
+                Order = 1,
+                PositionX = 2,
+                PositionY = 2,
+                Parameters = new List<StepToolParameterUpdateDto>
+                {
+                    new StepToolParameterUpdateDto
+                    {
+                        Value = "value1"
+                    }
+                },
+                Dependencies = new List<StepToolOutputDependencyDto>
+                {
+                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
+                }
+            };
+        }
+
         public static StepUpdateDto FindValidStepUpdateDto()
         {
             var f = new Faker("pt_BR");

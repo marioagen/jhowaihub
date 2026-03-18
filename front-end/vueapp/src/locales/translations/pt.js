@@ -909,6 +909,8 @@ const portuguese = {
         notFound: "Não há ferramentas cadastradas",
         ocrDependencyRequired:
             "A ferramenta de Agente requer uma dependência de uma ferramenta de Agente Digitalizador",
+        ocrOrPromptDependencyRequired:
+            "A ferramenta de Agente requer uma dependência de Agente Digitalizador (OCR) ou de outro Agente (Prompt)",
         removeError: "Erro ao remover Ferramenta",
         removeSuccess: "Ferramenta removida com sucesso",
         removeTitle: "Você está prestes a deletar uma ferramenta do sistema",
