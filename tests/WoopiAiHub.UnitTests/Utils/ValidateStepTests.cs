@@ -26,8 +26,6 @@ namespace WoopiAiHub.UnitTests.Utils
             _fixture = fixture;
         }
 
-        #region ValidateCreateStep Tests
-
         [Fact(DisplayName = "ValidateCreateStep - Should throw AppException when steps collection is null")]
         [Trait("ValidateCreateStep", "Fail")]
         public void ValidateCreateStep_StepsNull_ThrowsAppException()
@@ -213,10 +211,6 @@ namespace WoopiAiHub.UnitTests.Utils
             _validateStep.ValidateCreateStep(stepsCreateDto);
         }
 
-        #endregion
-
-        #region ValidateUpdateStep Tests
-
         [Fact(DisplayName = "ValidateUpdateStep - Should throw AppException when steps collection is null")]
         [Trait("ValidateUpdateStep", "Fail")]
         public void ValidateUpdateStep_StepsNull_ThrowsAppException()
@@ -394,26 +388,18 @@ namespace WoopiAiHub.UnitTests.Utils
         {
             // Arrange
             var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Workflow 1");
-            var stepsUpdateDto = new List<StepUpdateDto>
+            var stepsUpdateDto = WorkflowFixture.FindValidStepUpdateDto();
+            var stepsUpdateDto2 = WorkflowFixture.FindValidStepUpdateDto();
+            stepsUpdateDto2.Order = stepsUpdateDto.Order + 1;
+            var stepsUpdateDtoList = new List<StepUpdateDto>
             {
-                WorkflowFixture.FindValidStepUpdateDto(),
-                new StepUpdateDto
-                {
-                    Id = 2,
-                    Name = "Step 2",
-                    Order = 2,
-                    ProfileId = 1,
-                    StatusId = 1
-                }
+                stepsUpdateDto,
+                stepsUpdateDto2
             };
 
             // Act & Assert (should not throw)
-            _validateStep.ValidateUpdateStep(workflow, stepsUpdateDto);
+            _validateStep.ValidateUpdateStep(workflow, stepsUpdateDtoList);
         }
-
-        #endregion
-
-        #region ValidateDeleteStep Tests
 
         [Fact(DisplayName = "ValidateDeleteStep - Should throw AppException when steps are in use")]
         [Trait("ValidateDeleteStep", "Fail")]
@@ -449,7 +435,5 @@ namespace WoopiAiHub.UnitTests.Utils
 
             cardRepository.Verify(r => r.CountByStepsInUse(It.IsAny<ICollection<int>>()), Times.Once);
         }
-
-        #endregion
     }
 }
