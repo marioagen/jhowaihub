@@ -86,7 +86,7 @@
                     </div>
                 </div>
                 <div
-                    v-if="showLoadMoreButton"
+                    v-if="hasMore"
                     class="audit-list-footer flex-shrink-0 pt-2"
                 >
                     <button
@@ -106,8 +106,6 @@
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import AuditorsService from "@/services/auditors/AuditorsService";
 
-    const PAGE_SIZE = 10;
-
     export default {
         name: "AuditorUserSummary",
         components: {
@@ -126,7 +124,9 @@
                 isLoading: false,
                 selectedUser: null,
                 auditUserList: [],
-                displayedLimit: 10,
+                take: 10,
+                skip: 0,
+                hasMore: false,
             };
         },
         methods: {
@@ -139,7 +139,7 @@
                 this.selectedUser = item;
                 this.$emit("select-user", item);
             },
-            async getAuditUsersSummary() {
+            async getAuditUsersSummary(append = false) {
                 this.isLoading = true;
                 try {
                     const search = (this.filters.search || "").trim() || undefined;
@@ -149,10 +149,12 @@
                     const teamId =
                         teamIdRaw !== undefined && !Number.isNaN(teamIdRaw) ? teamIdRaw : undefined;
                     const params = {
-                        take: this.displayedLimit,
+                        take: this.take,
+                        skip: this.skip,
                         ...(search && { userName: search }),
                         ...(teamId !== undefined && { teamId }),
                     };
+
                     const response = await AuditorsService.getUserAuditSummary(params);
                     if (response.error) {
                         return this.$notify({
@@ -163,31 +165,22 @@
                             icon: "CircleX",
                         });
                     }
-                    const list = Array.isArray(response)
-                        ? response
-                        : Array.isArray(response?.data)
-                          ? response.data
-                          : [];
-                    this.auditUserList = list;
+
+                    this.auditUserList = append
+                        ? [...this.auditUserList, ...response.items]
+                        : response.items;
+                    this.hasMore = response?.hasMore === true;
                 } finally {
                     this.isLoading = false;
                 }
             },
             loadMore() {
-                this.displayedLimit += PAGE_SIZE;
-                this.getAuditUsersSummary();
+                this.skip += this.take;
+                this.getAuditUsersSummary(true);
             },
             refreshWithCurrentFilters() {
-                this.displayedLimit = 10;
-                this.getAuditUsersSummary();
-            },
-        },
-        computed: {
-            showLoadMoreButton() {
-                return (
-                    this.auditUserList.length > 0 &&
-                    this.auditUserList.length >= this.displayedLimit
-                );
+                this.skip = 0;
+                this.getAuditUsersSummary(false);
             },
         },
         async created() {

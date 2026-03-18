@@ -4,7 +4,9 @@ using Moq.AutoMock;
 using WoopiAiHub.Application.Services.Audit;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Response.Auditor;
-using WoopiAiHub.Domain.DTOs.Response.Auditor.Rows;
+using WoopiAiHub.Domain.DTOs.Response.Auditor.Documents;
+using WoopiAiHub.Domain.DTOs.Response.Auditor.Users;
+using WoopiAiHub.Domain.DTOs.Response.Auditor.Workflows;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
@@ -34,12 +36,12 @@ namespace WoopiAiHub.UnitTests.Services.Audit
         public async Task FindDocumentsAuditSummaryAsync_NoDocumentIds_ReturnsEmptyList()
         {
             _auditorRepositoryMock
-                .Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>()))
+                .Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>()))
                 .ReturnsAsync(new List<int>());
 
-            var result = await _service.FindDocumentsAuditSummaryAsync(10, null);
+            var result = await _service.FindDocumentsAuditSummaryAsync(10, 0, null);
 
-            Assert.Empty(result);
+            Assert.Empty(result.Items);
             _auditorRepositoryMock.Verify(r => r.FindAuditRowsForDocumentsSummaryAsync(It.IsAny<IReadOnlyList<int>>(), It.IsAny<string?>(), It.IsAny<bool?>()), Times.Never);
         }
 
@@ -53,19 +55,19 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 new() { DocumentId = 1, DocumentName = "Doc1", WorkflowId = 10, WorkflowName = "WF1", StepId = 1, StepName = "Step1", CardId = 1, CardStatusName = StatusNames.Finalize },
                 new() { DocumentId = 1, DocumentName = "Doc1", WorkflowId = 10, WorkflowName = "WF1", StepId = 1, StepName = "Step1", CardId = 2, CardStatusName = StatusNames.Finalize }
             };
-            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>())).ReturnsAsync(documentIds);
+            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>())).ReturnsAsync(documentIds);
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForDocumentsSummaryAsync(It.IsAny<IReadOnlyList<int>>(), It.IsAny<string?>(), It.IsAny<bool?>())).ReturnsAsync(auditRows);
 
-            var result = await _service.FindDocumentsAuditSummaryAsync(10, null);
+            var result = await _service.FindDocumentsAuditSummaryAsync(10, 0, null);
 
-            Assert.Single(result);
-            Assert.Equal(1, result.First().DocumentId);
-            Assert.Equal("Doc1", result.First().DocumentName);
-            Assert.True(result.First().IsFinalized);
-            Assert.Equal(2, result.First().ActionsCount);
-            Assert.Single(result.First().Workflows);
-            Assert.Equal(10, result.First().Workflows.First().Id);
-            Assert.Equal("WF1", result.First().Workflows.First().Name);
+            Assert.Single(result.Items);
+            Assert.Equal(1, result.Items.First().DocumentId);
+            Assert.Equal("Doc1", result.Items.First().DocumentName);
+            Assert.True(result.Items.First().IsFinalized);
+            Assert.Equal(2, result.Items.First().ActionsCount);
+            Assert.Single(result.Items.First().Workflows);
+            Assert.Equal(10, result.Items.First().Workflows.First().Id);
+            Assert.Equal("WF1", result.Items.First().Workflows.First().Name);
         }
 
         [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should set IsFinalized false when not all finalized")]
@@ -78,34 +80,34 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 new() { DocumentId = 1, DocumentName = "Doc1", WorkflowId = 10, WorkflowName = "WF1", StepId = 1, StepName = "S1", CardId = 1, CardStatusName = StatusNames.Finalize },
                 new() { DocumentId = 1, DocumentName = "Doc1", WorkflowId = 10, WorkflowName = "WF1", StepId = 1, StepName = "S1", CardId = 2, CardStatusName = "InProgress" }
             };
-            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>())).ReturnsAsync(documentIds);
+            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>())).ReturnsAsync(documentIds);
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForDocumentsSummaryAsync(It.IsAny<IReadOnlyList<int>>(), It.IsAny<string?>(), It.IsAny<bool?>())).ReturnsAsync(auditRows);
 
-            var result = await _service.FindDocumentsAuditSummaryAsync(10, null);
+            var result = await _service.FindDocumentsAuditSummaryAsync(10, 0, null);
 
-            Assert.Single(result);
-            Assert.False(result.First().IsFinalized);
+            Assert.Single(result.Items);
+            Assert.False(result.Items.First().IsFinalized);
         }
 
-        [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should pass take, search and isFinalized to repository")]
+        [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should pass take, skip, search and isFinalized to repository")]
         [Trait("AuditorServices", "FindDocumentsAuditSummaryAsync")]
         public async Task FindDocumentsAuditSummaryAsync_PassesParametersToRepository()
         {
-            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(5, "test", true)).ReturnsAsync(new List<int>());
+            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(5, 0, "test", true)).ReturnsAsync(new List<int>());
 
-            await _service.FindDocumentsAuditSummaryAsync(5, "test", true);
+            await _service.FindDocumentsAuditSummaryAsync(5, 0, "test", true);
 
-            _auditorRepositoryMock.Verify(r => r.FindDocumentIdsForDocumentsSummaryAsync(5, "test", true), Times.Once);
+            _auditorRepositoryMock.Verify(r => r.FindDocumentIdsForDocumentsSummaryAsync(5, 0, "test", true), Times.Once);
         }
 
         [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should throw AppException when repository throws")]
         [Trait("AuditorServices", "FindDocumentsAuditSummaryAsync")]
         public async Task FindDocumentsAuditSummaryAsync_RepositoryThrows_WrapsInAppException()
         {
-            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>()))
+            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindDocumentsAuditSummaryAsync(10, null));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindDocumentsAuditSummaryAsync(10, 0, null));
 
             Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
             Assert.Equal("Db error", ex.Message);
@@ -174,11 +176,11 @@ namespace WoopiAiHub.UnitTests.Services.Audit
         [Trait("AuditorServices", "FindWorkflowAuditSummaryAsync")]
         public async Task FindWorkflowAuditSummaryAsync_NoWorkflowIds_ReturnsEmptyList()
         {
-            _auditorRepositoryMock.Setup(r => r.FindWorkflowIdsForWorkflowSummaryAsync(It.IsAny<int>(), It.IsAny<string?>())).ReturnsAsync(new List<int>());
+            _auditorRepositoryMock.Setup(r => r.FindWorkflowIdsForWorkflowSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>())).ReturnsAsync(new List<int>());
 
             var result = await _service.FindWorkflowAuditSummaryAsync(10);
 
-            Assert.Empty(result);
+            Assert.Empty(result.Items);
             _auditorRepositoryMock.Verify(r => r.FindAuditRowsForWorkflowSummaryAsync(It.IsAny<IReadOnlyList<int>>()), Times.Never);
         }
 
@@ -193,27 +195,27 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 new() { WorkflowId = 10, DocumentId = 2, WorkflowName = "WF1", TeamId = 5, TeamName = "Team1", ProfileId = 2, ProfileName = "Profile1" },
                 new() { WorkflowId = 10, DocumentId = 1, WorkflowName = "WF1", TeamId = 5, TeamName = "Team1", ProfileId = 2, ProfileName = "Profile1" }
             };
-            _auditorRepositoryMock.Setup(r => r.FindWorkflowIdsForWorkflowSummaryAsync(10, null)).ReturnsAsync(workflowIds);
+            _auditorRepositoryMock.Setup(r => r.FindWorkflowIdsForWorkflowSummaryAsync(10, 0, null)).ReturnsAsync(workflowIds);
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForWorkflowSummaryAsync(It.IsAny<IReadOnlyList<int>>())).ReturnsAsync(auditRows);
 
             var result = await _service.FindWorkflowAuditSummaryAsync(10);
 
-            Assert.Single(result);
-            Assert.Equal(10, result.First().WorkflowId);
-            Assert.Equal("WF1", result.First().WorkflowName);
-            Assert.Equal(2, result.First().DocumentCount);
-            Assert.Equal(3, result.First().LogsCount);
-            Assert.Equal(5, result.First().TeamId);
-            Assert.Equal("Team1", result.First().TeamName);
-            Assert.Equal(2, result.First().ProfileId);
-            Assert.Equal("Profile1", result.First().ProfileName);
+            Assert.Single(result.Items);
+            Assert.Equal(10, result.Items.First().WorkflowId);
+            Assert.Equal("WF1", result.Items.First().WorkflowName);
+            Assert.Equal(2, result.Items.First().DocumentCount);
+            Assert.Equal(3, result.Items.First().LogsCount);
+            Assert.Equal(5, result.Items.First().TeamId);
+            Assert.Equal("Team1", result.Items.First().TeamName);
+            Assert.Equal(2, result.Items.First().ProfileId);
+            Assert.Equal("Profile1", result.Items.First().ProfileName);
         }
 
         [Fact(DisplayName = "FindWorkflowAuditSummaryAsync should throw AppException when repository throws")]
         [Trait("AuditorServices", "FindWorkflowAuditSummaryAsync")]
         public async Task FindWorkflowAuditSummaryAsync_RepositoryThrows_WrapsInAppException()
         {
-            _auditorRepositoryMock.Setup(r => r.FindWorkflowIdsForWorkflowSummaryAsync(It.IsAny<int>(), It.IsAny<string?>()))
+            _auditorRepositoryMock.Setup(r => r.FindWorkflowIdsForWorkflowSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
             var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindWorkflowAuditSummaryAsync(10));
@@ -234,7 +236,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 .Setup(r => r.FindAuditRowsForWorkflowDetailsAsync(It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<bool>()))
                 .ReturnsAsync(new List<WorkflowAuditorDetailsRowDto>());
 
-            var result = await _service.FindWorkflowAuditDetailsAsync(10);
+            var result = await _service.FindWorkflowAuditDetailsAsync(10, 10);
 
             Assert.Null(result);
         }
@@ -250,7 +252,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             };
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForWorkflowDetailsAsync(10, null, null, null, true)).ReturnsAsync(rows);
 
-            var result = await _service.FindWorkflowAuditDetailsAsync(10);
+            var result = await _service.FindWorkflowAuditDetailsAsync(10, 10);
 
             Assert.NotNull(result);
             Assert.Equal(10, result.WorkflowId);
@@ -269,7 +271,7 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForWorkflowDetailsAsync(It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<int?>(), It.IsAny<bool>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindWorkflowAuditDetailsAsync(10));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindWorkflowAuditDetailsAsync(10, 10));
 
             Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
             Assert.Equal("Db error", ex.Message);
@@ -283,11 +285,11 @@ namespace WoopiAiHub.UnitTests.Services.Audit
         [Trait("AuditorServices", "FindUserAuditSummaryAsync")]
         public async Task FindUserAuditSummaryAsync_NoUserIds_ReturnsEmptyList()
         {
-            _auditorRepositoryMock.Setup(r => r.FindUserIdsForUserSummaryAsync(It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<int?>())).ReturnsAsync(new List<Guid>());
+            _auditorRepositoryMock.Setup(r => r.FindUserIdsForUserSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<int?>())).ReturnsAsync(new List<Guid>());
 
             var result = await _service.FindUserAuditSummaryAsync(10);
 
-            Assert.Empty(result);
+            Assert.Empty(result.Items);
             _auditorRepositoryMock.Verify(r => r.FindAuditRowsForUserSummaryAsync(It.IsAny<IReadOnlyList<Guid>>()), Times.Never);
         }
 
@@ -303,28 +305,28 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 new() { UserId = userId, UserName = "User1", WorkflowId = 10, Teams = teams, ProfileId = 2, ProfileName = "Profile1" },
                 new() { UserId = userId, UserName = "User1", WorkflowId = 20, Teams = teams, ProfileId = 2, ProfileName = "Profile1" }
             };
-            _auditorRepositoryMock.Setup(r => r.FindUserIdsForUserSummaryAsync(10, null, null)).ReturnsAsync(userIds);
+            _auditorRepositoryMock.Setup(r => r.FindUserIdsForUserSummaryAsync(10, 0, null, null)).ReturnsAsync(userIds);
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForUserSummaryAsync(It.IsAny<IReadOnlyList<Guid>>())).ReturnsAsync(auditRows);
 
             var result = await _service.FindUserAuditSummaryAsync(10);
 
-            Assert.Single(result);
-            Assert.Equal(userId, result.First().UserId);
-            Assert.Equal("User1", result.First().UserName);
-            Assert.Single(result.First().Teams);
-            Assert.Equal(5, result.First().Teams!.First().TeamId);
-            Assert.Equal("Team1", result.First().Teams!.First().TeamName);
-            Assert.Single(result.First().Profiles);
-            Assert.Equal(2, result.First().Profiles!.First().ProfileId);
-            Assert.Equal(2, result.First().WorkflowCount);
-            Assert.Equal(2, result.First().LogCount);
+            Assert.Single(result.Items);
+            Assert.Equal(userId, result.Items.First().UserId);
+            Assert.Equal("User1", result.Items.First().UserName);
+            Assert.Single(result.Items.First().Teams);
+            Assert.Equal(5, result.Items.First().Teams!.First().TeamId);
+            Assert.Equal("Team1", result.Items.First().Teams!.First().TeamName);
+            Assert.Single(result.Items.First().Profiles);
+            Assert.Equal(2, result.Items.First().Profiles!.First().ProfileId);
+            Assert.Equal(2, result.Items.First().WorkflowCount);
+            Assert.Equal(2, result.Items.First().LogCount);
         }
 
         [Fact(DisplayName = "FindUserAuditSummaryAsync should throw AppException when repository throws")]
         [Trait("AuditorServices", "FindUserAuditSummaryAsync")]
         public async Task FindUserAuditSummaryAsync_RepositoryThrows_WrapsInAppException()
         {
-            _auditorRepositoryMock.Setup(r => r.FindUserIdsForUserSummaryAsync(It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<int?>()))
+            _auditorRepositoryMock.Setup(r => r.FindUserIdsForUserSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<int?>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
             var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindUserAuditSummaryAsync(10));
@@ -343,10 +345,10 @@ namespace WoopiAiHub.UnitTests.Services.Audit
         {
             var userId = Guid.NewGuid();
             _auditorRepositoryMock
-                .Setup(r => r.FindAuditRowsForUserDetailsAsync(It.IsAny<Guid>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<bool>()))
+                .Setup(r => r.FindAuditRowsForUserDetailsAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<bool>()))
                 .ReturnsAsync(new List<UserAuditorDetailsRowDto>());
 
-            var result = await _service.FindUserAuditDetailsAsync(userId);
+            var result = await _service.FindUserAuditDetailsAsync(userId, 10);
 
             Assert.Null(result);
         }
@@ -362,9 +364,9 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 new() { UserId = userId, UserName = "User1", WorkflowId = 10, WorkflowName = "WF1", Teams = teams, ProfileId = 2, ProfileName = "P1", ActionType = AuditCardActionType.Assign, CardId = 1, CardName = "C1", Created = DateTime.UtcNow },
                 new() { UserId = userId, UserName = "User1", WorkflowId = 10, WorkflowName = "WF1", Teams = teams, ProfileId = 2, ProfileName = "P1", ActionType = AuditCardActionType.Advancement, CardId = 1, CardName = "C1", Created = DateTime.UtcNow.AddHours(-1) }
             };
-            _auditorRepositoryMock.Setup(r => r.FindAuditRowsForUserDetailsAsync(userId, null, null, true)).ReturnsAsync(rows);
+            _auditorRepositoryMock.Setup(r => r.FindAuditRowsForUserDetailsAsync(userId, 10, null, null, true)).ReturnsAsync(rows);
 
-            var result = await _service.FindUserAuditDetailsAsync(userId);
+            var result = await _service.FindUserAuditDetailsAsync(userId, 10);
 
             Assert.NotNull(result);
             Assert.Equal(userId, result.UserId);
@@ -382,10 +384,10 @@ namespace WoopiAiHub.UnitTests.Services.Audit
         public async Task FindUserAuditDetailsAsync_RepositoryThrows_WrapsInAppException()
         {
             var userId = Guid.NewGuid();
-            _auditorRepositoryMock.Setup(r => r.FindAuditRowsForUserDetailsAsync(It.IsAny<Guid>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<bool>()))
+            _auditorRepositoryMock.Setup(r => r.FindAuditRowsForUserDetailsAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<int?>(), It.IsAny<bool>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindUserAuditDetailsAsync(userId));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _service.FindUserAuditDetailsAsync(userId, 10));
 
             Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
             Assert.Equal("Db error", ex.Message);

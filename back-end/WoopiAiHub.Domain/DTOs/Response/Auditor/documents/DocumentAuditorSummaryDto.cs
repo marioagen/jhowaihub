@@ -1,4 +1,4 @@
-namespace WoopiAiHub.Domain.DTOs.Response.Auditor
+namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Documents
 {
     /// <summary>
     /// Audit view item: document id, document name, workflows (with step), actions count, and isFinalized (document finalized).

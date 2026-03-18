@@ -1,4 +1,4 @@
-namespace WoopiAiHub.Domain.DTOs.Response.Auditor
+namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Documents
 {
     /// <summary>
     /// One audit history entry for document detail: UserId, UserName, ActionName, StepId, StepName, Created.

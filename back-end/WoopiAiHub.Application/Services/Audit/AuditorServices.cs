@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Response.Auditor;
+using WoopiAiHub.Domain.DTOs.Response.Auditor.Documents;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
@@ -39,17 +40,20 @@ namespace WoopiAiHub.Application.Services.Audit
         }
 
         /// <summary>
-        /// Returns up to <paramref name="take"/> documents with document audit summary: DocumentId, DocumentName, Workflows (id, name, step), ActionsCount, IsFinalized. Optional search (document name, workflow name, or numeric id) and isFinalized filter. Ordered by most recent audit activity.
+        /// Returns up to <paramref name="take"/> documents with document audit summary: DocumentId, DocumentName, Workflows (id, name, step), ActionsCount, IsFinalized. LoadMore logic: starting at <paramref name="skip"/>; optional search and isFinalized filter. HasMore is true when more documents exist.
         /// </summary>
-        public async Task<ICollection<DocumentAuditorSummaryDto>> FindDocumentsAuditSummaryAsync(int take, string? search, bool? isFinalized = null)
+        public async Task<AuditorLoadMoreResultDto<DocumentAuditorSummaryDto>> FindDocumentsAuditSummaryAsync(int take, int skip, string? search, bool? isFinalized = null)
         {
             try
             {
-                var documentIds = await _auditorRepository.FindDocumentIdsForDocumentsSummaryAsync(take, search, isFinalized);
+                var documentIds = await _auditorRepository.FindDocumentIdsForDocumentsSummaryAsync(take + 1, skip, search, isFinalized);
                 if (documentIds.Count == 0)
-                    return new List<DocumentAuditorSummaryDto>();
+                    return new AuditorLoadMoreResultDto<DocumentAuditorSummaryDto> { Items = new List<DocumentAuditorSummaryDto>(), HasMore = false };
 
-                var auditRows = await _auditorRepository.FindAuditRowsForDocumentsSummaryAsync(documentIds, search, isFinalized);
+                var hasMore = documentIds.Count > take;
+                var idsToUse = hasMore ? documentIds.Take(take).ToList() : documentIds;
+
+                var auditRows = await _auditorRepository.FindAuditRowsForDocumentsSummaryAsync(idsToUse, search, isFinalized);
 
                 var isFinalizedByDocument = auditRows
                     .GroupBy(a => a.DocumentId)
@@ -64,7 +68,7 @@ namespace WoopiAiHub.Application.Services.Audit
                     .OrderBy(g => g.Key)
                     .ToList();
 
-                return groupedByDocument.Select(g =>
+                var list = groupedByDocument.Select(g =>
                 {
                     var first = g.First();
                     var workflows = g
@@ -90,6 +94,8 @@ namespace WoopiAiHub.Application.Services.Audit
                         IsFinalized = isFinalizedByDocument.TryGetValue(g.Key, out var finalized) && finalized
                     };
                 }).ToList();
+
+                return new AuditorLoadMoreResultDto<DocumentAuditorSummaryDto> { Items = list, HasMore = hasMore };
             }
             catch (Exception ex)
             {
@@ -137,24 +143,27 @@ namespace WoopiAiHub.Application.Services.Audit
         }
 
         /// <summary>
-        /// Returns workflow audit summaries (one per workflow): WorkflowId, WorkflowName, DocumentCount, LogsCount, TeamId, TeamName, ProfileId, ProfileName. Up to <paramref name="take"/> workflows by most recent activity; optional search by workflow or team name.
+        /// Returns workflow audit summaries (one per workflow): WorkflowId, WorkflowName, DocumentCount, LogsCount, TeamId, TeamName, ProfileId, ProfileName. LoadMore logic: up to <paramref name="take"/> workflows starting at <paramref name="skip"/>; optional search by workflow or team name. HasMore is true when more workflows exist.
         /// </summary>
-        public async Task<ICollection<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync(int take = 10, string? search = null)
+        public async Task<AuditorLoadMoreResultDto<WorkflowAuditorSummaryDto>> FindWorkflowAuditSummaryAsync(int take = 10, int skip = 0, string? search = null)
         {
             try
             {
-                var workflowList = await _auditorRepository.FindWorkflowIdsForWorkflowSummaryAsync(take, search);
-                if (workflowList.Count == 0)
-                    return new List<WorkflowAuditorSummaryDto>();
+                var workflowIds = await _auditorRepository.FindWorkflowIdsForWorkflowSummaryAsync(take + 1, skip, search);
+                if (workflowIds.Count == 0)
+                    return new AuditorLoadMoreResultDto<WorkflowAuditorSummaryDto> { Items = new List<WorkflowAuditorSummaryDto>(), HasMore = false };
 
-                var auditRows = await _auditorRepository.FindAuditRowsForWorkflowSummaryAsync(workflowList);
+                var hasMore = workflowIds.Count > take;
+                var idsToUse = hasMore ? workflowIds.Take(take).ToList() : workflowIds;
+
+                var auditRows = await _auditorRepository.FindAuditRowsForWorkflowSummaryAsync(idsToUse);
 
                 var groupedByWorkflow = auditRows
                     .GroupBy(a => a.WorkflowId)
                     .OrderBy(g => g.Key)
                     .ToList();
 
-                return groupedByWorkflow.Select(g =>
+                var list = groupedByWorkflow.Select(g =>
                 {
                     var first = g.First();
                     return new WorkflowAuditorSummaryDto
@@ -169,6 +178,8 @@ namespace WoopiAiHub.Application.Services.Audit
                         ProfileName = first.ProfileName
                     };
                 }).ToList();
+
+                return new AuditorLoadMoreResultDto<WorkflowAuditorSummaryDto> { Items = list, HasMore = hasMore };
             }
             catch (Exception ex)
             {
@@ -178,9 +189,9 @@ namespace WoopiAiHub.Application.Services.Audit
         }
 
         /// <summary>
-        /// Returns full workflow audit details: WorkflowId, WorkflowName, LogCount, StepsCount (step id/name and document count per step), DocumentStatusCount (total/finalized/rejected), and Cards (card audit history). Optional filters: search (user/card/step/action), stepId, actionType. Returns null when the workflow has no audit entries.
+        /// Returns full workflow audit details: WorkflowId, WorkflowName, LogCount, StepsCount (step id/name and document count per step), DocumentStatusCount (total/finalized/rejected), and Cards (card audit history, limited by take). Optional filters: search (user/card/step/action), stepId, actionType. Returns null when the workflow has no audit entries.
         /// </summary>
-        public async Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId, string? search = null, int? stepId = null, int? actionType = null, bool orderDescending = true)
+        public async Task<WorkflowAuditorDetailsDto?> FindWorkflowAuditDetailsAsync(int workflowId, int take, string? search = null, int? stepId = null, int? actionType = null, bool orderDescending = true)
         {
             try
             {
@@ -192,6 +203,7 @@ namespace WoopiAiHub.Application.Services.Audit
                 var distinctDocumentIds = auditRows.Select(a => a.DocumentId).Distinct().ToList();
 
                 var cards = auditRows
+                    .Take(take <= 0 ? int.MaxValue : take)
                     .Select(a => new WorkflowAuditorCardsDto
                     {
                         CardId = a.CardId,
@@ -254,24 +266,27 @@ namespace WoopiAiHub.Application.Services.Audit
         }
 
         /// <summary>
-        /// Returns user audit summaries (one per user): UserId, UserName, Teams, Profiles, WorkflowCount, LogCount. Up to <paramref name="take"/> users; optional filters by userName and teamId.
+        /// Returns user audit summaries (one per user): UserId, UserName, Teams, Profiles, WorkflowCount, LogCount. Up to <paramref name="take"/> users starting at <paramref name="skip"/>; optional filters by userName and teamId. HasMore is true when more users exist.
         /// </summary>
-        public async Task<ICollection<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int take = 10, string? userName = null, int? teamId = null)
+        public async Task<AuditorLoadMoreResultDto<UserAuditorSummaryDto>> FindUserAuditSummaryAsync(int take = 10, int skip = 0, string? userName = null, int? teamId = null)
         {
             try
             {
-                var userIds = await _auditorRepository.FindUserIdsForUserSummaryAsync(take, userName, teamId);
+                var userIds = await _auditorRepository.FindUserIdsForUserSummaryAsync(take + 1, skip, userName, teamId);
                 if (userIds.Count == 0)
-                    return new List<UserAuditorSummaryDto>();
+                    return new AuditorLoadMoreResultDto<UserAuditorSummaryDto> { Items = new List<UserAuditorSummaryDto>(), HasMore = false };
 
-                var auditRows = await _auditorRepository.FindAuditRowsForUserSummaryAsync(userIds);
+                var hasMore = userIds.Count > take;
+                var idsToUse = hasMore ? userIds.Take(take).ToList() : userIds;
+
+                var auditRows = await _auditorRepository.FindAuditRowsForUserSummaryAsync(idsToUse);
 
                 var groupedByUser = auditRows
                     .GroupBy(a => a.UserId)
                     .OrderBy(g => g.Key)
                     .ToList();
 
-                return groupedByUser.Select(g =>
+                var list = groupedByUser.Select(g =>
                 {
                     var first = g.First();
                     var allTeams = g.SelectMany(a => a.Teams ?? Enumerable.Empty<UsersAuditorTeamsDto>());
@@ -295,6 +310,8 @@ namespace WoopiAiHub.Application.Services.Audit
                         LogCount = g.Count()
                     };
                 }).ToList();
+
+                return new AuditorLoadMoreResultDto<UserAuditorSummaryDto> { Items = list, HasMore = hasMore };
             }
             catch (Exception ex)
             {
@@ -304,13 +321,13 @@ namespace WoopiAiHub.Application.Services.Audit
         }
 
         /// <summary>
-        /// Returns full user audit details: UserId, UserName, Teams, Profiles, LogCountTotal, LogCountByActionType, Actions (card, action type, workflow, created). Optional filters: search (card/workflow/action name), actionTypeCode. Returns null when the user has no audit entries.
+        /// Returns full user audit details: UserId, UserName, Teams, Profiles, LogCountTotal, LogCountByActionType, Actions (card, action type, workflow, created, limited by take). Optional filters: search (card/workflow/action name), actionTypeCode. Returns null when the user has no audit entries.
         /// </summary>
-        public async Task<UserAuditorDetailsDto?> FindUserAuditDetailsAsync(Guid userId, string? search = null, int? actionTypeCode = null, bool orderDescending = true)
+        public async Task<UserAuditorDetailsDto?> FindUserAuditDetailsAsync(Guid userId, int take, string? search = null, int? actionTypeCode = null, bool orderDescending = true)
         {
             try
             {
-                var auditRows = await _auditorRepository.FindAuditRowsForUserDetailsAsync(userId, search, actionTypeCode, orderDescending);
+                var auditRows = await _auditorRepository.FindAuditRowsForUserDetailsAsync(userId, take, search, actionTypeCode, orderDescending);
                 if (auditRows.Count == 0)
                     return null;
 

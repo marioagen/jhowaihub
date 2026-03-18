@@ -9,7 +9,7 @@
         <template v-else>
             <div class="audit-list-wrapper d-flex flex-column flex-grow-1 min-h-0">
                 <div
-                    v-if="workflowItems.length === 0"
+                    v-if="auditWorkflowList.length === 0"
                     class="audit-list-empty text-muted small text-center py-5"
                 >
                     {{ $t("auditor.workflows.summary.empty") }}
@@ -19,7 +19,7 @@
                     class="audit-list overflow-auto flex-grow-1 min-h-0"
                 >
                     <div
-                        v-for="item in displayedWorkflowItems"
+                        v-for="item in auditWorkflowList"
                         :key="item.workflowId"
                         class="audit-list-item rounded-2 p-2 mb-2 cursor-pointer"
                         :class="{
@@ -78,7 +78,7 @@
                     </div>
                 </div>
                 <div
-                    v-if="showLoadMoreButton"
+                    v-if="hasMore"
                     class="audit-list-footer flex-shrink-0 pt-2"
                 >
                     <button
@@ -115,41 +115,24 @@
             return {
                 isLoading: false,
                 selectedWorkflow: null,
-                workflowItems: [],
-                displayedLimit: 10,
+                auditWorkflowList: [],
+                skip: 0,
+                hasMore: false,
+                take: 10,
             };
-        },
-        computed: {
-            filteredWorkflowItems() {
-                const q = (this.filters.search || "").toLowerCase().trim();
-                if (!q) return this.workflowItems;
-                return this.workflowItems.filter(
-                    (item) =>
-                        (item.workflowName && item.workflowName.toLowerCase().includes(q)) ||
-                        (item.teamName && item.teamName.toLowerCase().includes(q))
-                );
-            },
-            displayedWorkflowItems() {
-                return this.filteredWorkflowItems;
-            },
-            showLoadMoreButton() {
-                return (
-                    this.workflowItems.length > 0 &&
-                    this.workflowItems.length >= this.displayedLimit
-                );
-            },
         },
         methods: {
             selectWorkflow(item) {
                 this.selectedWorkflow = item;
                 this.$emit("select-workflow", item);
             },
-            async getWorkflowAuditSummary() {
+            async getWorkflowAuditSummary(append = false) {
                 this.isLoading = true;
                 try {
                     const search = (this.filters.search || "").trim() || undefined;
                     const response = await AuditorsService.getWorkflowAuditSummary({
-                        take: this.displayedLimit,
+                        take: this.take,
+                        skip: this.skip,
                         ...(search && { search }),
                     });
                     if (response.error) {
@@ -161,22 +144,22 @@
                             icon: "CircleX",
                         });
                     }
-                    this.workflowItems = Array.isArray(response)
-                        ? response
-                        : Array.isArray(response?.data)
-                          ? response.data
-                          : [];
+
+                    this.auditWorkflowList = append
+                        ? [...this.auditWorkflowList, ...response.items]
+                        : response.items;
+                    this.hasMore = response?.hasMore === true;
                 } finally {
                     this.isLoading = false;
                 }
             },
             loadMore() {
-                this.displayedLimit += 10;
-                this.getWorkflowAuditSummary();
+                this.skip += this.take;
+                this.getWorkflowAuditSummary(true);
             },
             refreshWithCurrentFilters() {
-                this.displayedLimit = 10;
-                this.getWorkflowAuditSummary();
+                this.skip = 0;
+                this.getWorkflowAuditSummary(false);
             },
         },
         async created() {

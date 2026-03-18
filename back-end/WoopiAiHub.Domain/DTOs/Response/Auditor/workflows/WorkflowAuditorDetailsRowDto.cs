@@ -1,6 +1,6 @@
 using WoopiAiHub.Domain.Enum.Audit;
 
-namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Rows
+namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Workflows
 {
     /// <summary>
     /// Raw audit row for workflow details. Used by repository and service to build WorkflowAuditorDetailsDto.

@@ -1,4 +1,4 @@
-namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Rows
+namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Workflows
 {
     /// <summary>
     /// Raw audit row for workflow summary. Used by repository and service to build WorkflowAuditorSummaryDto.

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Response.Auditor;
+using WoopiAiHub.Domain.DTOs.Response.Auditor.Documents;
 using WoopiAiHub.Domain.Interfaces.Services.Audit;
 
 namespace WoopiAiHub.Api.Controllers
@@ -33,20 +34,22 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns the first N documents for the auditor (load-more pattern). One row per document with DocumentId, DocumentName, Workflows (with DocumentId), ActionsCount, IsFinalized (from DB).
+        /// Returns documents for the auditor: one row per document with DocumentId, DocumentName, Workflows (with DocumentId), ActionsCount, IsFinalized. LoadMore logic: take (page size) and skip (offset); backend returns items and hasMore.
         /// </summary>
-        /// <param name="take">Maximum number of documents to return (default 10).</param>
+        /// <param name="take">Number of documents to return (default 10).</param>
+        /// <param name="skip">Number of documents to skip (default 0).</param>
         /// <param name="search">Optional. Matches DocumentId when numeric, or DocumentName/WorkflowName by contains.</param>
         /// <param name="isFinalized">Optional. When true, only finalized documents; when false, only non-finalized; when null, all.</param>
         [HttpGet("Documents")]
         [SwaggerOperation("Returns documents for the auditor with optional search and status filter")]
-        [ProducesResponseType(typeof(ICollection<DocumentAuditorSummaryDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AuditorLoadMoreResultDto<DocumentAuditorSummaryDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindDocumentsAuditSummary(
             [FromQuery] int take = 10,
+            [FromQuery] int skip = 0,
             [FromQuery] string? search = null,
             [FromQuery] bool? isFinalized = null)
         {
-            var result = await _auditorServices.FindDocumentsAuditSummaryAsync(take, search, isFinalized);
+            var result = await _auditorServices.FindDocumentsAuditSummaryAsync(take, skip, search, isFinalized);
             return Ok(result);
         }
 
@@ -82,16 +85,17 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Returns workflow-based audit entries (one row per workflow) with DocumentCount, LogsCount, Team, Profile. Load-more pattern: take 10, 20, 30, …
+        /// Returns workflow-based audit entries (one row per workflow) with DocumentCount, LogsCount, Team, Profile. LoadMore logic: take (page size) and skip (offset); backend returns items and hasMore.
         /// </summary>
-        /// <param name="take">Maximum number of workflows to return (default 10).</param>
+        /// <param name="take">Number of workflows to return (default 10).</param>
+        /// <param name="skip">Number of workflows to skip (default 0).</param>
         /// <param name="search">Optional. Matches WorkflowName or TeamName by contains.</param>
         [HttpGet("Workflows")]
         [SwaggerOperation("Returns workflow audit list for the auditor with optional search")]
-        [ProducesResponseType(typeof(ICollection<WorkflowAuditorSummaryDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindWorkflowAuditSummary([FromQuery] int take = 10, [FromQuery] string? search = null)
+        [ProducesResponseType(typeof(AuditorLoadMoreResultDto<WorkflowAuditorSummaryDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindWorkflowAuditSummary([FromQuery] int take = 10, [FromQuery] int skip = 0, [FromQuery] string? search = null)
         {
-            var result = await _auditorServices.FindWorkflowAuditSummaryAsync(take, search);
+            var result = await _auditorServices.FindWorkflowAuditSummaryAsync(take, skip, search);
             return Ok(result);
         }
 
@@ -103,6 +107,7 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="stepId">Optional. Filter by step id.</param>
         /// <param name="actionType">Optional. Filter by action type (AuditCardActionType enum value as int).</param>
         /// <param name="orderDescending">Order cards by Created descending when true (default), ascending when false.</param>
+        /// <param name="take">Maximum number of timeline cards to return (default 10). Load more: 10, 20, 30, …</param>
         [HttpGet("Workflow/{id:int}")]
         [SwaggerOperation("Returns audit data for a workflow by id with optional filters")]
         [ProducesResponseType(typeof(WorkflowAuditorDetailsDto), StatusCodes.Status200OK)]
@@ -112,26 +117,28 @@ namespace WoopiAiHub.Api.Controllers
             [FromQuery] string? search = null,
             [FromQuery] int? stepId = null,
             [FromQuery] int? actionType = null,
-            [FromQuery] bool orderDescending = true)
+            [FromQuery] bool orderDescending = true,
+            [FromQuery] int take = 10)
         {
-            var result = await _auditorServices.FindWorkflowAuditDetailsAsync(id, search, stepId, actionType, orderDescending);
+            var result = await _auditorServices.FindWorkflowAuditDetailsAsync(id, take, search, stepId, actionType, orderDescending);
             if (result is null)
                 return NotFound();
             return Ok(result);
         }
 
         /// <summary>
-        /// Returns user-based audit entries (one row per user) with UserId, UserName, Teams, Profiles, WorkflowCount, LogCount. Load-more pattern: take 10, 20, 30, …
+        /// Returns user-based audit entries (one row per user) with UserId, UserName, Teams, Profiles, WorkflowCount, LogCount. Pagination: take (page size) and skip (offset); backend returns items and hasMore.
         /// </summary>
-        /// <param name="take">Maximum number of users to return (default 10).</param>
+        /// <param name="take">Number of users to return (default 10).</param>
+        /// <param name="skip">Number of users to skip (default 0).</param>
         /// <param name="userName">Optional. Filter by user name (contains, case-sensitive).</param>
         /// <param name="teamId">Optional. Filter to users that have at least one audit entry in a workflow with this team.</param>
         [HttpGet("Users")]
         [SwaggerOperation("Returns user audit list for the auditor with load-more and filters")]
-        [ProducesResponseType(typeof(ICollection<UserAuditorSummaryDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindUserAuditSummary([FromQuery] int take = 10, [FromQuery] string? userName = null, [FromQuery] int? teamId = null)
+        [ProducesResponseType(typeof(AuditorLoadMoreResultDto<UserAuditorSummaryDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindUserAuditSummary([FromQuery] int take = 10, [FromQuery] int skip = 0, [FromQuery] string? userName = null, [FromQuery] int? teamId = null)
         {
-            var result = await _auditorServices.FindUserAuditSummaryAsync(take, userName, teamId);
+            var result = await _auditorServices.FindUserAuditSummaryAsync(take, skip, userName, teamId);
             return Ok(result);
         }
 
@@ -142,13 +149,14 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="search">Optional. Matches CardName, WorkflowName, or ActionType by contains.</param>
         /// <param name="actionTypeCode">Optional. Filter by action type (AuditCardActionType enum value as int).</param>
         /// <param name="orderDescending">Order by Created: true = newest first (default), false = oldest first.</param>
+        /// <param name="take">Maximum number of activity entries to return (default 10). Load more: 10, 20, 30, …</param>
         [HttpGet("User/{userId:guid}")]
         [SwaggerOperation("Returns user audit details by user id with optional filters and sort")]
         [ProducesResponseType(typeof(UserAuditorDetailsDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> FindUserAuditDetails(Guid userId, [FromQuery] string? search = null, [FromQuery] int? actionTypeCode = null, [FromQuery] bool orderDescending = true)
+        public async Task<IActionResult> FindUserAuditDetails(Guid userId, [FromQuery] string? search = null, [FromQuery] int? actionTypeCode = null, [FromQuery] bool orderDescending = true, [FromQuery] int take = 10)
         {
-            var result = await _auditorServices.FindUserAuditDetailsAsync(userId, search, actionTypeCode, orderDescending);
+            var result = await _auditorServices.FindUserAuditDetailsAsync(userId, take, search, actionTypeCode, orderDescending);
             if (result is null)
                 return NotFound();
             return Ok(result);

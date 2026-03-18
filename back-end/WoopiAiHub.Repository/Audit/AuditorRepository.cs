@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Response.Auditor;
-using WoopiAiHub.Domain.DTOs.Response.Auditor.Rows;
+using WoopiAiHub.Domain.DTOs.Response.Auditor.Documents;
+using WoopiAiHub.Domain.DTOs.Response.Auditor.Users;
+using WoopiAiHub.Domain.DTOs.Response.Auditor.Workflows;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Models.Audit;
@@ -30,11 +32,12 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns up to <paramref name="take"/> distinct document IDs ordered by most recent audit activity. Optional search (document name, workflow name, or numeric document id) and isFinalized filter.
+        /// Returns up to <paramref name="take"/> distinct document IDs ordered by most recent audit activity, skipping <paramref name="skip"/>. Optional search (document name, workflow name, or numeric document id) and isFinalized filter.
         /// </summary>
-        public async Task<List<int>> FindDocumentIdsForDocumentsSummaryAsync(int take, string? search, bool? isFinalized = null)
+        public async Task<List<int>> FindDocumentIdsForDocumentsSummaryAsync(int take, int skip, string? search, bool? isFinalized = null)
         {
             if (take <= 0) take = DefaultTake;
+            if (skip < 0) skip = 0;
 
             int? searchAsId = null;
             if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
@@ -42,12 +45,14 @@ namespace WoopiAiHub.Repository.Audit
 
             var auditQuery = ApplyDocumentsSummaryFilters(_context.AuditCards.AsNoTracking(), search, searchAsId, isFinalized);
 
-            var documentIdList = await auditQuery
-                .OrderByDescending(a => a.Created)
-                .Select(a => a.DocumentId)
+            return await auditQuery
+                .GroupBy(a => a.DocumentId)
+                .Select(g => new { DocumentId = g.Key, MaxCreated = g.Max(a => a.Created) })
+                .OrderByDescending(x => x.MaxCreated)
+                .Skip(skip)
                 .Take(take)
+                .Select(x => x.DocumentId)
                 .ToListAsync();
-            return documentIdList.Distinct().ToList();
         }
 
         /// <summary>
@@ -160,11 +165,12 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns up to <paramref name="take"/> workflow IDs ordered by most recent audit activity. Optional search by workflow name or team name.
+        /// Returns up to <paramref name="take"/> workflow IDs ordered by most recent audit activity, skipping <paramref name="skip"/>. Optional search by workflow name or team name.
         /// </summary>
-        public async Task<List<int>> FindWorkflowIdsForWorkflowSummaryAsync(int take, string? search)
+        public async Task<List<int>> FindWorkflowIdsForWorkflowSummaryAsync(int take, int skip, string? search)
         {
             if (take <= 0) take = DefaultTake;
+            if (skip < 0) skip = 0;
 
             var query = _context.AuditCards.AsNoTracking();
 
@@ -180,6 +186,7 @@ namespace WoopiAiHub.Repository.Audit
                 .GroupBy(a => a.WorkflowId)
                 .Select(g => new { WorkflowId = g.Key, MaxCreated = g.Max(a => a.Created) })
                 .OrderByDescending(x => x.MaxCreated)
+                .Skip(skip)
                 .Take(take)
                 .Select(x => x.WorkflowId)
                 .ToListAsync();
@@ -267,11 +274,12 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns up to <paramref name="take"/> distinct user IDs (ordered by id) that have audit entries. Optional filters: userName (contains), teamId.
+        /// Returns up to <paramref name="take"/> distinct user IDs (ordered by id) that have audit entries, skipping <paramref name="skip"/>. Optional filters: userName (contains), teamId.
         /// </summary>
-        public async Task<List<Guid>> FindUserIdsForUserSummaryAsync(int take, string? userName, int? teamId)
+        public async Task<List<Guid>> FindUserIdsForUserSummaryAsync(int take, int skip, string? userName, int? teamId)
         {
             if (take <= 0) take = DefaultTake;
+            if (skip < 0) skip = 0;
 
             var query = _context.AuditCards.AsNoTracking();
 
@@ -288,6 +296,7 @@ namespace WoopiAiHub.Repository.Audit
                 .Select(a => a.UserId)
                 .Distinct()
                 .OrderBy(id => id)
+                .Skip(skip)
                 .Take(take)
                 .ToListAsync();
         }
@@ -322,10 +331,12 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns all audit rows for the given user. Optional filters: search (card/workflow/action name), actionTypeCode. Ordered by Created (asc or desc). Projects to UserAuditorDetailsRowDto.
+        /// Returns up to <paramref name="take"/> audit rows for the given user. Optional filters: search (card/workflow/action name), actionTypeCode. Ordered by Created (asc or desc). Projects to UserAuditorDetailsRowDto.
         /// </summary>
-        public async Task<List<UserAuditorDetailsRowDto>> FindAuditRowsForUserDetailsAsync(Guid userId, string? search, int? actionTypeCode, bool orderDescending)
+        public async Task<List<UserAuditorDetailsRowDto>> FindAuditRowsForUserDetailsAsync(Guid userId, int take, string? search, int? actionTypeCode, bool orderDescending)
         {
+            if (take <= 0) take = DefaultTake;
+
             var query = _context.AuditCards
                 .AsNoTracking()
                 .Where(a => a.UserId == userId);
@@ -367,6 +378,7 @@ namespace WoopiAiHub.Repository.Audit
             return await (orderDescending
                 ? projected.OrderByDescending(a => a.Created)
                 : projected.OrderBy(a => a.Created))
+                .Take(take)
                 .ToListAsync();
         }
     }

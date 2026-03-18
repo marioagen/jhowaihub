@@ -12,7 +12,7 @@
                     />
                 </div>
                 <p class="text-muted text-center mb-0">
-                    Selecione um usuário para ver o histórico de ações
+                    {{ $t("auditor.users.detail.selectUser") }}
                 </p>
             </div>
         </template>
@@ -56,7 +56,6 @@
                         </div>
                     </div>
 
-                    <!-- 2. Summary stat cards -->
                     <div class="row g-2 mb-3">
                         <div class="col-6 col-md-3">
                             <div
@@ -75,7 +74,9 @@
                                 <span class="user-detail-stat-value fw-bold">
                                     {{ selectedUser.workflowCount ?? 0 }}
                                 </span>
-                                <span class="small text-muted">Esteiras</span>
+                                <span class="small text-muted">
+                                    {{ $t("auditor.users.detail.workflows") }}
+                                </span>
                             </div>
                         </div>
                         <div
@@ -92,11 +93,9 @@
                         </div>
                     </div>
 
-                    <!-- 3. Activity history -->
                     <div
                         class="user-detail-activity-section d-flex flex-column flex-grow-1 min-h-0"
                     >
-                        <!-- Header row: title + count on left, filters on right -->
                         <div
                             class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2"
                         >
@@ -108,7 +107,7 @@
                                     :size="14"
                                     class="text-primary"
                                 />
-                                Histórico de Atividade
+                                {{ $t("auditor.users.detail.activityHistory") }}
                                 <BadgeComponent
                                     :text="activityEntries.length + ' eventos'"
                                     variant="secondary"
@@ -120,14 +119,18 @@
                                 <button
                                     type="button"
                                     class="btn btn-light btn-sm border py-1 px-2 user-detail-filter d-flex align-items-center gap-1"
-                                    :class="orderDescending ? 'btn-primary' : ''"
+                                    :class="filters.orderDescending ? 'btn-primary' : ''"
                                     @click="toggleOrderAndRefresh"
                                 >
                                     <LucideIcon
                                         icon="ArrowUpDown"
                                         :size="12"
                                     />
-                                    {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
+                                    {{
+                                        filters.orderDescending
+                                            ? $t("auditor.users.detail.orderNewest")
+                                            : $t("auditor.users.detail.orderOldest")
+                                    }}
                                 </button>
                                 <div class="dropdown">
                                     <button
@@ -173,7 +176,7 @@
                                     />
                                 </span>
                                 <input
-                                    v-model="activitySearch"
+                                    v-model="filters.input"
                                     type="text"
                                     class="form-control form-control-sm border-start-0 py-1"
                                     placeholder="Buscar por documento, detalhes, esteira, etapa..."
@@ -214,13 +217,11 @@
                                                 :clickable="false"
                                             />
                                         </div>
-                                        <!-- Line 2: description (same i18n as document detail) -->
                                         <div
                                             class="small text-muted mb-1 user-activity-description"
                                         >
                                             {{ auditActionDisplay(entry).action }}
                                         </div>
-                                        <!-- Line 3: timestamp (left) | workflow + optional context (right) -->
                                         <div
                                             class="d-flex align-items-center justify-content-between flex-wrap gap-2 small text-muted"
                                         >
@@ -251,9 +252,9 @@
                                 <button
                                     type="button"
                                     class="btn btn-outline-primary btn-sm"
-                                    @click="activityDisplayedLimit += 10"
+                                    @click="loadMoreActivity"
                                 >
-                                    Carregar mais
+                                    {{ $t("auditor.users.detail.loadMore") }}
                                 </button>
                             </div>
                         </div>
@@ -272,7 +273,10 @@
 
     export default {
         name: "AuditorUserDetail",
-        components: { BadgeComponent, LoadingComponent },
+        components: {
+            BadgeComponent,
+            LoadingComponent,
+        },
         props: {
             selectedUser: {
                 type: Object,
@@ -283,11 +287,14 @@
             return {
                 isLoading: false,
                 userDetail: null,
-                activitySearch: "",
+                userActions: [],
+                filters: {
+                    input: "",
+                    orderDescending: true,
+                    actionType: null,
+                    take: 10,
+                },
                 activitySearchDebounceTimer: null,
-                selectedActionCode: null,
-                orderDescending: true,
-                activityDisplayedLimit: 10,
                 actionFilterOptions: [
                     { value: null, label: "Todas as ações" },
                     { value: 3, label: "Avançar" },
@@ -296,7 +303,6 @@
             };
         },
         computed: {
-            /** Action type codes we show in user details: 3 = Advancement, 13 = InputDocument */
             ACTION_CODES_USER_DETAIL: () => [3, 13],
             ACTION_TYPE_NAMES_USER_DETAIL: () => ["Advancement", "InputDocument"],
             logCountOnly3And13() {
@@ -320,25 +326,18 @@
                 return teams.filter((t) => t && t.teamName);
             },
             activityEntries() {
-                const actions = this.userDetail?.actions ?? [];
-                if (this.selectedActionCode != null) return actions;
-                return actions.filter((a) =>
-                    this.ACTION_TYPE_NAMES_USER_DETAIL.includes(a.actionType)
-                );
-            },
-            filteredActivityEntries() {
-                return [...this.activityEntries];
+                return this.userDetail?.actions ?? [];
             },
             displayedActivityEntries() {
-                return this.filteredActivityEntries.slice(0, this.activityDisplayedLimit);
+                return this.activityEntries;
             },
             showActivityLoadMore() {
-                const total = this.filteredActivityEntries.length;
-                return total > 10 && this.activityDisplayedLimit < total;
+                const total = this.activityEntries.length;
+                return total >= 10 && total === this.filters.take;
             },
             selectedActionLabel() {
                 const opt = this.actionFilterOptions.find(
-                    (o) => o.value === this.selectedActionCode
+                    (o) => o.value === this.filters.actionType
                 );
                 return opt ? opt.label : "Todas as ações";
             },
@@ -359,70 +358,70 @@
                 this.activitySearchDebounceTimer = setTimeout(() => {
                     this.activitySearchDebounceTimer = null;
                     if (this.selectedUser?.userId != null) {
-                        this.refreshWithCurrentDocument();
+                        this.getUserDetails();
                     }
                 }, 300);
             },
             toggleOrderAndRefresh() {
-                this.orderDescending = !this.orderDescending;
-                this.refreshWithCurrentDocument();
+                this.filters.orderDescending = !this.filters.orderDescending;
+                this.getUserDetails();
             },
             setActionFilter(value) {
-                this.selectedActionCode = value;
-                this.refreshWithCurrentDocument();
+                this.filters.actionType = value;
+                this.getUserDetails();
             },
-            async refreshWithCurrentDocument() {
+            loadMoreActivity() {
+                this.filters.take += 10;
+                this.getUserDetails(false);
+            },
+            refreshWithCurrentDocument(resetActivityLimit = true) {
+                return this.getUserDetails(resetActivityLimit);
+            },
+            async getUserDetails(resetActivityLimit = true) {
                 if (this.selectedUser?.userId == null) {
                     this.userDetail = null;
                     return;
                 }
-                this.activityDisplayedLimit = 10;
+                if (resetActivityLimit) {
+                    this.filters.input = "";
+                    this.filters.actionType = null;
+                    this.filters.take = 10;
+                    this.filters.orderDescending = true;
+                    this.userDetail = null;
+                }
                 this.isLoading = true;
-                const search = (this.activitySearch || "").trim() || undefined;
+                const search = (this.filters.input || "").trim() || undefined;
                 const params = {
+                    take: this.filters.take,
                     ...(search && { search }),
-                    ...(this.selectedActionCode != null && {
-                        actionTypeCode: this.selectedActionCode,
+                    ...(this.filters.actionType != null && {
+                        actionTypeCode: this.filters.actionType,
                     }),
-                    orderDescending: this.orderDescending,
+                    orderDescending: this.filters.orderDescending,
                 };
+
                 try {
                     const response = await AuditorsService.getUserAuditDetails(
                         this.selectedUser.userId,
                         params
                     );
                     if (response.error) {
-                        this.$notify({
+                        this.userDetail = null;
+                        return this.$notify({
                             title: "auditor.users.title",
                             message:
                                 response.error.response?.data?.detail ?? response.error.message,
                             variant: "danger",
                             icon: "CircleX",
                         });
-                        this.userDetail = null;
-                        return;
                     }
+                    const data = response?.data ?? response;
                     this.userDetail =
-                        response && typeof response === "object" && !Array.isArray(response)
-                            ? response
-                            : (response?.data ?? null);
+                        data && typeof data === "object" && !Array.isArray(data) ? data : null;
+                    this.userActions = this.userDetail?.actions ?? [];
                 } finally {
                     this.isLoading = false;
                 }
-            },
-        },
-        watch: {
-            selectedUser: {
-                handler() {
-                    this.activitySearch = "";
-                    this.selectedActionCode = null;
-                    this.activityDisplayedLimit = 10;
-                    this.userDetail = null;
-                    if (this.selectedUser?.userId != null) {
-                        this.refreshWithCurrentDocument();
-                    }
-                },
-                immediate: true,
             },
         },
     };

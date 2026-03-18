@@ -1,4 +1,4 @@
-namespace WoopiAiHub.Domain.DTOs.Response.Auditor
+namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Documents
 {
     /// <summary>
     /// Workflow id, name, step (id and name), and document id for auditor document view.

@@ -396,11 +396,11 @@
                 return opt ? opt.label : "Todas as ações";
             },
             timelineEntriesDisplay() {
-                return this.timelineEntries.slice(0, this.timelineDisplayedLimit);
+                return this.timelineEntries;
             },
             showTimelineLoadMore() {
                 const total = this.timelineEntries.length;
-                return total > 10 && this.timelineDisplayedLimit < total;
+                return total >= 10 && total === this.timelineDisplayedLimit;
             },
         },
         methods: {
@@ -415,6 +415,7 @@
             },
             loadMoreTimeline() {
                 this.timelineDisplayedLimit += 10;
+                this.refreshWithCurrentDocument(false);
             },
             onFilterInput() {
                 if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
@@ -435,14 +436,17 @@
                 this.filter.actionType = actionType;
                 this.refreshWithCurrentDocument();
             },
-            async refreshWithCurrentDocument() {
+            async refreshWithCurrentDocument(resetTimelineLimit = true) {
                 if (this.selectedWorkflow?.workflowId == null) {
                     this.workflowDetail = null;
                     return;
                 }
-                this.timelineDisplayedLimit = 10;
+                if (resetTimelineLimit) this.timelineDisplayedLimit = 10;
                 this.isLoading = true;
-                const params = { orderDescending: this.filter.orderDescending };
+                const params = {
+                    take: this.timelineDisplayedLimit,
+                    orderDescending: this.filter.orderDescending,
+                };
                 const search = (this.filter.input || "").trim();
                 if (search) params.search = search;
                 const stepId = this.filter.stepId ? Number(this.filter.stepId) : NaN;

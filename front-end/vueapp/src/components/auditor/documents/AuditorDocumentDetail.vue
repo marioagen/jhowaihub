@@ -583,7 +583,7 @@
             },
             showHistoryLoadMore() {
                 const total = this.documentHistory.length;
-                return total > 10 && this.displayedLimit < total;
+                return total >= 10 && total === this.displayedLimit;
             },
             documentDisplayName() {
                 const d = this.documentAuditDetail;

@@ -23,9 +23,9 @@
     </div>
 </template>
 <script>
-    import AuditorUserFilters from "./AuditorUserFilters.vue";
-    import AuditorUserSummary from "./AuditorUserSummary.vue";
-    import AuditorUserDetail from "./AuditorUserDetail.vue";
+    import AuditorUserFilters from "@/components/auditor/users/AuditorUserFilters.vue";
+    import AuditorUserSummary from "@/components/auditor/users/AuditorUserSummary.vue";
+    import AuditorUserDetail from "@/components/auditor/users/AuditorUserDetail.vue";
 
     export default {
         name: "AuditorUsersSection",

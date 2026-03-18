@@ -113,7 +113,7 @@
                     </div>
                 </div>
                 <div
-                    v-if="showLoadMoreButton"
+                    v-if="hasMore"
                     class="audit-list-footer flex-shrink-0 pt-2"
                 >
                     <button
@@ -153,7 +153,9 @@
                 isLoading: false,
                 selectedDocument: null,
                 auditDocumentList: [],
-                displayedLimit: 10,
+                skip: 0,
+                hasMore: false,
+                take: 10,
             };
         },
         methods: {
@@ -169,7 +171,7 @@
                 this.selectedDocument = item;
                 this.$emit("select-document", item);
             },
-            async getAuditDocumentsSummary() {
+            async getAuditDocumentsSummary(append = false) {
                 this.isLoading = true;
                 try {
                     const search = (this.filters.search || "").trim() || undefined;
@@ -180,40 +182,38 @@
                               ? false
                               : undefined;
                     const params = {
-                        take: this.displayedLimit,
+                        take: this.take,
+                        skip: this.skip,
                         ...(search && { search }),
                         ...(isFinalized !== undefined && { isFinalized }),
                     };
+
                     const response = await AuditorsService.getDocumentsAuditSummary(params);
                     if (response.error) {
                         return this.$notify({
                             title: "auditor.documents.title",
-                            message: response.error.response.data.detail,
+                            message:
+                                response.error.response?.data?.detail ?? response.error.message,
                             variant: "danger",
                             icon: "CircleX",
                         });
                     }
-                    this.auditDocumentList = Array.isArray(response)
-                        ? response
-                        : Array.isArray(response?.data)
-                          ? response.data
-                          : [];
+
+                    this.auditDocumentList = append
+                        ? [...this.auditDocumentList, ...response.items]
+                        : response.items;
+                    this.hasMore = response?.hasMore === true;
                 } finally {
                     this.isLoading = false;
                 }
             },
             loadMore() {
-                this.displayedLimit += 10;
-                this.getAuditDocumentsSummary();
+                this.skip += this.take;
+                this.getAuditDocumentsSummary(true);
             },
             refreshWithCurrentFilters() {
-                this.displayedLimit = 10;
-                this.getAuditDocumentsSummary();
-            },
-        },
-        computed: {
-            showLoadMoreButton() {
-                return this.auditDocumentList.length === this.displayedLimit;
+                this.skip = 0;
+                this.getAuditDocumentsSummary(false);
             },
         },
         async created() {
