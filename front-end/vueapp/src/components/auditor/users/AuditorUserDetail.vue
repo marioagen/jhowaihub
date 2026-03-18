@@ -64,7 +64,9 @@
                                 <span class="user-detail-stat-value fw-bold">
                                     {{ totalActions3And13 }}
                                 </span>
-                                <span class="small text-muted">Total de Ações</span>
+                                <span class="small text-muted">
+                                    {{ $t("auditor.users.detail.totalActions") }}
+                                </span>
                             </div>
                         </div>
                         <div class="col-6 col-md-3">
@@ -109,7 +111,11 @@
                                 />
                                 {{ $t("auditor.users.detail.activityHistory") }}
                                 <BadgeComponent
-                                    :text="activityEntries.length + ' eventos'"
+                                    :text="
+                                        $t('auditor.users.detail.events', {
+                                            count: activityEntries.length,
+                                        })
+                                    "
                                     variant="secondary"
                                     size="sm"
                                     :clickable="false"
@@ -179,8 +185,8 @@
                                     v-model="filters.input"
                                     type="text"
                                     class="form-control form-control-sm border-start-0 py-1"
-                                    placeholder="Buscar por documento, detalhes, esteira, etapa..."
-                                    aria-label="Buscar no histórico"
+                                    :placeholder="$t('auditor.users.detail.searchPlaceholder')"
+                                    :aria-label="$t('auditor.users.detail.searchAria')"
                                     @input="onActivitySearchInput"
                                 />
                             </div>
@@ -295,19 +301,26 @@
                     take: 10,
                 },
                 activitySearchDebounceTimer: null,
-                actionFilterOptions: [
-                    { value: null, label: "Todas as ações" },
-                    { value: 3, label: "Avançar" },
-                    { value: 13, label: "Documento de entrada" },
-                ],
             };
         },
         computed: {
+            actionFilterOptions() {
+                const t = this.$t;
+                return [
+                    { value: null, label: t("auditor.users.detail.allActions") },
+                    { value: 3, label: t("auditor.users.detail.actionAdvance") },
+                    { value: 13, label: t("auditor.users.detail.actionInputDocument") },
+                ];
+            },
             ACTION_CODES_USER_DETAIL: () => [3, 13],
             ACTION_TYPE_NAMES_USER_DETAIL: () => ["Advancement", "InputDocument"],
             logCountOnly3And13() {
                 const list = this.userDetail?.logCountByActionType ?? [];
-                const labels = { 3: "Avançar", 13: "Documento de entrada" };
+                const t = this.$t;
+                const labels = {
+                    3: t("auditor.users.detail.actionAdvance"),
+                    13: t("auditor.users.detail.actionInputDocument"),
+                };
                 return this.ACTION_CODES_USER_DETAIL.map((code) => {
                     const item = list.find((a) => a.actionTypeCode === code);
                     return {
@@ -339,7 +352,7 @@
                 const opt = this.actionFilterOptions.find(
                     (o) => o.value === this.filters.actionType
                 );
-                return opt ? opt.label : "Todas as ações";
+                return opt ? opt.label : this.$t("auditor.users.detail.allActions");
             },
         },
         methods: {

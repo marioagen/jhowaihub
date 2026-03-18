@@ -15,12 +15,14 @@
                                 :size="20"
                                 class="text-warning"
                             />
-                            Selecionar Esteira
+                            {{ $t("auditor.documents.detail.selectWorkflow") }}
                         </h6>
                         <p class="small text-muted mb-3">
-                            Este documento participa de
-                            <strong>{{ selectedDocumentWorkflows.length }} esteiras</strong>
-                            diferentes. Selecione qual deseja visualizar.
+                            {{
+                                $t("auditor.documents.detail.documentInWorkflows", {
+                                    count: selectedDocumentWorkflows.length,
+                                })
+                            }}
                         </p>
                         <!-- Document info card (not clickable) -->
                         <div class="workflow-select-card rounded-2 p-2 mb-2 border">
@@ -40,8 +42,12 @@
                                     <div class="small text-muted">
                                         {{
                                             selectedDocument.actionsCount != null
-                                                ? selectedDocument.actionsCount + " ação(ões)"
-                                                : selectedDocumentWorkflows.length + " esteira(s)"
+                                                ? $t("auditor.documents.detail.actionsCount", {
+                                                      count: selectedDocument.actionsCount,
+                                                  })
+                                                : $t("auditor.documents.detail.workflowsCount", {
+                                                      count: selectedDocumentWorkflows.length,
+                                                  })
                                         }}
                                     </div>
                                 </div>
@@ -67,14 +73,19 @@
                                     {{ wf.name }}
                                 </div>
                                 <div class="small text-muted">
-                                    <template v-if="wf.stepName">Etapa: {{ wf.stepName }}</template>
-                                    <template v-else>Workflow ID: {{ wf.id }}</template>
+                                    <template v-if="wf.stepName">
+                                        {{ $t("auditor.documents.detail.step") }}: {{ wf.stepName }}
+                                    </template>
+                                    <template v-else>
+                                        {{ $t("auditor.documents.detail.workflowId") }}: {{ wf.id }}
+                                    </template>
                                 </div>
                                 <div
                                     v-if="wf.lastAction || wf.lastActionTimestamp"
                                     class="small text-muted"
                                 >
-                                    Última ação: {{ wf.lastAction ?? "—" }}
+                                    {{ $t("auditor.documents.detail.lastAction") }}:
+                                    {{ wf.lastAction ?? "—" }}
                                     <span class="ms-1">{{ wf.lastActionTimestamp ?? "" }}</span>
                                 </div>
                             </div>
@@ -103,14 +114,14 @@
                             <button
                                 type="button"
                                 class="btn btn-light btn-sm border d-flex align-items-center gap-1 py-1 px-2"
-                                aria-label="Voltar para lista de esteiras"
+                                :aria-label="$t('auditor.documents.detail.backToWorkflowList')"
                                 @click="onReturnToWorkflowList"
                             >
                                 <LucideIcon
                                     icon="ArrowLeft"
                                     :size="14"
                                 />
-                                Voltar
+                                {{ $t("auditor.documents.detail.back") }}
                             </button>
                         </div>
                         <div
@@ -136,7 +147,11 @@
                                         />
                                         <span class="text-break">{{ workflowDisplayName }}</span>
                                         <BadgeComponent
-                                            :text="documentHistory.length + ' eventos'"
+                                            :text="
+                                                $t('auditor.documents.detail.events', {
+                                                    count: documentHistory.length,
+                                                })
+                                            "
                                             variant="secondary"
                                             size="sm"
                                             :clickable="false"
@@ -174,7 +189,11 @@
                                             icon="ArrowUpDown"
                                             :size="12"
                                         />
-                                        {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
+                                        {{
+                                            orderDescending
+                                                ? $t("auditor.documents.detail.orderNewest")
+                                                : $t("auditor.documents.detail.orderOldest")
+                                        }}
                                     </button>
                                     <div class="dropdown">
                                         <button
@@ -221,8 +240,8 @@
                             <input
                                 type="text"
                                 class="form-control form-control-sm border-start-0 py-1"
-                                placeholder="Buscar por usuário, detalhes, ação, etapa..."
-                                aria-label="Buscar no histórico"
+                                :placeholder="$t('auditor.documents.detail.searchPlaceholder')"
+                                :aria-label="$t('auditor.documents.detail.searchAria')"
                                 v-model="historySearchInput"
                             />
                         </div>
@@ -293,7 +312,7 @@
                                 class="btn btn-outline-primary btn-sm"
                                 @click="loadMoreHistory"
                             >
-                                Carregar mais
+                                {{ $t("auditor.documents.detail.loadMore") }}
                             </button>
                         </div>
                     </div>
@@ -333,7 +352,11 @@
                                         />
                                         <span class="text-break">{{ workflowDisplayName }}</span>
                                         <BadgeComponent
-                                            :text="documentHistory.length + ' eventos'"
+                                            :text="
+                                                $t('auditor.documents.detail.events', {
+                                                    count: documentHistory.length,
+                                                })
+                                            "
                                             variant="secondary"
                                             size="sm"
                                             :clickable="false"
@@ -371,7 +394,11 @@
                                             icon="ArrowUpDown"
                                             :size="12"
                                         />
-                                        {{ orderDescending ? "Mais recentes" : "Mais antigos" }}
+                                        {{
+                                            orderDescending
+                                                ? $t("auditor.documents.detail.orderNewest")
+                                                : $t("auditor.documents.detail.orderOldest")
+                                        }}
                                     </button>
                                     <div class="dropdown">
                                         <button
@@ -418,8 +445,8 @@
                             <input
                                 type="text"
                                 class="form-control form-control-sm border-start-0 py-1"
-                                placeholder="Buscar por usuário, detalhes, ação, etapa..."
-                                aria-label="Buscar no histórico"
+                                :placeholder="$t('auditor.documents.detail.searchPlaceholder')"
+                                :aria-label="$t('auditor.documents.detail.searchAria')"
                                 v-model="historySearchInput"
                             />
                         </div>
@@ -508,7 +535,7 @@
                             :size="48"
                         />
                     </div>
-                    <p class="mb-0">Selecione um documento para ver seu histórico</p>
+                    <p class="mb-0">{{ $t("auditor.documents.detail.selectDocument") }}</p>
                 </div>
             </div>
         </template>
@@ -553,19 +580,22 @@
                 searchDebounceTimer: null,
                 selectedActionCode: null,
                 orderDescending: true,
-                actionFilterOptions: [
-                    { value: null, label: "Todas as ações" },
-                    { value: 0, label: "Upload" },
-                    { value: 8, label: "Deletar" },
-                ],
             };
         },
         computed: {
+            actionFilterOptions() {
+                const t = this.$t;
+                return [
+                    { value: null, label: t("auditor.documents.detail.allActions") },
+                    { value: 0, label: t("auditor.documents.detail.actionUpload") },
+                    { value: 8, label: t("auditor.documents.detail.actionDelete") },
+                ];
+            },
             selectedActionLabel() {
                 const opt = this.actionFilterOptions.find(
                     (o) => o.value === this.selectedActionCode
                 );
-                return opt ? opt.label : "Todas as ações";
+                return opt ? opt.label : this.$t("auditor.documents.detail.allActions");
             },
             hasMultipleWorkflows() {
                 return (this.selectedDocumentWorkflows || []).length > 1;
@@ -591,7 +621,7 @@
                     d?.documentName ??
                     d?.DocumentName ??
                     this.selectedDocument?.documentName ??
-                    "Documento"
+                    this.$t("auditor.documents.detail.document")
                 );
             },
             workflowDisplayName() {

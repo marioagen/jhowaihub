@@ -115,6 +115,7 @@ const english = {
                 workflowsCount: "workflows",
             },
             detail: {
+                selectDocument: "Select a document to view its history",
                 selectWorkflow: "Select Workflow",
                 documentInWorkflows:
                     "This document is in {count} different workflows. Select which one to view.",

@@ -118,6 +118,7 @@ const spanish = {
                 workflowsCount: "flujos",
             },
             detail: {
+                selectDocument: "Seleccione un documento para ver su historial",
                 selectWorkflow: "Seleccionar flujo",
                 documentInWorkflows:
                     "Este documento está en {count} flujos distintos. Seleccione cuál ver.",

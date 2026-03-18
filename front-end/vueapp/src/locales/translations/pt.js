@@ -116,6 +116,7 @@ const portuguese = {
                 workflowsCount: "esteiras",
             },
             detail: {
+                selectDocument: "Selecione um documento para ver seu histórico",
                 selectWorkflow: "Selecionar Esteira",
                 documentInWorkflows:
                     "Este documento participa de {count} esteiras diferentes. Selecione qual deseja visualizar.",

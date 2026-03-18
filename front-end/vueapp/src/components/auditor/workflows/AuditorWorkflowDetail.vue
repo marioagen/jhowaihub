@@ -13,7 +13,7 @@
                     />
                 </div>
                 <p class="text-muted text-center mb-0">
-                    Selecione uma esteira para ver a auditoria processual
+                    {{ $t("auditor.workflows.detail.selectWorkflow") }}
                 </p>
             </div>
         </template>
@@ -42,7 +42,9 @@
                                 class="text-primary mb-1"
                             />
                             <span class="fs-5 fw-bold">{{ summary.totalDocuments }}</span>
-                            <span class="small text-muted">Total Documentos</span>
+                            <span class="small text-muted">
+                                {{ $t("auditor.workflows.detail.totalDocuments") }}
+                            </span>
                         </div>
                     </div>
                     <div class="col-4">
@@ -55,7 +57,9 @@
                                 class="text-success mb-1"
                             />
                             <span class="fs-5 fw-bold">{{ summary.finalizados }}</span>
-                            <span class="small text-muted">Finalizados</span>
+                            <span class="small text-muted">
+                                {{ $t("auditor.workflows.detail.finalized") }}
+                            </span>
                         </div>
                     </div>
                     <div class="col-4">
@@ -68,7 +72,9 @@
                                 class="text-danger mb-1"
                             />
                             <span class="fs-5 fw-bold">{{ summary.reprovados }}</span>
-                            <span class="small text-muted">Reprovados</span>
+                            <span class="small text-muted">
+                                {{ $t("auditor.workflows.detail.rejected") }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -80,7 +86,7 @@
                             icon="BarChart3"
                             :size="14"
                         />
-                        Distribuição por Etapa
+                        {{ $t("auditor.workflows.detail.distributionByStage") }}
                     </h6>
                     <div
                         class="workflow-stages-bar d-flex align-items-stretch gap-0 rounded-2 border overflow-hidden"
@@ -121,9 +127,13 @@
                                 :size="14"
                                 class="text-primary"
                             />
-                            Timeline Processual
+                            {{ $t("auditor.workflows.detail.processualTimeline") }}
                             <BadgeComponent
-                                :text="timelineEntries.length + ' eventos'"
+                                :text="
+                                    $t('auditor.workflows.detail.events', {
+                                        count: timelineEntries.length,
+                                    })
+                                "
                                 variant="secondary"
                                 size="sm"
                                 :clickable="false"
@@ -139,7 +149,11 @@
                                     icon="ArrowUpDown"
                                     :size="12"
                                 />
-                                {{ filter.orderDescending ? "Mais recentes" : "Mais antigos" }}
+                                {{
+                                    filter.orderDescending
+                                        ? $t("auditor.workflows.detail.orderNewest")
+                                        : $t("auditor.workflows.detail.orderOldest")
+                                }}
                             </button>
                             <div class="dropdown">
                                 <button
@@ -210,8 +224,8 @@
                             v-model="filter.input"
                             type="text"
                             class="form-control form-control-sm border-start-0 py-1"
-                            placeholder="Buscar por usuário, documento, detalhes, etapa..."
-                            aria-label="Filtro da timeline"
+                            :placeholder="$t('auditor.workflows.detail.searchPlaceholder')"
+                            :aria-label="$t('auditor.workflows.detail.searchAria')"
                             @input="onFilterInput"
                         />
                     </div>
@@ -284,7 +298,7 @@
                                 class="btn btn-outline-primary btn-sm"
                                 @click="loadMoreTimeline"
                             >
-                                Carregar mais
+                                {{ $t("auditor.workflows.detail.loadMore") }}
                             </button>
                         </div>
                     </div>
@@ -355,17 +369,20 @@
                 },
                 inputDebounceTimer: null,
                 timelineDisplayedLimit: 10,
-                actionFilterOptions: [
-                    { value: "", label: "Todas as ações" },
-                    { value: "avancar", label: "Avançar" },
-                    { value: "editar", label: "Editar resposta" },
-                    { value: "perguntar", label: "Perguntar ao documento" },
-                    { value: "atribuir", label: "Atribuir" },
-                    { value: "upload", label: "Upload" },
-                ],
             };
         },
         computed: {
+            actionFilterOptions() {
+                const t = this.$t;
+                return [
+                    { value: "", label: t("auditor.workflows.detail.allActions") },
+                    { value: "avancar", label: t("auditor.workflows.detail.actionAdvance") },
+                    { value: "editar", label: t("auditor.workflows.detail.actionEditAnswer") },
+                    { value: "perguntar", label: t("auditor.workflows.detail.actionAskDocument") },
+                    { value: "atribuir", label: t("auditor.workflows.detail.actionAssign") },
+                    { value: "upload", label: t("auditor.workflows.detail.actionUpload") },
+                ];
+            },
             summary() {
                 const sc = this.workflowDetail?.documentStatusCount;
                 if (!sc) return { totalDocuments: 0, finalizados: 0, reprovados: 0 };
@@ -382,18 +399,18 @@
                 return mapCardsToTimelineEntries(this.workflowDetail?.cards);
             },
             stageFilterOptions() {
-                const base = [{ value: "", label: "Todas as etapas" }];
+                const base = [{ value: "", label: this.$t("auditor.workflows.detail.allStages") }];
                 return base.concat(this.stages.map((s) => ({ value: s.id, label: s.name })));
             },
             selectedStageLabel() {
                 const opt = this.stageFilterOptions.find((o) => o.value === this.filter.stepId);
-                return opt ? opt.label : "Todas as etapas";
+                return opt ? opt.label : this.$t("auditor.workflows.detail.allStages");
             },
             selectedActionLabel() {
                 const opt = this.actionFilterOptions.find(
                     (o) => o.value === this.filter.actionType
                 );
-                return opt ? opt.label : "Todas as ações";
+                return opt ? opt.label : this.$t("auditor.workflows.detail.allActions");
             },
             timelineEntriesDisplay() {
                 return this.timelineEntries;
