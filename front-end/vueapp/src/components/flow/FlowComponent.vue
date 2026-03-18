@@ -34,18 +34,18 @@
             </div>
             <hr />
             <VueFlowComponent v-if="step !== null" :isEdit="isEdit" :stepId="stepId" :step="step" :stepOrder="stepOrder"
-                @openNodeConfig="openNodeConfig" @nodeDeleted="onNodeDeleted" ref="VueflowComponent"
-                :hasStepTools="hasStepTools" />
+                @openNodeConfig="openNodeConfig" @nodeDeleted="onNodeDeleted" @flowChanged="markFlowDirty"
+                ref="VueflowComponent" :hasStepTools="hasStepTools" />
 
             <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel"
-                ref="sidebar">
+                 ref="sidebar">
                 <div class="offcanvas-header">
                     <h5 id="offcanvasRightLabel">
                         {{ $t("flow.sidebarTitle") }}
                         {{ nodeFlow.label }}
                     </h5>
                     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"
-                        @click="closeSidebar"></button>
+                            @click="closeSidebar"></button>
                 </div>
                 <div class="offcanvas-body">
                     <div class="cover" v-if="loadingWebhooks || loadingInputs">
@@ -54,11 +54,11 @@
                         </div>
                     </div>
                     <DependencySelector :previousStepTools="previousStepTools"
-                        v-model:selectedDependencies="selectedDependencies" ref="dependencyTools" />
+                                        v-model:selectedDependencies="selectedDependencies" ref="dependencyTools" />
                     <hr />
                     <div v-if="isN8NTool" class="mb-3">
                         <select class="form-select form-select-sm w-auto mb-3" v-model="connector"
-                            @change="changeWebhook">
+                                @change="changeWebhook">
                             <option value="" disabled>
                                 {{ $t("flow.sidebar.filter") }}
                             </option>
@@ -68,17 +68,17 @@
                         </select>
                         <div v-for="field in formFields" :key="field.name">
                             <div class="mb-3" v-if="field.type === 'string' || field.type === 'integer'"
-                                :type="field.type === 'integer' ? 'number' : 'string'">
+                                 :type="field.type === 'integer' ? 'number' : 'string'">
                                 <label :for="field.name" class="form-label">
                                     {{ field.label }}
                                 </label>
                                 <input class="form-control form-control-sm" :id="field.name"
-                                    v-model="formData[field.name]" />
+                                       v-model="formData[field.name]" />
                             </div>
                             <div v-else-if="field.type === 'boolean'" class="form-check mb-3"
-                                :disabled="loadingWebhooks || loadingInputs">
+                                 :disabled="loadingWebhooks || loadingInputs">
                                 <input class="form-check-input" type="checkbox" :id="field.name"
-                                    v-model="formData[field.name]" :disabled="loadingWebhooks || loadingInputs" />
+                                       v-model="formData[field.name]" :disabled="loadingWebhooks || loadingInputs" />
                                 <label class="form-check-label" for="flexCheckDefault">
                                     {{ field.label }}
                                 </label>
@@ -88,15 +88,15 @@
                                 <div v-for="(item, index) in formData[field.name]" :key="index">
                                     <div class="mb-3" v-for="child in field.children" :key="child.name">
                                         <label v-if="child.label" :for="child.name" class="form-label"
-                                            :disabled="loadingWebhooks || loadingInputs">
+                                               :disabled="loadingWebhooks || loadingInputs">
                                             {{ child.label }}
                                         </label>
                                         <label v-else :for="child.name" class="form-label text-capitalize">
                                             {{ child.name }}
                                         </label>
                                         <input :id="child.name" v-model="formData[field.name][index][child.name]"
-                                            :disabled="loadingWebhooks || loadingInputs"
-                                            class="form-control form-control-sm" />
+                                               :disabled="loadingWebhooks || loadingInputs"
+                                               class="form-control form-control-sm" />
                                     </div>
                                 </div>
                             </div>
@@ -105,13 +105,13 @@
                                     {{ field.label }}
                                 </label>
                                 <textarea class="form-control form-control-sm text-long" :id="field.name"
-                                    v-model="formData[field.name]" rows="4" />
+                                          v-model="formData[field.name]" rows="4" />
                             </div>
                         </div>
 
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary" @click="updateNodeWithForm"
-                                :disabled="loadingWebhooks || loadingInputs">
+                                    :disabled="loadingWebhooks || loadingInputs">
                                 {{ $t("common.save") }}
                             </button>
                         </div>
@@ -138,7 +138,7 @@
                         </h6>
                         <div class="background-div" v-for="(param, index) in parameters" :key="index">
                             <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"
-                                v-model="parameters[index].value"></textarea>
+                                      v-model="parameters[index].value"></textarea>
                         </div>
 
                         <div class="mt-4">
@@ -151,6 +151,20 @@
             </div>
         </div>
     </main>
+    <ConfirmModal
+        id="confirm-leave-flow-modal"
+        :isLoading="leaveModalLoading"
+        title="common.caution"
+        message="workflow.leaveMessage"
+        confirmText="common.confirm"
+        cancelText="common.cancel"
+        confirmVariant="primary"
+        iconeName="AlertTriangle"
+        iconVariant="warning"
+        @confirm="confirmNavigation"
+        @cancel="cancelNavigation"
+        ref="confirmLeaveModal"
+    />
 </template>
 <script>
 import VueFlowComponent from "@/components/flow/VueFlowComponent.vue";
@@ -161,6 +175,7 @@ import QuizzesService from "@/services/quizzes/QuizzesService";
 import WorkflowService from "@/services/workflow/WorkflowService";
 import LogService from "@/services/log/logService";
 import ToolType from "@/constants/ToolType";
+import ConfirmModal from "@/components/global/ConfirmModal.vue";
 
 export default {
     name: "FlowPage",
@@ -226,14 +241,32 @@ export default {
             selectedDependencies: [],
             nodes: [],
             step: null,
+            /** igual WorkflowWizard: false = há alterações locais não gravadas na API */
+            canLeave: true,
+            pendingNavegation: null,
+            leaveModalLoading: false,
         };
     },
     components: {
         VueFlowComponent,
         DependencySelector,
+        ConfirmModal
     },
     methods: {
+        markFlowDirty() {
+            this.canLeave = false;
+        },
         redirectToIndex() {
+            if (!this.canLeave) {
+                this.checkNavigation(() => {
+                    this.canLeave = true;
+                    this.doRedirectToIndex();
+                });
+                return;
+            }
+            this.doRedirectToIndex();
+        },
+        doRedirectToIndex() {
             if (this.workflowId) {
                 const routeName = this.isEdit ? "EditWorkflow" : "NewWorkflow";
                 const params = this.isEdit
@@ -442,6 +475,7 @@ export default {
             this.step.stepTools.forEach((st, i) => {
                 st.order = i + 1;
             });
+            this.markFlowDirty();
         },
         updateNode() {
             if (this.idSelected) {
@@ -470,6 +504,7 @@ export default {
                 this.parameters,
                 depsToSave
             );
+            this.markFlowDirty();
             this.closeSidebar();
             this.showMessage();
         },
@@ -506,6 +541,7 @@ export default {
                 this.parameters,
                 depsToSave
             );
+            this.markFlowDirty();
             this.closeSidebar();
             this.showMessage();
         },
@@ -558,8 +594,9 @@ export default {
                         });
                     }
                 }
+                this.canLeave = true;
                 localStorage.removeItem("flow_state_params");
-                this.redirectToIndex();
+                this.doRedirectToIndex();
                 return this.$notify({
                     title: "flow.title",
                     message: "flow.formFlow.progressFlowSuccess",
@@ -723,52 +760,48 @@ export default {
             }
 
             const flowState = JSON.parse(flowStateJson);
-            if (flowState.nodes && this.step.stepTools) {
-                const toolNodes = flowState.nodes.filter((n) => n.id !== "start");
-                const newStepTools = toolNodes.map((node, index) => {
-                    const existing = this.step.stepTools.find(
-                        (st) => st.id.toString() === node.id
-                    );
-                    const order = index + 1;
-                    if (existing) {
-                        return {
-                            ...existing,
-                            parameters: node.data.parameters || [],
-                            dependencies: node.data.dependencies || [],
-                            positionX: node.position.x,
-                            positionY: node.position.y,
-                            order,
-                        };
-                    }
+            if (!flowState.nodes || !this.step.stepTools) {
+                return;
+            }
+
+            const toolNodes = flowState.nodes.filter((n) => n.id !== "start");
+            const newStepTools = toolNodes.map((node, index) => {
+                const existing = this.step.stepTools.find(
+                    (st) => st.id.toString() === node.id
+                );
+                const order = index + 1;
+                if (existing) {
                     return {
-                        id: parseInt(node.id) || 0,
-                        positionX: node.position.x,
-                        positionY: node.position.y,
-                        toolId: node.data.toolId,
-                        order,
+                        ...existing,
                         parameters: node.data.parameters || [],
                         dependencies: node.data.dependencies || [],
-                        tool: {
-                            id: node.data.toolId,
-                            name: node.label,
-                            isEditableInput: node.data.isEditableInput,
-                            toolType: node.data.toolType,
-                        },
+                        positionX: node.position.x,
+                        positionY: node.position.y,
+                        order,
                     };
-                });
-                this.step.stepTools = newStepTools;
-            }
+                }
+                return {
+                    id: parseInt(node.id) || 0,
+                    positionX: node.position.x,
+                    positionY: node.position.y,
+                    toolId: node.data.toolId,
+                    order,
+                    parameters: node.data.parameters || [],
+                    dependencies: node.data.dependencies || [],
+                    tool: {
+                        id: node.data.toolId,
+                        name: node.label,
+                        isEditableInput: node.data.isEditableInput,
+                        toolType: node.data.toolType,
+                    },
+                };
+            });
+            this.step.stepTools = newStepTools;
 
             this.$nextTick(() => {
                 if (this.$refs.VueflowComponent) {
                     this.$refs.VueflowComponent.reloadFlow();
-
-                    this.$notify({
-                        title: "flow.title",
-                        message: "flow.formFlow.configurationSaved",
-                        variant: "success",
-                        icon: "CircleCheckBig",
-                    });
+                    this.canLeave = false;
                 }
             });
 
@@ -779,6 +812,21 @@ export default {
             if (selectedQuiz) {
                 this.nodeFlow.data.subtitle = selectedQuiz.name;
             }
+        },
+        checkNavigation(next) {
+            this.pendingNavegation = next;
+            this.$refs.confirmLeaveModal.open();
+        },
+        confirmNavigation() {
+            this.$refs.confirmLeaveModal.close();
+            if (this.pendingNavegation) {
+                this.pendingNavegation();
+                this.pendingNavegation = null;
+            }
+        },
+        cancelNavigation() {
+            this.$refs.confirmLeaveModal.close();
+            this.pendingNavegation = null;
         },
     },
     async mounted() {
