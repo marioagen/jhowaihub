@@ -9,10 +9,10 @@
                             :size="22"
                             class="align-text-bottom me-1"
                         />
-                        Auditoria
+                        {{ $t("auditor.title") }}
                     </h5>
                     <p class="text-muted small mb-0">
-                        Acompanhe o histórico completo de ações em documentos, esteiras e usuários
+                        {{ $t("auditor.subtitle") }}
                     </p>
                 </div>
                 <TabsComponent
@@ -52,9 +52,9 @@
         data() {
             return {
                 tabsList: [
-                    { name: "documents", label: "Documentos", icon: "FileText" },
-                    { name: "workflows", label: "Esteiras", icon: "Workflow" },
-                    { name: "users", label: "Usuários", icon: "UsersRound" },
+                    { name: "documents", label: "auditor.tabs.documents", icon: "FileText" },
+                    { name: "workflows", label: "auditor.tabs.workflows", icon: "Workflow" },
+                    { name: "users", label: "auditor.tabs.users", icon: "UsersRound" },
                 ],
             };
         },

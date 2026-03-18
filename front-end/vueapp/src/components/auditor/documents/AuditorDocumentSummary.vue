@@ -12,7 +12,7 @@
                     v-if="auditDocumentList.length === 0"
                     class="audit-list-empty text-muted small text-center py-5"
                 >
-                    No documents to show.
+                    {{ $t("auditor.documents.summary.empty") }}
                 </div>
                 <div
                     v-else
@@ -43,7 +43,11 @@
                                         {{ item.documentName }}
                                     </span>
                                     <BadgeComponent
-                                        :text="item.isFinalized ? 'Finalized' : 'Active'"
+                                        :text="
+                                            item.isFinalized
+                                                ? $t('auditor.documents.summary.finalized')
+                                                : $t('auditor.documents.summary.active')
+                                        "
                                         :variant="item.isFinalized ? 'success' : 'primary'"
                                         size="sm"
                                         :clickable="false"
@@ -93,8 +97,16 @@
                                         <span>—</span>
                                     </div>
                                 </div>
-                                <div class="small text-muted">
-                                    {{ item.actionsCount }} action(s)
+                                <div class="small text-muted d-flex align-items-center gap-1">
+                                    <LucideIcon
+                                        icon="Zap"
+                                        :size="12"
+                                    />
+                                    {{
+                                        $t("auditor.documents.summary.actionsCount", {
+                                            count: item.actionsCount,
+                                        })
+                                    }}
                                 </div>
                             </div>
                         </div>
@@ -109,7 +121,7 @@
                         class="btn btn-outline-primary btn-sm w-100"
                         @click="loadMore"
                     >
-                        Load more
+                        {{ $t("auditor.documents.summary.loadMore") }}
                     </button>
                 </div>
             </div>
@@ -175,7 +187,7 @@
                     const response = await AuditorsService.getDocumentsAuditSummary(params);
                     if (response.error) {
                         return this.$notify({
-                            title: "audit-cards.title",
+                            title: "auditor.documents.title",
                             message: response.error.response.data.detail,
                             variant: "danger",
                             icon: "CircleX",

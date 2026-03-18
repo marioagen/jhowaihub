@@ -253,7 +253,7 @@
                                     <span class="small fw-semibold">{{ entry.userName }}</span>
                                     <BadgeComponent
                                         v-if="entry.actionName"
-                                        :text="entry.actionName"
+                                        :text="auditActionDisplay(entry).title"
                                         variant="primary"
                                         size="sm"
                                         :clickable="false"
@@ -270,7 +270,7 @@
                                         v-if="entry.actionName"
                                         class="small text-muted"
                                     >
-                                        {{ entry.actionName }}
+                                        {{ auditActionDisplay(entry).action }}
                                     </div>
                                     <div
                                         class="small text-muted d-flex align-items-center gap-1 mt-1"
@@ -450,7 +450,7 @@
                                     <span class="small fw-semibold">{{ entry.userName }}</span>
                                     <BadgeComponent
                                         v-if="entry.actionName"
-                                        :text="entry.actionName"
+                                        :text="auditActionDisplay(entry).title"
                                         variant="primary"
                                         size="sm"
                                         :clickable="false"
@@ -467,7 +467,7 @@
                                         v-if="entry.actionName"
                                         class="small text-muted"
                                     >
-                                        {{ entry.actionName }}
+                                        {{ auditActionDisplay(entry).action }}
                                     </div>
                                     <div
                                         class="small text-muted d-flex align-items-center gap-1 mt-1"
@@ -518,6 +518,7 @@
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import LucideIcon from "@/components/global/LucideIcon.vue";
+    import auditActionHelper from "@/helpers/auditActionHelper";
     import AuditorsService from "@/services/auditors/AuditorsService";
     import dateHelper from "@/helpers/date.js";
 
@@ -549,6 +550,7 @@
                 stageFilterOptions: [],
                 selectedStageId: "0",
                 historySearchInput: "",
+                searchDebounceTimer: null,
                 selectedActionCode: null,
                 orderDescending: true,
                 actionFilterOptions: [
@@ -617,12 +619,12 @@
                     return;
                 }
                 this.mustSelectWorkflow = false;
-                await this.fetchDocumentAuditDetail();
+                await this.getDocumentAuditDetail();
             },
             async onSelectWorkflow(workflow) {
                 this.selectedWorkflowId = workflow?.id ?? workflow;
                 this.mustSelectWorkflow = false;
-                await this.fetchDocumentAuditDetail();
+                await this.getDocumentAuditDetail();
             },
             onReturnToWorkflowList() {
                 this.mustSelectWorkflow = true;
@@ -631,18 +633,19 @@
             },
             setStageAndRefresh(stageValue) {
                 this.selectedStageId = stageValue;
-                this.fetchDocumentAuditDetail();
+                this.getDocumentAuditDetail();
             },
             setActionAndRefresh(value) {
                 this.selectedActionCode = value;
-                this.fetchDocumentAuditDetail();
+                this.getDocumentAuditDetail();
             },
             toggleOrderAndRefresh() {
                 this.orderDescending = !this.orderDescending;
-                this.fetchDocumentAuditDetail();
+                this.getDocumentAuditDetail();
             },
             loadMoreHistory() {
                 this.displayedLimit += 10;
+                this.getDocumentAuditDetail();
             },
             formatDate(date) {
                 return dateHelper.formatDate(date) || "—";
@@ -650,7 +653,13 @@
             formatDateWithTime(date) {
                 return dateHelper.formatDateWithTime(date) || "—";
             },
-            async fetchDocumentAuditDetail() {
+            auditActionDisplay(entry) {
+                return auditActionHelper.getAuditActionDisplay(entry?.actionName, {
+                    t: this.$t,
+                    stepName: entry?.stepName || this.$t("auditor.users.detail.nextStep"),
+                });
+            },
+            async getDocumentAuditDetail() {
                 const workflowId =
                     this.selectedWorkflowId ??
                     this.selectedDocumentWorkflows?.[0]?.id ??
@@ -695,7 +704,7 @@
                             return;
                         }
                         return this.$notify({
-                            title: "audit-cards.title",
+                            title: "auditor.documents.title",
                             message:
                                 response.error.response?.data?.detail ?? response.error.message,
                             variant: "danger",
@@ -706,6 +715,21 @@
                 } finally {
                     this.isLoading = false;
                 }
+            },
+        },
+        watch: {
+            historySearchInput() {
+                if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+                this.searchDebounceTimer = setTimeout(() => {
+                    this.searchDebounceTimer = null;
+                    if (
+                        this.selectedDocument != null &&
+                        !this.mustSelectWorkflow &&
+                        !this.isLoading
+                    ) {
+                        this.getDocumentAuditDetail();
+                    }
+                }, 300);
             },
         },
         async created() {

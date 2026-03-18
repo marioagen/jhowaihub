@@ -12,7 +12,7 @@
                     v-if="workflowItems.length === 0"
                     class="audit-list-empty text-muted small text-center py-5"
                 >
-                    No audit workflows to show.
+                    {{ $t("auditor.workflows.summary.empty") }}
                 </div>
                 <div
                     v-else
@@ -61,14 +61,16 @@
                                             icon="FileText"
                                             :size="12"
                                         />
-                                        {{ item.documentCount }} docs
+                                        {{ item.documentCount }}
+                                        {{ $t("auditor.workflows.summary.docs") }}
                                     </span>
                                     <span class="d-inline-flex align-items-center gap-1">
                                         <LucideIcon
                                             icon="Zap"
                                             :size="12"
                                         />
-                                        {{ item.logsCount }} eventos
+                                        {{ item.logsCount }}
+                                        {{ $t("auditor.workflows.summary.events") }}
                                     </span>
                                 </div>
                             </div>
@@ -84,7 +86,7 @@
                         class="btn btn-outline-primary btn-sm w-100"
                         @click="loadMore"
                     >
-                        Load more
+                        {{ $t("auditor.workflows.summary.loadMore") }}
                     </button>
                 </div>
             </div>
@@ -152,7 +154,7 @@
                     });
                     if (response.error) {
                         return this.$notify({
-                            title: "audit-workflows.title",
+                            title: "auditor.workflows.title",
                             message:
                                 response.error.response?.data?.detail ?? response.error.message,
                             variant: "danger",

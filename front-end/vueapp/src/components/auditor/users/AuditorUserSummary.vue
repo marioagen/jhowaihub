@@ -12,7 +12,7 @@
                     v-if="auditUserList.length === 0"
                     class="audit-list-empty text-muted small text-center py-5"
                 >
-                    No audit users to show.
+                    {{ $t("auditor.users.summary.empty") }}
                 </div>
                 <div
                     v-else
@@ -63,15 +63,21 @@
                                             icon="Zap"
                                             :size="12"
                                         />
-                                        {{ item.logCount }} ação(ões)
+                                        {{
+                                            $t("auditor.users.summary.actionsCount", {
+                                                count: item.logCount,
+                                            })
+                                        }}
                                     </span>
                                     <span class="d-inline-flex align-items-center gap-1">
                                         <LucideIcon
                                             icon="Workflow"
                                             :size="12"
                                         />
-                                        {{ item.workflowCount }} esteira{{
-                                            item.workflowCount !== 1 ? "s" : ""
+                                        {{
+                                            $t("auditor.users.summary.workflowsCount", {
+                                                count: item.workflowCount,
+                                            })
                                         }}
                                     </span>
                                 </div>
@@ -88,7 +94,7 @@
                         class="btn btn-outline-primary btn-sm w-100"
                         @click="loadMore"
                     >
-                        Load more
+                        {{ $t("auditor.users.summary.loadMore") }}
                     </button>
                 </div>
             </div>
@@ -150,7 +156,7 @@
                     const response = await AuditorsService.getUserAuditSummary(params);
                     if (response.error) {
                         return this.$notify({
-                            title: "audit-users.title",
+                            title: "auditor.users.title",
                             message:
                                 response.error.response?.data?.detail ?? response.error.message,
                             variant: "danger",

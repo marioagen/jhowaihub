@@ -178,6 +178,7 @@
                                     class="form-control form-control-sm border-start-0 py-1"
                                     placeholder="Buscar por documento, detalhes, esteira, etapa..."
                                     aria-label="Buscar no histórico"
+                                    @input="onActivitySearchInput"
                                 />
                             </div>
                         </div>
@@ -206,17 +207,18 @@
                                                 {{ entry.cardName }}
                                             </span>
                                             <BadgeComponent
-                                                :text="entry.actionType"
-                                                :variant="actionBadgeVariant(entry.actionType)"
+                                                v-if="entry.actionType"
+                                                :text="auditActionDisplay(entry).title"
+                                                variant="primary"
                                                 size="sm"
                                                 :clickable="false"
                                             />
                                         </div>
-                                        <!-- Line 2: description -->
+                                        <!-- Line 2: description (same i18n as document detail) -->
                                         <div
                                             class="small text-muted mb-1 user-activity-description"
                                         >
-                                            {{ activityDescription(entry) }}
+                                            {{ auditActionDisplay(entry).action }}
                                         </div>
                                         <!-- Line 3: timestamp (left) | workflow + optional context (right) -->
                                         <div
@@ -264,6 +266,7 @@
 <script>
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import auditActionHelper from "@/helpers/auditActionHelper";
     import AuditorsService from "@/services/auditors/AuditorsService";
     import dateHelper from "@/helpers/date.js";
 
@@ -281,6 +284,7 @@
                 isLoading: false,
                 userDetail: null,
                 activitySearch: "",
+                activitySearchDebounceTimer: null,
                 selectedActionCode: null,
                 orderDescending: true,
                 activityDisplayedLimit: 10,
@@ -323,19 +327,7 @@
                 );
             },
             filteredActivityEntries() {
-                let list = this.activityEntries;
-                const q = (this.activitySearch || "").toLowerCase().trim();
-                if (q) {
-                    list = list.filter((e) => {
-                        const desc = this.activityDescription(e).toLowerCase();
-                        return (
-                            (e.cardName && e.cardName.toLowerCase().includes(q)) ||
-                            (e.workflowName && e.workflowName.toLowerCase().includes(q)) ||
-                            desc.includes(q)
-                        );
-                    });
-                }
-                return [...list];
+                return [...this.activityEntries];
             },
             displayedActivityEntries() {
                 return this.filteredActivityEntries.slice(0, this.activityDisplayedLimit);
@@ -355,50 +347,21 @@
             formatDateWithTime(date) {
                 return dateHelper.formatDateWithTime(date) || "—";
             },
-            actionBadgeVariant(actionType) {
-                if (!actionType) return "secondary";
-                const t = actionType.toLowerCase();
-                if (t.includes("delet") || t.includes("removed") || t.includes("rejection"))
-                    return "danger";
-                if (t.includes("upload") || t.includes("documentcreated") || t.includes("input"))
-                    return "info";
-                if (
-                    t.includes("assign") ||
-                    t.includes("atribuir") ||
-                    t.includes("advancement") ||
-                    t.includes("finalize") ||
-                    t.includes("approval")
-                )
-                    return "primary";
-                return "secondary";
+            auditActionDisplay(entry) {
+                return auditActionHelper.getAuditActionDisplay(entry?.actionType, {
+                    t: this.$t,
+                    stepName: entry?.stepName || this.$t("auditor.users.detail.nextStep"),
+                });
             },
-            activityDescription(entry) {
-                const name = entry.cardName || "Documento";
-                const workflow = entry.workflowName;
-                const action = (entry.actionType || "").toLowerCase();
-                if (
-                    action.includes("upload") ||
-                    action.includes("documentcreated") ||
-                    action.includes("inputdocument")
-                )
-                    return "Documento carregado no sistema";
-                if (action.includes("assign") || action.includes("atribuir"))
-                    return workflow
-                        ? `Documento atribuído para ${workflow}`
-                        : "Documento atribuído";
-                if (action.includes("delet") || action.includes("removed"))
-                    return "Documento deletado";
-                if (action.includes("advancement"))
-                    return workflow
-                        ? `Documento encaminhado para ${workflow}`
-                        : "Documento encaminhado";
-                if (action.includes("finalize")) return "Documento finalizado";
-                if (action.includes("approval")) return "Documento aprovado";
-                if (action.includes("rejection")) return "Documento rejeitado";
-                if (action.includes("unassign")) return "Atribuição removida";
-                if (action.includes("editanswer")) return "Resposta editada";
-                if (action.includes("inputquestionnaire")) return "Questionário preenchido";
-                return `${name} — ${entry.actionType || "Ação"}`;
+            onActivitySearchInput() {
+                if (this.activitySearchDebounceTimer)
+                    clearTimeout(this.activitySearchDebounceTimer);
+                this.activitySearchDebounceTimer = setTimeout(() => {
+                    this.activitySearchDebounceTimer = null;
+                    if (this.selectedUser?.userId != null) {
+                        this.refreshWithCurrentDocument();
+                    }
+                }, 300);
             },
             toggleOrderAndRefresh() {
                 this.orderDescending = !this.orderDescending;
@@ -430,7 +393,7 @@
                     );
                     if (response.error) {
                         this.$notify({
-                            title: "audit-users.title",
+                            title: "auditor.users.title",
                             message:
                                 response.error.response?.data?.detail ?? response.error.message,
                             variant: "danger",

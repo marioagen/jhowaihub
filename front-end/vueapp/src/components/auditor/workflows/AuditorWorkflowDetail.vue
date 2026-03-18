@@ -222,75 +222,56 @@
                         <div
                             v-for="entry in timelineEntriesDisplay"
                             :key="entry.id"
-                            class="workflow-timeline-card rounded-2 p-2 mb-2 border"
+                            class="workflow-timeline-card audit-history-card rounded-2 p-2 mb-2 border"
                         >
-                            <div class="workflow-timeline-card-content">
-                                <div
-                                    class="d-flex flex-nowrap align-items-center gap-1 gap-sm-2 mb-1 workflow-timeline-card-first-row"
+                            <div class="d-flex align-items-start gap-2 flex-wrap">
+                                <BadgeComponent
+                                    variant="primary"
+                                    size="sm"
+                                    :clickable="false"
+                                    icon-only
                                 >
+                                    <LucideIcon
+                                        icon="User"
+                                        :size="12"
+                                    />
+                                </BadgeComponent>
+                                <div
+                                    class="d-flex align-items-center flex-wrap gap-1 gap-xl-2 align-self-center min-w-0 flex-grow-1"
+                                >
+                                    <span class="small fw-semibold">{{ entry.userName }}</span>
+                                    <BadgeComponent
+                                        v-if="entry.actionName"
+                                        :text="auditActionDisplay(entry).title"
+                                        variant="primary"
+                                        size="sm"
+                                        :clickable="false"
+                                    />
                                     <span
-                                        class="workflow-timeline-user-badge d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                                        v-if="entry.stepName"
+                                        class="small text-muted"
                                     >
-                                        <LucideIcon
-                                            icon="User"
-                                            :size="12"
-                                        />
-                                    </span>
-                                    <span
-                                        class="small fw-semibold text-nowrap text-truncate min-w-0"
-                                    >
-                                        {{ entry.userName }}
-                                    </span>
-                                    <template
-                                        v-for="tag in entry.actionTags"
-                                        :key="tag.label"
-                                    >
-                                        <BadgeComponent
-                                            :text="tag.label"
-                                            :variant="tag.variant"
-                                            size="sm"
-                                            :clickable="false"
-                                            class="flex-shrink-0"
-                                        />
-                                    </template>
-                                    <span
-                                        v-if="entry.documentName"
-                                        class="small text-primary d-inline-flex align-items-center gap-1 text-nowrap text-truncate min-w-0"
-                                    >
-                                        <LucideIcon
-                                            icon="FileText"
-                                            :size="12"
-                                            class="flex-shrink-0"
-                                        />
-                                        <span class="text-truncate">{{ entry.documentName }}</span>
+                                        {{ entry.stepName }}
                                     </span>
                                 </div>
                                 <div
-                                    v-if="entry.actionTags.length"
-                                    class="small text-muted mb-1"
+                                    class="w-100 audit-history-card-content workflow-timeline-card-content"
                                 >
-                                    {{ entry.actionTags[0].label }}
-                                </div>
-                                <div
-                                    class="small text-muted d-flex align-items-center flex-wrap gap-2"
-                                >
-                                    <span class="d-inline-flex align-items-center gap-1">
+                                    <div
+                                        v-if="entry.actionName"
+                                        class="small text-muted"
+                                    >
+                                        {{ auditActionDisplay(entry).action }}
+                                    </div>
+                                    <div
+                                        class="small text-muted d-flex align-items-center gap-1 mt-1"
+                                    >
                                         <LucideIcon
                                             icon="Clock"
                                             :size="12"
                                         />
-                                        {{ entry.timestamp }}
-                                    </span>
-                                    <span
-                                        v-if="entry.stageName"
-                                        class="d-inline-flex align-items-center gap-1"
-                                    >
-                                        <LucideIcon
-                                            icon="Workflow"
-                                            :size="12"
-                                        />
-                                        {{ entry.stageName }}
-                                    </span>
+                                        {{ formatDateWithTime(entry.created) }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -315,6 +296,8 @@
 <script>
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import LucideIcon from "@/components/global/LucideIcon.vue";
+    import auditActionHelper from "@/helpers/auditActionHelper";
     import AuditorsService from "@/services/auditors/AuditorsService";
     import dateHelper from "@/helpers/date.js";
 
@@ -323,13 +306,12 @@
         return cards.map((c, i) => ({
             id: `e-${c.cardId}-${i}-${c.created}`,
             userName: c.userName ?? "",
-            actionTags: [{ label: c.actionType ?? "", variant: "primary" }],
+            actionName: c.actionType ?? "",
             documentName: c.cardName ?? "",
-            description: [c.actionType, c.stepName].filter(Boolean).join(" · "),
-            timestamp: dateHelper.formatDateWithTime(c.created) ?? "",
+            created: c.created,
+            stepName: c.stepName ?? "",
             stageName: c.stepName ?? "",
             stageId: String(c.stepId ?? ""),
-            actionId: (c.actionType || "").toLowerCase().replace(/\s+/g, "-"),
         }));
     }
 
@@ -354,7 +336,7 @@
 
     export default {
         name: "AuditorWorkflowDetail",
-        components: { BadgeComponent, LoadingComponent },
+        components: { BadgeComponent, LoadingComponent, LucideIcon },
         props: {
             selectedWorkflow: {
                 type: Object,
@@ -422,6 +404,15 @@
             },
         },
         methods: {
+            formatDateWithTime(date) {
+                return dateHelper.formatDateWithTime(date) || "—";
+            },
+            auditActionDisplay(entry) {
+                return auditActionHelper.getAuditActionDisplay(entry?.actionName, {
+                    t: this.$t,
+                    stepName: entry?.stepName || this.$t("auditor.users.detail.nextStep"),
+                });
+            },
             loadMoreTimeline() {
                 this.timelineDisplayedLimit += 10;
             },
@@ -467,7 +458,7 @@
                     );
                     if (response.error) {
                         this.$notify({
-                            title: "audit-workflows.title",
+                            title: "auditor.workflows.title",
                             message:
                                 response.error.response?.data?.detail ?? response.error.message,
                             variant: "danger",
@@ -537,8 +528,13 @@
         flex: 1 1 0;
         min-height: 0;
     }
-    .workflow-timeline-card {
+    .workflow-timeline-card,
+    .audit-history-card {
         background-color: transparent;
+    }
+    .audit-history-card-content {
+        flex: 1 1 100%;
+        min-width: 0;
     }
     .workflow-timeline-user-badge {
         background-color: rgba(13, 110, 253, 0.15);
