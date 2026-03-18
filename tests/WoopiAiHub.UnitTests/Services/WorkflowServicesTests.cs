@@ -838,6 +838,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             var workflow = WorkflowFixture.FindValidWorkflow();
             var step = new Step(stepDto2.Id, DateTime.Now, workflow.Id, stepDto2.Name, stepDto2.Order, 1, 1);
+            step.AddCard(new Card(1, DateTime.Now, step.Id, 1, "Card 1", 1, null));
             workflow.Steps.Add(step);
 
             var tool = WorkflowFixture.CreateToolModel(1, "Test Tool", "OCR");
@@ -853,6 +854,9 @@ namespace WoopiAiHub.UnitTests.Services
 
             _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync(tool);
+
+            _stepRepositoryMock.Setup(x => x.FindById(It.IsAny<int>()))
+                .ReturnsAsync(step);
 
             var stepToolMap = new Dictionary<int, int>();
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
@@ -966,7 +970,8 @@ namespace WoopiAiHub.UnitTests.Services
                         ProfileId = stepDto.Profile.Id,
                         StatusId = stepDto.Status.Id
                     }
-                }
+                },
+                ResetDocuments = true
             };
 
             var existingSteps = new List<Step> { step };
