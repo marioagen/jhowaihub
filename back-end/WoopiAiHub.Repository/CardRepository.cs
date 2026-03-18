@@ -175,7 +175,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="cardIds">A list of card ids to delete. Cannot be null or empty.</param>
         /// <returns>true if one or more records were deleted successfully; otherwise, false.</returns>
-        public bool DeleteByIds(List<int> cardIds)
+        public bool DisableByIds(List<int> cardIds)
         {
             if (cardIds == null || cardIds.Count == 0)
                 return false;
@@ -185,7 +185,8 @@ namespace WoopiAiHub.Repository
             if (cards.Count == 0)
                 return false;
 
-            _context.Cards.RemoveRange(cards);
+            cards.ForEach(c => c.Disable());
+            _context.Cards.UpdateRange(cards);
             return _context.SaveChanges() > 0;
         }
 

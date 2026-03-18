@@ -828,8 +828,7 @@ namespace WoopiAiHub.Application.Services
             {
                 _stepToolExecutionRepository.DeleteByCardIds(allCardIds);
                 _stepToolOutputRepository.DeleteByCardIds(allCardIds);
-                await _auditCardRepository.DeleteByCardIdsAsync(allCardIds);
-                _cardRepository.DeleteByIds(allCardIds);
+                _cardRepository.DisableByIds(allCardIds);
             }
         }
 
