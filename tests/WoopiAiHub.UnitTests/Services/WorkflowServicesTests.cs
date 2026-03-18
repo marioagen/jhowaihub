@@ -778,7 +778,8 @@ namespace WoopiAiHub.UnitTests.Services
             var workflowPhase3Dto = new WorkflowPhase3Dto
             {
                 WorkflowId = 1,
-                Steps = { new StepPhase3Dto { Id = stepDto.Id, Order = stepDto.Order, StepTools = stepToolsList } }
+                Steps = { new StepPhase3Dto { Id = stepDto.Id, Order = stepDto.Order, StepTools = stepToolsList } },
+                ResetDocuments = true
             };
 
             var workflow = WorkflowFixture.FindValidWorkflow();
