@@ -1,8 +1,9 @@
+using System;
 using Bogus.DataSets;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Identity.Client;
 using Moq;
 using Moq.AutoMock;
-using System;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -779,10 +780,66 @@ namespace WoopiAiHub.UnitTests.Services
             {
                 WorkflowId = 1,
                 Steps = { new StepPhase3Dto { Id = stepDto.Id, Order = stepDto.Order, StepTools = stepToolsList } },
+                ResetDocuments = false
+            };
+
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            var tool = WorkflowFixture.CreateToolModel(1, "Test Tool", "OCR");
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(workflowPhase3Dto.WorkflowId))
+                .ReturnsAsync(workflow);
+
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(tool);
+
+            var stepToolMap = new Dictionary<int, int>();
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+
+            // Assert
+            Assert.True(result);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.AtLeastOnce);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 success")]
+        [Trait("UpdatePhase3", "Success")]
+        public async Task UpdatePhase3_WorkflowExistsDeletingData_UpdatesSuccessfully()
+        {
+            // Arrange
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var stepDto2 = WorkflowFixture.FindValidStepDto();
+            stepDto2.Id = stepDto.Id+1;
+            stepDto2.Order = stepDto.Order + 1;
+            var stepTools = WorkflowFixture.FindValidStepToolWithDependencies();
+            var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            var stepToolDependencyDto = new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 };
+            stepToolUpdateDto.Dependencies = new List<StepToolOutputDependencyDto> { stepToolDependencyDto };
+            var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto };
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = {
+                    new StepPhase3Dto { Id = stepDto.Id, Order = stepDto.Order, StepTools = stepToolsList },
+                },
                 ResetDocuments = true
             };
 
             var workflow = WorkflowFixture.FindValidWorkflow();
+            var step = new Step(stepDto2.Id, DateTime.Now, workflow.Id, stepDto2.Name, stepDto2.Order, 1, 1);
+            workflow.Steps.Add(step);
+
             var tool = WorkflowFixture.CreateToolModel(1, "Test Tool", "OCR");
 
             _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(workflowPhase3Dto.WorkflowId))
