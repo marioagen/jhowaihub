@@ -116,28 +116,37 @@
                         <div
                             class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2"
                         >
-                            <div class="min-w-0">
-                                <div class="d-flex align-items-center gap-1">
-                                    <LucideIcon
-                                        icon="FileText"
-                                        :size="18"
-                                        class="flex-shrink-0"
-                                    />
-                                    <span class="text-break">{{ documentDisplayName }}</span>
-                                </div>
-                                <div class="d-flex align-items-center gap-1 small text-muted">
-                                    {{ workflowDisplayName }}
-                                    <BadgeComponent
-                                        variant="warning"
-                                        size="sm"
-                                        :clickable="false"
-                                    >
+                            <div class="d-flex align-items-start gap-3 flex-wrap min-w-0">
+                                <div class="min-w-0">
+                                    <div class="d-flex align-items-center gap-1">
                                         <LucideIcon
-                                            icon="ListOrdered"
-                                            :size="12"
+                                            icon="FileText"
+                                            :size="18"
+                                            class="flex-shrink-0"
                                         />
-                                        {{ documentHistory.length }}
-                                    </BadgeComponent>
+                                        <span class="text-break">{{ documentDisplayName }}</span>
+                                    </div>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="d-flex align-items-center gap-1 small text-muted">
+                                        <LucideIcon
+                                            icon="Workflow"
+                                            :size="18"
+                                            class="flex-shrink-0"
+                                        />
+                                        <span class="text-break">{{ workflowDisplayName }}</span>
+                                        <BadgeComponent
+                                            variant="secondary"
+                                            size="sm"
+                                            :clickable="false"
+                                        >
+                                            <LucideIcon
+                                                icon="ListOrdered"
+                                                :size="12"
+                                            />
+                                            {{ documentHistory.length }}
+                                        </BadgeComponent>
+                                    </div>
                                 </div>
                             </div>
                             <div
@@ -309,28 +318,37 @@
                         <div
                             class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2"
                         >
-                            <div class="min-w-0">
-                                <div class="d-flex align-items-center gap-1">
-                                    <LucideIcon
-                                        icon="FileText"
-                                        :size="18"
-                                        class="flex-shrink-0"
-                                    />
-                                    <span class="text-break">{{ documentDisplayName }}</span>
-                                </div>
-                                <div class="d-flex align-items-center gap-1 small text-muted">
-                                    {{ workflowDisplayName }}
-                                    <BadgeComponent
-                                        variant="warning"
-                                        size="sm"
-                                        :clickable="false"
-                                    >
+                            <div class="d-flex align-items-start gap-3 flex-wrap min-w-0">
+                                <div class="min-w-0">
+                                    <div class="d-flex align-items-center gap-1">
                                         <LucideIcon
-                                            icon="ListOrdered"
-                                            :size="12"
+                                            icon="FileText"
+                                            :size="18"
+                                            class="flex-shrink-0"
                                         />
-                                        {{ documentHistory.length }}
-                                    </BadgeComponent>
+                                        <span class="text-break">{{ documentDisplayName }}</span>
+                                    </div>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="d-flex align-items-center gap-1 small text-muted">
+                                        <LucideIcon
+                                            icon="Workflow"
+                                            :size="18"
+                                            class="flex-shrink-0"
+                                        />
+                                        <span class="text-break">{{ workflowDisplayName }}</span>
+                                        <BadgeComponent
+                                            variant="secondary"
+                                            size="sm"
+                                            :clickable="false"
+                                        >
+                                            <LucideIcon
+                                                icon="ListOrdered"
+                                                :size="12"
+                                            />
+                                            {{ documentHistory.length }}
+                                        </BadgeComponent>
+                                    </div>
                                 </div>
                             </div>
                             <div

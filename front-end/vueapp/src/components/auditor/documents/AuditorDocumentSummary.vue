@@ -42,7 +42,6 @@
                                     <span class="fw-semibold small text-break">
                                         {{ item.documentName }}
                                     </span>
-                                    <span class="small text-muted">#{{ item.documentId }}</span>
                                     <BadgeComponent
                                         :text="item.isFinalized ? 'Finalized' : 'Active'"
                                         :variant="item.isFinalized ? 'success' : 'primary'"
