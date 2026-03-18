@@ -394,15 +394,9 @@ namespace WoopiAiHub.Repository.Audit
                     UserName = a.User != null ? a.User.Name : string.Empty,
                     WorkflowId = a.WorkflowId,
                     WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
-                    Teams = a.Workflow != null && a.Workflow.Teams != null
-                        ? a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
-                        : null,
-                    ProfileId = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
-                        ? (int?)a.Card.Step.Profile.Id
-                        : null,
-                    ProfileName = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
-                        ? a.Card.Step.Profile.Name ?? string.Empty
-                        : string.Empty,
+                    Teams = a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty }),
+                    ProfileId = a.Card.Step.Profile.Id,
+                    ProfileName = a.Card.Step.Profile.Name ?? string.Empty,
                     ActionType = a.ActionType,
                     CardId = a.CardId,
                     CardName = a.Card != null ? a.Card.Name : string.Empty,
