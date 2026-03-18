@@ -37,7 +37,7 @@ namespace WoopiAiHub.UnitTests.Utils
 
             // Act & Assert
             var exception = Assert.Throws<AppException>(() =>
-                _validateStep.ValidateCreateStep(stepsCreateDto));
+                _validateStep.ValidateCreateStep(stepsCreateDto!));
 
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
             Assert.Equal(StepLabel.Required, exception.LabelError);
@@ -91,7 +91,7 @@ namespace WoopiAiHub.UnitTests.Utils
             {
                 new StepCreateDto
                 {
-                    Name = null,
+                    Name = string.Empty,
                     Order = 1,
                     ProfileId = 1,
                     StatusId = 1
@@ -227,7 +227,7 @@ namespace WoopiAiHub.UnitTests.Utils
 
             // Act & Assert
             var exception = Assert.Throws<AppException>(() =>
-                _validateStep.ValidateUpdateStep(workflow, stepsUpdateDto));
+                _validateStep.ValidateUpdateStep(workflow, stepsUpdateDto!));
 
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
             Assert.Equal(StepLabel.Required, exception.LabelError);
@@ -262,7 +262,7 @@ namespace WoopiAiHub.UnitTests.Utils
 
             // Act & Assert
             var exception = Assert.Throws<AppException>(() =>
-                _validateStep.ValidateUpdateStep(workflow, stepsUpdateDto));
+                _validateStep.ValidateUpdateStep(workflow!, stepsUpdateDto));
 
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
