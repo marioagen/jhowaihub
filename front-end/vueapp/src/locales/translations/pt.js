@@ -102,6 +102,10 @@ const portuguese = {
             filters: {
                 searchPlaceholder: "ID, nome do documento ou esteira...",
                 allStatuses: "Todos os status",
+                statuses: {
+                    active: "Ativo",
+                    finalized: "Finalizado",
+                },
                 statusActive: "Ativo",
                 statusFinalized: "Finalizado",
                 clearSearch: "Limpar busca",

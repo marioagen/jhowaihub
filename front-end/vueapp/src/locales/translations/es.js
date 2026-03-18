@@ -104,6 +104,10 @@ const spanish = {
             filters: {
                 searchPlaceholder: "ID, nombre del documento o flujo...",
                 allStatuses: "Todos los estados",
+                statuses: {
+                    active: "Activo",
+                    finalized: "Finalizado",
+                },
                 statusActive: "Activo",
                 statusFinalized: "Finalizado",
                 clearSearch: "Limpiar búsqueda",

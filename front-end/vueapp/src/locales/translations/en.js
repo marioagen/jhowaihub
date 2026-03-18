@@ -101,6 +101,10 @@ const english = {
             filters: {
                 searchPlaceholder: "ID, document or workflow name...",
                 allStatuses: "All statuses",
+                statuses: {
+                    active: "Active",
+                    finalized: "Finalized",
+                },
                 statusActive: "Active",
                 statusFinalized: "Finalized",
                 clearSearch: "Clear search",

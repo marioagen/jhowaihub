@@ -1,3 +1,8 @@
+export const WorkflowStatusOptions = [
+    { value: "active", name: "active" },
+    { value: "finalized", name: "finalized" },
+];
+
 export function mapCardsToTimelineEntries(cards) {
     if (!Array.isArray(cards)) return [];
     return cards.map((c, i) => ({

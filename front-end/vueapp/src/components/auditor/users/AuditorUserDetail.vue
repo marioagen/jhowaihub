@@ -91,7 +91,7 @@
                                 <span class="user-detail-stat-value fw-bold">
                                     {{ action.count }}
                                 </span>
-                                <span class="small text-muted">{{ act.label }}</span>
+                                <span class="small text-muted">{{ action.label }}</span>
                             </div>
                         </div>
                     </div>

@@ -72,6 +72,7 @@
 </template>
 <script>
     import { buildSelectOptionsWithAll } from "@/utils/selectOptions";
+    import { WorkflowStatusOptions } from "@/utils/workflowUtils";
 
     export default {
         name: "AuditorDocumentFilters",
@@ -79,7 +80,7 @@
         data() {
             return {
                 statusList: buildSelectOptionsWithAll(WorkflowStatusOptions, this.$t, {
-                    allLabelKey: "auditor.documents.filters.allStatus",
+                    allLabelKey: "auditor.documents.filters.allStatuses",
                     labelKeyPrefix: "auditor.documents.filters.statuses.",
                 }),
                 filters: {

@@ -176,9 +176,9 @@
                 try {
                     const search = (this.filters.search || "").trim() || undefined;
                     const isFinalized =
-                        this.filters.statusId === "finalizado"
+                        this.filters.statusId === "finalized"
                             ? true
-                            : this.filters.statusId === "ativo"
+                            : this.filters.statusId === "active"
                               ? false
                               : undefined;
                     const params = {
