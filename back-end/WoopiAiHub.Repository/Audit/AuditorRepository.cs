@@ -272,9 +272,9 @@ namespace WoopiAiHub.Repository.Audit
             query = ApplyWorkflowDetailsFilters(query, search, stepId, actionType);
             query = query
                 .Include(a => a.User)
-                .Include(a => a.Workflow)
-                .Include(a => a.Card).ThenInclude(c => c.Step)
-                .Include(a => a.Card).ThenInclude(c => c.Status);
+                .Include(a => a.Workflow!)
+                .Include(a => a.Card!).ThenInclude(c => c!.Step)
+                .Include(a => a.Card!).ThenInclude(c => c!.Status);
 
             var list = await (orderDescending
                 ? query.OrderByDescending(a => a.Created)
@@ -339,8 +339,8 @@ namespace WoopiAiHub.Repository.Audit
                 .AsNoTracking()
                 .Where(a => userIds.Contains(a.UserId))
                 .Include(a => a.User)
-                .Include(a => a.Workflow).ThenInclude(w => w.Teams)
-                .Include(a => a.Card).ThenInclude(c => c.Step).ThenInclude(s => s.Profile)
+                .Include(a => a.Workflow!).ThenInclude(w => w.Teams)
+                .Include(a => a.Card!).ThenInclude(c => c!.Step!).ThenInclude(s => s!.Profile)
                 .ToListAsync();
 
             return list.Select(a => new UserAuditorSummaryRowDto
@@ -348,7 +348,7 @@ namespace WoopiAiHub.Repository.Audit
                 UserId = a.UserId,
                 UserName = a.User?.Name ?? string.Empty,
                 WorkflowId = a.WorkflowId,
-                Teams = a.Workflow?.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty }).ToList(),
+                Teams = a.Workflow?.Teams != null ? a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty }).ToList() : new List<UsersAuditorTeamsDto>(),
                 ProfileId = a.Card?.Step?.Profile?.Id,
                 ProfileName = a.Card?.Step?.Profile?.Name ?? string.Empty
             }).ToList();
@@ -390,8 +390,8 @@ namespace WoopiAiHub.Repository.Audit
             query = ApplyUserDetailsFilters(query, search, actionTypeCode);
             query = query
                 .Include(a => a.User)
-                .Include(a => a.Workflow).ThenInclude(w => w.Teams)
-                .Include(a => a.Card).ThenInclude(c => c.Step).ThenInclude(s => s.Profile);
+                .Include(a => a.Workflow!).ThenInclude(w => w.Teams)
+                .Include(a => a.Card!).ThenInclude(c => c!.Step!).ThenInclude(s => s!.Profile);
 
             var list = await (orderDescending
                 ? query.OrderByDescending(a => a.Created)
@@ -405,7 +405,7 @@ namespace WoopiAiHub.Repository.Audit
                 UserName = a.User?.Name ?? string.Empty,
                 WorkflowId = a.WorkflowId,
                 WorkflowName = a.Workflow?.Name ?? string.Empty,
-                Teams = a.Workflow?.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty }).ToList(),
+                Teams = a.Workflow?.Teams != null ? a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty }).ToList() : new List<UsersAuditorTeamsDto>(),
                 ProfileId = a.Card?.Step?.Profile?.Id,
                 ProfileName = a.Card?.Step?.Profile?.Name ?? string.Empty,
                 ActionType = a.ActionType,
