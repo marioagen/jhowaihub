@@ -1379,34 +1379,10 @@ namespace WoopiAiHub.UnitTests.Services
             var stepId = 1;
             var stepOrder = 1;
 
-            var firstStepToolDto = new StepToolUpdateDto
-            {
-                Id = 0,
-                ToolId = 999,
-                Order = 1,
-                PositionX = 1,
-                PositionY = 1,
-                Parameters = new List<StepToolParameterUpdateDto>()
-            };
+            var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
+            var promptStepToolDto = WorkflowFixture.FindValidStepToolUpdateDtoWithDependencies();
 
-            var promptStepToolDto = new StepToolUpdateDto
-            {
-                Id = 0,
-                ToolId = 2,
-                Order = 2,
-                PositionX = 2,
-                PositionY = 2,
-                Parameters = new List<StepToolParameterUpdateDto>
-                    {
-                        new StepToolParameterUpdateDto { Value = "value1" }
-                    },
-                Dependencies = new List<StepToolOutputDependencyDto>
-                {
-                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
-                }
-            };
-
-            var stepToolsList = new List<StepToolUpdateDto> { firstStepToolDto, promptStepToolDto };
+            var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto, promptStepToolDto };
             var workflowPhase3Dto = new WorkflowPhase3Dto
             {
                 WorkflowId = 1,
@@ -1458,49 +1434,19 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("UpdatePhase3", "Success")]
         public async Task UpdatePhase3_PromptToolWithPromptDependency_UpdatesSuccessfully()
         {
-            // Arrange: OCR (order 1), Prompt A (order 2, depends on OCR), Prompt B (order 3, depends on Prompt A)
             var stepId = 1;
             var stepOrder = 1;
 
-            var ocrStepToolDto = new StepToolUpdateDto
+            var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
+            var promptStepToolDto = WorkflowFixture.FindValidStepToolUpdateDtoWithDependencies();
+            var secondPromptStepToolDto = WorkflowFixture.FindValidStepToolUpdateDtoWithDependencies();
+
+            secondPromptStepToolDto.Dependencies = new List<StepToolOutputDependencyDto>
             {
-                Id = 0,
-                ToolId = 997,
-                Order = 1,
-                PositionX = 1,
-                PositionY = 1,
-                Parameters = new List<StepToolParameterUpdateDto>()
+                new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 2 }
             };
 
-            var firstPromptStepToolDto = new StepToolUpdateDto
-            {
-                Id = 0,
-                ToolId = 998,
-                Order = 2,
-                PositionX = 2,
-                PositionY = 2,
-                Parameters = new List<StepToolParameterUpdateDto>(),
-                Dependencies = new List<StepToolOutputDependencyDto>
-                {
-                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
-                }
-            };
-
-            var secondPromptStepToolDto = new StepToolUpdateDto
-            {
-                Id = 0,
-                ToolId = 999,
-                Order = 3,
-                PositionX = 3,
-                PositionY = 3,
-                Parameters = new List<StepToolParameterUpdateDto> { new StepToolParameterUpdateDto { Value = "value1" } },
-                Dependencies = new List<StepToolOutputDependencyDto>
-                {
-                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 2 }
-                }
-            };
-
-            var stepToolsList = new List<StepToolUpdateDto> { ocrStepToolDto, firstPromptStepToolDto, secondPromptStepToolDto };
+            var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto, promptStepToolDto, secondPromptStepToolDto };
             var workflowPhase3Dto = new WorkflowPhase3Dto
             {
                 WorkflowId = 1,

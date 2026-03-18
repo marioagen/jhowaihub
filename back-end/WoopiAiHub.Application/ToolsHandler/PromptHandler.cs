@@ -118,7 +118,6 @@ public class PromptHandler : IToolHandler
             }
             else
             {
-                // Unknown or missing tool type: try OCR format first (backward compatibility), then plain text
                 if (!TryAddOcrText(value, parts))
                 {
                     parts.Add(value.Trim());
@@ -129,22 +128,20 @@ public class PromptHandler : IToolHandler
         return string.Join("\n\n", parts);
     }
 
+    /// <summary>
+    /// Tries to parse OCR output in DocumentEmbeddings format and extract text. If parsing fails, returns false to allow fallback to plain text.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="parts"></param>
+    /// <returns></returns>
     private static bool TryAddOcrText(string value, List<string> parts)
     {
-        try
-        {
-            var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(value);
-            if (documents?.DocumentEmbeddings != null && documents.DocumentEmbeddings.Count > 0)
-            {
-                parts.Add(string.Join("\n", documents.DocumentEmbeddings.Select(d => d.Text)));
-                return true;
-            }
-        }
-        catch
-        {
-            // Not valid OCR JSON
-        }
-
+       var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(value);
+       if (documents?.DocumentEmbeddings != null && documents.DocumentEmbeddings.Count > 0)
+       {
+           parts.Add(string.Join("\n", documents.DocumentEmbeddings.Select(d => d.Text)));
+           return true;
+       }
         return false;
     }
 }

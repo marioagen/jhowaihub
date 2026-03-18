@@ -304,7 +304,7 @@ namespace WoopiAiHub.Application.Services.Automation
         {
             var handler = _toolFactoryHandler.GetHandler(stepTool.Tool!.ToolType!.Name);
 
-            var dependencyIds = GetDependencyStepToolIds(stepTool);
+            var dependencyIds = FindDependencyStepToolIds(stepTool);
             var outputs = dependencyIds.Count > 0
                 ? await _stepToolOutputRepository.FindAllByStepToolListIdsAsync(dependencyIds, cardId)
                 : new List<StepToolOutput>();
@@ -315,7 +315,7 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <summary>
         /// Collects all dependency step tool IDs from both the Dependencies collection and DependsOnStepToolId (legacy), without duplicates.
         /// </summary>
-        private static List<int> GetDependencyStepToolIds(StepTool stepTool)
+        private static List<int> FindDependencyStepToolIds(StepTool stepTool)
         {
             var ids = new HashSet<int>();
             if (stepTool.Dependencies != null)
