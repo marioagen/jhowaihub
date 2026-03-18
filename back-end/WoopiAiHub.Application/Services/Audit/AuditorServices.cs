@@ -1,5 +1,6 @@
 using WoopiAiHub.Domain.DTOs.Response.Auditor;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Documents;
+using WoopiAiHub.Domain.DTOs.Response.Auditor.Users;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Workflows;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
@@ -212,23 +213,61 @@ namespace WoopiAiHub.Application.Services.Audit
                 return null;
 
             var first = auditRows[0];
-            var distinctTeams = auditRows
+            return new UserAuditorDetailsDto
+            {
+                UserId = first.UserId,
+                UserName = first.UserName,
+                Teams = BuildDistinctTeamsFromUserDetailsRows(auditRows),
+                Profiles = BuildDistinctProfilesFromUserDetailsRows(auditRows),
+                LogCountTotal = auditRows.Count,
+                LogCountByActionType = BuildCountByActionTypeFromUserDetailsRows(auditRows),
+                Actions = BuildUserAuditorActionsList(auditRows)
+            };
+        }
+
+        /// <summary>
+        /// Builds distinct teams (by TeamId and TeamName) from user audit detail rows.
+        /// </summary>
+        private static List<UsersAuditorTeamsDto> BuildDistinctTeamsFromUserDetailsRows(IEnumerable<UserAuditorDetailsRowDto> auditRows)
+        {
+            return auditRows
                 .SelectMany(a => a.Teams ?? Enumerable.Empty<UsersAuditorTeamsDto>())
                 .GroupBy(t => new { t.TeamId, t.TeamName })
                 .Select(x => x.First())
                 .ToList();
-            var distinctProfiles = auditRows
+        }
+
+        /// <summary>
+        /// Builds distinct profiles (by ProfileId and ProfileName) from user audit detail rows.
+        /// </summary>
+        private static List<UsersAuditorProfilesDto> BuildDistinctProfilesFromUserDetailsRows(IEnumerable<UserAuditorDetailsRowDto> auditRows)
+        {
+            return auditRows
                 .Where(a => a.ProfileId.HasValue)
                 .Select(a => new UsersAuditorProfilesDto { ProfileId = a.ProfileId!.Value, ProfileName = a.ProfileName })
                 .GroupBy(p => new { p.ProfileId, p.ProfileName })
                 .Select(x => x.First())
                 .ToList();
-            var countByActionType = auditRows
+        }
+
+        /// <summary>
+        /// Builds action type counts (code and count) from user audit detail rows, ordered by action type code.
+        /// </summary>
+        private static List<UsersAuditorActionTypeCountsDto> BuildCountByActionTypeFromUserDetailsRows(IEnumerable<UserAuditorDetailsRowDto> auditRows)
+        {
+            return auditRows
                 .GroupBy(a => (int)a.ActionType)
                 .Select(g => new UsersAuditorActionTypeCountsDto { ActionTypeCode = g.Key, Count = g.Count() })
                 .OrderBy(x => x.ActionTypeCode)
                 .ToList();
-            var actions = auditRows
+        }
+
+        /// <summary>
+        /// Builds the list of user auditor action DTOs (card, action type, workflow, created) from user audit detail rows.
+        /// </summary>
+        private static List<UsersAuditorActionsDto> BuildUserAuditorActionsList(IEnumerable<UserAuditorDetailsRowDto> auditRows)
+        {
+            return auditRows
                 .Select(a => new UsersAuditorActionsDto
                 {
                     CardId = a.CardId,
@@ -239,17 +278,6 @@ namespace WoopiAiHub.Application.Services.Audit
                     Created = a.Created
                 })
                 .ToList();
-
-            return new UserAuditorDetailsDto
-            {
-                UserId = first.UserId,
-                UserName = first.UserName,
-                Teams = distinctTeams,
-                Profiles = distinctProfiles,
-                LogCountTotal = auditRows.Count,
-                LogCountByActionType = countByActionType,
-                Actions = actions
-            };
         }
 
         /// <summary>
