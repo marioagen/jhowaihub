@@ -241,7 +241,6 @@ export default {
             selectedDependencies: [],
             nodes: [],
             step: null,
-            /** igual WorkflowWizard: false = há alterações locais não gravadas na API */
             canLeave: true,
             pendingNavegation: null,
             leaveModalLoading: false,
