@@ -270,29 +270,33 @@ namespace WoopiAiHub.Repository.Audit
                 .AsNoTracking()
                 .Where(a => a.WorkflowId == workflowId);
             query = ApplyWorkflowDetailsFilters(query, search, stepId, actionType);
+            query = query
+                .Include(a => a.User)
+                .Include(a => a.Workflow)
+                .Include(a => a.Card).ThenInclude(c => c.Step)
+                .Include(a => a.Card).ThenInclude(c => c.Status);
 
-            var ordered = orderDescending
+            var list = await (orderDescending
                 ? query.OrderByDescending(a => a.Created)
-                : query.OrderBy(a => a.Created);
-
-            return await ordered
-                .Select(a => new WorkflowAuditorDetailsRowDto
-                {
-                    Id = a.Id,
-                    CardId = a.CardId,
-                    DocumentId = a.DocumentId,
-                    WorkflowId = a.WorkflowId,
-                    WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
-                    Created = a.Created,
-                    UserId = a.UserId,
-                    UserName = a.User != null ? a.User.Name : string.Empty,
-                    ActionType = a.ActionType,
-                    CardName = a.Card != null ? a.Card.Name : string.Empty,
-                    CardStatus = a.Card != null && a.Card.Status != null ? a.Card.Status.Name : string.Empty,
-                    StepId = a.Card != null ? a.Card.StepId : 0,
-                    StepName = a.Card != null && a.Card.Step != null ? a.Card.Step.Name : string.Empty
-                })
+                : query.OrderBy(a => a.Created))
                 .ToListAsync();
+
+            return list.Select(a => new WorkflowAuditorDetailsRowDto
+            {
+                Id = a.Id,
+                CardId = a.CardId,
+                DocumentId = a.DocumentId,
+                WorkflowId = a.WorkflowId,
+                WorkflowName = a.Workflow?.Name ?? string.Empty,
+                Created = a.Created,
+                UserId = a.UserId,
+                UserName = a.User?.Name ?? string.Empty,
+                ActionType = a.ActionType,
+                CardName = a.Card?.Name ?? string.Empty,
+                CardStatus = a.Card?.Status?.Name ?? string.Empty,
+                StepId = a.Card?.StepId ?? 0,
+                StepName = a.Card?.Step?.Name ?? string.Empty
+            }).ToList();
         }
 
         /// <summary>
@@ -331,25 +335,23 @@ namespace WoopiAiHub.Repository.Audit
             if (userIds.Count == 0)
                 return new List<UserAuditorSummaryRowDto>();
 
-            return await _context.AuditCards
+            var list = await _context.AuditCards
                 .AsNoTracking()
                 .Where(a => userIds.Contains(a.UserId))
-                .Select(a => new UserAuditorSummaryRowDto
-                {
-                    UserId = a.UserId,
-                    UserName = a.User != null ? a.User.Name : string.Empty,
-                    WorkflowId = a.WorkflowId,
-                    Teams = a.Workflow != null && a.Workflow.Teams != null
-                        ? a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty })
-                        : null,
-                    ProfileId = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
-                        ? (int?)a.Card.Step.Profile.Id
-                        : null,
-                    ProfileName = a.Card != null && a.Card.Step != null && a.Card.Step.Profile != null
-                        ? a.Card.Step.Profile.Name ?? string.Empty
-                        : string.Empty
-                })
+                .Include(a => a.User)
+                .Include(a => a.Workflow).ThenInclude(w => w.Teams)
+                .Include(a => a.Card).ThenInclude(c => c.Step).ThenInclude(s => s.Profile)
                 .ToListAsync();
+
+            return list.Select(a => new UserAuditorSummaryRowDto
+            {
+                UserId = a.UserId,
+                UserName = a.User?.Name ?? string.Empty,
+                WorkflowId = a.WorkflowId,
+                Teams = a.Workflow?.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty }).ToList(),
+                ProfileId = a.Card?.Step?.Profile?.Id,
+                ProfileName = a.Card?.Step?.Profile?.Name ?? string.Empty
+            }).ToList();
         }
 
         /// <summary>
@@ -386,28 +388,31 @@ namespace WoopiAiHub.Repository.Audit
                 .AsNoTracking()
                 .Where(a => a.UserId == userId);
             query = ApplyUserDetailsFilters(query, search, actionTypeCode);
+            query = query
+                .Include(a => a.User)
+                .Include(a => a.Workflow).ThenInclude(w => w.Teams)
+                .Include(a => a.Card).ThenInclude(c => c.Step).ThenInclude(s => s.Profile);
 
-            var projected = query
-                .Select(a => new UserAuditorDetailsRowDto
-                {
-                    UserId = a.UserId,
-                    UserName = a.User != null ? a.User.Name : string.Empty,
-                    WorkflowId = a.WorkflowId ?? null,
-                    WorkflowName = a.Workflow != null ? a.Workflow.Name : string.Empty,
-                    Teams = a.Workflow.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty }) ?? [],
-                    ProfileId = a.Card?.Step?.Profile?.Id,
-                    ProfileName = a.Card.Step.Profile.Name ?? string.Empty,
-                    ActionType = a.ActionType,
-                    CardId = a.CardId,
-                    CardName = a.Card != null ? a.Card.Name : string.Empty,
-                    Created = a.Created
-                });
-
-            return await (orderDescending
-                ? projected.OrderByDescending(a => a.Created)
-                : projected.OrderBy(a => a.Created))
+            var list = await (orderDescending
+                ? query.OrderByDescending(a => a.Created)
+                : query.OrderBy(a => a.Created))
                 .Take(take)
                 .ToListAsync();
+
+            return list.Select(a => new UserAuditorDetailsRowDto
+            {
+                UserId = a.UserId,
+                UserName = a.User?.Name ?? string.Empty,
+                WorkflowId = a.WorkflowId,
+                WorkflowName = a.Workflow?.Name ?? string.Empty,
+                Teams = a.Workflow?.Teams.Select(t => new UsersAuditorTeamsDto { TeamId = t.Id, TeamName = t.Name ?? string.Empty }).ToList(),
+                ProfileId = a.Card?.Step?.Profile?.Id,
+                ProfileName = a.Card?.Step?.Profile?.Name ?? string.Empty,
+                ActionType = a.ActionType,
+                CardId = a.CardId,
+                CardName = a.Card?.Name ?? string.Empty,
+                Created = a.Created
+            }).ToList();
         }
     }
 }
