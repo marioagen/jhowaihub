@@ -3,9 +3,6 @@ using WoopiAiHub.Domain.Enum.Audit;
 
 namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Users
 {
-    /// <summary>
-    /// Raw audit row for user details. Used by repository and service to build UserAuditorDetailsDto.
-    /// </summary>
     public record UserAuditorDetailsRowDto
     {
         public Guid UserId { get; init; }

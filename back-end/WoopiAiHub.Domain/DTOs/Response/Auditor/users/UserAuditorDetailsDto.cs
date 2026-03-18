@@ -1,8 +1,5 @@
 namespace WoopiAiHub.Domain.DTOs.Response.Auditor
 {
-    /// <summary>
-    /// Full audit details for one user: UserId, UserName, Teams, Profiles, log counts (total and by action type), and list of actions.
-    /// </summary>
     public record UserAuditorDetailsDto
     {
         public Guid UserId { get; init; }

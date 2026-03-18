@@ -4,10 +4,6 @@ using WoopiAiHub.Domain.DTOs.Response.Auditor.Workflows;
 
 namespace WoopiAiHub.Domain.Interfaces.Repository.Audit
 {
-    /// <summary>
-    /// Repository for auditor-related queries. Used to list and retrieve documents, workflows, and users for auditing.
-    /// Returns raw/projection data; service layer performs validation and DTO assembly.
-    /// </summary>
     public interface IAuditorRepository
     {
         Task<List<int>> FindDocumentIdsForDocumentsSummaryAsync(int take, int skip, string? search, bool? isFinalized = null);

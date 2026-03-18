@@ -2,9 +2,6 @@ using WoopiAiHub.Domain.DTOs.Response.Auditor;
 
 namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Users
 {
-    /// <summary>
-    /// Raw audit row for user summary. Used by repository and service to build UserAuditorSummaryDto.
-    /// </summary>
     public record UserAuditorSummaryRowDto
     {
         public Guid UserId { get; init; }

@@ -1,8 +1,5 @@
 namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Documents
 {
-    /// <summary>
-    /// Raw audit row for document detail. Used by repository and service to build DocumentAuditorDetailDto.
-    /// </summary>
     public record DocumentAuditorDetailRowDto
     {
         public string DocumentName { get; init; } = string.Empty;

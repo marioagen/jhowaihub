@@ -1,8 +1,5 @@
 namespace WoopiAiHub.Domain.DTOs.Response.Auditor
 {
-    /// <summary>
-    /// Composite audit response for a workflow: WorkflowId, WorkflowName, LogCount, StepsCount, DocumentStatusCount, Cards.
-    /// </summary>
     public record WorkflowAuditorDetailsDto
     {
         public int WorkflowId { get; init; }

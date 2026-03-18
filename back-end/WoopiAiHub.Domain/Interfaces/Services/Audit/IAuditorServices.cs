@@ -4,9 +4,6 @@ using WoopiAiHub.Domain.DTOs.Response.Auditor.Documents;
 
 namespace WoopiAiHub.Domain.Interfaces.Services.Audit
 {
-    /// <summary>
-    /// Service for auditor endpoints. Provides access to documents, workflows, and users for auditing.
-    /// </summary>
     public interface IAuditorServices
     {
         Task<AuditorLoadMoreResultDto<DocumentAuditorSummaryDto>> FindDocumentsAuditSummaryAsync(int take, int skip, string? search, bool? isFinalized = null);

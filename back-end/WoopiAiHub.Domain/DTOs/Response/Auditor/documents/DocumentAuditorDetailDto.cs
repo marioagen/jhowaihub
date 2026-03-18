@@ -1,8 +1,5 @@
 namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Documents
 {
-    /// <summary>
-    /// Document audit detail: DocumentId, DocumentName, WorkflowId, WorkflowName, and DocumentHistory (list of audit entries).
-    /// </summary>
     public record DocumentAuditorDetailDto
     {
         public int DocumentId { get; init; }

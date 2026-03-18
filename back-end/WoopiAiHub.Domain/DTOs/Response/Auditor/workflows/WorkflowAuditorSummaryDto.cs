@@ -1,8 +1,5 @@
 namespace WoopiAiHub.Domain.DTOs.Response.Auditor
 {
-    /// <summary>
-    /// One workflow row in the workflow audit list: WorkflowId, WorkflowName, DocumentCount, LogsCount, TeamId, TeamName, ProfileId, ProfileName.
-    /// </summary>
     public record WorkflowAuditorSummaryDto
     {
         public int WorkflowId { get; init; }

@@ -1,8 +1,5 @@
 namespace WoopiAiHub.Domain.DTOs.Response.Auditor
 {
-    /// <summary>
-    /// One user row in the user audit list: UserId, UserName, Teams, Profiles, WorkflowCount, LogCount.
-    /// </summary>
     public record UserAuditorSummaryDto
     {
         public Guid UserId { get; init; }

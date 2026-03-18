@@ -10,17 +10,11 @@ using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Repository.Audit
 {
-    /// <summary>
-    /// Repository for audit data. Reads from AuditCards and related entities to support document, workflow, and user audit summaries and details.
-    /// </summary>
     public class AuditorRepository : IAuditorRepository
     {
         private const int DefaultTake = 10;
         private readonly ApplicationDbContext _context;
 
-        /// <summary>
-        /// Initializes the auditor repository with the application database context.
-        /// </summary>
         public AuditorRepository(ApplicationDbContext context)
         {
             _context = context;
