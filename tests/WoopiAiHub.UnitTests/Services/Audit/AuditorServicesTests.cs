@@ -89,15 +89,16 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             Assert.False(result.Items.First().IsFinalized);
         }
 
-        [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should pass take, skip, search and isFinalized to repository")]
+        [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should pass take+1, skip, search and isFinalized to repository")]
         [Trait("AuditorServices", "FindDocumentsAuditSummaryAsync")]
         public async Task FindDocumentsAuditSummaryAsync_PassesParametersToRepository()
         {
-            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(5, 0, "test", true)).ReturnsAsync(new List<int>());
+            // Service requests take+1 from repository to detect HasMore
+            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(6, 0, "test", true)).ReturnsAsync(new List<int>());
 
             await _service.FindDocumentsAuditSummaryAsync(5, 0, "test", true);
 
-            _auditorRepositoryMock.Verify(r => r.FindDocumentIdsForDocumentsSummaryAsync(5, 0, "test", true), Times.Once);
+            _auditorRepositoryMock.Verify(r => r.FindDocumentIdsForDocumentsSummaryAsync(6, 0, "test", true), Times.Once);
         }
 
         [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should throw AppException when repository throws")]
@@ -195,7 +196,8 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 new() { WorkflowId = 10, DocumentId = 2, WorkflowName = "WF1", TeamId = 5, TeamName = "Team1", ProfileId = 2, ProfileName = "Profile1" },
                 new() { WorkflowId = 10, DocumentId = 1, WorkflowName = "WF1", TeamId = 5, TeamName = "Team1", ProfileId = 2, ProfileName = "Profile1" }
             };
-            _auditorRepositoryMock.Setup(r => r.FindWorkflowIdsForWorkflowSummaryAsync(10, 0, null)).ReturnsAsync(workflowIds);
+            // Service requests take+1 from repository to detect HasMore
+            _auditorRepositoryMock.Setup(r => r.FindWorkflowIdsForWorkflowSummaryAsync(11, 0, null)).ReturnsAsync(workflowIds);
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForWorkflowSummaryAsync(It.IsAny<IReadOnlyList<int>>())).ReturnsAsync(auditRows);
 
             var result = await _service.FindWorkflowAuditSummaryAsync(10);
@@ -305,7 +307,8 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 new() { UserId = userId, UserName = "User1", WorkflowId = 10, Teams = teams, ProfileId = 2, ProfileName = "Profile1" },
                 new() { UserId = userId, UserName = "User1", WorkflowId = 20, Teams = teams, ProfileId = 2, ProfileName = "Profile1" }
             };
-            _auditorRepositoryMock.Setup(r => r.FindUserIdsForUserSummaryAsync(10, 0, null, null)).ReturnsAsync(userIds);
+            // Service requests take+1 from repository to detect HasMore
+            _auditorRepositoryMock.Setup(r => r.FindUserIdsForUserSummaryAsync(11, 0, null, null)).ReturnsAsync(userIds);
             _auditorRepositoryMock.Setup(r => r.FindAuditRowsForUserSummaryAsync(It.IsAny<IReadOnlyList<Guid>>())).ReturnsAsync(auditRows);
 
             var result = await _service.FindUserAuditSummaryAsync(10);
