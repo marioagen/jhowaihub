@@ -25,7 +25,6 @@
             </div>
             <template v-else>
                 <div class="user-detail-content p-3 d-flex flex-column flex-grow-1 min-h-0">
-                    <!-- 1. User profile card -->
                     <div
                         class="user-detail-profile-card rounded-2 p-3 mb-3 border d-flex align-items-center"
                     >
@@ -82,14 +81,16 @@
                             </div>
                         </div>
                         <div
-                            v-for="act in logCountOnly3And13"
-                            :key="act.actionTypeCode"
+                            v-for="action in logCountOnly3And13"
+                            :key="action.actionTypeCode"
                             class="col-6 col-md-3"
                         >
                             <div
                                 class="user-detail-stat-card rounded-2 p-2 border d-flex flex-column align-items-center text-center"
                             >
-                                <span class="user-detail-stat-value fw-bold">{{ act.count }}</span>
+                                <span class="user-detail-stat-value fw-bold">
+                                    {{ action.count }}
+                                </span>
                                 <span class="small text-muted">{{ act.label }}</span>
                             </div>
                         </div>
@@ -157,22 +158,21 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-start">
                                         <li
-                                            v-for="opt in actionFilterOptions"
-                                            :key="opt.value"
+                                            v-for="action in actionFilterOptions"
+                                            :key="action.value"
                                         >
                                             <a
                                                 class="dropdown-item"
                                                 href="#"
-                                                @click.prevent="setActionFilter(opt.value)"
+                                                @click.prevent="setActionFilter(action.value)"
                                             >
-                                                {{ opt.label }}
+                                                {{ action.label }}
                                             </a>
                                         </li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
-                        <!-- Search row -->
                         <div class="mb-2">
                             <div class="input-group input-group-sm user-detail-filter">
                                 <span class="input-group-text border-end-0 py-1">
@@ -210,7 +210,6 @@
                                         />
                                     </span>
                                     <div class="min-w-0 flex-grow-1 user-activity-card-content">
-                                        <!-- Line 1: document name + action tag -->
                                         <div class="d-flex align-items-center flex-wrap gap-1 mb-1">
                                             <span class="user-activity-doc-title small fw-bold">
                                                 {{ entry.cardName }}

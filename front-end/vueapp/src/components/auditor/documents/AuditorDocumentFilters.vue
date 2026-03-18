@@ -55,15 +55,15 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-start">
                 <li
-                    v-for="opt in statusList"
-                    :key="opt.value"
+                    v-for="status in statusList"
+                    :key="status.value"
                 >
                     <a
                         class="dropdown-item"
                         href="#"
-                        @click.prevent="onStatusSelect(opt.value)"
+                        @click.prevent="onStatusSelect(status.value)"
                     >
-                        {{ opt.label }}
+                        {{ status.label }}
                     </a>
                 </li>
             </ul>
@@ -71,21 +71,17 @@
     </div>
 </template>
 <script>
-    import LucideIcon from "@/components/global/LucideIcon.vue";
+    import { buildSelectOptionsWithAll } from "@/utils/selectOptions";
 
     export default {
         name: "AuditorDocumentFilters",
-        components: {
-            LucideIcon,
-        },
         emits: ["filter"],
         data() {
             return {
-                statusList: [
-                    { value: "", label: "Todos os status" },
-                    { value: "ativo", label: "Ativo" },
-                    { value: "finalizado", label: "Finalizado" },
-                ],
+                statusList: buildSelectOptionsWithAll(WorkflowStatusOptions, this.$t, {
+                    allLabelKey: "auditor.documents.filters.allStatus",
+                    labelKeyPrefix: "auditor.documents.filters.statuses.",
+                }),
                 filters: {
                     search: "",
                     statusId: "",

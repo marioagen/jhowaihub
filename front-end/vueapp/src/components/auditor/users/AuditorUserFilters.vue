@@ -55,15 +55,15 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-start">
                 <li
-                    v-for="opt in teamList"
-                    :key="opt.value"
+                    v-for="team in teamList"
+                    :key="team.value"
                 >
                     <a
                         class="dropdown-item"
                         href="#"
-                        @click.prevent="onTeamSelect(opt.value)"
+                        @click.prevent="onTeamSelect(team.value)"
                     >
-                        {{ opt.label }}
+                        {{ team.label }}
                     </a>
                 </li>
             </ul>

@@ -41,11 +41,6 @@
                     search: "",
                     statusId: "",
                 },
-                statusFilterOptions: [
-                    { value: "", label: "Todos os status" },
-                    { value: "ativo", label: "Ativo" },
-                    { value: "finalizado", label: "Finalizado" },
-                ],
                 selectedDocument: null,
             };
         },

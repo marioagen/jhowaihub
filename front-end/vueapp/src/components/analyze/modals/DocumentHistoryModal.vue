@@ -39,7 +39,6 @@
                     {{ $t("analyze.documentHistoryModal.noDocument") }}
                 </div>
                 <template v-else>
-                    <!-- Toolbar: search + sort -->
                     <div class="document-history-toolbar row g-2 align-items-center mb-3">
                         <div class="col">
                             <div class="input-group input-group-sm">
@@ -80,7 +79,6 @@
                         </div>
                     </div>
 
-                    <!-- Timeline list -->
                     <div class="document-history-timeline">
                         <div
                             v-if="isLoading"
@@ -104,7 +102,6 @@
                                     :key="index"
                                     class="document-history-card"
                                 >
-                                    <!-- <div class="document-history-card-line" /> -->
                                     <div
                                         class="document-history-card-content card border rounded-2 p-2"
                                     >
@@ -171,6 +168,7 @@
         </template>
     </ModalComponent>
 </template>
+
 <script>
     import ModalComponent from "@/components/global/ModalComponent.vue";
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
@@ -198,18 +196,14 @@
         },
         computed: {
             changesCountLabel() {
-                const n = this.documentHistory.length;
-                return this.$t("analyze.documentHistoryModal.changesCount", { count: n });
+                const length = this.documentHistory.length;
+                return this.$t("analyze.documentHistoryModal.changesCount", { count: length });
             },
         },
         methods: {
             open(documentId, workflowId) {
                 this.documentId = documentId ?? null;
                 this.workflowId = workflowId ?? null;
-                this.documentName = null;
-                this.searchQuery = "";
-                this.orderDescending = true;
-                this.documentHistory = [];
                 this.$refs.documentHistoryModalRef?.open();
                 if (this.documentId && this.workflowId) {
                     this.getDocumentHistory();
@@ -256,6 +250,7 @@
         },
     };
 </script>
+
 <style scoped>
     .document-history-modal-icon {
         width: 48px;

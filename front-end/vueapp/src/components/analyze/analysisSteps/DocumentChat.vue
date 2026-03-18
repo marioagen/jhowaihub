@@ -178,7 +178,7 @@
     import DocumentQuestionnaireServices from "@/services/documents/DocumentQuestionnaireServices";
     import DocumentHistoryServices from "@/services/documents/DocumentHistoryServices";
     import QuizzesService from "@/services/quizzes/QuizzesService";
-    import QuestionsHistoryModal from "@/components/analyze/QuestionsHistoryModal.vue";
+    import QuestionsHistoryModal from "@/components/analyze/modals/QuestionsHistoryModal.vue";
 
     export default {
         name: "DocumentChat",

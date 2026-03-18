@@ -1,6 +1,5 @@
 <template>
     <div class="card-body d-flex flex-column p-0">
-        <!-- Placeholder when no workflow selected -->
         <template v-if="!selectedWorkflow">
             <div
                 class="d-flex flex-column align-items-center justify-content-center min-vh-50 py-5"
@@ -17,8 +16,6 @@
                 </p>
             </div>
         </template>
-
-        <!-- Detail content when workflow selected -->
         <template v-else>
             <div
                 v-if="isLoading"
@@ -30,7 +27,6 @@
                 v-else
                 class="workflow-detail-content p-3 d-flex flex-column flex-grow-1 min-h-0"
             >
-                <!-- 1. Summary cards -->
                 <div class="row g-2 mb-3">
                     <div class="col-4">
                         <div
@@ -79,7 +75,6 @@
                     </div>
                 </div>
 
-                <!-- 2. Distribuição por Etapa -->
                 <div class="mb-3">
                     <h6 class="small fw-semibold text-muted mb-2 d-flex align-items-center gap-1">
                         <LucideIcon
@@ -116,7 +111,6 @@
                     </div>
                 </div>
 
-                <!-- 3. Timeline Processual -->
                 <div class="workflow-timeline-section d-flex flex-column flex-grow-1 min-h-0">
                     <div
                         class="d-flex align-items-center flex-wrap justify-content-between gap-2 mb-2"
@@ -310,36 +304,11 @@
 <script>
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
-    import LucideIcon from "@/components/global/LucideIcon.vue";
     import auditActionHelper from "@/helpers/auditActionHelper";
     import AuditorsService from "@/services/auditors/AuditorsService";
     import dateHelper from "@/helpers/date.js";
+    import { mapCardsToTimelineEntries, mapStepsToStages } from "@/utils/workflowUtils.js";
 
-    function mapCardsToTimelineEntries(cards) {
-        if (!Array.isArray(cards)) return [];
-        return cards.map((c, i) => ({
-            id: `e-${c.cardId}-${i}-${c.created}`,
-            userName: c.userName ?? "",
-            actionName: c.actionType ?? "",
-            documentName: c.cardName ?? "",
-            created: c.created,
-            stepName: c.stepName ?? "",
-            stageName: c.stepName ?? "",
-            stageId: String(c.stepId ?? ""),
-        }));
-    }
-
-    function mapStepsToStages(stepsCount) {
-        if (!Array.isArray(stepsCount) || stepsCount.length === 0) return [];
-        return stepsCount.map((s, i) => ({
-            id: String(s.stepId ?? i),
-            name: s.stepName ?? "",
-            count: s.documentCount ?? 0,
-            isTerminal: i === stepsCount.length - 1,
-        }));
-    }
-
-    /** Maps UI action slug to AuditCardActionType enum value for the API. */
     const ACTION_SLUG_TO_TYPE = {
         avancar: 3,
         editar: 4,
@@ -350,7 +319,7 @@
 
     export default {
         name: "AuditorWorkflowDetail",
-        components: { BadgeComponent, LoadingComponent, LucideIcon },
+        components: { BadgeComponent, LoadingComponent },
         props: {
             selectedWorkflow: {
                 type: Object,
@@ -432,33 +401,43 @@
             },
             loadMoreTimeline() {
                 this.timelineDisplayedLimit += 10;
-                this.refreshWithCurrentDocument(false);
+                this.getWorkflowDetail(false);
             },
             onFilterInput() {
                 if (this.inputDebounceTimer) clearTimeout(this.inputDebounceTimer);
                 this.inputDebounceTimer = setTimeout(() => {
                     this.inputDebounceTimer = null;
-                    this.refreshWithCurrentDocument();
+                    this.getWorkflowDetail();
                 }, 300);
             },
             applyOrderAndRefresh() {
                 this.filter.orderDescending = !this.filter.orderDescending;
-                this.refreshWithCurrentDocument();
+                this.getWorkflowDetail();
             },
             applyStepFilter(stepId) {
                 this.filter.stepId = stepId;
-                this.refreshWithCurrentDocument();
+                this.getWorkflowDetail();
             },
             applyActionFilter(actionType) {
                 this.filter.actionType = actionType;
-                this.refreshWithCurrentDocument();
+                this.getWorkflowDetail();
             },
-            async refreshWithCurrentDocument(resetTimelineLimit = true) {
+            refreshWithCurrentDocument(resetTimelineLimit = true) {
+                return this.getWorkflowDetail(resetTimelineLimit);
+            },
+            async getWorkflowDetail(resetTimelineLimit = true) {
                 if (this.selectedWorkflow?.workflowId == null) {
                     this.workflowDetail = null;
                     return;
                 }
-                if (resetTimelineLimit) this.timelineDisplayedLimit = 10;
+                if (resetTimelineLimit) {
+                    this.filter.input = "";
+                    this.filter.stepId = "";
+                    this.filter.actionType = "";
+                    this.filter.orderDescending = true;
+                    this.timelineDisplayedLimit = 10;
+                    this.workflowDetail = null;
+                }
                 this.isLoading = true;
                 const params = {
                     take: this.timelineDisplayedLimit,

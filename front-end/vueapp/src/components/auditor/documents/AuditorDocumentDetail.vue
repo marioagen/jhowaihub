@@ -1,10 +1,7 @@
 <template>
     <div class="card-body d-flex flex-column p-0">
-        <!-- Prop not null: branch on workflow count -->
         <template v-if="selectedDocument != null">
-            <!-- More than 1 workflow: show workflow selection flow -->
             <template v-if="hasMultipleWorkflows">
-                <!-- Workflow selection screen -->
                 <template v-if="mustSelectWorkflow && !isLoading">
                     <div class="p-3">
                         <h6
@@ -24,7 +21,6 @@
                                 })
                             }}
                         </p>
-                        <!-- Document info card (not clickable) -->
                         <div class="workflow-select-card rounded-2 p-2 mb-2 border">
                             <div class="d-flex align-items-start gap-2">
                                 <span
@@ -53,12 +49,11 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Workflow cards (clickable) -->
                         <div
-                            v-for="wf in selectedDocumentWorkflows"
-                            :key="wf.id ?? wf.Id"
+                            v-for="workflow in selectedDocumentWorkflows"
+                            :key="workflow.id ?? workflow.Id"
                             class="workflow-select-card workflow-select-card-clickable rounded-2 p-2 mb-2 border cursor-pointer d-flex align-items-center gap-2"
-                            @click="onSelectWorkflow(wf)"
+                            @click="onSelectWorkflow(workflow)"
                         >
                             <span
                                 class="workflow-wf-icon d-inline-flex align-items-center justify-content-center flex-shrink-0"
@@ -70,23 +65,27 @@
                             </span>
                             <div class="min-w-0 flex-grow-1">
                                 <div class="workflow-select-card-title fw-semibold">
-                                    {{ wf.name }}
+                                    {{ workflow.name }}
                                 </div>
                                 <div class="small text-muted">
-                                    <template v-if="wf.stepName">
-                                        {{ $t("auditor.documents.detail.step") }}: {{ wf.stepName }}
+                                    <template v-if="workflow.stepName">
+                                        {{ $t("auditor.documents.detail.step") }}:
+                                        {{ workflow.stepName }}
                                     </template>
                                     <template v-else>
-                                        {{ $t("auditor.documents.detail.workflowId") }}: {{ wf.id }}
+                                        {{ $t("auditor.documents.detail.workflowId") }}:
+                                        {{ workflow.id }}
                                     </template>
                                 </div>
                                 <div
-                                    v-if="wf.lastAction || wf.lastActionTimestamp"
+                                    v-if="workflow.lastAction || workflow.lastActionTimestamp"
                                     class="small text-muted"
                                 >
                                     {{ $t("auditor.documents.detail.lastAction") }}:
-                                    {{ wf.lastAction ?? "—" }}
-                                    <span class="ms-1">{{ wf.lastActionTimestamp ?? "" }}</span>
+                                    {{ workflow.lastAction ?? "—" }}
+                                    <span class="ms-1">
+                                        {{ workflow.lastActionTimestamp ?? "" }}
+                                    </span>
                                 </div>
                             </div>
                             <LucideIcon
@@ -97,14 +96,12 @@
                         </div>
                     </div>
                 </template>
-                <!-- Loading after workflow selected -->
                 <div
                     v-else-if="isLoading"
                     class="d-flex align-items-center justify-content-center flex-grow-1 min-vh-50 p-5"
                 >
                     <LoadingComponent />
                 </div>
-                <!-- Detail view with return button -->
                 <template v-else>
                     <div class="p-3 border-bottom">
                         <div
@@ -214,15 +211,17 @@
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-start">
                                             <li
-                                                v-for="opt in actionFilterOptions"
-                                                :key="opt.value == null ? 'all' : opt.value"
+                                                v-for="action in actionFilterOptions"
+                                                :key="action.value == null ? 'all' : action.value"
                                             >
                                                 <a
                                                     class="dropdown-item"
                                                     href="#"
-                                                    @click.prevent="setActionAndRefresh(opt.value)"
+                                                    @click.prevent="
+                                                        setActionAndRefresh(action.value)
+                                                    "
                                                 >
-                                                    {{ opt.label }}
+                                                    {{ action.label }}
                                                 </a>
                                             </li>
                                         </ul>
@@ -243,6 +242,7 @@
                                 :placeholder="$t('auditor.documents.detail.searchPlaceholder')"
                                 :aria-label="$t('auditor.documents.detail.searchAria')"
                                 v-model="historySearchInput"
+                                @input="onHistorySearchInput"
                             />
                         </div>
                     </div>
@@ -318,8 +318,6 @@
                     </div>
                 </template>
             </template>
-
-            <!-- 1 or 0 workflows: render details part only (or loading) -->
             <template v-else>
                 <div
                     v-if="isLoading"
@@ -448,6 +446,7 @@
                                 :placeholder="$t('auditor.documents.detail.searchPlaceholder')"
                                 :aria-label="$t('auditor.documents.detail.searchAria')"
                                 v-model="historySearchInput"
+                                @input="onHistorySearchInput"
                             />
                         </div>
                     </div>
@@ -517,15 +516,13 @@
                                 class="btn btn-outline-primary btn-sm"
                                 @click="loadMoreHistory"
                             >
-                                Carregar mais
+                                {{ $t("auditor.documents.detail.loadMore") }}
                             </button>
                         </div>
                     </div>
                 </template>
             </template>
         </template>
-
-        <!-- Prop null: empty state -->
         <template v-else>
             <div class="d-flex align-items-center justify-content-center flex-grow-1 min-vh-50 p-4">
                 <div class="text-center text-muted py-5">
@@ -544,8 +541,8 @@
 <script>
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
-    import LucideIcon from "@/components/global/LucideIcon.vue";
-    import auditActionHelper from "@/helpers/auditActionHelper";
+    import auditActionHelper, { AuditActionTypeOptions } from "@/helpers/auditActionHelper";
+    import { buildSelectOptionsWithAll } from "@/utils/selectOptions";
     import AuditorsService from "@/services/auditors/AuditorsService";
     import dateHelper from "@/helpers/date.js";
 
@@ -554,7 +551,6 @@
         components: {
             BadgeComponent,
             LoadingComponent,
-            LucideIcon,
         },
         props: {
             selectedDocument: {
@@ -571,7 +567,6 @@
                 isLoading: false,
                 mustSelectWorkflow: false,
                 selectedWorkflowId: null,
-                /** Full document audit detail from API: { documentId, documentName, workflowId, workflowName, documentHistory } */
                 documentAuditDetail: null,
                 displayedLimit: 10,
                 stageFilterOptions: [],
@@ -584,12 +579,10 @@
         },
         computed: {
             actionFilterOptions() {
-                const t = this.$t;
-                return [
-                    { value: null, label: t("auditor.documents.detail.allActions") },
-                    { value: 0, label: t("auditor.documents.detail.actionUpload") },
-                    { value: 8, label: t("auditor.documents.detail.actionDelete") },
-                ];
+                return buildSelectOptionsWithAll(AuditActionTypeOptions, this.$t, {
+                    allLabelKey: "auditor.documents.detail.allActions",
+                    labelKeyPrefix: "auditor.documents.detail.actionTypes.",
+                });
             },
             selectedActionLabel() {
                 const opt = this.actionFilterOptions.find(
@@ -673,6 +666,19 @@
                 this.orderDescending = !this.orderDescending;
                 this.getDocumentAuditDetail();
             },
+            onHistorySearchInput() {
+                if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+                this.searchDebounceTimer = setTimeout(() => {
+                    this.searchDebounceTimer = null;
+                    if (
+                        this.selectedDocument != null &&
+                        !this.mustSelectWorkflow &&
+                        !this.isLoading
+                    ) {
+                        this.getDocumentAuditDetail();
+                    }
+                }, 300);
+            },
             loadMoreHistory() {
                 this.displayedLimit += 10;
                 this.getDocumentAuditDetail();
@@ -745,21 +751,6 @@
                 } finally {
                     this.isLoading = false;
                 }
-            },
-        },
-        watch: {
-            historySearchInput() {
-                if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
-                this.searchDebounceTimer = setTimeout(() => {
-                    this.searchDebounceTimer = null;
-                    if (
-                        this.selectedDocument != null &&
-                        !this.mustSelectWorkflow &&
-                        !this.isLoading
-                    ) {
-                        this.getDocumentAuditDetail();
-                    }
-                }, 300);
             },
         },
         async created() {

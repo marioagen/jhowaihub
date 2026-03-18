@@ -73,8 +73,8 @@
                                 <div class="small text-primary mb-0">
                                     <template v-if="topWorkflows(item).length > 0">
                                         <div
-                                            v-for="wf in topWorkflows(item)"
-                                            :key="wf.id ?? wf.name"
+                                            v-for="workflow in topWorkflows(item)"
+                                            :key="workflow.id ?? workflow.name"
                                             class="d-flex align-items-center gap-1"
                                         >
                                             <LucideIcon
@@ -82,7 +82,9 @@
                                                 :size="12"
                                                 class="flex-shrink-0"
                                             />
-                                            <span class="text-break">{{ wf.name || "—" }}</span>
+                                            <span class="text-break">
+                                                {{ workflow.name || "—" }}
+                                            </span>
                                         </div>
                                     </template>
                                     <div
@@ -131,7 +133,6 @@
 <script>
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
-    import LucideIcon from "@/components/global/LucideIcon.vue";
     import AuditorsService from "@/services/auditors/AuditorsService";
 
     export default {
@@ -139,7 +140,6 @@
         components: {
             BadgeComponent,
             LoadingComponent,
-            LucideIcon,
         },
         props: {
             filters: {

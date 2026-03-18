@@ -222,13 +222,13 @@
 </template>
 <script>
     import { hasPermission } from "@/utils/permissions";
-    import DocumentRejectionModal from "@/components/analyze/DocumentRejectionModal.vue";
-    import DocumentViewRejectionModal from "@/components/analyze/DocumentViewRejectionModal.vue";
+    import DocumentRejectionModal from "@/components/analyze/modals/DocumentRejectionModal.vue";
+    import DocumentViewRejectionModal from "@/components/analyze/modals/DocumentViewRejectionModal.vue";
     import ResizeColumnsComponent from "@/components/global/ResizeColumnsComponent.vue";
     import PermissionGroups from "@/constants/PermissionGroups";
     import PermissionNames from "@/constants/PermissionNames";
     import DocumentViewer from "@/components/analyze/DocumentViewer.vue";
-    import DocumentHistoryModal from "@/components/analyze/DocumentHistoryModal.vue";
+    import DocumentHistoryModal from "@/components/analyze/modals/DocumentHistoryModal.vue";
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import CardsServices from "@/services/cards/CardsServices";
