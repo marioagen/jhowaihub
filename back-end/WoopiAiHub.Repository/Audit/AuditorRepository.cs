@@ -112,15 +112,15 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns up to <paramref name="take"/> audit rows for the given document and workflow. Optional filters: search (user/document/action/step name), userId, actionType, stepId. Ordered by Created (asc or desc).
+        /// Applies search (user/document/card/action/step name), userId, actionType, and stepId filters to a document-detail AuditCards query.
         /// </summary>
-        public async Task<List<DocumentAuditorDetailRowDto>> FindAuditRowsForDocumentDetailAsync(int documentId, int workflowId, int take, string? search, Guid? userId, int? actionType, int? stepId, bool orderDescending)
+        private static IQueryable<AuditCard> ApplyDocumentDetailFilters(
+            IQueryable<AuditCard> query,
+            string? search,
+            Guid? userId,
+            int? actionType,
+            int? stepId)
         {
-            if (take <= 0) take = DefaultTake;
-
-            var query = _context.AuditCards.AsNoTracking()
-                .Where(a => a.DocumentId == documentId && a.WorkflowId == workflowId);
-
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchTerm = search!.Trim();
@@ -138,6 +138,20 @@ namespace WoopiAiHub.Repository.Audit
                 query = query.Where(a => (int)a.ActionType == actionType.Value);
             if (stepId.HasValue)
                 query = query.Where(a => a.Card != null && a.Card.StepId == stepId.Value);
+
+            return query;
+        }
+
+        /// <summary>
+        /// Returns up to <paramref name="take"/> audit rows for the given document and workflow. Optional filters: search (user/document/action/step name), userId, actionType, stepId. Ordered by Created (asc or desc).
+        /// </summary>
+        public async Task<List<DocumentAuditorDetailRowDto>> FindAuditRowsForDocumentDetailAsync(int documentId, int workflowId, int take, string? search, Guid? userId, int? actionType, int? stepId, bool orderDescending)
+        {
+            if (take <= 0) take = DefaultTake;
+
+            var query = _context.AuditCards.AsNoTracking()
+                .Where(a => a.DocumentId == documentId && a.WorkflowId == workflowId);
+            query = ApplyDocumentDetailFilters(query, search, userId, actionType, stepId);
 
             var ordered = orderDescending
                 ? query.OrderByDescending(a => a.Created)
@@ -220,14 +234,14 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns all audit rows for the given workflow. Optional filters: search (user/card/step/action name), stepId, actionType. Ordered by Created (asc or desc). Projects to WorkflowAuditorDetailsRowDto.
+        /// Applies search (user/card/step/action name), stepId, and actionType filters to a workflow-details AuditCards query.
         /// </summary>
-        public async Task<List<WorkflowAuditorDetailsRowDto>> FindAuditRowsForWorkflowDetailsAsync(int workflowId, string? search, int? stepId, int? actionType, bool orderDescending)
+        private static IQueryable<AuditCard> ApplyWorkflowDetailsFilters(
+            IQueryable<AuditCard> query,
+            string? search,
+            int? stepId,
+            int? actionType)
         {
-            var query = _context.AuditCards
-                .AsNoTracking()
-                .Where(a => a.WorkflowId == workflowId);
-
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchTerm = search!.Trim();
@@ -243,6 +257,19 @@ namespace WoopiAiHub.Repository.Audit
 
             if (actionType.HasValue)
                 query = query.Where(a => (int)a.ActionType == actionType.Value);
+
+            return query;
+        }
+
+        /// <summary>
+        /// Returns all audit rows for the given workflow. Optional filters: search (user/card/step/action name), stepId, actionType. Ordered by Created (asc or desc). Projects to WorkflowAuditorDetailsRowDto.
+        /// </summary>
+        public async Task<List<WorkflowAuditorDetailsRowDto>> FindAuditRowsForWorkflowDetailsAsync(int workflowId, string? search, int? stepId, int? actionType, bool orderDescending)
+        {
+            var query = _context.AuditCards
+                .AsNoTracking()
+                .Where(a => a.WorkflowId == workflowId);
+            query = ApplyWorkflowDetailsFilters(query, search, stepId, actionType);
 
             var ordered = orderDescending
                 ? query.OrderByDescending(a => a.Created)
@@ -326,16 +353,13 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns up to <paramref name="take"/> audit rows for the given user. Optional filters: search (card/workflow/action name), actionTypeCode. Ordered by Created (asc or desc). Projects to UserAuditorDetailsRowDto.
+        /// Applies search (card/workflow/action name) and actionTypeCode filters to a user-details AuditCards query.
         /// </summary>
-        public async Task<List<UserAuditorDetailsRowDto>> FindAuditRowsForUserDetailsAsync(Guid userId, int take, string? search, int? actionTypeCode, bool orderDescending)
+        private static IQueryable<AuditCard> ApplyUserDetailsFilters(
+            IQueryable<AuditCard> query,
+            string? search,
+            int? actionTypeCode)
         {
-            if (take <= 0) take = DefaultTake;
-
-            var query = _context.AuditCards
-                .AsNoTracking()
-                .Where(a => a.UserId == userId);
-
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchTerm = search!.Trim();
@@ -347,6 +371,21 @@ namespace WoopiAiHub.Repository.Audit
 
             if (actionTypeCode.HasValue)
                 query = query.Where(a => (int)a.ActionType == actionTypeCode.Value);
+
+            return query;
+        }
+
+        /// <summary>
+        /// Returns up to <paramref name="take"/> audit rows for the given user. Optional filters: search (card/workflow/action name), actionTypeCode. Ordered by Created (asc or desc). Projects to UserAuditorDetailsRowDto.
+        /// </summary>
+        public async Task<List<UserAuditorDetailsRowDto>> FindAuditRowsForUserDetailsAsync(Guid userId, int take, string? search, int? actionTypeCode, bool orderDescending)
+        {
+            if (take <= 0) take = DefaultTake;
+
+            var query = _context.AuditCards
+                .AsNoTracking()
+                .Where(a => a.UserId == userId);
+            query = ApplyUserDetailsFilters(query, search, actionTypeCode);
 
             var projected = query
                 .Select(a => new UserAuditorDetailsRowDto
