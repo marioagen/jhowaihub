@@ -37,11 +37,11 @@ namespace WoopiAiHub.Repository.Audit
         /// </summary>
         public async Task DeleteByCardIdsAsync(List<int> cardIds)
         {
-            if (cardIds == null || !cardIds.Any())
+            if (cardIds == null || cardIds.Count == 0)
                 return;
 
             var auditCards = await _context.AuditCards.Where(ac => cardIds.Contains(ac.CardId)).ToListAsync();
-            if (auditCards.Any())
+            if (auditCards.Count > 0)
             {
                 _context.AuditCards.RemoveRange(auditCards);
                 await _context.SaveChangesAsync();

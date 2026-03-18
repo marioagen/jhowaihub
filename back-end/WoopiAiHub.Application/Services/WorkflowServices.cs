@@ -660,7 +660,7 @@ namespace WoopiAiHub.Application.Services
                     .ToList();
 
 
-                if (stepsToRemove.Any())
+                if (stepsToRemove.Count > 0)
                 {
                     var cardsCount = await _cardRepository.CountByStepsInUse(stepsToRemove.Select(s => s.Id).ToList());
                     if (cardsCount > 0)
@@ -760,7 +760,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="stepsToRemove">The list of steps that are being removed in this phase update.</param>
         private async Task ResetStepToolDataAsync(Workflow workflow, bool resetDocuments, List<Step> stepsToRemove)
         {
-            if (!resetDocuments || !stepsToRemove.Any())
+            if (!resetDocuments || stepsToRemove.Count == 0)
                 return;
 
             var minRemovedOrder = stepsToRemove.Min(s => s.Order);
@@ -780,52 +780,70 @@ namespace WoopiAiHub.Application.Services
         /// <returns>A task that represents the asynchronous reset operation.</returns>
         private async Task ResetSteps(List<Step> stepsToReset)
         {
-            // Fase 1: coletar todos os IDs necessários
             var allStepToolIds = new List<int>();
             var allCardIds = new List<int>();
 
             foreach (var step in stepsToReset)
             {
-                if (step.Cards != null && step.Cards.Any())
+                if (step.Cards != null && step.Cards.Count > 0)
                 {
                     allCardIds.AddRange(step.Cards.Select(c => c.Id));
                 }
 
                 var stepToolIds = step.StepTools.Select(st => st.Id).ToList();
-                if (stepToolIds.Any())
+                if (stepToolIds.Count > 0)
                 {
                     allStepToolIds.AddRange(stepToolIds);
                 }
             }
 
-            await DeleteRelatedStepData(stepsToReset, allStepToolIds, allCardIds);
+            await DeleteRelatedStepData(allStepToolIds, allCardIds);
         }
 
-        private async Task DeleteRelatedStepData(List<Step> stepsToReset, List<int> allStepToolIds, List<int> allCardIds)
+        /// <summary>
+        /// Deletes data associated with the specified step tool and card identifiers.
+        /// </summary>
+        /// <param name="allStepToolIds">A list of step tool identifiers for which related data will be deleted. Cannot be null.</param>
+        /// <param name="allCardIds">A list of card identifiers for which related step data will be deleted. Cannot be null.</param>
+        /// <returns>A task that represents the asynchronous delete operation.</returns>
+        private async Task DeleteRelatedStepData(List<int> allStepToolIds, List<int> allCardIds)
         {
             await DeleteStepToolRelatedData(allStepToolIds);
 
             await DeleteRelatedStepsCardData(allCardIds);
         }
 
+        /// <summary>
+        /// Deletes all step tool execution, step tool output, audit card, and card data associated with the specified
+        /// card IDs.
+        /// </summary>
+        /// <remarks>This method removes data from multiple repositories based on the provided card IDs.
+        /// If the list is empty, no action is taken.</remarks>
+        /// <param name="allCardIds">A list of card IDs for which related step and card data will be deleted. Must not be null; if empty, no data
+        /// will be deleted.</param>
+        /// <returns>A task that represents the asynchronous delete operation.</returns>
         private async Task DeleteRelatedStepsCardData(List<int> allCardIds)
         {
-            if (allCardIds.Any())
+            if (allCardIds.Count > 0)
             {
                 _stepToolExecutionRepository.DeleteByCardIds(allCardIds);
                 _stepToolOutputRepository.DeleteByCardIds(allCardIds);
-            }
-
-            if (allCardIds.Any())
-            {
                 await _auditCardRepository.DeleteByCardIdsAsync(allCardIds);
                 _cardRepository.DeleteByIds(allCardIds);
             }
         }
 
+        /// <summary>
+        /// Deletes all data related to the specified step tool identifiers, including parameters, dependencies,
+        /// executions, and outputs.
+        /// </summary>
+        /// <remarks>This method removes all associated data for each provided step tool identifier. If
+        /// the list is empty, no action is taken.</remarks>
+        /// <param name="allStepToolIds">A list of step tool identifiers for which related data will be deleted. The list must not be empty.</param>
+        /// <returns>A task that represents the asynchronous delete operation.</returns>
         private async Task DeleteStepToolRelatedData(List<int> allStepToolIds)
         {
-            if (allStepToolIds.Any())
+            if (allStepToolIds.Count > 0)
             {
                 _stepToolParameterRepository.DeleteByStepToolsIds(allStepToolIds);
                 await _stepToolDependencyRepository.DeleteByStepToolIdAsync(allStepToolIds);
@@ -1457,7 +1475,7 @@ namespace WoopiAiHub.Application.Services
 
             var stepToolIds = step.StepTools.Select(st => st.Id).ToList();
 
-            if (stepToolIds.Any())
+            if (stepToolIds.Count > 0)
             {
                 if (await _stepToolOutputRepository.HasOutputsByStepToolIds(stepToolIds))
                     return true;
