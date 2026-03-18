@@ -34,7 +34,9 @@
                             :class="{
                                 active: currentPhase === index + 1,
                                 completed: index + 1 < currentPhase,
+                                'phase-clickable': isEdit,
                             }"
+                            @click="goToPhase(index + 1)"
                         >
                             <div class="phase-circle">
                                 <LucideIcon
@@ -183,8 +185,11 @@
             },
         },
         setup() {
-            const { validate } = useForm();
-            return { validate };
+            const form = useForm();
+            return {
+                validate: form.validate,
+                meta: form.meta,
+            };
         },
         data() {
             return {
@@ -244,6 +249,65 @@
                             this.loadPhase2Data();
                         }
                     });
+                }
+            },
+            async goToPhase(newPhase) {
+                if (!this.isEdit || newPhase === this.currentPhase) {
+                    return;
+                }
+
+                const navigationCallback = () => {
+                    this.currentPhase = newPhase;
+                    if (newPhase === 1) {
+                        this.loadPhase1Data();
+                    } else if (newPhase === 2) {
+                        this.loadPhase2Data();
+                    } else if (newPhase === 3) {
+                        this.loadPhase3Data();
+                    }
+                };
+
+                if (newPhase < this.currentPhase) {
+                    const isValid = await this.validate();
+                    if (!isValid.valid) {
+                        return this.$notify({
+                            title: "workflow.index",
+                            message: "validation.hasInvalid",
+                            variant: "warning",
+                            icon: "CircleAlert",
+                        });
+                    }
+
+                    if (this.meta.dirty) {
+                        this.checkNavigation(navigationCallback);
+                    } else {
+                        navigationCallback();
+                    }
+                } else if (newPhase === this.currentPhase + 1) {
+                    await this.nextPhase();
+                } else if (newPhase > this.currentPhase) {
+                    const isValid = await this.validate();
+                    if (!isValid.valid) {
+                        return this.$notify({
+                            title: "workflow.index",
+                            message: "validation.hasInvalid",
+                            variant: "warning",
+                            icon: "CircleAlert",
+                        });
+                    }
+
+                    if (this.currentPhase === 1) {
+                        await this.savePhase1();
+                        if (newPhase > 2) {
+                            await this.savePhase2();
+                        }
+                    } else if (this.currentPhase === 2) {
+                        await this.savePhase2();
+                    }
+
+                    if (this.currentPhase <= newPhase) {
+                        navigationCallback();
+                    }
                 }
             },
             async savePhase1() {
@@ -319,7 +383,6 @@
 
                     this.phase2Data = data;
                     this.currentPhase = 3;
-                    // Carrega apenas dados da fase 3
                     await this.loadPhase3Data();
 
                     this.$notify({
@@ -618,7 +681,6 @@
                 }
             },
         },
-
         created() {
             this.loadWorkflowData();
         },
@@ -679,6 +741,16 @@
         max-width: 200px;
     }
 
+    .phase-item.phase-clickable {
+        cursor: pointer;
+    }
+
+    .phase-item.phase-clickable:hover:not(.active) .phase-circle {
+        background-color: #e5eef7;
+        color: #2f80ed;
+        transform: scale(1.05);
+    }
+
     .phase-circle {
         width: 48px;
         height: 48px;
@@ -700,7 +772,7 @@
     }
 
     .phase-item.completed .phase-circle {
-        background-color: var( --color-bg-phase-circle-success)!important;
+        background-color: var(--color-bg-phase-circle-success) !important;
         color: white;
     }
 
@@ -718,7 +790,7 @@
     }
 
     .phase-item.completed .phase-label {
-        color: var( --color-bg-phase-circle-success)!important;
+        color: var(--color-bg-phase-circle-success) !important;
     }
 
     .phase-connector {
@@ -727,11 +799,11 @@
         left: 50%;
         width: 100%;
         height: 2px;
-        background-color: var( --color-bg-phase-circle) !important;
+        background-color: var(--color-bg-phase-circle) !important;
         z-index: 1;
     }
 
     .phase-item.completed .phase-connector {
-        background-color: var( --color-bg-phase-circle-success) !important;
+        background-color: var(--color-bg-phase-circle-success) !important;
     }
 </style>
