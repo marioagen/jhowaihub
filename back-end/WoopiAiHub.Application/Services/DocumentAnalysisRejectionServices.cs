@@ -77,7 +77,7 @@ namespace WoopiAiHub.Application.Services
 
                 Card.UpdateStepAndStatus(cards, dto.StepId, status.Id);
 
-                var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId)).ToList();
+                var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId, c.DocumentId)).ToList();
                 foreach (var card in cards)
                 {
                     card.Step = null;
