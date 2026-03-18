@@ -325,7 +325,17 @@ const portuguese = {
             titleMessage:
                 "Este documento está associado a múltiplas esteiras de processamento.<br>Escolha qual deseja visualizar:",
         },
-        workflows: "Esteira de Processamentos",
+        deleteValidationTitle: "Confirmar exclusão permanente",
+        deleteValidationMessage:
+            "Você está prestes a excluir permanentemente <b>{count} documentos</b> e a esteira \"<b>{name}</b>\". Essa ação é irreversível. Digite <span style='color: red' class='text-danger'><b>{name}</b></span> para confirmar:",
+        deleteValidationPlaceholder: "Digite '{name}' para confirmar",
+        confirmPermanentDelete: "Excluir permanentemente",
+        editValidationTitle: "Existem documentos em andamento nesta esteira",
+        editValidationMessage:
+            "Encontramos <b>{count} documentos</b> sendo processados nesta esteira. Ao salvar as alterações todos os documentos em andamento serão permanentemente excluídos. Digite <span style='color: red' class='text-danger'><b>{name}</b></span> para confirmar:",
+        editValidationPlaceholder: "Digite '{name}' para confirmar alteração",
+        confirmEdit: "Excluir documentos e salvar",
+        workflows: "Esteiras",
         youAreAboutToDeleteDocument: "Você está prestes a deletar <br/> o documento do sistema",
         youAreAboutToDeleteDocumentQuery:
             "Você está prestes a deletar <br/> o histórico de consulta do sistema",
@@ -1045,6 +1055,10 @@ const portuguese = {
         removeError: "Erro ao remover esteira de processamento",
         removeSuccess: "Esteira de processamento removida com sucesso",
         removeToolFlow: "Remover Fluxo",
+        removeToolValidationTitle: "Remover Ferramentas da Etapa",
+        removeToolValidationMessage: "A etapa {name} possui documentos ou dependências vinculadas. Ao confirmar a remoção estes documentos e dependências serão removidos permanentemente, digite o nome da etapa abaixo para confirmar:",
+        removeToolValidationPlaceholder: "Digite '{name}' para confirmar",
+        confirmRemoveTool: "Confirmar remoção",
         responsableTeam: "Time responsável",
         responsible: "Responsável",
         saveChanges: "Salvar Alterações",

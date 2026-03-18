@@ -18,13 +18,13 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// checks if a collection of card IDs exists in the database.
+        /// Counts how many cards are using the provided step ids.
         /// </summary>
-        /// <param name="ids"></param>
-        /// <returns></returns>
-        public async Task<bool> ExistsStepsInUse(ICollection<int> ids)
+        /// <param name="ids">Collection of step ids to check.</param>
+        /// <returns>Number of cards that reference any of the given steps.</returns>
+        public async Task<int> CountByStepsInUse(ICollection<int> ids)
         {
-            return await _context.Cards.Where(a => ids.Contains(a.StepId)).AnyAsync();
+            return await _context.Cards.CountAsync(a => ids.Contains(a.StepId) && a.Enable);
         }
 
         /// <summary>
@@ -167,6 +167,25 @@ namespace WoopiAiHub.Repository
         public bool UpdateList(List<Card> cards)
         {
             _context.Cards.UpdateRange(cards);
+            return _context.SaveChanges() > 0;
+        }
+
+        /// <summary>
+        /// Deletes the specified collection of card entities from the database by their ids.
+        /// </summary>
+        /// <param name="cardIds">A list of card ids to delete. Cannot be null or empty.</param>
+        /// <returns>true if one or more records were deleted successfully; otherwise, false.</returns>
+        public bool DeleteByIds(List<int> cardIds)
+        {
+            if (cardIds == null || cardIds.Count == 0)
+                return false;
+
+            var cards = _context.Cards.Where(c => cardIds.Contains(c.Id)).ToList();
+
+            if (cards.Count == 0)
+                return false;
+
+            _context.Cards.RemoveRange(cards);
             return _context.SaveChanges() > 0;
         }
 

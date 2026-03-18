@@ -164,9 +164,6 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task DeleteById_ShouldDeleteWorkflowAndSteps()
         {
             // Arrange
-            var workflow = WorkflowFixture.FindValidWorkflow();
-
-            _workflowRepositoryMock.Setup(repo => repo.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync(workflow);
             _workflowRepositoryMock.Setup(repo => repo.DeleteById(It.IsAny<int>())).ReturnsAsync(true);
 
             // Act
@@ -174,7 +171,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
-            _workflowRepositoryMock.Verify(repo => repo.FindByIdReturnModel(It.IsAny<int>()), Times.Once);
             _workflowRepositoryMock.Verify(repo => repo.DeleteById(It.IsAny<int>()), Times.Once);
         }
 
@@ -183,13 +179,13 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task DeleteById_ShouldThrowException_WhenWorkflowNotFound()
         {
             // Arrange
-            _workflowRepositoryMock.Setup(repo => repo.FindByIdReturnModel(It.IsAny<int>()))
-                .ReturnsAsync((Workflow?)null);
+            _workflowRepositoryMock.Setup(repo => repo.DeleteById(It.IsAny<int>()))
+                .ThrowsAsync(new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound));
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.DeleteById(1));
 
-            _workflowRepositoryMock.Verify(repo => repo.FindByIdReturnModel(It.IsAny<int>()), Times.Once);
+            _workflowRepositoryMock.Verify(repo => repo.DeleteById(It.IsAny<int>()), Times.Once);
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("Workflow not found", exception.Message);
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
@@ -958,7 +954,7 @@ namespace WoopiAiHub.UnitTests.Services
                 {
                     new StepPhase2Dto
                     {
-                        Id = 1,
+                        Id = 2,
                         Name = "Updated Step 1",
                         Order = 1,
                         ProfileId = stepDto.Profile.Id,
@@ -976,6 +972,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             _stepRepositoryMock.Setup(x => x.FindByIdsWithCards(It.IsAny<IEnumerable<int>>()))
                 .Returns(steps);
+            _cardRepositoryMock.Setup(x => x.CountByStepsInUse(It.IsAny<ICollection<int>>()))
+                .ReturnsAsync(1);
 
             // Act & Assert
             var exception =

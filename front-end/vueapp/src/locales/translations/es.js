@@ -317,6 +317,16 @@ const spanish = {
             titleMessage:
                 "Este documento está asociado a varios flujos de trabajo. Elija cuál desea ver:",
         },
+        deleteValidationTitle: "Confirmar eliminación permanente",
+        deleteValidationMessage:
+            "Está a punto de eliminar permanentemente <b>{count} documentos</b> y el workflow \"<b>{name}</b>\". Esta acción no se puede deshacer. Escriba <span style='color: red' class='text-danger'><b>{name}</b></span> para confirmar:",
+        deleteValidationPlaceholder: "Escriba '{name}' para confirmar",
+        confirmPermanentDelete: "Eliminar permanentemente",
+        editValidationTitle: "Hay documentos en progreso en este flujo de trabajo",
+        editValidationMessage:
+            "Encontramos <b>{count} documentos</b> siendo procesados en este flujo de trabajo. Al guardar los cambios, todos los documentos en progreso serán eliminados permanentemente. Escriba <span style='color: red' class='text-danger'><b>{name}</b></span> para confirmar:",
+        editValidationPlaceholder: "Escriba '{name}' para confirmar cambios",
+        confirmEdit: "Eliminar documentos y guardar",
         workflows: "Workflows",
         youAreAboutToDeleteDocument: "Estás a punto de eliminar <br/> el documento del sistema",
         youAreAboutToDeleteDocumentQuery:
@@ -1038,6 +1048,10 @@ const spanish = {
         removeError: "Error al eliminar workflow",
         removeSuccess: "Workflow eliminado con éxito",
         removeToolFlow: "Eliminar flujo",
+        removeToolValidationTitle: "Eliminar Herramientas de la Etapa",
+        removeToolValidationMessage: "La etapa {name} tiene datos o dependencias vinculadas. Todos los documentos y dependencias serán eliminados permanentemente. Para confirmar la eliminación, escriba el nombre de la etapa a continuación:   ",
+        removeToolValidationPlaceholder: "Escriba '{name}' para confirmar",
+        confirmRemoveTool: "Confirmar eliminación",
         responsableTeam: "Equipo Responsable",
         responsible: "Responsable",
         saveChanges: "Guardar Cambios",

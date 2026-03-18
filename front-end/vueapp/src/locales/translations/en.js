@@ -312,6 +312,16 @@ const english = {
             titleMessage:
                 "This document is associated with multiple workflows. Choose which one you want to view:",
         },
+        deleteValidationTitle: "Confirm permanent deletion",
+        deleteValidationMessage:
+            "You are about to permanently delete <b>{count} documents</b> and the workflow \"<b>{name}</b>\". This action cannot be undone. Type <span style='color: red' class='text-danger'><b>{name}</b></span> to confirm:",
+        deleteValidationPlaceholder: "Type '{name}' to confirm",
+        confirmPermanentDelete: "Permanently delete",
+        editValidationTitle: "There are documents in progress in this workflow",
+        editValidationMessage:
+            "We found <b>{count} documents</b> being processed in this workflow. By saving the changes, all documents and progress will be permanently deleted. Type <span style='color: red' class='text-danger'><b>{name}</b></span> to confirm:",
+        editValidationPlaceholder: "Type '{name}' to confirm changes",
+        confirmEdit: "Delete documents and save",
         workflows: "Workflows",
         youAreAboutToDeleteDocument: "You are about to delete <br/> the document from the system",
         youAreAboutToDeleteDocumentQuery:
@@ -1034,6 +1044,10 @@ const english = {
         removeError: "Error removing workflow",
         removeSuccess: "Workflow removed successfully",
         removeToolFlow: "Remove Flow",
+        removeToolValidationTitle: "Remove Step Tools",
+        removeToolValidationMessage: "The step {name} has linked data or dependencies. All documents and dependencies will be removed permanently. To confirm removal, type the name of the step below:",
+        removeToolValidationPlaceholder: "Type '{name}' to confirm",
+        confirmRemoveTool: "Confirm removal",
         responsableTeam: "Responsible Team",
         responsible: "Responsible",
         saveChanges: "Save Changes",
