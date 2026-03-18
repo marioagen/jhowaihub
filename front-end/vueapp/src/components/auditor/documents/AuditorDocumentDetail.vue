@@ -136,16 +136,11 @@
                                         />
                                         <span class="text-break">{{ workflowDisplayName }}</span>
                                         <BadgeComponent
+                                            :text="documentHistory.length + ' eventos'"
                                             variant="secondary"
                                             size="sm"
                                             :clickable="false"
-                                        >
-                                            <LucideIcon
-                                                icon="ListOrdered"
-                                                :size="12"
-                                            />
-                                            {{ documentHistory.length }}
-                                        </BadgeComponent>
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -338,16 +333,11 @@
                                         />
                                         <span class="text-break">{{ workflowDisplayName }}</span>
                                         <BadgeComponent
+                                            :text="documentHistory.length + ' eventos'"
                                             variant="secondary"
                                             size="sm"
                                             :clickable="false"
-                                        >
-                                            <LucideIcon
-                                                icon="ListOrdered"
-                                                :size="12"
-                                            />
-                                            {{ documentHistory.length }}
-                                        </BadgeComponent>
+                                        />
                                     </div>
                                 </div>
                             </div>

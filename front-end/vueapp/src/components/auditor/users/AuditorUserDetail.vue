@@ -110,7 +110,7 @@
                                 />
                                 Histórico de Atividade
                                 <BadgeComponent
-                                    :text="activityEntries.length"
+                                    :text="activityEntries.length + ' eventos'"
                                     variant="secondary"
                                     size="sm"
                                     :clickable="false"
