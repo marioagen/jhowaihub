@@ -66,6 +66,7 @@
                                         :isFirstStep="step.order === minOrder"
                                         :isLoading="isLoading"
                                         :isLastStep="isLastStep(step)"
+                                        :finalizeStatusId="finalizeStatusId"
                                         @reload="reloadList"
                                         @cardMoved="handleCardMoved"
                                         @cardUpdated="handleCardUpdated"
@@ -83,6 +84,7 @@
 </template>
 <script>
     import KanbanCard from "@/components/documentsHub/workflows/kanban/KanbanCard.vue";
+    import StatusService from "@/services/status/StatusService";
     export default {
         name: "KanbanBoard",
         components: {
@@ -125,6 +127,7 @@
             customClass: "",
             stepsList: [],
             isLastColumnVisible: true,
+            finalizeStatusId: null,
         }),
         computed: {
             minOrder() {
@@ -180,11 +183,18 @@
                 return cards.filter((card) => card.status.id !== 6).length;
             },
         },
-        mounted() {
+        async mounted() {
             this.setCard();
             const savedVisibility = localStorage.getItem("kanban_last_column_visibility");
             if (savedVisibility !== null) {
                 this.isLastColumnVisible = savedVisibility === "true";
+            }
+            const statusResponse = await StatusService.getStatus();
+            if (statusResponse?.error === undefined && Array.isArray(statusResponse)) {
+                const finalize = statusResponse.find(
+                    (s) => s.name && s.name.toLowerCase() === "finalize"
+                );
+                if (finalize) this.finalizeStatusId = finalize.id;
             }
         },
     };

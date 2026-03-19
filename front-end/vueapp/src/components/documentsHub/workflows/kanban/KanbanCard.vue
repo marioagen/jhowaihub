@@ -317,7 +317,6 @@
 </template>
 <script>
     import CardsServices from "@/services/cards/CardsServices";
-    import StatusService from "@/services/status/StatusService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import dates from "@/helpers/date";
 
@@ -334,7 +333,6 @@
             signalrEventStatusChanged: "StatusChanged",
             userSearchText: "",
             filteredUsers: [],
-            finalizeStatusId: null,
         }),
         props: {
             dataCard: {
@@ -361,6 +359,11 @@
                 type: [Array, Object],
                 required: true,
                 default: () => {},
+            },
+            finalizeStatusId: {
+                type: Number,
+                required: false,
+                default: null,
             },
         },
         methods: {
@@ -530,15 +533,8 @@
                 this.reloadList();
             },
         },
-        async mounted() {
+        mounted() {
             this.setUsers();
-            const statusResponse = await StatusService.getStatus();
-            if (statusResponse?.error === undefined && Array.isArray(statusResponse)) {
-                const finalize = statusResponse.find(
-                    (s) => s.name && s.name.toLowerCase() === "finalize"
-                );
-                if (finalize) this.finalizeStatusId = finalize.id;
-            }
         },
         computed: {
             showLoading() {
