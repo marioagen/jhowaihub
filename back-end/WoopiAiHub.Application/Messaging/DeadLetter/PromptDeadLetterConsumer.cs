@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -38,6 +39,11 @@ namespace WoopiAiHub.Application.Messaging.DeadLetter
                 using var scope = _scopeFactory.CreateScope();
                 try
                 {
+                    var connectionString = await GetConnectionStringAsync(scope, message.Tenant!);
+                    var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
+                    httpAccessor.HttpContext ??= new DefaultHttpContext();
+                    httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
+
                     var cardServices = scope.ServiceProvider.GetRequiredService<ICardServices>();
                     await cardServices.SetFailingCard(message.Data.CardId, message.Email);
                 }
