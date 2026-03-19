@@ -34,7 +34,9 @@
                             :class="{
                                 active: currentPhase === index + 1,
                                 completed: index + 1 < currentPhase,
+                                'phase-clickable': isEdit,
                             }"
+                            @click="goToPhase(index + 1)"
                         >
                             <div class="phase-circle">
                                 <LucideIcon
@@ -183,8 +185,11 @@
             },
         },
         setup() {
-            const { validate } = useForm();
-            return { validate };
+            const form = useForm();
+            return {
+                validate: form.validate,
+                meta: form.meta,
+            };
         },
         data() {
             return {
@@ -245,6 +250,78 @@
                         }
                     });
                 }
+            },
+            async goToPhase(newPhase) {
+                if (!this.isEdit || newPhase === this.currentPhase) {
+                    return;
+                }
+
+                if (newPhase < this.currentPhase) {
+                    await this.goBackwardToPhase(newPhase);
+                } else if (newPhase === this.currentPhase + 1) {
+                    await this.nextPhase();
+                } else if (newPhase > this.currentPhase) {
+                    await this.goForwardToPhase(newPhase);
+                }
+            },
+            async goBackwardToPhase(newPhase) {
+                const isValid = await this.validate();
+                if (!isValid.valid) {
+                    this.showValidationError();
+                    return;
+                }
+
+                const navigationCallback = () => this.executeNavigation(newPhase);
+
+                if (this.meta.dirty) {
+                    this.checkNavigation(navigationCallback);
+                } else {
+                    navigationCallback();
+                }
+            },
+            async goForwardToPhase(newPhase) {
+                const isValid = await this.validate();
+                if (!isValid.valid) {
+                    this.showValidationError();
+                    return;
+                }
+
+                await this.saveRequiredPhases(newPhase);
+
+                if (this.currentPhase <= newPhase) {
+                    this.executeNavigation(newPhase);
+                }
+            },
+            async saveRequiredPhases(newPhase) {
+                if (this.currentPhase === 1) {
+                    await this.savePhase1();
+                    if (newPhase > 2) {
+                        await this.savePhase2();
+                    }
+                } else if (this.currentPhase === 2) {
+                    await this.savePhase2();
+                }
+            },
+            executeNavigation(newPhase) {
+                this.currentPhase = newPhase;
+                this.loadPhaseData(newPhase);
+            },
+            loadPhaseData(phase) {
+                if (phase === 1) {
+                    this.loadPhase1Data();
+                } else if (phase === 2) {
+                    this.loadPhase2Data();
+                } else if (phase === 3) {
+                    this.loadPhase3Data();
+                }
+            },
+            showValidationError() {
+                this.$notify({
+                    title: "workflow.index",
+                    message: "validation.hasInvalid",
+                    variant: "warning",
+                    icon: "CircleAlert",
+                });
             },
             async savePhase1() {
                 this.isLoading = true;
@@ -319,7 +396,6 @@
 
                     this.phase2Data = data;
                     this.currentPhase = 3;
-                    // Carrega apenas dados da fase 3
                     await this.loadPhase3Data();
 
                     this.$notify({
@@ -618,7 +694,6 @@
                 }
             },
         },
-
         created() {
             this.loadWorkflowData();
         },
@@ -665,7 +740,6 @@
         min-height: 400px;
     }
 
-    /* Phase Navigation Styles */
     .phase-nav {
         position: relative;
     }
@@ -677,6 +751,16 @@
         position: relative;
         flex: 1;
         max-width: 200px;
+    }
+
+    .phase-item.phase-clickable {
+        cursor: pointer;
+    }
+
+    .phase-item.phase-clickable:hover:not(.active) .phase-circle {
+        background-color: var(--color-bg-phase-circle-hover);
+        color: var(--color-bg-phase-circle-active);
+        transform: scale(1.05);
     }
 
     .phase-circle {
@@ -700,7 +784,7 @@
     }
 
     .phase-item.completed .phase-circle {
-        background-color: var( --color-bg-phase-circle-success)!important;
+        background-color: var(--color-bg-phase-circle-success) !important;
         color: white;
     }
 
@@ -713,12 +797,12 @@
     }
 
     .phase-item.active .phase-label {
-        color: #2f80ed;
+        color: var(--color-bg-phase-circle-active);
         font-weight: 600;
     }
 
     .phase-item.completed .phase-label {
-        color: var( --color-bg-phase-circle-success)!important;
+        color: var(--color-bg-phase-circle-success) !important;
     }
 
     .phase-connector {
@@ -727,11 +811,11 @@
         left: 50%;
         width: 100%;
         height: 2px;
-        background-color: var( --color-bg-phase-circle) !important;
+        background-color: var(--color-bg-phase-circle) !important;
         z-index: 1;
     }
 
     .phase-item.completed .phase-connector {
-        background-color: var( --color-bg-phase-circle-success) !important;
+        background-color: var(--color-bg-phase-circle-success) !important;
     }
 </style>
