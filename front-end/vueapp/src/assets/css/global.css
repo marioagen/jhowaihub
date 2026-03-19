@@ -170,7 +170,7 @@ body {
     --color-bg-kanban-primary-accent: #a7bad3;
     --color-bg-kanban-success-accent: #a1cfb1;
     --color-read-only: #ffffff;
-    --color-bg-main: #f6fbff;
+    --color-bg-main: #f8f9fb;
 }
 
 .css-theme-dark {
@@ -227,7 +227,8 @@ body {
     --color-toast-content-danger: #ffffff;
     --color-border-toast: 1px solid #393e5c;
     --color-border-header-modal: 1px solid #393e5c;
-    --box-shadow-multiselect-wrapper: 0 0 0 var(--ms-ring-width, 3px) var(--ms-ring-color, rgba(16, 185, 129, 0.188));
+    --box-shadow-multiselect-wrapper: 0 0 0 var(--ms-ring-width, 3px)
+        var(--ms-ring-color, rgba(16, 185, 129, 0.188));
     --color-bg-dropdown-menu: #292f4c;
     --color-dropdown-menu: #b0b4c8;
     --color-fade-buttons: #d2f4ea;
@@ -281,7 +282,7 @@ body {
     --color-read-only: #232945;
     --color-bg-main: #243558;
 }
-    .css-theme-dark input[type="date"]::-webkit-calendar-picker-indicator {
+.css-theme-dark input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
 }
 
@@ -1035,7 +1036,7 @@ td {
 }
 
 .btn-outlined {
-    border-color: var( --color-border-form-control) !important;
+    border-color: var(--color-border-form-control) !important;
     color: var(--color-body-content) !important;
 }
 
@@ -1044,7 +1045,7 @@ td {
 }
 
 .main-div {
-    border: 1px solid var( --color-border-form-control) !important;
+    border: 1px solid var(--color-border-form-control) !important;
     border-radius: 8px;
     background: var(--color-card-content) !important;
     padding: 20px 24px;
@@ -1054,11 +1055,12 @@ td {
     background-color: var(--color-bg-dropdown-menu) !important;
     color: var(--color-body-content) !important;
 }
-    .dropdown-menu {
+.dropdown-menu {
     background-color: var(--color-bg-dropdown-menu) !important;
     color: var(--color-body-content) !important;
 }
-.dropdown-item:focus, .dropdown-item:hover {
+.dropdown-item:focus,
+.dropdown-item:hover {
     color: var(--color-body-content) !important;
     background-color: var(--color-bg-sidebar-li-selected) !important;
 }
@@ -1094,4 +1096,3 @@ td {
     color: var(--color-body-content) !important;
     border-color: var(--color-sidebar-li-collapsed-hover) !important;
 }
-
