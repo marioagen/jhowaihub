@@ -170,6 +170,7 @@ body {
     --color-bg-kanban-primary-accent: #a7bad3;
     --color-bg-kanban-success-accent: #a1cfb1;
     --color-read-only: #ffffff;
+    --color-bg-main: #f6fbff;
 }
 
 .css-theme-dark {
@@ -278,6 +279,7 @@ body {
     --color-bg-warning-badge: rgba(120, 53, 15, 0.4);
     --color-text-warning-badge: rgb(252, 211, 77);
     --color-read-only: #232945;
+    --color-bg-main: #243558;
 }
     .css-theme-dark input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
@@ -324,7 +326,7 @@ main {
     max-height: 100vh;
     overflow-x: auto;
     overflow-y: hidden;
-    background-color: var(--color-bg-body-content) !important;
+    background-color: var(--color-bg-main) !important;
 }
 
 main > .initial-sidebar,
@@ -398,7 +400,7 @@ main > #offcanvas-sidebar > .dropdown > a {
 main > .container-fluid {
     /*padding: 15px 10px 15px 0px;*/
     padding: 15px 15px 0px 0px;
-    background: var(--color-bg-body-content) !important;
+    background: transparent !important;
 }
 
 main > .container-fluid > .custom-padding > .row > .col-auto > .card {
