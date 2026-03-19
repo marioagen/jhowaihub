@@ -890,4 +890,9 @@ export default {
 .text-long {
     resize: none;
 }
+
+    .offcanvas {
+        background-color: var(--color-card-content) !important;
+    }
+
 </style>
