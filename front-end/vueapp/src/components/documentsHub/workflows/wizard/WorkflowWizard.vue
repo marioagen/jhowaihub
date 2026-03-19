@@ -256,59 +256,72 @@
                     return;
                 }
 
-                const navigationCallback = () => {
-                    this.currentPhase = newPhase;
-                    if (newPhase === 1) {
-                        this.loadPhase1Data();
-                    } else if (newPhase === 2) {
-                        this.loadPhase2Data();
-                    } else if (newPhase === 3) {
-                        this.loadPhase3Data();
-                    }
-                };
-
                 if (newPhase < this.currentPhase) {
-                    const isValid = await this.validate();
-                    if (!isValid.valid) {
-                        return this.$notify({
-                            title: "workflow.index",
-                            message: "validation.hasInvalid",
-                            variant: "warning",
-                            icon: "CircleAlert",
-                        });
-                    }
-
-                    if (this.meta.dirty) {
-                        this.checkNavigation(navigationCallback);
-                    } else {
-                        navigationCallback();
-                    }
+                    await this.goBackwardToPhase(newPhase);
                 } else if (newPhase === this.currentPhase + 1) {
                     await this.nextPhase();
                 } else if (newPhase > this.currentPhase) {
-                    const isValid = await this.validate();
-                    if (!isValid.valid) {
-                        return this.$notify({
-                            title: "workflow.index",
-                            message: "validation.hasInvalid",
-                            variant: "warning",
-                            icon: "CircleAlert",
-                        });
-                    }
+                    await this.goForwardToPhase(newPhase);
+                }
+            },
+            async goBackwardToPhase(newPhase) {
+                const isValid = await this.validate();
+                if (!isValid.valid) {
+                    this.showValidationError();
+                    return;
+                }
 
-                    if (this.currentPhase === 1) {
-                        await this.savePhase1();
-                        if (newPhase > 2) {
-                            await this.savePhase2();
-                        }
-                    } else if (this.currentPhase === 2) {
+                const navigationCallback = () => this.executeNavigation(newPhase);
+
+                if (this.meta.dirty) {
+                    this.checkNavigation(navigationCallback);
+                } else {
+                    navigationCallback();
+                }
+            },
+            async goForwardToPhase(newPhase) {
+                const isValid = await this.validate();
+                if (!isValid.valid) {
+                    this.showValidationError();
+                    return;
+                }
+
+                await this.saveRequiredPhases(newPhase);
+
+                if (this.currentPhase <= newPhase) {
+                    this.executeNavigation(newPhase);
+                }
+            },
+            async saveRequiredPhases(newPhase) {
+                if (this.currentPhase === 1) {
+                    await this.savePhase1();
+                    if (newPhase > 2) {
                         await this.savePhase2();
                     }
-
-                    if (this.currentPhase <= newPhase) {
-                        navigationCallback();
-                    }
+                } else if (this.currentPhase === 2) {
+                    await this.savePhase2();
                 }
+            },
+            executeNavigation(newPhase) {
+                this.currentPhase = newPhase;
+                this.loadPhaseData(newPhase);
+            },
+            loadPhaseData(phase) {
+                if (phase === 1) {
+                    this.loadPhase1Data();
+                } else if (phase === 2) {
+                    this.loadPhase2Data();
+                } else if (phase === 3) {
+                    this.loadPhase3Data();
+                }
+            },
+            showValidationError() {
+                this.$notify({
+                    title: "workflow.index",
+                    message: "validation.hasInvalid",
+                    variant: "warning",
+                    icon: "CircleAlert",
+                });
             },
             async savePhase1() {
                 this.isLoading = true;
