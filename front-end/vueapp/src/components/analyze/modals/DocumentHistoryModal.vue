@@ -106,12 +106,17 @@
                                         class="document-history-card-content card border rounded-2 p-2"
                                     >
                                         <div class="d-flex align-items-start gap-2 flex-wrap">
-                                            <span class="document-history-user-icon">
+                                            <BadgeComponent
+                                                variant="primary"
+                                                size="sm"
+                                                :clickable="false"
+                                                icon-only
+                                            >
                                                 <LucideIcon
                                                     icon="User"
-                                                    :size="14"
+                                                    :size="12"
                                                 />
-                                            </span>
+                                            </BadgeComponent>
                                             <div class="min-w-0 flex-grow-1">
                                                 <div
                                                     class="d-flex align-items-center flex-wrap gap-1 mb-1"
@@ -121,17 +126,23 @@
                                                     </span>
                                                     <BadgeComponent
                                                         v-if="entry.actionName"
+                                                        :text="auditActionDisplay(entry).title"
                                                         variant="primary"
                                                         size="sm"
                                                         :clickable="false"
+                                                    />
+                                                    <span
+                                                        v-if="entry.stepName"
+                                                        class="small text-muted"
                                                     >
-                                                        {{ entry.actionName }}
-                                                    </BadgeComponent>
+                                                        {{ entry.stepName }}
+                                                    </span>
                                                 </div>
                                                 <div
+                                                    v-if="entry.actionName"
                                                     class="small text-muted document-history-description"
                                                 >
-                                                    {{ entry.stepName || entry.actionName }}
+                                                    {{ auditActionDisplay(entry).action }}
                                                 </div>
                                                 <div
                                                     class="small text-muted d-flex align-items-center gap-1 mt-1"
@@ -168,13 +179,13 @@
         </template>
     </ModalComponent>
 </template>
-
 <script>
     import ModalComponent from "@/components/global/ModalComponent.vue";
     import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import AuditorsService from "@/services/auditors/AuditorsService";
     import dateHelper from "@/helpers/date";
+    import auditActionHelper from "@/helpers/auditActionHelper";
 
     export default {
         name: "DocumentHistoryModal",
@@ -247,10 +258,15 @@
             formatDateWithTime(date) {
                 return dateHelper.formatDateWithTime(date) || "—";
             },
+            auditActionDisplay(entry) {
+                return auditActionHelper.getAuditActionDisplay(entry?.actionName, {
+                    t: this.$t,
+                    stepName: entry?.stepName || this.$t("auditor.users.detail.nextStep"),
+                });
+            },
         },
     };
 </script>
-
 <style scoped>
     .document-history-modal-icon {
         width: 48px;
