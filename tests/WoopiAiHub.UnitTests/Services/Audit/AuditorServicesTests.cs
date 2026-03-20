@@ -33,14 +33,14 @@ namespace WoopiAiHub.UnitTests.Services.Audit
         public async Task FindDocumentsAuditSummaryAsync_NoDocumentIds_ReturnsEmptyList()
         {
             _auditorRepositoryMock
-                .Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>()))
+                .Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>(), It.IsAny<bool?>()))
                 .ReturnsAsync(new List<int>());
 
             var result = await _service.FindDocumentsAuditSummaryAsync(10, 0, null);
 
             Assert.NotNull(result.Items);
             Assert.Empty(result.Items);
-            _auditorRepositoryMock.Verify(r => r.FindAuditRowsForDocumentsSummaryAsync(It.IsAny<IReadOnlyList<int>>(), It.IsAny<string?>(), It.IsAny<bool?>()), Times.Never);
+            _auditorRepositoryMock.Verify(r => r.FindAuditRowsForDocumentsSummaryAsync(It.IsAny<IReadOnlyList<int>>(), It.IsAny<string?>(), It.IsAny<bool?>(), It.IsAny<bool?>()), Times.Never);
         }
 
         [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should return document summaries with workflows and IsFinalized when all finalized")]
@@ -53,8 +53,8 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 new() { DocumentId = 1, DocumentName = "Doc1", WorkflowId = 10, WorkflowName = "WF1", StepId = 1, StepName = "Step1", CardId = 1, CardStatusName = StatusNames.Finalize },
                 new() { DocumentId = 1, DocumentName = "Doc1", WorkflowId = 10, WorkflowName = "WF1", StepId = 1, StepName = "Step1", CardId = 2, CardStatusName = StatusNames.Finalize }
             };
-            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>())).ReturnsAsync(documentIds);
-            _auditorRepositoryMock.Setup(r => r.FindAuditRowsForDocumentsSummaryAsync(It.IsAny<IReadOnlyList<int>>(), It.IsAny<string?>(), It.IsAny<bool?>())).ReturnsAsync(auditRows);
+            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>(), It.IsAny<bool?>())).ReturnsAsync(documentIds);
+            _auditorRepositoryMock.Setup(r => r.FindAuditRowsForDocumentsSummaryAsync(It.IsAny<IReadOnlyList<int>>(), It.IsAny<string?>(), It.IsAny<bool?>(), It.IsAny<bool?>())).ReturnsAsync(auditRows);
 
             var result = await _service.FindDocumentsAuditSummaryAsync(10, 0, null);
 
@@ -65,10 +65,41 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             Assert.Equal(1, item.DocumentId);
             Assert.Equal("Doc1", item.DocumentName);
             Assert.True(item.IsFinalized);
+            Assert.False(item.IsRemoved);
             Assert.Equal(2, item.ActionsCount);
             Assert.Single(item.Workflows);
             Assert.Equal(10, item.Workflows[0].Id);
             Assert.Equal("WF1", item.Workflows[0].Name);
+        }
+
+        [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should set IsRemoved when document is soft-deleted")]
+        [Trait("AuditorServices", "FindDocumentsAuditSummaryAsync")]
+        public async Task FindDocumentsAuditSummaryAsync_DocumentDisabled_SetsIsRemovedTrue()
+        {
+            var documentIds = new List<int> { 1 };
+            var auditRows = new List<DocumentAuditorSummaryRowDto>
+            {
+                new()
+                {
+                    DocumentId = 1,
+                    DocumentName = "Gone",
+                    WorkflowId = 10,
+                    WorkflowName = "WF1",
+                    StepId = 1,
+                    StepName = "S1",
+                    CardId = 1,
+                    CardStatusName = StatusNames.Finalize,
+                    DocumentEnabled = false
+                }
+            };
+            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>(), It.IsAny<bool?>())).ReturnsAsync(documentIds);
+            _auditorRepositoryMock.Setup(r => r.FindAuditRowsForDocumentsSummaryAsync(It.IsAny<IReadOnlyList<int>>(), It.IsAny<string?>(), It.IsAny<bool?>(), It.IsAny<bool?>())).ReturnsAsync(auditRows);
+
+            var result = await _service.FindDocumentsAuditSummaryAsync(10, 0, null);
+
+            Assert.NotNull(result.Items);
+            var item = Assert.Single(result.Items);
+            Assert.True(item.IsRemoved);
         }
 
         [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should set IsFinalized false when not all finalized")]
@@ -81,8 +112,8 @@ namespace WoopiAiHub.UnitTests.Services.Audit
                 new() { DocumentId = 1, DocumentName = "Doc1", WorkflowId = 10, WorkflowName = "WF1", StepId = 1, StepName = "S1", CardId = 1, CardStatusName = StatusNames.Finalize },
                 new() { DocumentId = 1, DocumentName = "Doc1", WorkflowId = 10, WorkflowName = "WF1", StepId = 1, StepName = "S1", CardId = 2, CardStatusName = "InProgress" }
             };
-            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>())).ReturnsAsync(documentIds);
-            _auditorRepositoryMock.Setup(r => r.FindAuditRowsForDocumentsSummaryAsync(It.IsAny<IReadOnlyList<int>>(), It.IsAny<string?>(), It.IsAny<bool?>())).ReturnsAsync(auditRows);
+            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>(), It.IsAny<bool?>())).ReturnsAsync(documentIds);
+            _auditorRepositoryMock.Setup(r => r.FindAuditRowsForDocumentsSummaryAsync(It.IsAny<IReadOnlyList<int>>(), It.IsAny<string?>(), It.IsAny<bool?>(), It.IsAny<bool?>())).ReturnsAsync(auditRows);
 
             var result = await _service.FindDocumentsAuditSummaryAsync(10, 0, null);
 
@@ -90,24 +121,25 @@ namespace WoopiAiHub.UnitTests.Services.Audit
             var list = result.Items.ToList();
             Assert.Single(list);
             Assert.False(list[0].IsFinalized);
+            Assert.False(list[0].IsRemoved);
         }
 
         [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should pass take+1, skip, search and isFinalized to repository")]
         [Trait("AuditorServices", "FindDocumentsAuditSummaryAsync")]
         public async Task FindDocumentsAuditSummaryAsync_PassesParametersToRepository()
         {
-            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(6, 0, "test", true)).ReturnsAsync(new List<int>());
+            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(6, 0, "test", true, null)).ReturnsAsync(new List<int>());
 
             await _service.FindDocumentsAuditSummaryAsync(5, 0, "test", true);
 
-            _auditorRepositoryMock.Verify(r => r.FindDocumentIdsForDocumentsSummaryAsync(6, 0, "test", true), Times.Once);
+            _auditorRepositoryMock.Verify(r => r.FindDocumentIdsForDocumentsSummaryAsync(6, 0, "test", true, null), Times.Once);
         }
 
         [Fact(DisplayName = "FindDocumentsAuditSummaryAsync should propagate exception when repository throws")]
         [Trait("AuditorServices", "FindDocumentsAuditSummaryAsync")]
         public async Task FindDocumentsAuditSummaryAsync_RepositoryThrows_PropagatesException()
         {
-            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>()))
+            _auditorRepositoryMock.Setup(r => r.FindDocumentIdsForDocumentsSummaryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<bool?>(), It.IsAny<bool?>()))
                 .ThrowsAsync(new InvalidOperationException("Db error"));
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.FindDocumentsAuditSummaryAsync(10, 0, null));
