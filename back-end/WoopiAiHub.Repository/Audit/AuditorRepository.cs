@@ -4,6 +4,7 @@ using WoopiAiHub.Domain.DTOs.Response.Auditor.Documents;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Users;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Workflows;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
@@ -21,6 +22,13 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
+        /// Auditor reads must include soft-deleted documents and cards so history remains visible.
+        /// Global <c>Enable</c> query filters on <see cref="Document"/> and <see cref="Card"/> are ignored only for queries rooted here.
+        /// </summary>
+        private IQueryable<AuditCard> AuditCardsForAuditor()
+            => _context.AuditCards.AsNoTracking().IgnoreQueryFilters();
+
+        /// <summary>
         /// Returns up to <paramref name="take"/> distinct document IDs ordered by most recent audit activity, skipping <paramref name="skip"/>. Optional search (document name, workflow name, or numeric document id) and isFinalized filter.
         /// </summary>
         public async Task<List<int>> FindDocumentIdsForDocumentsSummaryAsync(int take, int skip, string? search, bool? isFinalized = null)
@@ -32,7 +40,7 @@ namespace WoopiAiHub.Repository.Audit
             if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
                 searchAsId = parsedId;
 
-            var auditQuery = ApplyDocumentsSummaryFilters(_context.AuditCards.AsNoTracking(), search, searchAsId, isFinalized);
+            var auditQuery = ApplyDocumentsSummaryFilters(AuditCardsForAuditor(), search, searchAsId, isFinalized);
 
             return await auditQuery
                 .GroupBy(a => a.DocumentId)
@@ -56,7 +64,7 @@ namespace WoopiAiHub.Repository.Audit
             if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
                 searchAsId = parsedId;
 
-            var auditRowsQuery = _context.AuditCards.AsNoTracking()
+            var auditRowsQuery = AuditCardsForAuditor()
                 .Where(a => documentIds.Contains(a.DocumentId));
             auditRowsQuery = ApplyDocumentsSummaryFilters(auditRowsQuery, search, searchAsId, isFinalized);
 
@@ -143,7 +151,7 @@ namespace WoopiAiHub.Repository.Audit
         {
             if (take <= 0) take = DefaultTake;
 
-            var query = _context.AuditCards.AsNoTracking()
+            var query = AuditCardsForAuditor()
                 .Where(a => a.DocumentId == documentId && a.WorkflowId == workflowId);
             query = ApplyDocumentDetailFilters(query, search, userId, actionType, stepId);
 
@@ -175,7 +183,7 @@ namespace WoopiAiHub.Repository.Audit
             if (take <= 0) take = DefaultTake;
             if (skip < 0) skip = 0;
 
-            var query = _context.AuditCards.AsNoTracking();
+            var query = AuditCardsForAuditor();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -203,8 +211,7 @@ namespace WoopiAiHub.Repository.Audit
             if (workflowIds.Count == 0)
                 return new List<WorkflowAuditorSummaryRowDto>();
 
-            return await _context.AuditCards
-                .AsNoTracking()
+            return await AuditCardsForAuditor()
                 .Where(a => workflowIds.Contains(a.WorkflowId))
                 .Select(a => new WorkflowAuditorSummaryRowDto
                 {
@@ -260,8 +267,7 @@ namespace WoopiAiHub.Repository.Audit
         /// </summary>
         public async Task<List<WorkflowAuditorDetailsRowDto>> FindAuditRowsForWorkflowDetailsAsync(int workflowId, string? search, int? stepId, int? actionType, bool orderDescending)
         {
-            var query = _context.AuditCards
-                .AsNoTracking()
+            var query = AuditCardsForAuditor()
                 .Where(a => a.WorkflowId == workflowId);
             query = ApplyWorkflowDetailsFilters(query, search, stepId, actionType);
             query = query
@@ -301,7 +307,7 @@ namespace WoopiAiHub.Repository.Audit
             if (take <= 0) take = DefaultTake;
             if (skip < 0) skip = 0;
 
-            var query = _context.AuditCards.AsNoTracking();
+            var query = AuditCardsForAuditor();
 
             if (!string.IsNullOrWhiteSpace(userName))
             {
@@ -329,8 +335,7 @@ namespace WoopiAiHub.Repository.Audit
             if (userIds.Count == 0)
                 return new List<UserAuditorSummaryRowDto>();
 
-            var list = await _context.AuditCards
-                .AsNoTracking()
+            var list = await AuditCardsForAuditor()
                 .Where(a => userIds.Contains(a.UserId))
                 .Include(a => a.User)
                 .Include(a => a.Workflow!).ThenInclude(w => w.Teams)
@@ -378,8 +383,7 @@ namespace WoopiAiHub.Repository.Audit
         {
             if (take <= 0) take = DefaultTake;
 
-            var query = _context.AuditCards
-                .AsNoTracking()
+            var query = AuditCardsForAuditor()
                 .Where(a => a.UserId == userId);
             query = ApplyUserDetailsFilters(query, search, actionTypeCode);
             query = query
