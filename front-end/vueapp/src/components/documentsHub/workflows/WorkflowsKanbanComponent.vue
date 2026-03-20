@@ -33,7 +33,7 @@
                                     <LucideIcon
                                         icon="ChevronDown"
                                         :size="20"
-                                        class="ms-2"
+                                        class="ms-2 text-muted"
                                     />
                                 </button>
                                 <ul class="dropdown-menu p-2 workflow-list">
