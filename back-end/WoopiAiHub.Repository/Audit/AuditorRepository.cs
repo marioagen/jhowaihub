@@ -87,34 +87,40 @@ namespace WoopiAiHub.Repository.Audit
         {
             if (isRemoved == true)
                 query = query.Where(a => a.Document != null && !a.Document.Enable);
-            else if (isRemoved == false)
-                query = query.Where(a => a.Document != null && a.Document.Enable);
-            else if (isFinalized.HasValue)
-                query = query.Where(a => a.Document != null && a.Document.Enable);
-
-            if (!string.IsNullOrWhiteSpace(search))
+            else if (isRemoved == false || isFinalized.HasValue)
             {
-                var searchTerm = search!.Trim();
-                int? searchAsId = null;
-                if (int.TryParse(searchTerm, out var parsedId))
-                    searchAsId = parsedId;
-
-                query = query.Where(a =>
-                    (searchAsId != null && (a.DocumentId == searchAsId.Value || a.CardId == searchAsId.Value))
-                    || (a.Document != null && a.Document.Name.Contains(searchTerm))
-                    || (a.Card != null && a.Card.Name.Contains(searchTerm))
-                    || (a.Card != null && a.Card.Step != null && a.Card.Step.Workflow != null && a.Card.Step.Workflow.Name.Contains(searchTerm)));
+                query = query.Where(a => a.Document != null && a.Document.Enable);
+                if (isFinalized.HasValue)
+                {
+                    if (isFinalized.Value)
+                        query = query.Where(a => a.Card != null && a.Card.Status != null && a.Card.Status.Name == StatusNames.Finalize);
+                    else
+                        query = query.Where(a => a.Card == null || a.Card.Status == null || a.Card.Status.Name != StatusNames.Finalize);
+                }
             }
 
-            if (isFinalized.HasValue && isRemoved != true)
-            {
-                if (isFinalized.Value)
-                    query = query.Where(a => a.Card != null && a.Card.Status != null && a.Card.Status.Name == StatusNames.Finalize);
-                else
-                    query = query.Where(a => a.Card == null || a.Card.Status == null || a.Card.Status.Name != StatusNames.Finalize);
-            }
-
+            query = ApplyDocumentsSummarySearchFilter(query, search);
             return query;
+        }
+
+        /// <summary>
+        /// Restricts <paramref name="query"/> to audit rows matching <paramref name="search"/> (trimmed document/workflow/card name, or numeric document or card id).
+        /// </summary>
+        private static IQueryable<AuditCard> ApplyDocumentsSummarySearchFilter(IQueryable<AuditCard> query, string? search)
+        {
+            if (string.IsNullOrWhiteSpace(search))
+                return query;
+
+            var searchTerm = search.Trim();
+            int? searchAsId = null;
+            if (int.TryParse(searchTerm, out var parsedId))
+                searchAsId = parsedId;
+
+            return query.Where(a =>
+                (searchAsId != null && (a.DocumentId == searchAsId.Value || a.CardId == searchAsId.Value))
+                || (a.Document != null && a.Document.Name.Contains(searchTerm))
+                || (a.Card != null && a.Card.Name.Contains(searchTerm))
+                || (a.Card != null && a.Card.Step != null && a.Card.Step.Workflow != null && a.Card.Step.Workflow.Name.Contains(searchTerm)));
         }
 
         /// <summary>
