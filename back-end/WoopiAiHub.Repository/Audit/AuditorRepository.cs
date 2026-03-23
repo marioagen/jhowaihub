@@ -36,11 +36,7 @@ namespace WoopiAiHub.Repository.Audit
             if (take <= 0) take = DefaultTake;
             if (skip < 0) skip = 0;
 
-            int? searchAsId = null;
-            if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
-                searchAsId = parsedId;
-
-            var auditQuery = ApplyDocumentsSummaryFilters(AuditCardsForAuditor(), search, searchAsId, isFinalized, isRemoved);
+            var auditQuery = ApplyDocumentsSummaryFilters(AuditCardsForAuditor(), search, isFinalized, isRemoved);
 
             return await auditQuery
                 .GroupBy(a => a.DocumentId)
@@ -60,13 +56,9 @@ namespace WoopiAiHub.Repository.Audit
             if (documentIds.Count == 0)
                 return new List<DocumentAuditorSummaryRowDto>();
 
-            int? searchAsId = null;
-            if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
-                searchAsId = parsedId;
-
             var auditRowsQuery = AuditCardsForAuditor()
                 .Where(a => documentIds.Contains(a.DocumentId));
-            auditRowsQuery = ApplyDocumentsSummaryFilters(auditRowsQuery, search, searchAsId, isFinalized, isRemoved);
+            auditRowsQuery = ApplyDocumentsSummaryFilters(auditRowsQuery, search, isFinalized, isRemoved);
 
             return await auditRowsQuery
                 .Select(a => new DocumentAuditorSummaryRowDto
@@ -90,7 +82,6 @@ namespace WoopiAiHub.Repository.Audit
         private static IQueryable<AuditCard> ApplyDocumentsSummaryFilters(
             IQueryable<AuditCard> query,
             string? search,
-            int? searchAsId,
             bool? isFinalized,
             bool? isRemoved)
         {
@@ -104,6 +95,10 @@ namespace WoopiAiHub.Repository.Audit
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var searchTerm = search!.Trim();
+                int? searchAsId = null;
+                if (int.TryParse(searchTerm, out var parsedId))
+                    searchAsId = parsedId;
+
                 query = query.Where(a =>
                     (searchAsId != null && (a.DocumentId == searchAsId.Value || a.CardId == searchAsId.Value))
                     || (a.Document != null && a.Document.Name.Contains(searchTerm))
