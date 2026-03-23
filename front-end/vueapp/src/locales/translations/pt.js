@@ -105,6 +105,7 @@ const portuguese = {
                 statuses: {
                     active: "Ativo",
                     finalized: "Finalizado",
+                    removed: "Removido",
                 },
                 statusActive: "Ativo",
                 statusFinalized: "Finalizado",
@@ -116,6 +117,7 @@ const portuguese = {
                 loadMore: "Carregar mais",
                 finalized: "Finalizado",
                 active: "Ativo",
+                removed: "Removido",
                 actionsCount: "{count} eventos",
                 workflowsCount: "esteiras",
             },

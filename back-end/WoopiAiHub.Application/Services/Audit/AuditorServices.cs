@@ -38,18 +38,18 @@ namespace WoopiAiHub.Application.Services.Audit
         }
 
         /// <summary>
-        /// Returns up to <paramref name="take"/> documents with document audit summary: DocumentId, DocumentName, Workflows (id, name, step), ActionsCount, IsFinalized. LoadMore logic: starting at <paramref name="skip"/>; optional search and isFinalized filter. HasMore is true when more documents exist.
+        /// Returns up to <paramref name="take"/> documents with document audit summary: DocumentId, DocumentName, Workflows (id, name, step), ActionsCount, IsFinalized, IsRemoved. LoadMore logic: starting at <paramref name="skip"/>; optional search, <paramref name="isFinalized"/>, and <paramref name="isRemoved"/> filter. HasMore is true when more documents exist.
         /// </summary>
-        public async Task<AuditorLoadMoreResultDto<DocumentAuditorSummaryDto>> FindDocumentsAuditSummaryAsync(int take, int skip, string? search, bool? isFinalized = null)
+        public async Task<AuditorLoadMoreResultDto<DocumentAuditorSummaryDto>> FindDocumentsAuditSummaryAsync(int take, int skip, string? search, bool? isFinalized = null, bool? isRemoved = null)
         {
-            var documentIds = await _auditorRepository.FindDocumentIdsForDocumentsSummaryAsync(take + 1, skip, search, isFinalized);
+            var documentIds = await _auditorRepository.FindDocumentIdsForDocumentsSummaryAsync(take + 1, skip, search, isFinalized, isRemoved);
             if (documentIds.Count == 0)
                 return new AuditorLoadMoreResultDto<DocumentAuditorSummaryDto> { Items = new List<DocumentAuditorSummaryDto>(), HasMore = false };
 
             var hasMore = documentIds.Count > take;
             var idsToUse = hasMore ? documentIds.Take(take).ToList() : documentIds;
 
-            var auditRows = await _auditorRepository.FindAuditRowsForDocumentsSummaryAsync(idsToUse, search, isFinalized);
+            var auditRows = await _auditorRepository.FindAuditRowsForDocumentsSummaryAsync(idsToUse, search, isFinalized, isRemoved);
 
             var isFinalizedByDocument = BuildIsFinalizedByDocument(auditRows);
 
@@ -324,7 +324,8 @@ namespace WoopiAiHub.Application.Services.Audit
                     DocumentName = first.DocumentName,
                     Workflows = workflows,
                     ActionsCount = g.Count(),
-                    IsFinalized = isFinalizedByDocument.TryGetValue(g.Key, out var finalized) && finalized
+                    IsFinalized = isFinalizedByDocument.TryGetValue(g.Key, out var finalized) && finalized,
+                    IsRemoved = !first.DocumentEnabled
                 };
             }).ToList();
         }

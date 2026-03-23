@@ -4,6 +4,7 @@ using WoopiAiHub.Domain.DTOs.Response.Auditor.Documents;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Users;
 using WoopiAiHub.Domain.DTOs.Response.Auditor.Workflows;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Models.Audit;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Context;
@@ -21,18 +22,21 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns up to <paramref name="take"/> distinct document IDs ordered by most recent audit activity, skipping <paramref name="skip"/>. Optional search (document name, workflow name, or numeric document id) and isFinalized filter.
+        /// Auditor reads must include soft-deleted documents and cards so history remains visible.
+        /// Global <c>Enable</c> query filters on <see cref="Document"/> and <see cref="Card"/> are ignored only for queries rooted here.
         /// </summary>
-        public async Task<List<int>> FindDocumentIdsForDocumentsSummaryAsync(int take, int skip, string? search, bool? isFinalized = null)
+        private IQueryable<AuditCard> AuditCardsForAuditor()
+            => _context.AuditCards.AsNoTracking().IgnoreQueryFilters();
+
+        /// <summary>
+        /// Returns up to <paramref name="take"/> distinct document IDs ordered by most recent audit activity, skipping <paramref name="skip"/>. Optional search (document name, workflow name, or numeric document id), <paramref name="isFinalized"/>, and <paramref name="isRemoved"/> (soft-deleted documents).
+        /// </summary>
+        public async Task<List<int>> FindDocumentIdsForDocumentsSummaryAsync(int take, int skip, string? search, bool? isFinalized = null, bool? isRemoved = null)
         {
             if (take <= 0) take = DefaultTake;
             if (skip < 0) skip = 0;
 
-            int? searchAsId = null;
-            if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
-                searchAsId = parsedId;
-
-            var auditQuery = ApplyDocumentsSummaryFilters(_context.AuditCards.AsNoTracking(), search, searchAsId, isFinalized);
+            var auditQuery = ApplyDocumentsSummaryFilters(AuditCardsForAuditor(), search, isFinalized, isRemoved);
 
             return await auditQuery
                 .GroupBy(a => a.DocumentId)
@@ -45,20 +49,16 @@ namespace WoopiAiHub.Repository.Audit
         }
 
         /// <summary>
-        /// Returns audit rows for the given document IDs, applying the same search and isFinalized filter as the documents summary. Projects to DocumentAuditorSummaryRowDto (document, workflow, step, card, status).
+        /// Returns audit rows for the given document IDs, applying the same search, <paramref name="isFinalized"/>, and <paramref name="isRemoved"/> filters as the documents summary. Projects to DocumentAuditorSummaryRowDto (document, workflow, step, card, status).
         /// </summary>
-        public async Task<List<DocumentAuditorSummaryRowDto>> FindAuditRowsForDocumentsSummaryAsync(IReadOnlyList<int> documentIds, string? search, bool? isFinalized = null)
+        public async Task<List<DocumentAuditorSummaryRowDto>> FindAuditRowsForDocumentsSummaryAsync(IReadOnlyList<int> documentIds, string? search, bool? isFinalized = null, bool? isRemoved = null)
         {
             if (documentIds.Count == 0)
                 return new List<DocumentAuditorSummaryRowDto>();
 
-            int? searchAsId = null;
-            if (!string.IsNullOrWhiteSpace(search) && int.TryParse(search.Trim(), out var parsedId))
-                searchAsId = parsedId;
-
-            var auditRowsQuery = _context.AuditCards.AsNoTracking()
+            var auditRowsQuery = AuditCardsForAuditor()
                 .Where(a => documentIds.Contains(a.DocumentId));
-            auditRowsQuery = ApplyDocumentsSummaryFilters(auditRowsQuery, search, searchAsId, isFinalized);
+            auditRowsQuery = ApplyDocumentsSummaryFilters(auditRowsQuery, search, isFinalized, isRemoved);
 
             return await auditRowsQuery
                 .Select(a => new DocumentAuditorSummaryRowDto
@@ -70,39 +70,57 @@ namespace WoopiAiHub.Repository.Audit
                     StepId = a.Card != null ? a.Card.StepId : 0,
                     StepName = a.Card != null && a.Card.Step != null ? a.Card.Step.Name : string.Empty,
                     CardId = a.CardId,
-                    CardStatusName = a.Card != null && a.Card.Status != null ? a.Card.Status.Name : string.Empty
+                    CardStatusName = a.Card != null && a.Card.Status != null ? a.Card.Status.Name : string.Empty,
+                    DocumentEnabled = a.Document != null && a.Document.Enable
                 })
                 .ToListAsync();
         }
 
         /// <summary>
-        /// Applies search (document/workflow name or numeric id) and isFinalized filters to an AuditCards query.
+        /// Applies search (document/workflow name or numeric id), soft-delete (<paramref name="isRemoved"/>), and isFinalized filters to an AuditCards query.
         /// </summary>
         private static IQueryable<AuditCard> ApplyDocumentsSummaryFilters(
             IQueryable<AuditCard> query,
             string? search,
-            int? searchAsId,
-            bool? isFinalized)
+            bool? isFinalized,
+            bool? isRemoved)
         {
-            if (!string.IsNullOrWhiteSpace(search))
+            if (isRemoved == true)
+                query = query.Where(a => a.Document != null && !a.Document.Enable);
+            else if (isRemoved == false || isFinalized.HasValue)
             {
-                var searchTerm = search!.Trim();
-                query = query.Where(a =>
-                    (searchAsId != null && (a.DocumentId == searchAsId.Value || a.CardId == searchAsId.Value))
-                    || (a.Document != null && a.Document.Name.Contains(searchTerm))
-                    || (a.Card != null && a.Card.Name.Contains(searchTerm))
-                    || (a.Card != null && a.Card.Step != null && a.Card.Step.Workflow != null && a.Card.Step.Workflow.Name.Contains(searchTerm)));
+                query = query.Where(a => a.Document != null && a.Document.Enable);
+                if (isFinalized.HasValue)
+                {
+                    if (isFinalized.Value)
+                        query = query.Where(a => a.Card != null && a.Card.Status != null && a.Card.Status.Name == StatusNames.Finalize);
+                    else
+                        query = query.Where(a => a.Card == null || a.Card.Status == null || a.Card.Status.Name != StatusNames.Finalize);
+                }
             }
 
-            if (isFinalized.HasValue)
-            {
-                if (isFinalized.Value)
-                    query = query.Where(a => a.Card != null && a.Card.Status != null && a.Card.Status.Name == StatusNames.Finalize);
-                else
-                    query = query.Where(a => a.Card == null || a.Card.Status == null || a.Card.Status.Name != StatusNames.Finalize);
-            }
-
+            query = ApplyDocumentsSummarySearchFilter(query, search);
             return query;
+        }
+
+        /// <summary>
+        /// Restricts <paramref name="query"/> to audit rows matching <paramref name="search"/> (trimmed document/workflow/card name, or numeric document or card id).
+        /// </summary>
+        private static IQueryable<AuditCard> ApplyDocumentsSummarySearchFilter(IQueryable<AuditCard> query, string? search)
+        {
+            if (string.IsNullOrWhiteSpace(search))
+                return query;
+
+            var searchTerm = search.Trim();
+            int? searchAsId = null;
+            if (int.TryParse(searchTerm, out var parsedId))
+                searchAsId = parsedId;
+
+            return query.Where(a =>
+                (searchAsId != null && (a.DocumentId == searchAsId.Value || a.CardId == searchAsId.Value))
+                || (a.Document != null && a.Document.Name.Contains(searchTerm))
+                || (a.Card != null && a.Card.Name.Contains(searchTerm))
+                || (a.Card != null && a.Card.Step != null && a.Card.Step.Workflow != null && a.Card.Step.Workflow.Name.Contains(searchTerm)));
         }
 
         /// <summary>
@@ -143,7 +161,7 @@ namespace WoopiAiHub.Repository.Audit
         {
             if (take <= 0) take = DefaultTake;
 
-            var query = _context.AuditCards.AsNoTracking()
+            var query = AuditCardsForAuditor()
                 .Where(a => a.DocumentId == documentId && a.WorkflowId == workflowId);
             query = ApplyDocumentDetailFilters(query, search, userId, actionType, stepId);
 
@@ -175,7 +193,7 @@ namespace WoopiAiHub.Repository.Audit
             if (take <= 0) take = DefaultTake;
             if (skip < 0) skip = 0;
 
-            var query = _context.AuditCards.AsNoTracking();
+            var query = AuditCardsForAuditor();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -203,8 +221,7 @@ namespace WoopiAiHub.Repository.Audit
             if (workflowIds.Count == 0)
                 return new List<WorkflowAuditorSummaryRowDto>();
 
-            return await _context.AuditCards
-                .AsNoTracking()
+            return await AuditCardsForAuditor()
                 .Where(a => workflowIds.Contains(a.WorkflowId))
                 .Select(a => new WorkflowAuditorSummaryRowDto
                 {
@@ -260,8 +277,7 @@ namespace WoopiAiHub.Repository.Audit
         /// </summary>
         public async Task<List<WorkflowAuditorDetailsRowDto>> FindAuditRowsForWorkflowDetailsAsync(int workflowId, string? search, int? stepId, int? actionType, bool orderDescending)
         {
-            var query = _context.AuditCards
-                .AsNoTracking()
+            var query = AuditCardsForAuditor()
                 .Where(a => a.WorkflowId == workflowId);
             query = ApplyWorkflowDetailsFilters(query, search, stepId, actionType);
             query = query
@@ -301,7 +317,7 @@ namespace WoopiAiHub.Repository.Audit
             if (take <= 0) take = DefaultTake;
             if (skip < 0) skip = 0;
 
-            var query = _context.AuditCards.AsNoTracking();
+            var query = AuditCardsForAuditor();
 
             if (!string.IsNullOrWhiteSpace(userName))
             {
@@ -329,8 +345,7 @@ namespace WoopiAiHub.Repository.Audit
             if (userIds.Count == 0)
                 return new List<UserAuditorSummaryRowDto>();
 
-            var list = await _context.AuditCards
-                .AsNoTracking()
+            var list = await AuditCardsForAuditor()
                 .Where(a => userIds.Contains(a.UserId))
                 .Include(a => a.User)
                 .Include(a => a.Workflow!).ThenInclude(w => w.Teams)
@@ -378,8 +393,7 @@ namespace WoopiAiHub.Repository.Audit
         {
             if (take <= 0) take = DefaultTake;
 
-            var query = _context.AuditCards
-                .AsNoTracking()
+            var query = AuditCardsForAuditor()
                 .Where(a => a.UserId == userId);
             query = ApplyUserDetailsFilters(query, search, actionTypeCode);
             query = query
