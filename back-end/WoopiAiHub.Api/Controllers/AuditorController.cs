@@ -39,7 +39,8 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="take">Number of documents to return (default 10).</param>
         /// <param name="skip">Number of documents to skip (default 0).</param>
         /// <param name="search">Optional. Matches DocumentId when numeric, or DocumentName/WorkflowName by contains.</param>
-        /// <param name="isFinalized">Optional. When true, only finalized documents; when false, only non-finalized; when null, all.</param>
+        /// <param name="isFinalized">Optional. When true, only finalized documents; when false, only non-finalized; when null, all (unless combined with IsRemoved).</param>
+        /// <param name="isRemoved">Optional. When true, only soft-deleted documents; when false, only non-deleted; when null, no filter by document enabled state.</param>
         [HttpGet("Documents")]
         [SwaggerOperation("Returns documents for the auditor with optional search and status filter")]
         [ProducesResponseType(typeof(AuditorLoadMoreResultDto<DocumentAuditorSummaryDto>), StatusCodes.Status200OK)]
@@ -47,9 +48,10 @@ namespace WoopiAiHub.Api.Controllers
             [FromQuery] int take = 10,
             [FromQuery] int skip = 0,
             [FromQuery] string? search = null,
-            [FromQuery] bool? isFinalized = null)
+            [FromQuery] bool? isFinalized = null,
+            [FromQuery] bool? isRemoved = null)
         {
-            var result = await _auditorServices.FindDocumentsAuditSummaryAsync(take, skip, search, isFinalized);
+            var result = await _auditorServices.FindDocumentsAuditSummaryAsync(take, skip, search, isFinalized, isRemoved);
             return Ok(result);
         }
 

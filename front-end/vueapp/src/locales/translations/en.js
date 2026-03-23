@@ -104,6 +104,7 @@ const english = {
                 statuses: {
                     active: "Active",
                     finalized: "Finalized",
+                    removed: "Removed",
                 },
                 statusActive: "Active",
                 statusFinalized: "Finalized",
@@ -115,6 +116,7 @@ const english = {
                 loadMore: "Load more",
                 finalized: "Finalized",
                 active: "Active",
+                removed: "Removed",
                 actionsCount: "{count} events",
                 workflowsCount: "workflows",
             },
@@ -1086,7 +1088,8 @@ const english = {
         index: "Tools",
         notFound: "No tools registered",
         ocrDependencyRequired: "Agent tool requires a dependency on a Digitizer Agent tool",
-        ocrOrPromptDependencyRequired: "Agent tool requires a dependency on a Digitizer Agent (OCR) or another Agent (Prompt)",
+        ocrOrPromptDependencyRequired:
+            "Agent tool requires a dependency on a Digitizer Agent (OCR) or another Agent (Prompt)",
         removeError: "Error removing tool",
         removeSuccess: "Tool removed successfully",
         removeTitle: "You are about to delete a tool from the system",

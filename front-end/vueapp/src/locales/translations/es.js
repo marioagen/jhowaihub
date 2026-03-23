@@ -107,6 +107,7 @@ const spanish = {
                 statuses: {
                     active: "Activo",
                     finalized: "Finalizado",
+                    removed: "Eliminado",
                 },
                 statusActive: "Activo",
                 statusFinalized: "Finalizado",
@@ -118,6 +119,7 @@ const spanish = {
                 loadMore: "Ver más",
                 finalized: "Finalizado",
                 active: "Activo",
+                removed: "Eliminado",
                 actionsCount: "{count} eventos",
                 workflowsCount: "flujos",
             },

@@ -107,6 +107,7 @@
                         <LucideIcon
                             icon="ChevronLeft"
                             :size="16"
+                            class="text-muted"
                         />
                         {{ $t("workflow.previous") }}
                     </button>
