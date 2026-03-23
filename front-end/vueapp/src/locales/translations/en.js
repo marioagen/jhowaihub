@@ -815,6 +815,7 @@ const english = {
     },
     permissions: {
         descriptions: {
+            auditor: "View Audit",
             dashboard: "View Dashboard",
             documents: "View Documents",
             documentRejection: "Reject documents",
@@ -833,6 +834,7 @@ const english = {
         },
         groups: {
             actions: "Actions",
+            auditor: "Audit",
             dashboard: "Dashboard",
             documents: "Documents",
             management: "Management",

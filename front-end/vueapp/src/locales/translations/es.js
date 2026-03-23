@@ -825,6 +825,7 @@ const spanish = {
     },
     permissions: {
         descriptions: {
+            auditor: "Ver Auditoría",
             dashboard: "Ver Dashboard",
             documents: "Ver Documentos",
             documentRejection: "Rechazar documentos",
@@ -843,6 +844,7 @@ const spanish = {
         },
         groups: {
             actions: "Acciones",
+            auditor: "Auditoría",
             dashboard: "Dashboard",
             documents: "Documentos",
             management: "Gestión",
