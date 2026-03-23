@@ -445,8 +445,8 @@ namespace WoopiAiHub.Application.Services.Automation
                 throw new AppException(ErrorCode.NotFound, "Tool connector api-key not found", null);
             }
 
-            var api = _apiClientFactory.Create(tool.ConnectorUrl!);    
-            
+            var api = _apiClientFactory.Create(tool.ConnectorUrl!);
+
             var response = await api.FindWorkflows(apiKey);
 
             if (!response.IsSuccessStatusCode)
@@ -476,7 +476,7 @@ namespace WoopiAiHub.Application.Services.Automation
 
             if (!response.IsSuccessStatusCode)
                 throw new AppException(ErrorCode.RefitApiError, "Connector fails listing workflows", null);
-            
+
             return JsonSchemaToFormMapper.MapToFormFields(response.Content!);
         }
 
@@ -487,7 +487,8 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns></returns>
         private static ICollection<ConnectorDto> MapToConnectorDtos(WebhookDataDto? root)
         {
-            if (root?.Data == null) return Array.Empty<ConnectorDto>();
+            if (root?.Data == null)
+                return Array.Empty<ConnectorDto>();
 
             return root.Data
                 .Select(w => new

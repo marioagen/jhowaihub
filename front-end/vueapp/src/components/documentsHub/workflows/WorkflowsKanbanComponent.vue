@@ -6,22 +6,18 @@
                     <div class="col-12">
                         <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
                             <div>
-                                <LucideIcon
-                                    icon="Clock"
-                                    :size="14"
-                                    class="me-2"
-                                />
+                                <LucideIcon icon="Clock"
+                                            :size="14"
+                                            class="me-2" />
                                 <span>
                                     {{ $t("workflow.boardView") }}
                                 </span>
                             </div>
                             <div class="dropdown">
-                                <button
-                                    class="btn btn-light border text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle pe-1"
-                                    type="button"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                >
+                                <button class="btn btn-light border text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle pe-1"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
                                     <div>
                                         <div class="fw-bold font-size-sm">
                                             {{ selectedOption.teamName }}
@@ -37,37 +33,27 @@
                                     />
                                 </button>
                                 <ul class="dropdown-menu p-2 workflow-list">
-                                    <li
-                                        v-if="workflowList.length > 5"
-                                        class="mb-1"
-                                    >
+                                    <li v-if="workflowList.length > 5"
+                                        class="mb-1">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text p-1">
-                                                <LucideIcon
-                                                    icon="Search"
-                                                    :size="16"
-                                                    class="me-1"
-                                                />
+                                                <LucideIcon icon="Search"
+                                                            :size="16"
+                                                            class="me-1" />
                                             </span>
-                                            <input
-                                                id="filter-workflow"
-                                                v-model="workflowSearchText"
-                                                type="text"
-                                                name="filter"
-                                                class="form-control"
-                                                @input="searchWorkflow"
-                                                @click.stop=""
-                                            />
+                                            <input id="filter-workflow"
+                                                   v-model="workflowSearchText"
+                                                   type="text"
+                                                   name="filter"
+                                                   class="form-control"
+                                                   @input="searchWorkflow"
+                                                   @click.stop="" />
                                         </div>
                                     </li>
-                                    <li
-                                        v-for="item in filteredWorkflows"
-                                        :key="item.id"
-                                    >
-                                        <a
-                                            class="dropdown-item"
-                                            @click="selectOption(item)"
-                                        >
+                                    <li v-for="item in filteredWorkflows"
+                                        :key="item.id">
+                                        <a class="dropdown-item"
+                                           @click="selectOption(item)">
                                             <div class="fw-bold">
                                                 {{ item.teams.name }}
                                             </div>
@@ -79,12 +65,10 @@
                                 </ul>
                             </div>
                             <div class="badge bg-secondary badge-custom">
-                                <LucideIcon
-                                    icon="Workflow"
-                                    :size="14"
-                                    class="me-2"
-                                    stroke="#0d6efd"
-                                />
+                                <LucideIcon icon="Workflow"
+                                            :size="14"
+                                            class="me-2"
+                                            stroke="#0d6efd" />
                                 <span>
                                     {{ selectedOption.name || $t("workflow.selectWorkflow") }}
                                 </span>
@@ -97,14 +81,10 @@
                                 <WorkflowViewFilters @filter="filterData" />
                             </div>
                             <div class="col-2 pe-0 ps-4">
-                                <button
-                                    class="btn btn-primary new-doc-btn py-1 px-2"
-                                    @click="redirectToNewUpload"
-                                >
-                                    <LucideIcon
-                                        icon="Plus"
-                                        :size="14"
-                                    />
+                                <button class="btn btn-primary new-doc-btn py-1 px-2"
+                                        @click="redirectToNewUpload">
+                                    <LucideIcon icon="Plus"
+                                                :size="14" />
                                     {{ $t("documents.createBtn") }}
                                 </button>
                             </div>
@@ -120,24 +100,20 @@
             <div class="card custom-height">
                 <div class="card-body d-flex flex-column p-2 card-container">
                     <div class="kanban-wrapper">
-                        <KanbanBoard
-                            ref="kanbanBoardRef"
-                            :kanbanData="kanbanCards"
-                            :users="users"
-                            @reload="reloadKanban"
-                            @cardMoved="handleCardMoved"
-                            @cardUpdated="updateCard"
-                            :isLoading="isLoadingKanban"
-                            :cardIdsToUpdate="cardIdsToUpdate"
-                        />
+                        <KanbanBoard ref="kanbanBoardRef"
+                                     :kanbanData="kanbanCards"
+                                     :users="users"
+                                     @reload="reloadKanban"
+                                     @cardMoved="handleCardMoved"
+                                     @cardUpdated="updateCard"
+                                     :isLoading="isLoadingKanban"
+                                     :cardIdsToUpdate="cardIdsToUpdate" />
                     </div>
                 </div>
             </div>
         </div>
-        <div
-            v-else
-            class="text-center"
-        >
+        <div v-else
+             class="text-center">
             <span class="text-primary">
                 {{ $t("workflow.notFound") }}
             </span>
@@ -582,9 +558,11 @@
         width: 100%;
         height: 100%;
     }
+
     .border {
         border: 1px solid var(--color-border-form-control) !important;
     }
+
     .bg-secondary {
         background-color: var(--color-hover-transfer) !important;
         border-color: var(--color-hover-transfer) !important;
