@@ -160,6 +160,7 @@
                                     <LucideIcon
                                         icon="ChevronDown"
                                         :size="12"
+                                        class="text-muted"
                                     />
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-start">
@@ -188,6 +189,7 @@
                                     <LucideIcon
                                         icon="ChevronDown"
                                         :size="12"
+                                        class="text-muted"
                                     />
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-start">

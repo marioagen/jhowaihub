@@ -40,11 +40,13 @@
                                 v-if="showDateFilter"
                                 icon="ChevronUp"
                                 :size="17"
+                                class="text-muted"
                             />
                             <LucideIcon
                                 v-else
                                 icon="ChevronDown"
                                 :size="17"
+                                class="text-muted"
                             />
                         </button>
                         <div
