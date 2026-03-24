@@ -489,6 +489,7 @@ const portuguese = {
             noTeamChosen: "Nenhum time escolhido",
             noWorkflowFound: "Nenhuma esteira de processamento vinculada aos seus times do usuário",
             removeAllDropzone: "Remover arquivos do dropzone",
+            removeWorkflowChip: "Remover esta esteira da seleção",
             selectionList: "Lista de seleção",
             subtitle: "Faça upload de novos documentos para análise",
             title: "Novo Documento",

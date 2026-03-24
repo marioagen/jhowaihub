@@ -475,6 +475,7 @@ const english = {
             noTeamChosen: "No team chosen",
             noWorkflowFound: "No workflow linked to your user teams",
             removeAllDropzone: "Remove files from dropzone",
+            removeWorkflowChip: "Remove this workflow from selection",
             selectionList: "Selection list",
             subtitle: "Upload new documents for analysis",
             title: "New Document",
