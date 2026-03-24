@@ -43,7 +43,6 @@ namespace WoopiAiHub.Application.Services
             IStatusRepository statusRepository,
             IStepRepository stepRepository,
             ICardRepository cardRepository,
-            IAuditCardRepository auditCardRepository,
             IStepToolRepository stepToolRepository,
             IStepToolDependencyRepository stepToolDependencyRepository,
             IStepToolOutputRepository stepToolOutputRepository,
@@ -61,7 +60,6 @@ namespace WoopiAiHub.Application.Services
             _statusRepository = statusRepository;
             _stepRepository = stepRepository;
             _cardRepository = cardRepository;
-            _auditCardRepository = auditCardRepository;
             _stepToolRepository = stepToolRepository;
             _stepToolDependencyRepository = stepToolDependencyRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
@@ -810,7 +808,7 @@ namespace WoopiAiHub.Application.Services
         {
             await DeleteStepToolRelatedData(allStepToolIds);
 
-            await DeleteRelatedStepsCardData(allCardIds);
+            DeleteRelatedStepsCardData(allCardIds);
         }
 
         /// <summary>
@@ -822,7 +820,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="allCardIds">A list of card IDs for which related step and card data will be deleted. Must not be null; if empty, no data
         /// will be deleted.</param>
         /// <returns>A task that represents the asynchronous delete operation.</returns>
-        private async Task DeleteRelatedStepsCardData(List<int> allCardIds)
+        private void DeleteRelatedStepsCardData(List<int> allCardIds)
         {
             if (allCardIds.Count > 0)
             {
