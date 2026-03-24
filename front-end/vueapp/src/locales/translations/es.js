@@ -327,6 +327,8 @@ const spanish = {
         selectAnItemFromTheList: "Seleccione un elemento de la lista.",
         selected: "Seleccionada",
         selectedList: "Lista seleccionada",
+        selectionList: "Lista de selección",
+        removeSelectionChip: "Quitar de la selección",
         send: "Enviar",
         showingToTotal: "del",
         signOut: "Desconectar",
@@ -483,6 +485,7 @@ const spanish = {
             noWorkflowFound:
                 "No se encontró ningún flujo de trabajo vinculado a los equipos del usuario",
             removeAllDropzone: "Eliminar archivos del área de carga",
+            removeWorkflowChip: "Quitar este flujo de la selección",
             selectionList: "Lista de selección",
             subtitle: "Sube nuevos documentos para su análisis",
             title: "Nuevo Documento",
