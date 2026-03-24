@@ -824,6 +824,7 @@ const spanish = {
         quizzes: "Cuestionarios",
         templates: "Plantillas de API",
         tools: "Herramientas",
+        connectors: "Conectores",
         types: "Tipos",
         workflowManagement: "Gestión de Flujos de Trabajo",
         workflows: "Flujos de Trabajo de Documentos",

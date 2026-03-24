@@ -815,7 +815,7 @@ const portuguese = {
         message: "Tem certeza?",
     },
     pages: {
-        dashboard: "Dashboard",
+        dashboard: "Painel de Consumo",
         documents: "Documentos",
         management: "Gestão de Usuários",
         prompts: "Agentes",
@@ -823,6 +823,7 @@ const portuguese = {
         quizzes: "Questionários",
         templates: "Templates de API",
         tools: "Ferramentas",
+        connectors: "Conectores",
         types: "Tipos",
         workflowManagement: "Gestão de Esteiras",
         workflows: "Esteiras de Processamento",

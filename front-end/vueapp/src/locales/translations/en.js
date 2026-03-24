@@ -814,6 +814,7 @@ const english = {
         quizzes: "Quizzes",
         templates: "API Templates",
         tools: "Tools",
+        connectors: "Connectors",
         types: "Types",
         workflowManagement: "Workflow Management",
         workflows: "Document Workflows",
