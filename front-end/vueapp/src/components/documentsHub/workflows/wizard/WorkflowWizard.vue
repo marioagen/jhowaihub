@@ -482,7 +482,34 @@ import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidat
                 });
             },
             async handleRemoveToolFlow(step) {
-                const phase3Component = this.$refs.phase3;
+                this.isLoading = true;
+                try {
+                    const hasConstraints = await WorkflowService.hasStepToolConstraints(step.id);
+                    if (hasConstraints) {
+                        this.pendingStepToRemove = step;
+                        this.$refs.RemoveToolValidationDialog.open();
+                    } else {
+                        await this.executeRemoveToolFlow(step, false);
+                    }
+                } catch (error) {
+                    this.$notify({
+                        title: "workflow.index",
+                        message: "workflow.removeError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+            async executeRemoveToolFlow(stepParam = null, resetDocuments = false) {
+                this.$refs.RemoveToolValidationDialog?.close();
+                const step = stepParam || this.pendingStepToRemove;
+                if (!step) return;
+
+                this.isLoading = true;
+                try {
+
                 let phase3DataResult = await this.getPhase3Data();
 
                 const stepIndex = phase3DataResult.findIndex((s) => s.id === step.id);
