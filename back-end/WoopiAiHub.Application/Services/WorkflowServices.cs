@@ -994,7 +994,7 @@ namespace WoopiAiHub.Application.Services
                 var stepWithCards = await _stepRepository.FindById(step.Id);
                 if (stepWithCards != null)
                 {
-                    await DeleteRelatedStepsCardData(stepWithCards.Cards.Select(c => c.Id).ToList());
+                    DeleteRelatedStepsCardData(stepWithCards.Cards.Select(c => c.Id).ToList());
                 }
             }
             if (stepToolIdsToRemove.Any())
