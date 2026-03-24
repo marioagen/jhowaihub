@@ -51,14 +51,72 @@
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
             <li
                 v-for="(item, index) in filteredMenuItems"
-                :key="item.labelKey"
+                :key="item.activeKey ? `${item.activeKey}-${index}` : `nav-${index}`"
                 class="mb-1 sidebar-menu-item-enter"
                 :class="{
                     'is-active': isRouteActive(item),
                 }"
                 :style="{ '--item-index': index }"
             >
+                <div v-if="item.group && item.group.length">
+                    <button
+                        type="button"
+                        class="d-flex align-items-center custom-menu-item sidebar-group-toggle link-dark rounded border-0 bg-transparent w-100 text-start"
+                        :class="[
+                            isRouteActive(item) ? 'active' : '',
+                            isGroupExpanded(item) ? 'is-expanded' : '',
+                            isCollapsed ? 'justify-content-center' : '',
+                        ]"
+                        :aria-expanded="isGroupExpanded(item)"
+                        :aria-controls="'sidebar-submenu-' + item.activeKey"
+                        @click="toggleGroup(item)"
+                    >
+                        <LucideIcon
+                            strokeWidth="2"
+                            :icon="item.icon.name"
+                            :color="item.icon.color"
+                        />
+                        <span
+                            v-show="!isCollapsed"
+                            class="ms-2 flex-grow-1 text-truncate"
+                        >
+                            {{ $t(item.labelKey) }}
+                        </span>
+                        <LucideIcon
+                            v-show="!isCollapsed"
+                            icon="ChevronDown"
+                            strokeWidth="2"
+                            class="sidebar-group-chevron flex-shrink-0 ms-1"
+                            :class="{ 'is-open': isGroupExpanded(item) }"
+                        />
+                    </button>
+                    <ul
+                        v-show="isGroupExpanded(item) && !isCollapsed"
+                        :id="'sidebar-submenu-' + item.activeKey"
+                        class="list-unstyled mb-0 mt-1 sidebar-group-submenu"
+                    >
+                        <li
+                            v-for="(sub, subIndex) in filterByPermission(item.group)"
+                            :key="`${sub.activeKey}-${sub.to}-${subIndex}`"
+                            class="mb-1"
+                        >
+                            <router-link
+                                class="d-flex align-items-center custom-menu-item link-dark rounded sidebar-group-link"
+                                :class="{ active: matchesMenuPath(sub.to) }"
+                                :to="sub.to"
+                            >
+                                <LucideIcon
+                                    strokeWidth="2"
+                                    :icon="sub.icon.name"
+                                    :color="sub.icon.color"
+                                />
+                                <span class="ms-2">{{ $t(sub.labelKey) }}</span>
+                            </router-link>
+                        </li>
+                    </ul>
+                </div>
                 <router-link
+                    v-else
                     :class="[
                         'd-flex align-items-center custom-menu-item link-dark rounded',
                         isRouteActive(item) ? 'active' : '',
@@ -103,6 +161,7 @@
         data() {
             return {
                 title: "SideBarComponent",
+                expandedGroupKey: null,
                 menuItems: [
                     {
                         activeKey: "Home",
@@ -112,16 +171,6 @@
                             color: "#0d6efd",
                         },
                         labelKey: "common.home",
-                    },
-                    {
-                        permission: "Dashboard",
-                        activeKey: "Dashboard",
-                        to: "/dashboard",
-                        icon: {
-                            name: "ChartColumn",
-                            color: "#40b04d",
-                        },
-                        labelKey: "pages.dashboard",
                     },
                     {
                         permission: "Management",
@@ -134,24 +183,14 @@
                         labelKey: "pages.management",
                     },
                     {
-                        permission: "Prompts",
-                        activeKey: "Prompts",
-                        to: "/prompts",
+                        permission: "Workflow",
+                        activeKey: "Workflow",
+                        to: "/workflow",
                         icon: {
-                            name: "Braces",
-                            color: "#8e51ff",
+                            name: "Kanban",
+                            color: "#615FFF",
                         },
-                        labelKey: "pages.prompts",
-                    },
-                    {
-                        permission: "Quizzes",
-                        activeKey: "ManagementQuizzes",
-                        to: "/management-quizzes",
-                        icon: {
-                            name: "ClipboardList",
-                            color: "#a259ff",
-                        },
-                        labelKey: "pages.quizzes",
+                        labelKey: "pages.workflows",
                     },
                     {
                         permission: "WorkflowManagement",
@@ -159,39 +198,69 @@
                         to: "/workflow/management",
                         icon: {
                             name: "Workflow",
-                            color: "#00bba7",
+                            color: "#06b6d4",
                         },
                         labelKey: "pages.workflowManagement",
                     },
                     {
-                        permission: "Workflow",
-                        activeKey: "Workflow",
-                        to: "/workflow",
-                        icon: {
-                            name: "Workflow",
-                            color: "#615FFF",
-                        },
-                        labelKey: "pages.workflows",
-                    },
-                    {
                         permission: "Tools",
-                        activeKey: "Tools",
-                        to: "/tools",
                         icon: {
                             name: "PocketKnife",
-                            color: "#f59e0b",
+                            color: "#8b5cf6",
                         },
                         labelKey: "pages.tools",
+                        group: [
+                            {
+                                permission: "Prompts",
+                                activeKey: "Prompts",
+                                to: "/prompts",
+                                icon: {
+                                    name: "Bot",
+                                    color: "#8b5cf6",
+                                },
+                                labelKey: "pages.prompts",
+                            },
+                            {
+                                permission: "Tools",
+                                activeKey: "Connectors",
+                                to: "/tools",
+                                icon: {
+                                    name: "Plug",
+                                    color: "#8b5cf6",
+                                },
+                                labelKey: "pages.connectors",
+                            },
+                            {
+                                permission: "Templates",
+                                activeKey: "Templates",
+                                to: "/templates",
+                                icon: {
+                                    name: "Zap",
+                                    color: "#8b5cf6",
+                                },
+                                labelKey: "pages.templates",
+                            },
+                            {
+                                permission: "Quizzes",
+                                activeKey: "ManagementQuizzes",
+                                to: "/management-quizzes",
+                                icon: {
+                                    name: "ClipboardList",
+                                    color: "#8b5cf6",
+                                },
+                                labelKey: "pages.quizzes",
+                            },
+                        ],
                     },
                     {
-                        permission: "Templates",
-                        activeKey: "Templates",
-                        to: "/templates",
+                        permission: "Dashboard",
+                        activeKey: "Dashboard",
+                        to: "/dashboard",
                         icon: {
-                            name: "Zap",
-                            color: "#2f80ed",
+                            name: "ChartColumn",
+                            color: "#40b04d",
                         },
-                        labelKey: "pages.templates",
+                        labelKey: "pages.dashboard",
                     },
                     {
                         permission: "Auditor",
@@ -208,7 +277,8 @@
         },
         computed: {
             isDarkMode() {
-                const theme = this.$store.state.theme || localStorage.getItem("theme") || "css-theme-light";
+                const theme =
+                    this.$store.state.theme || localStorage.getItem("theme") || "css-theme-light";
                 return theme === "css-theme-dark";
             },
             logoSrc() {
@@ -218,17 +288,42 @@
                 return logoSmall;
             },
             filteredMenuItems() {
-                return this.menuItems.filter((item) => {
+                return this.filterByPermission(this.menuItems);
+            },
+        },
+        methods: {
+            filterByPermission(list) {
+                if (!list?.length) {
+                    return [];
+                }
+                return list.filter((item) => {
                     if (!item.permission) {
                         return true;
                     }
                     return hasPermission(item.permission, "View");
                 });
             },
-        },
-        methods: {
+            toggleGroup(item) {
+                const key = item.activeKey;
+                if (this.expandedGroupKey === key) {
+                    this.expandedGroupKey = null;
+                } else {
+                    this.expandedGroupKey = key;
+                }
+            },
+            isGroupExpanded(item) {
+                return this.expandedGroupKey === item.activeKey;
+            },
+            matchesMenuPath(to) {
+                return this.$route.path === to;
+            },
             isRouteActive(item) {
-                return this.$route.path === item.to;
+                if (item.group?.length) {
+                    return this.filterByPermission(item.group).some((sub) =>
+                        this.matchesMenuPath(sub.to)
+                    );
+                }
+                return this.matchesMenuPath(item.to);
             },
         },
     };
@@ -241,21 +336,51 @@
         cursor: pointer;
     }
 
-    .btn-toggle-nav a:hover {
-        color: var( --color-body-content) !important;
+    .btn-toggle-nav a:hover:not(.active),
+    .btn-toggle-nav button.custom-menu-item:not(.sidebar-group-toggle):hover {
+        color: var(--color-body-content) !important;
         background-color: var(--color-sidebar-li-collapsed-hover) !important;
         cursor: pointer;
     }
 
-    .btn-toggle-nav a.active {
-        background-color: var(--color-bg-sidebar-li-selected) !important;
-        color: #007bff !important;
+    .btn-toggle-nav button.sidebar-group-toggle:hover {
+        color: var(--color-body-content) !important;
+        background-color: rgba(13, 110, 253, 0.08) !important;
+        cursor: pointer;
+    }
+
+    .btn-toggle-nav button.sidebar-group-toggle.is-expanded:hover,
+    .btn-toggle-nav button.sidebar-group-toggle.active:hover {
+        background-color: rgba(13, 110, 253, 0.16) !important;
+        color: #0d6efd !important;
+        box-shadow: 0 2px 10px rgba(13, 110, 253, 0.22);
+    }
+
+    .btn-toggle-nav a.custom-menu-item.active,
+    .sidebar-group-link.active,
+    .btn-toggle-nav button.sidebar-group-toggle.is-expanded,
+    .btn-toggle-nav button.sidebar-group-toggle.active {
+        background-color: rgba(13, 110, 253, 0.12) !important;
+        color: #0d6efd !important;
         font-weight: 600;
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
         cursor: default;
+    }
+
+    .btn-toggle-nav button.sidebar-group-toggle.is-expanded .sidebar-group-chevron,
+    .btn-toggle-nav button.sidebar-group-toggle.active .sidebar-group-chevron {
+        color: #0d6efd;
     }
 
     .btn-toggle-nav a {
         margin-left: 0 !important;
+        color: #676879;
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
+    }
+
+    .btn-toggle-nav button.custom-menu-item {
         color: #676879;
         transition:
             background-color 0.2s ease,
@@ -279,10 +404,10 @@
         line-height: 1.5;
     }
 
-        .custom-menu-item:hover {
-            background-color: var(--color-sidebar-li-collapsed-hover) !important;
-            text-decoration: none;
-        }
+    .custom-menu-item:hover:not(.active):not(.sidebar-group-toggle) {
+        background-color: var(--color-sidebar-li-collapsed-hover) !important;
+        text-decoration: none;
+    }
 
     .collapse-toggle-container {
         display: flex;
@@ -313,16 +438,29 @@
         padding: 0;
     }
 
-    .offcanvas-start {
-        width: initial;
+    .sidebar-group-chevron {
+        transition: transform 0.2s ease;
+        color: #676879;
     }
 
-    .offcanvas-header {
-        padding: 0;
+    .sidebar-group-chevron.is-open {
+        transform: rotate(-180deg);
     }
 
-    .offcanvas-header .btn-close {
-        padding: 0.5rem 1rem;
+    .sidebar-group-submenu {
+        padding-left: 0.75rem;
+        margin-left: 0.25rem;
+        border-left: 2px solid var(--color-border-form-control, #dee2e6);
+    }
+
+    .sidebar-group-link {
+        margin-left: 0 !important;
+        text-decoration: none;
+    }
+
+    .sidebar-group-link:hover {
+        background-color: var(--color-sidebar-li-collapsed-hover) !important;
+        color: var(--color-body-content) !important;
     }
 
     .btn-toggle {
@@ -369,13 +507,24 @@
         text-decoration: none;
     }
 
-        .btn-toggle-nav a:hover,
-        .btn-toggle-nav a:focus {
-            background-color: var(--color-sidebar-li-collapsed-hover);
-        }
+    .btn-toggle-nav button.custom-menu-item {
+        display: inline-flex;
+        padding: 0.1875rem 0.5rem;
+        margin-top: 0.125rem;
+        margin-left: 0 !important;
+    }
 
-    .btn-toggle-nav > li > .active {
-        background-color: #d2f4ea;
+    .btn-toggle-nav a:hover:not(.active),
+    .btn-toggle-nav a:focus:not(.active) {
+        background-color: var(--color-sidebar-li-collapsed-hover);
+    }
+
+    .btn-toggle-nav a.custom-menu-item.active:hover,
+    .btn-toggle-nav a.custom-menu-item.active:focus,
+    .sidebar-group-link.active:hover,
+    .sidebar-group-link.active:focus {
+        background-color: rgba(13, 110, 253, 0.14) !important;
+        color: #0d6efd !important;
     }
 
     @media (max-height: 500px) {
@@ -401,13 +550,12 @@
         color: black;
     }
 
-    .custom-menu-item.active {
-        background-color: var(--bs-primary-bg-subtle);
-        font-weight: 600;
+    .custom-menu-item:not(.active):not(.sidebar-group-toggle) {
+        opacity: 0.8;
     }
 
-    .custom-menu-item:not(.active) {
-        opacity: 0.8;
+    .sidebar-group-toggle {
+        opacity: 1;
     }
 
     .sidebar-menu-item-enter {

@@ -7,5 +7,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task DeleteByStepToolIdAsync(IEnumerable<int> stepToolIds);
         Task CreateAsync(StepToolDependency dependency);
         Task<ICollection<StepToolDependency>> FindByStepToolIdAsync(int stepToolId);
+        Task<bool> HasDependenciesByStepToolIdsAsync(IEnumerable<int> stepToolIds);
     }
 }

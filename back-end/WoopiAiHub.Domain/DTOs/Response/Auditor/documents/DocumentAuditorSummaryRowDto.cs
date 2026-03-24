@@ -10,5 +10,6 @@ namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Documents
         public string StepName { get; init; } = string.Empty;
         public int CardId { get; init; }
         public string CardStatusName { get; init; } = string.Empty;
+        public bool DocumentEnabled { get; init; } = true;
     }
 }

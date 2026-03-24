@@ -7,5 +7,6 @@ namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Documents
         public IReadOnlyList<DocumentAuditorWorkflowsDto> Workflows { get; init; } = [];
         public int ActionsCount { get; init; }
         public bool IsFinalized { get; init; }
+        public bool IsRemoved { get; init; }
     }
 }

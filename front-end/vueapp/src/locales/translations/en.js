@@ -104,6 +104,7 @@ const english = {
                 statuses: {
                     active: "Active",
                     finalized: "Finalized",
+                    removed: "Removed",
                 },
                 statusActive: "Active",
                 statusFinalized: "Finalized",
@@ -115,6 +116,7 @@ const english = {
                 loadMore: "Load more",
                 finalized: "Finalized",
                 active: "Active",
+                removed: "Removed",
                 actionsCount: "{count} events",
                 workflowsCount: "workflows",
             },
@@ -499,6 +501,16 @@ const english = {
             titleMessage:
                 "This document is associated with multiple workflows. Choose which one you want to view:",
         },
+        deleteValidationTitle: "Confirm permanent deletion",
+        deleteValidationMessage:
+            "You are about to permanently delete <b>{count} documents</b> and the workflow \"<b>{name}</b>\". This action cannot be undone. Type <span style='color: red' class='text-danger'><b>{name}</b></span> to confirm:",
+        deleteValidationPlaceholder: "Type '{name}' to confirm",
+        confirmPermanentDelete: "Permanently delete",
+        editValidationTitle: "There are documents in progress in this workflow",
+        editValidationMessage:
+            "We found <b>{count} documents</b> being processed in this workflow. By saving the changes, all documents and progress will be permanently deleted. Type <span style='color: red' class='text-danger'><b>{name}</b></span> to confirm:",
+        editValidationPlaceholder: "Type '{name}' to confirm changes",
+        confirmEdit: "Delete documents and save",
         workflows: "Workflows",
         youAreAboutToDeleteDocument: "You are about to delete <br/> the document from the system",
         youAreAboutToDeleteDocumentQuery:
@@ -803,6 +815,7 @@ const english = {
         quizzes: "Quizzes",
         templates: "API Templates",
         tools: "Tools",
+        connectors: "Connectors",
         types: "Types",
         workflowManagement: "Workflow Management",
         workflows: "Document Workflows",
@@ -814,6 +827,7 @@ const english = {
     },
     permissions: {
         descriptions: {
+            auditor: "View Audit",
             dashboard: "View Dashboard",
             documents: "View Documents",
             documentRejection: "Reject documents",
@@ -832,6 +846,7 @@ const english = {
         },
         groups: {
             actions: "Actions",
+            auditor: "Audit",
             dashboard: "Dashboard",
             documents: "Documents",
             management: "Management",
@@ -1087,7 +1102,8 @@ const english = {
         index: "Tools",
         notFound: "No tools registered",
         ocrDependencyRequired: "Agent tool requires a dependency on a Digitizer Agent tool",
-        ocrOrPromptDependencyRequired: "Agent tool requires a dependency on a Digitizer Agent (OCR) or another Agent (Prompt)",
+        ocrOrPromptDependencyRequired:
+            "Agent tool requires a dependency on a Digitizer Agent (OCR) or another Agent (Prompt)",
         removeError: "Error removing tool",
         removeSuccess: "Tool removed successfully",
         removeTitle: "You are about to delete a tool from the system",
@@ -1223,6 +1239,10 @@ const english = {
         removeError: "Error removing workflow",
         removeSuccess: "Workflow removed successfully",
         removeToolFlow: "Remove Flow",
+        removeToolValidationTitle: "Remove Step Tools",
+        removeToolValidationMessage: "The step {name} has linked data or dependencies. All documents and dependencies will be removed permanently. To confirm removal, type the name of the step below:",
+        removeToolValidationPlaceholder: "Type '{name}' to confirm",
+        confirmRemoveTool: "Confirm removal",
         responsableTeam: "Responsible Team",
         responsible: "Responsible",
         saveChanges: "Save Changes",

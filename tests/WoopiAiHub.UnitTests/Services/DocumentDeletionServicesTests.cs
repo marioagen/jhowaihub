@@ -3,10 +3,14 @@ using Moq;
 using Moq.AutoMock;
 using System.Net;
 using System.Text;
+using System.Threading;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
@@ -48,6 +52,11 @@ namespace WoopiAiHub.UnitTests.Services
             var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
             var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var unitOfWork = _mocker.GetMock<IUnitOfWork>();
+            var cardServices = _mocker.GetMock<ICardServices>();
+            var auditCardService = _mocker.GetMock<IAuditCardService>();
+
+            cardServices.Setup(s => s.FindCardsByDocumentIdWithStepWorkflowAsync(It.IsAny<int>()))
+                .ReturnsAsync(new List<Card>());
 
             documentRepository.Setup(r => r.ClearWorkflowRelationships(ids)).Returns(true);
             documentRepository.Setup(r => r.Delete(ids)).Returns(true);
@@ -91,6 +100,136 @@ namespace WoopiAiHub.UnitTests.Services
             unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
             unitOfWork.Verify(u => u.Commit(), Times.Once);
             unitOfWork.Verify(u => u.Rollback(), Times.Never);
+            auditCardService.Verify(a => a.CreateBatchAndSaveAsync(It.IsAny<IReadOnlyList<(int, int, int)>>(), It.IsAny<AuditCardActionType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "Delete - Should write Removed then DocumentDeleted audit when cards have step")]
+        [Trait("Delete", "Audit")]
+        public async Task Delete_WritesRemovedAndDocumentDeletedAudit_WhenCardsHaveStep()
+        {
+            var ids = new List<int> { 1 };
+            var hashes = new List<string> { "hash1" };
+            var cardIds = new List<int> { 10 };
+            var headers = DocumentFixture.FindValidHeadersDto();
+
+            var step = new Step(1, DateTime.UtcNow, 10, "S", 1, 1, 1);
+            var card = new Card(1, DateTime.UtcNow, 1, 1, "C", 1, null) { Step = step };
+
+            var documentRepository = _mocker.GetMock<IDocumentRepository>();
+            var cardRepository = _mocker.GetMock<ICardRepository>();
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            var stepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
+            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
+            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
+            var unitOfWork = _mocker.GetMock<IUnitOfWork>();
+            var cardServices = _mocker.GetMock<ICardServices>();
+            var auditCardService = _mocker.GetMock<IAuditCardService>();
+
+            cardServices.Setup(s => s.FindCardsByDocumentIdWithStepWorkflowAsync(1))
+                .ReturnsAsync(new List<Card> { card });
+
+            documentRepository.Setup(r => r.ClearWorkflowRelationships(ids)).Returns(true);
+            documentRepository.Setup(r => r.Delete(ids)).Returns(true);
+            documentRepository.Setup(r => r.FindHashById(ids)).Returns(hashes.AsQueryable());
+
+            embeddingsApi.Setup(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
+
+            fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
+                .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
+
+            cardRepository
+                .Setup(r => r.FindCardIdsByDocumentIdsAsync(ids))
+                .ReturnsAsync(cardIds);
+            cardRepository
+                .Setup(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()))
+                .ReturnsAsync(true);
+
+            stepToolExecutionRepository
+                .Setup(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(true);
+
+            stepToolOutputRepository
+                .Setup(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(true);
+
+            await _documentDeletionServices.Delete(ids, headers);
+
+            auditCardService.Verify(a => a.CreateBatchAndSaveAsync(
+                It.Is<IReadOnlyList<(int, int, int)>>(l => l.Count == 1 && l[0].Item1 == 1 && l[0].Item2 == 10 && l[0].Item3 == 1),
+                AuditCardActionType.Removed,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()), Times.Once);
+            auditCardService.Verify(a => a.CreateBatchAndSaveAsync(
+                It.Is<IReadOnlyList<(int, int, int)>>(l => l.Count == 1 && l[0].Item1 == 1 && l[0].Item2 == 10 && l[0].Item3 == 1),
+                AuditCardActionType.DocumentDeleted,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "Delete - Should write one DocumentDeleted per document when multiple cards share a document")]
+        [Trait("Delete", "Audit")]
+        public async Task Delete_WritesOneDocumentDeletedPerDocument_WhenMultipleCardsOnSameDocument()
+        {
+            var ids = new List<int> { 1 };
+            var hashes = new List<string> { "hash1" };
+            var cardIds = new List<int> { 10, 11 };
+            var headers = DocumentFixture.FindValidHeadersDto();
+
+            var step = new Step(1, DateTime.UtcNow, 10, "S", 1, 1, 1);
+            var card1 = new Card(10, DateTime.UtcNow, 1, 1, "C1", 1, null) { Step = step };
+            var card2 = new Card(11, DateTime.UtcNow, 1, 1, "C2", 1, null) { Step = step };
+
+            var documentRepository = _mocker.GetMock<IDocumentRepository>();
+            var cardRepository = _mocker.GetMock<ICardRepository>();
+            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
+            var stepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
+            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
+            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
+            var unitOfWork = _mocker.GetMock<IUnitOfWork>();
+            var cardServices = _mocker.GetMock<ICardServices>();
+            var auditCardService = _mocker.GetMock<IAuditCardService>();
+
+            cardServices.Setup(s => s.FindCardsByDocumentIdWithStepWorkflowAsync(1))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+
+            documentRepository.Setup(r => r.ClearWorkflowRelationships(ids)).Returns(true);
+            documentRepository.Setup(r => r.Delete(ids)).Returns(true);
+            documentRepository.Setup(r => r.FindHashById(ids)).Returns(hashes.AsQueryable());
+
+            embeddingsApi.Setup(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
+
+            fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
+                .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
+
+            cardRepository
+                .Setup(r => r.FindCardIdsByDocumentIdsAsync(ids))
+                .ReturnsAsync(cardIds);
+            cardRepository
+                .Setup(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()))
+                .ReturnsAsync(true);
+
+            stepToolExecutionRepository
+                .Setup(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(true);
+
+            stepToolOutputRepository
+                .Setup(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
+                .Returns(true);
+
+            await _documentDeletionServices.Delete(ids, headers);
+
+            auditCardService.Verify(a => a.CreateBatchAndSaveAsync(
+                It.Is<IReadOnlyList<(int, int, int)>>(l => l.Count == 2),
+                AuditCardActionType.Removed,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()), Times.Once);
+            auditCardService.Verify(a => a.CreateBatchAndSaveAsync(
+                It.Is<IReadOnlyList<(int, int, int)>>(l => l.Count == 1 && l[0].Item3 == 1),
+                AuditCardActionType.DocumentDeleted,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact(DisplayName = "Delete - Should return false when repository delete fails")]
@@ -110,6 +249,11 @@ namespace WoopiAiHub.UnitTests.Services
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             var stepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
             var unitOfWork = _mocker.GetMock<IUnitOfWork>();
+            var cardServices = _mocker.GetMock<ICardServices>();
+            var auditCardService = _mocker.GetMock<IAuditCardService>();
+
+            cardServices.Setup(s => s.FindCardsByDocumentIdWithStepWorkflowAsync(It.IsAny<int>()))
+                .ReturnsAsync(new List<Card>());
 
             documentRepository.Setup(a => a.ClearWorkflowRelationships(list)).Returns(true);
             documentRepository.Setup(a => a.Delete(list)).Returns(false);
@@ -151,6 +295,7 @@ namespace WoopiAiHub.UnitTests.Services
             unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
             unitOfWork.Verify(u => u.Commit(), Times.Once);
             unitOfWork.Verify(u => u.Rollback(), Times.Never);
+            auditCardService.Verify(a => a.CreateBatchAndSaveAsync(It.IsAny<IReadOnlyList<(int, int, int)>>(), It.IsAny<AuditCardActionType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact(DisplayName = "DeleteHash - Should delete hash from embeddings successfully")]

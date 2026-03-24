@@ -229,8 +229,7 @@ body {
     --color-toast-content-danger: #ffffff;
     --color-border-toast: 1px solid #393e5c;
     --color-border-header-modal: 1px solid #393e5c;
-    --box-shadow-multiselect-wrapper: 0 0 0 var(--ms-ring-width, 3px)
-        var(--ms-ring-color, rgba(16, 185, 129, 0.188));
+    --box-shadow-multiselect-wrapper: 0 0 0 var(--ms-ring-width, 3px) var(--ms-ring-color, rgba(16, 185, 129, 0.188));
     --color-bg-dropdown-menu: #292f4c;
     --color-dropdown-menu: #b0b4c8;
     --color-fade-buttons: #d2f4ea;
@@ -284,7 +283,7 @@ body {
     --color-bg-warning-badge: rgba(120, 53, 15, 0.4);
     --color-text-warning-badge: rgb(252, 211, 77);
     --color-read-only: #232945;
-    --color-bg-main: #243558;
+    --color-bg-main: #1f2132;
 }
 .css-theme-dark input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);

@@ -43,12 +43,8 @@
                                         {{ item.documentName }}
                                     </span>
                                     <BadgeComponent
-                                        :text="
-                                            item.isFinalized
-                                                ? $t('auditor.documents.summary.finalized')
-                                                : $t('auditor.documents.summary.active')
-                                        "
-                                        :variant="item.isFinalized ? 'success' : 'primary'"
+                                        :text="documentStatusBadgeText(item)"
+                                        :variant="documentStatusBadgeVariant(item)"
                                         size="sm"
                                         :clickable="false"
                                     />
@@ -159,6 +155,24 @@
             };
         },
         methods: {
+            documentStatusBadgeText(item) {
+                if (item.isRemoved) {
+                    return this.$t("auditor.documents.summary.removed");
+                }
+                if (item.isFinalized) {
+                    return this.$t("auditor.documents.summary.finalized");
+                }
+                return this.$t("auditor.documents.summary.active");
+            },
+            documentStatusBadgeVariant(item) {
+                if (item.isRemoved) {
+                    return "danger";
+                }
+                if (item.isFinalized) {
+                    return "success";
+                }
+                return "primary";
+            },
             workflowsCount(item) {
                 return item.workflows.length;
             },
@@ -175,17 +189,24 @@
                 this.isLoading = true;
                 try {
                     const search = (this.filters.search || "").trim() || undefined;
-                    const isFinalized =
-                        this.filters.statusId === "finalized"
-                            ? true
-                            : this.filters.statusId === "active"
-                              ? false
-                              : undefined;
+                    const statusId = this.filters.statusId;
+                    let isFinalized;
+                    let isRemoved;
+                    if (statusId === "removed") {
+                        isRemoved = true;
+                    } else if (statusId === "finalized") {
+                        isFinalized = true;
+                        isRemoved = false;
+                    } else if (statusId === "active") {
+                        isFinalized = false;
+                        isRemoved = false;
+                    }
                     const params = {
                         take: this.take,
                         skip: this.skip,
                         ...(search && { search }),
                         ...(isFinalized !== undefined && { isFinalized }),
+                        ...(isRemoved !== undefined && { isRemoved }),
                     };
 
                     const response = await AuditorsService.getDocumentsAuditSummary(params);

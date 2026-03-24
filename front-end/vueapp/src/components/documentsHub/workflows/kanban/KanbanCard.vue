@@ -140,7 +140,7 @@
                             <LucideIcon
                                 icon="ChevronRight"
                                 :size="16"
-                                class="me-1"
+                                class="me-1 text-muted"
                                 v-if="!isLoadingAnalysis"
                             />
                             <div
@@ -173,12 +173,12 @@
                                     <LucideIcon
                                         icon="ChevronRight"
                                         :size="15"
-                                        class="ml-2 icon-closed"
+                                        class="ml-2 icon-closed text-muted"
                                     />
                                     <LucideIcon
                                         icon="ChevronDown"
                                         :size="15"
-                                        class="ml-2 icon-open"
+                                        class="ml-2 icon-open text-muted"
                                     />
                                 </button>
                                 <ul class="dropdown-menu p-2 users-list">
