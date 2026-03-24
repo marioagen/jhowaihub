@@ -10,8 +10,6 @@ namespace WoopiAiHub.Domain.DTOs.Response.Auditor.Documents
         public string StepName { get; init; } = string.Empty;
         public int CardId { get; init; }
         public string CardStatusName { get; init; } = string.Empty;
-
-        /// <summary>False when the document is soft-deleted (<c>Enable == false</c>).</summary>
         public bool DocumentEnabled { get; init; } = true;
     }
 }

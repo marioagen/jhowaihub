@@ -259,6 +259,10 @@
                 }
             },
 
+            hasRemovedOriginalSteps() {
+                return this.steps.some(s => s.id > 0 && s.isActive === false);
+            },
+
             getData() {
                 return {
                     steps: this.steps

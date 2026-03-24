@@ -171,7 +171,6 @@ export default {
                 };
             });
     },
-    // Phased workflow creation methods
     createPhase1(params) {
         return api
             .post("/Workflow/Phase1", params)
@@ -259,4 +258,22 @@ export default {
                 };
             });
     },
+    countDocuments(workflowId) {
+        return api
+            .get(`/Workflow/CountDocuments/${workflowId}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
+    hasStepToolConstraints(stepId) {
+        return api
+            .get(`/Workflow/Step/${stepId}/HasConstraints`)
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
+    }
 };

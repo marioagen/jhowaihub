@@ -1,8 +1,5 @@
-using Bogus.DataSets;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Moq;
 using Moq.AutoMock;
-using System;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -164,9 +161,6 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task DeleteById_ShouldDeleteWorkflowAndSteps()
         {
             // Arrange
-            var workflow = WorkflowFixture.FindValidWorkflow();
-
-            _workflowRepositoryMock.Setup(repo => repo.FindByIdReturnModel(It.IsAny<int>())).ReturnsAsync(workflow);
             _workflowRepositoryMock.Setup(repo => repo.DeleteById(It.IsAny<int>())).ReturnsAsync(true);
 
             // Act
@@ -174,7 +168,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.True(result);
-            _workflowRepositoryMock.Verify(repo => repo.FindByIdReturnModel(It.IsAny<int>()), Times.Once);
             _workflowRepositoryMock.Verify(repo => repo.DeleteById(It.IsAny<int>()), Times.Once);
         }
 
@@ -183,13 +176,13 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task DeleteById_ShouldThrowException_WhenWorkflowNotFound()
         {
             // Arrange
-            _workflowRepositoryMock.Setup(repo => repo.FindByIdReturnModel(It.IsAny<int>()))
-                .ReturnsAsync((Workflow?)null);
+            _workflowRepositoryMock.Setup(repo => repo.DeleteById(It.IsAny<int>()))
+                .ThrowsAsync(new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound));
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.DeleteById(1));
 
-            _workflowRepositoryMock.Verify(repo => repo.FindByIdReturnModel(It.IsAny<int>()), Times.Once);
+            _workflowRepositoryMock.Verify(repo => repo.DeleteById(It.IsAny<int>()), Times.Once);
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("Workflow not found", exception.Message);
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
@@ -782,7 +775,8 @@ namespace WoopiAiHub.UnitTests.Services
             var workflowPhase3Dto = new WorkflowPhase3Dto
             {
                 WorkflowId = 1,
-                Steps = { new StepPhase3Dto { Id = stepDto.Id, Order = stepDto.Order, StepTools = stepToolsList } }
+                Steps = { new StepPhase3Dto { Id = stepDto.Id, Order = stepDto.Order, StepTools = stepToolsList } },
+                ResetDocuments = false
             };
 
             var workflow = WorkflowFixture.FindValidWorkflow();
@@ -799,6 +793,66 @@ namespace WoopiAiHub.UnitTests.Services
 
             _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync(tool);
+
+            var stepToolMap = new Dictionary<int, int>();
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+
+            // Assert
+            Assert.True(result);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.AtLeastOnce);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 success")]
+        [Trait("UpdatePhase3", "Success")]
+        public async Task UpdatePhase3_WorkflowExistsDeletingData_UpdatesSuccessfully()
+        {
+            // Arrange
+            var stepDto = WorkflowFixture.FindValidStepDto();
+            var stepDto2 = WorkflowFixture.FindValidStepDto();
+            stepDto2.Id = stepDto.Id+1;
+            stepDto2.Order = stepDto.Order + 1;
+            var stepTools = WorkflowFixture.FindValidStepToolWithDependencies();
+            var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            var stepToolDependencyDto = new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 };
+            stepToolUpdateDto.Dependencies = new List<StepToolOutputDependencyDto> { stepToolDependencyDto };
+            var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto };
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = {
+                    new StepPhase3Dto { Id = stepDto.Id, Order = stepDto.Order, StepTools = stepToolsList },
+                },
+                ResetDocuments = true
+            };
+
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            var step = new Step(stepDto2.Id, DateTime.Now, workflow.Id, stepDto2.Name, stepDto2.Order, 1, 1);
+            step.AddCard(new Card(1, DateTime.Now, step.Id, 1, "Card 1", 1, null));
+            workflow.Steps.Add(step);
+
+            var tool = WorkflowFixture.CreateToolModel(1, "Test Tool", "OCR");
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(workflowPhase3Dto.WorkflowId))
+                .ReturnsAsync(workflow);
+
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(tool);
+
+            _stepRepositoryMock.Setup(x => x.FindById(It.IsAny<int>()))
+                .ReturnsAsync(step);
 
             var stepToolMap = new Dictionary<int, int>();
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
@@ -912,7 +966,8 @@ namespace WoopiAiHub.UnitTests.Services
                         ProfileId = stepDto.Profile.Id,
                         StatusId = stepDto.Status.Id
                     }
-                }
+                },
+                ResetDocuments = true
             };
 
             var existingSteps = new List<Step> { step };
@@ -958,7 +1013,7 @@ namespace WoopiAiHub.UnitTests.Services
                 {
                     new StepPhase2Dto
                     {
-                        Id = 1,
+                        Id = 2,
                         Name = "Updated Step 1",
                         Order = 1,
                         ProfileId = stepDto.Profile.Id,
@@ -976,6 +1031,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             _stepRepositoryMock.Setup(x => x.FindByIdsWithCards(It.IsAny<IEnumerable<int>>()))
                 .Returns(steps);
+            _cardRepositoryMock.Setup(x => x.CountByStepsInUse(It.IsAny<ICollection<int>>()))
+                .ReturnsAsync(1);
 
             // Act & Assert
             var exception =
@@ -2181,8 +2238,6 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
         }
 
-        #region CloneAsync Tests
-
         [Fact(DisplayName = "CloneAsync should throw AppException when name is empty")]
         [Trait("CloneAsync", "Fail")]
         public async Task CloneAsync_EmptyName_ThrowsAppException()
@@ -2460,10 +2515,6 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
         }
 
-        #endregion
-
-        #region CreateStepToolUpdate Tests
-
         [Fact(DisplayName = "UpdatePhase3 should encrypt API tool parameters and normalize body correctly")]
         [Trait("UpdatePhase3", "Success")]
         public async Task UpdatePhase3_ApiToolParameterEncryption_EncryptsSuccessfully()
@@ -2725,10 +2776,6 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(678.90m, createdStepTool.PositionY);
         }
 
-        #endregion
-
-        #region CloneAsync Tests
-
         [Fact(DisplayName = "CloneAsync should preserve team associations")]
         [Trait("CloneAsync", "Success")]
         public async Task CloneAsync_WithTeams_PreservesTeamAssociations()
@@ -2780,6 +2827,446 @@ namespace WoopiAiHub.UnitTests.Services
             )), Times.Once);
         }
 
-        #endregion
+        [Fact(DisplayName = "CountCards should return total number of cards in workflow steps")]
+        [Trait("CountCards", "Success")]
+        public async Task CountCards_WorkflowWithCards_ReturnsCardCount()
+        {
+            // Arrange
+            var workflowId = 1;
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow");
+
+            var step1 = new Step(1, DateTime.Now, workflowId, "Step 1", 1, 1, 1);
+            var step2 = new Step(2, DateTime.Now, workflowId, "Step 2", 2, 1, 1);
+
+            step1.AddCard(new Card(1, DateTime.Now, 1, 1, "Card 1", 1, null));
+            step1.AddCard(new Card(2, DateTime.Now, 1, 1, "Card 2", 1, null));
+
+            step2.AddCard(new Card(3, DateTime.Now, 2, 1, "Card 3", 1, null));
+
+            workflow.AddStep(step1);
+            workflow.AddStep(step2);
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(workflowId))
+                .ReturnsAsync(workflow);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(3);
+
+            // Act
+            var result = await _workflowServices.CountCards(workflowId);
+
+            // Assert
+            Assert.Equal(3, result);
+            _workflowRepositoryMock.Verify(r => r.FindByIdReturnModel(workflowId), Times.Once);
+            _cardRepositoryMock.Verify(r => r.CountByStepsInUse(It.Is<List<int>>(ids =>
+                ids.Count == 2 && ids.Contains(1) && ids.Contains(2))), Times.Once);
+        }
+
+        [Fact(DisplayName = "CountCards should return zero when workflow has no steps")]
+        [Trait("CountCards", "Success")]
+        public async Task CountCards_WorkflowWithoutSteps_ReturnsZero()
+        {
+            // Arrange
+            var workflowId = 1;
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow");
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(workflowId))
+                .ReturnsAsync(workflow);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(0);
+
+            // Act
+            var result = await _workflowServices.CountCards(workflowId);
+
+            // Assert
+            Assert.Equal(0, result);
+            _cardRepositoryMock.Verify(r => r.CountByStepsInUse(It.IsAny<List<int>>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "CountCards should return zero when steps have no cards")]
+        [Trait("CountCards", "Success")]
+        public async Task CountCards_StepsWithoutCards_ReturnsZero()
+        {
+            // Arrange
+            var workflowId = 1;
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow");
+
+            var step1 = new Step(1, DateTime.Now, workflowId, "Step 1", 1, 1, 1);
+            var step2 = new Step(2, DateTime.Now, workflowId, "Step 2", 2, 1, 1);
+
+            workflow.AddStep(step1);
+            workflow.AddStep(step2);
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(workflowId))
+                .ReturnsAsync(workflow);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(0);
+
+            // Act
+            var result = await _workflowServices.CountCards(workflowId);
+
+            // Assert
+            Assert.Equal(0, result);
+        }
+
+        [Fact(DisplayName = "CountCards should throw AppException when workflow not found")]
+        [Trait("CountCards", "Fail")]
+        public async Task CountCards_WorkflowNotFound_ThrowsAppException()
+        {
+            // Arrange
+            var workflowId = 999;
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(workflowId))
+                .ReturnsAsync((Workflow?)null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CountCards(workflowId));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal("Workflow not found", exception.Message);
+            Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "CountCards should pass correct step IDs to repository")]
+        [Trait("CountCards", "Success")]
+        public async Task CountCards_PassesCorrectStepIds_ToRepository()
+        {
+            // Arrange
+            var workflowId = 1;
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow");
+
+            var step1 = new Step(5, DateTime.Now, workflowId, "Step 1", 1, 1, 1);
+            var step2 = new Step(10, DateTime.Now, workflowId, "Step 2", 2, 1, 1);
+            var step3 = new Step(15, DateTime.Now, workflowId, "Step 3", 3, 1, 1);
+
+            workflow.AddStep(step1);
+            workflow.AddStep(step2);
+            workflow.AddStep(step3);
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(workflowId))
+                .ReturnsAsync(workflow);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(0);
+
+            // Act
+            await _workflowServices.CountCards(workflowId);
+
+            // Assert
+            _cardRepositoryMock.Verify(r => r.CountByStepsInUse(It.Is<List<int>>(ids =>
+                ids.Count == 3 && ids.Contains(5) && ids.Contains(10) && ids.Contains(15))), Times.Once);
+        }
+
+        [Fact(DisplayName = "HasStepToolConstraints should return false when step not found")]
+        [Trait("HasStepToolConstraints", "Success")]
+        public async Task HasStepToolConstraints_StepNotFound_ReturnsFalse()
+        {
+            // Arrange
+            var stepId = 999;
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(stepId))
+                .ReturnsAsync((Step?)null);
+
+            // Act
+            var result = await _workflowServices.HasStepToolConstraints(stepId);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "HasStepToolConstraints should return false when step has no step tools and no cards")]
+        [Trait("HasStepToolConstraints", "Success")]
+        public async Task HasStepToolConstraints_NoStepToolsNoCards_ReturnsFalse()
+        {
+            // Arrange
+            var stepId = 1;
+            var step = new Step(stepId, DateTime.Now, 1, "Step 1", 1, 1, 1);
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(It.IsAny<int>()))
+                .ReturnsAsync(step);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(0);
+
+            // Act
+            var result = await _workflowServices.HasStepToolConstraints(stepId);
+
+            // Assert
+            Assert.False(result);
+            _stepRepositoryMock.Verify(r => r.FindByIdWithTools(It.IsAny<int>()), Times.Once);
+            _cardRepositoryMock.Verify(r => r.CountByStepsInUse(It.IsAny<List<int>>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "HasStepToolConstraints should return true when step has card outputs")]
+        [Trait("HasStepToolConstraints", "Success")]
+        public async Task HasStepToolConstraints_HasCards_ReturnsTrue()
+        {
+            // Arrange
+            var stepId = 1;
+            var step = new Step(stepId, DateTime.Now, 1, "Step 1", 1, 1, 1);
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(stepId))
+                .ReturnsAsync(step);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(5);
+
+            // Act
+            var result = await _workflowServices.HasStepToolConstraints(stepId);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact(DisplayName = "HasStepToolConstraints should return true when step tools have outputs")]
+        [Trait("HasStepToolConstraints", "Success")]
+        public async Task HasStepToolConstraints_StepToolHasOutputs_ReturnsTrue()
+        {
+            // Arrange
+            var stepId = 1;
+            var step = new Step(stepId, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var stepTool = new StepTool(10, DateTime.Now, stepId, 1, 1, 1, 1);
+            step.AddStepTool(stepTool);
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(stepId))
+                .ReturnsAsync(step);
+
+            var _stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            _stepToolOutputRepositoryMock.Setup(r => r.HasOutputsByStepToolIds(It.IsAny<List<int>>()))
+                .ReturnsAsync(true);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(0);
+
+            // Act
+            var result = await _workflowServices.HasStepToolConstraints(stepId);
+
+            // Assert
+            Assert.True(result);
+            _stepToolOutputRepositoryMock.Verify(r => r.HasOutputsByStepToolIds(It.Is<List<int>>(ids =>
+                ids.Count == 1 && ids.Contains(10))), Times.Once);
+        }
+
+        [Fact(DisplayName = "HasStepToolConstraints should return true when step tools have executions")]
+        [Trait("HasStepToolConstraints", "Success")]
+        public async Task HasStepToolConstraints_StepToolHasExecutions_ReturnsTrue()
+        {
+            // Arrange
+            var stepId = 1;
+            var step = new Step(stepId, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var stepTool1 = new StepTool(10, DateTime.Now, stepId, 1, 1, 1, 1);
+            var stepTool2 = new StepTool(11, DateTime.Now, stepId, 2, 2, 1, 1);
+            step.AddStepTool(stepTool1);
+            step.AddStepTool(stepTool2);
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(stepId))
+                .ReturnsAsync(step);
+
+            var _stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            _stepToolOutputRepositoryMock.Setup(r => r.HasOutputsByStepToolIds(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            var _stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            _stepToolExecutionRepositoryMock.Setup(r => r.HasExecutionsByStepToolIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(true);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(0);
+
+            // Act
+            var result = await _workflowServices.HasStepToolConstraints(stepId);
+
+            // Assert
+            Assert.True(result);
+            _stepToolExecutionRepositoryMock.Verify(r => r.HasExecutionsByStepToolIdsAsync(It.Is<List<int>>(ids =>
+                ids.Count == 2 && ids.Contains(10) && ids.Contains(11))), Times.Once);
+        }
+
+        [Fact(DisplayName = "HasStepToolConstraints should return true when step tools have dependencies")]
+        [Trait("HasStepToolConstraints", "Success")]
+        public async Task HasStepToolConstraints_StepToolHasDependencies_ReturnsTrue()
+        {
+            // Arrange
+            var stepId = 1;
+            var step = new Step(stepId, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var stepTool = new StepTool(10, DateTime.Now, stepId, 1, 1, 1, 1);
+            step.AddStepTool(stepTool);
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(stepId))
+                .ReturnsAsync(step);
+
+            var _stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            _stepToolOutputRepositoryMock.Setup(r => r.HasOutputsByStepToolIds(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            var _stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            _stepToolExecutionRepositoryMock.Setup(r => r.HasExecutionsByStepToolIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolDependencyRepositoryMock.Setup(r => r.HasDependenciesByStepToolIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(true);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(0);
+
+            // Act
+            var result = await _workflowServices.HasStepToolConstraints(stepId);
+
+            // Assert
+            Assert.True(result);
+            _stepToolDependencyRepositoryMock.Verify(r => r.HasDependenciesByStepToolIdsAsync(It.Is<List<int>>(ids =>
+                ids.Count == 1 && ids.Contains(10))), Times.Once);
+        }
+
+        [Fact(DisplayName = "HasStepToolConstraints should return false when no constraints exist")]
+        [Trait("HasStepToolConstraints", "Success")]
+        public async Task HasStepToolConstraints_NoConstraints_ReturnsFalse()
+        {
+            // Arrange
+            var stepId = 1;
+            var step = new Step(stepId, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var stepTool = new StepTool(10, DateTime.Now, stepId, 1, 1, 1, 1);
+            step.AddStepTool(stepTool);
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(stepId))
+                .ReturnsAsync(step);
+
+            var _stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            _stepToolOutputRepositoryMock.Setup(r => r.HasOutputsByStepToolIds(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            var _stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            _stepToolExecutionRepositoryMock.Setup(r => r.HasExecutionsByStepToolIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolDependencyRepositoryMock.Setup(r => r.HasDependenciesByStepToolIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(0);
+
+            // Act
+            var result = await _workflowServices.HasStepToolConstraints(stepId);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "HasStepToolConstraints should check all constraint types in order")]
+        [Trait("HasStepToolConstraints", "Success")]
+        public async Task HasStepToolConstraints_ChecksAllConstraintTypes_InOrder()
+        {
+            // Arrange
+            var stepId = 1;
+            var step = new Step(stepId, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var stepTool1 = new StepTool(10, DateTime.Now, stepId, 1, 1, 1, 1);
+            var stepTool2 = new StepTool(11, DateTime.Now, stepId, 2, 2, 1, 1);
+            step.AddStepTool(stepTool1);
+            step.AddStepTool(stepTool2);
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(stepId))
+                .ReturnsAsync(step);
+
+            var _stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            _stepToolOutputRepositoryMock.Setup(r => r.HasOutputsByStepToolIds(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            var _stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            _stepToolExecutionRepositoryMock.Setup(r => r.HasExecutionsByStepToolIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolDependencyRepositoryMock.Setup(r => r.HasDependenciesByStepToolIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(0);
+
+            // Act
+            await _workflowServices.HasStepToolConstraints(stepId);
+
+            // Assert - Verify all checks were performed
+            _stepToolOutputRepositoryMock.Verify(r => r.HasOutputsByStepToolIds(It.IsAny<List<int>>()), Times.Once);
+            _stepToolExecutionRepositoryMock.Verify(r => r.HasExecutionsByStepToolIdsAsync(It.IsAny<List<int>>()), Times.Once);
+            _stepToolDependencyRepositoryMock.Verify(r => r.HasDependenciesByStepToolIdsAsync(It.IsAny<List<int>>()), Times.Once);
+            _cardRepositoryMock.Verify(r => r.CountByStepsInUse(It.IsAny<List<int>>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "HasStepToolConstraints should early exit on StepToolOutput constraint")]
+        [Trait("HasStepToolConstraints", "Success")]
+        public async Task HasStepToolConstraints_EarlyExitOnOutputConstraint_DoesNotCheckOtherConstraints()
+        {
+            // Arrange
+            var stepId = 1;
+            var step = new Step(stepId, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var stepTool = new StepTool(10, DateTime.Now, stepId, 1, 1, 1, 1);
+            step.AddStepTool(stepTool);
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(stepId))
+                .ReturnsAsync(step);
+
+            var _stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            _stepToolOutputRepositoryMock.Setup(r => r.HasOutputsByStepToolIds(It.IsAny<List<int>>()))
+                .ReturnsAsync(true);
+
+            var _stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+
+            // Act
+            var result = await _workflowServices.HasStepToolConstraints(stepId);
+
+            // Assert
+            Assert.True(result);
+            _stepToolExecutionRepositoryMock.Verify(r => r.HasExecutionsByStepToolIdsAsync(It.IsAny<List<int>>()), Times.Never);
+            _stepToolDependencyRepositoryMock.Verify(r => r.HasDependenciesByStepToolIdsAsync(It.IsAny<List<int>>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "HasStepToolConstraints should pass correct step tool IDs to repository checks")]
+        [Trait("HasStepToolConstraints", "Success")]
+        public async Task HasStepToolConstraints_PassesCorrectToolIds_ToRepositories()
+        {
+            // Arrange
+            var stepId = 1;
+            var step = new Step(stepId, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var stepTool1 = new StepTool(5, DateTime.Now, stepId, 1, 1, 1, 1);
+            var stepTool2 = new StepTool(15, DateTime.Now, stepId, 2, 2, 1, 1);
+            var stepTool3 = new StepTool(25, DateTime.Now, stepId, 3, 3, 1, 1);
+            step.AddStepTool(stepTool1);
+            step.AddStepTool(stepTool2);
+            step.AddStepTool(stepTool3);
+
+            _stepRepositoryMock.Setup(r => r.FindByIdWithTools(stepId))
+                .ReturnsAsync(step);
+
+            var _stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
+            _stepToolOutputRepositoryMock.Setup(r => r.HasOutputsByStepToolIds(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            var _stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            _stepToolExecutionRepositoryMock.Setup(r => r.HasExecutionsByStepToolIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolDependencyRepositoryMock.Setup(r => r.HasDependenciesByStepToolIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(false);
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+                .ReturnsAsync(0);
+
+            // Act
+            await _workflowServices.HasStepToolConstraints(stepId);
+
+            // Assert
+            var expectedIds = new List<int> { 5, 15, 25 };
+            _stepToolOutputRepositoryMock.Verify(r => r.HasOutputsByStepToolIds(It.Is<List<int>>(ids =>
+                ids.Count == 3 && ids.Contains(5) && ids.Contains(15) && ids.Contains(25))), Times.Once);
+            _stepToolExecutionRepositoryMock.Verify(r => r.HasExecutionsByStepToolIdsAsync(It.Is<List<int>>(ids =>
+                ids.Count == 3 && ids.Contains(5) && ids.Contains(15) && ids.Contains(25))), Times.Once);
+            _stepToolDependencyRepositoryMock.Verify(r => r.HasDependenciesByStepToolIdsAsync(It.Is<List<int>>(ids =>
+                ids.Count == 3 && ids.Contains(5) && ids.Contains(15) && ids.Contains(25))), Times.Once);
+        }
     }
 }

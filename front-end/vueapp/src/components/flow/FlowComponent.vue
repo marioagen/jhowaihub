@@ -150,6 +150,13 @@
                 </div>
             </div>
         </div>
+        <ConfirmModalValidationInput id="removeToolValidationConfirm" title="workflow.removeToolValidationTitle"
+            :message="$t('workflow.removeToolValidationMessage', { name: step?.name })"
+            cancelText="common.cancel" confirmText="workflow.confirmRemoveTool"
+            :placeholder="$t('workflow.removeToolValidationPlaceholder', { name: step?.name })"
+            :validationText="step?.name || ''" confirmVariant="danger" iconeName="AlertTriangle"
+            iconVariant="warning" ref="RemoveToolValidationDialog" :isLoading="isLoading"
+            @confirm="() => executeSave(true)" />
     </main>
     <ConfirmModal
         id="confirm-leave-flow-modal"
@@ -176,9 +183,15 @@ import WorkflowService from "@/services/workflow/WorkflowService";
 import LogService from "@/services/log/logService";
 import ToolType from "@/constants/ToolType";
 import ConfirmModal from "@/components/global/ConfirmModal.vue";
+import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidationInput.vue";
 
 export default {
     name: "FlowPage",
+    components: {
+        VueFlowComponent,
+        DependencySelector,
+        ConfirmModalValidationInput,
+    },
     props: {
         stepId: {
             type: Number,
@@ -244,12 +257,14 @@ export default {
             canLeave: true,
             pendingNavegation: null,
             leaveModalLoading: false,
+            isLoading: false,
         };
     },
     components: {
         VueFlowComponent,
         DependencySelector,
-        ConfirmModal
+        ConfirmModal,
+        ConfirmModalValidationInput
     },
     methods: {
         markFlowDirty() {
@@ -545,6 +560,33 @@ export default {
             this.showMessage();
         },
         async save() {
+            this.isLoading = true;
+            try {
+                if (!this.stepId) {
+                    await this.executeSave();
+                    return;
+                }
+
+                const hasConstraints = await WorkflowService.hasStepToolConstraints(this.stepId);
+                if (hasConstraints) {
+                    this.$refs.RemoveToolValidationDialog.open();
+                } else {
+                    await this.executeSave();
+                }
+            } catch (error) {
+                this.$notify({
+                    title: "flow.title",
+                    message: "workflow.errors.fetchError",
+                    variant: "danger",
+                    icon: "CircleX",
+                });
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        async executeSave(resetDocuments = false) {
+            this.$refs.RemoveToolValidationDialog?.close();
+            this.isLoading = true;
             try {
                 let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
                 if (this.workflowId) {
@@ -570,6 +612,7 @@ export default {
                     const params = {
                         workflowId: this.workflowId,
                         steps: allSteps,
+                        resetDocuments: resetDocuments,
                     };
 
                     const result = await WorkflowService.updatePhase3(params);
@@ -609,6 +652,8 @@ export default {
                     variant: "danger",
                     icon: "CircleX",
                 });
+            } finally {
+                this.isLoading = false;
             }
         },
         fillValues(fields, data) {
