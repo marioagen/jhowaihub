@@ -6,7 +6,6 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
@@ -21,7 +20,6 @@ namespace WoopiAiHub.Application.Services
         private readonly ITeamRepository _teamRepository;
         private readonly IStepRepository _stepRepository;
         private readonly ICardRepository _cardRepository;
-        private readonly IAuditCardRepository _auditCardRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IStatusRepository _statusRepository;
         private readonly IStepToolDependencyRepository _stepToolDependencyRepository;
@@ -29,7 +27,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IStepToolParameterRepository _stepToolParameterRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IValidateStep _validateStep;
         private readonly IToolRepository _toolRepository;
         private readonly IStepToolRepository _stepToolRepository;
         private readonly IEncryptionService _encryptationService;
@@ -50,7 +47,6 @@ namespace WoopiAiHub.Application.Services
             IStepToolParameterRepository stepToolParameterRepository,
             IUnitOfWork unitOfWork,
             IToolRepository toolRepository,
-            IValidateStep validateStep,
             IEncryptionService encryptationService,
             ILogger<WorkflowServices> logger 
         )
@@ -66,7 +62,6 @@ namespace WoopiAiHub.Application.Services
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolParameterRepository = stepToolParameterRepository;
             _unitOfWork = unitOfWork;
-            _validateStep = validateStep;
             _teamRepository = teamRepository;
             _toolRepository = toolRepository;
             _encryptationService = encryptationService;
