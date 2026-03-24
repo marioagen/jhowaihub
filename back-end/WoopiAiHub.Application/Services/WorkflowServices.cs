@@ -19,12 +19,14 @@ namespace WoopiAiHub.Application.Services
         private readonly IWorkflowRepository _workflowRepository;
         private readonly ITeamRepository _teamRepository;
         private readonly IStepRepository _stepRepository;
+        private readonly ICardRepository _cardRepository;
         private readonly IProfileRepository _profileRepository;
         private readonly IStatusRepository _statusRepository;
         private readonly IStepToolDependencyRepository _stepToolDependencyRepository;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
+        private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
+        private readonly IStepToolParameterRepository _stepToolParameterRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IValidateStep _validateStep;
         private readonly IToolRepository _toolRepository;
         private readonly IStepToolRepository _stepToolRepository;
         private readonly IEncryptionService _encryptationService;
@@ -37,12 +39,14 @@ namespace WoopiAiHub.Application.Services
             ITeamRepository teamRepository,
             IStatusRepository statusRepository,
             IStepRepository stepRepository,
+            ICardRepository cardRepository,
             IStepToolRepository stepToolRepository,
             IStepToolDependencyRepository stepToolDependencyRepository,
             IStepToolOutputRepository stepToolOutputRepository,
+            IStepToolExecutionRepository stepToolExecutionRepository,
+            IStepToolParameterRepository stepToolParameterRepository,
             IUnitOfWork unitOfWork,
             IToolRepository toolRepository,
-            IValidateStep validateStep,
             IEncryptionService encryptationService,
             ILogger<WorkflowServices> logger 
         )
@@ -51,11 +55,13 @@ namespace WoopiAiHub.Application.Services
             _profileRepository = profileRepository;
             _statusRepository = statusRepository;
             _stepRepository = stepRepository;
+            _cardRepository = cardRepository;
             _stepToolRepository = stepToolRepository;
             _stepToolDependencyRepository = stepToolDependencyRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
+            _stepToolExecutionRepository = stepToolExecutionRepository;
+            _stepToolParameterRepository = stepToolParameterRepository;
             _unitOfWork = unitOfWork;
-            _validateStep = validateStep;
             _teamRepository = teamRepository;
             _toolRepository = toolRepository;
             _encryptationService = encryptationService;
@@ -158,14 +164,6 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> DeleteById(int id)
         {
-            var workflow = await _workflowRepository.FindByIdReturnModel(id);
-            if (workflow == null)
-            {
-                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
-            }
-
-            var stepIds = workflow.Steps.Select(s => s.Id).ToList();
-            await _validateStep.ValidateDeleteStep(stepIds);
             return await _workflowRepository.DeleteById(id);
         }
 
@@ -644,6 +642,8 @@ namespace WoopiAiHub.Application.Services
                     .Where(es => !newStepsDict.ContainsKey(es.Id))
                     .ToList();
 
+                await ResetStepToolDataAsync(workflow, workflowPhase2Dto.ResetDocuments, stepsToRemove);
+
                 var stepsToUpdate = existingSteps
                     .Where(es => newStepsDict.ContainsKey(es.Id))
                     .ToList();
@@ -653,10 +653,13 @@ namespace WoopiAiHub.Application.Services
                     .ToList();
 
 
-                var stepcards = _stepRepository.FindByIdsWithCards(stepsToRemove.Select(s => s.Id));
-                if (stepcards.Any(s => s.Cards.Count > 0))
+                if (stepsToRemove.Count > 0)
                 {
-                    throw new AppException(ErrorCode.DefaultError, "Can't delete with cards related", null);
+                    var cardsCount = await _cardRepository.CountByStepsInUse(stepsToRemove.Select(s => s.Id).ToList());
+                    if (cardsCount > 0)
+                    {
+                        throw new AppException(ErrorCode.DefaultError, "Can't delete with cards related", null);
+                    }
                 }
 
                 _stepRepository.DeleteByIds(stepsToRemove.Select(s => s.Id));
@@ -739,6 +742,109 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// When <paramref name="resetDocuments"/> is <see langword="true"/> and there are removed steps, removes all transactional data
+        /// (StepToolDependency, StepToolOutput, StepToolExecution, StepToolParameter) for StepTools
+        /// belonging to steps that have an Order greater than or equal to the minimum Order of the removed steps.
+        /// It also sets Enable = false for all Cards in these steps.
+        /// This prevents referential integrity exceptions when StepTools are removed or reordered.
+        /// </summary>
+        /// <param name="workflow">The workflow model with Steps and StepTools loaded.</param>
+        /// <param name="resetDocuments">When false, the method returns immediately without any changes.</param>
+        /// <param name="stepsToRemove">The list of steps that are being removed in this phase update.</param>
+        private async Task ResetStepToolDataAsync(Workflow workflow, bool resetDocuments, List<Step> stepsToRemove)
+        {
+            if (!resetDocuments || stepsToRemove.Count == 0)
+                return;
+
+            var minRemovedOrder = stepsToRemove.Min(s => s.Order);
+            var stepsToReset = workflow.Steps.Where(s => s.Order >= minRemovedOrder).ToList();
+
+            await ResetSteps(stepsToReset);
+        }
+
+        /// <summary>
+        /// Resets the specified steps by removing all related transactional data and associated entities.
+        /// </summary>
+        /// <remarks>This method deletes dependent data in the correct order to maintain referential
+        /// integrity. All related executions, outputs, parameters, dependencies, and cards associated with the provided
+        /// steps are removed. The operation is asynchronous and should be awaited to ensure completion.</remarks>
+        /// <param name="stepsToReset">The list of steps to reset. Each step and its related data will be deleted or cleared as part of the reset
+        /// operation. Cannot be null.</param>
+        /// <returns>A task that represents the asynchronous reset operation.</returns>
+        private async Task ResetSteps(List<Step> stepsToReset)
+        {
+            var allStepToolIds = new List<int>();
+            var allCardIds = new List<int>();
+
+            foreach (var step in stepsToReset)
+            {
+                if (step.Cards != null && step.Cards.Count > 0)
+                {
+                    allCardIds.AddRange(step.Cards.Select(c => c.Id));
+                }
+
+                var stepToolIds = step.StepTools.Select(st => st.Id).ToList();
+                if (stepToolIds.Count > 0)
+                {
+                    allStepToolIds.AddRange(stepToolIds);
+                }
+            }
+
+            await DeleteRelatedStepData(allStepToolIds, allCardIds);
+        }
+
+        /// <summary>
+        /// Deletes data associated with the specified step tool and card identifiers.
+        /// </summary>
+        /// <param name="allStepToolIds">A list of step tool identifiers for which related data will be deleted. Cannot be null.</param>
+        /// <param name="allCardIds">A list of card identifiers for which related step data will be deleted. Cannot be null.</param>
+        /// <returns>A task that represents the asynchronous delete operation.</returns>
+        private async Task DeleteRelatedStepData(List<int> allStepToolIds, List<int> allCardIds)
+        {
+            await DeleteStepToolRelatedData(allStepToolIds);
+
+            DeleteRelatedStepsCardData(allCardIds);
+        }
+
+        /// <summary>
+        /// Deletes all step tool execution, step tool output, audit card, and card data associated with the specified
+        /// card IDs.
+        /// </summary>
+        /// <remarks>This method removes data from multiple repositories based on the provided card IDs.
+        /// If the list is empty, no action is taken.</remarks>
+        /// <param name="allCardIds">A list of card IDs for which related step and card data will be deleted. Must not be null; if empty, no data
+        /// will be deleted.</param>
+        /// <returns>A task that represents the asynchronous delete operation.</returns>
+        private void DeleteRelatedStepsCardData(List<int> allCardIds)
+        {
+            if (allCardIds.Count > 0)
+            {
+                _stepToolExecutionRepository.DeleteByCardIds(allCardIds);
+                _stepToolOutputRepository.DeleteByCardIds(allCardIds);
+                _cardRepository.DisableByIds(allCardIds);
+            }
+        }
+
+        /// <summary>
+        /// Deletes all data related to the specified step tool identifiers, including parameters, dependencies,
+        /// executions, and outputs.
+        /// </summary>
+        /// <remarks>This method removes all associated data for each provided step tool identifier. If
+        /// the list is empty, no action is taken.</remarks>
+        /// <param name="allStepToolIds">A list of step tool identifiers for which related data will be deleted. The list must not be empty.</param>
+        /// <returns>A task that represents the asynchronous delete operation.</returns>
+        private async Task DeleteStepToolRelatedData(List<int> allStepToolIds)
+        {
+            if (allStepToolIds.Count > 0)
+            {
+                _stepToolParameterRepository.DeleteByStepToolsIds(allStepToolIds);
+                await _stepToolDependencyRepository.DeleteByStepToolIdAsync(allStepToolIds);
+                await _stepToolExecutionRepository.DeleteByStepToolIdsAsync(allStepToolIds);
+                await _stepToolOutputRepository.DeleteByStepToolIdsAsync(allStepToolIds);
+            }
+        }
+
+        /// <summary>
         /// Validates that the profile and status associated with a step DTO exist.
         /// </summary>
         /// <param name="stepDto"></param>
@@ -776,7 +882,8 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                var stepToolMap = await ProcessStepTools(workflow, workflowPhase3Dto.Steps);
+                
+                var stepToolMap = await ProcessStepTools(workflow, workflowPhase3Dto.Steps, workflowPhase3Dto.ResetDocuments);
                 await ResolveDependencies(workflow, workflowPhase3Dto.Steps, stepToolMap);
 
                 await _unitOfWork.SaveChangesAsync();
@@ -796,7 +903,8 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         private async Task<Dictionary<(int stepId, int order), StepTool>> ProcessStepTools(
             Workflow workflow,
-            ICollection<StepPhase3Dto> steps)
+            ICollection<StepPhase3Dto> steps,
+            bool resetDocuments)
         {
             StepTool? lastGlobalStepTool = null;
             var stepToolMap = new Dictionary<(int stepId, int order), StepTool>();
@@ -804,7 +912,7 @@ namespace WoopiAiHub.Application.Services
             foreach (var stepDto in steps.OrderBy(s => s.Order))
             {
                 var existingStep = FindStepInWorkflow(workflow, stepDto);
-                await ClearExistingStepTools(existingStep);
+                await ClearExistingStepTools(existingStep, resetDocuments);
 
                 StepTool? previousStepToolInStep = null;
 
@@ -872,9 +980,18 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Clears existing step tools and their dependencies.
         /// </summary>
-        private async Task ClearExistingStepTools(Step step)
+        private async Task ClearExistingStepTools(Step step, bool resetDocuments)
         {
             var stepToolIdsToRemove = step.StepTools.Select(st => st.Id).ToList();
+            if (resetDocuments)
+            {
+                await DeleteStepToolRelatedData(stepToolIdsToRemove);
+                var stepWithCards = await _stepRepository.FindById(step.Id);
+                if (stepWithCards != null)
+                {
+                    DeleteRelatedStepsCardData(stepWithCards.Cards.Select(c => c.Id).ToList());
+                }
+            }
             if (stepToolIdsToRemove.Any())
             {
                 var hasOutputs = await _stepToolOutputRepository.HasOutputsByStepToolIds(stepToolIdsToRemove);
@@ -1353,6 +1470,69 @@ namespace WoopiAiHub.Application.Services
         public Task<Workflow?> FindModelById(int id)
         {
             return _workflowRepository.FindByIdReturnModelWithSteps(id);
+        }
+
+        /// <summary>
+        /// Asynchronously counts the number of cards associated with the steps of the specified workflow.
+        /// </summary>
+        /// <param name="id">The unique identifier of the workflow for which to count associated cards.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the total number of cards linked
+        /// to the workflow's steps.</returns>
+        /// <exception cref="AppException">Thrown if a workflow with the specified identifier does not exist.</exception>
+        public async Task<int> CountCards(int id)
+        {
+            var workflow = await FindWorkflowModel(id);
+            var stepIds = workflow.Steps.Select(s => s.Id).ToList();
+            return await _cardRepository.CountByStepsInUse(stepIds);
+        }
+
+        /// <summary>
+        /// Checks whether the given Step has associated transactional data that would prevent
+        /// the removal of its tool flow. Verifies StepToolOutput, StepToolExecution,
+        /// StepToolDependency (as source or target) and linked Cards.
+        /// </summary>
+        /// <param name="stepId">The ID of the Step to check.</param>
+        /// <returns>True if any constraint exists; otherwise, false.</returns>
+        public async Task<bool> HasStepToolConstraints(int stepId)
+        {
+            var step = await _stepRepository.FindByIdWithTools(stepId);
+            if (step == null)
+                return false;
+
+            var stepToolIds = step.StepTools.Select(st => st.Id).ToList();
+
+            if (stepToolIds.Count > 0)
+            {
+                if (await _stepToolOutputRepository.HasOutputsByStepToolIds(stepToolIds))
+                    return true;
+
+                if (await _stepToolExecutionRepository.HasExecutionsByStepToolIdsAsync(stepToolIds))
+                    return true;
+
+                if (await _stepToolDependencyRepository.HasDependenciesByStepToolIdsAsync(stepToolIds))
+                    return true;
+            }
+
+            var cardCount = await _cardRepository.CountByStepsInUse(new List<int> { stepId });
+            return cardCount > 0;
+        }
+
+        /// <summary>
+        /// Retrieves the workflow model with the specified identifier.
+        /// </summary>
+        /// <param name="id">The unique identifier of the workflow to retrieve.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the workflow model if found;
+        /// otherwise, the method throws an exception.</returns>
+        /// <exception cref="AppException">Thrown if a workflow with the specified identifier is not found.</exception>
+        private async Task<Workflow> FindWorkflowModel(int id)
+        {
+            var workflow = await _workflowRepository.FindByIdReturnModel(id);
+            if (workflow == null)
+            {
+                throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+
+            return workflow;
         }
     }
 }

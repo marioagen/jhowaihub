@@ -200,7 +200,7 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindPhase3ById(int id)
         {
-            var result =  await _workflowServices.FindPhase3ById(id);
+            var result = await _workflowServices.FindPhase3ById(id);
             return Ok(result);
         }
 
@@ -214,7 +214,7 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindPhase2ById(int id)
         {
-            var result =  await _workflowServices.FindPhase2ById(id);
+            var result = await _workflowServices.FindPhase2ById(id);
             return Ok(result);
         }
 
@@ -228,7 +228,7 @@ namespace WoopiAiHub.Api.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindPhase1ById(int id)
         {
-            var result =  await _workflowServices.FindPhase1ById(id);
+            var result = await _workflowServices.FindPhase1ById(id);
             return Ok(result);
         }
 
@@ -246,7 +246,7 @@ namespace WoopiAiHub.Api.Controllers
             return Ok(result);
         }
 
-        
+
         /// <summary>
         /// Endpoint that get all the workflows linked to a document and user
         /// </summary>
@@ -255,7 +255,7 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPost("Document")]
         [SwaggerOperation("Endpoint that receive an document id and return workflow list linke to the document")]
         [ProducesResponseType(typeof(List<WorkflowDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindWorkflowByDocument([FromBody]RequestWorkFlowByDocumentDto dto, CancellationToken ct = default)
+        public async Task<IActionResult> FindWorkflowByDocument([FromBody] RequestWorkFlowByDocumentDto dto, CancellationToken ct = default)
         {
             var workflow = await _workflowServices.FindWorkflowsByDocument(dto, ct);
             return Ok(workflow);
@@ -275,6 +275,29 @@ namespace WoopiAiHub.Api.Controllers
         {
             var newWorkflowId = await _workflowServices.CloneAsync(dto);
             return Ok(newWorkflowId);
+        }
+
+        [HttpGet("CountDocuments/{id}")]
+        [SwaggerOperation("Endpoint that receives a workflow id and return the count of documents linked to it")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CountDocuments(int id)
+        {
+            var count = await _workflowServices.CountCards(id);
+            return Ok(count);
+        }
+
+        /// <summary>
+        /// Checks whether the given Step has associated tool data (executions, outputs,
+        /// dependencies or cards) that would prevent removal of its tool flow.
+        /// </summary>
+        /// <param name="stepId">The ID of the step to check.</param>
+        [HttpGet("Step/{stepId}/HasConstraints")]
+        [SwaggerOperation("Checks if a step has tool constraints preventing tool flow removal")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> HasStepToolConstraints(int stepId)
+        {
+            var hasConstraints = await _workflowServices.HasStepToolConstraints(stepId);
+            return Ok(hasConstraints);
         }
     }
 }

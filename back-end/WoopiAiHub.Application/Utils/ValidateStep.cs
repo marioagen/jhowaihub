@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
@@ -72,8 +72,8 @@ namespace WoopiAiHub.Application.Utils
         /// <exception cref="AppException"></exception>
         public async Task ValidateDeleteStep(ICollection<int> stepIds)
         {
-            var existingStepsInUse = await _cardRepository.ExistsStepsInUse(stepIds);
-            if (existingStepsInUse)
+            var count = await _cardRepository.CountByStepsInUse(stepIds);
+            if (count > 0)
             {
                 throw new AppException(ErrorCode.Conflict, "Cannot delete steps that are in use by cards", CardLabel.CardsOpened);
             }
