@@ -325,6 +325,8 @@ const portuguese = {
         selectAnItemFromTheList: "Selecione um item da lista.",
         selected: "Selecionada",
         selectedList: "Lista selecionada",
+        selectionList: "Lista de seleção",
+        removeSelectionChip: "Remover da seleção",
         send: "Enviar",
         showingToTotal: "de",
         signOut: "Sair",

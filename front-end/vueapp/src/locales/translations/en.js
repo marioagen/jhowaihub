@@ -324,6 +324,8 @@ const english = {
         selectAnItemFromTheList: "Select an item from the list.",
         selected: "Selected",
         selectedList: "Selected list",
+        selectionList: "Selection list",
+        removeSelectionChip: "Remove from selection",
         send: "Send",
         showingToTotal: "of",
         signOut: "Sign out",
