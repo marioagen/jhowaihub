@@ -116,13 +116,6 @@ public class PromptHandler : IToolHandler
             {
                 parts.Add(value.Trim());
             }
-            else
-            {
-                if (!TryAddOcrText(value, parts))
-                {
-                    parts.Add(value.Trim());
-                }
-            }
         }
 
         return string.Join("\n\n", parts);
