@@ -158,7 +158,6 @@
                 type: String,
                 default: "80px",
             },
-            /** Ícone Lucide nos chips (ex.: ShieldCheck para perfis). Se vazio, usa User (lista de usuários) ou UsersRound. */
             chipIcon: {
                 type: String,
                 default: "",
