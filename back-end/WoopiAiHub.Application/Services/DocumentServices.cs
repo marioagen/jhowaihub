@@ -165,7 +165,8 @@ namespace WoopiAiHub.Application.Services
                 return new FindDocumentDto
                 {
                     BytesDocument = bytesFile,
-                    ReferenceFile = documentDb.ReferenceFile
+                    ReferenceFile = documentDb.ReferenceFile,
+                    DocumentName = documentDb.Name
                 };
             }
             catch (Exception ex)

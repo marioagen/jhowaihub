@@ -4,7 +4,6 @@ using Refit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Utils;
-using WoopiAiHub.Infrastructure.Messaging.Configuration;
 
 namespace WoopiAiHub.Application.DependencyInjection
 {
@@ -33,12 +32,16 @@ namespace WoopiAiHub.Application.DependencyInjection
             else if (string.IsNullOrWhiteSpace(externalSettings.AiGatewayApiBaseAddress))
                 throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.AiGatewayApiBaseAddress)}");
 
+            else if (string.IsNullOrWhiteSpace(externalSettings.ServicesWoopiAiBaseAddress))
+                throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.ServicesWoopiAiBaseAddress)}");
+
             services.AddRefitClient<IEmbeddingsApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.IndexerApiBaseAddress));
             services.AddRefitClient<IFileRepositoryApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.FileRepositoryApiBaseAddress));
             services.AddRefitClient<IFunctionFileRetriever>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.FunctionGetFileBaseAddress));
             services.AddRefitClient<IGraphApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.GraphApiBaseAddress));
             services.AddRefitClient<IMarketPlaceApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.MarketPlaceBaseAddress));
             services.AddRefitClient<IChatCompletionApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.AiGatewayApiBaseAddress));
+            services.AddRefitClient<IServicesWoopiAiApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.ServicesWoopiAiBaseAddress));
 
             services.Configure<EncryptionSettings>(configuration.GetSection("EncryptionSettings"));
             services.Configure<PromptSettings>(configuration.GetSection("PromptSettings"));

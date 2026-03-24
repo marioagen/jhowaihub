@@ -82,6 +82,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IDocumentAnalysisRejectionServices, DocumentAnalysisRejectionServices>();
             services.AddScoped<IExecutionServices, ExecutionServices>();
             services.AddScoped<IExternalFileUploadServices, ExternalFileUploadServices>();
+            services.AddScoped<IAnonimizationServices, AnonimizationServices>();
             services.AddHostedService<OcrConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
             services.AddHostedService<N8NConsumer>();
