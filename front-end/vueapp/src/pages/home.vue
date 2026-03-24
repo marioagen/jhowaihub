@@ -144,6 +144,7 @@
     </main>
     <WhatsAppComponent v-if="showWhatsAppLink" />
 </template>
+
 <script>
     import store from "@/store";
     import DashboardServices from "@/services/dashboard/DashboardServices";
@@ -183,6 +184,7 @@
         },
     };
 </script>
+
 <style scoped>
     .home-container {
         max-width: 1200px;

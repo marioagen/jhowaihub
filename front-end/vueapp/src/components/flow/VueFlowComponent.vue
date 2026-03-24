@@ -92,7 +92,7 @@
 
     export default {
         name: "VueFlowComponent",
-        emits: ["openNodeConfig", "nodeDeleted"],
+        emits: ["openNodeConfig", "nodeDeleted", "flowChanged"],
         props: {
             stepId: {
                 type: Number,
@@ -136,6 +136,9 @@
             SpecialEdge,
         },
         methods: {
+            emitFlowChanged() {
+                this.$emit("flowChanged");
+            },
             getToolsList() {
                 ToolsServices.getToolsList().then((response) => {
                     this.toolsList = response;
@@ -235,6 +238,7 @@
                     (edge) => edge.source !== nodeId && edge.target !== nodeId
                 );
                 this.$emit("nodeDeleted", nodeId);
+                this.emitFlowChanged();
             },
             removeNodeDependency(nodeId) {
                 const idx = this.nodes.findIndex((node) => node.id === nodeId);
@@ -282,6 +286,7 @@
             },
             deleteEdge(edgeId) {
                 this.edges = this.edges.filter((edge) => edge.id !== edgeId);
+                this.emitFlowChanged();
             },
             openNodeConfig(node) {
                 const idx = this.nodes.findIndex((n) => n.id === node.id);
@@ -289,6 +294,7 @@
             },
             onConnect(params) {
                 this.vueFlowInstance?.addEdges([{ ...params, type: "special" }]);
+                this.emitFlowChanged();
             },
             onDragOver(event) {
                 event.preventDefault();
@@ -327,6 +333,7 @@
                     },
                 };
                 this.vueFlowInstance?.addNodes([newNode]);
+                this.emitFlowChanged();
             },
             getNodesOrderedByEdges() {
                 const edges = this.edges || [];

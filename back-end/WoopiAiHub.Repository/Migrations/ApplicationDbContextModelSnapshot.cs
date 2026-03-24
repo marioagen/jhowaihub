@@ -158,6 +158,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created");
 
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int")
+                        .HasColumnName("DocumentId");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("UserId");
@@ -173,6 +177,8 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasIndex("CardId");
 
                     b.HasIndex("Created");
+
+                    b.HasIndex("DocumentId");
 
                     b.HasIndex("UserId");
 
@@ -601,8 +607,8 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("Name");
 
                     b.Property<string>("Text")
@@ -1559,6 +1565,12 @@ namespace WoopiAiHub.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WoopiAiHub.Domain.Models.Document", "Document")
+                        .WithMany()
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("WoopiAiHub.Domain.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -1572,6 +1584,8 @@ namespace WoopiAiHub.Repository.Migrations
                         .IsRequired();
 
                     b.Navigation("Card");
+
+                    b.Navigation("Document");
 
                     b.Navigation("User");
 

@@ -23,10 +23,17 @@
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="phase-nav d-flex justify-content-center">
-                        <div v-for="(phase, index) in phases" :key="index" class="phase-item" :class="{
-                            active: currentPhase === index + 1,
-                            completed: index + 1 < currentPhase,
-                        }">
+                        <div
+                            v-for="(phase, index) in phases"
+                            :key="index"
+                            class="phase-item"
+                            :class="{
+                                active: currentPhase === index + 1,
+                                completed: index + 1 < currentPhase,
+                                'phase-clickable': isEdit,
+                            }"
+                            @click="goToPhase(index + 1)"
+                        >
                             <div class="phase-circle">
                                 <LucideIcon v-if="index + 1 < currentPhase" icon="Check" :size="20" />
                                 <span v-else>
@@ -64,9 +71,17 @@
             <!-- Navigation Buttons -->
             <div class="row mt-4 mb-2">
                 <div class="col-12 d-flex justify-content-between">
-                    <button v-if="currentPhase > 1" class="btn btn-outline-secondary" @click="previousPhase"
-                        type="button">
-                        <LucideIcon icon="ChevronLeft" :size="16" />
+                    <button
+                        v-if="currentPhase > 1"
+                        class="btn btn-outline-secondary"
+                        @click="previousPhase"
+                        type="button"
+                    >
+                        <LucideIcon
+                            icon="ChevronLeft"
+                            :size="16"
+                            class="text-muted"
+                        />
                         {{ $t("workflow.previous") }}
                     </button>
                     <div v-else></div>
@@ -111,112 +126,187 @@ import FullscreenLoadingComponent from "@/components/global/FullscreenLoadingCom
 import ConfirmModal from "@/components/global/ConfirmModal.vue";
 import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidationInput.vue";
 
-export default {
-    name: "WorkflowWizard",
-    components: {
-        Phase1NameAndTeams,
-        Phase2Steps,
-        Phase3Tools,
-        FullscreenLoadingComponent,
-        ConfirmModal,
-        ConfirmModalValidationInput,
-    },
-    props: {
-        isEdit: {
-            type: Boolean,
-            default: false,
+    export default {
+        name: "WorkflowWizard",
+        components: {
+            Phase1NameAndTeams,
+            Phase2Steps,
+            Phase3Tools,
+            FullscreenLoadingComponent,
+            ConfirmModal,
+            ConfirmModalValidationInput,
         },
-        workflowId: {
-            type: Number,
-            default: null,
+        props: {
+            isEdit: {
+                type: Boolean,
+                default: false,
+            },
+            workflowId: {
+                type: Number,
+                default: null,
+            },
         },
-    },
-    setup() {
-        const { validate } = useForm();
-        return { validate };
-    },
-    data() {
-        return {
-            currentPhase: Number(this.$route.params.phase ?? 1),
-            phases: [
-                this.$t("workflow.nameAndAssociations"),
-                this.$t("workflow.steps"),
-                this.$t("workflow.tools"),
-            ],
-            isLoading: false,
-            workflowIdInternal: this.workflowId,
-            phase1Data: null,
-            phase2Data: null,
-            phase3Data: null,
-            profilesList: [],
-            canLeave: false,
-            pendingNavegation: null,
-            documentCountToEdit: 0,
-            pendingStepToRemove: null,
-        };
-    },
-    computed: {
-        formTitle() {
-            return this.$t(
-                this.isEdit ? "workflow.formEdit.title" : "workflow.formCreate.title"
-            );
+        setup() {
+            const form = useForm();
+            return {
+                validate: form.validate,
+                meta: form.meta,
+            };
         },
-        formSubtitle() {
-            return this.$t(
-                this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle"
-            );
+        data() {
+            return {
+                currentPhase: Number(this.$route.params.phase ?? 1),
+                phases: [
+                    this.$t("workflow.nameAndAssociations"),
+                    this.$t("workflow.steps"),
+                    this.$t("workflow.tools"),
+                ],
+                isLoading: false,
+                workflowIdInternal: this.workflowId,
+                phase1Data: null,
+                phase2Data: null,
+                phase3Data: null,
+                profilesList: [],
+                canLeave: false,
+                pendingNavegation: null,
+                documentCountToEdit: 0,
+                pendingStepToRemove: null,
+            };
         },
-        editValidationMessage() {
-            return this.$t('documents.editValidationMessage', {
-                count: this.documentCountToEdit,
-                name: this.phase1Data?.name || ''
-            });
-        }
-    },
-    methods: {
-        async nextPhase() {
-            const isValid = await this.validate();
-            if (!isValid.valid) {
-                return this.$notify({
+        computed: {
+            formTitle() {
+                return this.$t(
+                    this.isEdit ? "workflow.formEdit.title" : "workflow.formCreate.title"
+                );
+            },
+            formSubtitle() {
+                return this.$t(
+                    this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle"
+                );
+            },
+            editValidationMessage() {
+                return this.$t('documents.editValidationMessage', {
+                    count: this.documentCountToEdit,
+                    name: this.phase1Data?.name || ''
+                });
+            }
+        },
+        methods: {
+            async nextPhase() {
+                const isValid = await this.validate();
+                if (!isValid.valid) {
+                    return this.$notify({
+                        title: "workflow.index",
+                        message: "validation.hasInvalid",
+                        variant: "warning",
+                        icon: "CircleAlert",
+                    });
+                }
+
+                if (this.currentPhase === 1) {
+                    await this.savePhase1();
+                } else if (this.currentPhase === 2) {
+                    await this.savePhase2();
+                }
+            },
+            async previousPhase() {
+                if (this.currentPhase > 1) {
+                    this.checkNavigation(() => {
+                        this.currentPhase--;
+                        if (this.currentPhase === 1 && (this.workflowIdInternal || this.isEdit)) {
+                            this.loadPhase1Data();
+                        } else if (this.currentPhase === 2 && this.workflowIdInternal) {
+                            this.loadPhase2Data();
+                        }
+                    });
+                }
+            },
+            async goToPhase(newPhase) {
+                if (!this.isEdit || newPhase === this.currentPhase) {
+                    return;
+                }
+
+                if (newPhase < this.currentPhase) {
+                    await this.goBackwardToPhase(newPhase);
+                } else if (newPhase === this.currentPhase + 1) {
+                    await this.nextPhase();
+                } else if (newPhase > this.currentPhase) {
+                    await this.goForwardToPhase(newPhase);
+                }
+            },
+            async goBackwardToPhase(newPhase) {
+                const isValid = await this.validate();
+                if (!isValid.valid) {
+                    this.showValidationError();
+                    return;
+                }
+
+                const navigationCallback = () => this.executeNavigation(newPhase);
+
+                if (this.meta.dirty) {
+                    this.checkNavigation(navigationCallback);
+                } else {
+                    navigationCallback();
+                }
+            },
+            async goForwardToPhase(newPhase) {
+                const isValid = await this.validate();
+                if (!isValid.valid) {
+                    this.showValidationError();
+                    return;
+                }
+
+                await this.saveRequiredPhases(newPhase);
+
+                if (this.currentPhase <= newPhase) {
+                    this.executeNavigation(newPhase);
+                }
+            },
+            async saveRequiredPhases(newPhase) {
+                if (this.currentPhase === 1) {
+                    await this.savePhase1();
+                    if (newPhase > 2) {
+                        await this.savePhase2();
+                    }
+                } else if (this.currentPhase === 2) {
+                    await this.savePhase2();
+                }
+            },
+            executeNavigation(newPhase) {
+                this.currentPhase = newPhase;
+                this.loadPhaseData(newPhase);
+            },
+            loadPhaseData(phase) {
+                if (phase === 1) {
+                    this.loadPhase1Data();
+                } else if (phase === 2) {
+                    this.loadPhase2Data();
+                } else if (phase === 3) {
+                    this.loadPhase3Data();
+                }
+            },
+            showValidationError() {
+                this.$notify({
                     title: "workflow.index",
                     message: "validation.hasInvalid",
                     variant: "warning",
                     icon: "CircleAlert",
                 });
-            }
-
-            if (this.currentPhase === 1) {
-                await this.savePhase1();
-            } else if (this.currentPhase === 2) {
-                await this.savePhase2();
-            }
-        },
-        async previousPhase() {
-            if (this.currentPhase > 1) {
-                this.checkNavigation(() => {
-                    this.currentPhase--;
-                    if (this.currentPhase === 1 && (this.workflowIdInternal || this.isEdit)) {
-                        this.loadPhase1Data();
-                    } else if (this.currentPhase === 2 && this.workflowIdInternal) {
-                        this.loadPhase2Data();
-                    }
-                });
-            }
-        },
-        async savePhase1() {
-            this.isLoading = true;
-            const phase1Component = this.$refs.phase1;
-            const data = phase1Component.getData();
-            let workflowIdInternal = this.workflowIdInternal;
-            try {
-                if (workflowIdInternal != null || this.isEdit) {
-                    this.phase1Data = data;
-                    this.currentPhase = 2;
-                    const params = {
-                        id: this.workflowIdInternal,
-                        name: data.name,
-                        teams: data.teams,
-                    };
+            },
+            async savePhase1() {
+                this.isLoading = true;
+                const phase1Component = this.$refs.phase1;
+                const data = phase1Component.getData();
+                let workflowIdInternal = this.workflowIdInternal;
+                try {
+                    if (workflowIdInternal != null || this.isEdit) {
+                        this.phase1Data = data;
+                        this.currentPhase = 2;
+                        const params = {
+                            id: this.workflowIdInternal,
+                            name: data.name,
+                            teams: data.teams,
+                        };
 
                     const result = await WorkflowService.updatePhase1(params);
                     await this.loadPhase2Data();
@@ -305,119 +395,93 @@ export default {
                     throw new Error(result.error);
                 }
 
-                this.phase2Data = data;
-                this.currentPhase = 3;
-                await this.loadPhase3Data();
-                this.$notify({
-                    title: "workflow.index",
-                    message: "workflow.phase2Success",
-                    variant: "success",
-                    icon: "CircleCheckBig",
-                });
-            } catch (error) {
-                this.$notify({
-                    title: "workflow.index",
-                    message: "workflow.phase2Error",
-                    variant: "danger",
-                    icon: "CircleX",
-                });
-            } finally {
-                this.isLoading = false;
-            }
-        },
-        finalize() {
-            this.canLeave = true;
-            this.redirectToIndex();
-        },
-        redirectToIndex() {
-            if (!this.canLeave) {
-                this.checkNavigation(() => {
-                    this.canLeave = true;
+                    this.phase2Data = data;
+                    this.currentPhase = 3;
+                    await this.loadPhase3Data();
+
+                    this.$notify({
+                        title: "workflow.index",
+                        message: "workflow.phase2Success",
+                        variant: "success",
+                        icon: "CircleCheckBig",
+                    });
+                } catch (error) {
+                    this.$notify({
+                        title: "workflow.index",
+                        message: "workflow.phase2Error",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+            finalize() {
+                this.canLeave = true;
+                this.redirectToIndex();
+            },
+            redirectToIndex() {
+                if (!this.canLeave) {
+                    this.checkNavigation(() => {
+                        this.canLeave = true;
+                        this.$router.push({
+                            name: "WorkflowPage",
+                        });
+                    });
+                } else {
                     this.$router.push({
                         name: "WorkflowPage",
                     });
-                });
-            } else {
-                this.$router.push({
-                    name: "WorkflowPage",
-                });
-            }
-        },
-        checkNavigation(next) {
-            this.pendingNavegation = next;
-            this.$refs.confirmLeaveModal.open();
-        },
-        confirmNavigation() {
-            this.$refs.confirmLeaveModal.close();
-            if (this.pendingNavegation) {
-                this.pendingNavegation();
-                this.pendingNavegation = null;
-            }
-        },
-        cancelNavigation() {
-            this.$refs.confirmLeaveModal.close();
-            this.pendingNavegation = null;
-        },
-        handleAddToolFlow(step, phase) {
-            this.canLeave = true;
-            localStorage.setItem("wizardPhase1Data", JSON.stringify(this.phase1Data));
-            localStorage.setItem("wizardPhase2Data", JSON.stringify(this.phase2Data));
-            localStorage.setItem("wizardPhase3Data", JSON.stringify(this.phase3Data));
-            this.$router.push({
-                name: "NewFlow",
-                params: {
-                    stepOrder: step.order,
-                    phase: this.currentPhase,
-                    workflowId: this.workflowIdInternal,
-                    stepId: step.id,
-                    hasStepTools: step.hasStepTools,
-                },
-            });
-        },
-        handleEditToolFlow(step, phase) {
-            this.canLeave = true;
-            localStorage.setItem("wizardPhase1Data", JSON.stringify(this.phase1Data));
-            localStorage.setItem("wizardPhase2Data", JSON.stringify(this.phase2Data));
-            localStorage.setItem("wizardPhase3Data", JSON.stringify(this.phase3Data));
-            this.$router.push({
-                name: "EditFlow",
-                params: {
-                    stepOrder: step.order,
-                    phase: this.currentPhase,
-                    workflowId: this.workflowIdInternal,
-                    stepId: step.id,
-                    hasStepTools: step.hasStepTools,
-                },
-            });
-        },
-        async handleRemoveToolFlow(step) {
-            this.isLoading = true;
-            try {
-                const hasConstraints = await WorkflowService.hasStepToolConstraints(step.id);
-                if (hasConstraints) {
-                    this.pendingStepToRemove = step;
-                    this.$refs.RemoveToolValidationDialog.open();
-                } else {
-                    await this.executeRemoveToolFlow(step, false);
                 }
-            } catch (error) {
-                this.$notify({
-                    title: "workflow.index",
-                    message: "workflow.removeError",
-                    variant: "danger",
-                    icon: "CircleX",
+            },
+            checkNavigation(next) {
+                this.pendingNavegation = next;
+                this.$refs.confirmLeaveModal.open();
+            },
+            confirmNavigation() {
+                this.$refs.confirmLeaveModal.close();
+                if (this.pendingNavegation) {
+                    this.pendingNavegation();
+                    this.pendingNavegation = null;
+                }
+            },
+            cancelNavigation() {
+                this.$refs.confirmLeaveModal.close();
+                this.pendingNavegation = null;
+            },
+            handleAddToolFlow(step, phase) {
+                this.canLeave = true;
+                localStorage.setItem("wizardPhase1Data", JSON.stringify(this.phase1Data));
+                localStorage.setItem("wizardPhase2Data", JSON.stringify(this.phase2Data));
+                localStorage.setItem("wizardPhase3Data", JSON.stringify(this.phase3Data));
+                this.$router.push({
+                    name: "NewFlow",
+                    params: {
+                        stepOrder: step.order,
+                        phase: this.currentPhase,
+                        workflowId: this.workflowIdInternal,
+                        stepId: step.id,
+                        hasStepTools: step.hasStepTools,
+                    },
                 });
-            } finally {
-                this.isLoading = false;
-            }
-        },
-        async executeRemoveToolFlow(stepParam = null, resetDocuments = false) {
-            this.$refs.RemoveToolValidationDialog?.close();
-            const step = stepParam || this.pendingStepToRemove;
-            if (!step) return;
-
-            this.isLoading = true;
-            try {
+            },
+            handleEditToolFlow(step, phase) {
+                this.canLeave = true;
+                localStorage.setItem("wizardPhase1Data", JSON.stringify(this.phase1Data));
+                localStorage.setItem("wizardPhase2Data", JSON.stringify(this.phase2Data));
+                localStorage.setItem("wizardPhase3Data", JSON.stringify(this.phase3Data));
+                this.$router.push({
+                    name: "EditFlow",
+                    params: {
+                        stepOrder: step.order,
+                        phase: this.currentPhase,
+                        workflowId: this.workflowIdInternal,
+                        stepId: step.id,
+                        hasStepTools: step.hasStepTools,
+                    },
+                });
+            },
+            async handleRemoveToolFlow(step) {
                 const phase3Component = this.$refs.phase3;
                 let phase3DataResult = await this.getPhase3Data();
 
@@ -609,67 +673,66 @@ export default {
             try {
                 await this.loadProfiles();
 
-                let result = await this.getPhase2Data();
-                this.phase2Data = {
-                    steps: result.map((step) => ({
-                        id: step.id,
-                        name: step.name,
-                        order: step.order,
-                        profileId: String(step.profile?.id || ""),
-                        statusId: String(step.status?.id || ""),
-                        hasStepTools: step.hasStepTools,
-                    })),
-                };
-                this.phase3Data = this.phase2Data;
-            } catch (error) {
-                this.$notify({
-                    title: "workflow.index",
-                    message: error.message || "workflow.loadError",
-                    variant: "danger",
-                    icon: "CircleX",
-                });
-            } finally {
-                this.isLoading = false;
-            }
-        },
-    },
-
-    created() {
-        this.loadWorkflowData();
-    },
-    async mounted() {
-        const phase1 = localStorage.getItem("wizardPhase1Data");
-        const phase2 = localStorage.getItem("wizardPhase2Data");
-        const phase3 = localStorage.getItem("wizardPhase3Data");
-        if (phase1 && phase2 && phase3) {
-            this.phase1Data = JSON.parse(phase1);
-            this.phase2Data = JSON.parse(phase2);
-            this.phase3Data = JSON.parse(phase3);
-            localStorage.removeItem("wizardPhase1Data");
-            localStorage.removeItem("wizardPhase2Data");
-            localStorage.removeItem("wizardPhase3Data");
-        }
-    },
-    watch: {
-        "$route.params.phase": {
-            handler(newPhase) {
-                if (newPhase) {
-                    this.currentPhase = Number(newPhase);
-                    if (this.workflowIdInternal) {
-                        if (this.currentPhase === 1) {
-                            this.loadPhase1Data();
-                        } else if (this.currentPhase === 2) {
-                            this.loadPhase2Data();
-                        } else if (this.currentPhase === 3) {
-                            this.loadPhase3Data();
-                        }
-                    }
+                    let result = await this.getPhase2Data();
+                    this.phase2Data = {
+                        steps: result.map((step) => ({
+                            id: step.id,
+                            name: step.name,
+                            order: step.order,
+                            profileId: String(step.profile?.id || ""),
+                            statusId: String(step.status?.id || ""),
+                            hasStepTools: step.hasStepTools,
+                        })),
+                    };
+                    this.phase3Data = this.phase2Data;
+                } catch (error) {
+                    this.$notify({
+                        title: "workflow.index",
+                        message: error.message || "workflow.loadError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isLoading = false;
                 }
             },
-            immediate: false,
         },
-    },
-};
+        created() {
+            this.loadWorkflowData();
+        },
+        async mounted() {
+            const phase1 = localStorage.getItem("wizardPhase1Data");
+            const phase2 = localStorage.getItem("wizardPhase2Data");
+            const phase3 = localStorage.getItem("wizardPhase3Data");
+            if (phase1 && phase2 && phase3) {
+                this.phase1Data = JSON.parse(phase1);
+                this.phase2Data = JSON.parse(phase2);
+                this.phase3Data = JSON.parse(phase3);
+                localStorage.removeItem("wizardPhase1Data");
+                localStorage.removeItem("wizardPhase2Data");
+                localStorage.removeItem("wizardPhase3Data");
+            }
+        },
+        watch: {
+            "$route.params.phase": {
+                handler(newPhase) {
+                    if (newPhase) {
+                        this.currentPhase = Number(newPhase);
+                        if (this.workflowIdInternal) {
+                            if (this.currentPhase === 1) {
+                                this.loadPhase1Data();
+                            } else if (this.currentPhase === 2) {
+                                this.loadPhase2Data();
+                            } else if (this.currentPhase === 3) {
+                                this.loadPhase3Data();
+                            }
+                        }
+                    }
+                },
+                immediate: false,
+            },
+        },
+    };
 </script>
 <style scoped>
 .container-fluid {
@@ -680,10 +743,9 @@ export default {
     min-height: 400px;
 }
 
-/* Phase Navigation Styles */
-.phase-nav {
-    position: relative;
-}
+    .phase-nav {
+        position: relative;
+    }
 
 .phase-item {
     display: flex;
@@ -694,30 +756,40 @@ export default {
     max-width: 200px;
 }
 
-.phase-circle {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-color: var(--color-bg-phase-circle);
-    color: #6b7280;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 18px;
-    transition: all 0.3s ease;
-    z-index: 2;
-}
+    .phase-item.phase-clickable {
+        cursor: pointer;
+    }
+
+    .phase-item.phase-clickable:hover:not(.active) .phase-circle {
+        background-color: var(--color-bg-phase-circle-hover);
+        color: var(--color-bg-phase-circle-active);
+        transform: scale(1.05);
+    }
+
+    .phase-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: var(--color-bg-phase-circle);
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        transition: all 0.3s ease;
+        z-index: 2;
+    }
 
 .phase-item.active .phase-circle {
     background-color: #2f80ed;
     color: white;
 }
 
-.phase-item.completed .phase-circle {
-    background-color: var(--color-bg-phase-circle-success) !important;
-    color: white;
-}
+    .phase-item.completed .phase-circle {
+        background-color: var(--color-bg-phase-circle-success) !important;
+        color: white;
+    }
 
 .phase-label {
     margin-top: 8px;
@@ -727,26 +799,26 @@ export default {
     text-align: center;
 }
 
-.phase-item.active .phase-label {
-    color: #2f80ed;
-    font-weight: 600;
-}
+    .phase-item.active .phase-label {
+        color: var(--color-bg-phase-circle-active);
+        font-weight: 600;
+    }
 
-.phase-item.completed .phase-label {
-    color: var(--color-bg-phase-circle-success) !important;
-}
+    .phase-item.completed .phase-label {
+        color: var(--color-bg-phase-circle-success) !important;
+    }
 
-.phase-connector {
-    position: absolute;
-    top: 24px;
-    left: 50%;
-    width: 100%;
-    height: 2px;
-    background-color: var(--color-bg-phase-circle) !important;
-    z-index: 1;
-}
+    .phase-connector {
+        position: absolute;
+        top: 24px;
+        left: 50%;
+        width: 100%;
+        height: 2px;
+        background-color: var(--color-bg-phase-circle) !important;
+        z-index: 1;
+    }
 
-.phase-item.completed .phase-connector {
-    background-color: var(--color-bg-phase-circle-success) !important;
-}
+    .phase-item.completed .phase-connector {
+        background-color: var(--color-bg-phase-circle-success) !important;
+    }
 </style>

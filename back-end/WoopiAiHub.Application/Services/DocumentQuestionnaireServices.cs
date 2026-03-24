@@ -188,7 +188,7 @@ namespace WoopiAiHub.Application.Services
         private async Task CreateAuditLogForDocumentCardsAsync(int documentId, AuditCardActionType actionType)
         {
             var cards = await _cardServices.FindCardsByDocumentIdWithStepWorkflowAsync(documentId) ?? Array.Empty<Card>();
-            var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId)).ToList();
+            var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId, c.DocumentId)).ToList();
             if (cardWorkflows.Count > 0)
             {
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, actionType);

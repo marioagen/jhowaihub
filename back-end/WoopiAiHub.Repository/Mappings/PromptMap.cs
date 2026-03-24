@@ -14,7 +14,7 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.Property(u => u.Name)
                    .IsRequired()
-                   .HasMaxLength(50);
+                   .HasMaxLength(100);
 
             builder.Property(u => u.Description)
                    .IsRequired()

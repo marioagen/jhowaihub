@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Application.Messaging;
+using WoopiAiHub.Application.Messaging.DeadLetter;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Services.Audit;
 using WoopiAiHub.Application.Services.Automation;
@@ -8,6 +9,7 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Audit;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Repository;
@@ -50,6 +52,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IValidateWorkflow, ValidateWorkflow>();
             services.AddScoped<ICardServices, CardServices>();
             services.AddScoped<IAuditCardService, AuditCardService>();
+            services.AddScoped<IAuditorServices, AuditorServices>();
             services.AddScoped<IToolServices, ToolServices>();
             services.AddScoped<IToolTypeServices, ToolTypeServices>();
             services.AddScoped<IToolDataServices, ToolDataServices>();
@@ -88,6 +91,12 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddHostedService<SubscriptionEndPeriodConsumer>();
             services.AddHostedService<ApiOutputConsumer>();
             services.AddHostedService<ExternalFileUploadConsumer>();
+            services.AddHostedService<OcrDeadLetterConsumer>();
+            services.AddHostedService<EmbeddingsDeadLetterConsumer>();
+            services.AddHostedService<PromptDeadLetterConsumer>();
+            services.AddHostedService<ApiDeadLetterConsumer>();
+            services.AddHostedService<QuizDeadLetterConsumer>();
+            services.AddHostedService<N8NDeadLetterConsumer>();
 
             services.AddLogging();
             services.AddMemoryCache();

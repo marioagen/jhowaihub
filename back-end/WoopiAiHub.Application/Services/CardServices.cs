@@ -1,18 +1,18 @@
+using Newtonsoft.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
-using Newtonsoft.Json;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -24,6 +24,9 @@ namespace WoopiAiHub.Application.Services
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IWorkflowRepository _workflowRepository;
+        private readonly IStatusRepository _statusRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubNotifier _hubNotifier;
 
         private const string CardNotFoundMessage = "Card not found";
 
@@ -32,7 +35,10 @@ namespace WoopiAiHub.Application.Services
                             IStepRepository stepRepository,
                             IAutomationServices automationServices,
                             IStepToolExecutionRepository stepToolExecutionRepository,
-                            IWorkflowRepository workflowRepository)
+                            IWorkflowRepository workflowRepository,
+                            IStatusRepository statusRepository,
+                            IUnitOfWork unitOfWork,
+                            IHubNotifier hubNotifier)
         {
             _cardRepository = cardRepository;
             _auditCardService = auditCardService;
@@ -40,6 +46,9 @@ namespace WoopiAiHub.Application.Services
             _automationServices = automationServices;
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _workflowRepository = workflowRepository;
+            _statusRepository = statusRepository;
+            _unitOfWork = unitOfWork;
+            _hubNotifier = hubNotifier;
         }
 
         /// <summary>
@@ -72,7 +81,7 @@ namespace WoopiAiHub.Application.Services
 
             Card.UpdateAssignedUser(cards, updateAssingnedUserDto.UserId);
 
-            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
+            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
             if (cardWorkflows.Count > 0)
             {
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
@@ -95,7 +104,7 @@ namespace WoopiAiHub.Application.Services
 
             Card.UpdateAssignedUser(cards, null);
 
-            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
+            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
             if (cardWorkflows.Count > 0)
             {
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign);
@@ -131,7 +140,7 @@ namespace WoopiAiHub.Application.Services
 
             Card.UpdateStepAndStatus(cards, step.Id, card => card.IsRejected() ? previousStatusId : step.StatusId);
 
-            var cardWorkflows = cards.Select(card => (card.Id, updateCardStepStatusDto.WorkflowId)).ToList();
+            var cardWorkflows = cards.Select(card => (card.Id, updateCardStepStatusDto.WorkflowId, card.DocumentId)).ToList();
             if (cardWorkflows.Count > 0)
             {
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement);
@@ -183,7 +192,7 @@ namespace WoopiAiHub.Application.Services
             foreach (var card in cards)
                 card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
 
-            var cardWorkflows = cards.Where(card => card.Step != null).Select(card => (card.Id, card.Step!.WorkflowId)).ToList();
+            var cardWorkflows = cards.Where(card => card.Step != null).Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
             if (cardWorkflows.Count > 0)
             {
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Finalize);
@@ -467,6 +476,82 @@ namespace WoopiAiHub.Application.Services
                 DocumentId = card.DocumentId,
                 DocumentName = card.Name
             })];
+        }
+
+        /// <summary>
+        /// Sets the specified card to a failing status and updates its execution state if applicable.
+        /// </summary>
+        /// <remarks>If the card has an execution in a running state, its execution status is set to
+        /// pending. The operation is performed within a transaction and will be rolled back if an error
+        /// occurs.</remarks>
+        /// <param name="cardId">The unique identifier of the card to update. Must correspond to an existing card.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <exception cref="AppException">Thrown if the card with the specified identifier is not found, if the fail status is not found, or if an
+        /// error occurs during the update process.</exception>
+        public async Task SetFailingCard(int cardId, string? email)
+        {
+            var card = await _cardRepository.FindByIdWithExecutions(cardId) ?? throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
+            var failStatus = await _statusRepository.FindByName(StatusNames.Fail) ?? throw new AppException(ErrorCode.NotFound, $"Status '{StatusNames.Fail}' not found", null);
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                card.UpdateStatus(failStatus.Id);
+                _cardRepository.Update(card);
+
+                var execution = card.Executions.FirstOrDefault(w => w.Status == StatusExecution.Running);
+                if (execution is not null)
+                {
+                    execution.UpdateStatusExecution(StatusExecution.Pending);
+                    await _stepToolExecutionRepository.UpdateAsync(execution);
+                }
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    await _hubNotifier.CardProgessAsync(email, card.Id, 0.0, card.StepId, string.Empty, true);
+                }
+
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
+        }
+
+        /// <summary>
+        /// Initiates the reprocessing of a card by updating its status and triggering automation services for the
+        /// specified tenant and user email.
+        /// </summary>
+        /// <remarks>This method updates the card's status before starting the automation process. The
+        /// operation is performed asynchronously and may trigger additional workflows depending on the automation
+        /// service configuration.</remarks>
+        /// <param name="cardId">The unique identifier of the card to be reprocessed. Must correspond to an existing card.</param>
+        /// <param name="tenant">The tenant context in which the card reprocessing should occur. Used to scope the operation.</param>
+        /// <param name="email">The email address of the user associated with the card reprocessing. Used for notification or tracking
+        /// purposes.</param>
+        /// <returns>A task that represents the asynchronous reprocessing operation.</returns>
+        /// <exception cref="AppException">Thrown if the specified card does not exist.</exception>
+        public async Task<bool> ReprocessCard(int cardId, string tenant, string email)
+        {
+            var card = await _cardRepository.FindByIdWithDocumentAndStep(cardId) ?? throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
+
+            card.UpdateStatus(card.Step!.StatusId);
+            _cardRepository.Update(card);
+
+            var automationServicesDto = new AutomationServicesDto
+            (
+                0,
+                card.Id,
+                tenant,
+                email,
+                card.Document!.ReferenceFile,
+                card.StepId
+            );
+
+            await _automationServices.ReprocessStepTool(automationServicesDto);
+            return true;
         }
     }
 }

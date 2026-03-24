@@ -38,6 +38,7 @@ namespace WoopiAiHub.Repository.DependencyInjection
             services.AddScoped<IStepRepository, StepRepository>();
             services.AddScoped<ICardRepository, CardRepository>();
             services.AddScoped<IAuditCardRepository, AuditCardRepository>();
+            services.AddScoped<IAuditorRepository, AuditorRepository>();
             services.AddScoped<IToolRepository, ToolRepository>();
             services.AddScoped<IToolTypeRepository, ToolTypeRepository>();
             services.AddScoped<IToolDataRepository, ToolDataRepository>();

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -21,6 +22,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IEmbeddingsApi _embbedingsApi;
         private readonly IConfiguration _config;
         private readonly IFileRepositoryApi _fileRepositoryApi;
+        private readonly IAuditCardService _auditCardService;
+        private readonly ICardServices _cardServices;
         private readonly ILogger<DocumentDeletionServices> _logger;
 
         public DocumentDeletionServices(
@@ -32,6 +35,8 @@ namespace WoopiAiHub.Application.Services
             IEmbeddingsApi embbedingsApi,
             IConfiguration config,
             IFileRepositoryApi fileRepositoryApi,
+            IAuditCardService auditCardService,
+            ICardServices cardServices,
             ILogger<DocumentDeletionServices> logger)
         {
             _documentRepository = documentRepository;
@@ -42,6 +47,8 @@ namespace WoopiAiHub.Application.Services
             _embbedingsApi = embbedingsApi;
             _config = config;
             _fileRepositoryApi = fileRepositoryApi;
+            _auditCardService = auditCardService;
+            _cardServices = cardServices;
             _logger = logger;
         }
 
@@ -70,7 +77,23 @@ namespace WoopiAiHub.Application.Services
                     _stepToolOutputRepository.DeleteByCardIds(cardIds);
                 }
 
+                var cardWorkflows = await CollectCardWorkflowsForDocumentsAsync(ids);
+                if (cardWorkflows.Count > 0)
+                {
+                    await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Removed);
+                }
+
                 await _cardRepository.DeleteByDocumentIds(ids);
+
+                if (cardWorkflows.Count > 0)
+                {
+                    var documentDeletedTuples = cardWorkflows
+                        .GroupBy(t => t.documentId)
+                        .Select(g => g.First())
+                        .ToList();
+                    await _auditCardService.CreateBatchAndSaveAsync(documentDeletedTuples, AuditCardActionType.DocumentDeleted);
+                }
+
                 var deleted = _documentRepository.Delete(ids);
                 await Task.WhenAll(hashList.Select(hash => DeleteHash(hash, headersDto.Tenant)));
 
@@ -133,6 +156,25 @@ namespace WoopiAiHub.Application.Services
                     await _fileRepositoryApi.Delete(blobPath);
                 }
             }
+        }
+
+        /// <summary>
+        /// Builds (cardId, workflowId, documentId) tuples for audit while cards are still active (before soft-delete).
+        /// </summary>
+        private async Task<List<(int cardId, int workflowId, int documentId)>> CollectCardWorkflowsForDocumentsAsync(List<int> documentIds)
+        {
+            var result = new List<(int, int, int)>();
+            foreach (var documentId in documentIds.Distinct())
+            {
+                var cards = await _cardServices.FindCardsByDocumentIdWithStepWorkflowAsync(documentId);
+                foreach (var c in cards)
+                {
+                    if (c.Step != null)
+                        result.Add((c.Id, c.Step.WorkflowId, c.DocumentId));
+                }
+            }
+
+            return result;
         }
 
     }

@@ -1,12 +1,10 @@
 <template>
     <main class="d-flex justify-content-center align-items-center min-vh-100">
-        <div class="container" style="padding: 0">
-            <div class="row justify-content-center">
-                <div class="text-center">
-                    <img src="../../assets/img/woopiai-hub-logo.png" style="padding-bottom: 10px; height: 50px;"
-                        alt="WOOPI AI" />
-                </div>
-                <div class="card mb-3" style="max-width: 25rem;">
+        <div class="d-flex flex-column align-items-center login-wrapper">
+            <div class="text-center mb-2">
+                <img :src="logoSrc" class="logo-image" alt="WOOPI AI" />
+            </div>
+                <div class="card mb-3 w-100">
                     <div class="text-center mt-3">
                         <h6 class="fw-bold">
                             {{ $t("login.title") }}
@@ -84,7 +82,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
     </main>
     <TenantModal :tenants="tenants" :typeLogin="typeLogin" @continueLogin="continueLogin" ref="TenantModal" />
@@ -96,6 +93,8 @@ import { getJWTPermissions } from "@/utils/permissions";
 import AuthService from "@/services/authenticate/AuthService";
 import { scheduleTokenRefresh } from "@/services/api";
 import TenantModal from "@/components/authentication/TenantModal.vue";
+import logoDark from "@/assets/img/woopiai-logo-dark.png";
+import logoLight from "@/assets/img/woopiai-logo-light.png";
 
 export default {
     name: "LoginIndex",
@@ -128,6 +127,12 @@ export default {
             tenants: [],
             typeLogin: ""
         };
+    },
+    computed: {
+        logoSrc() {
+            const theme = this.$store.state.theme || localStorage.getItem("theme") || "css-theme-light";
+            return theme === "css-theme-dark" ? logoLight : logoDark;
+        },
     },
     methods: {
         continueLogin(tenant, typeLogin) {
@@ -371,5 +376,18 @@ h5 {
 
 .is-invalid {
     border-color: red;
+}
+
+main {
+    background-color: var(--color-bg-body-content) !important;
+}
+
+.login-wrapper {
+    width: 25rem;
+    max-width: 100%;
+}
+
+.logo-image {
+    height: 55px;
 }
 </style>

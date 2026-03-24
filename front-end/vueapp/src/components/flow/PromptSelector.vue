@@ -5,7 +5,8 @@
                 <div class="col-6">
                     <div class="row">
                         <div class="col-1">
-                            <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="backToFlow">
+                            <button class="btn btn-outline-primary btn-table btn-sm table-btn" type="button"
+                                @click="backToFlow">
                                 <LucideIcon icon="ArrowLeft" />
                             </button>
                         </div>
@@ -30,7 +31,7 @@
                 <div class="main-div shadow-sm">
                     <div class="mb-4">
                         <DependencySelector :previousStepTools="previousStepTools"
-                            v-model:selectedDependencies="selectedDependencies" />
+                                            v-model:selectedDependencies="selectedDependencies" />
                     </div>
                     <div class="mb-4">
                         <h6 class="fw-bold mb-3">{{ $t("flow.formFlow.prompts") }}</h6>
@@ -45,7 +46,7 @@
                             </select>
                         </div>
                         <button v-if="!showCreateForm" class="btn btn-outline-primary w-100 border-dashed"
-                            @click="showCreateForm = true">
+                                @click="showCreateForm = true">
                             <LucideIcon icon="Plus" :size="16" class="me-2" />
                             {{ $t("flow.formFlow.createNewPrompt") }}
                         </button>
@@ -57,6 +58,20 @@
             </div>
         </div>
     </main>
+    <ConfirmModal
+        id="confirm-leave-prompt-modal"
+        :isLoading="leaveModalLoading"
+        title="common.caution"
+        message="workflow.leaveMessage"
+        confirmText="common.confirm"
+        cancelText="common.cancel"
+        confirmVariant="primary"
+        iconeName="AlertTriangle"
+        iconVariant="warning"
+        @confirm="confirmNavigation"
+        @cancel="cancelNavigation"
+        ref="confirmLeaveModal"
+    />
 </template>
 <script>
 import DependencySelector from "@/components/flow/DependencySelector.vue";
@@ -64,12 +79,14 @@ import PromptForm from "@/components/prompts/PromptForm.vue";
 import PromptService from "@/services/prompts/PromptsService";
 import LogService from "@/services/log/logService";
 import flowStateHelper from "@/helpers/flowStateHelper";
+import ConfirmModal from "@/components/global/ConfirmModal.vue";
 
 export default {
     name: "PromptSelector",
     components: {
         DependencySelector,
         PromptForm,
+        ConfirmModal
     },
     data() {
         return {
@@ -80,10 +97,37 @@ export default {
             selectedPromptId: null,
             showCreateForm: false,
             flowState: null,
+            pendingNavegation: null,
+            leaveModalLoading: false,
+            baselinePromptId: null,
+            baselineDepsJson: "",
+            baselineShowCreate: false,
         };
     },
     methods: {
+        capturePromptBaseline() {
+            this.baselinePromptId = this.selectedPromptId;
+            this.baselineDepsJson = JSON.stringify(this.selectedDependencies || []);
+            this.baselineShowCreate = this.showCreateForm;
+        },
+        hasPromptPageChanges() {
+            if (this.showCreateForm !== this.baselineShowCreate) {
+                return true;
+            }
+            if (this.selectedPromptId !== this.baselinePromptId) {
+                return true;
+            }
+            return (
+                JSON.stringify(this.selectedDependencies || []) !== this.baselineDepsJson
+            );
+        },
         backToFlow() {
+            if (this.hasPromptPageChanges()) {
+                this.checkNavigation(() => {
+                    this.$router.go(-1);
+                });
+                return;
+            }
             this.$router.go(-1);
         },
         saveConfiguration() {
@@ -142,14 +186,6 @@ export default {
                 });
                 return;
             }
-
-            this.$notify({
-                title: "common.success",
-                message: "flow.formFlow.configurationSaved",
-                variant: "success",
-                icon: "CircleCheckBig",
-            });
-
             this.$router.go(-1);
         },
         onPromptSaved(response) {
@@ -194,10 +230,26 @@ export default {
                 this.$router.push({ name: "Flow" });
             }
         },
+        checkNavigation(next) {
+            this.pendingNavegation = next;
+            this.$refs.confirmLeaveModal.open();
+        },
+        confirmNavigation() {
+            this.$refs.confirmLeaveModal.close();
+            if (this.pendingNavegation) {
+                this.pendingNavegation();
+                this.pendingNavegation = null;
+            }
+        },
+        cancelNavigation() {
+            this.$refs.confirmLeaveModal.close();
+            this.pendingNavegation = null;
+        },
     },
-    mounted() {
+    async mounted() {
         this.loadState();
-        this.loadPrompts();
+        await this.loadPrompts();
+        this.$nextTick(() => this.capturePromptBaseline());
     },
 };
 </script>
