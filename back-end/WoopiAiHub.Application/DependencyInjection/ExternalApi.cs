@@ -32,8 +32,8 @@ namespace WoopiAiHub.Application.DependencyInjection
             else if (string.IsNullOrWhiteSpace(externalSettings.AiGatewayApiBaseAddress))
                 throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.AiGatewayApiBaseAddress)}");
 
-            else if (string.IsNullOrWhiteSpace(externalSettings.ServicesWoopiAiBaseAddress))
-                throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.ServicesWoopiAiBaseAddress)}");
+            else if (string.IsNullOrWhiteSpace(externalSettings.AnonymizationApiBaseAddress))
+                throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.AnonymizationApiBaseAddress)}");
 
             services.AddRefitClient<IEmbeddingsApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.IndexerApiBaseAddress));
             services.AddRefitClient<IFileRepositoryApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.FileRepositoryApiBaseAddress));
@@ -41,7 +41,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddRefitClient<IGraphApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.GraphApiBaseAddress));
             services.AddRefitClient<IMarketPlaceApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.MarketPlaceBaseAddress));
             services.AddRefitClient<IChatCompletionApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.AiGatewayApiBaseAddress));
-            services.AddRefitClient<IServicesWoopiAiApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.ServicesWoopiAiBaseAddress));
+            services.AddRefitClient<IAnonymizationApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.AnonymizationApiBaseAddress));
 
             services.Configure<EncryptionSettings>(configuration.GetSection("EncryptionSettings"));
             services.Configure<PromptSettings>(configuration.GetSection("PromptSettings"));

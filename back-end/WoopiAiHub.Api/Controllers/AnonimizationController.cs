@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Interfaces.Services;
 
@@ -10,23 +11,24 @@ namespace WoopiAiHub.Api.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
-    public class AnonimizationController(IAnonimizationServices anonimizationServices) : ControllerBase
+    public class AnonymizationController(IAnonymizationServices AnonymizationServices) : ControllerBase
     {
-        readonly IAnonimizationServices _anonimizationServices = anonimizationServices;
+        readonly IAnonymizationServices _AnonymizationServices = AnonymizationServices;
 
         /// <summary>
-        /// Processes the anonymization of a document identified by the specified document ID.
+        /// Processes the anonymization of a document based on the specified request data.
         /// </summary>
-        /// <param name="documentId">The unique identifier of the document to be anonymized. Must be a valid, existing document ID.</param>
-        /// <param name="headersDto">The headers containing additional request metadata required for processing the anonymization.</param>
-        /// <returns>An IActionResult containing the result of the anonymization process.</returns>
-        [HttpPost("document/{documentId}")]
-        [SwaggerOperation("Processes the anonymization of a document identified by the specified document ID")]
+        /// <param name="request">The request data containing information required to perform document anonymization.</param>
+        /// <param name="headersDto">The headers containing metadata or authentication information for the request.</param>
+        /// <returns>An IActionResult indicating the result of the anonymization process. Returns a status code 200 (OK) if the
+        /// operation is successful.</returns>
+        [HttpPost]
+        [SwaggerOperation("Processes the anonymization of a document based on the specified request data.")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> ProcessAnonimization([FromRoute] int documentId, [FromHeader] HeadersDto headersDto)
+        public async Task<IActionResult> ProcessAnonymization([FromBody] ProcessAnonymizationRequestDto request, [FromHeader] HeadersDto headersDto)
         {
-            var result = await _anonimizationServices.ProcessAnonimization(documentId, headersDto);
-            return Ok(result);
+            await _AnonymizationServices.ProcessAnonymization(request, headersDto);
+            return Ok();
         }
     }
 }

@@ -1,9 +1,10 @@
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
 {
-    public interface IAnonimizationServices
+    public interface IAnonymizationServices
     {
-        Task<bool> ProcessAnonimization(int documentId, HeadersDto headersDto);
+        Task ProcessAnonymization(ProcessAnonymizationRequestDto requestDto, HeadersDto headersDto);
     }
 }
