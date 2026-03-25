@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Domain.Utils.ErrorLabels
+namespace WoopiAiHub.Domain.Utils.ErrorLabels
 {
     public static class WorkflowLabel
     {
@@ -8,5 +8,6 @@
         public const string NameRequired = "workflow.nameRequired";
         public const string InvalidName = "workflow.invalidName";
         public const string InvalidTeams = "workflow.invalidTeams";
+        public const string InvalidDescription = "workflow.invalidDescription";
     }
 }

@@ -21,7 +21,7 @@ namespace WoopiAiHub.Domain.Models
             : base(id, created)
         {
             Name = name;
-            Description = NormalizeDescription(description);
+            Description = description ?? string.Empty;
             Steps = new List<Step>();
             Teams = teams;
             Enable = true;
@@ -70,15 +70,7 @@ namespace WoopiAiHub.Domain.Models
         public void Update(string name, string? description = null)
         {
             Name = name;
-            Description = NormalizeDescription(description);
-        }
-
-        private static string NormalizeDescription(string? description)
-        {
-            if (string.IsNullOrWhiteSpace(description))
-                return string.Empty;
-            var trimmed = description.Trim();
-            return trimmed.Length <= 500 ? trimmed : trimmed[..500];
+            Description = description ?? string.Empty;
         }
     }
 }

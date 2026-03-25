@@ -483,6 +483,28 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(TeamLabel.NotFound, exception.LabelError);
         }
 
+        [Fact(DisplayName = "CreatePhase1 should throw AppException when description exceeds 500 characters")]
+        [Trait("CreatePhase1", "Fail")]
+        public async Task CreatePhase1_DescriptionTooLong_ThrowsAppException()
+        {
+            var longDescription = new string('a', 501);
+            var phase1Dto = new WorkflowPhase1Dto
+            {
+                Name = "Test Workflow",
+                Description = longDescription,
+                Teams = new List<int> { 1 }
+            };
+            var team = new Team("Team 1", 1, DateTime.Now);
+            _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { team });
+
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CreatePhase1(phase1Dto));
+
+            Assert.Equal(ErrorCode.InvalidValue, exception.ErrorCode);
+            Assert.Equal(WorkflowLabel.InvalidDescription, exception.LabelError);
+            _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Never);
+        }
+
         [Fact(DisplayName = "CreatePhase1 should return workflow ID when successful")]
         [Trait("CreatePhase1", "Success")]
         public async Task CreatePhase1_ValidData_ReturnsWorkflowId()
@@ -640,6 +662,31 @@ namespace WoopiAiHub.UnitTests.Services
             var exception =
                 await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase1(workflowUpdatePhase1Dto));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+        }
+
+        [Fact(DisplayName = "UpdatePhase1 should throw AppException when description exceeds 500 characters")]
+        [Trait("UpdatePhase1", "Fail")]
+        public async Task UpdatePhase1_DescriptionTooLong_ThrowsAppException()
+        {
+            var longDescription = new string('b', 501);
+            var workflowUpdatePhase1Dto = new WorkflowUpdatePhase1Dto
+            {
+                Id = 1,
+                Name = "Updated Workflow",
+                Description = longDescription,
+                Teams = new List<int> { 1 }
+            };
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(1)).ReturnsAsync(workflow);
+
+            var exception =
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase1(workflowUpdatePhase1Dto));
+
+            Assert.Equal(ErrorCode.InvalidValue, exception.ErrorCode);
+            Assert.Equal(WorkflowLabel.InvalidDescription, exception.LabelError);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Never);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Never);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
         }
 
         [Fact(DisplayName = "UpdatePhase1 success")]

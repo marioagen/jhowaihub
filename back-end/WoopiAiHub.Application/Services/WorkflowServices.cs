@@ -32,6 +32,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IEncryptionService _encryptationService;
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
+        private const int WorkflowDescriptionMaxLength = 500;
 
         public WorkflowServices(
             IWorkflowRepository workflowRepository,
@@ -575,6 +576,13 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "One or more teams not found", TeamLabel.NotFound);
             }
 
+            if (workflowPhase1Dto.Description.Length > WorkflowDescriptionMaxLength)
+            {
+                throw new AppException(ErrorCode.InvalidValue,
+                    $"Workflow description cannot exceed {WorkflowDescriptionMaxLength} characters",
+                    WorkflowLabel.InvalidDescription);
+            }
+
             var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowPhase1Dto.Name, workflowPhase1Dto.Description);
             await _workflowRepository.Create(workflow);
 
@@ -716,6 +724,13 @@ namespace WoopiAiHub.Application.Services
             if (workflow == null)
             {
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
+            }
+
+            if (workflowUpdatePhase1Dto.Description.Length > WorkflowDescriptionMaxLength)
+            {
+                throw new AppException(ErrorCode.InvalidValue,
+                    $"Workflow description cannot exceed {WorkflowDescriptionMaxLength} characters",
+                    WorkflowLabel.InvalidDescription);
             }
 
             _unitOfWork.BeginTransaction();
