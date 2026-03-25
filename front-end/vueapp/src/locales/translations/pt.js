@@ -1029,6 +1029,8 @@ const portuguese = {
         importCurl: "Importar cURL",
         requestDetails: "Detalhes da Requisição",
         requestBody: "Corpo da Requisição",
+        tabBody: "Corpo",
+        tabTests: "Testes",
         templateName: "Nome do Template",
         templateNamePlaceholder: "ex. Processamento de OCR de Usuário",
         endpointUrl: "URL do Endpoint",
@@ -1253,7 +1255,8 @@ const portuguese = {
         removeSuccess: "Esteira de processamento removida com sucesso",
         removeToolFlow: "Remover Fluxo",
         removeToolValidationTitle: "Remover Ferramentas da Etapa",
-        removeToolValidationMessage: "A etapa {name} possui documentos ou dependências vinculadas. Ao confirmar a remoção estes documentos e dependências serão removidos permanentemente, digite o nome da etapa abaixo para confirmar:",
+        removeToolValidationMessage:
+            "A etapa {name} possui documentos ou dependências vinculadas. Ao confirmar a remoção estes documentos e dependências serão removidos permanentemente, digite o nome da etapa abaixo para confirmar:",
         removeToolValidationPlaceholder: "Digite '{name}' para confirmar",
         confirmRemoveTool: "Confirmar remoção",
         responsableTeam: "Time responsável",

@@ -316,82 +316,91 @@
                     <div class="col-lg-6">
                         <div class="card">
                             <div class="card-body">
-                                <div class="mb-2">
-                                    <h6 class="card-title">
-                                        {{ $t("template.requestBody") }}
-                                    </h6>
-                                    <small class="text-muted">
-                                        {{ $tBracketsToBraces("template.bodySubtitle") }}
-                                    </small>
-                                </div>
-                                <Field
-                                    name="body"
-                                    rules="jsonValidation"
-                                    v-slot="{ field, errorMessage }"
+                                <TabsComponent
+                                    :tabs="bodyAndTestsTabs"
+                                    compact
                                 >
-                                    <div class="position-relative">
-                                        <textarea
-                                            v-bind="field"
-                                            ref="bodyTextarea"
-                                            class="form-control font-monospace"
-                                            rows="15"
-                                            :placeholder="bodyPlaceholder"
-                                            :class="{
-                                                'is-invalid': errorMessage,
-                                            }"
-                                            @input="handleBodyInput"
-                                            @keydown="handleKeyDown"
-                                            @blur="hideAutocomplete"
-                                        ></textarea>
-                                        <div
-                                            v-if="showAutocomplete"
-                                            class="autocomplete-dropdown"
-                                            :style="{
-                                                top: autocompletePosition.top + 'px',
-                                                left: autocompletePosition.left + 'px',
-                                            }"
-                                        >
-                                            <div
-                                                v-for="(
-                                                    option, index
-                                                ) in filteredAutocompleteOptions"
-                                                :key="index"
-                                                class="autocomplete-item"
-                                                :class="{
-                                                    active: index === selectedAutocompleteIndex,
-                                                }"
-                                                @mousedown.prevent="
-                                                    selectAutocompleteOption(option)
-                                                "
-                                            >
-                                                <strong>
-                                                    {{ option.label }}
-                                                </strong>
-                                                <span class="text-muted ms-2">
-                                                    {{ option.value }}
-                                                </span>
-                                            </div>
+                                    <template #body>
+                                        <div class="mb-2">
+                                            <h6 class="card-title">
+                                                {{ $t("template.requestBody") }}
+                                            </h6>
+                                            <small class="text-muted">
+                                                {{ $tBracketsToBraces("template.bodySubtitle") }}
+                                            </small>
                                         </div>
-                                    </div>
-                                    <span
-                                        class="validation-message text-danger"
-                                        v-if="errorMessage"
-                                    >
-                                        {{ errorMessage }}
-                                    </span>
-                                </Field>
-                                <div
-                                    class="alert alert-info mt-3 py-2 px-3 d-flex align-items-start"
-                                >
-                                    <LucideIcon
-                                        icon="Lightbulb"
-                                        :size="16"
-                                        class="me-2 flex-shrink-0"
-                                    />
-                                    <small>
-                                        {{ $tBracketsToBraces("template.variablesTip") }}
-                                    </small>
-                                </div>
+                                        <Field
+                                            name="body"
+                                            rules="jsonValidation"
+                                            v-slot="{ field, errorMessage }"
+                                        >
+                                            <div class="position-relative">
+                                                <textarea
+                                                    v-bind="field"
+                                                    ref="bodyTextarea"
+                                                    class="form-control font-monospace"
+                                                    rows="15"
+                                                    :placeholder="bodyPlaceholder"
+                                                    :class="{
+                                                        'is-invalid': errorMessage,
+                                                    }"
+                                                    @input="handleBodyInput"
+                                                    @keydown="handleKeyDown"
+                                                    @blur="hideAutocomplete"
+                                                ></textarea>
+                                                <div
+                                                    v-if="showAutocomplete"
+                                                    class="autocomplete-dropdown"
+                                                    :style="{
+                                                        top: autocompletePosition.top + 'px',
+                                                        left: autocompletePosition.left + 'px',
+                                                    }"
+                                                >
+                                                    <div
+                                                        v-for="(
+                                                            option, index
+                                                        ) in filteredAutocompleteOptions"
+                                                        :key="index"
+                                                        class="autocomplete-item"
+                                                        :class="{
+                                                            active:
+                                                                index === selectedAutocompleteIndex,
+                                                        }"
+                                                        @mousedown.prevent="
+                                                            selectAutocompleteOption(option)
+                                                        "
+                                                    >
+                                                        <strong>
+                                                            {{ option.label }}
+                                                        </strong>
+                                                        <span class="text-muted ms-2">
+                                                            {{ option.value }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span
+                                                class="validation-message text-danger"
+                                                v-if="errorMessage"
+                                            >
+                                                {{ errorMessage }}
+                                            </span>
+                                        </Field>
+                                        <div
+                                            class="alert alert-info mt-3 py-2 px-3 d-flex align-items-start"
+                                        >
+                                            <LucideIcon
+                                                icon="Lightbulb"
+                                                :size="16"
+                                                class="me-2 flex-shrink-0"
+                                            />
+                                            <small>
+                                                {{ $tBracketsToBraces("template.variablesTip") }}
+                                            </small>
+                                        </div>
+                                    </template>
+                                    <template #tests></template>
+                                </TabsComponent>
                             </div>
                         </div>
                     </div>
@@ -405,11 +414,13 @@
     import TemplateService from "@/services/template/TemplateService";
     import ToolsService from "@/services/tools/ToolsServices";
     import textHelper from "@/helpers/textHelper";
+    import TabsComponent from "@/components/global/TabsComponent.vue";
 
     export default {
         name: "TemplateDetail",
         components: {
             Field,
+            TabsComponent,
         },
         props: {
             methodsList: {
@@ -441,6 +452,10 @@
                 autocompletePosition: { top: 0, left: 0 },
                 selectedAutocompleteIndex: 0,
                 autocompleteOptions: [],
+                bodyAndTestsTabs: [
+                    { name: "body", label: "template.tabBody" },
+                    { name: "tests", label: "template.tabTests" },
+                ],
             };
         },
         computed: {

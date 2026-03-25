@@ -1019,6 +1019,8 @@ const english = {
         importCurl: "Import cURL",
         requestDetails: "Request Details",
         requestBody: "Request Body",
+        tabBody: "Body",
+        tabTests: "Tests",
         templateName: "Template Name",
         templateNamePlaceholder: "e.g. User OCR Processing",
         endpointUrl: "Endpoint URL",
@@ -1242,7 +1244,8 @@ const english = {
         removeSuccess: "Workflow removed successfully",
         removeToolFlow: "Remove Flow",
         removeToolValidationTitle: "Remove Step Tools",
-        removeToolValidationMessage: "The step {name} has linked data or dependencies. All documents and dependencies will be removed permanently. To confirm removal, type the name of the step below:",
+        removeToolValidationMessage:
+            "The step {name} has linked data or dependencies. All documents and dependencies will be removed permanently. To confirm removal, type the name of the step below:",
         removeToolValidationPlaceholder: "Type '{name}' to confirm",
         confirmRemoveTool: "Confirm removal",
         responsableTeam: "Responsible Team",

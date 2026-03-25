@@ -1045,6 +1045,8 @@ const spanish = {
         removeError: "Error al eliminar plantilla",
         removeSuccess: "Plantilla eliminada exitosamente",
         requestBody: "Cuerpo de la Solicitud",
+        tabBody: "Cuerpo",
+        tabTests: "Pruebas",
         requestDetails: "Detalles de la Solicitud",
         subtitle: "Administre, pruebe y edite sus plantillas de solicitud de API.",
         tableTitle: "Plantillas",
@@ -1247,7 +1249,8 @@ const spanish = {
         removeSuccess: "Workflow eliminado con éxito",
         removeToolFlow: "Eliminar flujo",
         removeToolValidationTitle: "Eliminar Herramientas de la Etapa",
-        removeToolValidationMessage: "La etapa {name} tiene datos o dependencias vinculadas. Todos los documentos y dependencias serán eliminados permanentemente. Para confirmar la eliminación, escriba el nombre de la etapa a continuación:   ",
+        removeToolValidationMessage:
+            "La etapa {name} tiene datos o dependencias vinculadas. Todos los documentos y dependencias serán eliminados permanentemente. Para confirmar la eliminación, escriba el nombre de la etapa a continuación:   ",
         removeToolValidationPlaceholder: "Escriba '{name}' para confirmar",
         confirmRemoveTool: "Confirmar eliminación",
         responsableTeam: "Equipo Responsable",
