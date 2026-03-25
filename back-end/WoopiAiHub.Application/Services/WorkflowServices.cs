@@ -575,7 +575,7 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "One or more teams not found", TeamLabel.NotFound);
             }
 
-            var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowPhase1Dto.Name);
+            var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowPhase1Dto.Name, workflowPhase1Dto.Description);
             await _workflowRepository.Create(workflow);
 
             return workflow.Id;
@@ -728,7 +728,7 @@ namespace WoopiAiHub.Application.Services
                     workflow.AddTeam(team);
                 }
 
-                workflow.Update(workflowUpdatePhase1Dto.Name);
+                workflow.Update(workflowUpdatePhase1Dto.Name, workflowUpdatePhase1Dto.Description);
                 await _unitOfWork.SaveChangesAsync();
                 _unitOfWork.Commit();
 
@@ -1283,7 +1283,7 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                var newWorkflow = new Workflow(0, DateTime.UtcNow, teamsList, dto.NewName);
+                var newWorkflow = new Workflow(0, DateTime.UtcNow, teamsList, dto.NewName, source.Description);
                 await _workflowRepository.Create(newWorkflow);
 
                 var sourceStepsOrdered = source.Steps.OrderBy(s => s.Order).ToList();
