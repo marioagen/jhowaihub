@@ -399,7 +399,93 @@
                                             </small>
                                         </div>
                                     </template>
-                                    <template #tests></template>
+                                    <template #tests>
+                                        <div class="template-tests">
+                                            <h6
+                                                class="template-tests-heading d-flex align-items-center gap-2 mb-2"
+                                            >
+                                                <LucideIcon
+                                                    icon="Globe"
+                                                    :size="18"
+                                                    class="text-primary flex-shrink-0"
+                                                />
+                                                <span class="card-title mb-0">
+                                                    {{ $t("template.testsDetectedVariables") }}
+                                                </span>
+                                            </h6>
+                                            <div
+                                                class="template-tests-variables-box mb-3 d-flex align-items-center justify-content-center"
+                                            >
+                                                <template
+                                                    v-if="detectedTemplateVariables.length === 0"
+                                                >
+                                                    <p
+                                                        class="template-tests-empty text-muted text-center mb-0 small"
+                                                    >
+                                                        <span>
+                                                            {{
+                                                                $t("template.testsNoVariablesLead")
+                                                            }}
+                                                        </span>
+                                                        <code
+                                                            v-pre
+                                                            class="template-tests-brace-badge"
+                                                        >
+                                                            {{}}
+                                                        </code>
+                                                        <span>
+                                                            {{
+                                                                $t("template.testsNoVariablesTail")
+                                                            }}
+                                                        </span>
+                                                    </p>
+                                                </template>
+                                                <div
+                                                    v-else
+                                                    class="d-flex flex-wrap gap-2 justify-content-center w-100"
+                                                >
+                                                    <span
+                                                        v-for="v in detectedTemplateVariables"
+                                                        :key="v"
+                                                        class="badge bg-light text-dark border font-monospace"
+                                                    >
+                                                        {{ v }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                class="btn template-tests-simulate-btn w-100 d-inline-flex align-items-center justify-content-center mb-4"
+                                                @click="onSimulateRequest"
+                                            >
+                                                <LucideIcon
+                                                    icon="Play"
+                                                    :size="18"
+                                                    class="me-2 flex-shrink-0"
+                                                />
+                                                {{ $t("template.testsSimulateRequest") }}
+                                            </button>
+                                            <div
+                                                class="template-tests-result-placeholder text-center py-2"
+                                            >
+                                                <div
+                                                    class="template-tests-result-icon-wrap mx-auto mb-3 d-flex align-items-center justify-content-center"
+                                                >
+                                                    <LucideIcon
+                                                        icon="Play"
+                                                        :size="32"
+                                                        class="text-secondary"
+                                                    />
+                                                </div>
+                                                <p class="fw-medium text-secondary mb-1">
+                                                    {{ $t("template.testsNoRunTitle") }}
+                                                </p>
+                                                <p class="small text-muted mb-0">
+                                                    {{ $t("template.testsNoRunHint") }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </template>
                                 </TabsComponent>
                             </div>
                         </div>
@@ -482,6 +568,21 @@
                 return this.isEditMode
                     ? this.$t("template.formEdit.subtitle")
                     : this.$t("template.formCreate.subtitle");
+            },
+            detectedTemplateVariables() {
+                const body = (this.values && this.values.body) || "";
+                const url = (this.values && this.values.url) || "";
+                const combined = `${body}\n${url}`;
+                const re = /\{\{([^{}]+)\}\}/g;
+                const seen = new Set();
+                let m;
+                while ((m = re.exec(combined)) !== null) {
+                    const name = m[1].trim();
+                    if (name) {
+                        seen.add(name);
+                    }
+                }
+                return Array.from(seen).sort((a, b) => a.localeCompare(b));
             },
         },
         setup() {
@@ -676,6 +777,7 @@
             redirectToTemplateList() {
                 this.$router.push({ name: "Templates" });
             },
+            onSimulateRequest() {},
             addQueryParam() {
                 this.form.queryParams.push({ key: "" });
             },
@@ -907,5 +1009,51 @@
     .autocomplete-item .text-muted {
         font-size: 0.75rem;
         font-family: "Courier New", Courier, monospace;
+    }
+
+    .template-tests-heading .card-title {
+        font-size: 1rem;
+    }
+
+    .template-tests-variables-box {
+        min-height: 5.5rem;
+        padding: 1.25rem;
+        border: 2px dashed var(--color-border-form-control, #d3d3d3);
+        border-radius: 0.5rem;
+        background-color: var(--color-bg-form-control, #ffffff);
+    }
+
+    .template-tests-brace-badge {
+        display: inline-block;
+        margin: 0 0.2rem;
+        padding: 0.1rem 0.35rem;
+        font-size: 0.75rem;
+        font-family: "Courier New", Courier, monospace;
+        color: var(--color-body-content, #212529);
+        background-color: var(--color-bg-body-content, #f5f5f5);
+        border: 1px solid var(--color-border-form-control, #d3d3d3);
+        border-radius: 0.25rem;
+        vertical-align: middle;
+    }
+
+    .template-tests-simulate-btn {
+        color: var(--color-btn-primary, #ffffff) !important;
+        background-color: var(--color-bg-btn-primary, #0d6efd) !important;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.55rem 1rem;
+        font-weight: 500;
+    }
+
+    .template-tests-simulate-btn:hover {
+        filter: brightness(0.95);
+        color: var(--color-btn-primary, #ffffff) !important;
+    }
+
+    .template-tests-result-icon-wrap {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 50%;
+        background-color: var(--color-bg-body-content, #e9ecef);
     }
 </style>
