@@ -15,8 +15,6 @@ import LucideIcon from "@/components/global/LucideIcon.vue";
 import NotificationComponent from "@/components/global/NotificationComponent.vue";
 import { notify } from "@/utils/notification";
 
-import "@/validators/validationRules";
-
 import "@/assets/css/bootstrap-5.0.2/css/bootstrap.min.css";
 import "@/assets/webfont/fontawesome-5.15.4/css/all.min.css";
 import "@vueform/multiselect/themes/default.css";
