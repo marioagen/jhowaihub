@@ -456,7 +456,7 @@
                                             <button
                                                 type="button"
                                                 class="btn template-tests-simulate-btn w-100 d-inline-flex align-items-center justify-content-center mb-4"
-                                                @click="onSimulateRequest"
+                                                @click="simulateRequest"
                                             >
                                                 <LucideIcon
                                                     icon="Play"
@@ -777,7 +777,7 @@
             redirectToTemplateList() {
                 this.$router.push({ name: "Templates" });
             },
-            onSimulateRequest() {},
+            simulateRequest() {},
             addQueryParam() {
                 this.form.queryParams.push({ key: "" });
             },
