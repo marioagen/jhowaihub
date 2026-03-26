@@ -50,6 +50,7 @@
                                 :labelSearch="'management.profiles.searchProfiles'"
                                 :items="profilesList"
                                 :loading="isLoadingProfiles"
+                                chip-icon="ShieldCheck"
                                 v-model:selectedItems="selectedProfiles"
                             />
                             <SelectionListComponent

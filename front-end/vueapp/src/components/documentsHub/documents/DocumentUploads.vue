@@ -301,6 +301,18 @@
                                                 <span class="me-1">
                                                     {{ getName(id) }}
                                                 </span>
+                                                <button
+                                                    type="button"
+                                                    class="chip-remove-btn"
+                                                    :title="$t('documents.upload.removeWorkflowChip')"
+                                                    :aria-label="$t('documents.upload.removeWorkflowChip')"
+                                                    @click.stop="removeWorkflowFromSelection(id)"
+                                                >
+                                                    <LucideIcon
+                                                        icon="X"
+                                                        :size="14"
+                                                    />
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -433,6 +445,9 @@
             clearSelection(event) {
                 event.target.blur();
                 this.selectedWorkflows = [];
+            },
+            removeWorkflowFromSelection(id) {
+                this.selectedWorkflows = this.selectedWorkflows.filter((wId) => wId !== id);
             },
             validateSelection() {
                 this.hasError = this.selectedWorkflows.length === 0;
@@ -757,6 +772,30 @@
     .selected-team-chip {
         background-color: #155dfc !important;
         color: white !important;
+    }
+
+    .chip-remove-btn {
+        border: none;
+        background: transparent;
+        color: inherit;
+        padding: 0 0 0 4px;
+        margin: 0;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        opacity: 0.85;
+    }
+
+    .chip-remove-btn:hover,
+    .chip-remove-btn:focus-visible {
+        opacity: 1;
+    }
+
+    .chip-remove-btn:focus-visible {
+        outline: 2px solid rgba(255, 255, 255, 0.8);
+        outline-offset: 1px;
+        border-radius: 2px;
     }
 
     .team-chip-icon {

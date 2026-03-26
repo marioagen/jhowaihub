@@ -305,6 +305,7 @@ import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidat
                         const params = {
                             id: this.workflowIdInternal,
                             name: data.name,
+                            description: data.description ?? "",
                             teams: data.teams,
                         };
 
@@ -567,6 +568,7 @@ import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidat
                         let result = await this.getPhase1Data();
                         this.phase1Data = {
                             name: result.name,
+                            description: result.description ?? "",
                             teams: result.teams.map((t) => t.id),
                         };
                     }
@@ -654,6 +656,7 @@ import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidat
                 let result = await this.getPhase1Data();
                 this.phase1Data = {
                     name: result.name,
+                    description: result.description ?? "",
                     teams: result.teams.map((t) => t.id),
                 };
             } catch (error) {

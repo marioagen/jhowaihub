@@ -47,10 +47,10 @@ namespace WoopiAiHub.Api.Controllers
         [HttpGet("Analyze/{id}")]
         [SwaggerOperation("It receives an id and returns a FindByIdAnalyzeDto with the document's information")]
         [ProducesResponseType(typeof(FindByIdAnalyzeDto), StatusCodes.Status200OK)]
-        public IActionResult FindByIdAnalyze(int id,
-                                             [FromHeader] HeadersDto headersDto)
+        public async Task<IActionResult> FindByIdAnalyze(int id,
+                                                        [FromHeader] HeadersDto headersDto)
         {
-            var result = _documentMetadataServices.FindByIdAnalyze(id, headersDto);
+            var result = await _documentMetadataServices.FindByIdAnalyze(id, headersDto);
             return Ok(result);
         }
 
