@@ -410,7 +410,7 @@
                                                     class="text-primary flex-shrink-0"
                                                 />
                                                 <span class="card-title mb-0">
-                                                    {{ $t("template.testsDetectedVariables") }}
+                                                    {{ $t("template.tests.detectedVariables") }}
                                                 </span>
                                             </h6>
                                             <div
@@ -424,7 +424,7 @@
                                                     >
                                                         <span>
                                                             {{
-                                                                $t("template.testsNoVariablesLead")
+                                                                $t("template.tests.noVariablesLead")
                                                             }}
                                                         </span>
                                                         <code
@@ -435,7 +435,7 @@
                                                         </code>
                                                         <span>
                                                             {{
-                                                                $t("template.testsNoVariablesTail")
+                                                                $t("template.tests.noVariablesTail")
                                                             }}
                                                         </span>
                                                     </p>
@@ -453,19 +453,89 @@
                                                     </span>
                                                 </div>
                                             </div>
+                                            <div
+                                                v-if="detectedTemplateVariables.length > 0"
+                                                class="template-tests-variable-inputs mb-3"
+                                            >
+                                                <h6 class="small fw-semibold text-secondary mb-2">
+                                                    {{ $t("template.tests.variableValues") }}
+                                                </h6>
+                                                <div
+                                                    v-for="v in detectedTemplateVariables"
+                                                    :key="'var-input-' + v"
+                                                    class="mb-2"
+                                                >
+                                                    <label
+                                                        class="form-label small font-monospace mb-1"
+                                                        :for="'test-var-' + v"
+                                                    >
+                                                        {{ v }}
+                                                    </label>
+                                                    <input
+                                                        :id="'test-var-' + v"
+                                                        v-model="variableValues[v]"
+                                                        type="text"
+                                                        class="form-control form-control-sm"
+                                                        autocomplete="off"
+                                                    />
+                                                </div>
+                                            </div>
                                             <button
                                                 type="button"
                                                 class="btn template-tests-simulate-btn w-100 d-inline-flex align-items-center justify-content-center mb-4"
+                                                :disabled="testsSimulateLoading"
                                                 @click="simulateRequest"
                                             >
+                                                <span
+                                                    v-if="testsSimulateLoading"
+                                                    class="spinner-border spinner-border-sm me-2"
+                                                    role="status"
+                                                    aria-hidden="true"
+                                                ></span>
                                                 <LucideIcon
+                                                    v-else
                                                     icon="Play"
                                                     :size="18"
                                                     class="me-2 flex-shrink-0"
                                                 />
-                                                {{ $t("template.testsSimulateRequest") }}
+                                                {{ $t("template.tests.simulateRequest") }}
                                             </button>
                                             <div
+                                                v-if="testsSimulateLoading"
+                                                class="template-tests-result-placeholder text-center py-4"
+                                            >
+                                                <span
+                                                    class="spinner-border text-primary"
+                                                    role="status"
+                                                    aria-hidden="true"
+                                                ></span>
+                                            </div>
+                                            <div
+                                                v-else-if="testsResult"
+                                                class="template-tests-result text-start"
+                                            >
+                                                <div
+                                                    class="mb-2 d-flex align-items-center flex-wrap gap-2"
+                                                >
+                                                    <span
+                                                        class="badge method-badge"
+                                                        :class="testsResultStatusBadgeClass"
+                                                    >
+                                                        {{ testsResult.statusCode }}
+                                                    </span>
+                                                    <span class="small text-muted">
+                                                        {{
+                                                            $t("template.tests.responseHttpStatus")
+                                                        }}
+                                                    </span>
+                                                </div>
+                                                <pre
+                                                    class="template-tests-response-body small mb-0 p-3 rounded border bg-light text-dark"
+                                                    >{{ testsResult.content }}</pre
+                                                >
+                                            </div>
+                                            <div
+                                                v-else
                                                 class="template-tests-result-placeholder text-center py-2"
                                             >
                                                 <div
@@ -478,10 +548,10 @@
                                                     />
                                                 </div>
                                                 <p class="fw-medium text-secondary mb-1">
-                                                    {{ $t("template.testsNoRunTitle") }}
+                                                    {{ $t("template.tests.noRunTitle") }}
                                                 </p>
                                                 <p class="small text-muted mb-0">
-                                                    {{ $t("template.testsNoRunHint") }}
+                                                    {{ $t("template.tests.noRunHint") }}
                                                 </p>
                                             </div>
                                         </div>
@@ -533,6 +603,9 @@
                 },
                 isSaving: false,
                 isLoading: false,
+                testsSimulateLoading: false,
+                testsResult: null,
+                variableValues: {},
                 bodyPlaceholder: '{\n  "key": "variable"\n}',
                 showAutocomplete: false,
                 autocompletePosition: { top: 0, left: 0 },
@@ -584,6 +657,14 @@
                 }
                 return Array.from(seen).sort((a, b) => a.localeCompare(b));
             },
+            testsResultStatusBadgeClass() {
+                if (!this.testsResult) return "";
+                const c = this.testsResult.statusCode;
+                if (c >= 200 && c < 300) return "method-get";
+                if (c >= 400 && c < 500) return "method-patch";
+                if (c >= 500) return "method-delete";
+                return "method-post";
+            },
         },
         setup() {
             const { validate, setValues, values, resetForm } = useForm();
@@ -613,6 +694,18 @@
                     this.updateUrlWithQueryParams();
                 },
                 deep: true,
+            },
+            detectedTemplateVariables: {
+                handler(vars) {
+                    const next = { ...this.variableValues };
+                    for (const v of vars) {
+                        if (!(v in next)) {
+                            next[v] = "";
+                        }
+                    }
+                    this.variableValues = next;
+                },
+                immediate: true,
             },
         },
         methods: {
@@ -777,7 +870,80 @@
             redirectToTemplateList() {
                 this.$router.push({ name: "Templates" });
             },
-            simulateRequest() {},
+            buildApiTemplateDraftPayload() {
+                const queryParams = this.form.queryParams
+                    .filter((p) => p.key.trim() !== "")
+                    .map((p) => ({
+                        key: p.key,
+                        value: `{{${p.key}}}`,
+                    }));
+                const headers = this.form.headers
+                    .filter((h) => h.key.trim() !== "")
+                    .map((h) => ({
+                        key: h.key,
+                        value: `{{${h.key}}}`,
+                    }));
+                return {
+                    name: this.values.name,
+                    method: this.values.method,
+                    url: this.values.url,
+                    queryTemplate: queryParams.length === 0 ? null : JSON.stringify(queryParams),
+                    headerTemplate: headers.length === 0 ? null : JSON.stringify(headers),
+                    bodyTemplate:
+                        this.values.body === "" || this.values.body == null
+                            ? null
+                            : this.values.body,
+                };
+            },
+            async simulateRequest() {
+                const validation = await this.validate();
+                if (!validation.valid) {
+                    return;
+                }
+
+                const variables = {};
+                for (const v of this.detectedTemplateVariables) {
+                    variables[v] =
+                        this.variableValues[v] != null && this.variableValues[v] !== ""
+                            ? String(this.variableValues[v])
+                            : "";
+                }
+
+                const payload = {
+                    templateId: this.isEditMode ? Number(this.routeId) : null,
+                    draft: this.buildApiTemplateDraftPayload(),
+                    variables,
+                    templateName: this.values.name || null,
+                    tenant: this.$store.state.userProfile?.tenant ?? null,
+                    email: this.$store.state.userProfile?.login ?? null,
+                    executionId: null,
+                };
+
+                this.testsSimulateLoading = true;
+                this.testsResult = null;
+
+                try {
+                    this.testsResult = await TemplateService.executeRequestTest(payload);
+                    const statusCode = this.testsResult?.statusCode;
+                    if (typeof statusCode === "number" && statusCode >= 200 && statusCode < 300) {
+                        this.$notify({
+                            title: "common.success",
+                            message: "template.tests.simulateSuccess",
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
+                    }
+                } catch (error) {
+                    this.$notify({
+                        title: "common.error",
+                        message: "template.tests.simulateError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.testsSimulateLoading = false;
+                }
+            },
             addQueryParam() {
                 this.form.queryParams.push({ key: "" });
             },
@@ -1048,6 +1214,12 @@
     .template-tests-simulate-btn:hover {
         filter: brightness(0.95);
         color: var(--color-btn-primary, #ffffff) !important;
+    }
+
+    .template-tests-response-body {
+        max-height: min(50vh, 22rem);
+        overflow: auto;
+        white-space: pre;
     }
 
     .template-tests-result-icon-wrap {

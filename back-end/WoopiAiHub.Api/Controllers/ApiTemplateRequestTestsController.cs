@@ -16,7 +16,8 @@ namespace WoopiAiHub.Api.Controllers
         private readonly IApiTemplateRequestTestsHandler _apiTemplateRequestTestsHandler = apiTemplateRequestTestsHandler;
 
         /// <summary>
-        /// Executes a generic HTTP call to a third-party URL for API template request testing. The ASP.NET response is always 200 OK;
+        /// Executes a simulated HTTP call from a template definition plus variable values. Send <see cref="ApiTemplateRequestTestsRequestDto.Draft"/>
+        /// (current editor state) or <see cref="ApiTemplateRequestTestsRequestDto.TemplateId"/> to load from storage. The ASP.NET response is always 200 OK;
         /// the downstream HTTP status is in <see cref="ApiTemplateRequestTestsResponseDto.StatusCode"/>.
         /// </summary>
         [HttpPost("execute")]

@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
 
 namespace WoopiAiHub.Application.Utils
@@ -23,37 +24,26 @@ namespace WoopiAiHub.Application.Utils
         public Task<HttpResponseMessage> DeleteAsync(string url, Dictionary<string, string>? headers, CancellationToken cancellationToken) =>
             SendAsync(HttpMethod.Delete, url, body: null, headers, cancellationToken);
 
-        private Task<HttpResponseMessage> SendAsync(
+        private async Task<HttpResponseMessage> SendAsync(
             HttpMethod method,
             string url,
             HttpContent? body,
             Dictionary<string, string>? headers,
             CancellationToken cancellationToken)
         {
-            var uri = new Uri(url);
-            var baseAddress = $"{uri.Scheme}://{uri.Authority}";
-            using var client = _httpClientFactory.CreateClient(NamedClient);
-            client.BaseAddress = new Uri(baseAddress);
-            ApplyHeaders(client, headers);
+            ArgumentNullException.ThrowIfNull(url);
 
-            if (method == HttpMethod.Get || method == HttpMethod.Delete)
-            {
-                return method == HttpMethod.Get
-                    ? client.GetAsync(url, cancellationToken)
-                    : client.DeleteAsync(url, cancellationToken);
-            }
+            using var request = new HttpRequestMessage(method, url);
+            if (body != null)
+                request.Content = body;
 
-            if (method == HttpMethod.Post)
-                return client.PostAsync(url, body, cancellationToken);
-            if (method == HttpMethod.Put)
-                return client.PutAsync(url, body, cancellationToken);
-            if (method == HttpMethod.Patch)
-                return client.PatchAsync(url, body, cancellationToken);
+            ApplyHeaders(request, body, headers);
 
-            throw new InvalidOperationException($"Unsupported HTTP method: {method}");
+            var client = _httpClientFactory.CreateClient(NamedClient);
+            return await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         }
 
-        private static void ApplyHeaders(HttpClient client, Dictionary<string, string>? headers)
+        private static void ApplyHeaders(HttpRequestMessage request, HttpContent? body, Dictionary<string, string>? headers)
         {
             if (headers == null || headers.Count == 0)
                 return;
@@ -62,7 +52,15 @@ namespace WoopiAiHub.Application.Utils
             {
                 if (string.IsNullOrEmpty(name) || string.Equals(name, "Host", StringComparison.OrdinalIgnoreCase))
                     continue;
-                client.DefaultRequestHeaders.TryAddWithoutValidation(name, value);
+
+                if (string.Equals(name, "Content-Type", StringComparison.OrdinalIgnoreCase) && body != null)
+                {
+                    if (MediaTypeHeaderValue.TryParse(value, out var mediaType))
+                        body.Headers.ContentType = mediaType;
+                    continue;
+                }
+
+                request.Headers.TryAddWithoutValidation(name, value);
             }
         }
     }

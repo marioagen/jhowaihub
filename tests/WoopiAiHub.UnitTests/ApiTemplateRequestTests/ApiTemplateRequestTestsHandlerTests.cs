@@ -4,6 +4,8 @@ using Moq;
 using WoopiAiHub.Application.ApiTemplateRequestTests;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
+using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Models;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
@@ -11,15 +13,16 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
     public class ApiTemplateRequestTestsHandlerTests
     {
         private readonly Mock<IApiTemplateRequestTestsHttpGateway> _gateway = new();
+        private readonly Mock<IApiTemplateRepository> _templateRepository = new();
         private readonly ApiTemplateRequestTestsHandler _handler;
 
         public ApiTemplateRequestTestsHandlerTests()
         {
-            _handler = new ApiTemplateRequestTestsHandler(_gateway.Object);
+            _handler = new ApiTemplateRequestTestsHandler(_gateway.Object, _templateRepository.Object);
         }
 
         [Fact]
-        public async Task GetAsync_MergesQueryIntoUrl()
+        public async Task GetAsync_MergesQueryTemplateIntoUrl()
         {
             string? capturedUrl = null;
             _gateway
@@ -27,11 +30,17 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Callback<string, Dictionary<string, string>?, CancellationToken>((u, _, _) => capturedUrl = u)
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("x") });
 
+            var queryJson = """[{"key":"a","value":"1"},{"key":"b","value":"two"}]""";
             var request = new ApiTemplateRequestTestsRequestDto
             {
-                Url = "https://api.example.com/v1/items",
-                Method = "GET",
-                Query = new Dictionary<string, string> { ["a"] = "1", ["b"] = "two" }
+                Draft = new ApiTemplateCreateDto
+                {
+                    Name = "T",
+                    Method = "GET",
+                    Url = "https://api.example.com/v1/items",
+                    QueryTemplate = queryJson
+                },
+                Variables = new Dictionary<string, string>()
             };
 
             await _handler.ExecuteAsync(request);
@@ -56,9 +65,14 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
 
             var request = new ApiTemplateRequestTestsRequestDto
             {
-                Url = "https://api.example.com/p",
-                Method = "POST",
-                Body = doubleEncoded
+                Draft = new ApiTemplateCreateDto
+                {
+                    Name = "T",
+                    Method = "POST",
+                    Url = "https://api.example.com/p",
+                    BodyTemplate = doubleEncoded
+                },
+                Variables = new Dictionary<string, string>()
             };
 
             await _handler.ExecuteAsync(request);
@@ -80,9 +94,14 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
 
             await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
             {
-                Url = "https://api.example.com/p",
-                Method = "POST",
-                Body = raw
+                Draft = new ApiTemplateCreateDto
+                {
+                    Name = "T",
+                    Method = "POST",
+                    Url = "https://api.example.com/p",
+                    BodyTemplate = raw
+                },
+                Variables = new Dictionary<string, string>()
             });
 
             Assert.NotNull(capturedContent);
@@ -98,8 +117,13 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
 
             var result = await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
             {
-                Url = "https://api.example.com/r",
-                Method = "DELETE",
+                Draft = new ApiTemplateCreateDto
+                {
+                    Name = "T1",
+                    Method = "DELETE",
+                    Url = "https://api.example.com/r"
+                },
+                Variables = new Dictionary<string, string>(),
                 TemplateName = "T1",
                 Tenant = "tn",
                 Email = "e@x.com",
@@ -120,9 +144,61 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
                 {
-                    Url = "https://api.example.com/r",
-                    Method = "OPTIONS"
+                    Draft = new ApiTemplateCreateDto
+                    {
+                        Name = "T",
+                        Method = "OPTIONS",
+                        Url = "https://api.example.com/r"
+                    },
+                    Variables = new Dictionary<string, string>()
                 }));
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_SubstitutesVariablesInUrl()
+        {
+            string? capturedUrl = null;
+            _gateway
+                .Setup(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
+                .Callback<string, Dictionary<string, string>?, CancellationToken>((u, _, _) => capturedUrl = u)
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
+
+            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            {
+                Draft = new ApiTemplateCreateDto
+                {
+                    Name = "T",
+                    Method = "GET",
+                    Url = "https://api.example.com/v1/{{id}}"
+                },
+                Variables = new Dictionary<string, string> { ["id"] = "42" }
+            });
+
+            Assert.Equal("https://api.example.com/v1/42", capturedUrl);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_LoadsFromTemplateId_WhenDraftIsNull()
+        {
+            var model = new ApiTemplate("Db", "GET", "https://api.example.com/from-db", null, null, null);
+            _templateRepository
+                .Setup(r => r.FindByIdReturnModel(7))
+                .ReturnsAsync(model);
+
+            string? capturedUrl = null;
+            _gateway
+                .Setup(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
+                .Callback<string, Dictionary<string, string>?, CancellationToken>((u, _, _) => capturedUrl = u)
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
+
+            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            {
+                TemplateId = 7,
+                Draft = null,
+                Variables = new Dictionary<string, string>()
+            });
+
+            Assert.Equal("https://api.example.com/from-db", capturedUrl);
         }
     }
 }

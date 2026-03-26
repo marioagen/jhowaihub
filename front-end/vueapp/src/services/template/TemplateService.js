@@ -75,4 +75,16 @@ export default {
                 throw e;
             });
     },
+    executeRequestTest(request) {
+        return api
+            .post("/ApiTemplateRequestTests/execute", request)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                return {
+                    error: e,
+                };
+            });
+    },
 };

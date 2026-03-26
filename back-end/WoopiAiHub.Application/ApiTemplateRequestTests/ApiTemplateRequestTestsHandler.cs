@@ -1,16 +1,20 @@
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using Microsoft.AspNetCore.WebUtilities;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
+using WoopiAiHub.Domain.Interfaces.Repository;
 
 namespace WoopiAiHub.Application.ApiTemplateRequestTests
 {
-    public class ApiTemplateRequestTestsHandler(IApiTemplateRequestTestsHttpGateway httpGateway) : IApiTemplateRequestTestsHandler
+    public class ApiTemplateRequestTestsHandler(
+        IApiTemplateRequestTestsHttpGateway httpGateway,
+        IApiTemplateRepository apiTemplateRepository) : IApiTemplateRequestTestsHandler
     {
         private readonly IApiTemplateRequestTestsHttpGateway _httpGateway = httpGateway;
+        private readonly IApiTemplateRepository _apiTemplateRepository = apiTemplateRepository;
         private readonly JsonSerializerOptions _jsonOptions = new()
         {
             PropertyNameCaseInsensitive = true,
@@ -20,56 +24,71 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
         public async Task<ApiTemplateRequestTestsResponseDto> ExecuteAsync(ApiTemplateRequestTestsRequestDto request, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(request);
-            if (string.IsNullOrWhiteSpace(request.Url))
-                throw new InvalidOperationException("Url is required and must be an absolute URI.");
-            if (!Uri.TryCreate(request.Url, UriKind.Absolute, out _))
-                throw new InvalidOperationException("Url must be an absolute URI.");
 
-            var url = BuildFinalUrl(request.Url, request.Query);
-            var method = string.IsNullOrWhiteSpace(request.Method)
-                ? string.Empty
-                : request.Method.Trim().ToUpperInvariant();
+            var variables = request.Variables ?? new Dictionary<string, string>(StringComparer.Ordinal);
+            var draft = await ResolveDraftAsync(request, cancellationToken).ConfigureAwait(false);
+
+            var assembled = ApiTemplateRequestTestsRequestAssembler.Assemble(
+                draft.Method,
+                draft.Url,
+                draft.QueryTemplate,
+                draft.HeaderTemplate,
+                draft.BodyTemplate,
+                variables);
+
+            var method = assembled.Method;
+            var url = assembled.Url;
+            var headers = assembled.Headers;
 
             using HttpResponseMessage response = method switch
             {
-                "GET" => await _httpGateway.GetAsync(url, request.Headers, cancellationToken),
+                "GET" => await _httpGateway.GetAsync(url, headers, cancellationToken).ConfigureAwait(false),
                 "POST" => await _httpGateway.PostAsync(
                     url,
-                    BuildJsonHttpContent(request.Body),
-                    request.Headers,
-                    cancellationToken),
+                    BuildJsonHttpContent(assembled.Body),
+                    headers,
+                    cancellationToken).ConfigureAwait(false),
                 "PUT" => await _httpGateway.PutAsync(
                     url,
-                    BuildJsonHttpContent(request.Body),
-                    request.Headers,
-                    cancellationToken),
+                    BuildJsonHttpContent(assembled.Body),
+                    headers,
+                    cancellationToken).ConfigureAwait(false),
                 "PATCH" => await _httpGateway.PatchAsync(
                     url,
-                    BuildJsonHttpContent(request.Body),
-                    request.Headers,
-                    cancellationToken),
-                "DELETE" => await _httpGateway.DeleteAsync(url, request.Headers, cancellationToken),
-                _ => throw new InvalidOperationException($"HTTP method '{request.Method}' is not supported. Use GET, POST, PUT, PATCH, or DELETE.")
+                    BuildJsonHttpContent(assembled.Body),
+                    headers,
+                    cancellationToken).ConfigureAwait(false),
+                "DELETE" => await _httpGateway.DeleteAsync(url, headers, cancellationToken).ConfigureAwait(false),
+                _ => throw new InvalidOperationException($"HTTP method '{method}' is not supported. Use GET, POST, PUT, PATCH, or DELETE.")
             };
 
-            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             return new ApiTemplateRequestTestsResponseDto
             {
                 StatusCode = (int)response.StatusCode,
                 Content = content,
-                TemplateName = request.TemplateName,
+                TemplateName = request.TemplateName ?? draft.Name,
                 Tenant = request.Tenant,
                 Email = request.Email,
                 ExecutionId = request.ExecutionId
             };
         }
 
-        private static string BuildFinalUrl(string url, Dictionary<string, string>? query)
+        private async Task<ApiTemplateCreateDto> ResolveDraftAsync(ApiTemplateRequestTestsRequestDto request, CancellationToken cancellationToken)
         {
-            if (query == null || query.Count == 0)
-                return url;
-            var forQuery = query.ToDictionary(kv => kv.Key, kv => (string?)kv.Value);
-            return QueryHelpers.AddQueryString(url, forQuery);
+            if (request.Draft != null)
+                return request.Draft;
+
+            if (request.TemplateId is int id && id > 0)
+            {
+                var model = await _apiTemplateRepository.FindByIdReturnModel(id).ConfigureAwait(false);
+                if (model == null)
+                    throw new InvalidOperationException($"API template with id '{id}' was not found.");
+
+                return ApiTemplateRequestTestsRequestAssembler.ToDraft(model);
+            }
+
+            throw new InvalidOperationException("Either Draft or a valid TemplateId must be provided.");
         }
 
         private HttpContent? BuildJsonHttpContent(string? body)
