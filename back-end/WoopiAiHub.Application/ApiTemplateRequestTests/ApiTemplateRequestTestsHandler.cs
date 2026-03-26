@@ -4,20 +4,20 @@ using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Interfaces.ThirdParty;
+using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
 
-namespace WoopiAiHub.Application.ThirdParty
+namespace WoopiAiHub.Application.ApiTemplateRequestTests
 {
-    public class ThirdPartyApiHandler(IHttpRequestGateway httpRequestGateway) : IThirdPartyApiHandler
+    public class ApiTemplateRequestTestsHandler(IApiTemplateRequestTestsHttpGateway httpGateway) : IApiTemplateRequestTestsHandler
     {
-        private readonly IHttpRequestGateway _httpRequestGateway = httpRequestGateway;
+        private readonly IApiTemplateRequestTestsHttpGateway _httpGateway = httpGateway;
         private readonly JsonSerializerOptions _jsonOptions = new()
         {
             PropertyNameCaseInsensitive = true,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
-        public async Task<ThirdPartyApiResponseDto> ExecuteAsync(ThirdPartyApiRequestDto request, CancellationToken cancellationToken = default)
+        public async Task<ApiTemplateRequestTestsResponseDto> ExecuteAsync(ApiTemplateRequestTestsRequestDto request, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(request);
             if (string.IsNullOrWhiteSpace(request.Url))
@@ -32,28 +32,28 @@ namespace WoopiAiHub.Application.ThirdParty
 
             using HttpResponseMessage response = method switch
             {
-                "GET" => await _httpRequestGateway.GetAsync(url, request.Headers, cancellationToken),
-                "POST" => await _httpRequestGateway.PostAsync(
+                "GET" => await _httpGateway.GetAsync(url, request.Headers, cancellationToken),
+                "POST" => await _httpGateway.PostAsync(
                     url,
                     BuildJsonHttpContent(request.Body),
                     request.Headers,
                     cancellationToken),
-                "PUT" => await _httpRequestGateway.PutAsync(
+                "PUT" => await _httpGateway.PutAsync(
                     url,
                     BuildJsonHttpContent(request.Body),
                     request.Headers,
                     cancellationToken),
-                "PATCH" => await _httpRequestGateway.PatchAsync(
+                "PATCH" => await _httpGateway.PatchAsync(
                     url,
                     BuildJsonHttpContent(request.Body),
                     request.Headers,
                     cancellationToken),
-                "DELETE" => await _httpRequestGateway.DeleteAsync(url, request.Headers, cancellationToken),
+                "DELETE" => await _httpGateway.DeleteAsync(url, request.Headers, cancellationToken),
                 _ => throw new InvalidOperationException($"HTTP method '{request.Method}' is not supported. Use GET, POST, PUT, PATCH, or DELETE.")
             };
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            return new ThirdPartyApiResponseDto
+            return new ApiTemplateRequestTestsResponseDto
             {
                 StatusCode = (int)response.StatusCode,
                 Content = content,

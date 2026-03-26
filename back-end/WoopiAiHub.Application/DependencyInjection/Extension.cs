@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Application.Messaging;
-using WoopiAiHub.Application.ThirdParty;
+using WoopiAiHub.Application.ApiTemplateRequestTests;
 using WoopiAiHub.Application.Messaging.DeadLetter;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Services.Audit;
@@ -12,7 +12,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Audit;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
-using WoopiAiHub.Domain.Interfaces.ThirdParty;
+using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Repository;
 
@@ -22,9 +22,9 @@ namespace WoopiAiHub.Application.DependencyInjection
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            services.AddHttpClient(HttpRequestGateway.NamedClient);
-            services.AddScoped<IHttpRequestGateway, HttpRequestGateway>();
-            services.AddScoped<IThirdPartyApiHandler, ThirdPartyApiHandler>();
+            services.AddHttpClient(ApiTemplateRequestTestsHttpGateway.NamedClient);
+            services.AddScoped<IApiTemplateRequestTestsHttpGateway, ApiTemplateRequestTestsHttpGateway>();
+            services.AddScoped<IApiTemplateRequestTestsHandler, ApiTemplateRequestTestsHandler>();
 
             services.AddSingleton<IServiceCollection, ServiceCollection>();
             services.AddScoped<IDocumentServices, DocumentServices>();

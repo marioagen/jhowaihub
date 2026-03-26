@@ -1,10 +1,10 @@
 namespace WoopiAiHub.Domain.DTOs.Request
 {
     /// <summary>
-    /// Describes an outbound HTTP call to a third-party API.
+    /// Describes an outbound HTTP call for API template request testing against a third-party URL.
     /// <see cref="Url"/> must be an absolute URI. Optional <see cref="Query"/> entries are merged into the URL via the handler.
     /// </summary>
-    public class ThirdPartyApiRequestDto
+    public class ApiTemplateRequestTestsRequestDto
     {
         public string Url { get; set; } = string.Empty;
         public string Method { get; set; } = string.Empty;

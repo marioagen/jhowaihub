@@ -1,10 +1,10 @@
-using WoopiAiHub.Domain.Interfaces.ThirdParty;
+using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
 
 namespace WoopiAiHub.Application.Utils
 {
-    public class HttpRequestGateway(IHttpClientFactory httpClientFactory) : IHttpRequestGateway
+    public class ApiTemplateRequestTestsHttpGateway(IHttpClientFactory httpClientFactory) : IApiTemplateRequestTestsHttpGateway
     {
-        public const string NamedClient = "ThirdPartyIntegration";
+        public const string NamedClient = "ApiTemplateRequestTests";
 
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 

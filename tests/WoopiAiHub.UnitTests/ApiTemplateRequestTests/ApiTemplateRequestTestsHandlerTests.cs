@@ -1,21 +1,21 @@
 using System.Net;
 using System.Text.Json;
 using Moq;
-using WoopiAiHub.Application.ThirdParty;
+using WoopiAiHub.Application.ApiTemplateRequestTests;
 using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.Interfaces.ThirdParty;
+using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
 using Xunit;
 
-namespace WoopiAiHub.UnitTests.ThirdParty
+namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
 {
-    public class ThirdPartyApiHandlerTests
+    public class ApiTemplateRequestTestsHandlerTests
     {
-        private readonly Mock<IHttpRequestGateway> _gateway = new();
-        private readonly ThirdPartyApiHandler _handler;
+        private readonly Mock<IApiTemplateRequestTestsHttpGateway> _gateway = new();
+        private readonly ApiTemplateRequestTestsHandler _handler;
 
-        public ThirdPartyApiHandlerTests()
+        public ApiTemplateRequestTestsHandlerTests()
         {
-            _handler = new ThirdPartyApiHandler(_gateway.Object);
+            _handler = new ApiTemplateRequestTestsHandler(_gateway.Object);
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace WoopiAiHub.UnitTests.ThirdParty
                 .Callback<string, Dictionary<string, string>?, CancellationToken>((u, _, _) => capturedUrl = u)
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("x") });
 
-            var request = new ThirdPartyApiRequestDto
+            var request = new ApiTemplateRequestTestsRequestDto
             {
                 Url = "https://api.example.com/v1/items",
                 Method = "GET",
@@ -54,7 +54,7 @@ namespace WoopiAiHub.UnitTests.ThirdParty
                 .Callback<string, HttpContent?, Dictionary<string, string>?, CancellationToken>((_, content, _, _) => capturedContent = content)
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}") });
 
-            var request = new ThirdPartyApiRequestDto
+            var request = new ApiTemplateRequestTestsRequestDto
             {
                 Url = "https://api.example.com/p",
                 Method = "POST",
@@ -78,7 +78,7 @@ namespace WoopiAiHub.UnitTests.ThirdParty
                 .Callback<string, HttpContent?, Dictionary<string, string>?, CancellationToken>((_, content, _, _) => capturedContent = content)
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}") });
 
-            await _handler.ExecuteAsync(new ThirdPartyApiRequestDto
+            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
             {
                 Url = "https://api.example.com/p",
                 Method = "POST",
@@ -96,7 +96,7 @@ namespace WoopiAiHub.UnitTests.ThirdParty
                 .Setup(g => g.DeleteAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new StringContent("gone") });
 
-            var result = await _handler.ExecuteAsync(new ThirdPartyApiRequestDto
+            var result = await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
             {
                 Url = "https://api.example.com/r",
                 Method = "DELETE",
@@ -118,7 +118,7 @@ namespace WoopiAiHub.UnitTests.ThirdParty
         public async Task ExecuteAsync_InvalidMethod_Throws()
         {
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _handler.ExecuteAsync(new ThirdPartyApiRequestDto
+                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
                 {
                     Url = "https://api.example.com/r",
                     Method = "OPTIONS"

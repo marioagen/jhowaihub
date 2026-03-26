@@ -1,6 +1,6 @@
-namespace WoopiAiHub.Domain.Interfaces.ThirdParty
+namespace WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests
 {
-    public interface IHttpRequestGateway
+    public interface IApiTemplateRequestTestsHttpGateway
     {
         Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string>? headers, CancellationToken cancellationToken);
 
