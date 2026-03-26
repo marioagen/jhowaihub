@@ -483,19 +483,48 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(TeamLabel.NotFound, exception.LabelError);
         }
 
+        [Fact(DisplayName = "CreatePhase1 should throw AppException when description exceeds 500 characters")]
+        [Trait("CreatePhase1", "Fail")]
+        public async Task CreatePhase1_DescriptionTooLong_ThrowsAppException()
+        {
+            var longDescription = new string('a', 501);
+            var phase1Dto = new WorkflowPhase1Dto
+            {
+                Name = "Test Workflow",
+                Description = longDescription,
+                Teams = new List<int> { 1 }
+            };
+            var team = new Team("Team 1", 1, DateTime.Now);
+            _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
+                .Returns(new List<Team> { team });
+
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.CreatePhase1(phase1Dto));
+
+            Assert.Equal(ErrorCode.InvalidValue, exception.ErrorCode);
+            Assert.Equal(WorkflowLabel.InvalidDescription, exception.LabelError);
+            _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Never);
+        }
+
         [Fact(DisplayName = "CreatePhase1 should return workflow ID when successful")]
         [Trait("CreatePhase1", "Success")]
         public async Task CreatePhase1_ValidData_ReturnsWorkflowId()
         {
             // Arrange
-            var phase1Dto = new WorkflowPhase1Dto { Name = "Test Workflow", Teams = new List<int> { 1 } };
+            var phase1Dto = new WorkflowPhase1Dto
+            {
+                Name = "Test Workflow",
+                Description = "Test description",
+                Teams = new List<int> { 1 }
+            };
 
             var team = new Team("Team 1", 1, DateTime.Now);
             _teamRepositoryMock.Setup(r => r.FindByIds(It.IsAny<ICollection<int>>()))
                 .Returns(new List<Team> { team });
 
+            Workflow? createdWorkflow = null;
             _workflowRepositoryMock.Setup(r => r.Create(It.IsAny<Workflow>()))
-                .ReturnsAsync(true);
+                .ReturnsAsync(true)
+                .Callback<Workflow>(wf => createdWorkflow = wf);
 
             // Act
             var result = await _workflowServices.CreatePhase1(phase1Dto);
@@ -504,6 +533,8 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result >= 0);
             _teamRepositoryMock.Verify(r => r.FindByIds(It.IsAny<ICollection<int>>()), Times.Once);
             _workflowRepositoryMock.Verify(r => r.Create(It.IsAny<Workflow>()), Times.Once);
+            Assert.NotNull(createdWorkflow);
+            Assert.Equal(phase1Dto.Description, createdWorkflow!.Description);
         }
 
         [Fact(DisplayName = "UpdatePhase2 should throw AppException when workflow not found")]
@@ -633,13 +664,44 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
         }
 
+        [Fact(DisplayName = "UpdatePhase1 should throw AppException when description exceeds 500 characters")]
+        [Trait("UpdatePhase1", "Fail")]
+        public async Task UpdatePhase1_DescriptionTooLong_ThrowsAppException()
+        {
+            var longDescription = new string('b', 501);
+            var workflowUpdatePhase1Dto = new WorkflowUpdatePhase1Dto
+            {
+                Id = 1,
+                Name = "Updated Workflow",
+                Description = longDescription,
+                Teams = new List<int> { 1 }
+            };
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(1)).ReturnsAsync(workflow);
+
+            var exception =
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase1(workflowUpdatePhase1Dto));
+
+            Assert.Equal(ErrorCode.InvalidValue, exception.ErrorCode);
+            Assert.Equal(WorkflowLabel.InvalidDescription, exception.LabelError);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Never);
+            _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Never);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+        }
+
         [Fact(DisplayName = "UpdatePhase1 success")]
         [Trait("UpdatePhase1", "Success")]
         public async Task UpdatePhase1_WorkflowExists_UpdatesSuccessfully()
         {
             // Arrange
             var workflowUpdatePhase1Dto =
-                new WorkflowUpdatePhase1Dto { Id = 1, Name = "Updated Workflow", Teams = new List<int> { 1, 2 } };
+                new WorkflowUpdatePhase1Dto
+                {
+                    Id = 1,
+                    Name = "Updated Workflow",
+                    Description = "Updated description",
+                    Teams = new List<int> { 1, 2 }
+                };
             var workflow = WorkflowFixture.FindValidWorkflow();
             _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(1)).ReturnsAsync(workflow);
             _teamRepositoryMock.Setup(x => x.FindByIds(It.IsAny<List<int>>())).Returns(new List<Team> { });
@@ -652,6 +714,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+            Assert.Equal(workflowUpdatePhase1Dto.Description, workflow.Description);
         }
 
         [Fact(DisplayName = "FindPhase1ById success")]
@@ -917,14 +980,19 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task CreatePhase1_ValidDto_CreatesWorkflowSuccessfully()
         {
             // Arrange
-            var workflowPhase1Dto = new WorkflowPhase1Dto { Name = "New Workflow", Teams = new List<int> { 2 } };
+            var workflowPhase1Dto = new WorkflowPhase1Dto
+            {
+                Name = "New Workflow",
+                Description = "New workflow description",
+                Teams = new List<int> { 2 }
+            };
 
             var teamsList = new List<Team> { new Team("nome", 2, DateTime.Now), };
 
             _teamRepositoryMock.Setup(x => x.FindByIds(workflowPhase1Dto.Teams))
                 .Returns(teamsList);
 
-            var createdWorkflow = new Workflow(1, DateTime.UtcNow, teamsList, workflowPhase1Dto.Name);
+            var createdWorkflow = new Workflow(1, DateTime.UtcNow, teamsList, workflowPhase1Dto.Name, workflowPhase1Dto.Description);
             _workflowRepositoryMock.Setup(x => x.Create(It.IsAny<Workflow>())).ReturnsAsync(true)
                 .Callback<Workflow>(wf => createdWorkflow = wf);
 
@@ -933,6 +1001,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.Equal(createdWorkflow.Id, result);
+            Assert.Equal(workflowPhase1Dto.Description, createdWorkflow.Description);
             _teamRepositoryMock.Verify(x => x.FindByIds(workflowPhase1Dto.Teams), Times.Once);
             _workflowRepositoryMock.Verify(x => x.Create(It.IsAny<Workflow>()), Times.Once);
         }
