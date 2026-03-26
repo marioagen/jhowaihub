@@ -643,18 +643,47 @@
                     : this.$t("template.formCreate.subtitle");
             },
             detectedTemplateVariables() {
+                const placeholderRe = /\{\{([^{}]+)\}\}/g;
+                const seen = new Set();
+
+                const collectFrom = (text) => {
+                    if (!text) {
+                        return;
+                    }
+                    placeholderRe.lastIndex = 0;
+                    for (const m of text.matchAll(placeholderRe)) {
+                        const name = m[1].trim();
+                        if (name) {
+                            seen.add(name);
+                        }
+                    }
+                };
+
                 const body = (this.values && this.values.body) || "";
                 const url = (this.values && this.values.url) || "";
-                const combined = `${body}\n${url}`;
-                const re = /\{\{([^{}]+)\}\}/g;
-                const seen = new Set();
-                let m;
-                while ((m = re.exec(combined)) !== null) {
-                    const name = m[1].trim();
-                    if (name) {
-                        seen.add(name);
-                    }
+                collectFrom(body);
+                collectFrom(url);
+
+                const queryParams = this.form.queryParams
+                    .filter((p) => p.key.trim() !== "")
+                    .map((p) => ({
+                        key: p.key,
+                        value: `{{${p.key}}}`,
+                    }));
+                if (queryParams.length > 0) {
+                    collectFrom(JSON.stringify(queryParams));
                 }
+
+                const headers = this.form.headers
+                    .filter((h) => h.key.trim() !== "")
+                    .map((h) => ({
+                        key: h.key,
+                        value: `{{${h.key}}}`,
+                    }));
+                if (headers.length > 0) {
+                    collectFrom(JSON.stringify(headers));
+                }
+
                 return Array.from(seen).sort((a, b) => a.localeCompare(b));
             },
             testsResultStatusBadgeClass() {
