@@ -36,7 +36,7 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// This sends the id to the repository and returns document information.
         /// </summary>
-        public FindByIdAnalyzeDto FindByIdAnalyze(int id, HeadersDto headersDto)
+        public async Task<FindByIdAnalyzeDto> FindByIdAnalyze(int id, HeadersDto headersDto)
         {
             try
             {
@@ -50,7 +50,7 @@ namespace WoopiAiHub.Application.Services
                     throw ex;
                 }
 
-                var cards = _cardRepository.FindByDocumentIdCardListAsync(id).Result;
+                var cards = await _cardRepository.FindByDocumentIdCardListAsync(id);
                 var activeCard = cards.FirstOrDefault();
 
                 return new FindByIdAnalyzeDto

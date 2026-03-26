@@ -30,7 +30,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "FindByIdAnalyze - Should return document metadata with card when document found")]
         [Trait("FindByIdAnalyze", "Success")]
-        public void FindByIdAnalyze_Success()
+        public async Task FindByIdAnalyze_Success()
         {
             // Arrange
             var document = DocumentFixture.FindValidDocument();
@@ -43,7 +43,7 @@ namespace WoopiAiHub.UnitTests.Services
             cardRepository.Setup(a => a.FindByDocumentIdCardListAsync(It.IsAny<int>())).ReturnsAsync(new List<Card> { card });
 
             // Act
-            var result = _documentMetadataServices.FindByIdAnalyze(document.Id, headers);
+            var result = await _documentMetadataServices.FindByIdAnalyze(document.Id, headers);
 
             // Assert
             Assert.Equal(document.Name, result.Name);
@@ -55,7 +55,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "FindByIdAnalyze - Should throw AppException when document not found")]
         [Trait("FindByIdAnalyze", "Fail")]
-        public void FindByIdAnalyze_Fail()
+        public async Task FindByIdAnalyze_Fail()
         {
             // Arrange
             var documentId = DocumentFixture.FindValidDocument().Id;
@@ -64,7 +64,7 @@ namespace WoopiAiHub.UnitTests.Services
             var headers = DocumentFixture.FindValidHeadersDto();
 
             // Act / Assert
-            var ex = Assert.Throws<AppException>(() => _documentMetadataServices.FindByIdAnalyze(documentId, headers));
+            var ex = await Assert.ThrowsAsync<AppException>(() => _documentMetadataServices.FindByIdAnalyze(documentId, headers));
             Assert.Equal("Error while finding document in database", ex.Message);
             documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
         }
