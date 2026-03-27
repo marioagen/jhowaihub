@@ -1,5 +1,3 @@
-using WoopiAiHub.Domain.Enum;
-
 namespace WoopiAiHub.Domain.DTOs.Refit
 {
     public record AnonymizationRequestDto

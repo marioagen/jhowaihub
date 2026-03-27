@@ -88,6 +88,27 @@ const spanish = {
             tagQuestionnaire: "Cuestionario",
             tagFreeQuestion: "Pregunta libre",
         },
+        anonymizeDocument: "Anonimizar documento",
+    },
+    anonymization: {
+        title: "Anonimizar Documento",
+        subtitle: "Configure las opciones de anonimización y seleccione un prompt",
+        type: "Tipo de Anonimización",
+        selectType: "Seleccione un tipo de anonimización...",
+        prompt: "Prompt",
+        selectPrompt: "Seleccione un prompt...",
+        cancel: "Cancelar",
+        confirm: "Confirmar Anonimización",
+        success: "Proceso de anonimización iniciado con éxito.",
+        error: "Error al anonimizar documento.",
+        validationError: "Por favor, complete todos los campos obligatorios.",
+        types: {
+            partialMasking: "Enmascaramiento Parcial",
+            totalMasking: "Enmascaramiento Total",
+            replaceWithInitials: "Reemplazar con Iniciales",
+            fictitiousData: "Datos Ficticios",
+            relativeReferences: "Referencias Relativas",
+        },
     },
     auditor: {
         placeholder: "El contenido de auditoría se mostrará aquí.",
@@ -316,6 +337,7 @@ const spanish = {
         new: "Nuevo",
         notAllowed: "No permitido",
         notice: "Aviso",
+        optional: "Opcional",
         order: "Orden",
         output: "Salida",
         owner: "Dueño",
@@ -511,6 +533,7 @@ const spanish = {
         youAreAboutToDeleteDocumentQuery:
             "Estás a punto de eliminar <br/> el historial de consultas del sistema",
         documentsBatchCheckbox: "Documentos en lote",
+        originalPdf: "PDF ORIGINAL",
     },
     documentsHub: {
         title: "Cadenas de procesamiento",

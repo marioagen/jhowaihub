@@ -87,6 +87,27 @@ const portuguese = {
             tagQuestionnaire: "Questionário",
             tagFreeQuestion: "Pergunta Livre",
         },
+        anonymizeDocument: "Anonimizar documento",
+    },
+    anonymization: {
+        title: "Anonimizar Documento",
+        subtitle: "Configure as opções de anonimização e selecione um prompt",
+        type: "Tipo de Anonimização",
+        selectType: "Selecione um tipo de anonimização...",
+        prompt: "Prompt",
+        selectPrompt: "Selecione um prompt...",
+        cancel: "Cancelar",
+        confirm: "Confirmar Anonimização",
+        success: "Processo de anonimização iniciado com sucesso.",
+        error: "Erro ao anonimizar documento.",
+        validationError: "Por favor, preencha todos os campos obrigatórios.",
+        types: {
+            partialMasking: "Mascaramento Parcial",
+            totalMasking: "Mascaramento Total",
+            replaceWithInitials: "Substituir com Iniciais",
+            fictitiousData: "Dados Fictícios",
+            relativeReferences: "Referências Relativas",
+        },
     },
     auditor: {
         placeholder: "O conteúdo de auditoria será exibido aqui.",
@@ -314,6 +335,7 @@ const portuguese = {
         new: "Novo",
         notAllowed: "Não permitido",
         notice: "Aviso",
+        optional: "Opcional",
         order: "Ordenar",
         output: "Saída",
         owner: "Proprietário",
@@ -518,6 +540,7 @@ const portuguese = {
         youAreAboutToDeleteDocumentQuery:
             "Você está prestes a deletar <br/> o histórico de consulta do sistema",
         documentsBatchCheckbox: "Documentos em lote",
+        originalPdf: "PDF ORIGINAL",
     },
     filters: {
         assignment: {
