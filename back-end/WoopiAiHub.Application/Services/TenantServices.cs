@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -82,11 +82,17 @@ namespace WoopiAiHub.Application.Services
 
             dbContext.Database.GetDbConnection().ConnectionString = connectionString;
 
+            var password = tenantSubscriptionDto.Password;
+            if (string.IsNullOrEmpty(password))
+            {
+                password = tenantSubscriptionDto.Name;
+            }
+
             var userCreateDto = new UserCreateDto
             {
                 Name = tenantSubscriptionDto.Name!,
                 Email = tenantSubscriptionDto.Email,
-                Password = tenantSubscriptionDto.Name,
+                Password = password,
                 TeamIds = new List<int> { 1 }
             };
             var headerDto = new HeadersDto
