@@ -13,5 +13,6 @@ namespace WoopiAiHub.Domain.DTOs
         public ColTypeDocument ColType { get; set; }
         public List<int> WorkflowIds { get; set; } = new List<int>();
         public int? StatusId { get; set; }
+        public DocumentFilter? DocumentType { get; set; } = DocumentFilter.All;
     }
 }

@@ -111,5 +111,42 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _cardServices.FindHeaderInfoAsync(id);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Retrieves the collection of card batches associated with the specified document batch identifier.
+        /// </summary>
+        /// <remarks>This method is asynchronous and may involve I/O operations. Ensure that the
+        /// documentBatchId parameter is valid to avoid exceptions.</remarks>
+        /// <param name="documentBatchId">The unique identifier of the document batch for which to retrieve associated card batches. Must be a
+        /// positive integer.</param>
+        /// <returns>An IActionResult containing a collection of CardBatchDto objects that represent the card batches linked to
+        /// the specified document batch identifier. Returns an empty collection if no card batches are found.</returns>
+        [HttpGet("Batch/{documentBatchId}")]
+        [SwaggerOperation("Retrieves the collection of card batches associated with the specified document batch identifier.")]
+        [ProducesResponseType(typeof(ICollection<CardBatchDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindCardsByDocumentBatchId(int documentBatchId)
+        {
+            var result = await _cardServices.FindCardsByDocumentBatchId(documentBatchId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Initiates a reprocessing operation for the specified card.
+        /// </summary>
+        /// <remarks>This endpoint requires valid tenant and creator email information in the request
+        /// headers. The operation returns <see langword="true"/> if the card was successfully reprocessed; otherwise,
+        /// <see langword="false"/>.</remarks>
+        /// <param name="id">The unique identifier of the card to reprocess.</param>
+        /// <param name="headersDto">The headers containing tenant and creator email information required for authorization and auditing.</param>
+        /// <returns>An <see cref="IActionResult"/> containing a boolean value indicating whether the reprocessing operation was
+        /// successful.</returns>
+        [HttpPut("{id}/Reprocess")]
+        [SwaggerOperation("Initiates a reprocessing operation for the specified card.")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ReprocessCard(int id, [FromHeader] HeadersDto headersDto)
+        {
+            var result = await _cardServices.ReprocessCard(id, headersDto.Tenant, headersDto.EmailCreator);
+            return Ok(result);
+        }
     }
 }

@@ -1,6 +1,6 @@
 <template>
     <main>
-        <div class="container-fluid mx-2">
+        <div class="container-fluid scroll-area mx-2">
             <div class="row align-items-center mb-3">
                 <div class="col-auto">
                     <button
@@ -23,37 +23,61 @@
                         </p>
                     </div>
                 </div>
+                <div class="col-auto ms-auto">
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        :disabled="isLoading || !selectedTemplate"
+                        @click="handleConfirm"
+                    >
+                        <div
+                            style="min-width: 80px"
+                            class="text-center"
+                        >
+                            <span
+                                v-if="isLoading"
+                                class="spinner-grow spinner-grow-sm"
+                                role="status"
+                            ></span>
+                            <span v-else>
+                                {{ $t("common.save") }}
+                            </span>
+                        </div>
+                    </button>
+                </div>
             </div>
 
             <div class="row">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="mb-4">
-                                <label
-                                    for="templateSelect"
-                                    class="form-label fw-bold"
-                                >
-                                    {{ $t("template.selectTemplate") }}
-                                </label>
-                                <select
-                                    id="templateSelect"
-                                    class="form-select"
-                                    v-model="selectedTemplateId"
-                                    @change="onTemplateSelect"
-                                    :disabled="isLoading"
-                                >
-                                    <option value="">
-                                        {{ $t("template.selectTemplatePlaceholder") }}
-                                    </option>
-                                    <option
-                                        v-for="template in templates"
-                                        :key="template.id"
-                                        :value="template.id"
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label
+                                        for="templateSelect"
+                                        class="form-label fw-bold"
                                     >
-                                        {{ template.name }}
-                                    </option>
-                                </select>
+                                        {{ $t("template.selectTemplate") }}
+                                    </label>
+                                    <select
+                                        id="templateSelect"
+                                        class="form-select"
+                                        v-model="selectedTemplateId"
+                                        @change="onTemplateSelect"
+                                        :disabled="isLoading"
+                                    >
+                                        <option value="">
+                                            {{ $t("template.selectTemplatePlaceholder") }}
+                                        </option>
+                                        <option
+                                            v-for="template in templates"
+                                            :key="template.id"
+                                            :value="template.id"
+                                        >
+                                            {{ template.name }}
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div v-if="selectedTemplate">
@@ -61,50 +85,48 @@
                                     :template-data="templateData"
                                     :read-only="false"
                                     :editable="true"
+                                    :previous-step-tools="previousStepTools"
+                                    :selected-dependencies="selectedDependencies"
                                     @update:url="handleUrlUpdate"
                                     @update:queryParam="handleQueryParamUpdate"
                                     @update:header="handleHeaderUpdate"
                                     @update:body="handleBodyUpdate"
+                                    @update:dependencies="updateDependencies"
                                 />
                             </div>
-                        </div>
-
-                        <div class="card-footer d-flex justify-content-end">
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                :disabled="isLoading || !selectedTemplate"
-                                @click="handleConfirm"
-                            >
-                                <div
-                                    style="min-width: 80px"
-                                    class="text-center"
-                                >
-                                    <span
-                                        v-if="isLoading"
-                                        class="spinner-grow spinner-grow-sm"
-                                        role="status"
-                                    ></span>
-                                    <span v-else>
-                                        {{ $t("common.confirm") }}
-                                    </span>
-                                </div>
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+    <ConfirmModal
+        id="confirm-datatype-modal"
+        :isLoading="isLoading"
+        title="common.caution"
+        message="template.configuration.leaveMessage"
+        confirmText="template.configuration.saveAndExit"
+        cancelText="template.configuration.keepEditing"
+        confirmVariant="primary"
+        iconeName="AlertTriangle"
+        iconVariant="warning"
+        @confirm="confirmSave"
+        @cancel="cancelSave"
+        ref="confirmDatatypeModal"
+    />
 </template>
 <script>
     import TemplateService from "@/services/template/TemplateService";
     import TemplateFormDisplay from "@/components/templates/TemplateFormDisplay.vue";
+    import flowStateHelper from "@/helpers/flowStateHelper";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import textHelper from "@/helpers/textHelper";
 
     export default {
         name: "TemplateConfiguration",
         components: {
             TemplateFormDisplay,
+            ConfirmModal,
         },
         data() {
             return {
@@ -116,6 +138,8 @@
                 editableHeaders: [],
                 editableBody: "",
                 editableUrl: "",
+                previousStepTools: [],
+                selectedDependencies: [],
             };
         },
         computed: {
@@ -161,6 +185,29 @@
                     body: this.editableBody,
                 };
             },
+            hasDatatypeMismatch() {
+                const depTypes = this.selectedDependencies
+                    .map((dep) => {
+                        const step = this.previousStepTools.find((s) => s.order === dep.stepOrder);
+                        const st = step?.stepTools?.find((st) => st.order === dep.stepToolOrder);
+                        return st?.tool?.toolType
+                            ? textHelper.sanitizeToolNameForVariable(st.tool.toolType)
+                            : null;
+                    })
+                    .filter(Boolean);
+
+                const bodyPlaceholders = [
+                    ...new Set(
+                        [...(this.editableBody || "").matchAll(/\{\{([^}]+)\}\}/g)].map((m) => m[1])
+                    ),
+                ];
+
+                if (bodyPlaceholders.length === 0 && depTypes.length === 0) return false;
+
+                const missingDep = bodyPlaceholders.some((p) => !depTypes.includes(p));
+                const missingPlaceholder = depTypes.some((t) => !bodyPlaceholders.includes(t));
+                return missingDep || missingPlaceholder;
+            },
         },
         mounted() {
             this.loadTemplates();
@@ -185,6 +232,8 @@
                 try {
                     const flowState = JSON.parse(flowStateJson);
                     const selectedNode = flowState.selectedNode;
+                    this.previousStepTools = flowState.previousStepTools;
+                    this.selectedDependencies = flowState.selectedDependencies;
 
                     if (
                         !selectedNode ||
@@ -306,11 +355,8 @@
                 this.editableQueryParams = this.parseQueryParams(
                     this.selectedTemplate.queryTemplate
                 );
-
                 this.editableHeaders = this.parseHeaders(this.selectedTemplate.headerTemplate);
-
                 this.editableBody = this.selectedTemplate.bodyTemplate || "";
-
                 this.editableUrl = "";
             },
             handleUrlUpdate(value) {
@@ -328,6 +374,9 @@
             },
             handleBodyUpdate(value) {
                 this.editableBody = value;
+            },
+            updateDependencies(dependencies) {
+                this.selectedDependencies = dependencies;
             },
             parseQueryParams(queryTemplate) {
                 if (!queryTemplate) return [];
@@ -429,6 +478,20 @@
                 return JSON.stringify(formatted);
             },
             handleConfirm() {
+                if (this.hasDatatypeMismatch) {
+                    this.$refs.confirmDatatypeModal.open();
+                    return;
+                }
+                this.doSave();
+            },
+            confirmSave() {
+                this.$refs.confirmDatatypeModal.close();
+                this.doSave();
+            },
+            cancelSave() {
+                this.$refs.confirmDatatypeModal.close();
+            },
+            doSave() {
                 this.isLoading = true;
                 const json = {
                     method: this.selectedTemplate.method,
@@ -445,12 +508,6 @@
                 };
 
                 const formattedJson = this.formatTemplateJson(json, this.selectedTemplateId);
-
-                const newParam = {
-                    stepToolId: this.$route.params.stepToolId,
-                    value: formattedJson,
-                };
-
                 const flowStateJson = localStorage.getItem("flow_state_params");
 
                 if (!flowStateJson) {
@@ -466,10 +523,14 @@
                 }
 
                 const flowState = JSON.parse(flowStateJson);
+                const flowStateUpdated = flowStateHelper.commitNodeConfig(
+                    flowState.selectedNode?.id,
+                    formattedJson,
+                    this.selectedTemplate?.name ?? null,
+                    this.selectedDependencies
+                );
 
-                let node = flowState.nodes.find((n) => n.id === flowState.selectedNode.id);
-
-                if (!node) {
+                if (!flowStateUpdated) {
                     this.$notify({
                         title: "common.error",
                         message: "template.configuration.saveError",
@@ -480,11 +541,6 @@
                     this.handleNavigateBack();
                     return;
                 }
-
-                node.data.parameters = [newParam];
-                flowState.selectedNode = undefined;
-
-                localStorage.setItem("flow_state_params", JSON.stringify(flowState));
 
                 this.isLoading = false;
                 this.handleNavigateBack();
@@ -498,3 +554,22 @@
         },
     };
 </script>
+<style>
+    .nav-tabs .nav-item.show .nav-link,
+    .nav-tabs .nav-link.active {
+        background-color: var(--color-card-content) !important;
+        border-color: var(--color-border-form-control) var(--color-border-form-control)
+            var(--color-border-form-control) !important;
+        color: var(--color-body-content) !important;
+    }
+
+    .nav-tabs {
+        border-bottom: 1px solid var(--color-border-form-control) !important;
+    }
+
+    .alert-info {
+        color: var(--color-kanban-primary) !important;
+        background-color: var(--color-bg-kanban-primary) !important;
+        border-color: var(--color-border-form-control) !important;
+    }
+</style>

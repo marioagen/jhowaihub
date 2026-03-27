@@ -1,49 +1,31 @@
 <template>
     <div class="card mb-3">
         <div class="card-body">
-            <div
-                class="d-flex align-items-center gap-2 mb-3"
-            >
+            <div class="d-flex align-items-center gap-2 mb-3">
                 <h6 class="mb-0 fw-bold">
-                    {{
-                        $t(
-                            "dashboard.graphs.pagesGraphTitle"
-                        )
-                    }}
+                    {{ $t("dashboard.graphs.pagesGraphTitle") }}
                 </h6>
                 <LucideIcon
-                    v-tooltip.right="
-                        $t('dashboard.graphs.pagesTooltip')
-                    "
+                    v-tooltip.right="$t('dashboard.graphs.pagesTooltip')"
                     icon="Info"
                     :size="17"
                 />
             </div>
-            <div class="card ms-4 me-4 mb-3">
+            <div class="card mb-3">
                 <div class="card-body">
                     <h6>
-                        {{
-                            $t(
-                                "dashboard.graphs.totalPages"
-                            )
-                        }}
+                        {{ $t("dashboard.graphs.totalPages") }}
                     </h6>
                     <h4 class="mb-0 fw-bold">
                         {{ totalPages }}
                     </h4>
                     <span>
-                        {{
-                            $t("dashboard.graphs.unitValue")
-                        }}
+                        {{ $t("dashboard.graphs.unitValue") }}
                         {{ usageUnitPages }}
                     </span>
                     <hr />
                     <span class="mt-1">
-                        {{
-                            $t(
-                                "dashboard.graphs.periodTotal"
-                            )
-                        }}
+                        {{ $t("dashboard.graphs.periodTotal") }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
                         {{ totalPages * usageUnitPages }}
@@ -51,11 +33,7 @@
                 </div>
             </div>
             <h6>
-                {{
-                    $t(
-                        "dashboard.graphs.pagesGraphSubtitle"
-                    )
-                }}
+                {{ $t("dashboard.graphs.pagesGraphSubtitle") }}
             </h6>
             <BarGraphComponent
                 v-if="isLoaded"
@@ -124,24 +102,15 @@
         }),
         computed: {
             totalPages() {
-                return this.graph.series[0].data.reduce(
-                    (a, b) => a + b,
-                    0
-                );
+                return this.graph.series[0].data.reduce((a, b) => a + b, 0);
             },
             usageUnitPages() {
-                if (
-                    !Array.isArray(this.usageUnits) ||
-                    this.usageUnits.length === 0
-                ) {
+                if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
                     return 0;
                 }
                 return (
-                    this.usageUnits.find(
-                        (item) =>
-                            item.usageTypeName ===
-                            ColTypeUsage.Page
-                    )?.value ?? 0
+                    this.usageUnits.find((item) => item.usageTypeName === ColTypeUsage.Page)
+                        ?.value ?? 0
                 );
             },
         },
@@ -162,19 +131,13 @@
                             this.graph.options = {
                                 ...this.graph.options,
                                 xaxis: {
-                                    categories:
-                                        response.map(
-                                            (item) =>
-                                                item.date
-                                        ),
+                                    categories: response.map((item) => item.date),
                                 },
                             };
                             this.graph.series = [
                                 {
                                     name: "Pages",
-                                    data: response.map(
-                                        (item) => item.value
-                                    ),
+                                    data: response.map((item) => item.value),
                                 },
                             ];
                         }
@@ -185,10 +148,7 @@
                     });
             },
             setTotalPages() {
-                this.$emit(
-                    "setTotalPages",
-                    this.usageUnitPages * this.totalPages
-                );
+                this.$emit("setTotalPages", this.usageUnitPages * this.totalPages);
             },
             updateGraph(start, end) {
                 this.start = start;

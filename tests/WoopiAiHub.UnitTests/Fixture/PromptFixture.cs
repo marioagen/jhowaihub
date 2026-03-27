@@ -1,4 +1,4 @@
-﻿using Bogus;
+using Bogus;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Identity.Client;
 using System;
@@ -59,6 +59,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                 IdUser = Guid.NewGuid(),
                 IsOwner = true,
                 Created = _faker.Date.Past(),
+                OwnerName = _faker.Name.FullName(),
+                OwnerEmail = _faker.Internet.Email(),
             };
         }
     }

@@ -139,6 +139,7 @@
                                                 class="form-control"
                                                 :placeholder="$t('template.endpointUrlPlaceholder')"
                                                 id="endpointUrl"
+                                                maxlength="500"
                                                 :class="{
                                                     'is-invalid': errorMessage,
                                                 }"
@@ -320,7 +321,7 @@
                                         {{ $t("template.requestBody") }}
                                     </h6>
                                     <small class="text-muted">
-                                        {{ $t("template.bodySubtitle") }}
+                                        {{ $tBracketsToBraces("template.bodySubtitle") }}
                                     </small>
                                 </div>
                                 <Field
@@ -394,7 +395,7 @@
                                         class="me-2 flex-shrink-0"
                                     />
                                     <small>
-                                        {{ $t("template.variablesTip") }}
+                                        {{ $tBracketsToBraces("template.variablesTip") }}
                                     </small>
                                 </div>
                             </div>
@@ -408,19 +409,16 @@
 <script>
     import { Field, useForm, defineRule } from "vee-validate";
     import TemplateService from "@/services/template/TemplateService";
+    import ToolsService from "@/services/tools/ToolsServices";
     import i18n from "@/locales/i18n";
+    import textHelper from "@/helpers/textHelper";
 
     defineRule("jsonValidation", (value) => {
-        if (!value || value.trim() === "") {
-            return true;
-        }
-        try {
-            const sanitizedValue = value.replace(/\{\{[^}]+\}\}/g, '"PLACEHOLDER"');
-            JSON.parse(sanitizedValue);
-            return true;
-        } catch (e) {
+        const result = textHelper.validateJSON(value);
+        if (!result.isValid) {
             return i18n.global.t("template.invalidJsonFormat");
         }
+        return true;
     });
 
     export default {
@@ -453,19 +451,12 @@
                 },
                 isSaving: false,
                 isLoading: false,
-                bodyPlaceholder: '{\n  "key": "{{variable}}"\n}',
+                bodyPlaceholder: '{\n  "key": "variable"\n}',
                 jsonError: "",
                 showAutocomplete: false,
                 autocompletePosition: { top: 0, left: 0 },
                 selectedAutocompleteIndex: 0,
-                autocompleteOptions: [
-                    { labelKey: "OCR", value: "{{ocr}}", active: true },
-                    { labelKey: "EMBEDDINGS", value: "{{embeddings}}", active: false },
-                    { labelKey: "PROMPT", value: "{{prompt}}", active: true },
-                    { label: "AI MODEL", value: "{{ai_model}}", active: false },
-                    { label: "TRANSLATION", value: "{{translation}}", active: false },
-                    { label: "IMAGE DATA", value: "{{image_data}}", active: false },
-                ],
+                autocompleteOptions: [],
             };
         },
         computed: {
@@ -476,10 +467,12 @@
                 return this.routeId !== undefined;
             },
             filteredAutocompleteOptions() {
-                return this.autocompleteOptions.map((opt) => ({
-                    ...opt,
-                    label: opt.labelKey ? this.$t(opt.labelKey) : opt.label,
-                }));
+                return this.autocompleteOptions
+                    .filter((w) => w.active)
+                    .map((opt) => ({
+                        ...opt,
+                        label: opt.labelKey ? this.$t(opt.labelKey) : opt.label,
+                    }));
             },
             getTemplateTitle() {
                 return this.isEditMode
@@ -502,6 +495,7 @@
             };
         },
         mounted() {
+            this.loadToolsForAutocomplete();
             if (this.isEditMode) {
                 this.loadTemplate();
             } else {
@@ -522,6 +516,33 @@
             },
         },
         methods: {
+            toolTypeDisplayName(apiName) {
+                if (!apiName) return "";
+                const key = "tools.typeDisplay." + apiName;
+                const translated = this.$t(key);
+                return translated !== key ? translated : apiName;
+            },
+            loadToolsForAutocomplete() {
+                ToolsService.getToolsList()
+                    .then((tools) => {
+                        if (tools && Array.isArray(tools)) {
+                            this.autocompleteOptions = tools.map((tool) => {
+                                const translatedType = this.toolTypeDisplayName(tool.toolType);
+                                const sanitizedType = textHelper.sanitizeToolNameForVariable(
+                                    tool.toolType
+                                );
+                                return {
+                                    label: `${translatedType} - ${tool.name}`,
+                                    value: `{{${sanitizedType}}}`,
+                                    active: true,
+                                };
+                            });
+                        }
+                    })
+                    .catch((e) => {
+                        console.error("Failed to load tools for autocomplete", e);
+                    });
+            },
             handleBodyInput(event) {
                 const textarea = event.target;
                 const value = textarea.value;
@@ -553,17 +574,8 @@
                 return depth === 0;
             },
             validateJSON(value) {
-                if (!value || value.trim() === "") {
-                    this.jsonError = "";
-                    return;
-                }
-                try {
-                    const sanitizedValue = value.replace(/\{\{[^}]+\}\}/g, '"PLACEHOLDER"');
-                    JSON.parse(sanitizedValue);
-                    this.jsonError = "";
-                } catch (e) {
-                    this.jsonError = "";
-                }
+                const result = textHelper.validateJSON(value);
+                this.jsonError = result.isValid ? "" : "";
             },
             showAutocompleteDropdown(textarea) {
                 const coords = this.getCaretCoordinates(textarea);

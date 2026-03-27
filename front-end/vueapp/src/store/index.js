@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 
 export default new Vuex.Store({
     state: {
+        theme: null,
         tenantInitialized: false,
         userProfile: {
             language: "pt",
@@ -18,6 +19,9 @@ export default new Vuex.Store({
         },
         permissions: [],
         lastSelectedWorkflow: null,
+        userPreferences: {
+            analyzeLeftColumnPercent: 50,
+        },
         tempWorkflow: {
             status: false,
             list: [],
@@ -29,6 +33,9 @@ export default new Vuex.Store({
         uploadNotifications: [],
     },
     mutations: {
+        setTheme(state, themeName) {
+            state.theme = themeName;
+        },
         updateUserProfile(state, payload) {
             state.userProfile = payload.amount;
         },
@@ -52,6 +59,12 @@ export default new Vuex.Store({
         },
         setLastSelectedWorkflow(state, workflow) {
             state.lastSelectedWorkflow = workflow;
+        },
+        setUserPreference(state, { key, value }) {
+            if (!state.userPreferences) {
+                state.userPreferences = {};
+            }
+            state.userPreferences[key] = value;
         },
         setTempWorkflow(state, payload) {
             state.tempWorkflow.status = true;
@@ -115,7 +128,8 @@ export default new Vuex.Store({
                 removeItem: (key) => Cookies.remove(key),
             },
             reducer(state) {
-                return { ...state, uploadNotifications: [] };
+                const { theme, ...rest } = state;
+                return rest;
             },
         }),
     ],

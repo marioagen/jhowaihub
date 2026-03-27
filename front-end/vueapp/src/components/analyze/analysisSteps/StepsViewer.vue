@@ -34,7 +34,6 @@
         </button>
     </div>
 </template>
-
 <script>
     export default {
         name: "StepStepper",
@@ -109,7 +108,6 @@
         },
     };
 </script>
-
 <style scoped>
     .step-stepper-container {
         display: flex;
@@ -117,7 +115,7 @@
         justify-content: center;
         gap: 1rem;
         padding: 1rem;
-        background: white;
+        background: var(--color-card-content);
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }

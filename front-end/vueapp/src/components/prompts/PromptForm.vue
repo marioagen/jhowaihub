@@ -8,7 +8,7 @@
                 <div class="col-md-8 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
                         <button
-                            class="btn btn-sm p-0 me-3"
+                            class="btn btn-sm btn-back p-0 me-3"
                             @click="cancel"
                             type="button"
                         >
@@ -65,7 +65,7 @@
                                 </label>
                                 <Field
                                     name="name"
-                                    :rules="'required|max:50'"
+                                    :rules="'required|max:100'"
                                     v-slot="{ field, errorMessage }"
                                 >
                                     <input
@@ -464,5 +464,8 @@
         to {
             transform: rotate(360deg);
         }
+    }
+    .btn-back {
+        color: var(--color-body-content) !important;
     }
 </style>

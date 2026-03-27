@@ -9,9 +9,7 @@
                                 class="btn btn-outline-primary btn-table btn-sm table-btn"
                                 @click="returnToTable"
                             >
-                                <LucideIcon
-                                    icon="ArrowLeft"
-                                />
+                                <LucideIcon icon="ArrowLeft" />
                             </button>
                         </div>
                         <div class="col-10">
@@ -20,12 +18,8 @@
                                     {{ $t(formTitle) }}
                                 </h5>
                                 <p>
-                                    <small
-                                        class="text-muted"
-                                    >
-                                        {{
-                                            $t(formSubtitle)
-                                        }}
+                                    <small class="text-muted">
+                                        {{ $t(formSubtitle) }}
                                     </small>
                                 </p>
                             </div>
@@ -53,11 +47,7 @@
                         </h6>
                         <p>
                             <small class="text-muted">
-                                {{
-                                    $t(
-                                        "quizzes.basicInfoSubtitle"
-                                    )
-                                }}
+                                {{ $t("quizzes.basicInfoSubtitle") }}
                             </small>
                         </p>
                     </div>
@@ -68,11 +58,7 @@
                             </label>
                             <input
                                 class="form-control form-control-sm"
-                                :placeholder="
-                                    $t(
-                                        'quizzes.formNamePlaceholder'
-                                    )
-                                "
+                                :placeholder="$t('quizzes.formNamePlaceholder')"
                                 :required="true"
                                 v-model="form.title"
                             />
@@ -88,16 +74,10 @@
                                 :required="true"
                             >
                                 <option value="">
-                                    {{
-                                        $t(
-                                            "quizzes.formSelect"
-                                        )
-                                    }}
+                                    {{ $t("quizzes.formSelect") }}
                                 </option>
                                 <option
-                                    v-for="(
-                                        item, index
-                                    ) in docTypesList"
+                                    v-for="(item, index) in docTypesList"
                                     :key="index"
                                     :value="item.id"
                                 >
@@ -130,19 +110,11 @@
                 <div class="main-div shadow-sm">
                     <div>
                         <h6 class="mb-0">
-                            {{
-                                $t(
-                                    "quizzes.questionsSection.title"
-                                )
-                            }}
+                            {{ $t("quizzes.questionsSection.title") }}
                         </h6>
                         <p>
                             <small class="text-muted">
-                                {{
-                                    $t(
-                                        "quizzes.questionsSection.subtitle"
-                                    )
-                                }}
+                                {{ $t("quizzes.questionsSection.subtitle") }}
                             </small>
                         </p>
                     </div>
@@ -232,39 +204,26 @@
         },
         methods: {
             getDocTypes(docTypeCreated = null) {
-                if (
-                    docTypeCreated !== null &&
-                    docTypeCreated.duplicated === false
-                ) {
+                if (docTypeCreated !== null && docTypeCreated.duplicated === false) {
                     this.form.typeDocId = docTypeCreated.id;
                 }
                 TypesService.getTypesList()
                     .then((response) => {
                         if (response.error === undefined) {
-                            return (this.docTypesList =
-                                response);
+                            return (this.docTypesList = response);
                         }
                     })
-                    .finally(() =>
-                        this.$refs.TypesModal.close()
-                    );
+                    .finally(() => this.$refs.TypesModal.close());
             },
             getQuestions() {
                 this.isLoadingQuestions = true;
                 this.questionsList = [];
                 QuestionsService.getQuestionsList()
                     .then((response) => {
-                        for (
-                            let i = 0;
-                            i < response.length;
-                            i++
-                        ) {
+                        for (let i = 0; i < response.length; i++) {
                             var item = {
                                 id: response[i].id,
-                                text:
-                                    response[i].id +
-                                    " - " +
-                                    response[i].description,
+                                text: response[i].id + " - " + response[i].description,
                             };
                             this.questionsList.push(item);
                         }
@@ -275,15 +234,13 @@
             },
             setForm() {
                 if (!this.isEdit) return;
-                QuizzesService.getQuizzById(this.id).then(
-                    (response) => {
-                        this.form = {
-                            title: response.title,
-                            typeDocId: response.typeDoc.id,
-                            questions: response.questions,
-                        };
-                    }
-                );
+                QuizzesService.getQuizzById(this.id).then((response) => {
+                    this.form = {
+                        title: response.title,
+                        typeDocId: response.typeDoc.id,
+                        questions: response.questions,
+                    };
+                });
             },
             save() {
                 if (this.isEdit) {
@@ -295,62 +252,52 @@
                 var paramsData = {
                     title: this.form.title,
                     typeDocId: this.form.typeDocId,
-                    questionsId: this.form.questions.map(
-                        (obj) => obj.id
-                    ),
+                    questionsId: this.form.questions.map((obj) => obj.id),
                 };
 
-                QuizzesService.createQuizz(paramsData).then(
-                    (response) => {
-                        if (response.error === undefined) {
-                            this.$notify({
-                                title: "quizzes.title",
-                                message:
-                                    "quizzes.createSuccess",
-                                variant: "success",
-                                icon: "CircleCheckBig",
-                            });
-                            return this.returnToTable();
-                        }
+                QuizzesService.createQuizz(paramsData).then((response) => {
+                    if (response.error === undefined) {
                         this.$notify({
                             title: "quizzes.title",
-                            message: response.error,
-                            variant: "danger",
-                            icon: "CircleX",
+                            message: "quizzes.createSuccess",
+                            variant: "success",
+                            icon: "CircleCheckBig",
                         });
+                        return this.returnToTable();
                     }
-                );
+                    this.$notify({
+                        title: "quizzes.title",
+                        message: response.error,
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                });
             },
             editQuizz() {
                 var paramsData = {
                     id: parseInt(this.id),
                     title: this.form.title,
                     typeDocId: this.form.typeDocId,
-                    questionsId: this.form.questions.map(
-                        (obj) => obj.id
-                    ),
+                    questionsId: this.form.questions.map((obj) => obj.id),
                 };
 
-                QuizzesService.editQuizz(paramsData).then(
-                    (response) => {
-                        if (response.error === undefined) {
-                            this.$notify({
-                                title: "quizzes.title",
-                                message:
-                                    "quizzes.editSuccess",
-                                variant: "success",
-                                icon: "CircleCheckBig",
-                            });
-                            return this.returnToTable();
-                        }
+                QuizzesService.editQuizz(paramsData).then((response) => {
+                    if (response.error === undefined) {
                         this.$notify({
                             title: "quizzes.title",
-                            message: response.error,
-                            variant: "danger",
-                            icon: "CircleX",
+                            message: "quizzes.editSuccess",
+                            variant: "success",
+                            icon: "CircleCheckBig",
                         });
+                        return this.returnToTable();
                     }
-                );
+                    this.$notify({
+                        title: "quizzes.title",
+                        message: response.error,
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                });
             },
             resetForm() {
                 this.form = {
@@ -373,14 +320,10 @@
         },
         computed: {
             formTitle() {
-                return this.isEdit
-                    ? "quizzes.formEdit.title"
-                    : "quizzes.formCreate.title";
+                return this.isEdit ? "quizzes.formEdit.title" : "quizzes.formCreate.title";
             },
             formSubtitle() {
-                return this.isEdit
-                    ? "quizzes.formEdit.subtitle"
-                    : "quizzes.formCreate.subtitle";
+                return this.isEdit ? "quizzes.formEdit.subtitle" : "quizzes.formCreate.subtitle";
             },
         },
         created() {
@@ -409,12 +352,5 @@
 
     .container-fluid {
         padding: 0 13px;
-    }
-
-    .main-div {
-        border: 1px solid #d3d3d3;
-        border-radius: 8px;
-        background: white;
-        padding: 20px 24px;
     }
 </style>

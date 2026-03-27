@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -10,14 +10,18 @@ namespace WoopiAiHub.Domain.Models
         [Column("Enable", TypeName = "bit")]
         public bool Enable { get; private set; }
 
+        [Column("Description", TypeName = "varchar(500)")]
+        public string Description { get; private set; } = string.Empty;
+
         public virtual ICollection<Step> Steps { get; set; } = [];
         public virtual ICollection<Team> Teams { get; set; } = [];
         public virtual ICollection<Document> Documents { get; set; } = [];
 
-        public Workflow(int id, DateTime created, List<Team> teams, string name)
+        public Workflow(int id, DateTime created, List<Team> teams, string name, string? description = null)
             : base(id, created)
         {
             Name = name;
+            Description = description ?? string.Empty;
             Steps = new List<Step>();
             Teams = teams;
             Enable = true;
@@ -63,9 +67,10 @@ namespace WoopiAiHub.Domain.Models
             }
         }
                 
-        public void Update(string name)
+        public void Update(string name, string? description = null)
         {
             Name = name;
-        }   
+            Description = description ?? string.Empty;
+        }
     }
 }

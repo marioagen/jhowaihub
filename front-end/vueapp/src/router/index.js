@@ -41,6 +41,8 @@ import TemplatePage from "@/pages/templates/index.vue";
 import TemplateDetail from "@/pages/templates/templateDetail.vue";
 import TemplateConfiguration from "@/pages/templates/templateConfiguration.vue";
 
+import AuditorPage from "@/pages/auditor.vue";
+
 import PromptSelector from "@/components/flow/PromptSelector.vue";
 
 import { hasPermission } from "@/utils/permissions";
@@ -291,7 +293,7 @@ const routes = [
         component: WorkflowPage,
         meta: {
             layout: "default",
-            module: "WorkflowPage",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -302,7 +304,7 @@ const routes = [
         component: NewWorkflow,
         meta: {
             layout: "default",
-            module: "WorkflowPage",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -313,7 +315,7 @@ const routes = [
         component: EditWorkflow,
         meta: {
             layout: "default",
-            module: "WorkflowPage",
+            module: "WorkflowManagement",
             action: "View",
         },
         beforeEnter: authenticate,
@@ -447,6 +449,17 @@ const routes = [
         meta: {
             layout: "default",
             module: "Workflow",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/auditor",
+        name: "Auditor",
+        component: AuditorPage,
+        meta: {
+            layout: "default",
+            module: "Auditor",
             action: "View",
         },
         beforeEnter: authenticate,

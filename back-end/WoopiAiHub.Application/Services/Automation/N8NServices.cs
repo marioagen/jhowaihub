@@ -1,8 +1,6 @@
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
-using WoopiAiHub.Domain.Enum;
-using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
@@ -14,20 +12,17 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IDocumentHistoryRepository _documentHistoryRepository;
-        private readonly IWorkflowRepository _workflowRepository;
-        private readonly IHubNotifier _hubNotifier;
+        private readonly IExecutionServices _executionServices;
 
         public N8NServices(IStepToolOutputRepository stepToolOutputRepository,
                            IStepToolExecutionRepository stepToolExecutionRepository,
                            IDocumentHistoryRepository documentHistoryRepository,
-                           IWorkflowRepository workflowRepository,
-                           IHubNotifier hubNotifier)
+                           IExecutionServices executionServices)
         {
             _stepToolOutputRepository = stepToolOutputRepository;
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _documentHistoryRepository = documentHistoryRepository;
-            _workflowRepository = workflowRepository;
-            _hubNotifier = hubNotifier;
+            _executionServices = executionServices;
         }
 
         /// <summary>
@@ -62,28 +57,9 @@ namespace WoopiAiHub.Application.Services.Automation
             var documentHistory = new DocumentHistory(execution.Card!.DocumentId, "N8N", content.JsonToHumanReadable(), 0, DateTime.Now);
             _documentHistoryRepository.Create(documentHistory);
 
-            await UpdateExecutionAsync(execution!, automationOutputDto.Email!);
+            await _executionServices.HandleExecutionProgress(execution, automationOutputDto.Email!);
 
             return automationServicesDto;
-        }
-
-        /// <summary>
-        /// Updates StepToolExecution status and send notification 
-        /// </summary>
-        /// <param name="execution"></param>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        private async Task UpdateExecutionAsync(StepToolExecution execution, string email)
-        {
-            var count = await _stepToolExecutionRepository.ExecutionsByStepIdCountAsync(execution.StepTool!.StepId,
-                                                                                        execution.CardId);
-            var percent = (count / execution.StepTool.Order) * 100;
-
-            execution.UpdateStatusExecution(StatusExecution.Ready);
-            await _stepToolExecutionRepository.UpdateAsync(execution);
-
-            var tool = await _workflowRepository.FindToolByStepToolId(execution.StepToolId);
-            await _hubNotifier.CardProgessAsync(email, execution.CardId, percent, execution.StepTool.StepId, tool != null ? tool.Name : string.Empty);
         }
     }
 }

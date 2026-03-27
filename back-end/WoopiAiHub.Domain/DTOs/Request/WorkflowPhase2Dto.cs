@@ -8,5 +8,6 @@ namespace WoopiAiHub.Domain.DTOs.Request
         public int WorkflowId { get; set; }
         public ICollection<StepPhase2Dto> Steps { get; set; } = [];
         public bool HasStepTool { get; set; } = false;
+        public bool ResetDocuments { get; set; } = false;
     }
 }

@@ -1,7 +1,7 @@
 <template>
     <div
         class="doc-view-scroll"
-        :class="documentView === 'both' ? 'col-md-6' : 'col-12'"
+        :class="fillContainer ? 'w-100' : documentView === 'both' ? 'col-md-6' : 'col-12'"
     >
         <div
             class="mb-2"
@@ -106,6 +106,7 @@
 </template>
 <script>
     import DocumentsServices from "@/services/documents/DocumentsServices.js";
+    import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices.js";
     import LogService from "@/services/log/logService";
 
     const VIEW_MODE_PDF = "pdf";
@@ -119,6 +120,10 @@
             documentView: {
                 type: String,
                 required: true,
+            },
+            fillContainer: {
+                type: Boolean,
+                default: false,
             },
         },
         data() {
@@ -172,7 +177,7 @@
                 this.viewMode = VIEW_MODE_TEXT;
                 if (this.textContent == "") {
                     this.loadingText = true;
-                    DocumentsServices.getOcrText(this.documentId)
+                    DocumentMetadataServices.getOcrText(this.documentId)
                         .then((response) => {
                             if (response.error !== undefined) {
                                 this.loadingText = false;
@@ -192,7 +197,7 @@
                 }
             },
             checkOcrAvailability() {
-                DocumentsServices.getOcrText(this.documentId)
+                DocumentMetadataServices.getOcrText(this.documentId)
                     .then((response) => {
                         if (response && response.hasOcr) {
                             this.hasOcrText = true;
@@ -220,7 +225,7 @@
                     Embeddings_model_name: "",
                 };
                 this.loadingNormalize = true;
-                DocumentsServices.normalizeDocument(paramsReq)
+                DocumentMetadataServices.normalizeDocument(paramsReq)
                     .then((response) => {
                         if (response.error !== undefined) {
                             window.onbeforeunload = null;
@@ -261,12 +266,11 @@
     .view-pdf {
         width: 100% !important;
         height: auto !important;
-        max-height: 65vh;
+        max-height: calc(100vh - 233px);
         min-height: 300px;
         aspect-ratio: 1/1.414;
         display: flex;
         justify-content: center;
-        align-items: center;
     }
     @media (max-width: 768px) {
         .view-pdf {
@@ -274,12 +278,18 @@
         }
     }
 
-    .view-pdf object,
     .view-pdf embed {
         width: 100% !important;
         height: 100% !important;
         max-width: 100%;
         max-height: 70vh;
+        display: block;
+    }
+
+    .view-pdf object {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100%;
         display: block;
     }
 

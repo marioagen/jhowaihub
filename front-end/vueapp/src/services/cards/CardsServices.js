@@ -73,4 +73,28 @@ export default {
                 };
             });
     },
+    getCardsByBatch(documentBatchId) {
+        return api
+            .get(`/Card/Batch/${documentBatchId}`)
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
+                return {
+                    error: e,
+                };
+            });
+    },
+    reprocessCard(cardId) {
+        return api
+            .put(`/Card/${cardId}/Reprocess`)
+            .then((result) => {
+                return result.data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
 };

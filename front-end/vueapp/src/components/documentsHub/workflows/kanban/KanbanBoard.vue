@@ -14,7 +14,7 @@
                         <span>
                             {{ step.name }}
                             <span class="badge">
-                                {{ step.cards.length }}
+                                {{ toFinalizeCardLength(step.cards) }}
                             </span>
                         </span>
                         <div
@@ -54,21 +54,26 @@
                             <div
                                 v-for="card in step.cards"
                                 :key="card.id"
-                                class="card-body"
                                 :id="card.id"
                             >
-                                <KanbanCard
-                                    :dataCard="card"
-                                    :dataStep="step"
-                                    :isFirstStep="step.order === minOrder"
-                                    :isLoading="isLoading"
-                                    :isLastStep="step.order === maxOrder"
-                                    @reload="reloadList"
-                                    @cardMoved="handleCardMoved"
-                                    @cardUpdated="handleCardUpdated"
-                                    label="common.analyze"
-                                    :users="users"
-                                />
+                                <div
+                                    v-if="showFinalized(card.status.id, step)"
+                                    class="card-body"
+                                >
+                                    <KanbanCard
+                                        :dataCard="card"
+                                        :dataStep="step"
+                                        :isFirstStep="step.order === minOrder"
+                                        :isLoading="isLoading"
+                                        :isLastStep="isLastStep(step)"
+                                        :finalizeStatusId="finalizeStatusId"
+                                        @reload="reloadList"
+                                        @cardMoved="handleCardMoved"
+                                        @cardUpdated="handleCardUpdated"
+                                        label="common.analyze"
+                                        :users="users"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -79,6 +84,7 @@
 </template>
 <script>
     import KanbanCard from "@/components/documentsHub/workflows/kanban/KanbanCard.vue";
+    import StatusService from "@/services/status/StatusService";
     export default {
         name: "KanbanBoard",
         components: {
@@ -121,6 +127,7 @@
             customClass: "",
             stepsList: [],
             isLastColumnVisible: true,
+            finalizeStatusId: null,
         }),
         computed: {
             minOrder() {
@@ -164,12 +171,30 @@
                 this.isLastColumnVisible = !this.isLastColumnVisible;
                 localStorage.setItem("kanban_last_column_visibility", this.isLastColumnVisible);
             },
+            isLastStep(step) {
+                return step.order === this.maxOrder;
+            },
+            showFinalized(id, step) {
+                if (id == 6) return false;
+                if (this.isLastStep(step)) return this.isLastColumnVisible;
+                return true;
+            },
+            toFinalizeCardLength(cards) {
+                return cards.filter((card) => card.status.id !== 6).length;
+            },
         },
-        mounted() {
+        async mounted() {
             this.setCard();
             const savedVisibility = localStorage.getItem("kanban_last_column_visibility");
             if (savedVisibility !== null) {
                 this.isLastColumnVisible = savedVisibility === "true";
+            }
+            const statusResponse = await StatusService.getStatus();
+            if (statusResponse?.error === undefined && Array.isArray(statusResponse)) {
+                const finalize = statusResponse.find(
+                    (s) => s.name && s.name.toLowerCase() === "finalize"
+                );
+                if (finalize) this.finalizeStatusId = finalize.id;
             }
         },
     };
@@ -211,43 +236,39 @@
     }
 
     .first-steps {
-        background-color: #dbe9fc;
+        background-color: var(--color-bg-kanban-primary) !important;
     }
 
     .first-steps > span > span {
-        background-color: #a7bad3 !important;
+        background-color: var(--color-bg-kanban-primary-accent) !important;
     }
 
     .last-step {
-        background-color: #dcfce7;
+        background-color: var(--color-bg-kanban-success) !important;
     }
 
     .last-step > span > span {
-        background-color: #a1cfb1 !important;
-    }
-    .bg-primary {
-        background-color: #dbeafe !important;
-        color: #2b7fff !important;
+        background-color: var(--color-bg-kanban-success-accent) !important;
     }
 
     .bg-primary {
-        background-color: #dbeafe !important;
-        color: #2b7fff !important;
+        background-color: var(--color-bg-kanban-primary) !important;
+        color: var(--color-kanban-primary) !important;
     }
 
     .bg-warning {
-        background-color: #fef9c2 !important;
-        color: #a65f00 !important;
+        background-color: var(--color-bg-kanban-warning) !important;
+        color: var(--color-kanban-warning) !important;
     }
 
     .bg-danger {
-        background-color: #ffedd4 !important;
-        color: #ca3500 !important;
+        background-color: var(--color-bg-kanban-danger) !important;
+        color: var(--color-kanban-danger) !important;
     }
 
     .bg-success {
-        background-color: #d0fae5 !important;
-        color: #007a55 !important;
+        background-color: var(--color-bg-kanban-success) !important;
+        color: var(--color-kanban-success) !important;
     }
 
     @media (min-width: 768px) and (max-width: 1024px) {
@@ -281,6 +302,6 @@
 
     .badge {
         color: unset;
-        background-color: #ebebeb;
+        background-color: var(--color-hover-transfer) !important;
     }
 </style>

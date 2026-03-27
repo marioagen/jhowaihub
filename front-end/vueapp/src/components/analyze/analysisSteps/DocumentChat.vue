@@ -175,9 +175,10 @@
     <QuestionsHistoryModal ref="QuestionsHistoryModal" />
 </template>
 <script>
-    import DocumentServices from "@/services/documents/DocumentsServices";
+    import DocumentQuestionnaireServices from "@/services/documents/DocumentQuestionnaireServices";
+    import DocumentHistoryServices from "@/services/documents/DocumentHistoryServices";
     import QuizzesService from "@/services/quizzes/QuizzesService";
-    import QuestionsHistoryModal from "@/components/analyze/QuestionsHistoryModal.vue";
+    import QuestionsHistoryModal from "@/components/analyze/modals/QuestionsHistoryModal.vue";
 
     export default {
         name: "DocumentChat",
@@ -224,8 +225,8 @@
                         isAscending: false,
                         colType: 2,
                     });
-                    if (result.length > 0) {
-                        this.questionnaires = result;
+                    if (result.content) {
+                        this.questionnaires = result.content;
                     }
                 } catch (error) {
                     this.$notify({
@@ -266,13 +267,13 @@
                         idQuestionnaire: this.selectedQuestionnaireId,
                     };
 
-                    const response = await DocumentServices.applyQuestionnaire(params);
+                    const response = await DocumentQuestionnaireServices.applyQuestionnaire(params);
                     if (response.error) {
                         throw new Error("Failed to apply questionnaire");
                     }
 
                     this.appliedQuestionnaireId = this.selectedQuestionnaireId;
-                    const historyResponse = await DocumentServices.getDocumentHistory(
+                    const historyResponse = await DocumentHistoryServices.getDocumentHistory(
                         this.documentId
                     );
                     if (historyResponse.error) {
@@ -346,7 +347,7 @@
                     input: this.question,
                 };
                 try {
-                    await DocumentServices.inputDocument(params).then((response) => {
+                    await DocumentQuestionnaireServices.inputDocument(params).then((response) => {
                         this.output = response.data;
                     });
                 } catch (error) {
@@ -367,7 +368,6 @@
                 this.output = "";
             },
             openQuestionsHistoryModal() {
-                console.log("Temp button clicked");
                 this.$refs.QuestionsHistoryModal.open(this.documentId);
             },
         },
@@ -384,7 +384,7 @@
     .chat-toggle-button {
         width: 100%;
         padding: 0.75rem 1rem;
-        background: #f8f9fa;
+        background: var(--color-card-content);
         border: 2px dashed #0073e6;
         border-radius: 8px;
         color: #0073e6;
@@ -399,7 +399,7 @@
     }
 
     .chat-toggle-button:hover {
-        background: #e7f3ff;
+        background: var(--color-sidebar-li-collapsed-hover) !important;
         border-color: #005bb5;
     }
 
@@ -408,7 +408,7 @@
     }
 
     .chat-panel {
-        background: white;
+        background: var(--color-card-content) !important;
         border: 2px solid #0073e6;
         border-radius: 8px;
         padding: 1rem;
@@ -431,7 +431,6 @@
     .chat-toggle-button {
         width: 100%;
         padding: 0.75rem 1rem;
-        background: #f8f9fa;
         border: 2px dashed #0073e6;
         border-radius: 8px;
         color: #0073e6;
@@ -466,7 +465,7 @@
 
     .input-label {
         font-size: 0.9rem;
-        color: #333;
+        color: var(--color-body-content);
         font-weight: 500;
         margin: 0;
     }
@@ -474,12 +473,14 @@
     .chat-textarea {
         width: 100%;
         padding: 0.75rem;
-        border: 1px solid #ddd;
+        border: 1px solid var(--color-border-form-control);
         border-radius: 6px;
         font-size: 0.9rem;
         font-family: inherit;
         resize: vertical;
         transition: border-color 0.3s ease;
+        background-color: var(--color-card-content);
+        color: var(--color-body-content) !important;
     }
 
     .chat-textarea:focus {
@@ -521,7 +522,7 @@
         gap: 0.75rem;
         margin-bottom: 1.5rem;
         padding-bottom: 1.5rem;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--color-border-form-control);
     }
 
     .questionnaire-controls {
@@ -533,14 +534,15 @@
     .questionnaire-select {
         flex: 1;
         padding: 0.75rem;
-        border: 1px solid #ddd;
+        border: 1px solid var(--color-border-form-control);
         border-radius: 6px;
         font-size: 0.9rem;
         font-family: inherit;
-        background: white;
+        background: var(--color-card-content);
         cursor: pointer;
         transition: border-color 0.3s ease;
         width: 50%;
+        color: var(--color-body-content) !important;
     }
 
     .questionnaire-select:focus {
@@ -593,19 +595,19 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        background: #f8f9fa;
-        border: 1px solid #ddd;
+        background: var(--color-card-content);
+        border: 1px solid var(--color-border-form-control);
         border-radius: 6px;
-        color: #666;
+        color: var(--color-body-content);
         font-size: 0.85rem;
         cursor: pointer;
         transition: all 0.3s ease;
     }
 
     .close-results-button:hover {
-        background: #e9ecef;
-        border-color: #ccc;
-        color: #333;
+        background: var(--color-card-content-hover);
+        border-color: var(--color-border-form-control);
+        color: var(--color-body-content);
     }
 
     .close-results-button i {
@@ -643,8 +645,8 @@
     }
 
     .result-card {
-        background: #f8f9fa;
-        border: 1px solid #e0e0e0;
+        background: var(--color-card-content);
+        border: 1px solid var(--color-border-form-control);
         border-radius: 6px;
         padding: 1rem;
         transition: box-shadow 0.3s ease;
@@ -655,13 +657,13 @@
     }
 
     .result-question {
-        color: #333;
+        color: var(--color-body-content);
         margin-bottom: 0.5rem;
         font-size: 0.95rem;
     }
 
     .result-answer {
-        color: #666;
+        color: var(--color-body-content);
         font-size: 0.9rem;
         line-height: 1.5;
         white-space: pre-wrap;
@@ -674,8 +676,8 @@
         gap: 0.25rem;
         margin-left: 0.5rem;
         padding: 0.25rem 0.5rem;
-        background: #d4edda;
-        color: #155724;
+        background: var(--color-bg-badge-confirmed);
+        color: var(--color-text-badge-confirmed);
         border-radius: 4px;
         font-size: 0.75rem;
         font-weight: 500;
@@ -683,7 +685,6 @@
 
     @media (max-width: 768px) {
         .chat-panel {
-            background: white;
             border: 2px solid #0073e6;
             border-radius: 8px;
             padding: 1rem;
@@ -714,7 +715,6 @@
 
         .input-label {
             font-size: 0.9rem;
-            color: #333;
             font-weight: 500;
             margin: 0;
         }
@@ -997,7 +997,7 @@
         font-weight: 600;
         margin-bottom: 1rem;
         padding-bottom: 0.75rem;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--color-border-form-control);
         position: relative;
     }
 

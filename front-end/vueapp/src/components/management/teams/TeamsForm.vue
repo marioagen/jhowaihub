@@ -5,31 +5,50 @@
                 <div class="col-6">
                     <div class="row">
                         <div class="col-1">
-                            <button class="btn btn-outline-primary btn-table btn-sm table-btn" @click="returnToTable">
+                            <button
+                                class="btn btn-outline-primary btn-table btn-sm table-btn"
+                                @click="returnToTable"
+                            >
                                 <LucideIcon icon="ArrowLeft" />
                             </button>
                         </div>
                         <div class="col-10">
                             <div>
                                 <h5 class="mb-0 fw-bold">{{ $t(formTitle) }}</h5>
-                                <p><small class="text-muted">{{ $t(formSubtitle) }}</small></p>
+                                <p>
+                                    <small class="text-muted">{{ $t(formSubtitle) }}</small>
+                                </p>
                             </div>
                         </div>
                     </div>
-                </div>            
+                </div>
                 <div class="col-auto ms-auto">
-                    <button class="btn btn-primary btn-sm" @click="save">
-                        <LucideIcon icon="Save" :size="15" />
+                    <button
+                        class="btn btn-primary btn-sm"
+                        @click="save"
+                    >
+                        <LucideIcon
+                            icon="Save"
+                            :size="15"
+                        />
                         {{ $t("common.save") }}
                     </button>
                 </div>
             </div>
             <div class="row mt-1">
                 <div class="main-div shadow-sm">
-                    <Form @submit="save" ref="formRef">
+                    <Form
+                        @submit="save"
+                        ref="formRef"
+                    >
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="teamName" class="form-label fw-semibold mb-0">{{ $t("management.teams.teamName") }}</label>
+                                <label
+                                    for="teamName"
+                                    class="form-label fw-semibold mb-0"
+                                >
+                                    {{ $t("management.teams.teamName") }}
+                                </label>
                                 <Field
                                     type="text"
                                     class="form-control form-control-sm"
@@ -41,7 +60,10 @@
                                     :placeholder="$t('management.teams.typeTeamName')"
                                     :rules="'required|min:3|max:100'"
                                 />
-                                <ErrorMessage name="teamName" class="invalid-feedback d-block" />
+                                <ErrorMessage
+                                    name="teamName"
+                                    class="invalid-feedback d-block"
+                                />
                             </div>
                             <SelectionListComponent
                                 :id="'profiles'"
@@ -50,6 +72,7 @@
                                 :labelSearch="'management.profiles.searchProfiles'"
                                 :items="profilesList"
                                 :loading="isLoadingProfiles"
+                                chip-icon="ShieldCheck"
                                 v-model:selectedItems="selectedProfiles"
                             />
                             <SelectionListComponent
@@ -71,7 +94,10 @@
                                             class="btn btn-sm btn-outline-secondary fw-semibold"
                                             @click="showUserSection"
                                         >
-                                            <LucideIcon :icon="'UserPlus'" :size="16" />
+                                            <LucideIcon
+                                                :icon="'UserPlus'"
+                                                :size="16"
+                                            />
                                             {{ $t("management.users.createBtn") }}
                                         </button>
                                     </div>
@@ -80,12 +106,21 @@
                         </div>
                     </Form>
                 </div>
-                <div v-if="showUsers" class="main-div shadow-sm mt-2">
-                    <Form @submit="createUser" ref="formRef">
+                <div
+                    v-if="showUsers"
+                    class="main-div shadow-sm mt-2"
+                >
+                    <Form
+                        @submit="createUser"
+                        ref="formRef"
+                    >
                         <div class="row">
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label for="userName" class="form-label fw-semibold mb-0">
+                                    <label
+                                        for="userName"
+                                        class="form-label fw-semibold mb-0"
+                                    >
                                         {{ $t("common.name") }}
                                     </label>
                                     <Field
@@ -99,12 +134,18 @@
                                         v-model="userData.name"
                                         :placeholder="$t('management.users.typeUserName')"
                                     />
-                                    <ErrorMessage name="userName" class="invalid-feedback d-block" />
+                                    <ErrorMessage
+                                        name="userName"
+                                        class="invalid-feedback d-block"
+                                    />
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label for="userEmail" class="form-label fw-semibold mb-0">
+                                    <label
+                                        for="userEmail"
+                                        class="form-label fw-semibold mb-0"
+                                    >
                                         {{ $t("management.users.email") }}
                                     </label>
                                     <Field
@@ -119,13 +160,19 @@
                                         :placeholder="$t('management.users.typeUserEmail')"
                                         @blur="validateEmailBackend"
                                     />
-                                    <ErrorMessage name="userEmail" class="invalid-feedback d-block" />
+                                    <ErrorMessage
+                                        name="userEmail"
+                                        class="invalid-feedback d-block"
+                                    />
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <label for="userPassword" class="form-label fw-semibold mb-0">
+                                <label
+                                    for="userPassword"
+                                    class="form-label fw-semibold mb-0"
+                                >
                                     {{ $t("management.users.password") }}
                                 </label>
                                 <PasswordInputComponent
@@ -136,7 +183,10 @@
                                 />
                             </div>
                             <div class="col-6">
-                                <label for="userConfirmedPassword" class="form-label fw-semibold mb-0">
+                                <label
+                                    for="userConfirmedPassword"
+                                    class="form-label fw-semibold mb-0"
+                                >
                                     {{ $t("management.users.confirmedPassword") }}
                                 </label>
                                 <PasswordInputComponent
@@ -149,7 +199,10 @@
                         </div>
                         <div class="col-auto ms-auto">
                             <button class="btn btn-primary btn-sm mt-2">
-                                <LucideIcon icon="Save" :size="15" />
+                                <LucideIcon
+                                    icon="Save"
+                                    :size="15"
+                                />
                                 {{ $t("common.save") }}
                             </button>
                         </div>
@@ -159,7 +212,6 @@
         </div>
     </main>
 </template>
-
 <script>
     import { Form, Field, ErrorMessage } from "vee-validate";
     import api from "@/services/api";
@@ -187,7 +239,7 @@
                 type: Number,
                 required: false,
                 default: null,
-            }
+            },
         },
         data() {
             return {
@@ -211,7 +263,9 @@
                 return this.isEdit ? "management.teams.editTitle" : "management.teams.createTitle";
             },
             formSubtitle() {
-                return this.isEdit ? "management.teams.editSubtitle" : "management.teams.createSubtitle";
+                return this.isEdit
+                    ? "management.teams.editSubtitle"
+                    : "management.teams.createSubtitle";
             },
             filteredUsers() {
                 if (!this.searchTerm) {
@@ -263,7 +317,7 @@
                     page: 1,
                     isAscending: this.isAscending,
                 };
-                
+
                 this.isLoadingProfiles = true;
                 api.get("/Profile/Paged", { params: paramsReq })
                     .then(({ data }) => {
@@ -292,29 +346,33 @@
                     userIds: this.selectedUsers,
                     profileIds: this.selectedProfiles,
                 };
-                
+
                 const request = team.id === 0 ? api.post("Team", team) : api.put("Team", team);
-                request.then(() => {
+                request
+                    .then(() => {
                         this.$notify({
-                            title: 'management.teams.title',
-                            message: 'management.teams.saveSuccess',
-                            variant: 'success',
-                            icon: 'CircleCheckBig',
+                            title: "management.teams.title",
+                            message: "management.teams.saveSuccess",
+                            variant: "success",
+                            icon: "CircleCheckBig",
                         });
                         this.returnToTable();
                     })
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
-                        let errorMessage = "management.teams.errors.invalid";
+                        let notifyMessage = this.$t("management.teams.errors.invalid");
                         if (errorCode && errorCode === ErrorCode.Duplicated) {
-                            this.$refs.formRef.setFieldError("teamName", this.$t("management.teams.errors.duplicated"));
-                            errorMessage = "management.teams.errors.duplicated";
-                        } 
+                            this.$refs.formRef.setFieldError(
+                                "teamName",
+                                this.$t("management.teams.errors.duplicated")
+                            );
+                            notifyMessage = this.$t("management.teams.errors.duplicated");
+                        }
                         this.$notify({
-                            title: 'management.teams.title',
-                            message: errorMessage,
-                            variant: 'danger',
-                            icon: 'CircleX',
+                            title: this.$t("management.teams.title"),
+                            message: notifyMessage,
+                            variant: "danger",
+                            icon: "CircleX",
                         });
                     });
             },
@@ -326,13 +384,12 @@
                 this.searchTerm = "";
             },
             setupEdit() {
-                if(!this.isEdit) return;
-                TeamsService.getTeamById(this.id)
-                    .then((response) => {
-                        this.teamData = response;
-                        this.selectedUsers = response.users.map((u) => u.id);
-                        this.selectedProfiles = response.profiles.map(p => p.id);
-                    });
+                if (!this.isEdit) return;
+                TeamsService.getTeamById(this.id).then((response) => {
+                    this.teamData = response;
+                    this.selectedUsers = response.users.map((u) => u.id);
+                    this.selectedProfiles = response.profiles.map((p) => p.id);
+                });
             },
             showUserSection() {
                 this.showUsers = !this.showUsers;
@@ -349,44 +406,42 @@
                     teamIds: [],
                 };
 
-                api.post("User", user).then(() => {
+                api.post("User", user)
+                    .then(() => {
                         this.$notify({
-                            title: 'management.users.title',
-                            message: 'management.users.saveSuccess',
-                            variant: 'success',
-                            icon: 'CircleCheckBig',
+                            title: "management.users.title",
+                            message: "management.users.saveSuccess",
+                            variant: "success",
+                            icon: "CircleCheckBig",
                         });
                         this.getUsers();
                         this.closeUserSection();
                     })
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
-                        let errorMessage = "management.teams.errors.invalid";
+                        const detail = (err?.response?.data?.detail || "").toLowerCase();
+                        let notifyMessage = this.$t("management.users.errors.saveError");
                         if (errorCode && errorCode === ErrorCode.Duplicated) {
-                            this.$refs.formRef.setFieldError("teamName", this.$t("management.teams.errors.duplicated"));
-                            errorMessage = "management.teams.errors.duplicated";
-                        } 
+                            notifyMessage = detail.includes("name")
+                                ? this.$t("management.users.errors.duplicated")
+                                : this.$t("management.users.errors.emailDuplicated");
+                        }
                         this.$notify({
-                            title: 'management.users.title',
-                            message: errorMessage,
-                            variant: 'danger',
-                            icon: 'CircleX',
+                            title: this.$t("management.users.title"),
+                            message: notifyMessage,
+                            variant: "danger",
+                            icon: "CircleX",
                         });
                     });
             },
         },
     };
 </script>
-
 <style scoped>
     .container-fluid {
         padding: 0 13px;
     }
-
-    .main-div {
-        border: 1px solid #d3d3d3;
-        border-radius: 8px;
-        background: white;
-        padding: 20px 24px;
+    .border-top {
+        border-top: 1px solid var(--color-border-form-control) !important;
     }
 </style>

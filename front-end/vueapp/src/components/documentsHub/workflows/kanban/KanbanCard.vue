@@ -1,10 +1,27 @@
 <template>
-    <div class="card">
+    <div
+        class="card"
+        :class="{ 'batch-card': dataCard.isBatchParent }"
+    >
         <div class="card-content">
             <div class="card-body pb-0">
                 <div class="mb-1 title-text">
+                    <LucideIcon
+                        v-if="dataCard.isBatchParent"
+                        icon="Files"
+                        :size="16"
+                        class="batch-icon me-1"
+                    />
                     {{ truncateText(dataCard.name) }}
                     <div
+                        v-if="isCardRejected || isCardFailed"
+                        class="badge fr flex-shrink-1 mt-1"
+                        :style="badgeStyle(dataCard.status.color)"
+                    >
+                        {{ $t("workflow.statusList." + dataCard.status.name.toLowerCase()) }}
+                    </div>
+                    <div
+                        v-else
                         class="badge fr flex-shrink-1 mt-1"
                         :style="badgeStyle(dataStep.status.color)"
                     >
@@ -83,7 +100,7 @@
             >
                 <div
                     class="mb-2 d-flex justify-content-between align-items-center flex-wrap"
-                    v-if="!showLoading"
+                    v-if="!showLoading && !isCardFailed"
                 >
                     <div class="d-flex align-items-center gap-2">
                         <button
@@ -123,7 +140,7 @@
                             <LucideIcon
                                 icon="ChevronRight"
                                 :size="16"
-                                class="me-1"
+                                class="me-1 text-muted"
                                 v-if="!isLoadingAnalysis"
                             />
                             <div
@@ -156,12 +173,12 @@
                                     <LucideIcon
                                         icon="ChevronRight"
                                         :size="15"
-                                        class="ml-2 icon-closed"
+                                        class="ml-2 icon-closed text-muted"
                                     />
                                     <LucideIcon
                                         icon="ChevronDown"
                                         :size="15"
-                                        class="ml-2 icon-open"
+                                        class="ml-2 icon-open text-muted"
                                     />
                                 </button>
                                 <ul class="dropdown-menu p-2 users-list">
@@ -222,6 +239,32 @@
                     </div>
                 </div>
                 <div
+                    class="mb-2 d-flex justify-content-between align-items-center flex-wrap"
+                    v-if="!showLoading && isCardFailed"
+                >
+                    <div class="d-flex align-items-center gap-1">
+                        <LucideIcon
+                            icon="XCircle"
+                            :size="16"
+                            class="text-danger"
+                        />
+                        <span class="text-danger fw-bold">
+                            {{ $t("card.executionFailed") }}
+                        </span>
+                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-primary"
+                        @click.stop="reprocessCard"
+                    >
+                        <LucideIcon
+                            icon="RefreshCcwDot"
+                            :size="16"
+                        />
+                        {{ $t("card.reprocess") }}
+                    </button>
+                </div>
+                <div
                     class="cover"
                     v-if="showLoading"
                 >
@@ -274,7 +317,6 @@
 </template>
 <script>
     import CardsServices from "@/services/cards/CardsServices";
-    import StatusService from "@/services/status/StatusService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import dates from "@/helpers/date";
 
@@ -291,7 +333,6 @@
             signalrEventStatusChanged: "StatusChanged",
             userSearchText: "",
             filteredUsers: [],
-            finalizeStatusId: null,
         }),
         props: {
             dataCard: {
@@ -318,6 +359,11 @@
                 type: [Array, Object],
                 required: true,
                 default: () => {},
+            },
+            finalizeStatusId: {
+                type: Number,
+                required: false,
+                default: null,
             },
         },
         methods: {
@@ -482,20 +528,17 @@
                 if (!text) return "";
                 return text.length > 25 ? text.substring(0, 25) + "..." : text;
             },
+            async reprocessCard() {
+                await CardsServices.reprocessCard(this.dataCard.id);
+                this.reloadList();
+            },
         },
-        async mounted() {
+        mounted() {
             this.setUsers();
-            const statusResponse = await StatusService.getStatus();
-            if (statusResponse?.error === undefined && Array.isArray(statusResponse)) {
-                const finalize = statusResponse.find(
-                    (s) => s.name && s.name.toLowerCase() === "finalize"
-                );
-                if (finalize) this.finalizeStatusId = finalize.id;
-            }
         },
         computed: {
             showLoading() {
-                return this.dataCard.percentage < 100;
+                return !this.isCardFailed && this.dataCard.percentage < 100;
             },
             isAdmin() {
                 return this.$store.state.userProfile.isAdmin;
@@ -510,6 +553,12 @@
                 if (!this.dataCard?.toolName) return "";
                 const toolName = this.dataCard.toolName.trim();
                 return toolName.length > 10 ? toolName.substring(0, 10) + "..." : toolName;
+            },
+            isCardRejected() {
+                return this.dataCard.status.name.toLowerCase() === "rejected";
+            },
+            isCardFailed() {
+                return this.dataCard.status.name.toLowerCase() === "fail";
             },
         },
     };
@@ -558,6 +607,7 @@
         padding: var(--kanban-card-padding) !important;
         font-size: var(--kanban-card-text-size) !important;
     }
+
     .progress-content .progress {
         height: 10px;
     }
@@ -592,6 +642,7 @@
         0% {
             background-position: -400px 0;
         }
+
         100% {
             background-position: 400px 0;
         }
@@ -772,5 +823,15 @@
 
     .title-text {
         font-size: 13px;
+    }
+
+    .batch-card {
+        border-top: 3px solid #2b7fff !important;
+        border: 1px solid #2b7fff;
+    }
+
+    .batch-icon {
+        color: #2b7fff;
+        vertical-align: middle;
     }
 </style>

@@ -10,6 +10,34 @@
             :hasSelection="false"
             @change-page="changePage"
         >
+            <template #cell-description="{ data }">
+                <span
+                    v-if="!data.row.description || !String(data.row.description).trim()"
+                    class="text-muted"
+                >
+                    -
+                </span>
+                <div
+                    v-else
+                    class="d-flex align-items-center gap-2"
+                >
+                    <span
+                        class="text-truncate flex-grow-1"
+                        style="min-width: 0"
+                    >
+                        {{ descriptionPreview(data.row.description) }}
+                    </span>
+                    <a
+                        v-if="String(data.row.description).length > 50"
+                        href="#"
+                        class="text-primary flex-shrink-0"
+                        @click.prevent="openDescriptionModal(data.row)"
+                        v-tooltip="$t('workflow.viewFullDescription')"
+                    >
+                        <LucideIcon icon="Eye" />
+                    </a>
+                </div>
+            </template>
             <template #cell-teams="{ data }">
                 <div v-if="data.row.teams.length > 0">
                     <BadgeOutlinedComponent
@@ -63,12 +91,27 @@
     </div>
     <ConfirmModal
         id="deleteConfirm"
-        title="questions.removeTitle"
+        title="documents.deleteValidationTitle"
         message="common.thisActionCannotBeUndone"
         cancelText="common.cancel"
         confirmText="common.confirm"
-        confirmVariant="primary"
+        confirmVariant="danger"
         ref="DeleteDialog"
+        :isLoading="isDeleting"
+        @confirm="deleteWorkflow"
+    />
+    <ConfirmModalValidationInput
+        id="deleteValidationConfirm"
+        title="documents.deleteValidationTitle"
+        :message="deleteValidationMessage"
+        cancelText="common.cancel"
+        confirmText="documents.confirmPermanentDelete"
+        :placeholder="$t('documents.deleteValidationPlaceholder', { name: selectedWorkflowName })"
+        :validationText="selectedWorkflowName"
+        confirmVariant="danger"
+        iconeName="Trash2"
+        iconVariant="danger"
+        ref="DeleteValidationDialog"
         :isLoading="isDeleting"
         @confirm="deleteWorkflow"
     />
@@ -102,10 +145,35 @@
             </div>
         </template>
     </ModalComponent>
+    <ModalComponent
+        id="workflowDescriptionModal"
+        ref="DescriptionModal"
+        title="workflow.fullDescriptionTitle"
+    >
+        <template #body>
+            <div class="modal-body">
+                <p class="mb-0 text-break workflow-description-modal-text">
+                    {{ descriptionModalText }}
+                </p>
+            </div>
+        </template>
+        <template #footer>
+            <div class="modal-footer justify-content-center">
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-bs-dismiss="modal"
+                >
+                    {{ $t("common.close") }}
+                </button>
+            </div>
+        </template>
+    </ModalComponent>
 </template>
 <script>
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidationInput.vue";
     import ModalComponent from "@/components/global/ModalComponent.vue";
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
@@ -117,6 +185,7 @@
             ActionTableListComponent,
             TableComponent,
             ConfirmModal,
+            ConfirmModalValidationInput,
             ModalComponent,
         },
         data: () => ({
@@ -125,6 +194,7 @@
                 columns: [
                     { key: "id", label: "id" },
                     { key: "name", label: "workflow.name" },
+                    { key: "description", label: "common.description" },
                     {
                         key: "teams",
                         label: "workflow.teams",
@@ -144,7 +214,7 @@
                 selectedRows: [],
             },
             filters: {
-                orderBy: "",
+                orderBy: "name asc",
                 input: "",
                 isAsc: true,
                 isAllUsers: true,
@@ -152,11 +222,27 @@
                 userId: "",
             },
             isDeleting: false,
+            isCheckingDocuments: false,
             isCloning: false,
             selectedWorkflowForClone: null,
             cloneWorkflowName: "",
+            selectedWorkflowId: null,
+            selectedWorkflowName: "",
+            documentCountToDel: 0,
+            descriptionModalText: "",
         }),
         methods: {
+            descriptionPreview(text) {
+                const s = String(text ?? "").trim();
+                if (s.length <= 50) {
+                    return s;
+                }
+                return `${s.slice(0, 50)}…`;
+            },
+            openDescriptionModal(row) {
+                this.descriptionModalText = String(row.description ?? "").trim();
+                this.$refs.DescriptionModal.open();
+            },
             getWorkflowList() {
                 this.table.isLoading = true;
                 const params = {
@@ -206,7 +292,30 @@
             },
             openConfirmation(workflow) {
                 this.selectedWorkflow = [workflow.id];
-                this.$refs.DeleteDialog.open();
+                this.selectedWorkflowId = workflow.id;
+                this.selectedWorkflowName = workflow.name;
+                this.isCheckingDocuments = true;
+
+                WorkflowService.countDocuments(workflow.id)
+                    .then((count) => {
+                        if (count > 0) {
+                            this.documentCountToDel = count;
+                            this.$refs.DeleteValidationDialog.open();
+                        } else {
+                            this.$refs.DeleteDialog.open();
+                        }
+                    })
+                    .catch(() => {
+                        this.$notify({
+                            title: "workflow.index",
+                            message: "documents.errors.removeError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    })
+                    .finally(() => {
+                        this.isCheckingDocuments = false;
+                    });
             },
             openCloneModal(workflow) {
                 this.selectedWorkflowForClone = workflow;
@@ -258,7 +367,8 @@
                 WorkflowService.deleteWorkflowById(this.selectedWorkflow)
                     .then((result) => {
                         if (result.error === undefined) {
-                            this.$refs.DeleteDialog.close();
+                            this.$refs.DeleteDialog?.close();
+                            this.$refs.DeleteValidationDialog?.close();
                             this.getWorkflowList();
                             this.$notify({
                                 title: "workflow.index",
@@ -293,6 +403,17 @@
             showMultiDelete() {
                 return this.table.selectedRows.length > 1;
             },
+            deleteValidationMessage() {
+                return this.$t("documents.deleteValidationMessage", {
+                    count: this.documentCountToDel,
+                    name: this.selectedWorkflowName,
+                });
+            },
         },
     };
 </script>
+<style scoped>
+    .workflow-description-modal-text {
+        white-space: pre-wrap;
+    }
+</style>

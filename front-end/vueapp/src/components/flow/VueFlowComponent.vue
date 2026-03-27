@@ -92,7 +92,7 @@
 
     export default {
         name: "VueFlowComponent",
-        emits: ["openNodeConfig"],
+        emits: ["openNodeConfig", "nodeDeleted", "flowChanged"],
         props: {
             stepId: {
                 type: Number,
@@ -136,6 +136,9 @@
             SpecialEdge,
         },
         methods: {
+            emitFlowChanged() {
+                this.$emit("flowChanged");
+            },
             getToolsList() {
                 ToolsServices.getToolsList().then((response) => {
                     this.toolsList = response;
@@ -234,6 +237,8 @@
                 this.edges = this.edges.filter(
                     (edge) => edge.source !== nodeId && edge.target !== nodeId
                 );
+                this.$emit("nodeDeleted", nodeId);
+                this.emitFlowChanged();
             },
             removeNodeDependency(nodeId) {
                 const idx = this.nodes.findIndex((node) => node.id === nodeId);
@@ -281,6 +286,7 @@
             },
             deleteEdge(edgeId) {
                 this.edges = this.edges.filter((edge) => edge.id !== edgeId);
+                this.emitFlowChanged();
             },
             openNodeConfig(node) {
                 const idx = this.nodes.findIndex((n) => n.id === node.id);
@@ -288,6 +294,7 @@
             },
             onConnect(params) {
                 this.vueFlowInstance?.addEdges([{ ...params, type: "special" }]);
+                this.emitFlowChanged();
             },
             onDragOver(event) {
                 event.preventDefault();
@@ -313,7 +320,7 @@
                     toolId: nodeData.id,
                     data: {
                         order: this.nodes.length + 1,
-                        icon: "Activity",
+                        icon: nodeData.toolType === "Quiz" ? "ClipboardList" : "Activity",
                         color: "#000",
                         isStartNode: false,
                         isEditableInput: nodeData.isEditableInput,
@@ -326,32 +333,56 @@
                     },
                 };
                 this.vueFlowInstance?.addNodes([newNode]);
+                this.emitFlowChanged();
+            },
+            getNodesOrderedByEdges() {
+                const edges = this.edges || [];
+                const outgoings = {};
+                edges.forEach((e) => {
+                    const s = String(e.source);
+                    if (!outgoings[s]) outgoings[s] = [];
+                    outgoings[s].push(String(e.target));
+                });
+                const visited = new Set();
+                const order = [];
+                const queue = ["start"];
+                while (queue.length) {
+                    const id = queue.shift();
+                    if (visited.has(id)) continue;
+                    visited.add(id);
+                    if (id !== "start") order.push(id);
+                    (outgoings[id] || []).forEach((target) => queue.push(target));
+                }
+                const nodeMap = {};
+                this.nodes.forEach((n) => {
+                    nodeMap[String(n.id)] = n;
+                });
+                return order.map((id) => nodeMap[id]).filter(Boolean);
             },
             buildFlowPayload() {
-                return this.nodes
-                    .filter((node) => node.id !== "start")
-                    .map((node, index) => ({
-                        id: parseInt(node.id, 10),
-                        toolId: node.toolId,
-                        tool: {
-                            name: node.label,
-                            isEditableInput: node.data.isEditableInput,
-                            toolType: node.data.toolType,
-                        },
-                        positionX: parseFloat(node.position.x.toFixed(2)),
-                        positionY: parseFloat(node.position.y.toFixed(2)),
-                        order: index + 1,
-                        status: "Active",
-                        parameters: node.data.parameters,
-                        dependsOnStepToolId:
-                            node.data.stepToolId && node.data.stepToolId > 0
-                                ? node.data.stepToolId
-                                : null,
-                        dependencies: (node.data.dependencies || []).map((d) => ({
-                            stepOrder: d.stepOrder ?? null,
-                            stepToolOrder: d.stepToolOrder ?? null,
-                        })),
-                    }));
+                const orderedNodes = this.getNodesOrderedByEdges();
+                return orderedNodes.map((node, index) => ({
+                    id: parseInt(node.id, 10),
+                    toolId: node.toolId,
+                    tool: {
+                        name: node.label,
+                        isEditableInput: node.data.isEditableInput,
+                        toolType: node.data.toolType,
+                    },
+                    positionX: parseFloat(node.position.x.toFixed(2)),
+                    positionY: parseFloat(node.position.y.toFixed(2)),
+                    order: index + 1,
+                    status: "Active",
+                    parameters: node.data.parameters,
+                    dependsOnStepToolId:
+                        node.data.stepToolId && node.data.stepToolId > 0
+                            ? node.data.stepToolId
+                            : null,
+                    dependencies: (node.data.dependencies || []).map((d) => ({
+                        stepOrder: d.stepOrder ?? null,
+                        stepToolOrder: d.stepToolOrder ?? null,
+                    })),
+                }));
             },
             showCollapse() {
                 this.isActiveCollapse = !this.isActiveCollapse;
@@ -376,31 +407,12 @@
                     });
                 }
             },
-            async restoreFromStorage() {
-                const tempNodes = localStorage.getItem("flow_temp_nodes");
-                const tempEdges = localStorage.getItem("flow_temp_edges");
-
-                if (tempNodes && tempEdges) {
-                    this.nodes = JSON.parse(tempNodes);
-                    this.edges = JSON.parse(tempEdges);
-                    localStorage.removeItem("flow_temp_nodes");
-                    localStorage.removeItem("flow_temp_edges");
-                    localStorage.removeItem("flow_state_params");
-
-                    await this.enrichNodesWithSubtitles(this.nodes);
-                    return true;
-                }
-                return false;
-            },
         },
         async mounted() {
             this.getToolsList();
-            const restored = await this.restoreFromStorage();
-            if (!restored) {
-                this.getFlow();
-            }
+            this.getFlow();
         },
-        expose: ["updateNodeInput", "buildFlowPayload", "reloadFlow"],
+        expose: ["updateNodeInput", "buildFlowPayload", "reloadFlow", "getNodesOrderedByEdges"],
     };
 </script>
 <style>
@@ -409,5 +421,35 @@
 
     .vue-flow-container {
         height: calc(100vh - 200px);
+    }
+</style>
+<style scoped>
+    .btn-outline-quiz {
+        color: #7c4dff;
+        border: 1px solid #7c4dff;
+        background: transparent;
+    }
+
+    .btn-outline-quiz:hover {
+        color: #6a3ee6;
+        border-color: #6a3ee6;
+        background: #f3eeff;
+    }
+
+    .btn-outline-quiz:active {
+        color: #5a32cc;
+        border-color: #5a32cc;
+        background: #e8e0ff;
+    }
+
+    .btn-outline-quiz:disabled {
+        color: #b8a7ff;
+        border-color: #d6ccff;
+        background: #faf8ff;
+    }
+
+    .vue-flow__node-default {
+        background: var(--color-card-content) !important;
+        color: var(--color-body-content) !important;
     }
 </style>

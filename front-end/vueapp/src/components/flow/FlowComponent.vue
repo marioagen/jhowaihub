@@ -49,6 +49,8 @@
                 :step="step"
                 :stepOrder="stepOrder"
                 @openNodeConfig="openNodeConfig"
+                @nodeDeleted="onNodeDeleted"
+                @flowChanged="markFlowDirty"
                 ref="VueflowComponent"
                 :hasStepTools="hasStepTools"
             />
@@ -88,7 +90,7 @@
                     </div>
                     <DependencySelector
                         :previousStepTools="previousStepTools"
-                        v-model="selectedDependencies"
+                        v-model:selectedDependencies="selectedDependencies"
                         ref="dependencyTools"
                     />
                     <hr />
@@ -217,6 +219,34 @@
                             </button>
                         </div>
                     </div>
+                    <div v-else-if="isQuizTool">
+                        <h6>Quiz</h6>
+                        <div class="background-div">
+                            <select
+                                class="form-select"
+                                v-model="idSelected"
+                                @change="onQuizSelect"
+                            >
+                                <option
+                                    v-for="item in quizlist"
+                                    :key="item.id"
+                                    :value="item.id"
+                                >
+                                    {{ item.title }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mt-4">
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                @click="updateNode"
+                            >
+                                {{ $t("common.save") }}
+                            </button>
+                        </div>
+                    </div>
                     <div
                         v-else
                         class="mb-3"
@@ -250,18 +280,56 @@
                 </div>
             </div>
         </div>
+        <ConfirmModalValidationInput
+            id="removeToolValidationConfirm"
+            title="workflow.removeToolValidationTitle"
+            :message="$t('workflow.removeToolValidationMessage', { name: step?.name })"
+            cancelText="common.cancel"
+            confirmText="workflow.confirmRemoveTool"
+            :placeholder="$t('workflow.removeToolValidationPlaceholder', { name: step?.name })"
+            :validationText="step?.name || ''"
+            confirmVariant="danger"
+            iconeName="AlertTriangle"
+            iconVariant="warning"
+            ref="RemoveToolValidationDialog"
+            :isLoading="isLoading"
+            @confirm="() => executeSave(true)"
+        />
     </main>
+    <ConfirmModal
+        id="confirm-leave-flow-modal"
+        :isLoading="leaveModalLoading"
+        title="common.caution"
+        message="workflow.leaveMessage"
+        confirmText="common.confirm"
+        cancelText="common.cancel"
+        confirmVariant="primary"
+        iconeName="AlertTriangle"
+        iconVariant="warning"
+        @confirm="confirmNavigation"
+        @cancel="cancelNavigation"
+        ref="confirmLeaveModal"
+    />
 </template>
 <script>
     import VueFlowComponent from "@/components/flow/VueFlowComponent.vue";
     import DependencySelector from "@/components/flow/DependencySelector.vue";
     import AutomationServices from "@/services/automation/AutomationServices";
+    import PromptService from "@/services/prompts/PromptsService";
+    import QuizzesService from "@/services/quizzes/QuizzesService";
     import WorkflowService from "@/services/workflow/WorkflowService";
     import LogService from "@/services/log/logService";
     import ToolType from "@/constants/ToolType";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidationInput.vue";
 
     export default {
         name: "FlowPage",
+        components: {
+            VueFlowComponent,
+            DependencySelector,
+            ConfirmModalValidationInput,
+        },
         props: {
             stepId: {
                 type: Number,
@@ -318,19 +386,39 @@
                 valueInput: "",
                 idSelected: 0,
                 promptlist: [],
+                quizlist: [],
                 toolType: "",
                 previousStepTools: [],
                 selectedDependencies: [],
                 nodes: [],
                 step: null,
+                canLeave: true,
+                pendingNavegation: null,
+                leaveModalLoading: false,
+                isLoading: false,
             };
         },
         components: {
             VueFlowComponent,
             DependencySelector,
+            ConfirmModal,
+            ConfirmModalValidationInput,
         },
         methods: {
+            markFlowDirty() {
+                this.canLeave = false;
+            },
             redirectToIndex() {
+                if (!this.canLeave) {
+                    this.checkNavigation(() => {
+                        this.canLeave = true;
+                        this.doRedirectToIndex();
+                    });
+                    return;
+                }
+                this.doRedirectToIndex();
+            },
+            doRedirectToIndex() {
                 if (this.workflowId) {
                     const routeName = this.isEdit ? "EditWorkflow" : "NewWorkflow";
                     const params = this.isEdit
@@ -431,29 +519,19 @@
                 this.nodeFlow = selectedNode;
                 this.parameters = selectedNode.data.parameters;
                 this.toolType = selectedNode.data.toolType;
-
                 await this.loadPreviousStepTools(selectedNode);
 
-                this.selectedDependencies = selectedNode.data.dependencies;
+                const rawDeps = selectedNode.data.dependencies || [];
+                const validDeps = this.filterDependenciesToValidOnly(rawDeps);
+                this.selectedDependencies = validDeps;
 
                 if (this.isTargetTool(ToolType.API)) {
-                    const state = {
-                        selectedNode: selectedNode,
-                        previousStepTools: this.previousStepTools,
-                        selectedDependencies: this.selectedDependencies,
-                        nodes: nodes,
-                        edges: this.$refs.VueflowComponent.edges,
-                        step: this.step,
-                    };
-                    localStorage.setItem("flow_state_params", JSON.stringify(state));
-
+                    this.saveFlowStateLocal(selectedNode, nodes);
                     this.$router.push({
                         name: "TemplateConfiguration",
                     });
                     return;
-                }
-
-                if (this.isTargetTool(ToolType.N8N)) {
+                } else if (this.isTargetTool(ToolType.N8N)) {
                     this.loadingWebhooks = true;
                     this.resetFormConnector();
                     AutomationServices.getWorkflows(selectedNode.data.toolId)
@@ -485,20 +563,24 @@
                             this.loadingWebhooks = false;
                         });
                 } else if (this.isTargetTool(ToolType.Prompt)) {
-                    const edges = this.$refs.VueflowComponent.edges;
-                    const state = {
-                        selectedNode: selectedNode,
-                        previousStepTools: this.previousStepTools,
-                        selectedDependencies: this.selectedDependencies,
-                        nodes: nodes,
-                        edges: edges,
-                        step: this.step,
-                    };
-                    localStorage.setItem("flow_state_params", JSON.stringify(state));
+                    this.saveFlowStateLocal(selectedNode, nodes);
                     this.$router.push({
                         name: "PromptSelector",
                     });
                     return;
+                } else if (this.isTargetTool(ToolType.Quiz)) {
+                    this.findAllQuizzes();
+                    if (this.parameters.length === 0) {
+                        this.idSelected = 0;
+                        this.parameters.push({
+                            stepToolId: 0,
+                            value: null,
+                            requiredFile: false,
+                            webhookId: null,
+                        });
+                    } else {
+                        this.idSelected = parseInt(this.parameters[0]?.value);
+                    }
                 } else if (this.parameters.length === 0) {
                     this.parameters.push({
                         stepToolId: 0,
@@ -518,6 +600,36 @@
                     sidebar.hide();
                 }
             },
+            saveFlowStateLocal(selectedNode, nodes) {
+                const edges = this.$refs.VueflowComponent.edges;
+                const orderedToolNodes =
+                    this.$refs.VueflowComponent.getNodesOrderedByEdges?.() ??
+                    nodes.filter((n) => n.id !== "start");
+                const startNode = nodes.find((n) => n.id === "start");
+                const nodesInFlowOrder = startNode
+                    ? [startNode, ...orderedToolNodes]
+                    : orderedToolNodes;
+                const state = {
+                    selectedNode: selectedNode,
+                    previousStepTools: this.previousStepTools,
+                    selectedDependencies: this.selectedDependencies,
+                    nodes: nodesInFlowOrder,
+                    edges: edges,
+                    step: this.step,
+                };
+                localStorage.setItem("flow_state_params", JSON.stringify(state));
+            },
+            onNodeDeleted(nodeId) {
+                if (!this.step?.stepTools?.length) return;
+                const idStr = String(nodeId);
+                const index = this.step.stepTools.findIndex((st) => st.id.toString() === idStr);
+                if (index === -1) return;
+                this.step.stepTools.splice(index, 1);
+                this.step.stepTools.forEach((st, i) => {
+                    st.order = i + 1;
+                });
+                this.markFlowDirty();
+            },
             updateNode() {
                 if (this.idSelected) {
                     this.parameters[0].value = this.idSelected.toString();
@@ -527,7 +639,10 @@
                     }
                 }
 
-                if (!this.selectedDependencies || this.selectedDependencies.length === 0) {
+                const depsToSave = this.filterDependenciesToValidOnly(
+                    this.selectedDependencies || []
+                );
+                if (!depsToSave.length) {
                     this.$notify({
                         title: "common.warning",
                         message: "flow.formFlow.dependenciesRequired",
@@ -540,8 +655,9 @@
                 this.$refs.VueflowComponent.updateNodeInput(
                     this.nodeFlow.id,
                     this.parameters,
-                    this.selectedDependencies
+                    depsToSave
                 );
+                this.markFlowDirty();
                 this.closeSidebar();
                 this.showMessage();
             },
@@ -570,15 +686,48 @@
                 this.parameters[0].value = JSON.stringify(this.formData);
                 this.parameters[0].webhookId = this.connector;
 
+                const depsToSave = this.filterDependenciesToValidOnly(
+                    this.selectedDependencies || []
+                );
                 this.$refs.VueflowComponent.updateNodeInput(
                     this.nodeFlow.id,
                     this.parameters,
-                    this.selectedDependencies
+                    depsToSave
                 );
+                this.markFlowDirty();
                 this.closeSidebar();
                 this.showMessage();
             },
             async save() {
+                this.isLoading = true;
+                try {
+                    if (!this.stepId) {
+                        await this.executeSave();
+                        return;
+                    }
+
+                    const hasConstraints = await WorkflowService.hasStepToolConstraints(
+                        this.stepId
+                    );
+                    if (hasConstraints) {
+                        this.$refs.RemoveToolValidationDialog.open();
+                    } else {
+                        await this.executeSave();
+                    }
+                } catch (error) {
+                    this.$notify({
+                        title: "flow.title",
+                        message: "workflow.errors.fetchError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+            async executeSave(resetDocuments = false) {
+                this.$refs.RemoveToolValidationDialog?.close();
+                this.isLoading = true;
                 try {
                     let nodesList = this.$refs.VueflowComponent.buildFlowPayload();
                     if (this.workflowId) {
@@ -604,6 +753,7 @@
                         const params = {
                             workflowId: this.workflowId,
                             steps: allSteps,
+                            resetDocuments: resetDocuments,
                         };
 
                         const result = await WorkflowService.updatePhase3(params);
@@ -627,8 +777,9 @@
                             });
                         }
                     }
+                    this.canLeave = true;
                     localStorage.removeItem("flow_state_params");
-                    this.redirectToIndex();
+                    this.doRedirectToIndex();
                     return this.$notify({
                         title: "flow.title",
                         message: "flow.formFlow.progressFlowSuccess",
@@ -642,6 +793,8 @@
                         variant: "danger",
                         icon: "CircleX",
                     });
+                } finally {
+                    this.isLoading = false;
                 }
             },
             fillValues(fields, data) {
@@ -673,13 +826,25 @@
                     }
                 });
             },
+            findAllPrompts() {
+                PromptService.getPrompts().then((response) => {
+                    this.promptlist = response;
+                });
+            },
+            findAllQuizzes() {
+                QuizzesService.getQuizzesList().then((response) => {
+                    this.quizlist = response;
+                });
+            },
             async loadPreviousStepTools(node) {
                 let workflowSteps = [];
+                let dataSource = "none";
                 if (this.workflowId) {
                     try {
                         const workflow = await WorkflowService.getWorkflowById(this.workflowId);
                         if (!workflow.error) {
                             workflowSteps = workflow.steps || [];
+                            dataSource = "api";
                         }
                     } catch (error) {
                         LogService.showMessage("Error loading workflow steps: " + error);
@@ -688,6 +853,7 @@
 
                 if (workflowSteps.length === 0) {
                     workflowSteps = this.$store.state.tempWorkflow.list || [];
+                    dataSource = dataSource === "none" ? "store" : dataSource;
                 }
 
                 const relevantSteps = workflowSteps.filter((step) => step.order <= this.stepOrder);
@@ -699,19 +865,51 @@
 
                 const maxOrder = Math.max(...relevantSteps.map((step) => step.order));
                 const nodesToolIds = this.nodes.map((n) => n.data?.toolId).filter(Boolean);
+                const currentStepFromWorkflow = relevantSteps.find((s) => s.order === maxOrder);
+                const currentStepBackendToolCount = (currentStepFromWorkflow?.stepTools || [])
+                    .length;
 
-                this.previousStepTools = relevantSteps.map((step) => ({
-                    id: step.id,
-                    name: step?.name || step.name || "Unnamed Tool",
-                    order: step.order,
-                    stepTools: (step.stepTools || []).filter(
-                        (stepTool) =>
-                            step.order < maxOrder ||
-                            (step.order === maxOrder &&
-                                stepTool.order < node.data.order &&
-                                nodesToolIds.includes(stepTool.tool?.id))
-                    ),
-                }));
+                this.previousStepTools = relevantSteps.map((step) => {
+                    if (step.order < maxOrder) {
+                        return {
+                            id: step.id,
+                            name: step?.name || step.name || "Unnamed Tool",
+                            order: step.order,
+                            stepTools: step.stepTools || [],
+                        };
+                    }
+
+                    const stepToolsFromNodes = this.nodes
+                        .filter(
+                            (n) =>
+                                n.id !== "start" &&
+                                n.data?.order != null &&
+                                n.data.order < node.data.order
+                        )
+                        .map((n) => ({
+                            order: n.data.order,
+                            tool: {
+                                id: n.data.toolId,
+                                name: n.label,
+                                toolType: n.data.toolType || "",
+                            },
+                        }));
+                    return {
+                        id: step.id,
+                        name: step?.name || step.name || "Unnamed Tool",
+                        order: step.order,
+                        stepTools: stepToolsFromNodes,
+                    };
+                });
+            },
+            filterDependenciesToValidOnly(dependencies) {
+                if (!dependencies?.length || !this.previousStepTools?.length)
+                    return dependencies || [];
+                return dependencies.filter((d) => {
+                    const step = this.previousStepTools.find((s) => s.order === d.stepOrder);
+                    if (!step || !step.stepTools?.length) return false;
+                    return step.stepTools.some((st) => st.order === d.stepToolOrder);
+                });
             },
             resetFormConnector() {
                 this.connectors = [];
@@ -747,58 +945,71 @@
                 }
 
                 const flowState = JSON.parse(flowStateJson);
-
-                if (flowState.nodes && this.step.stepTools) {
-                    flowState.nodes.forEach((node) => {
-                        if (node.id === "start") {
-                            return;
-                        }
-
-                        let stepTool = this.step.stepTools.find(
-                            (st) => st.id.toString() === node.id
-                        );
-
-                        if (stepTool) {
-                            stepTool.parameters = node.data.parameters || [];
-                            stepTool.dependencies = node.data.dependencies || [];
-                            stepTool.positionX = node.position.x;
-                            stepTool.positionY = node.position.y;
-                        } else {
-                            const newStepTool = {
-                                id: parseInt(node.id) || 0,
-                                positionX: node.position.x,
-                                positionY: node.position.y,
-                                toolId: node.data.toolId,
-                                order: node.data.order,
-                                parameters: node.data.parameters || [],
-                                dependencies: node.data.dependencies || [],
-                                tool: {
-                                    id: node.data.toolId,
-                                    name: node.label,
-                                    isEditableInput: node.data.isEditableInput,
-                                    toolType: node.data.toolType,
-                                },
-                            };
-
-                            this.step.stepTools.push(newStepTool);
-                        }
-                    });
+                if (!flowState.nodes || !this.step.stepTools) {
+                    return;
                 }
+
+                const toolNodes = flowState.nodes.filter((n) => n.id !== "start");
+                const newStepTools = toolNodes.map((node, index) => {
+                    const existing = this.step.stepTools.find((st) => st.id.toString() === node.id);
+                    const order = index + 1;
+                    if (existing) {
+                        return {
+                            ...existing,
+                            parameters: node.data.parameters || [],
+                            dependencies: node.data.dependencies || [],
+                            positionX: node.position.x,
+                            positionY: node.position.y,
+                            order,
+                        };
+                    }
+                    return {
+                        id: parseInt(node.id) || 0,
+                        positionX: node.position.x,
+                        positionY: node.position.y,
+                        toolId: node.data.toolId,
+                        order,
+                        parameters: node.data.parameters || [],
+                        dependencies: node.data.dependencies || [],
+                        tool: {
+                            id: node.data.toolId,
+                            name: node.label,
+                            isEditableInput: node.data.isEditableInput,
+                            toolType: node.data.toolType,
+                        },
+                    };
+                });
+                this.step.stepTools = newStepTools;
 
                 this.$nextTick(() => {
                     if (this.$refs.VueflowComponent) {
                         this.$refs.VueflowComponent.reloadFlow();
-
-                        this.$notify({
-                            title: "flow.title",
-                            message: "Template configurado com sucesso",
-                            variant: "success",
-                            icon: "CircleCheckBig",
-                        });
+                        this.canLeave = false;
                     }
                 });
 
                 localStorage.removeItem("flow_state_params");
+            },
+            onQuizSelect() {
+                const selectedQuiz = this.quizlist.find((q) => q.id === this.idSelected);
+                if (selectedQuiz) {
+                    this.nodeFlow.data.subtitle = selectedQuiz.name;
+                }
+            },
+            checkNavigation(next) {
+                this.pendingNavegation = next;
+                this.$refs.confirmLeaveModal.open();
+            },
+            confirmNavigation() {
+                this.$refs.confirmLeaveModal.close();
+                if (this.pendingNavegation) {
+                    this.pendingNavegation();
+                    this.pendingNavegation = null;
+                }
+            },
+            cancelNavigation() {
+                this.$refs.confirmLeaveModal.close();
+                this.pendingNavegation = null;
             },
         },
         async mounted() {
@@ -818,6 +1029,9 @@
             },
             isPromptTool() {
                 return this.isTargetTool(ToolType.Prompt);
+            },
+            isQuizTool() {
+                return this.isTargetTool(ToolType.Quiz);
             },
         },
     };
@@ -859,5 +1073,9 @@
 
     .text-long {
         resize: none;
+    }
+
+    .offcanvas {
+        background-color: var(--color-card-content) !important;
     }
 </style>

@@ -11,6 +11,8 @@ using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
+using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Repository.Context;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -101,6 +103,10 @@ namespace WoopiAiHub.Application.Services
             var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
             httpAccessor.HttpContext ??= new DefaultHttpContext();
             httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
+
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            dbContext.Database.GetDbConnection().ConnectionString = connectionString;
+
             var usageDailyRepository = scope.ServiceProvider.GetRequiredService<IUsageDailyRepository>();
             var usageLogRepository = scope.ServiceProvider.GetRequiredService<IUsageLogRepository>();
 
@@ -156,6 +162,10 @@ namespace WoopiAiHub.Application.Services
             var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
             httpAccessor.HttpContext ??= new DefaultHttpContext();
             httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
+
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            dbContext.Database.GetDbConnection().ConnectionString = connectionString;
+
             var usageMonthRepository = scope.ServiceProvider.GetRequiredService<IUsageMonthRepository>();
             var subcriptionPeriodService = scope.ServiceProvider.GetRequiredService<ISubscriptionPeriodServices>();
 
@@ -168,21 +178,17 @@ namespace WoopiAiHub.Application.Services
 
             var usageByTenant = await usageMonthRepository.FindTotalUsageAsync(lastPeriod.PeriodStart, lastPeriod.PeriodEnd);
 
-            if (usageByTenant <= 0)
-            {
-                _logger.LogInformation("No usage to charge for tenant {TenantName}", tenant.Name);
-                return;
-            }
-
-            var chargeRequest = new ExcessManagementTenantDto
+            var tenantConsumption = new TenantConsumptionDto
             {
                 Tenant = tenant.Name,
                 UsageCount = usageByTenant,
+                PeriodStart = lastPeriod.PeriodStart,
+                PeriodEnd = lastPeriod.PeriodEnd
             };
 
             await _resiliencePipeline.ExecuteAsync(async token =>
             {
-                var result = await _marketPlaceApi.ProcessConsumption(keyAccess, chargeRequest);
+                var result = await _marketPlaceApi.ProcessConsumption(keyAccess, tenantConsumption);
                 if (result)
                 {
                     _logger.LogInformation("Successfully sent usage charge for tenant {TenantName}", tenant.Name);

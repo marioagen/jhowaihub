@@ -1,38 +1,54 @@
+using Newtonsoft.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
-using Newtonsoft.Json;
-using WoopiAiHub.Repository;
 
 namespace WoopiAiHub.Application.Services
 {
     public class CardServices : ICardServices
     {
         private readonly ICardRepository _cardRepository;
+        private readonly IAuditCardService _auditCardService;
         private readonly IStepRepository _stepRepository;
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IWorkflowRepository _workflowRepository;
+        private readonly IStatusRepository _statusRepository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubNotifier _hubNotifier;
+
+        private const string CardNotFoundMessage = "Card not found";
 
         public CardServices(ICardRepository cardRepository,
+                            IAuditCardService auditCardService,
                             IStepRepository stepRepository,
                             IAutomationServices automationServices,
                             IStepToolExecutionRepository stepToolExecutionRepository,
-                            IWorkflowRepository workflowRepository)
+                            IWorkflowRepository workflowRepository,
+                            IStatusRepository statusRepository,
+                            IUnitOfWork unitOfWork,
+                            IHubNotifier hubNotifier)
         {
             _cardRepository = cardRepository;
+            _auditCardService = auditCardService;
             _stepRepository = stepRepository;
             _automationServices = automationServices;
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _workflowRepository = workflowRepository;
+            _statusRepository = statusRepository;
+            _unitOfWork = unitOfWork;
+            _hubNotifier = hubNotifier;
         }
 
         /// <summary>
@@ -48,11 +64,10 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentNullException(updateAssingnedUserDto.UserId.ToString(), "Invalid UserId");
             }
 
-            var card = await _cardRepository.FindById(updateAssingnedUserDto.CardId);
-
-            if (card == null)
+            var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(updateAssingnedUserDto.CardId);
+            if (cards == null || cards.Count == 0)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
             }
 
             var isValidTeamUser = await _workflowRepository.IsValidTeamUser(updateAssingnedUserDto.CardId,
@@ -60,13 +75,19 @@ namespace WoopiAiHub.Application.Services
 
             if (!isValidTeamUser)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "User not found",
+                throw new AppException(ErrorCode.NotFound, "User not found",
                     CardLabel.UserCannotBeAssigned);
             }
 
-            card.UpdateAssignedUser(updateAssingnedUserDto.UserId);
+            Card.UpdateAssignedUser(cards, updateAssingnedUserDto.UserId);
 
-            return _cardRepository.Update(card);
+            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
+            if (cardWorkflows.Count > 0)
+            {
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
+            }
+
+            return _cardRepository.UpdateList(cards);
         }
 
         /// <summary>
@@ -77,15 +98,19 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> UnassignUser(int cardId)
         {
-            var card = await _cardRepository.FindById(cardId);
-            if (card == null)
+            var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
+            if (cards == null || cards.Count == 0)
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
+
+            Card.UpdateAssignedUser(cards, null);
+
+            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
+            if (cardWorkflows.Count > 0)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign);
             }
 
-            card.UpdateAssignedUser(null);
-
-            return _cardRepository.Update(card);
+            return _cardRepository.UpdateList(cards);
         }
 
         /// <summary>
@@ -100,44 +125,56 @@ namespace WoopiAiHub.Application.Services
             string email
         )
         {
-            var card = await _cardRepository.FindByIdWithDocument(updateCardStepStatusDto.CardId) ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            var cards = await _cardRepository.FindCardOrBatchWithDocumentAsync(updateCardStepStatusDto.CardId);
+            if (cards == null || cards.Count == 0)
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
+
+            var leadCard = cards[0];
+            var previousStepId = leadCard.StepId;
+            var previousStatusId = leadCard.StatusId;
 
             var step = await _stepRepository.FindByOrderAndWorkflowId(
                 updateCardStepStatusDto.NextStepOrder,
                 updateCardStepStatusDto.WorkflowId
             ) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
 
-            var previousStepId = card.StepId;
-            var previousStatusId = card.StatusId;
+            Card.UpdateStepAndStatus(cards, step.Id, card => card.IsRejected() ? previousStatusId : step.StatusId);
 
-            card.UpdateStepAndStatus(step.Id, step.StatusId);
-            var result = _cardRepository.Update(card);
+            var cardWorkflows = cards.Select(card => (card.Id, updateCardStepStatusDto.WorkflowId, card.DocumentId)).ToList();
+            if (cardWorkflows.Count > 0)
+            {
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement);
+            }
 
+            var result = _cardRepository.UpdateList(cards);
             if (result)
             {
-                try
+                foreach (var tempCard in cards)
                 {
-                    var automationServicesDto = new AutomationServicesDto
-                    (
-                        0,
-                        card.Id,
-                        tenant,
-                        email,
-                        card.Document!.ReferenceFile,
-                        step.Id
-                    );
+                    try
+                    {
+                        var automationServicesDto = new AutomationServicesDto
+                        (
+                            0,
+                            tempCard.Id,
+                            tenant,
+                            email,
+                            tempCard.Document!.ReferenceFile,
+                            step.Id
+                        );
 
-                    await _automationServices.StartExecutionByCardAsync(automationServicesDto);
-                }
-                catch
-                {
-                    card.UpdateStepAndStatus(previousStepId, previousStatusId);
-                    _cardRepository.Update(card);
-                    throw;
+                        await _automationServices.StartExecutionByCardAsync(automationServicesDto);
+                    }
+                    catch
+                    {
+                        tempCard.UpdateStepAndStatus(previousStepId, previousStatusId);
+                        _cardRepository.Update(tempCard);
+                        throw;
+                    }
                 }
             }
 
-            return true;
+            return result;
         }
 
         /// <summary>
@@ -148,12 +185,20 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException"></exception>
         public async Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto)
         {
-            var card = await _cardRepository.FindById(updateCardStatusDto.CardId)
-                ?? throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+            var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(updateCardStatusDto.CardId);
+            if (cards == null || cards.Count == 0)
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
 
-            card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
+            foreach (var card in cards)
+                card.UpdateStepAndStatus(card.StepId, updateCardStatusDto.StatusId);
 
-            var result = _cardRepository.Update(card);
+            var cardWorkflows = cards.Where(card => card.Step != null).Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
+            if (cardWorkflows.Count > 0)
+            {
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Finalize);
+            }
+
+            var result = _cardRepository.UpdateList(cards);
             return result;
         }
 
@@ -167,7 +212,7 @@ namespace WoopiAiHub.Application.Services
         public async Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
             HeadersDto headersDto)
         {
-            var card = await FindCardWithRelationships(cardId);
+            var card = await _cardRepository.FindByIdWithDocumentAndWorkflow(cardId) ?? throw new AppException(ErrorCode.NotFound, $"Card {cardId} not found", null);
             var verifyAnswer = await VerifyCanAnswer(card);
             var document = card.Document ?? throw new ArgumentException("Document not found for the card");
             if (card.Step == null)
@@ -198,7 +243,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="card"></param>
         /// <returns></returns>
-        private async Task<bool> VerifyCanAnswer(Card card)
+        private async Task<bool> VerifyCanAnswer(CardAnalysisDto card)
         {
             var executions = await _stepToolExecutionRepository.FindByStepToolByCardIdAsync(card.Id);
 
@@ -219,28 +264,12 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Find card by id and returns the card with relationships
-        /// </summary>
-        /// <param name="cardId"></param>
-        /// <returns></returns>
-        private async Task<Card> FindCardWithRelationships(int cardId)
-        {
-            var card = await _cardRepository.FindByIdWithDocumentAndWorkflow(cardId);
-            if (card == null)
-            {
-                throw new AppException(ErrorCode.NotFound, $"Card {cardId} not found", null);
-            }
-
-            return card;
-        }
-
-        /// <summary>
         /// Prepare steps from workflow
         /// </summary>
         /// <param name="workflow"></param>
         /// <param name="card"></param>
         /// <returns></returns>
-        private List<DocumentStepDto> BuildStepsFromWorkflow(Workflow workflow, Card card)
+        private List<DocumentStepDto> BuildStepsFromWorkflow(Workflow workflow, CardAnalysisDto card)
         {
             var steps = new List<DocumentStepDto>();
             var workflowSteps = workflow.Steps.OrderBy(s => s.Order).ToList();
@@ -276,13 +305,18 @@ namespace WoopiAiHub.Application.Services
         /// <param name="stepDto"></param>
         /// <param name="step"></param>
         /// <param name="card"></param>
-        private void PopulateStepOutputs(DocumentStepDto stepDto, Step step, Card card)
+        private static void PopulateStepOutputs(DocumentStepDto stepDto, Step step, CardAnalysisDto card)
         {
             foreach (var stepTool in step.StepTools.OrderBy(st => st.Order))
             {
-                var outputs = card.Outputs
+                var outputs = card.Outputs?
                     .Where(o => o.StepToolId == stepTool.Id)
                     .ToList();
+
+                if (outputs is null || outputs.Count <= 0)
+                {
+                    continue;
+                }
 
                 foreach (var output in outputs)
                 {
@@ -300,12 +334,12 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
-        private bool ShouldSkipOutput(StepToolOutput output)
+        private static bool ShouldSkipOutput(StepToolOutputAnalysesDto output)
         {
             if (output.StepTool?.Tool == null)
                 return true;
 
-            var toolTypeName = output.StepTool.Tool.ToolType?.Name;
+            var toolTypeName = output.StepTool.Tool.ToolType;
             return toolTypeName == HandlersTypes.Ocr || toolTypeName == HandlersTypes.Embeddings;
         }
 
@@ -314,14 +348,14 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
-        private List<ExtractedFieldDto> ParseOutput(StepToolOutput output)
+        private static List<ExtractedFieldDto> ParseOutput(StepToolOutputAnalysesDto output)
         {
             var fields = new List<ExtractedFieldDto>();
 
             if (string.IsNullOrWhiteSpace(output.Value))
                 return fields;
 
-            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType?.Name))
+            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType))
             {
                 fields.AddRange(jsonFields);
             }
@@ -333,7 +367,7 @@ namespace WoopiAiHub.Application.Services
                     Value = output.Value,
                     IsEdited = false,
                     OutputId = output.Id,
-                    OutputType = output.StepTool?.Tool?.ToolType?.Name ?? "None",
+                    OutputType = output.StepTool?.Tool?.ToolType ?? "None",
                 });
             }
 
@@ -348,9 +382,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="id"></param>
         /// <param name="outputType"></param>
         /// <returns></returns>
-        private bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields,
+        private static bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields,
             int id,
-            string outputType)
+            string? outputType)
         {
             fields = new List<ExtractedFieldDto>();
 
@@ -376,7 +410,7 @@ namespace WoopiAiHub.Application.Services
                             Value = kvp.Value?.ToString() ?? string.Empty,
                             IsEdited = false,
                             OutputId = id,
-                            OutputType = outputType,
+                            OutputType = outputType ?? string.Empty,
                         });
                     }
 
@@ -401,10 +435,123 @@ namespace WoopiAiHub.Application.Services
             var dto = await _cardRepository.FindHeaderInfoAsync(cardId);
             if (dto == null)
             {
-                throw new AppException(Domain.Enum.ErrorCode.NotFound, "Card not found", CardLabel.NotFound);
+                throw new AppException(Domain.Enum.ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
             }
 
             return dto;
+        }
+
+        /// <summary>
+        /// Gets all cards for a document including step and workflow data.
+        /// </summary>
+        /// <param name="documentId">The document ID to get cards for.</param>
+        /// <returns>Read-only list of cards with step and workflow; empty list if none found.</returns>
+        public async Task<IReadOnlyList<Card>> FindCardsByDocumentIdWithStepWorkflowAsync(int documentId)
+        {
+            var cards = await _cardRepository.FindByDocumentIdCardListWithStepWorkflowAsync(documentId);
+            return cards ?? new List<Card>();
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves a collection of card batch data transfer objects associated with the specified
+        /// document batch identifier.
+        /// </summary>
+        /// <remarks>If no card batches are associated with the provided document batch identifier, the
+        /// method returns <see langword="null"/> instead of an empty collection.</remarks>
+        /// <param name="documentBatchId">The unique identifier of the document batch for which to retrieve associated card batches. Must be a
+        /// positive integer.</param>
+        /// <returns>A collection of <see cref="CardBatchDto"/> objects representing the card batches linked to the specified
+        /// document batch identifier, or <see langword="null"/> if no card batches are found.</returns>
+        public async Task<ICollection<CardBatchDto>?> FindCardsByDocumentBatchId(int documentBatchId)
+        {
+            var cards = await _cardRepository.FindByDocumentBatchId(documentBatchId);
+            if (cards is null || cards.Count <= 0)
+            {
+                return null;
+            }
+
+            return [.. cards.Select(card => new CardBatchDto
+            {
+                CardId = card.Id,
+                DocumentId = card.DocumentId,
+                DocumentName = card.Name
+            })];
+        }
+
+        /// <summary>
+        /// Sets the specified card to a failing status and updates its execution state if applicable.
+        /// </summary>
+        /// <remarks>If the card has an execution in a running state, its execution status is set to
+        /// pending. The operation is performed within a transaction and will be rolled back if an error
+        /// occurs.</remarks>
+        /// <param name="cardId">The unique identifier of the card to update. Must correspond to an existing card.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <exception cref="AppException">Thrown if the card with the specified identifier is not found, if the fail status is not found, or if an
+        /// error occurs during the update process.</exception>
+        public async Task SetFailingCard(int cardId, string? email)
+        {
+            var card = await _cardRepository.FindByIdWithExecutions(cardId) ?? throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
+            var failStatus = await _statusRepository.FindByName(StatusNames.Fail) ?? throw new AppException(ErrorCode.NotFound, $"Status '{StatusNames.Fail}' not found", null);
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                card.UpdateStatus(failStatus.Id);
+                _cardRepository.Update(card);
+
+                var execution = card.Executions.FirstOrDefault(w => w.Status == StatusExecution.Running);
+                if (execution is not null)
+                {
+                    execution.UpdateStatusExecution(StatusExecution.Pending);
+                    await _stepToolExecutionRepository.UpdateAsync(execution);
+                }
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    await _hubNotifier.CardProgessAsync(email, card.Id, 0.0, card.StepId, string.Empty, true);
+                }
+
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
+        }
+
+        /// <summary>
+        /// Initiates the reprocessing of a card by updating its status and triggering automation services for the
+        /// specified tenant and user email.
+        /// </summary>
+        /// <remarks>This method updates the card's status before starting the automation process. The
+        /// operation is performed asynchronously and may trigger additional workflows depending on the automation
+        /// service configuration.</remarks>
+        /// <param name="cardId">The unique identifier of the card to be reprocessed. Must correspond to an existing card.</param>
+        /// <param name="tenant">The tenant context in which the card reprocessing should occur. Used to scope the operation.</param>
+        /// <param name="email">The email address of the user associated with the card reprocessing. Used for notification or tracking
+        /// purposes.</param>
+        /// <returns>A task that represents the asynchronous reprocessing operation.</returns>
+        /// <exception cref="AppException">Thrown if the specified card does not exist.</exception>
+        public async Task<bool> ReprocessCard(int cardId, string tenant, string email)
+        {
+            var card = await _cardRepository.FindByIdWithDocumentAndStep(cardId) ?? throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
+
+            card.UpdateStatus(card.Step!.StatusId);
+            _cardRepository.Update(card);
+
+            var automationServicesDto = new AutomationServicesDto
+            (
+                0,
+                card.Id,
+                tenant,
+                email,
+                card.Document!.ReferenceFile,
+                card.StepId
+            );
+
+            await _automationServices.ReprocessStepTool(automationServicesDto);
+            return true;
         }
     }
 }

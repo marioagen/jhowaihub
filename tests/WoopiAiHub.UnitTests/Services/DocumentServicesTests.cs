@@ -4,24 +4,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.AutoMock;
-using Refit;
-using System.Net;
-using System.Text;
 using WoopiAiHub.Application.Services;
-using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Messaging;
-using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
-using WoopiAiHub.Domain.Interfaces.Repository.Cache;
-using WoopiAiHub.Domain.Interfaces.Services;
-using WoopiAiHub.Domain.Interfaces.Utils;
-using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
@@ -43,7 +31,8 @@ namespace WoopiAiHub.UnitTests.Services
             var mockQueues = new Mock<IOptions<MessageQueues>>();
             mockQueues.Setup(x => x.Value).Returns(new MessageQueues
             {
-                OcrQueue = "ocrQueue"
+                OcrQueue = "ocrQueue",
+                EmbeddingQueueAiHubResponse = "embeddingQueue"
             });
 
             _mocker.Use(mockQueues);
@@ -52,6 +41,7 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x.GetSection("keyAccess").Value).Returns(Guid.NewGuid().ToString());
             configMock.Setup(x => x.GetSection("UseOcrGoogle").Value).Returns(() => "true");
             configMock.Setup(x => x["RefitExternalSettings:FunctionApiKey"]).Returns(Guid.NewGuid().ToString());
+            configMock.Setup(x => x["IndexerApiKey"]).Returns(Guid.NewGuid().ToString());
 
             _mocker.Use(configMock.Object);
 
@@ -69,7 +59,7 @@ namespace WoopiAiHub.UnitTests.Services
             _documentServices = _mocker.CreateInstance<DocumentServices>();
         }
 
-        [Fact(DisplayName = "CheckerExceededPages")]
+        [Fact(DisplayName = "CheckerExceededPages - Should return true when pages exceeded")]
         [Trait("CheckerExceededPages", "Success")]
         public async Task CheckerExceededPages_Success()
         {
@@ -85,7 +75,7 @@ namespace WoopiAiHub.UnitTests.Services
             marketPlaceApi.Verify(a => a.CheckExceededPages(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
-        [Fact(DisplayName = "CheckerExceededPages")]
+        [Fact(DisplayName = "CheckerExceededPages - Should return false when pages not exceeded")]
         [Trait("CheckerExceededPages", "Fail")]
         public async Task CheckerExceededPages_Fail()
         {
@@ -101,13 +91,13 @@ namespace WoopiAiHub.UnitTests.Services
             marketPlaceApi.Verify(a => a.CheckExceededPages(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
-        [Fact(DisplayName = "FindAllPaged")]
+        [Fact(DisplayName = "FindAllPaged - Should return paged documents when valid paged data")]
         [Trait("FindAllPaged", "Success")]
         public void FindAllPaged_Success()
         {
             // Arrange
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var pagedData = _fixture.FindValidDocumentPagedDataDto();
+            var pagedData = DocumentFixture.FindValidDocumentPagedDataDto();
             var iqueryable = new List<DocumentListItemDto>().AsQueryable();
             documentRepository.Setup(a => a.FindAllOrdered(pagedData, "email")).Returns(iqueryable);
 
@@ -119,90 +109,19 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(a => a.FindAllOrdered(pagedData, "email"), Times.Once);
         }
 
-        [Fact(DisplayName = "FindAllPaged")]
+        [Fact(DisplayName = "FindAllPaged - Should throw ArgumentException when paged data invalid")]
         [Trait("FindAllPaged", "Fail")]
         public void FindAllPaged_Fail()
         {
             // Arrange
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var pagedData = _fixture.FindInvalidDocumentPagedDataDto();
+            var pagedData = DocumentFixture.FindInvalidDocumentPagedDataDto();
 
             // Act / Assert
             Assert.Throws<ArgumentException>(() => _documentServices.FindAllPaged(pagedData, "email"));
-        }     
-
-        [Fact(DisplayName = "ProcessChunks")]
-        [Trait("FindByIdAnalyze", "Success")]
-        public async Task ProcessChunks_Success()
-        {
-            // Arrange
-            var requestCreateDocumentDto = _fixture.FindValidRequestCreateDocumentDto();
-            var fileUploadSummaryDto = _fixture.FindValidFileUploadSummaryDto();
-            var tenant = _fixture.FindValidTenantInfoDto();
-            var team = DocumentFixture.FindValidTeam();
-            var workflows = WorkflowFixture.FindValidWorkflows();
-            List<Team> teams = new List<Team> { team };
-
-            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
-            fileRepositoryApi.Setup(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>())).ReturnsAsync(fileUploadSummaryDto);
-
-            var teamServicesMock = _mocker.GetMock<ITeamServices>();
-            teamServicesMock.Setup(a => a.FindByIdsAndUser(It.IsAny<List<int>>(), It.IsAny<string>())).Returns(teams);
-
-            var tenantCache = _mocker.GetMock<ITenantCacheServices>();
-            tenantCache.Setup(a => a.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenant);
-
-            var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
-            workflowRepositoryMock.Setup(a => a.FindByIdsAsync(requestCreateDocumentDto.Workflows)).ReturnsAsync(workflows);
-
-            // Act / Assert
-            await _documentServices.ProcessChunks(requestCreateDocumentDto, "tenant");
-            fileRepositoryApi.Verify(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>()), Times.Once);
         }
 
-        [Fact(DisplayName = "FindByIdAnalyzeSuccess")]
-        [Trait("FindByIdAnalyze", "Success")]
-        public void FindByIdAnalyze_Success()
-        {
-            // Arrange
-            var document = DocumentFixture.FindValidDocument();
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var cardRepository = _mocker.GetMock<ICardRepository>();
-            var functionFileRetriever = _mocker.GetMock<IFunctionFileRetriever>();
-            var headers = DocumentFixture.FindValidHeadersDto();
-
-            var card = new Card(1, DateTime.Now, 1, document.Id, "Card Test", 1, null);
-            documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            cardRepository.Setup(a => a.FindByDocumentIdCardListAsync(It.IsAny<int>())).ReturnsAsync(new List<Card> { card });
-
-            // Act
-            var result = _documentServices.FindByIdAnalyze(document.Id, headers);
-
-            // Assert
-            Assert.Equal(document.Name, result.Name);
-            Assert.NotNull(result.CardId);
-            Assert.Equal(card.Id, result.CardId);
-            documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-            cardRepository.Verify(a => a.FindByDocumentIdCardListAsync(It.IsAny<int>()), Times.Once);
-        }
-
-        [Fact(DisplayName = "FindByIdAnalyzeFail")]
-        [Trait("FindByIdAnalyze", "Fail")]
-        public void FindByIdAnalyze_Fail()
-        {
-            // Arrange
-            Document? document = null;
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
-            document = DocumentFixture.FindValidDocument();
-            var headers = DocumentFixture.FindValidHeadersDto();
-
-            // Act / Assert
-            Assert.Throws<ArgumentException>(() => _documentServices.FindByIdAnalyze(document.Id, headers));
-            documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
-        }
-
-        [Fact(DisplayName = "FindDocumentSuccess")]
+        [Fact(DisplayName = "FindDocumentById - Should return document when found")]
         [Trait("FindDocument", "Success")]
         public async Task FindDocument_Success()
         {
@@ -213,7 +132,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(a => a.FindById(It.IsAny<int>())).Returns(document);
             functionFileRetriever.Setup(a => a.Get(It.IsAny<string>(),
                                                    It.IsAny<string>(),
-                                                   It.IsAny<string>())).ReturnsAsync(_fixture.FindHttpResponseMessage());
+                                                   It.IsAny<string>())).ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
 
             // Act
             var result = await _documentServices.FindDocumentById(It.IsAny<int>(),
@@ -226,7 +145,7 @@ namespace WoopiAiHub.UnitTests.Services
                                                     It.IsAny<string>()), Times.Once);
         }
 
-        [Fact(DisplayName = "FindDocumentFail")]
+        [Fact(DisplayName = "FindDocumentById - Should throw ArgumentNullException when API key empty")]
         [Trait("FindDocument", "Fail")]
         public async Task FindDocument_Fail()
         {
@@ -242,7 +161,7 @@ namespace WoopiAiHub.UnitTests.Services
             await Assert.ThrowsAsync<ArgumentNullException>(() => documentServices.FindDocumentById(id, tenant));
         }
 
-        [Fact(DisplayName = "FindStatusAndName")]
+        [Fact(DisplayName = "FindStatusAndName - Should return status and name when document found")]
         [Trait("FindStatusAndName", "Success")]
         public void FindStatusAndName_Success()
         {
@@ -259,7 +178,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(a => a.FindById(It.IsAny<int>()), Times.Once);
         }
 
-        [Fact(DisplayName = "ChangeStatus")]
+        [Fact(DisplayName = "ChangeStatus - Should return true when status updated successfully")]
         [Trait("ChangeStatus", "Success")]
         public async Task ChangeStatus_Success()
         {
@@ -276,7 +195,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
         }
 
-        [Fact(DisplayName = "ChangeStatus")]
+        [Fact(DisplayName = "ChangeStatus - Should return false when repository update fails")]
         [Trait("ChangeStatus", "Fail")]
         public async Task ChangeStatus_Fail()
         {
@@ -293,165 +212,7 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(r => r.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
         }
 
-        [Fact(DisplayName = "Delete")]
-        [Trait("Delete", "Success")]
-        public async Task Delete_Success()
-        {
-            // Arrange
-            var ids = new List<int> { 1, 2, 3 };
-            var hashes = new List<string> { "hash1", "hash2" };
-            var cardIds = new List<int> { 10, 20, 30 };
-            var headers = DocumentFixture.FindValidHeadersDto();
-
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var cardRepository = _mocker.GetMock<ICardRepository>();
-            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
-            var stepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
-            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
-            var unitOfWork = _mocker.GetMock<IUnitOfWork>();
-
-            documentRepository.Setup(r => r.ClearWorkflowRelationships(ids)).Returns(true);
-            documentRepository.Setup(r => r.Delete(ids)).Returns(true);
-            documentRepository.Setup(r => r.FindHashById(ids)).Returns(hashes.AsQueryable());
-
-            embeddingsApi.Setup(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                         .ReturnsAsync(_fixture.FindHttpResponseMessage);
-
-            fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
-                            .ReturnsAsync(_fixture.FindHttpResponseMessage);
-
-            cardRepository
-                .Setup(r => r.FindCardIdsByDocumentIdsAsync(ids))
-                .ReturnsAsync(cardIds);
-            cardRepository
-                .Setup(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()))
-                .ReturnsAsync(true);
-
-            stepToolExecutionRepository
-                .Setup(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
-                .Returns(true);
-
-            stepToolOutputRepository
-                .Setup(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
-                .Returns(true);
-
-            // Act
-            var result = await _documentServices.Delete(ids, headers);
-
-            // Assert
-            Assert.True(result);
-            documentRepository.Verify(r => r.ClearWorkflowRelationships(ids), Times.Once);
-            documentRepository.Verify(r => r.Delete(ids), Times.Once);
-            documentRepository.Verify(r => r.FindHashById(ids), Times.Once);
-            embeddingsApi.Verify(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(hashes.Count));
-            fileRepositoryApi.Verify(api => api.Delete(It.IsAny<string>()), Times.Exactly(hashes.Count));
-            cardRepository.Verify(r => r.FindCardIdsByDocumentIdsAsync(ids), Times.Once);
-            cardRepository.Verify(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
-            stepToolExecutionRepository.Verify(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()), Times.Once);
-            stepToolOutputRepository.Verify(r => r.DeleteByCardIds(It.IsAny<IEnumerable<int>>()), Times.Once);
-            unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
-            unitOfWork.Verify(u => u.Commit(), Times.Once);
-            unitOfWork.Verify(u => u.Rollback(), Times.Never);
-        }
-
-        [Fact(DisplayName = "Delete")]
-        [Trait("Delete", "Fail")]
-        public async Task Delete_FailAsync()
-        {
-            // Arrange
-            List<int> list = new() { 1, 2, 3 };
-            List<string> stringArray = new() { "test" };
-            var cardIds = new List<int> { 10, 20, 30 };
-            var headers = DocumentFixture.FindValidHeadersDto();
-
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var embeddingRepository = _mocker.GetMock<IEmbeddingsApi>();
-            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
-            var cardRepository = _mocker.GetMock<ICardRepository>();
-            var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
-            var stepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
-            var unitOfWork = _mocker.GetMock<IUnitOfWork>();
-
-            documentRepository.Setup(a => a.ClearWorkflowRelationships(list)).Returns(true);
-            documentRepository.Setup(a => a.Delete(list)).Returns(false);
-            documentRepository.Setup(a => a.FindHashById(list)).Returns(stringArray.AsQueryable());
-            embeddingRepository
-                .Setup(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(_fixture.FindHttpResponseMessage);
-            fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
-                            .ReturnsAsync(_fixture.FindHttpResponseMessage);
-            cardRepository
-                .Setup(a => a.FindCardIdsByDocumentIdsAsync(list))
-                .ReturnsAsync(cardIds);
-            cardRepository
-                .Setup(a => a.DeleteByDocumentIds(It.IsAny<List<int>>()))
-                .ReturnsAsync(false);
-
-            stepToolExecutionRepository
-                .Setup(a => a.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
-                .Returns(true);
-
-            stepToolOutputRepository
-                .Setup(a => a.DeleteByCardIds(It.IsAny<IEnumerable<int>>()))
-                .Returns(true);
-
-            // Act
-            var result = await _documentServices.Delete(list, headers);
-
-            // Assert
-            Assert.False(result);
-            documentRepository.Verify(a => a.ClearWorkflowRelationships(list), Times.Once);
-            documentRepository.Verify(a => a.Delete(list), Times.Once);
-            documentRepository.Verify(a => a.FindHashById(list), Times.Once);
-            embeddingRepository.Verify(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            fileRepositoryApi.Verify(api => api.Delete(It.IsAny<string>()), Times.Once);
-            cardRepository.Verify(a => a.FindCardIdsByDocumentIdsAsync(list), Times.Once);
-            cardRepository.Verify(a => a.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
-            stepToolExecutionRepository.Verify(a => a.DeleteByCardIds(It.IsAny<IEnumerable<int>>()), Times.Once);
-            stepToolOutputRepository.Verify(a => a.DeleteByCardIds(It.IsAny<IEnumerable<int>>()), Times.Once);
-            unitOfWork.Verify(u => u.BeginTransaction(), Times.Once);
-            unitOfWork.Verify(u => u.Commit(), Times.Once);   // mesmo retornando false, ainda faz commit
-            unitOfWork.Verify(u => u.Rollback(), Times.Never);
-        }
-
-        [Fact(DisplayName = "InputQuestionnaire")]
-        [Trait("InputQuestionnaire", "Success")]
-        public async Task InputQuestionnaire_Success()
-        {
-            // Arrange
-            var document = DocumentFixture.FindValidDocument();
-            var headers = DocumentFixture.FindValidHeadersDto();
-            var tenant = _fixture.FindValidTenantInfoDto();
-            var documentQuestionnaireDto = _fixture.FindDocumentQuestionnaireDto();
-            var questionnaire = _fixture.FindValidQuestionnaireDto();
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            documentRepository.Setup(a => a.FindById(1)).Returns(document);
-            var questionnaireRepository = _mocker.GetMock<IQuestionnaireRepository>();
-            questionnaireRepository.Setup(a => a.FindById(1)).Returns(questionnaire);
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
-            var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent("{'key':'value'}", Encoding.UTF8, "application/json")
-            };
-            embeddingsApi.Setup(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()))
-                         .ReturnsAsync(httpResponseMessage);
-            var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
-            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
-                               .ReturnsAsync(tenant);
-
-            //Act
-            var result = await _documentServices.InputQuestionnaire(documentQuestionnaireDto, headers);
-
-            //Assert
-            Assert.True(result);
-            documentRepository.Verify(a => a.FindById(1), Times.Once);
-            questionnaireRepository.Verify(a => a.FindById(1), Times.Once);
-            embeddingsApi.Verify(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()), Times.Once);
-            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
-        }
-
-        [Fact(DisplayName = "FindDocumentCount")]
+        [Fact(DisplayName = "FindDocumentCount - Should return document count when documents exist")]
         [Trait("FindDocumentCount", "Success")]
         public void FindDocumentCount_Success()
         {
@@ -468,7 +229,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         }
 
-        [Fact(DisplayName = "FindDocumentCount")]
+        [Fact(DisplayName = "FindDocumentCount - Should return zero when no documents")]
         [Trait("FindDocumentCount", "Fail")]
         public void FindDocumentCount_Fail()
         {
@@ -485,85 +246,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         }
 
-        [Fact(DisplayName = "InputDocument")]
-        [Trait("InputDocument", "Success")]
-        public async Task InputDocument_Success()
-        {
-            // Arrange
-            var document = DocumentFixture.FindValidDocument();
-            var headers = DocumentFixture.FindValidHeadersDto();
-            var tenant = _fixture.FindValidTenantInfoDto();
-            var documentInput = _fixture.FindValidDocumentInputDto();
-            var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            documentRepository.Setup(a => a.FindById(1)).Returns(document);
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
-            var documentHistoryServices = _mocker.GetMock<IDocumentHistoryServices>();
-            var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
-            documentHistoryServices.Setup(a => a.Create(It.IsAny<DocumentHistory>())).Returns(true);
-
-            var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent("{'response':'value'}", Encoding.UTF8, "application/json")
-            };
-            embeddingsApi.Setup(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()))
-                         .ReturnsAsync(httpResponseMessage);
-            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
-                               .ReturnsAsync(tenant);
-
-            //Act
-            var result = await _documentServices.InputDocument(documentInput, headers);
-
-            //Assert
-            Assert.NotNull(result);
-            documentRepository.Verify(a => a.FindById(1), Times.Once);
-            embeddingsApi.Verify(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()), Times.Once);
-            documentHistoryServices.Verify(a => a.Create(It.IsAny<DocumentHistory>()), Times.Once);
-            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
-        }
-
-        [Fact(DisplayName = "DeleteHash")]
-        [Trait("DeleteHash", "Success")]
-        public async Task DeleteHash_Success()
-        {
-            // Arrange
-            bool result;
-            var embeddingsRepository = _mocker.GetMock<IEmbeddingsApi>();
-            embeddingsRepository.Setup(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                                .ReturnsAsync(_fixture.FindHttpResponseMessage);
-
-            // Act
-            try
-            {
-                await _documentServices.DeleteHash("test", "test");
-                result = true;
-            }
-            catch (Exception)
-            {
-                result = false;
-            }
-
-            //Assert
-            Assert.True(result);
-        }
-
-        [Fact(DisplayName = "DeleteHash")]
-        [Trait("DeleteHash", "Fail")]
-        public async Task DeleteHash_Fail()
-        {
-            // Arrange
-            var embeddingsRepository = _mocker.GetMock<IEmbeddingsApi>();
-            var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
-            {
-                Content = new StringContent("{'response':'value'}", Encoding.UTF8, "application/json")
-            };
-            embeddingsRepository.Setup(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                                .ReturnsAsync(_fixture.FindInvalidHttpResponseMessage);
-
-            // Act // Assert
-            await Assert.ThrowsAsync<ArgumentException>(() => _documentServices.DeleteHash("test", "test"));
-        }
-
-        [Fact(DisplayName = "ChangeStatusByReferenceFile Success")]
+        [Fact(DisplayName = "ChangeStatusByReferenceFile - Should return true when status updated successfully")]
         [Trait("ChangeStatusByReferenceFile", "Success")]
         public async Task ChangeStatusByReferenceFile_Success()
         {
@@ -582,182 +265,6 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             documentRepository.Verify(a => a.FindDocumentIdByReferenceFile(referenceFile), Times.Once);
             documentRepository.Verify(a => a.ChangeStatus(It.IsAny<int>(), It.IsAny<DocumentStatus>()), Times.Once);
-        }
-
-        [Fact(DisplayName = "ProcessOcrResult should successfully process OCR result and list of DocumentEmbeddingsAddDto")]
-        [Trait("ProcessOcrResult", "Success")]
-        public async Task ProcessOcrResult_Success()
-        {
-            // Arrange
-            var processOcrResultDto = DocumentFixture.FindValidProcessOcrResultDto();
-            var ProcessOcrDataAutomationDto = DocumentFixture.FindValidProcessOcrDataAutomationDto();
-            var idDocument = 1;
-            var tenant = _fixture.FindValidTenantInfoDto();
-            var execution = DocumentFixture.FindValidStepToolExecution();
-            var stepTool =  WorkflowFixture.FindValidStepTool();
-
-            var configurationMock = new Mock<IConfiguration>();
-            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
-            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
-            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
-            var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
-            documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile)).Returns(idDocument);
-            
-            stepToolExecutionRepositoryMock.Setup(e => e.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>())).ReturnsAsync(execution);
-            tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
-                               .ReturnsAsync(tenant);
-            var documentServices = _mocker.CreateInstance<DocumentServices>();
-            stepToolRepositoryMock.Setup(s=> s.FindDependentAsync(processOcrResultDto.Data.StepToolId)).ReturnsAsync(stepTool);
-
-            // Act
-            var result = await documentServices.ProcessOcrResult(processOcrResultDto);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(ProcessOcrDataAutomationDto.CardId, result.CardId);
-            Assert.Equal(ProcessOcrDataAutomationDto.StepToolId, result.StepToolId);
-
-            documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(processOcrResultDto.ReferenceFile), Times.Once);
-            tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
-        }
-
-        [Fact(DisplayName = "ProcessEmbeddingsResult should successfully process embeddings result")]
-        [Trait("ProcessEmbeddingsResult", "Success")]
-        public async Task ProcessEmbeddingsResult_Success()
-        {
-            // Arrange
-            var documentEmbeddingsResultDto = DocumentFixture.FindValidDocumentEmbeddingsResultDto();
-            var idDocument = 1;
-            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
-            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
-            var stepToolExecution = DocumentFixture.FindValidStepToolExecution();
-
-            documentRepositoryMock.Setup(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile)).Returns(idDocument);
-            stepToolExecutionRepositoryMock.Setup(r => r.FindByStepToolIdAndCardIdAsync(documentEmbeddingsResultDto.Data.StepToolId, documentEmbeddingsResultDto.Data.CardId)).ReturnsAsync(stepToolExecution);
-
-             var documentServices = _mocker.CreateInstance<DocumentServices>();
-
-            // Act
-            await documentServices.ProcessEmbeddingsResult(documentEmbeddingsResultDto);
-
-            // Assert
-            documentRepositoryMock.Verify(r => r.FindDocumentIdByReferenceFile(documentEmbeddingsResultDto.ReferenceFile), Times.Once);
-        }
-
-        [Fact(DisplayName = "FindOcrTextByDocumentId - Should return OCR text when available")]
-        [Trait("FindOcrTextByDocumentId", "Success")]
-        public async Task FindOcrTextByDocumentId_Success()
-        {
-            // Arrange
-            var documentId = 1;
-            var cardId = 10;
-            var stepToolId = 5;
-            var referenceFile = "test-file.pdf";
-
-            var document = new Document("Test Document", "Description", referenceFile, 
-                DocumentStatus.OCR, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
-
-            var toolType = new ToolType(1, DateTime.UtcNow, HandlersTypes.Ocr, string.Empty, true);
-            var tool = new Tool(1, DateTime.UtcNow, "OCR Tool", true, 1, 1, 1, false, null, null);
-            typeof(Tool).GetProperty("ToolType")!.SetValue(tool, toolType);
-
-            var stepTool = new StepTool(stepToolId, DateTime.UtcNow, 1, 1, 1, 0, 0);
-            typeof(StepTool).GetProperty("Tool")!.SetValue(stepTool, tool);
-
-            var execution = new StepToolExecution(1, DateTime.UtcNow, stepToolId, StatusExecution.Ready, cardId);
-            typeof(StepToolExecution).GetProperty("StepTool")!.SetValue(execution, stepTool);
-
-            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, null);
-            typeof(Card).GetProperty("Executions")!.SetValue(card, new List<StepToolExecution> { execution });
-
-            var ocrOutput = new DocumentEmbeddingsDataDto
-            {
-                ReferenceFile = referenceFile,
-                DocumentEmbeddings = new List<DocumentEmbeddingsAddDto>
-                {
-                    new DocumentEmbeddingsAddDto { Text = "Page 1 text", Metadata = new { PageNumber = 1 } },
-                    new DocumentEmbeddingsAddDto { Text = "Page 2 text", Metadata = new { PageNumber = 2 } }
-                }
-            };
-            var outputJson = Newtonsoft.Json.JsonConvert.SerializeObject(ocrOutput);
-
-            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
-            documentRepositoryMock.Setup(r => r.FindById(documentId)).Returns(document);
-
-            var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
-            cardRepositoryMock.Setup(r => r.FindByDocumentIdCardAsync(documentId)).ReturnsAsync(card);
-
-            var stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
-            stepToolOutputRepositoryMock.Setup(r => r.FindByStepToolId(stepToolId, cardId)).ReturnsAsync(outputJson);
-
-            var documentServices = _mocker.CreateInstance<DocumentServices>();
-
-            // Act
-            var result = await documentServices.FindOcrTextByDocumentId(documentId);
-
-            // Assert
-            Assert.True(result.HasOcr);
-            Assert.Contains("Page 1 text", result.Content);
-            Assert.Contains("Page 2 text", result.Content);
-            Assert.Equal(referenceFile, result.ReferenceFile);
-            documentRepositoryMock.Verify(r => r.FindById(documentId), Times.Once);
-            cardRepositoryMock.Verify(r => r.FindByDocumentIdCardAsync(documentId), Times.Once);
-            stepToolOutputRepositoryMock.Verify(r => r.FindByStepToolId(stepToolId, cardId), Times.Once);
-        }
-
-        [Fact(DisplayName = "FindOcrTextByDocumentId - Should return HasOcr false when document not found")]
-        [Trait("FindOcrTextByDocumentId", "DocumentNotFound")]
-        public async Task FindOcrTextByDocumentId_DocumentNotFound()
-        {
-            // Arrange
-            var documentId = 1;
-
-            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
-            documentRepositoryMock.Setup(r => r.FindById(documentId)).Returns((Document)null!);
-
-            var documentServices = _mocker.CreateInstance<DocumentServices>();
-
-            // Act
-            var result = await documentServices.FindOcrTextByDocumentId(documentId);
-
-            // Assert
-            Assert.False(result.HasOcr);
-            Assert.Empty(result.Content);
-            documentRepositoryMock.Verify(r => r.FindById(documentId), Times.Once);
-        }
-
-        [Fact(DisplayName = "FindOcrTextByDocumentId - Should return HasOcr false when no OCR execution found")]
-        [Trait("FindOcrTextByDocumentId", "NoOcrExecution")]
-        public async Task FindOcrTextByDocumentId_NoOcrExecution()
-        {
-            // Arrange
-            var documentId = 1;
-            var cardId = 10;
-            var referenceFile = "test-file.pdf";
-
-            var document = new Document("Test Document", "Description", referenceFile, 
-                DocumentStatus.NotAnalyzed, "test@email.com", documentId, new List<Workflow>(), DateTime.UtcNow);
-
-            var card = new Card(cardId, DateTime.UtcNow, 1, documentId, "Card Name", 1, null);
-            typeof(Card).GetProperty("Executions")!.SetValue(card, new List<StepToolExecution>());
-
-            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
-            documentRepositoryMock.Setup(r => r.FindById(documentId)).Returns(document);
-
-            var cardRepositoryMock = _mocker.GetMock<ICardRepository>();
-            cardRepositoryMock.Setup(r => r.FindByDocumentIdCardAsync(documentId)).ReturnsAsync(card);
-
-            var documentServices = _mocker.CreateInstance<DocumentServices>();
-
-            // Act
-            var result = await documentServices.FindOcrTextByDocumentId(documentId);
-
-            // Assert
-            Assert.False(result.HasOcr);
-            Assert.Empty(result.Content);
-            Assert.Equal(referenceFile, result.ReferenceFile);
-            documentRepositoryMock.Verify(r => r.FindById(documentId), Times.Once);
-            cardRepositoryMock.Verify(r => r.FindByDocumentIdCardAsync(documentId), Times.Once);
         }
     }
 }

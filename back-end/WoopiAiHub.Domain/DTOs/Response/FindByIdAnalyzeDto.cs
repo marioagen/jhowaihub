@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 
 namespace WoopiAiHub.Domain.DTOs.Response
 {
@@ -8,5 +8,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public string Description { get; set; } = string.Empty;
         public string ReferenceFile { get; set; } = string.Empty;
         public int? CardId { get; set; }
+        public int? DocumentBatchId { get; set; }
     }
 }

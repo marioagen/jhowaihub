@@ -2,9 +2,7 @@
     <div class="row">
         <div :class="`col-${findColSize('search')}`">
             <div class="input-group">
-                <span
-                    class="input-group-text border-end-0 bg-white"
-                >
+                <span class="input-group-text border-end-0">
                     <LucideIcon
                         icon="Search"
                         size="16"
@@ -20,14 +18,12 @@
                     v-model="filters.input"
                     @keydown.enter="filterData"
                     @keydown.delete="filterData"
-                    :placeholder="
-                        $t('filters.workflowInput')
-                    "
+                    :placeholder="$t('filters.workflowInput')"
                     ref="searchInpt"
                 />
                 <span
                     v-if="showCleanBtn"
-                    class="input-group-text border-start-0 bg-white"
+                    class="input-group-text border-start-0"
                     @click="cleanInput"
                 >
                     <LucideIcon
@@ -39,9 +35,7 @@
         </div>
         <div :class="`col-${findColSize('orderBy')}`">
             <div class="input-group">
-                <span
-                    class="input-group-text border-end-0 bg-white"
-                >
+                <span class="input-group-text border-end-0">
                     <LucideIcon
                         icon="ArrowUpDown"
                         size="16"
@@ -72,9 +66,7 @@
             v-if="hasTeams"
         >
             <div class="input-group">
-                <span
-                    class="input-group-text border-end-0 bg-white"
-                >
+                <span class="input-group-text border-end-0">
                     <LucideIcon
                         icon="Users"
                         size="16"
@@ -87,9 +79,7 @@
                     label="name"
                     trackBy="name"
                     :searchable="true"
-                    :placeholder="
-                        $t('filters.teamsSelect.all')
-                    "
+                    :placeholder="$t('filters.teamsSelect.all')"
                     mode="single"
                     :canClear="true"
                     @change="filterData"
@@ -110,9 +100,7 @@
             v-if="hasUsers"
         >
             <div class="input-group">
-                <span
-                    class="input-group-text border-end-0 bg-white"
-                >
+                <span class="input-group-text border-end-0">
                     <LucideIcon
                         icon="User"
                         size="16"
@@ -160,11 +148,10 @@
         data() {
             return {
                 filters: {
-                    orderBy: "created asc",
+                    orderBy: "name asc",
                     input: null,
                     isAllUsers: true,
-                    login: this.$store.state.userProfile
-                        .login,
+                    login: this.$store.state.userProfile.login,
                     teamId: null,
                     userId: null,
                 },
@@ -175,8 +162,7 @@
                 this.$emit("filter", this.filters);
             },
             filterUsers() {
-                this.filters.isAllUsers =
-                    !this.filters.isAllUsers;
+                this.filters.isAllUsers = !this.filters.isAllUsers;
                 this.filterData();
             },
             cleanInput() {
@@ -186,15 +172,9 @@
             findColSize(item) {
                 switch (item) {
                     case "search":
-                        return this.hasTeams ||
-                            this.hasUsers
-                            ? "5"
-                            : "7";
+                        return this.hasTeams || this.hasUsers ? "5" : "7";
                     case "orderBy":
-                        return this.hasTeams ||
-                            this.hasUsers
-                            ? "3"
-                            : "5";
+                        return this.hasTeams || this.hasUsers ? "3" : "5";
                     case "team":
                         return this.hasTeams ? "2" : "0";
                     case "user":
@@ -218,9 +198,7 @@
                 return [
                     {
                         id: "",
-                        name: this.$t(
-                            "filters.teamsSelect.all"
-                        ),
+                        name: this.$t("filters.teamsSelect.all"),
                     },
                     ...this.teamsList,
                 ];

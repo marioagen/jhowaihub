@@ -3,7 +3,6 @@ using System.Linq.Expressions;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
@@ -145,6 +144,7 @@ namespace WoopiAiHub.Repository
                     Color = s.Status.Color,
                 },
                 StepTools = s.StepTools
+            .OrderBy(st => st.Order)
             .Select(st => new StepToolDto
             {
                 Id = st.Id,
@@ -413,6 +413,7 @@ namespace WoopiAiHub.Repository
                 .Select(w => new Phase1Dto
                 {
                     Name = w.Name,
+                    Description = w.Description,
                     Teams = w.Teams.Select(t => new TeamDto
                     {
                         Id = t.Id,
@@ -490,6 +491,7 @@ namespace WoopiAiHub.Repository
                     },
                     HasStepTools = s.StepTools.Any(),
                     StepTools = s.StepTools
+                        .OrderBy(st => st.Order)
                         .Select(st => new StepToolDto
                         {
                             Id = st.Id,
@@ -539,6 +541,7 @@ namespace WoopiAiHub.Repository
             {
                 Id = w.Id,
                 Name = w.Name,
+                Description = w.Description,
                 Created = w.Created,
                 Teams = w.Teams.Select(t => new TeamDto
                 {
@@ -564,6 +567,7 @@ namespace WoopiAiHub.Repository
                     },
                     HasStepTools = s.StepTools.Any(),
                     StepTools = s.StepTools
+                        .OrderBy(st => st.Order)
                         .Select(st => new StepToolDto
                         {
                             Id = st.Id,
@@ -746,6 +750,7 @@ namespace WoopiAiHub.Repository
             {
                 Id = w.Id,
                 Name = w.Name,
+                Description = w.Description,
                 Teams = w.Teams
                     .Select(t => new TeamDto
                     {
@@ -805,6 +810,42 @@ namespace WoopiAiHub.Repository
                                                 .AnyAsync(u => u.Id == userId);
 
             return isValidTeamUser;
+        }
+
+        /// <summary>
+        /// Retrieves all enabled workflows as internal data transfer objects.
+        /// </summary>
+        /// <returns>A collection of <see cref="WorkflowInternalDto"/> objects representing all workflows that are currently
+        /// enabled. The collection is empty if no enabled workflows are found.</returns>
+        public ICollection<WorkflowInternalDto> FindAllInternal()
+        {
+            return _context.Workflows
+                            .AsNoTracking()
+                            .Where(w => w.Enable.Equals(true))
+                            .Select(t => new WorkflowInternalDto
+                            {
+                                Id = t.Id,
+                                Name = t.Name,
+                                Created = t.Created,
+                            })
+                            .ToList();
+        }
+
+        /// <summary>
+        /// Retrieves a workflow by its ID, including its associated steps.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Workflow?> FindByIdReturnModelWithSteps(int id)
+        {
+            return await _context.Workflows
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.StepTools)
+                        .ThenInclude(t => t.Tool)
+                            .ThenInclude(tt => tt.ToolType)
+                .Include(w => w.Teams)
+                .AsSplitQuery()
+                .FirstAsync(w => w.Id == id && w.Enable.Equals(true));
         }
     }
 }

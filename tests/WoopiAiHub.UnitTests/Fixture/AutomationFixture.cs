@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Bogus;
 using Bogus.DataSets;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -11,6 +11,7 @@ using WoopiAiHub.Domain.DTOs.Request.Automation;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Fixture
@@ -264,16 +265,27 @@ namespace WoopiAiHub.UnitTests.Fixture
             );
         }
 
-        public static StepToolOutput FindValidStepToolOutput(string? value = null)
+        public static StepToolOutput FindValidStepToolOutput(string? value = null, string toolTypeName = HandlersTypes.Ocr)
         {
             var _faker = new Faker("pt_BR");
-            return new StepToolOutput(
+            var output = new StepToolOutput(
                 _faker.Random.Int(1, 1000),
                 DateTime.UtcNow,
                 _faker.Random.Int(1, 1000),
                 _faker.Random.Int(1, 1000),
                 value ?? FindValidJsonContent()
             );
+
+            var toolType = new ToolType(1, DateTime.UtcNow, toolTypeName, toolTypeName, true);
+            var tool = new Tool(1, DateTime.UtcNow, "Tool", true, 1, 1, 1, false, null, null);
+            tool.ToolType = toolType;
+
+            var stepTool = new StepTool(1, DateTime.UtcNow, 1, 1, 1, 1, 1);
+            stepTool.Tool = tool;
+
+            output.StepTool = stepTool;
+
+            return output;
         }
     }
 

@@ -33,5 +33,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> IsValidTeamUser(int cardId,
                                    Guid userId);
         Task<Workflow?> FindByIdForAnalyze(int id);
+        ICollection<WorkflowInternalDto> FindAllInternal();
+        Task<Workflow?> FindByIdReturnModelWithSteps(int id);
     }
 }

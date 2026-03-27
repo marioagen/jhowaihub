@@ -21,18 +21,6 @@ export default {
                 };
             });
     },
-    getQuizzes() {
-        return api
-            .get("/Questionnaire/FindAll")
-            .then(({ data }) => {
-                return data;
-            })
-            .catch((e) => {
-                return {
-                    error: e,
-                };
-            });
-    },
     getQuizzById(id) {
         return api
             .get(`/Questionnaire/${id}`)
@@ -78,6 +66,18 @@ export default {
                 return true;
             })
             .catch(function (e) {
+                return {
+                    error: e,
+                };
+            });
+    },
+    getQuizzesList() {
+        return api
+            .get("/Questionnaire/FindAll")
+            .then(({ data }) => {
+                return data;
+            })
+            .catch((e) => {
                 return {
                     error: e,
                 };

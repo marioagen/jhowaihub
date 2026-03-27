@@ -1,6 +1,13 @@
 <template>
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-4">
+            <div class="mb-4">
+                <DependencySelector
+                    :previousStepTools="previousStepTools"
+                    :selectedDependencies="selectedDependencies"
+                    @update:selectedDependencies="updateDependencies"
+                />
+            </div>
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title mb-3">
@@ -42,184 +49,219 @@
                                 type="text"
                                 class="form-control"
                                 id="endpointUrl"
+                                maxlength="500"
                                 :disabled="readOnly"
                             />
                         </div>
                     </div>
-                    <ul
-                        class="nav nav-tabs mb-3"
-                        role="tablist"
-                    >
-                        <li
-                            class="nav-item"
-                            role="presentation"
+                    <div class="row">
+                        <ul
+                            class="nav nav-tabs mb-3"
+                            role="tablist"
                         >
-                            <button
-                                class="nav-link active"
-                                id="query-params-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#query-params"
-                                type="button"
-                                role="tab"
+                            <li
+                                class="nav-item"
+                                role="presentation"
                             >
-                                {{ $t("template.queryParams") }}
-                            </button>
-                        </li>
-                        <li
-                            class="nav-item"
-                            role="presentation"
-                        >
-                            <button
-                                class="nav-link"
-                                id="headers-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#headers"
-                                type="button"
-                                role="tab"
-                            >
-                                {{ $t("template.headers") }}
-                            </button>
-                        </li>
-                    </ul>
-                    <div class="tab-content">
-                        <div
-                            class="tab-pane fade show active"
-                            id="query-params"
-                            role="tabpanel"
-                        >
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="mb-0">
-                                    {{ $t("template.queryParameters") }}
-                                </h6>
-                            </div>
-                            <div v-if="templateData.queryParams.length > 0">
-                                <div
-                                    v-for="(param, index) in templateData.queryParams"
-                                    :key="index"
-                                    class="row mb-2 align-items-center"
+                                <button
+                                    class="nav-link active"
+                                    id="query-params-tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#query-params"
+                                    type="button"
+                                    role="tab"
                                 >
-                                    <div :class="editable ? 'col-6' : 'col-12'">
-                                        <input
-                                            :value="param.key"
-                                            type="text"
-                                            class="form-control form-control-sm"
-                                            disabled
-                                            :placeholder="$t('template.keyPlaceholder')"
-                                        />
-                                    </div>
-                                    <div
-                                        v-if="editable"
-                                        class="col-6"
-                                    >
-                                        <input
-                                            :value="param.value"
-                                            @input="updateQueryParam(index, $event.target.value)"
-                                            type="text"
-                                            class="form-control form-control-sm"
-                                            :placeholder="$t('template.valuePlaceholder')"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div
-                                v-else
-                                class="text-center text-muted py-4"
+                                    {{ $t("template.queryParams") }}
+                                </button>
+                            </li>
+                            <li
+                                class="nav-item"
+                                role="presentation"
                             >
-                                <small>
-                                    {{ $t("template.noQueryParameters") }}
-                                </small>
-                            </div>
-                        </div>
-                        <div
-                            class="tab-pane fade"
-                            id="headers"
-                            role="tabpanel"
-                        >
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h6 class="mb-0">
+                                <button
+                                    class="nav-link"
+                                    id="headers-tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#headers"
+                                    type="button"
+                                    role="tab"
+                                >
                                     {{ $t("template.headers") }}
-                                </h6>
-                            </div>
-                            <div v-if="templateData.headers.length > 0">
-                                <div
-                                    v-for="(header, index) in templateData.headers"
-                                    :key="index"
-                                    class="row mb-2 align-items-center"
-                                >
-                                    <div :class="editable ? 'col-6' : 'col-12'">
-                                        <input
-                                            :value="header.key"
-                                            type="text"
-                                            class="form-control form-control-sm"
-                                            disabled
-                                            :placeholder="$t('template.keyPlaceholder')"
-                                        />
-                                    </div>
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div
+                                class="tab-pane fade show active"
+                                id="query-params"
+                                role="tabpanel"
+                            >
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">
+                                        {{ $t("template.queryParameters") }}
+                                    </h6>
+                                </div>
+                                <div v-if="templateData.queryParams.length > 0">
                                     <div
-                                        v-if="editable"
-                                        class="col-6"
+                                        v-for="(param, index) in templateData.queryParams"
+                                        :key="index"
+                                        class="row mb-2 align-items-center"
                                     >
-                                        <input
-                                            :value="header.value"
-                                            @input="updateHeader(index, $event.target.value)"
-                                            type="text"
-                                            class="form-control form-control-sm"
-                                            :placeholder="$t('template.valuePlaceholder')"
-                                        />
+                                        <div :class="editable ? 'col-6' : 'col-12'">
+                                            <input
+                                                :value="param.key"
+                                                type="text"
+                                                class="form-control form-control-sm"
+                                                disabled
+                                                :placeholder="$t('template.keyPlaceholder')"
+                                            />
+                                        </div>
+                                        <div
+                                            v-if="editable"
+                                            class="col-6"
+                                        >
+                                            <input
+                                                :value="param.value"
+                                                @input="
+                                                    updateQueryParam(index, $event.target.value)
+                                                "
+                                                type="text"
+                                                class="form-control form-control-sm"
+                                                :placeholder="$t('template.valuePlaceholder')"
+                                            />
+                                        </div>
                                     </div>
+                                </div>
+                                <div
+                                    v-else
+                                    class="text-center text-muted py-4"
+                                >
+                                    <small>
+                                        {{ $t("template.noQueryParameters") }}
+                                    </small>
                                 </div>
                             </div>
                             <div
-                                v-else
-                                class="text-center text-muted py-4"
+                                class="tab-pane fade"
+                                id="headers"
+                                role="tabpanel"
                             >
-                                <small>
-                                    {{ $t("template.noQueryParameters") }}
-                                </small>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">
+                                        {{ $t("template.headers") }}
+                                    </h6>
+                                </div>
+                                <div v-if="templateData.headers.length > 0">
+                                    <div
+                                        v-for="(header, index) in templateData.headers"
+                                        :key="index"
+                                        class="row mb-2 align-items-center"
+                                    >
+                                        <div :class="editable ? 'col-6' : 'col-12'">
+                                            <input
+                                                :value="header.key"
+                                                type="text"
+                                                class="form-control form-control-sm"
+                                                disabled
+                                                :placeholder="$t('template.keyPlaceholder')"
+                                            />
+                                        </div>
+                                        <div
+                                            v-if="editable"
+                                            class="col-6"
+                                        >
+                                            <input
+                                                :value="header.value"
+                                                @input="updateHeader(index, $event.target.value)"
+                                                type="text"
+                                                class="form-control form-control-sm"
+                                                :placeholder="$t('template.valuePlaceholder')"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div
+                                    v-else
+                                    class="text-center text-muted py-4"
+                                >
+                                    <small>
+                                        {{ $t("template.noQueryParameters") }}
+                                    </small>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6">
+        <div class="col-lg-8">
             <div class="card">
                 <div class="card-body">
                     <div class="mb-2">
                         <h6 class="card-title">
                             {{ $t("template.requestBody") }}
                         </h6>
-                        <small class="text-muted">
-                            {{ $t("template.bodySubtitle") }}
-                        </small>
                     </div>
-                    <div class="position-relative">
-                        <textarea
-                            :value="templateData.body"
-                            @input="updateBody($event.target.value)"
-                            class="form-control font-monospace"
-                            rows="15"
-                            :disabled="readOnly && !editable"
-                        ></textarea>
-                    </div>
-                    <div class="alert alert-info mt-3 py-2 px-3 d-flex align-items-start">
-                        <LucideIcon
-                            icon="Lightbulb"
-                            :size="16"
-                            class="me-2 flex-shrink-0"
-                        />
-                        <small>
-                            {{ $t("template.variablesTip") }}
-                        </small>
-                    </div>
+                    <Field
+                        name="body"
+                        rules="jsonValidation"
+                        v-slot="{ field, errorMessage }"
+                    >
+                        <div class="position-relative">
+                            <textarea
+                                :name="field.name"
+                                :value="templateData.body"
+                                @input="
+                                    handleBodyInput($event);
+                                    field.onInput($event);
+                                "
+                                @blur="
+                                    handleBodyBlur($event);
+                                    field.onBlur($event);
+                                "
+                                class="form-control font-monospace"
+                                rows="17"
+                                :disabled="readOnly && !editable"
+                                :class="{ 'is-invalid': errorMessage || jsonError }"
+                            ></textarea>
+                        </div>
+                        <span
+                            class="validation-message text-danger"
+                            v-if="errorMessage"
+                        >
+                            {{ errorMessage }}
+                        </span>
+                        <span
+                            class="validation-message text-danger"
+                            v-if="jsonError"
+                        >
+                            {{ jsonError }}
+                        </span>
+                    </Field>
                 </div>
             </div>
         </div>
     </div>
 </template>
 <script>
+    import DependencySelector from "@/components/flow/DependencySelector.vue";
+    import { Field, defineRule } from "vee-validate";
+    import i18n from "@/locales/i18n";
+    import textHelper from "@/helpers/textHelper";
+
+    defineRule("jsonValidation", (value) => {
+        const result = textHelper.validateJSON(value);
+        if (!result.isValid) {
+            return i18n.global.t("template.invalidJsonFormat");
+        }
+        return true;
+    });
     export default {
         name: "TemplateFormDisplay",
+        components: {
+            DependencySelector,
+            Field,
+        },
         props: {
             templateData: {
                 type: Object,
@@ -250,6 +292,19 @@
                     { id: 5, value: "DELETE" },
                 ],
             },
+            selectedDependencies: {
+                type: Array,
+                default: () => [],
+            },
+            previousStepTools: {
+                type: Array,
+                default: () => [],
+            },
+        },
+        data() {
+            return {
+                jsonError: "",
+            };
         },
         methods: {
             updateUrl(value) {
@@ -267,8 +322,24 @@
                     value,
                 });
             },
+            handleBodyInput(event) {
+                const value = event.target.value;
+                this.validateJSON(value);
+                this.updateBody(value);
+            },
+            handleBodyBlur(event) {
+                const value = event.target.value;
+                this.validateJSON(value);
+            },
+            validateJSON(value) {
+                const result = textHelper.validateJSON(value);
+                this.jsonError = result.isValid ? "" : this.$t("template.invalidJsonFormat");
+            },
             updateBody(value) {
                 this.$emit("update:body", value);
+            },
+            updateDependencies(dependencies) {
+                this.$emit("update:dependencies", dependencies);
             },
         },
     };

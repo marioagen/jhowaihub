@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.CodeAnalysis;
+using Microsoft.AspNetCore.SignalR;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 
@@ -31,7 +30,8 @@ namespace WoopiAiHub.Api.Hubs
                                            int cardId, 
                                            double percentage,
                                            int stepId,
-                                           string toolName)
+                                           string toolName,
+                                           bool failed = false)
         {
             var connections = _connectionMapping.GetConnections(userEmail);
             foreach (var connectionId in connections)
@@ -41,7 +41,8 @@ namespace WoopiAiHub.Api.Hubs
                     CardId = cardId,
                     Percentage = (int)percentage,
                     StepId = stepId,
-                    ToolName = toolName
+                    ToolName = toolName,
+                    Failed = failed
                 });
             }
         }

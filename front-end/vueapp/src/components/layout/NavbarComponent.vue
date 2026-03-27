@@ -8,6 +8,22 @@
                 <span class="badge bg-light text-dark border">{{ this.selectedTenant }}</span>
                 <div class="navbar-right-group d-flex align-items-center gap-1 pe-2 ms-auto">
                     <NavbarNotificationComponent />
+                    <button
+                        class="btn btn-outline-primary table-btn btn-sm"
+                        type="button"
+                        @click="toggleTheme"
+                        aria-expanded="false"
+                        style="display: flex; align-items: center; justify-content: center"
+                    >
+                        <LucideIcon
+                            icon="Moon"
+                            v-if="isDarkMode"
+                        />
+                        <LucideIcon
+                            icon="Sun"
+                            v-else
+                        />
+                    </button>
                     <LanguageComponent />
                     <div
                         class="dropdown-menu-user"
@@ -29,21 +45,6 @@
                                     v-if="profileImage !== ''"
                                 />
                                 {{ setBreakWord(user) }}
-                            </a>
-                            <a
-                                class="d-flex align-items-center text-black text-decoration-none dropdown-toggle username-collapsed"
-                                id="dropdownUser1"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                            >
-                                <img
-                                    :src="profileImage"
-                                    alt="Imagem do perfil"
-                                    width="32"
-                                    height="32"
-                                    class="rounded-circle me-2"
-                                    v-if="profileImage !== ''"
-                                />
                             </a>
                             <ul
                                 class="dropdown-menu dropdown-menu-sidebar text-small shadow menu-right"
@@ -99,18 +100,17 @@
                 user: this.$store.state.userProfile.name,
                 selectedTenant: null,
                 tenantsFromState: [],
+                currentTheme: localStorage.getItem("theme") || "css-theme-light",
             };
         },
         methods: {
             handleTenantChange(event) {
-                let self = this;
-
-                self.selectedTenant = event.target.value;
-                self.$store.commit("updateUserProfileTenant", {
-                    amount: self.selectedTenant,
+                this.selectedTenant = event.target.value;
+                this.$store.commit("updateUserProfileTenant", {
+                    amount: this.selectedTenant,
                 });
 
-                self.InitializeTenant(self.selectedTenant)
+                this.InitializeTenant(this.selectedTenant)
                     .then(() => {
                         window.location.href = "/";
                     })
@@ -119,8 +119,6 @@
                     });
             },
             InitializeTenant(tenant) {
-                let self = this;
-
                 return api.get("/Tenant/InitializeTenant/" + tenant);
             },
             getUserTenants(userEmail, savedTenant) {
@@ -162,8 +160,24 @@
                 if (strSplit.length === 1) return strSplit[0];
                 return `${strSplit[0]} ${strSplit[strSplit.length - 1]}`;
             },
+            toggleTheme() {
+                if (localStorage.getItem("theme") === "css-theme-dark") {
+                    this.setTheme("css-theme-light");
+                } else {
+                    this.setTheme("css-theme-dark");
+                }
+            },
+            setTheme(themeName) {
+                localStorage.setItem("theme", themeName);
+                document.documentElement.className = themeName;
+                this.currentTheme = themeName;
+                this.$store.commit("setTheme", themeName);
+            },
         },
         computed: {
+            isDarkMode() {
+                return this.currentTheme === "css-theme-dark";
+            },
             tenantInitialized() {
                 return this.$store.state.tenantInitialized;
             },
@@ -196,19 +210,22 @@
             this.getUserTenants(userEmail, savedTenant);
         },
         mounted() {
-            document.documentElement.className = "css-theme-light";
+            const savedTheme = localStorage.getItem("theme");
+            this.currentTheme =
+                savedTheme === "css-theme-dark" ? "css-theme-dark" : "css-theme-light";
+            this.setTheme(this.currentTheme);
         },
     };
 </script>
 <style scoped>
     .navbar {
-        padding: 1;
+        padding: 1%;
         padding-top: 0.9rem;
         padding-bottom: 0.8rem;
     }
 
     .navbar-light {
-        background-color: #ffffff;
+        background-color: var(--color-bg-navbar) !important;
     }
 
     .navbar-toggler,
@@ -256,6 +273,32 @@
         border: 1px solid #c7c8c9 !important;
     }
 
+    .btn.btn-light.lang-link,
+    .btn.btn-light.lang-link:hover,
+    .btn.btn-light.lang-link.lang-active,
+    .btn.btn-light.lang-link.lang-active:hover {
+        padding: 0.1rem 0.3rem;
+        background-color: transparent;
+        border: none;
+    }
+
+    .lang-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .lang-link.lang-active,
+    .lang-link:hover {
+        color: #0d6efd !important;
+    }
+
+    .btn-lang {
+        padding: 2%;
+        background-color: white;
+        border-color: white;
+    }
+
     .text-black {
         color: black;
     }
@@ -295,95 +338,189 @@
             display: block !important;
         }
 
-        .username {
-            display: none !important;
+        .navbar-light {
+            background-color: #ffffff;
         }
 
-        .dropdown-menu {
-            right: 0 !important;
-            left: auto !important;
+        .navbar-toggler,
+        .navbar-toggler-icon {
+            display: none;
+        }
+
+        .navbar-expand-lg {
+            flex-wrap: nowrap !important;
+            justify-content: flex-start !important;
+        }
+
+        .navbar-expand-lg .navbar-collapse {
+            display: flex !important;
+            flex-basis: auto !important;
+        }
+
+        .collapse {
+            justify-content: space-between;
+        }
+
+        .dropdown-menu-user {
+            padding: 0px 10px;
+        }
+
+        .dropdown-toggle {
+            outline: 0;
+        }
+
+        .dropdown-item {
+            padding: 0rem 0.2rem !important;
+        }
+
+        .remove-hover .dropdown-item,
+        .remove-hover a:hover {
+            color: #212529;
+            background-color: #ffffff;
+        }
+
+        .form-switch {
+            padding-left: 2.7em !important;
+        }
+
+        .bd-circle {
+            border: 1px solid #c7c8c9 !important;
+        }
+
+        .text-black {
+            color: black;
         }
 
         #tenantDropdownButton {
-            font-size: 0.9rem;
-            /* Reduz o tamanho da fonte em telas menores */
-            padding: 0.5rem;
-            /* Ajusta o espaçamento interno */
-        }
-
-        #tenantDropdownMenu {
             width: 100%;
-            /* Garante que o menu dropdown seja responsivo */
-            font-size: 0.85rem;
+            /* Ajusta o botão para ser responsivo */
+            font-size: 1rem;
             /* Ajusta o tamanho da fonte */
         }
 
-        #tenantDropdownLabel {
-            font-size: 0.9rem;
-            /* Ajusta o tamanho da fonte no label */
-        }
-
         .circle-icon {
-            padding-top: 11%;
-        }
-    }
-
-    #tenantDropdownMenu {
-        border: 1px solid var(--border-color);
-        border-radius: 0.25rem;
-        padding: 0.5rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        overflow-y: auto;
-    }
-
-    #tenantDropdownMenu li {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        white-space: normal;
-        /* Permite quebra de linhas */
-        padding: 0.25rem 0.5rem;
-        /* Ajusta o padding dos itens */
-    }
-
-    .vertical-line {
-        width: 1px;
-        height: 40px;
-        background-color: #ccc;
-    }
-
-    @media (min-width: 769px) {
-        .username-collapsed {
-            display: none !important;
+            width: 32px;
+            height: 32px;
+            background-color: var(--color-bg-btn-primary) !important;
+            /* Cor de fundo padrão */
+            text-align: center;
+            color: white;
+            border-radius: 50%;
+            padding-top: 7%;
         }
 
-        .username {
-            display: block !important;
+        #dropdown-menu-button {
+            margin-top: 1rem !important;
         }
-    }
 
-    @media (max-width: 576px) {
-        #tenantDropdownButton {
-            font-size: 0.8rem;
-            padding: 0.4rem;
+        @media (max-width: 309px) {
+            .logo {
+                width: 31px;
+                height: 40px;
+                overflow: hidden;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .username-collapsed {
+                display: block !important;
+            }
+
+            .username {
+                display: none !important;
+            }
+
+            .dropdown-menu {
+                right: 0 !important;
+                left: auto !important;
+            }
+
+            #tenantDropdownButton {
+                font-size: 0.9rem;
+                /* Reduz o tamanho da fonte em telas menores */
+                padding: 0.5rem;
+                /* Ajusta o espaçamento interno */
+            }
+
+            #tenantDropdownMenu {
+                width: 100%;
+                /* Garante que o menu dropdown seja responsivo */
+                font-size: 0.85rem;
+                /* Ajusta o tamanho da fonte */
+            }
+
+            #tenantDropdownLabel {
+                font-size: 0.9rem;
+                /* Ajusta o tamanho da fonte no label */
+            }
+
+            .circle-icon {
+                padding-top: 11%;
+            }
         }
 
         #tenantDropdownMenu {
-            max-width: 100%;
-            font-size: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
         }
 
         #tenantDropdownMenu li {
-            padding: 0.2rem 0.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            white-space: normal;
+            /* Permite quebra de linhas */
+            padding: 0.25rem 0.5rem;
+            /* Ajusta o padding dos itens */
         }
 
-        #tenantDropdownLabel {
-            font-size: 0.8rem;
+        .vertical-line {
+            width: 1px;
+            height: 40px;
+            background-color: #ccc;
         }
-    }
 
-    .menu-right {
-        right: 0 !important;
-        left: auto !important;
+        @media (min-width: 769px) {
+            .username-collapsed {
+                display: none !important;
+            }
+
+            .username {
+                display: block !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            #tenantDropdownButton {
+                font-size: 0.8rem;
+                padding: 0.4rem;
+            }
+
+            #tenantDropdownMenu {
+                max-width: 100%;
+                font-size: 0.8rem;
+            }
+
+            #tenantDropdownMenu li {
+                padding: 0.2rem 0.4rem;
+            }
+
+            #tenantDropdownLabel {
+                font-size: 0.8rem;
+            }
+        }
+
+        .menu-right {
+            right: 0 !important;
+            left: auto !important;
+        }
+        .bg-light {
+            background-color: var(--color-bg-body-content) !important;
+            border: 1px solid var(--color-border-form-control) !important;
+            color: var(--color-body-content) !important;
+        }
     }
 </style>

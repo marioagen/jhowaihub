@@ -1,7 +1,5 @@
 <template>
-    <div
-        class="d-flex flex-column justify-content-between align-items-start mb-2"
-    >
+    <div class="d-flex flex-column justify-content-between align-items-start mb-2">
         <div class="delete-container">
             <button
                 class="btn btn-outline-danger btn-sm delete-button"
@@ -35,9 +33,7 @@
         >
             <template #cell-questions="{ data }">
                 <BadgeComponent
-                    :text="
-                        questionsNumber(data.row.questions)
-                    "
+                    :text="questionsNumber(data.row.questions)"
                     :clickable="false"
                     variant="primary"
                 />
@@ -45,12 +41,21 @@
             <template #cell-created="{ data }">
                 {{ formatDate(data.row.created) }}
             </template>
-            <template #cell-actions="{ data }">                            
+            <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
-                    <a :class="actionClass" @click="redirectToEdit(data.row)" v-tooltip="$t('common.edit')">
+                    <a
+                        :class="actionClass"
+                        @click="redirectToEdit(data.row)"
+                        v-tooltip="$t('common.edit')"
+                    >
                         <LucideIcon icon="SquarePen" />
                     </a>
-                    <a :class="actionClass" class="text-danger" @click="openConfirmation(data.row)" v-tooltip="$t('common.delete')">
+                    <a
+                        :class="actionClass"
+                        class="text-danger"
+                        @click="openConfirmation(data.row)"
+                        v-tooltip="$t('common.delete')"
+                    >
                         <LucideIcon icon="Trash2" />
                     </a>
                 </ActionTableListComponent>
@@ -124,7 +129,7 @@
             selectedQuizz: {},
             queryPage: 1,
             selectedOption: 10,
-            isAscending: false,
+            isAscending: true,
             colType: 2,
             searchInput: "",
             isDeleting: false,
@@ -134,9 +139,7 @@
                 this.table.isLoading = true;
                 this.searchInput = obj.search;
                 var paramsReq = {
-                    search: this.searchInput.trim()
-                        ? this.searchInput.trim()
-                        : "",
+                    search: this.searchInput.trim() ? this.searchInput.trim() : "",
                     page: obj.page,
                     pageSize: this.selectedOption,
                     isAscending: this.isAscending,
@@ -146,12 +149,10 @@
                 QuizzesService.getQuizzes(paramsReq)
                     .then((response) => {
                         this.table.data = response.content;
-                        this.table.pagination =
-                            response.pagination;
+                        this.table.pagination = response.pagination;
                     })
                     .finally(() => {
-                        if (obj.type === "search")
-                            this.searching = true;
+                        if (obj.type === "search") this.searching = true;
                         this.table.isLoading = false;
                     });
             },
@@ -185,22 +186,17 @@
                 });
             },
             openConfirmation(quizz) {
-                console.log(quizz);
                 this.selectedQuizz = [quizz.id];
                 this.$refs.DeleteDialog.open();
             },
             openConfirmationMultiple() {
-                const ids = this.table.selectedRows.map(
-                    (item) => item.id
-                );
+                const ids = this.table.selectedRows.map((item) => item.id);
                 this.selectedQuizz = ids;
                 this.$refs.DeleteDialog.open();
             },
             deleteQuizz() {
                 this.isDeleting = true;
-                QuizzesService.deleteQuizzById(
-                    this.selectedQuizz
-                )
+                QuizzesService.deleteQuizzById(this.selectedQuizz)
                     .then((success) => {
                         if (success) {
                             this.$refs.DeleteDialog.close();
@@ -211,16 +207,14 @@
                             });
                             this.$notify({
                                 title: "quizzes.title",
-                                message:
-                                    "quizzes.removeSuccess",
+                                message: "quizzes.removeSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
                                 title: "quizzes.title",
-                                message:
-                                    "quizzes.errors.removeError",
+                                message: "quizzes.errors.removeError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -257,9 +251,7 @@
             },
         },
         created() {
-            this.queryPage = this.$route.query.page
-                ? this.$route.query.page
-                : 1;
+            this.queryPage = this.$route.query.page ? this.$route.query.page : 1;
             this.getQuizzes({
                 search: "",
                 page: this.queryPage,

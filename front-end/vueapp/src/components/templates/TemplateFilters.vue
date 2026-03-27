@@ -2,9 +2,7 @@
     <div class="row">
         <div class="col-12 mb-3">
             <div class="input-group">
-                <span
-                    class="input-group-text border-end-0 bg-white"
-                >
+                <span class="input-group-text border-end-0">
                     <LucideIcon
                         icon="Search"
                         size="16"
@@ -20,14 +18,12 @@
                     v-model="filters.input"
                     @keydown.enter="setFilters"
                     @keydown.delete="setFilters"
-                    :placeholder="
-                        $t('filters.workflowInput')
-                    "
+                    :placeholder="$t('filters.workflowInput')"
                     ref="searchInpt"
                 />
                 <span
                     v-if="showCleanBtn"
-                    class="input-group-text border-start-0 bg-white"
+                    class="input-group-text border-start-0"
                     @click="cleanInput"
                 >
                     <LucideIcon
@@ -39,9 +35,7 @@
         </div>
         <div class="col-12 col-md-3 mb-3 mb-md-0">
             <div class="input-group">
-                <span
-                    class="input-group-text border-end-0 bg-white"
-                >
+                <span class="input-group-text border-end-0">
                     <LucideIcon
                         icon="ArrowUpDown"
                         size="16"
@@ -64,9 +58,7 @@
         </div>
         <div class="col-12 col-md-3">
             <div class="input-group">
-                <span
-                    class="input-group-text border-end-0 bg-white"
-                >
+                <span class="input-group-text border-end-0">
                     <LucideIcon
                         icon="Zap"
                         size="16"
@@ -154,10 +146,7 @@
         },
         computed: {
             showCleanBtn() {
-                return (
-                    this.filters.input !== null &&
-                    this.filters.input !== ""
-                );
+                return this.filters.input !== null && this.filters.input !== "";
             },
             hasTemplates() {
                 return this.templatesList.length > 0;

@@ -1,9 +1,10 @@
-﻿using AutoMapper;
+using AutoMapper;
 using System.Linq;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
@@ -98,7 +99,7 @@ namespace WoopiAiHub.Application.Services
             var createResult = _profileRepository.CreateUniqueProfile(profile);
             if (!createResult)
             {
-                throw new InvalidOperationException("Duplicated Profile");
+                throw new AppException(ErrorCode.Duplicated, "Duplicated Profile", null);
             }
 
             if (profileCreateDto.PermissionsWorkflow.Count() > 0)
@@ -122,6 +123,9 @@ namespace WoopiAiHub.Application.Services
             if (profile == null)
                 return false;
 
+            if (_profileRepository.ExistsProfileByNameExceptId(profileUpdateDto.Name, profileUpdateDto.Id))
+                throw new AppException(ErrorCode.Duplicated, "Duplicated Profile", null);
+
             profile.Update(profileUpdateDto.Name);            
 
             if (profileUpdateDto.PermissionsIds != null)
@@ -136,10 +140,6 @@ namespace WoopiAiHub.Application.Services
             }
 
             var updateResult = _profileRepository.Update(profile);
-            if (!updateResult)
-            {
-                throw new InvalidOperationException("Duplicated Profile");
-            }
 
             var oldStepsIds = (profile.StepProfilePermissions ?? Enumerable.Empty<StepProfilePermission>())
                 .Select(spp => spp.StepId)

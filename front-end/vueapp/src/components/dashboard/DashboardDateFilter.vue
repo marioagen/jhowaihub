@@ -8,9 +8,7 @@
                 <button
                     class="btn btn-sm w-100 text-start mb-1 date-preset-btn"
                     :class="{
-                        'date-preset-selected':
-                            selectedPreset ===
-                            'currentMonth',
+                        'date-preset-selected': selectedPreset === 'currentMonth',
                     }"
                     @click="setCurrentMonth"
                 >
@@ -19,8 +17,7 @@
                 <button
                     class="btn btn-sm w-100 text-start mb-1 date-preset-btn"
                     :class="{
-                        'date-preset-selected':
-                            selectedPreset === 'lastMonth',
+                        'date-preset-selected': selectedPreset === 'lastMonth',
                     }"
                     @click="setLastMonth"
                 >
@@ -29,9 +26,7 @@
                 <button
                     class="btn btn-sm w-100 text-start mb-1 date-preset-btn"
                     :class="{
-                        'date-preset-selected':
-                            selectedPreset ===
-                            'previousSeven',
+                        'date-preset-selected': selectedPreset === 'previousSeven',
                     }"
                     @click="setPreviousSeven"
                 >
@@ -40,9 +35,7 @@
                 <button
                     class="btn btn-sm w-100 text-start mb-1 date-preset-btn"
                     :class="{
-                        'date-preset-selected':
-                            selectedPreset ===
-                            'previousNinety',
+                        'date-preset-selected': selectedPreset === 'previousNinety',
                     }"
                     @click="setPreviousNinety"
                 >
@@ -51,9 +44,7 @@
             </div>
             <div class="p-3 flex-grow-1">
                 <div class="mb-3">
-                    <label class="form-label">
-                        Data de Início
-                    </label>
+                    <label class="form-label">Data de Início</label>
                     <input
                         type="date"
                         class="form-control form-control-sm"
@@ -61,9 +52,7 @@
                     />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">
-                        Data Final
-                    </label>
+                    <label class="form-label">Data Final</label>
                     <input
                         type="date"
                         class="form-control form-control-sm"
@@ -71,9 +60,7 @@
                     />
                 </div>
                 <hr />
-                <div
-                    class="d-flex justify-content-end gap-2 mt-3"
-                >
+                <div class="d-flex justify-content-end gap-2 mt-3">
                     <button
                         class="btn btn-light btn-sm"
                         @click="$emit('close')"
@@ -96,11 +83,7 @@
         name: "DashboardDateFilter",
         data() {
             const today = new Date();
-            const first = new Date(
-                today.getFullYear(),
-                today.getMonth(),
-                1
-            );
+            const first = new Date(today.getFullYear(), today.getMonth(), 1);
             return {
                 selectedPreset: "currentMonth",
                 start: first.toISOString().slice(0, 10),
@@ -122,33 +105,17 @@
             setCurrentMonth() {
                 this.selectedPreset = "currentMonth";
                 const today = new Date();
-                const first = new Date(
-                    today.getFullYear(),
-                    today.getMonth(),
-                    1
-                );
-                this.start = first
-                    .toISOString()
-                    .slice(0, 10);
+                const first = new Date(today.getFullYear(), today.getMonth(), 1);
+                this.start = first.toISOString().slice(0, 10);
                 this.end = today.toISOString().slice(0, 10);
                 this.filterData();
             },
             setLastMonth() {
                 this.selectedPreset = "lastMonth";
                 const now = new Date();
-                const first = new Date(
-                    now.getFullYear(),
-                    now.getMonth() - 1,
-                    1
-                );
-                const last = new Date(
-                    now.getFullYear(),
-                    now.getMonth(),
-                    0
-                );
-                this.start = first
-                    .toISOString()
-                    .slice(0, 10);
+                const first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                const last = new Date(now.getFullYear(), now.getMonth(), 0);
+                this.start = first.toISOString().slice(0, 10);
                 this.end = last.toISOString().slice(0, 10);
                 this.filterData();
             },
@@ -157,9 +124,7 @@
                 const end = new Date();
                 const start = new Date();
                 start.setDate(end.getDate() - 7);
-                this.start = start
-                    .toISOString()
-                    .slice(0, 10);
+                this.start = start.toISOString().slice(0, 10);
                 this.end = end.toISOString().slice(0, 10);
                 this.filterData();
             },
@@ -168,9 +133,7 @@
                 const end = new Date();
                 const start = new Date();
                 start.setDate(end.getDate() - 90);
-                this.start = start
-                    .toISOString()
-                    .slice(0, 10);
+                this.start = start.toISOString().slice(0, 10);
                 this.end = end.toISOString().slice(0, 10);
                 this.filterData();
             },
@@ -183,9 +146,13 @@
         box-shadow: none !important;
     }
 
+    .date-preset-btn {
+        color: var(--color-body-content) !important;
+    }
+
     .date-preset-selected {
-        background-color: #e7f1ff !important;
-        color: #0d6efd !important;
+        background-color: var(--color-bg-sidebar-li-selected) !important;
+        color: var(--color-body-content) !important;
         font-weight: 500;
     }
 </style>

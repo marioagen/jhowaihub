@@ -1,25 +1,13 @@
 <template>
     <div class="card mb-3">
         <div class="card-body">
-            <div
-                class="d-flex justify-content-between align-items-center mb-3"
-            >
-                <div
-                    class="d-flex align-items-center gap-2"
-                >
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-2">
                     <h6 class="mb-0 fw-bold">
-                        {{
-                            $t(
-                                "dashboard.graphs.tokenGraphTitle"
-                            )
-                        }}
+                        {{ $t("dashboard.graphs.tokenGraphTitle") }}
                     </h6>
                     <LucideIcon
-                        v-tooltip.right="
-                            $t(
-                                'dashboard.graphs.tokensTooltip'
-                            )
-                        "
+                        v-tooltip.right="$t('dashboard.graphs.tokensTooltip')"
                         icon="Info"
                         :size="17"
                     />
@@ -35,11 +23,8 @@
                         <LucideIcon
                             icon="ChevronLeft"
                             :size="17"
-                            :class="
-                                currentIAIndex === 0
-                                    ? 'disabled'
-                                    : ''
-                            "
+                            :class="currentIAIndex === 0 ? 'disabled' : ''"
+                            class="text-muted"
                         />
                     </button>
                     <span class="mb-0">
@@ -52,41 +37,27 @@
                         <LucideIcon
                             icon="ChevronRight"
                             :size="17"
-                            :class="
-                                currentIAIndex ===
-                                IAList.length - 1
-                                    ? 'disabled'
-                                    : ''
-                            "
+                            :class="currentIAIndex === IAList.length - 1 ? 'disabled' : ''"
+                            class="text-muted"
                         />
                     </button>
                 </div>
             </div>
-            <div class="card ms-4 me-4 mb-3">
+            <div class="card mb-3">
                 <div class="card-body">
                     <h6>
-                        {{
-                            $t(
-                                "dashboard.graphs.totalTokens"
-                            )
-                        }}
+                        {{ $t("dashboard.graphs.totalTokens") }}
                     </h6>
                     <h4 class="mb-0 fw-bold">
                         {{ totalTokens }}
                     </h4>
                     <span>
-                        {{
-                            $t("dashboard.graphs.unitValue")
-                        }}
+                        {{ $t("dashboard.graphs.unitValue") }}
                         {{ usageUnitTokens }}
                     </span>
                     <hr />
                     <span class="mt-1">
-                        {{
-                            $t(
-                                "dashboard.graphs.periodTotal"
-                            )
-                        }}
+                        {{ $t("dashboard.graphs.periodTotal") }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
                         {{ totalTokens * usageUnitTokens }}
@@ -94,11 +65,7 @@
                 </div>
             </div>
             <h6>
-                {{
-                    $t(
-                        "dashboard.graphs.tokenGraphSubtitle"
-                    )
-                }}
+                {{ $t("dashboard.graphs.tokenGraphSubtitle") }}
             </h6>
             <BarGraphComponent
                 v-if="isLoaded"
@@ -173,51 +140,37 @@
         },
         computed: {
             currentIA() {
-                return (
-                    this.IAList[this.currentIAIndex] ??
-                    undefined
-                );
+                return this.IAList[this.currentIAIndex] ?? undefined;
             },
             totalTokens() {
-                return this.graph.series[0].data.reduce(
-                    (a, b) => a + b,
-                    0
-                );
+                return this.graph.series[0].data.reduce((a, b) => a + b, 0);
             },
             usageUnitTokens() {
-                if (
-                    !Array.isArray(this.usageUnits) ||
-                    this.usageUnits.length === 0
-                ) {
+                if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
                     return 0;
                 }
                 return (
                     this.usageUnits.find(
                         (item) =>
-                            item.modelEmbeddingId ===
-                            (this.IAList[
-                                this.currentIAIndex
-                            ]?.id ?? 0)
+                            item.modelEmbeddingId === (this.IAList[this.currentIAIndex]?.id ?? 0)
                     )?.value ?? 0
                 );
             },
         },
         methods: {
             getIAList() {
-                DashboardServices.GetUsedModels().then(
-                    (response) => {
-                        if (response && !response.error) {
-                            this.IAList = response;
-                            if (this.IAList.length > 0) {
-                                this.currentIAIndex = 0;
-                                this.getTokensData();
-                                this.getTotalCost();
-                            } else {
-                                this.isLoaded = true;
-                            }
+                DashboardServices.GetUsedModels().then((response) => {
+                    if (response && !response.error) {
+                        this.IAList = response;
+                        if (this.IAList.length > 0) {
+                            this.currentIAIndex = 0;
+                            this.getTokensData();
+                            this.getTotalCost();
+                        } else {
+                            this.isLoaded = true;
                         }
                     }
-                );
+                });
             },
             getTokensData() {
                 if (!this.currentIA) return;
@@ -233,19 +186,13 @@
                             this.graph.options = {
                                 ...this.graph.options,
                                 xaxis: {
-                                    categories:
-                                        response.map(
-                                            (item) =>
-                                                item.date
-                                        ),
+                                    categories: response.map((item) => item.date),
                                 },
                             };
                             this.graph.series = [
                                 {
                                     name: "Tokens",
-                                    data: response.map(
-                                        (item) => item.value
-                                    ),
+                                    data: response.map((item) => item.value),
                                 },
                             ];
                         }
@@ -260,9 +207,7 @@
                     end: this.end,
                 };
                 this.isLoaded = false;
-                DashboardServices.GetTotalUsageCost(
-                    paramsTotalCost
-                )
+                DashboardServices.GetTotalUsageCost(paramsTotalCost)
                     .then((response) => {
                         if (response && !response.error) {
                             this.totalCost = response;
@@ -274,22 +219,13 @@
                     });
             },
             setTotalTokens() {
-                this.$emit(
-                    "setTotalTokens",
-                    this.totalCost
-                );
+                this.$emit("setTotalTokens", this.totalCost);
             },
             nextIA() {
                 if (this.IAList.length === 0) return;
-                if (
-                    this.currentIAIndex >=
-                    this.IAList.length - 1
-                )
-                    return;
+                if (this.currentIAIndex >= this.IAList.length - 1) return;
 
-                this.currentIAIndex =
-                    (this.currentIAIndex + 1) %
-                    this.IAList.length;
+                this.currentIAIndex = (this.currentIAIndex + 1) % this.IAList.length;
                 this.getTokensData();
             },
             previousIA() {
@@ -297,10 +233,7 @@
                 if (this.currentIAIndex <= 0) return;
 
                 this.currentIAIndex =
-                    (this.currentIAIndex -
-                        1 +
-                        this.IAList.length) %
-                    this.IAList.length;
+                    (this.currentIAIndex - 1 + this.IAList.length) % this.IAList.length;
                 this.getTokensData();
             },
         },

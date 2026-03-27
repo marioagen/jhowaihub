@@ -11,5 +11,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public DocumentStatus Status { get; set; }
         public DateTime Created { get; set; }
         public IEnumerable<DocumentWorkflowProgressDto> WorkflowProgress { get; set; } = new List<DocumentWorkflowProgressDto>();
+        public bool HasBatch { get; set; }
     }
 }

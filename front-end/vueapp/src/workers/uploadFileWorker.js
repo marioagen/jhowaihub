@@ -6,7 +6,11 @@ let isUploading = false;
 addEventListener("message", (event) => {
     const fileData = event.data.message;
     chunkQueue.push(fileData);
-    self.postMessage({ type: "uploadStarted", success: true, namesFiles: fileData.message.additionalData.filesNames });
+    self.postMessage({
+        type: "uploadStarted",
+        success: true,
+        namesFiles: fileData.message.additionalData.filesNames,
+    });
     processQueue();
 });
 
@@ -28,10 +32,24 @@ async function processQueue() {
         url,
         chunkIndex,
         totalChunks,
+        isLastFile,
+        isDocumentBatch,
     } = fileData.message;
     const chunk = new Blob([fileChunk], { type: fileType });
 
-    await uploadChunk(chunk, additionalData, headers, fileName, userEmail, tokenAzure, url, chunkIndex, totalChunks);
+    await uploadChunk(
+        chunk,
+        additionalData,
+        headers,
+        fileName,
+        userEmail,
+        tokenAzure,
+        url,
+        chunkIndex,
+        totalChunks,
+        isLastFile,
+        isDocumentBatch
+    );
 
     isUploading = false;
     processQueue();
@@ -47,7 +65,9 @@ async function uploadChunk(
     tokenAzure,
     url,
     chunkIndex,
-    totalChunks
+    totalChunks,
+    isLastFile,
+    isDocumentBatch
 ) {
     const formData = new FormData();
     formData.append("chunk", chunk, `${fileName}.part${chunkIndex + 1}`);
@@ -56,6 +76,8 @@ async function uploadChunk(
     formData.append("name", additionalData.name);
     formData.append("description", additionalData.description);
     formData.append("emailCreator", additionalData.emailCreator);
+    formData.append("isLastFile", isLastFile);
+    formData.append("isDocumentBatch", isDocumentBatch);
     additionalData.workflows.forEach((id) => formData.append("workflows", id));
     const fullURL = url + "/api/Document/UploadByChunks";
 
@@ -97,7 +119,9 @@ async function uploadChunk(
                     tokenAzure,
                     url,
                     chunkIndex,
-                    totalChunks
+                    totalChunks,
+                    isLastFile,
+                    isDocumentBatch
                 );
             } catch (error) {
                 console.error(`Erro ao renovar o token: ${error.message}`);
@@ -109,6 +133,8 @@ async function uploadChunk(
                 nameFile: fileName,
                 chunkIndex: chunkIndex + 1,
                 chunks: totalChunks,
+                isLastFile: isLastFile,
+                isDocumentBatch: isDocumentBatch,
             });
             console.error(`Erro ao enviar o chunk ${chunkIndex + 1}: ${response.statusText}`);
         }
@@ -119,6 +145,8 @@ async function uploadChunk(
             nameFile: fileName,
             chunkIndex: chunkIndex + 1,
             chunks: totalChunks,
+            isLastFile: isLastFile,
+            isDocumentBatch: isDocumentBatch,
         });
         console.error(`Erro ao enviar o chunk ${chunkIndex + 1}:`, error);
     }

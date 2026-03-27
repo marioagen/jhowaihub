@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WoopiAiHub.Domain.Models;
 
@@ -35,6 +35,16 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.Property(u => u.Created)
                    .IsRequired();
+
+            builder.Property(u => u.HasBatch)
+                .HasDefaultValue(false)
+                .IsRequired();
+
+            builder.Property(u => u.Enable)
+                .HasDefaultValue(true)
+                .IsRequired();
+
+            builder.HasQueryFilter(d => d.Enable);
 
             builder.HasMany(u => u.DocumentHistories)
                    .WithOne(s => s.Document)
