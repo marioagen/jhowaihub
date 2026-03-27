@@ -126,6 +126,41 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.False(capturing.LastRequest!.Headers.Contains("Host"));
         }
 
+        [Theory]
+        [InlineData("host")]
+        [InlineData("HOST")]
+        [InlineData("HoSt")]
+        public async Task GetAsync_SkipsHostHeader_CaseInsensitive(string hostHeaderName)
+        {
+            var (gateway, capturing, _) = CreateGateway();
+            var headers = new Dictionary<string, string> { [hostHeaderName] = "evil.example.com" };
+
+            await gateway.GetAsync("https://api.example.com/safe", headers, CancellationToken.None);
+
+            Assert.False(capturing.LastRequest!.Headers.Contains("Host"));
+        }
+
+        [Fact]
+        public async Task GetAsync_NullHeaders_DoesNotApplyCustomHeaders()
+        {
+            var (gateway, capturing, _) = CreateGateway();
+
+            await gateway.GetAsync("https://api.example.com/h", headers: null, CancellationToken.None);
+
+            Assert.False(capturing.LastRequest!.Headers.TryGetValues("X-None", out _));
+        }
+
+        [Fact]
+        public async Task GetAsync_EmptyHeaders_DoesNotApplyCustomHeaders()
+        {
+            var (gateway, capturing, _) = CreateGateway();
+            var headers = new Dictionary<string, string>();
+
+            await gateway.GetAsync("https://api.example.com/h", headers, CancellationToken.None);
+
+            Assert.False(capturing.LastRequest!.Headers.TryGetValues("X-None", out _));
+        }
+
         [Fact]
         public async Task GetAsync_SkipsEmptyHeaderName()
         {
@@ -153,9 +188,73 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         }
 
         [Fact]
-        public async Task PostAsync_WhenBodyNull_ContentTypeInHeaders_DoesNotThrow()
+        public async Task PostAsync_WithBody_ContentTypeAndOtherHeaders_AppliesBoth()
+        {
+            var (gateway, capturing, _) = CreateGateway();
+            using var body = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+            var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Content-Type"] = "application/xml",
+                ["X-After-Content-Type"] = "yes"
+            };
+
+            await gateway.PostAsync("https://api.example.com/p", body, headers, CancellationToken.None);
+
+            Assert.Equal("application/xml", body.Headers.ContentType!.MediaType);
+            Assert.True(capturing.LastRequest!.Headers.TryGetValues("X-After-Content-Type", out var v));
+            Assert.Equal("yes", Assert.Single(v));
+        }
+
+        [Fact]
+        public async Task PostAsync_ContentTypeHeader_LowercaseName_UpdatesBodyContentType()
         {
             var (gateway, _, _) = CreateGateway();
+            using var body = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+            var headers = new Dictionary<string, string>
+            {
+                ["content-type"] = "application/xml"
+            };
+
+            await gateway.PostAsync("https://api.example.com/p", body, headers, CancellationToken.None);
+
+            Assert.Equal("application/xml", body.Headers.ContentType!.MediaType);
+        }
+
+        [Fact]
+        public async Task PostAsync_InvalidContentTypeValue_LeavesBodyContentTypeUnchanged()
+        {
+            var (gateway, _, _) = CreateGateway();
+            using var body = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+            var originalMediaType = body.Headers.ContentType!.MediaType;
+            var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Content-Type"] = ";;;"
+            };
+
+            await gateway.PostAsync("https://api.example.com/p", body, headers, CancellationToken.None);
+
+            Assert.Equal(originalMediaType, body.Headers.ContentType!.MediaType);
+        }
+
+        [Fact]
+        public async Task PatchAsync_ContentTypeHeader_UpdatesBodyContentType()
+        {
+            var (gateway, _, _) = CreateGateway();
+            using var body = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+            var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Content-Type"] = "text/plain"
+            };
+
+            await gateway.PatchAsync("https://api.example.com/x", body, headers, CancellationToken.None);
+
+            Assert.Equal("text/plain", body.Headers.ContentType!.MediaType);
+        }
+
+        [Fact]
+        public async Task PostAsync_WhenBodyNull_ContentTypeInHeaders_DoesNotThrow_AndLeavesRequestWithoutContent()
+        {
+            var (gateway, capturing, _) = CreateGateway();
             var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["Content-Type"] = "application/json"
@@ -164,6 +263,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             using var response = await gateway.PostAsync("https://api.example.com/p", null, headers, CancellationToken.None);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Null(capturing.LastRequest!.Content);
         }
 
         [Fact]
