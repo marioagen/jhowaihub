@@ -504,7 +504,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         }
 
         [Fact]
-        public async Task ExecuteAsync_MalformedDoubleEncodedJsonBody_Throws()
+        public async Task ExecuteAsync_MalformedDoubleEncodedJsonBody_ThrowsInvalidOperation_WrappingJsonException()
         {
             _gateway
                 .Setup(g => g.PostAsync(It.IsAny<string>(), It.IsAny<HttpContent?>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
@@ -523,8 +523,11 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                     Variables = new Dictionary<string, string>()
                 }));
 
-            Assert.Contains("double-encoded", ex.Message, StringComparison.OrdinalIgnoreCase);
-            Assert.NotNull(ex.InnerException);
+            Assert.Equal(
+                "Body appears to be a double-encoded JSON string (wrapped in quotes) but could not be unwrapped. Ensure it is valid JSON.",
+                ex.Message);
+            var inner = Assert.IsType<JsonException>(ex.InnerException);
+            Assert.NotEmpty(inner.Message);
         }
     }
 }
