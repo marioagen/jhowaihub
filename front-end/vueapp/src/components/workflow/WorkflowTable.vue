@@ -3,6 +3,26 @@
         <TableComponent modalName="workflow.index" emptyMessage="workflow.notFound" :data="table.data"
             :columns="table.columns" :isLoading="table.isLoading" :pagination="table.pagination" :hasSelection="false"
             @change-page="changePage">
+            <template #cell-description="{ data }">
+                <span
+                    v-if="!data.row.description || !String(data.row.description).trim()"
+                    class="text-muted"
+                >-</span>
+                <div v-else class="d-flex align-items-center gap-2">
+                    <span class="text-truncate flex-grow-1" style="min-width: 0">{{
+                        descriptionPreview(data.row.description)
+                    }}</span>
+                    <a
+                        v-if="String(data.row.description).length > 50"
+                        href="#"
+                        class="text-primary flex-shrink-0"
+                        @click.prevent="openDescriptionModal(data.row)"
+                        v-tooltip="$t('workflow.viewFullDescription')"
+                    >
+                        <LucideIcon icon="Eye" />
+                    </a>
+                </div>
+            </template>
             <template #cell-teams="{ data }">
                 <div v-if="data.row.teams.length > 0">
                     <BadgeOutlinedComponent v-for="team in data.row.teams" :key="team.id" :text="team.name"
@@ -53,6 +73,20 @@
             </div>
         </template>
     </ModalComponent>
+    <ModalComponent id="workflowDescriptionModal" ref="DescriptionModal" title="workflow.fullDescriptionTitle">
+        <template #body>
+            <div class="modal-body">
+                <p class="mb-0 text-break workflow-description-modal-text">{{ descriptionModalText }}</p>
+            </div>
+        </template>
+        <template #footer>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    {{ $t("common.close") }}
+                </button>
+            </div>
+        </template>
+    </ModalComponent>
 </template>
 <script>
 import TableComponent from "@/components/global/TableComponent.vue";
@@ -78,6 +112,7 @@ export default {
             columns: [
                 { key: "id", label: "id" },
                 { key: "name", label: "workflow.name" },
+                { key: "description", label: "common.description" },
                 {
                     key: "teams",
                     label: "workflow.teams",
@@ -112,8 +147,20 @@ export default {
         selectedWorkflowId: null,
         selectedWorkflowName: "",
         documentCountToDel: 0,
+        descriptionModalText: "",
     }),
     methods: {
+        descriptionPreview(text) {
+            const s = String(text ?? "").trim();
+            if (s.length <= 50) {
+                return s;
+            }
+            return `${s.slice(0, 50)}…`;
+        },
+        openDescriptionModal(row) {
+            this.descriptionModalText = String(row.description ?? "").trim();
+            this.$refs.DescriptionModal.open();
+        },
         getWorkflowList() {
             this.table.isLoading = true;
             const params = {
@@ -283,3 +330,8 @@ export default {
     },
 };
 </script>
+<style scoped>
+.workflow-description-modal-text {
+    white-space: pre-wrap;
+}
+</style>
