@@ -68,6 +68,18 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         }
 
         [Fact]
+        public async Task PutAsync_WithHeaders_AddsToRequest()
+        {
+            var (gateway, capturing, _) = CreateGateway();
+            var headers = new Dictionary<string, string>(StringComparer.Ordinal) { ["X-Put"] = "1" };
+
+            await gateway.PutAsync("https://api.example.com/u", null, headers, CancellationToken.None);
+
+            Assert.True(capturing.LastRequest!.Headers.TryGetValues("X-Put", out var v));
+            Assert.Equal("1", Assert.Single(v));
+        }
+
+        [Fact]
         public async Task PatchAsync_UsesPatch()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -86,6 +98,18 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
 
             Assert.Equal(HttpMethod.Delete, capturing.LastRequest!.Method);
             Assert.Null(capturing.LastRequest.Content);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WithHeaders_AddsToRequest()
+        {
+            var (gateway, capturing, _) = CreateGateway();
+            var headers = new Dictionary<string, string>(StringComparer.Ordinal) { ["X-Del"] = "z" };
+
+            await gateway.DeleteAsync("https://api.example.com/d", headers, CancellationToken.None);
+
+            Assert.True(capturing.LastRequest!.Headers.TryGetValues("X-Del", out var v));
+            Assert.Equal("z", Assert.Single(v));
         }
 
         [Fact]

@@ -100,6 +100,77 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         }
 
         [Fact]
+        public void Assemble_QueryTemplate_JsonNull_LeavesUrlUnchanged()
+        {
+            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+                "GET",
+                "https://api.example.com/a",
+                "null",
+                null,
+                null,
+                Vars());
+
+            Assert.Equal("https://api.example.com/a", r.Url);
+        }
+
+        [Fact]
+        public void Assemble_QueryTemplate_OnlyBlankKeys_LeavesUrlUnchanged()
+        {
+            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+                "GET",
+                "https://api.example.com/a",
+                """[{"key":"","value":"1"},{"key":" ","value":"2"}]""",
+                null,
+                null,
+                Vars());
+
+            Assert.Equal("https://api.example.com/a", r.Url);
+            Assert.False(r.Url.Contains('?', StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void Assemble_HeaderTemplate_EmptyJsonArray_ReturnsNullHeaders()
+        {
+            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+                "GET",
+                "https://api.example.com/a",
+                null,
+                "[]",
+                null,
+                Vars());
+
+            Assert.Null(r.Headers);
+        }
+
+        [Fact]
+        public void Assemble_HeaderTemplate_JsonNull_ReturnsNullHeaders()
+        {
+            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+                "GET",
+                "https://api.example.com/a",
+                null,
+                "null",
+                null,
+                Vars());
+
+            Assert.Null(r.Headers);
+        }
+
+        [Fact]
+        public void Assemble_HeaderTemplate_OnlyBlankKeys_ReturnsNullHeaders()
+        {
+            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+                "GET",
+                "https://api.example.com/a",
+                null,
+                """[{"key":"","value":"x"},{"key":"  ","value":"y"}]""",
+                null,
+                Vars());
+
+            Assert.Null(r.Headers);
+        }
+
+        [Fact]
         public void Assemble_QueryTemplate_SkipsBlankKeys()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(

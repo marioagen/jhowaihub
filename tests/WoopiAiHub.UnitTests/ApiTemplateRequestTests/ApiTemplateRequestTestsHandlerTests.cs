@@ -202,6 +202,60 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         }
 
         [Fact]
+        public async Task ExecuteAsync_FromTemplateId_EchoesRequestMetadata_IncludingNullExecutionId()
+        {
+            var model = new ApiTemplate("DbName", "GET", "https://api.example.com/from-db", null, null, null);
+            _templateRepository
+                .Setup(r => r.FindByIdReturnModel(5))
+                .ReturnsAsync(model);
+
+            _gateway
+                .Setup(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("body") });
+
+            var result = await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            {
+                TemplateId = 5,
+                Draft = null,
+                Variables = new Dictionary<string, string>(),
+                TemplateName = "OverrideName",
+                Tenant = "t1",
+                Email = "u@example.org",
+                ExecutionId = null
+            });
+
+            Assert.Equal("OverrideName", result.TemplateName);
+            Assert.Equal("t1", result.Tenant);
+            Assert.Equal("u@example.org", result.Email);
+            Assert.Null(result.ExecutionId);
+            Assert.Equal("body", result.Content);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_FromTemplateId_EchoesExecutionId_WhenSet()
+        {
+            var model = new ApiTemplate("DbName", "GET", "https://api.example.com/from-db", null, null, null);
+            _templateRepository
+                .Setup(r => r.FindByIdReturnModel(5))
+                .ReturnsAsync(model);
+
+            _gateway
+                .Setup(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.NoContent));
+
+            var result = await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            {
+                TemplateId = 5,
+                Draft = null,
+                Variables = new Dictionary<string, string>(),
+                ExecutionId = 42
+            });
+
+            Assert.Equal(42, result.ExecutionId);
+            Assert.Equal("DbName", result.TemplateName);
+        }
+
+        [Fact]
         public async Task ExecuteAsync_NullRequest_ThrowsArgumentNullException()
         {
             await Assert.ThrowsAsync<ArgumentNullException>(() => _handler.ExecuteAsync(null!));
