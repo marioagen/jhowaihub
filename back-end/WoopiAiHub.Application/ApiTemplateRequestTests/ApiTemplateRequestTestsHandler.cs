@@ -26,7 +26,7 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             ArgumentNullException.ThrowIfNull(request);
 
             var variables = request.Variables ?? new Dictionary<string, string>(StringComparer.Ordinal);
-            var draft = await ResolveDraftAsync(request, cancellationToken).ConfigureAwait(false);
+            var draft = await ResolveDraftAsync(request).ConfigureAwait(false);
 
             var assembled = ApiTemplateRequestTestsRequestAssembler.Assemble(
                 draft.Method,
@@ -74,7 +74,7 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             };
         }
 
-        private async Task<ApiTemplateCreateDto> ResolveDraftAsync(ApiTemplateRequestTestsRequestDto request, CancellationToken cancellationToken)
+        private async Task<ApiTemplateCreateDto> ResolveDraftAsync(ApiTemplateRequestTestsRequestDto request)
         {
             if (request.Draft != null)
                 return request.Draft;
@@ -91,7 +91,7 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             throw new InvalidOperationException("Either Draft or a valid TemplateId must be provided.");
         }
 
-        private HttpContent? BuildJsonHttpContent(string? body)
+        private StringContent? BuildJsonHttpContent(string? body)
         {
             if (body is null)
                 return null;
