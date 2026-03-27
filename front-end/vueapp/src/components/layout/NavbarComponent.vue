@@ -8,22 +8,7 @@
                 <span class="badge bg-light text-dark border">{{ this.selectedTenant }}</span>
                 <div class="navbar-right-group d-flex align-items-center gap-1 pe-2 ms-auto">
                     <NavbarNotificationComponent />
-                    <button
-                        class="btn btn-outline-primary table-btn btn-sm"
-                        type="button"
-                        @click="toggleTheme"
-                        aria-expanded="false"
-                        style="display: flex; align-items: center; justify-content: center"
-                    >
-                        <LucideIcon
-                            icon="Moon"
-                            v-if="isDarkMode"
-                        />
-                        <LucideIcon
-                            icon="Sun"
-                            v-else
-                        />
-                    </button>
+                    <ThemeSwitchComponent />
                     <LanguageComponent />
                     <div
                         class="dropdown-menu-user"
@@ -78,6 +63,7 @@
     import AvatarComponent from "@/components/global/AvatarComponent.vue";
     import LanguageComponent from "@/components/layout/LanguageComponent.vue";
     import NavbarNotificationComponent from "@/components/layout/NavbarNotificationComponent.vue";
+    import ThemeSwitchComponent from "@/components/layout/ThemeSwitchComponent.vue";
 
     export default {
         name: "NavBarComponent",
@@ -92,6 +78,7 @@
             AvatarComponent,
             LanguageComponent,
             NavbarNotificationComponent,
+            ThemeSwitchComponent,
         },
         data() {
             return {
@@ -100,7 +87,6 @@
                 user: this.$store.state.userProfile.name,
                 selectedTenant: null,
                 tenantsFromState: [],
-                currentTheme: localStorage.getItem("theme") || "css-theme-light",
             };
         },
         methods: {
@@ -151,7 +137,7 @@
                             new Blob([response.data], { type: "image/jpeg" })
                         );
                         this.$store.commit("updateUserProfileImage", {
-                            amount: self.profileImage,
+                            amount: this.profileImage,
                         });
                     });
             },
@@ -160,24 +146,8 @@
                 if (strSplit.length === 1) return strSplit[0];
                 return `${strSplit[0]} ${strSplit[strSplit.length - 1]}`;
             },
-            toggleTheme() {
-                if (localStorage.getItem("theme") === "css-theme-dark") {
-                    this.setTheme("css-theme-light");
-                } else {
-                    this.setTheme("css-theme-dark");
-                }
-            },
-            setTheme(themeName) {
-                localStorage.setItem("theme", themeName);
-                document.documentElement.className = themeName;
-                this.currentTheme = themeName;
-                this.$store.commit("setTheme", themeName);
-            },
         },
         computed: {
-            isDarkMode() {
-                return this.currentTheme === "css-theme-dark";
-            },
             tenantInitialized() {
                 return this.$store.state.tenantInitialized;
             },
@@ -208,12 +178,6 @@
             }
 
             this.getUserTenants(userEmail, savedTenant);
-        },
-        mounted() {
-            const savedTheme = localStorage.getItem("theme");
-            this.currentTheme =
-                savedTheme === "css-theme-dark" ? "css-theme-dark" : "css-theme-light";
-            this.setTheme(this.currentTheme);
         },
     };
 </script>
