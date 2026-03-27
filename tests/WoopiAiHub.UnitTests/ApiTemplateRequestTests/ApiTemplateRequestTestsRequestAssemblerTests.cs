@@ -6,7 +6,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
 {
     public class ApiTemplateRequestTestsRequestAssemblerTests
     {
-        private static IReadOnlyDictionary<string, string> Vars(params (string Key, string Value)[] pairs) =>
+        private static Dictionary<string, string> Vars(params (string Key, string Value)[] pairs) =>
             pairs.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
 
         [Fact]
