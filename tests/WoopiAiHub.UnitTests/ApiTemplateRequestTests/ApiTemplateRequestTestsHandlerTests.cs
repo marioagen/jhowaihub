@@ -200,5 +200,277 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
 
             Assert.Equal("https://api.example.com/from-db", capturedUrl);
         }
+
+        [Fact]
+        public async Task ExecuteAsync_NullRequest_ThrowsArgumentNullException()
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _handler.ExecuteAsync(null!));
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_NoDraftAndNoTemplateId_Throws()
+        {
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                {
+                    Draft = null,
+                    TemplateId = null,
+                    Variables = new Dictionary<string, string>()
+                }));
+
+            Assert.Contains("Either Draft or a valid TemplateId", ex.Message, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_TemplateIdZero_Throws()
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                {
+                    Draft = null,
+                    TemplateId = 0,
+                    Variables = new Dictionary<string, string>()
+                }));
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_TemplateNotFound_Throws()
+        {
+            _templateRepository
+                .Setup(r => r.FindByIdReturnModel(99))
+                .ReturnsAsync((ApiTemplate?)null);
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                {
+                    TemplateId = 99,
+                    Draft = null,
+                    Variables = new Dictionary<string, string>()
+                }));
+
+            Assert.Contains("99", ex.Message, StringComparison.Ordinal);
+            Assert.Contains("not found", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_NullVariables_DoesNotThrow()
+        {
+            _gateway
+                .Setup(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
+
+            var result = await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            {
+                Draft = new ApiTemplateCreateDto
+                {
+                    Name = "T",
+                    Method = "GET",
+                    Url = "https://api.example.com/v1/"
+                },
+                Variables = null
+            });
+
+            Assert.Equal(200, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetAsync_PassesParsedHeaders()
+        {
+            Dictionary<string, string>? capturedHeaders = null;
+            _gateway
+                .Setup(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
+                .Callback<string, Dictionary<string, string>?, CancellationToken>((_, h, _) => capturedHeaders = h)
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
+
+            var headerJson = """[{"key":"Authorization","value":"Bearer t"},{"key":"X-Custom","value":"v"}]""";
+            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            {
+                Draft = new ApiTemplateCreateDto
+                {
+                    Name = "T",
+                    Method = "GET",
+                    Url = "https://api.example.com/r",
+                    HeaderTemplate = headerJson
+                },
+                Variables = new Dictionary<string, string>()
+            });
+
+            Assert.NotNull(capturedHeaders);
+            Assert.Equal("Bearer t", capturedHeaders["Authorization"]);
+            Assert.Equal("v", capturedHeaders["X-Custom"]);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_UsesDraftName_WhenTemplateNameIsNull()
+        {
+            _gateway
+                .Setup(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
+
+            var result = await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            {
+                Draft = new ApiTemplateCreateDto
+                {
+                    Name = "FromDraft",
+                    Method = "GET",
+                    Url = "https://api.example.com/"
+                },
+                Variables = new Dictionary<string, string>(),
+                TemplateName = null
+            });
+
+            Assert.Equal("FromDraft", result.TemplateName);
+        }
+
+        [Fact]
+        public async Task PostAsync_NullBodyTemplate_PassesNullContent()
+        {
+            HttpContent? capturedContent = null;
+            _gateway
+                .Setup(g => g.PostAsync(It.IsAny<string>(), It.IsAny<HttpContent?>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
+                .Callback<string, HttpContent?, Dictionary<string, string>?, CancellationToken>((_, c, _, _) => capturedContent = c)
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}") });
+
+            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            {
+                Draft = new ApiTemplateCreateDto
+                {
+                    Name = "T",
+                    Method = "POST",
+                    Url = "https://api.example.com/p",
+                    BodyTemplate = null
+                },
+                Variables = new Dictionary<string, string>()
+            });
+
+            Assert.Null(capturedContent);
+        }
+
+        [Fact]
+        public async Task PutAsync_SendsJsonBody()
+        {
+            const string raw = """{"a":1}""";
+            HttpContent? capturedContent = null;
+            _gateway
+                .Setup(g => g.PutAsync(It.IsAny<string>(), It.IsAny<HttpContent?>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
+                .Callback<string, HttpContent?, Dictionary<string, string>?, CancellationToken>((_, c, _, _) => capturedContent = c)
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.NoContent));
+
+            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            {
+                Draft = new ApiTemplateCreateDto
+                {
+                    Name = "T",
+                    Method = "PUT",
+                    Url = "https://api.example.com/u",
+                    BodyTemplate = raw
+                },
+                Variables = new Dictionary<string, string>()
+            });
+
+            Assert.NotNull(capturedContent);
+            Assert.Equal(raw, await capturedContent.ReadAsStringAsync());
+            Assert.Equal("application/json", capturedContent.Headers.ContentType?.MediaType);
+        }
+
+        [Fact]
+        public async Task PatchAsync_SendsJsonBody()
+        {
+            const string raw = """{"p":true}""";
+            HttpContent? capturedContent = null;
+            _gateway
+                .Setup(g => g.PatchAsync(It.IsAny<string>(), It.IsAny<HttpContent?>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
+                .Callback<string, HttpContent?, Dictionary<string, string>?, CancellationToken>((_, c, _, _) => capturedContent = c)
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}") });
+
+            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            {
+                Draft = new ApiTemplateCreateDto
+                {
+                    Name = "T",
+                    Method = "PATCH",
+                    Url = "https://api.example.com/patch",
+                    BodyTemplate = raw
+                },
+                Variables = new Dictionary<string, string>()
+            });
+
+            Assert.NotNull(capturedContent);
+            Assert.Equal(raw, await capturedContent.ReadAsStringAsync());
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_InvalidQueryTemplateJson_Throws()
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                {
+                    Draft = new ApiTemplateCreateDto
+                    {
+                        Name = "T",
+                        Method = "GET",
+                        Url = "https://api.example.com/r",
+                        QueryTemplate = "not-json"
+                    },
+                    Variables = new Dictionary<string, string>()
+                }));
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_InvalidHeaderTemplateJson_Throws()
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                {
+                    Draft = new ApiTemplateCreateDto
+                    {
+                        Name = "T",
+                        Method = "GET",
+                        Url = "https://api.example.com/r",
+                        HeaderTemplate = "{"
+                    },
+                    Variables = new Dictionary<string, string>()
+                }));
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_NonAbsoluteUrl_Throws()
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                {
+                    Draft = new ApiTemplateCreateDto
+                    {
+                        Name = "T",
+                        Method = "GET",
+                        Url = "/relative/path"
+                    },
+                    Variables = new Dictionary<string, string>()
+                }));
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_MalformedDoubleEncodedJsonBody_Throws()
+        {
+            _gateway
+                .Setup(g => g.PostAsync(It.IsAny<string>(), It.IsAny<HttpContent?>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK));
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                {
+                    Draft = new ApiTemplateCreateDto
+                    {
+                        Name = "T",
+                        Method = "POST",
+                        Url = "https://api.example.com/p",
+                        BodyTemplate = "\"\\uZZZZ\""
+                    },
+                    Variables = new Dictionary<string, string>()
+                }));
+
+            Assert.Contains("double-encoded", ex.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.NotNull(ex.InnerException);
+        }
     }
 }
