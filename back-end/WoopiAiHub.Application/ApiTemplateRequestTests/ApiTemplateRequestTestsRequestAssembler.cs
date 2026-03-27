@@ -34,12 +34,12 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             var headerText = headerTemplate == null ? null : ApplyVariables(headerTemplate, variables);
             var bodyText = bodyTemplate == null ? null : ApplyVariables(bodyTemplate, variables);
 
-            if (!Uri.TryCreate(urlText, UriKind.Absolute, out _))
+            if (!IsHttpOrHttpsAbsoluteUri(urlText))
                 throw new InvalidOperationException("URL must be an absolute URI after applying variables.");
 
             var finalUrl = MergeQueryTemplate(urlText, queryText);
 
-            if (!Uri.TryCreate(finalUrl, UriKind.Absolute, out _))
+            if (!IsHttpOrHttpsAbsoluteUri(finalUrl))
                 throw new InvalidOperationException("Final URL must be an absolute URI.");
 
             var methodNormalized = string.IsNullOrWhiteSpace(method)
@@ -49,6 +49,20 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             var headers = ParseHeaderTemplate(headerText);
 
             return new AssembledOutboundRequest(methodNormalized, finalUrl, headers, bodyText);
+        }
+
+        private static bool IsHttpOrHttpsAbsoluteUri(string urlText)
+        {
+            if (string.IsNullOrWhiteSpace(urlText))
+                return false;
+
+            var trimmed = urlText.Trim();
+            if (!trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+                && !trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return Uri.TryCreate(trimmed, UriKind.Absolute, out var uri)
+                && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
         }
 
         private static string ApplyVariables(string input, IReadOnlyDictionary<string, string> variables)
