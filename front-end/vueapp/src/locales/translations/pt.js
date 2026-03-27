@@ -1289,6 +1289,9 @@ const portuguese = {
         title: "Board de Processamento de Documentos",
         toolFlowsTitle: "Adicionar Fluxo de Ferramentas",
         tools: "Ferramentas",
+        errors: {
+            urlTooLong: "A resposta do prompt é grande demais para a URL. Refine o prompt.",
+        },
     },
 };
 

@@ -593,6 +593,198 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.Contains("{\"score\":10}", message.Body);
         }
 
+        [Fact(DisplayName = "BuildPayload should replace Prompt placeholder in URL")]
+        [Trait("BuildPayload", "Success")]
+        public async Task BuildPayload_ShouldReplacePromptPlaceholder_InUrl()
+        {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolDto = CreateValidStepToolDto();
+            var apiTemplate = CreateValidApiTemplateDto();
+            var execution = AutomationFixture.FindValidStepToolExecution();
+
+            var promptText = "hello world";
+            var output = CreateStepToolOutput(HandlersTypes.Prompt, promptText);
+            var outputs = new List<StepToolOutput> { output };
+
+            var apiRequest = new ApiRequestDto
+            {
+                TemplateId = apiTemplate.Id!.Value,
+                Url = "https://api.example.com/search?q={{prompt}}",
+                Method = apiTemplate.Method,
+                Body = null
+            };
+
+            var encryptedData = JsonSerializer.Serialize(apiRequest);
+
+            _mockStepToolRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(stepToolDto);
+
+            _mockEncryptionService
+                .Setup(service => service.Decrypt(It.IsAny<string>()))
+                .Returns(encryptedData);
+
+            _mockApiTemplateRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(apiTemplate);
+
+            // Act
+            var result = await _handler.BuildPayload(automationServicesDto, null, outputs, execution);
+
+            // Assert
+            var message = result.Message as ApiRequestDto;
+            Assert.NotNull(message);
+            Assert.DoesNotContain("{{prompt}}", message.Url);
+            Assert.Contains(Uri.EscapeDataString(promptText), message.Url);
+        }
+
+        [Fact(DisplayName = "BuildPayload should replace OCR placeholder in URL")]
+        [Trait("BuildPayload", "Success")]
+        public async Task BuildPayload_ShouldReplaceOcrPlaceholder_InUrl()
+        {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolDto = CreateValidStepToolDto();
+            var apiTemplate = CreateValidApiTemplateDto();
+            var execution = AutomationFixture.FindValidStepToolExecution();
+
+            var ocrOutput = new
+            {
+                DocumentEmbeddings = new[]
+                {
+                    new { Text = "Document text" }
+                }
+            };
+
+            var outputValue = JsonSerializer.Serialize(ocrOutput);
+            var output = CreateStepToolOutput(HandlersTypes.Ocr, outputValue);
+            var outputs = new List<StepToolOutput> { output };
+
+            var apiRequest = new ApiRequestDto
+            {
+                TemplateId = apiTemplate.Id!.Value,
+                Url = "https://api.example.com/analyze?text={{ocr}}",
+                Method = apiTemplate.Method,
+                Body = null
+            };
+
+            var encryptedData = JsonSerializer.Serialize(apiRequest);
+
+            _mockStepToolRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(stepToolDto);
+
+            _mockEncryptionService
+                .Setup(service => service.Decrypt(It.IsAny<string>()))
+                .Returns(encryptedData);
+
+            _mockApiTemplateRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(apiTemplate);
+
+            // Act
+            var result = await _handler.BuildPayload(automationServicesDto, null, outputs, execution);
+
+            // Assert
+            var message = result.Message as ApiRequestDto;
+            Assert.NotNull(message);
+            Assert.DoesNotContain("{{ocr}}", message.Url);
+            Assert.Contains(Uri.EscapeDataString("Document text"), message.Url);
+        }
+
+        [Fact(DisplayName = "BuildPayload should replace Prompt placeholder in both URL and body")]
+        [Trait("BuildPayload", "Success")]
+        public async Task BuildPayload_ShouldReplacePromptPlaceholder_InUrlAndBody()
+        {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolDto = CreateValidStepToolDto();
+            var apiTemplate = CreateValidApiTemplateDto();
+            var execution = AutomationFixture.FindValidStepToolExecution();
+
+            var promptText = "test response";
+            var output = CreateStepToolOutput(HandlersTypes.Prompt, promptText);
+            var outputs = new List<StepToolOutput> { output };
+
+            var apiRequest = new ApiRequestDto
+            {
+                TemplateId = apiTemplate.Id!.Value,
+                Url = "https://api.example.com/run?input={{prompt}}",
+                Method = apiTemplate.Method,
+                Body = "{\"text\": {{prompt}}}"
+            };
+
+            var encryptedData = JsonSerializer.Serialize(apiRequest);
+
+            _mockStepToolRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(stepToolDto);
+
+            _mockEncryptionService
+                .Setup(service => service.Decrypt(It.IsAny<string>()))
+                .Returns(encryptedData);
+
+            _mockApiTemplateRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(apiTemplate);
+
+            // Act
+            var result = await _handler.BuildPayload(automationServicesDto, null, outputs, execution);
+
+            // Assert
+            var message = result.Message as ApiRequestDto;
+            Assert.NotNull(message);
+            Assert.DoesNotContain("{{prompt}}", message.Url);
+            Assert.DoesNotContain("{{prompt}}", message.Body ?? string.Empty);
+            Assert.Contains(Uri.EscapeDataString(promptText), message.Url);
+            Assert.Contains(promptText, message.Body);
+        }
+
+        [Fact(DisplayName = "BuildPayload should throw AppException when URL exceeds max length after placeholder replacement")]
+        [Trait("BuildPayload", "Fail")]
+        public async Task BuildPayload_ShouldThrowAppException_WhenUrlExceedsMaxLength()
+        {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolDto = CreateValidStepToolDto();
+            var apiTemplate = CreateValidApiTemplateDto();
+            var execution = AutomationFixture.FindValidStepToolExecution();
+
+            var hugePromptText = new string('a', 3000);
+            var output = CreateStepToolOutput(HandlersTypes.Prompt, hugePromptText);
+            var outputs = new List<StepToolOutput> { output };
+
+            var apiRequest = new ApiRequestDto
+            {
+                TemplateId = apiTemplate.Id!.Value,
+                Url = "https://api.example.com/search?q={{prompt}}",
+                Method = apiTemplate.Method,
+                Body = null
+            };
+
+            var encryptedData = JsonSerializer.Serialize(apiRequest);
+
+            _mockStepToolRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(stepToolDto);
+
+            _mockEncryptionService
+                .Setup(service => service.Decrypt(It.IsAny<string>()))
+                .Returns(encryptedData);
+
+            _mockApiTemplateRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(apiTemplate);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _handler.BuildPayload(automationServicesDto, null, outputs, execution));
+
+            Assert.Equal(ErrorCode.InvalidValue, exception.ErrorCode);
+            Assert.Contains("Refine o prompt", exception.Message);
+        }
+
         private static StepToolDto CreateValidStepToolDto()
         {
             var stepToolDto = AutomationFixture.FindValidStepToolDto();
