@@ -15,13 +15,7 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
-        internal sealed record AssembledOutboundRequest(
-            string Method,
-            string Url,
-            Dictionary<string, string>? Headers,
-            string? Body);
-
-        internal static AssembledOutboundRequest Assemble(
+        internal static ApiTemplateRequestTestsAssembledRequestDto Assemble(
             string method,
             string url,
             string? queryTemplate,
@@ -48,7 +42,13 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
 
             var headers = ParseHeaderTemplate(headerText);
 
-            return new AssembledOutboundRequest(methodNormalized, finalUrl, headers, bodyText);
+            return new ApiTemplateRequestTestsAssembledRequestDto
+            {
+                Method = methodNormalized,
+                Url = finalUrl,
+                Headers = headers,
+                Body = bodyText
+            };
         }
 
         private static bool IsHttpOrHttpsAbsoluteUri(string urlText)
@@ -82,10 +82,10 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             if (string.IsNullOrWhiteSpace(queryTemplateJson))
                 return urlAfterSubstitute;
 
-            List<JsonKeyValue>? items;
+            List<ApiTemplateRequestTestsJsonKeyValue>? items;
             try
             {
-                items = JsonSerializer.Deserialize<List<JsonKeyValue>>(queryTemplateJson, JsonOptions);
+                items = JsonSerializer.Deserialize<List<ApiTemplateRequestTestsJsonKeyValue>>(queryTemplateJson, JsonOptions);
             }
             catch (JsonException ex)
             {
@@ -114,10 +114,10 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             if (string.IsNullOrWhiteSpace(headerTemplateJson))
                 return null;
 
-            List<JsonKeyValue>? items;
+            List<ApiTemplateRequestTestsJsonKeyValue>? items;
             try
             {
-                items = JsonSerializer.Deserialize<List<JsonKeyValue>>(headerTemplateJson, JsonOptions);
+                items = JsonSerializer.Deserialize<List<ApiTemplateRequestTestsJsonKeyValue>>(headerTemplateJson, JsonOptions);
             }
             catch (JsonException ex)
             {
@@ -137,8 +137,6 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
 
             return headers.Count == 0 ? null : headers;
         }
-
-        private sealed record JsonKeyValue(string Key, string Value);
 
         internal static ApiTemplateCreateDto ToDraft(ApiTemplate model) =>
             new()
