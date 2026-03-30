@@ -196,7 +196,7 @@
                                         </label>
                                         <div class="d-flex flex-wrap gap-2">
                                             <div
-                                                v-for="id in sortedSelectedWorkflows"
+                                                v-for="id in selectedWorkflowsOrderedByName"
                                                 :key="id"
                                                 class="badge rounded-pill d-flex align-items-center px-2 py-1 selected-team-chip"
                                             >
@@ -661,7 +661,7 @@
                     team.name.toLowerCase().includes(this.searchTerm.toLowerCase())
                 );
             },
-            sortedSelectedWorkflows() {
+            selectedWorkflowsOrderedByName() {
                 return [...this.selectedWorkflows].sort((a, b) => {
                     const nameA = this.getName(a).toLowerCase();
                     const nameB = this.getName(b).toLowerCase();

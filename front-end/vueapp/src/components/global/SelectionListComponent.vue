@@ -33,7 +33,7 @@
                     </label>
                     <div class="d-flex flex-wrap gap-2">
                         <div
-                            v-for="itemId in sortedSelected"
+                            v-for="itemId in selecteOrderedByName"
                             :key="itemId"
                             class="badge rounded-pill d-flex align-items-center px-2 py-1 selected-item-chip"
                         >
@@ -188,7 +188,7 @@
                 }
                 return this.type === "user-list" ? "User" : "UsersRound";
             },
-            sortedSelected() {
+            selecteOrderedByName() {
                 return [...this.selected].sort((a, b) => {
                     const nameA = this.getItemName(a).toLowerCase();
                     const nameB = this.getItemName(b).toLowerCase();
