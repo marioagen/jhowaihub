@@ -413,6 +413,7 @@ namespace WoopiAiHub.Repository
                 .Select(w => new Phase1Dto
                 {
                     Name = w.Name,
+                    Description = w.Description,
                     Teams = w.Teams.Select(t => new TeamDto
                     {
                         Id = t.Id,
@@ -540,6 +541,7 @@ namespace WoopiAiHub.Repository
             {
                 Id = w.Id,
                 Name = w.Name,
+                Description = w.Description,
                 Created = w.Created,
                 Teams = w.Teams.Select(t => new TeamDto
                 {
@@ -748,6 +750,7 @@ namespace WoopiAiHub.Repository
             {
                 Id = w.Id,
                 Name = w.Name,
+                Description = w.Description,
                 Teams = w.Teams
                     .Select(t => new TeamDto
                     {

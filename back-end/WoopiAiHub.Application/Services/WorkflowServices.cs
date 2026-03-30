@@ -32,6 +32,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IEncryptionService _encryptationService;
         private readonly ILogger<WorkflowServices> _logger;
         private const string NotFoundMessage = "Workflow not found";
+        private const int WorkflowDescriptionMaxLength = 500;
 
         public WorkflowServices(
             IWorkflowRepository workflowRepository,
@@ -575,7 +576,14 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "One or more teams not found", TeamLabel.NotFound);
             }
 
-            var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowPhase1Dto.Name);
+            if (workflowPhase1Dto.Description.Length > WorkflowDescriptionMaxLength)
+            {
+                throw new AppException(ErrorCode.InvalidValue,
+                    $"Workflow description cannot exceed {WorkflowDescriptionMaxLength} characters",
+                    WorkflowLabel.InvalidDescription);
+            }
+
+            var workflow = new Workflow(0, DateTime.UtcNow, teamsList, workflowPhase1Dto.Name, workflowPhase1Dto.Description);
             await _workflowRepository.Create(workflow);
 
             return workflow.Id;
@@ -718,6 +726,13 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
 
+            if (workflowUpdatePhase1Dto.Description.Length > WorkflowDescriptionMaxLength)
+            {
+                throw new AppException(ErrorCode.InvalidValue,
+                    $"Workflow description cannot exceed {WorkflowDescriptionMaxLength} characters",
+                    WorkflowLabel.InvalidDescription);
+            }
+
             _unitOfWork.BeginTransaction();
             workflow.Teams.Clear();
             try
@@ -728,7 +743,7 @@ namespace WoopiAiHub.Application.Services
                     workflow.AddTeam(team);
                 }
 
-                workflow.Update(workflowUpdatePhase1Dto.Name);
+                workflow.Update(workflowUpdatePhase1Dto.Name, workflowUpdatePhase1Dto.Description);
                 await _unitOfWork.SaveChangesAsync();
                 _unitOfWork.Commit();
 
@@ -1172,39 +1187,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Determines whether any of the specified dependencies require an OCR tool.
-        /// </summary>
-        /// <remarks>This method checks each dependency to determine if it is associated with a tool of
-        /// type OCR. The <paramref name="toolCache"/> is used to avoid redundant lookups and may be populated with
-        /// additional tools as needed.</remarks>
-        /// <param name="dependencies">A list of <see cref="StepTool"/> objects representing the tool dependencies to check.</param>
-        /// <param name="toolCache">A dictionary that maps tool IDs to <see cref="Tool"/> instances, used to cache tool lookups and improve
-        /// performance. May be updated with additional entries during execution.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if at least one
-        /// dependency requires an OCR tool; otherwise, <see langword="false"/>.</returns>
-        private async Task<bool> HasOcrDependency(List<StepTool> dependencies, Dictionary<int, Tool> toolCache)
-        {
-            foreach (var dependency in dependencies)
-            {
-                if (!toolCache.TryGetValue(dependency.ToolId, out var dependencyTool))
-                {
-                    dependencyTool = await _toolRepository.FindModelByIdAsync(dependency.ToolId);
-                    if (dependencyTool != null)
-                    {
-                        toolCache[dependency.ToolId] = dependencyTool;
-                    }
-                }
-
-                if (dependencyTool?.ToolType?.Name == HandlersTypes.Ocr)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Determines whether any of the specified dependencies require an Embedding tool.
         /// </summary>
         /// <remarks>This method checks each dependency to determine if it is associated with a tool of
@@ -1283,7 +1265,7 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                var newWorkflow = new Workflow(0, DateTime.UtcNow, teamsList, dto.NewName);
+                var newWorkflow = new Workflow(0, DateTime.UtcNow, teamsList, dto.NewName, source.Description);
                 await _workflowRepository.Create(newWorkflow);
 
                 var sourceStepsOrdered = source.Steps.OrderBy(s => s.Order).ToList();
