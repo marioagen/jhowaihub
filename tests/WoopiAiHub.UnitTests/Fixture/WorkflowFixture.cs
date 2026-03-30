@@ -196,7 +196,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return new StepCreateDto
             {
                 Name = faker.Lorem.Sentence(2),
-                Order = faker.Random.Int(1, 10),
+                Order = 1,
                 ProfileId = faker.Random.Int(1, 100),
                 StatusId = faker.Random.Int(1, 5),
                 StepTools = new List<StepToolUpdateDto>() { stepToolUpdateDto }
