@@ -143,5 +143,27 @@ namespace WoopiAiHub.Repository
 
             return false;
         }
+
+        /// <summary>
+        /// Deletes all step tool outputs associated with the specified step tool IDs.
+        /// </summary>
+        /// <param name="stepToolIds">A collection of step tool IDs whose outputs are to be deleted.</param>
+        /// <returns><see langword="true"/> if one or more entities were deleted; otherwise, <see langword="false"/>.</returns>
+        public async Task<bool> DeleteByStepToolIdsAsync(IEnumerable<int> stepToolIds)
+        {
+            if (!stepToolIds?.Any() ?? true)
+                return false;
+
+            var outputs = await _context.StepToolOutputs
+                .Where(o => stepToolIds!.Contains(o.StepToolId))
+                .ToListAsync();
+
+            if (outputs.Count == 0)
+                return false;
+
+            _context.StepToolOutputs.RemoveRange(outputs);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

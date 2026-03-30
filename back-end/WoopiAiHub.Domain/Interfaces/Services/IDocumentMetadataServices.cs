@@ -5,7 +5,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
 {
     public interface IDocumentMetadataServices
     {
-        FindByIdAnalyzeDto FindByIdAnalyze(int id, HeadersDto headersDto);
+        Task<FindByIdAnalyzeDto> FindByIdAnalyze(int id, HeadersDto headersDto);
 
         Task<OcrTextResponseDto> FindOcrTextByDocumentId(int documentId);
     }

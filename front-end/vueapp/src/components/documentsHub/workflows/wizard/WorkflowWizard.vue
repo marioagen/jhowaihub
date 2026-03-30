@@ -155,6 +155,38 @@
         @cancel="cancelNavigation"
         ref="confirmLeaveModal"
     />
+    <ConfirmModalValidationInput
+        id="editValidationConfirm"
+        title="documents.editValidationTitle"
+        :message="editValidationMessage"
+        cancelText="common.cancel"
+        confirmText="documents.confirmEdit"
+        :placeholder="$t('documents.editValidationPlaceholder', { name: phase1Data?.name })"
+        :validationText="phase1Data?.name || ''"
+        confirmVariant="danger"
+        iconeName="AlertTriangle"
+        iconVariant="warning"
+        ref="EditValidationDialog"
+        :isLoading="isLoading"
+        @confirm="() => executeSavePhase2(null, true)"
+    />
+    <ConfirmModalValidationInput
+        id="removeToolValidationConfirm"
+        title="workflow.removeToolValidationTitle"
+        :message="$t('workflow.removeToolValidationMessage', { name: pendingStepToRemove?.name })"
+        cancelText="common.cancel"
+        confirmText="workflow.confirmRemoveTool"
+        :placeholder="
+            $t('workflow.removeToolValidationPlaceholder', { name: pendingStepToRemove?.name })
+        "
+        :validationText="pendingStepToRemove?.name || ''"
+        confirmVariant="danger"
+        iconeName="AlertTriangle"
+        iconVariant="warning"
+        ref="RemoveToolValidationDialog"
+        :isLoading="isLoading"
+        @confirm="() => executeRemoveToolFlow(null, true)"
+    />
 </template>
 <script>
     import { useForm } from "vee-validate";
@@ -165,6 +197,7 @@
     import ProfilesService from "@/services/profiles/ProfilesService";
     import FullscreenLoadingComponent from "@/components/global/FullscreenLoadingComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidationInput.vue";
 
     export default {
         name: "WorkflowWizard",
@@ -174,6 +207,7 @@
             Phase3Tools,
             FullscreenLoadingComponent,
             ConfirmModal,
+            ConfirmModalValidationInput,
         },
         props: {
             isEdit: {
@@ -208,6 +242,8 @@
                 profilesList: [],
                 canLeave: false,
                 pendingNavegation: null,
+                documentCountToEdit: 0,
+                pendingStepToRemove: null,
             };
         },
         computed: {
@@ -220,6 +256,12 @@
                 return this.$t(
                     this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle"
                 );
+            },
+            editValidationMessage() {
+                return this.$t("documents.editValidationMessage", {
+                    count: this.documentCountToEdit,
+                    name: this.phase1Data?.name || "",
+                });
             },
         },
         methods: {
@@ -336,6 +378,7 @@
                         const params = {
                             id: this.workflowIdInternal,
                             name: data.name,
+                            description: data.description ?? "",
                             teams: data.teams,
                         };
 
@@ -372,6 +415,7 @@
                 this.isLoading = true;
                 const phase2Component = this.$refs.phase2;
                 const data = phase2Component.getData();
+                const hasRemovedOriginalSteps = phase2Component.hasRemovedOriginalSteps();
 
                 if (data.steps.length === 0) {
                     this.$notify({
@@ -384,10 +428,40 @@
                     return;
                 }
 
+                if (this.workflowIdInternal && hasRemovedOriginalSteps) {
+                    WorkflowService.countDocuments(this.workflowIdInternal)
+                        .then((count) => {
+                            if (count > 0) {
+                                this.documentCountToEdit = count;
+                                this.isLoading = false;
+                                this.$refs.EditValidationDialog.open();
+                            } else {
+                                this.executeSavePhase2(data);
+                            }
+                        })
+                        .catch(() => {
+                            this.isLoading = false;
+                            this.$notify({
+                                title: "workflow.index",
+                                message: "documents.errors.removeError",
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
+                        });
+                } else {
+                    this.executeSavePhase2(data);
+                }
+            },
+            async executeSavePhase2(dataParam, resetDocuments = false) {
+                this.isLoading = true;
+                this.$refs.EditValidationDialog?.close();
+                const data = dataParam?.steps ? dataParam : this.$refs.phase2.getData();
+
                 try {
                     const params = {
                         workflowId: this.workflowIdInternal,
                         steps: data.steps,
+                        resetDocuments: resetDocuments,
                     };
 
                     const result = await WorkflowService.updatePhase2(params);
@@ -482,46 +556,74 @@
                 });
             },
             async handleRemoveToolFlow(step) {
-                const phase3Component = this.$refs.phase3;
-                let phase3DataResult = await this.getPhase3Data();
-
-                const stepIndex = phase3DataResult.findIndex((s) => s.id === step.id);
-                if (stepIndex !== -1) {
-                    phase3DataResult[stepIndex].stepTools = [];
+                this.isLoading = true;
+                try {
+                    const hasConstraints = await WorkflowService.hasStepToolConstraints(step.id);
+                    if (hasConstraints) {
+                        this.pendingStepToRemove = step;
+                        this.$refs.RemoveToolValidationDialog.open();
+                    } else {
+                        await this.executeRemoveToolFlow(step, false);
+                    }
+                } catch (error) {
+                    this.$notify({
+                        title: "workflow.index",
+                        message: "workflow.removeError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isLoading = false;
                 }
+            },
+            async executeRemoveToolFlow(stepParam = null, resetDocuments = false) {
+                this.$refs.RemoveToolValidationDialog?.close();
+                const step = stepParam || this.pendingStepToRemove;
+                if (!step) return;
 
-                const params = {
-                    workflowId: this.workflowId ?? this.$route.params.workflowId,
-                    steps: phase3DataResult,
-                };
+                this.isLoading = true;
+                try {
+                    let phase3DataResult = await this.getPhase3Data();
 
-                await WorkflowService.updatePhase3(params)
-                    .then((result) => {
-                        if (result.error !== undefined) {
-                            return this.$notify({
-                                title: "flow.title",
-                                message: "flow.formFlow.progressFlowUpdateFail",
-                                variant: "danger",
-                                icon: "CircleX",
-                            });
-                        } else {
-                            this.loadPhase3Data();
-                            this.$notify({
-                                title: "flow.title",
-                                message: "flow.formFlow.progressFlowSuccess",
-                                variant: "success",
-                                icon: "CircleCheckBig",
-                            });
-                        }
-                    })
-                    .catch((error) => {
-                        this.$notify({
+                    const stepIndex = phase3DataResult.findIndex((s) => s.id === step.id);
+                    if (stepIndex !== -1) {
+                        phase3DataResult[stepIndex].stepTools = [];
+                    }
+
+                    const params = {
+                        workflowId: this.workflowId ?? this.$route.params.workflowId,
+                        steps: phase3DataResult,
+                        resetDocuments: resetDocuments,
+                    };
+
+                    const result = await WorkflowService.updatePhase3(params);
+                    if (result && result.error !== undefined) {
+                        return this.$notify({
                             title: "flow.title",
-                            message: error.message || "flow.formFlow.progressFlowFail",
+                            message: "flow.formFlow.progressFlowUpdateFail",
                             variant: "danger",
                             icon: "CircleX",
                         });
+                    } else {
+                        this.loadPhase3Data();
+                        this.$notify({
+                            title: "flow.title",
+                            message: "flow.formFlow.progressFlowSuccess",
+                            variant: "success",
+                            icon: "CircleCheckBig",
+                        });
+                    }
+                } catch (error) {
+                    this.$notify({
+                        title: "flow.title",
+                        message: error.message || "flow.formFlow.progressFlowFail",
+                        variant: "danger",
+                        icon: "CircleX",
                     });
+                } finally {
+                    this.pendingStepToRemove = null;
+                    this.isLoading = false;
+                }
             },
             async loadWorkflowData() {
                 this.workflowIdInternal = this.workflowIdInternal ?? this.$route.params.workflowId;
@@ -538,6 +640,7 @@
                             let result = await this.getPhase1Data();
                             this.phase1Data = {
                                 name: result.name,
+                                description: result.description ?? "",
                                 teams: result.teams.map((t) => t.id),
                             };
                         }
@@ -625,6 +728,7 @@
                     let result = await this.getPhase1Data();
                     this.phase1Data = {
                         name: result.name,
+                        description: result.description ?? "",
                         teams: result.teams.map((t) => t.id),
                     };
                 } catch (error) {

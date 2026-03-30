@@ -120,4 +120,7 @@
     .clear-search:hover {
         background: var(--bs-secondary-bg);
     }
+    .border {
+        border: 1px solid var(--color-border-form-control) !important;
+    }
 </style>

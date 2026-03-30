@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 
 export default new Vuex.Store({
     state: {
-        theme: null, 
+        theme: null,
         tenantInitialized: false,
         userProfile: {
             language: "pt",
@@ -30,6 +30,7 @@ export default new Vuex.Store({
                 teamId: "",
             },
         },
+        uploadNotifications: [],
     },
     mutations: {
         setTheme(state, themeName) {
@@ -89,6 +90,35 @@ export default new Vuex.Store({
                 data: {},
             };
         },
+        clearInProgressUploadNotifications(state, payload) {
+            const namesFiles = payload.namesFiles || [];
+            if (namesFiles.length === 0) return;
+            state.uploadNotifications = state.uploadNotifications.filter(
+                (n) => !(n.status === "in_progress" && namesFiles.includes(n.fileName))
+            );
+        },
+        addUploadNotification(state, payload) {
+            const { id, fileName, status = "in_progress", success = true } = payload;
+            const exists = state.uploadNotifications.some((n) => n.id === id);
+            if (!exists) {
+                state.uploadNotifications.unshift({ id, fileName, status, success });
+            }
+        },
+        setUploadNotificationComplete(state, payload) {
+            const notification = state.uploadNotifications.find((n) => n.id === payload.id);
+            if (notification) {
+                notification.status = "completed";
+                notification.success = payload.success !== false;
+            }
+        },
+        removeUploadNotification(state, payload) {
+            state.uploadNotifications = state.uploadNotifications.filter(
+                (n) => n.id !== payload.id
+            );
+        },
+        clearUploadNotifications(state) {
+            state.uploadNotifications = [];
+        },
     },
     plugins: [
         createPersistedState({
@@ -99,7 +129,7 @@ export default new Vuex.Store({
             },
             reducer(state) {
                 const { theme, ...rest } = state;
-                return rest; 
+                return rest;
             },
         }),
     ],

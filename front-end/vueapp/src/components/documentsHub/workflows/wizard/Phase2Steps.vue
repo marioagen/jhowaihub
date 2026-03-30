@@ -259,6 +259,10 @@
                 }
             },
 
+            hasRemovedOriginalSteps() {
+                return this.steps.some((s) => s.id > 0 && s.isActive === false);
+            },
+
             getData() {
                 return {
                     steps: this.steps
@@ -362,9 +366,9 @@
         transition: background-color 0.2s;
     }
 
-        .add-step-card:hover {
-            background-color: var(--color-hover-transfer) !important;
-        }
+    .add-step-card:hover {
+        background-color: var(--color-hover-transfer) !important;
+    }
 
     .icon-circle {
         width: 32px;

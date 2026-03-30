@@ -349,9 +349,16 @@ const spanish = {
         selectAnItemFromTheList: "Seleccione un elemento de la lista.",
         selected: "Seleccionada",
         selectedList: "Lista seleccionada",
+        selectionList: "Lista de selección",
+        removeSelectionChip: "Quitar de la selección",
         send: "Enviar",
         showingToTotal: "del",
         signOut: "Desconectar",
+        notifications: "Notificaciones",
+        noNotifications: "Sin notificaciones",
+        inProgress: "En progreso",
+        completed: "Completado",
+        remove: "Eliminar",
         status: "Estado",
         success: "Éxito",
         textCopiedToClipboard: "Texto copiado al portapapeles.",
@@ -505,6 +512,7 @@ const spanish = {
             noWorkflowFound:
                 "No se encontró ningún flujo de trabajo vinculado a los equipos del usuario",
             removeAllDropzone: "Eliminar archivos del área de carga",
+            removeWorkflowChip: "Quitar este flujo de la selección",
             selectionList: "Lista de selección",
             subtitle: "Sube nuevos documentos para su análisis",
             title: "Nuevo Documento",
@@ -513,6 +521,7 @@ const spanish = {
         },
         uploadComplete: "Carga completa",
         uploadedFiles: "Todos los archivos subidos",
+        sentNowProcessing: "Documentos enviados, en proceso.",
         uploadPdf:
             "Arrastre y suelte sus archivos PDF a continuación para empezar o haga clic en el área para navegar",
         viewHistory: "Ver historial",
@@ -528,6 +537,16 @@ const spanish = {
             titleMessage:
                 "Este documento está asociado a varios flujos de trabajo. Elija cuál desea ver:",
         },
+        deleteValidationTitle: "Confirmar eliminación permanente",
+        deleteValidationMessage:
+            "Está a punto de eliminar permanentemente <b>{count} documentos</b> y el workflow \"<b>{name}</b>\". Esta acción no se puede deshacer. Escriba <span style='color: red' class='text-danger'><b>{name}</b></span> para confirmar:",
+        deleteValidationPlaceholder: "Escriba '{name}' para confirmar",
+        confirmPermanentDelete: "Eliminar permanentemente",
+        editValidationTitle: "Hay documentos en progreso en este flujo de trabajo",
+        editValidationMessage:
+            "Encontramos <b>{count} documentos</b> siendo procesados en este flujo de trabajo. Al guardar los cambios, todos los documentos en progreso serán eliminados permanentemente. Escriba <span style='color: red' class='text-danger'><b>{name}</b></span> para confirmar:",
+        editValidationPlaceholder: "Escriba '{name}' para confirmar cambios",
+        confirmEdit: "Eliminar documentos y guardar",
         workflows: "Workflows",
         youAreAboutToDeleteDocument: "Estás a punto de eliminar <br/> el documento del sistema",
         youAreAboutToDeleteDocumentQuery:
@@ -837,6 +856,7 @@ const spanish = {
         quizzes: "Cuestionarios",
         templates: "Plantillas de API",
         tools: "Herramientas",
+        connectors: "Conectores",
         types: "Tipos",
         workflowManagement: "Gestión de Flujos de Trabajo",
         workflows: "Flujos de Trabajo de Documentos",
@@ -848,6 +868,7 @@ const spanish = {
     },
     permissions: {
         descriptions: {
+            auditor: "Ver Auditoría",
             dashboard: "Ver Dashboard",
             documents: "Ver Documentos",
             documentRejection: "Rechazar documentos",
@@ -866,6 +887,7 @@ const spanish = {
         },
         groups: {
             actions: "Acciones",
+            auditor: "Auditoría",
             dashboard: "Dashboard",
             documents: "Documentos",
             management: "Gestión",
@@ -1210,6 +1232,9 @@ const spanish = {
         createSuccess: "Workflow creado con éxito",
         createWorkflow: "Crear Workflow",
         deleteBtn: "Eliminar",
+        descriptionOptional: "(opcional)",
+        fullDescriptionTitle: "Descripción completa",
+        viewFullDescription: "Ver descripción completa",
         editError: "Error al editar workflow",
         editSuccess: "Workflow editado con éxito",
         editTitle: "Editor de Workflow",
@@ -1253,6 +1278,11 @@ const spanish = {
         removeError: "Error al eliminar workflow",
         removeSuccess: "Workflow eliminado con éxito",
         removeToolFlow: "Eliminar flujo",
+        removeToolValidationTitle: "Eliminar Herramientas de la Etapa",
+        removeToolValidationMessage:
+            "La etapa {name} tiene datos o dependencias vinculadas. Todos los documentos y dependencias serán eliminados permanentemente. Para confirmar la eliminación, escriba el nombre de la etapa a continuación:   ",
+        removeToolValidationPlaceholder: "Escriba '{name}' para confirmar",
+        confirmRemoveTool: "Confirmar eliminación",
         responsableTeam: "Equipo Responsable",
         responsible: "Responsable",
         saveChanges: "Guardar Cambios",

@@ -541,7 +541,7 @@
         height: auto;
         background-color: var(--color-card-content) !important;
         color: var(--color-body-content) !important;
-        border-color: var( --color-border-form-control) !important;
+        border-color: var(--color-border-form-control) !important;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 38%);
     }
 

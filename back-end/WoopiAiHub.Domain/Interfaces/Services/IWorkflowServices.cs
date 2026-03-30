@@ -33,5 +33,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<int> CloneAsync(WorkflowCloneRequestDto dto);
         ICollection<WorkflowInternalDto> FindAllInternal();
         Task<Workflow?> FindModelById(int id);
+        Task<int> CountCards(int id);
+        Task<bool> HasStepToolConstraints(int stepId);
     }
 }
