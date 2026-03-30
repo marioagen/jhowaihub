@@ -303,37 +303,33 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// Returns an empty string if no text is found or if the input is invalid.</returns>
         private static string ExtractOcrText(string outputValue)
         {
-            try
+            if (string.IsNullOrEmpty(outputValue))
+                return string.Empty;
+
+            using var document = JsonDocument.Parse(outputValue);
+            var root = document.RootElement;
+
+            if (root.TryGetProperty("DocumentEmbeddings", out var embeddingsArray) &&
+                embeddingsArray.ValueKind == JsonValueKind.Array)
             {
-                using var document = JsonDocument.Parse(outputValue);
-                var root = document.RootElement;
-                
-                if (root.TryGetProperty("DocumentEmbeddings", out var embeddingsArray) && 
-                    embeddingsArray.ValueKind == JsonValueKind.Array)
+                var texts = new List<string>();
+
+                foreach (var embedding in embeddingsArray.EnumerateArray())
                 {
-                    var texts = new List<string>();
-                    
-                    foreach (var embedding in embeddingsArray.EnumerateArray())
+                    if (embedding.TryGetProperty("Text", out var embedTextProperty))
                     {
-                        if (embedding.TryGetProperty("Text", out var embedTextProperty))
+                        var text = embedTextProperty.GetString();
+                        if (!string.IsNullOrEmpty(text))
                         {
-                            var text = embedTextProperty.GetString();
-                            if (!string.IsNullOrEmpty(text))
-                            {
-                                texts.Add(text);
-                            }
+                            texts.Add(text);
                         }
                     }
-                    
-                    return texts.Count > 0 ? string.Join("\n\n", texts) : string.Empty;
                 }
-                
-                return string.Empty;
+
+                return texts.Count > 0 ? string.Join("\n\n", texts) : string.Empty;
             }
-            catch
-            {
-                return string.Empty;
-            }
+
+            return string.Empty;
         }
     }
 }
