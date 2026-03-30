@@ -201,13 +201,12 @@ namespace WoopiAiHub.UnitTests.Utils
                 new StepCreateDto
                 {
                     Name = "Step 2",
-                    Order = 2,
+                    Order = 3,
                     ProfileId = 1,
                     StatusId = 1
                 }
             };
 
-            // Act & Assert (should not throw)
             _validateStep.ValidateCreateStep(stepsCreateDto);
         }
 

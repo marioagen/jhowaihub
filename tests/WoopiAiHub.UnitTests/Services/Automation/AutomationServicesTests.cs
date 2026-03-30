@@ -639,5 +639,239 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             stepRepositoryMock.Verify(r => r.FindByOrderAndWorkflowId(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
             cardRepositoryMock.Verify(r => r.Update(It.IsAny<Domain.Models.Card>()), Times.Never);
         }
+
+        [Fact(DisplayName = "ReprocessStepTool should throw AppException when StepId is null")]
+        [Trait("ReprocessStepTool", "Fail")]
+        public async Task ReprocessStepTool_ShouldThrowAppException_WhenStepIdIsNull()
+        {
+            // Arrange
+            var automationDto = new AutomationServicesDto(1, 1, "tenant", "email", "ref", null);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<AppException>(() => _service.ReprocessStepTool(automationDto));
+            Assert.Equal(ErrorCode.InvalidValue, exception.ErrorCode);
+        }
+
+        [Fact(DisplayName = "ReprocessStepTool should do nothing when no pending step tool is found")]
+        [Trait("ReprocessStepTool", "Success")]
+        public async Task ReprocessStepTool_ShouldDoNothing_WhenNoPendingStepToolFound()
+        {
+            // Arrange
+            var automationDto = AutomationFixture.FindValidautomationServicesDto();
+
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var messagePublisherMock = _mocker.GetMock<IMessagePublisher<object>>();
+            var toolFactoryHandlerMock = _mocker.GetMock<IToolFactoryHandler>();
+
+            stepToolRepositoryMock
+                .Setup(r => r.FindNextPending(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync((StepTool?)null);
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => _service.ReprocessStepTool(automationDto));
+
+            // Assert
+            Assert.Null(exception);
+            stepToolRepositoryMock.Verify(r => r.FindNextPending(automationDto.StepId!.Value, automationDto.CardId), Times.Once);
+            stepToolExecutionRepositoryMock.Verify(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Never);
+            toolFactoryHandlerMock.Verify(s => s.GetHandler(It.IsAny<string>()), Times.Never);
+            messagePublisherMock.Verify(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "ReprocessStepTool should execute step tool when a pending step tool is found")]
+        [Trait("ReprocessStepTool", "Success")]
+        public async Task ReprocessStepTool_ShouldExecuteStepTool_WhenPendingStepToolFound()
+        {
+            // Arrange
+            var automationDto = AutomationFixture.FindValidautomationServicesDto();
+            var stepTool = AutomationFixture.FindValidStepTool();
+            var tool = ToolFixture.FindValidToolModel();
+            tool.ToolType = ToolTypeFixture.FindValidToolType();
+            stepTool.Tool = tool;
+
+            var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
+            var payload = AutomationFixture.FindValidExecutionMessageDto();
+
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var toolFactoryHandlerMock = _mocker.GetMock<IToolFactoryHandler>();
+            var handlerMock = _mocker.GetMock<IToolHandler>();
+            var messagePublisherMock = _mocker.GetMock<IMessagePublisher<object>>();
+
+            stepToolRepositoryMock
+                .Setup(r => r.FindNextPending(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync(stepTool);
+            stepToolExecutionRepositoryMock
+                .Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync(stepToolExecution);
+            stepToolExecutionRepositoryMock
+                .Setup(r => r.UpdateAsync(It.IsAny<StepToolExecution>()))
+                .Returns(Task.CompletedTask);
+            toolFactoryHandlerMock
+                .Setup(s => s.GetHandler(It.IsAny<string>()))
+                .Returns(handlerMock.Object);
+            handlerMock
+                .Setup(h => h.BuildPayload(It.IsAny<AutomationServicesDto>(), It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>()))
+                .ReturnsAsync(payload);
+            messagePublisherMock
+                .Setup(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _service.ReprocessStepTool(automationDto);
+
+            // Assert
+            stepToolRepositoryMock.Verify(r => r.FindNextPending(automationDto.StepId!.Value, automationDto.CardId), Times.Once);
+            stepToolExecutionRepositoryMock.Verify(r => r.FindByStepToolIdAndCardIdAsync(stepTool.Id, automationDto.CardId), Times.Once);
+            stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
+            toolFactoryHandlerMock.Verify(s => s.GetHandler(It.IsAny<string>()), Times.Once);
+            handlerMock.Verify(h => h.BuildPayload(It.IsAny<AutomationServicesDto>(), It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>()), Times.Once);
+            messagePublisherMock.Verify(m => m.PublishAsync(payload.Queue, payload.Message!), Times.Once);
+        }
+
+        [Fact(DisplayName = "ReprocessStepTool should do nothing when execution record is not found for the pending step tool")]
+        [Trait("ReprocessStepTool", "Success")]
+        public async Task ReprocessStepTool_ShouldDoNothing_WhenExecutionNotFound()
+        {
+            // Arrange
+            var automationDto = AutomationFixture.FindValidautomationServicesDto();
+            var stepTool = AutomationFixture.FindValidStepTool();
+            var tool = ToolFixture.FindValidToolModel();
+            tool.ToolType = ToolTypeFixture.FindValidToolType();
+            stepTool.Tool = tool;
+
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var messagePublisherMock = _mocker.GetMock<IMessagePublisher<object>>();
+
+            stepToolRepositoryMock
+                .Setup(r => r.FindNextPending(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync(stepTool);
+            stepToolExecutionRepositoryMock
+                .Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync((StepToolExecution?)null);
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => _service.ReprocessStepTool(automationDto));
+
+            // Assert
+            Assert.Null(exception);
+            stepToolRepositoryMock.Verify(r => r.FindNextPending(automationDto.StepId!.Value, automationDto.CardId), Times.Once);
+            stepToolExecutionRepositoryMock.Verify(r => r.FindByStepToolIdAndCardIdAsync(stepTool.Id, automationDto.CardId), Times.Once);
+            stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Never);
+            messagePublisherMock.Verify(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "ReprocessStepTool should revert execution to Pending and notify hub with LabelError when AppException is thrown")]
+        [Trait("ReprocessStepTool", "Fail")]
+        public async Task ReprocessStepTool_ShouldRevertToPendingAndNotifyWithLabelError_WhenAppExceptionThrown()
+        {
+            // Arrange
+            var automationDto = AutomationFixture.FindValidautomationServicesDto();
+            var stepTool = AutomationFixture.FindValidStepTool();
+            var tool = ToolFixture.FindValidToolModel();
+            tool.ToolType = ToolTypeFixture.FindValidToolType();
+            stepTool.Tool = tool;
+
+            var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
+            var labelError = "Créditos insuficientes";
+            var appException = new AppException(ErrorCode.NoCreditsAvailable, "No credits", labelError);
+
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var toolFactoryHandlerMock = _mocker.GetMock<IToolFactoryHandler>();
+            var handlerMock = _mocker.GetMock<IToolHandler>();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+
+            stepToolRepositoryMock
+                .Setup(r => r.FindNextPending(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync(stepTool);
+            stepToolExecutionRepositoryMock
+                .Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync(stepToolExecution);
+            stepToolExecutionRepositoryMock
+                .Setup(r => r.UpdateAsync(It.IsAny<StepToolExecution>()))
+                .Returns(Task.CompletedTask);
+            toolFactoryHandlerMock
+                .Setup(s => s.GetHandler(It.IsAny<string>()))
+                .Returns(handlerMock.Object);
+            handlerMock
+                .Setup(h => h.BuildPayload(It.IsAny<AutomationServicesDto>(), It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>()))
+                .ThrowsAsync(appException);
+            hubNotifierMock
+                .Setup(h => h.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string?>()))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => _service.ReprocessStepTool(automationDto));
+
+            // Assert
+            Assert.Null(exception);
+            stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Exactly(2));
+            hubNotifierMock.Verify(h => h.CardProgessAsync(
+                automationDto.Email,
+                automationDto.CardId,
+                0.0,
+                automationDto.StepId.GetValueOrDefault(),
+                It.IsAny<string>(),
+                true,
+                labelError), Times.Once);
+        }
+
+        [Fact(DisplayName = "ReprocessStepTool should revert execution to Pending and notify hub without LabelError when unexpected exception is thrown")]
+        [Trait("ReprocessStepTool", "Fail")]
+        public async Task ReprocessStepTool_ShouldRevertToPendingAndNotifyWithoutLabelError_WhenUnexpectedExceptionThrown()
+        {
+            // Arrange
+            var automationDto = AutomationFixture.FindValidautomationServicesDto();
+            var stepTool = AutomationFixture.FindValidStepTool();
+            var tool = ToolFixture.FindValidToolModel();
+            tool.ToolType = ToolTypeFixture.FindValidToolType();
+            stepTool.Tool = tool;
+
+            var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
+
+            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
+            var toolFactoryHandlerMock = _mocker.GetMock<IToolFactoryHandler>();
+            var handlerMock = _mocker.GetMock<IToolHandler>();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+
+            stepToolRepositoryMock
+                .Setup(r => r.FindNextPending(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync(stepTool);
+            stepToolExecutionRepositoryMock
+                .Setup(r => r.FindByStepToolIdAndCardIdAsync(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync(stepToolExecution);
+            stepToolExecutionRepositoryMock
+                .Setup(r => r.UpdateAsync(It.IsAny<StepToolExecution>()))
+                .Returns(Task.CompletedTask);
+            toolFactoryHandlerMock
+                .Setup(s => s.GetHandler(It.IsAny<string>()))
+                .Returns(handlerMock.Object);
+            handlerMock
+                .Setup(h => h.BuildPayload(It.IsAny<AutomationServicesDto>(), It.IsAny<StepToolParameter>(), It.IsAny<List<StepToolOutput>>(), It.IsAny<StepToolExecution>()))
+                .ThrowsAsync(new InvalidOperationException("Erro inesperado"));
+            hubNotifierMock
+                .Setup(h => h.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), null))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => _service.ReprocessStepTool(automationDto));
+
+            // Assert
+            Assert.Null(exception);
+            stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Exactly(2));
+            hubNotifierMock.Verify(h => h.CardProgessAsync(
+                automationDto.Email,
+                automationDto.CardId,
+                0.0,
+                automationDto.StepId.GetValueOrDefault(),
+                It.IsAny<string>(),
+                true,
+                null), Times.Once);
+        }
     }
 }
