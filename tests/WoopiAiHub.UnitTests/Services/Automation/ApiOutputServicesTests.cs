@@ -51,7 +51,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .ReturnsAsync(true);
             _mockWorkflowRepository.Setup(repo => repo.FindToolByStepToolId(It.IsAny<int>()))
                 .ReturnsAsync((ToolDto?)null!);
-            _mockHubNotifier.Setup(notifier => notifier.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>()))
+            _mockHubNotifier.Setup(notifier => notifier.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(),null))
                 .Returns(Task.CompletedTask);
 
             // Act

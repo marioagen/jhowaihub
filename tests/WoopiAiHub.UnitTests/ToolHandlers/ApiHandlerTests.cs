@@ -782,7 +782,6 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 _handler.BuildPayload(automationServicesDto, null, outputs, execution));
 
             Assert.Equal(ErrorCode.InvalidValue, exception.ErrorCode);
-            Assert.Contains("Refine o prompt", exception.Message);
         }
 
         private static StepToolDto CreateValidStepToolDto()

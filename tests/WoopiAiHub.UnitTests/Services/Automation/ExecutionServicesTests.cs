@@ -69,7 +69,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .ReturnsAsync(tool);
 
             _mocker.GetMock<IHubNotifier>()
-                .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool1.StepId, It.IsAny<string>(), It.IsAny<bool>()))
+                .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool1.StepId, It.IsAny<string>(), It.IsAny<bool>(), null))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -79,7 +79,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             _mocker.GetMock<IStepToolExecutionRepository>().Verify(x => x.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             _mocker.GetMock<ICardRepository>().Verify(x => x.FindById(execution.CardId), Times.Once);
             _mocker.GetMock<IStepRepository>().Verify(x => x.FindByIdWithTools(stepTool1.StepId), Times.Once);
-            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 50.0, stepTool1.StepId, tool.Name, It.IsAny<bool>()), Times.Once);
+            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 50.0, stepTool1.StepId, tool.Name, It.IsAny<bool>(), null), Times.Once);
         }
 
         [Fact(DisplayName = "HandleExecutionProgress should notify all batch cards when card has DocumentBatchId")]
@@ -130,7 +130,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .ReturnsAsync(execution2);
 
             _mocker.GetMock<IHubNotifier>()
-                .Setup(x => x.CardProgessAsync(email, It.IsAny<int>(), It.IsAny<double>(), stepTool.StepId, It.IsAny<string>(), It.IsAny<bool>()))
+                .Setup(x => x.CardProgessAsync(email, It.IsAny<int>(), It.IsAny<double>(), stepTool.StepId, It.IsAny<string>(), It.IsAny<bool>(), null))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -138,8 +138,8 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             // Assert
             _mocker.GetMock<ICardRepository>().Verify(x => x.FindByDocumentBatchId(100), Times.Once);
-            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, batchCard1.Id, 100.0, stepTool.StepId, string.Empty, It.IsAny<bool>()), Times.Once);
-            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, batchCard2.Id, 100.0, stepTool.StepId, string.Empty, It.IsAny<bool>()), Times.Once);
+            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, batchCard1.Id, 100.0, stepTool.StepId, string.Empty, It.IsAny<bool>(), null), Times.Once);
+            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, batchCard2.Id, 100.0, stepTool.StepId, string.Empty, It.IsAny<bool>(), null), Times.Once);
         }
 
         [Fact(DisplayName = "HandleExecutionProgress should return early when card is not found")]
@@ -167,7 +167,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Assert
             _mocker.GetMock<IStepToolExecutionRepository>().Verify(x => x.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             _mocker.GetMock<IStepRepository>().Verify(x => x.FindByIdWithTools(It.IsAny<int>()), Times.Never);
-            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), null), Times.Never);
         }
 
         [Fact(DisplayName = "HandleExecutionProgress should return early when step is not found")]
@@ -201,7 +201,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             // Assert
             _mocker.GetMock<IStepToolExecutionRepository>().Verify(x => x.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
             _mocker.GetMock<ICardRepository>().Verify(x => x.FindById(execution.CardId), Times.Once);
-            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never);
+            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), null), Times.Never);
         }
 
         [Fact(DisplayName = "HandleExecutionProgress should notify 100% progress when step has no tools")]
@@ -233,14 +233,14 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .ReturnsAsync(step);
 
             _mocker.GetMock<IHubNotifier>()
-                .Setup(x => x.CardProgessAsync(email, card.Id, 100.0, stepTool.StepId, string.Empty, It.IsAny<bool>()))
+                .Setup(x => x.CardProgessAsync(email, card.Id, 100.0, stepTool.StepId, string.Empty, It.IsAny<bool>(), null))
                 .Returns(Task.CompletedTask);
 
             // Act
             await _service.HandleExecutionProgress(execution, email);
 
             // Assert
-            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 100.0, stepTool.StepId, string.Empty, It.IsAny<bool>()), Times.Once);
+            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 100.0, stepTool.StepId, string.Empty, It.IsAny<bool>(), null), Times.Once);
         }
 
         [Fact(DisplayName = "HandleExecutionProgress should calculate correct progress percentage with multiple tools")]
@@ -301,7 +301,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .ReturnsAsync(tool);
 
             _mocker.GetMock<IHubNotifier>()
-                .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool1.StepId, It.IsAny<string>(), It.IsAny<bool>()))
+                .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool1.StepId, It.IsAny<string>(), It.IsAny<bool>(), null))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -309,7 +309,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             // Assert
             // 2 completed out of 4 = 50%
-            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 50.0, stepTool1.StepId, tool.Name, It.IsAny<bool>()), Times.Once);
+            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 50.0, stepTool1.StepId, tool.Name, It.IsAny<bool>(), null), Times.Once);
         }
 
         [Fact(DisplayName = "HandleExecutionProgress should identify running tool name correctly")]
@@ -359,14 +359,14 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .ReturnsAsync(tool);
 
             _mocker.GetMock<IHubNotifier>()
-                .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool1.StepId, "Running Tool Name", It.IsAny<bool>()))
+                .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool1.StepId, "Running Tool Name", It.IsAny<bool>(), null))
                 .Returns(Task.CompletedTask);
 
             // Act
             await _service.HandleExecutionProgress(execution, email);
 
             // Assert
-            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 0.0, stepTool1.StepId, "Running Tool Name", It.IsAny<bool>()), Times.Once);
+            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 0.0, stepTool1.StepId, "Running Tool Name", It.IsAny<bool>(), null), Times.Once);
         }
 
         [Fact(DisplayName = "HandleExecutionProgress should handle null tool name gracefully")]
@@ -408,14 +408,14 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .ReturnsAsync(default(ToolDto)!);
 
             _mocker.GetMock<IHubNotifier>()
-                .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool.StepId, string.Empty, It.IsAny<bool>()))
+                .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool.StepId, string.Empty, It.IsAny<bool>(),null))
                 .Returns(Task.CompletedTask);
 
             // Act
             await _service.HandleExecutionProgress(execution, email);
 
             // Assert
-            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 0.0, stepTool.StepId, string.Empty, It.IsAny<bool>()), Times.Once);
+            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 0.0, stepTool.StepId, string.Empty, It.IsAny<bool>(),null), Times.Once);
         }
 
         [Fact(DisplayName = "HandleExecutionProgress should handle null execution for a card")]
@@ -458,7 +458,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .ReturnsAsync((StepToolExecution?)null);
 
             _mocker.GetMock<IHubNotifier>()
-                .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool1.StepId, It.IsAny<string>(), It.IsAny<bool>()))
+                .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool1.StepId, It.IsAny<string>(), It.IsAny<bool>(), null))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -466,7 +466,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             // Assert
             // Only 1 complete out of 2 = 50%
-            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 50.0, stepTool1.StepId, string.Empty, It.IsAny<bool>()), Times.Once);
+            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 50.0, stepTool1.StepId, string.Empty, It.IsAny<bool>(), null), Times.Once);
         }
 
         [Fact(DisplayName = "HandleExecutionProgress should notify 100% when all step tools are ready")]
@@ -510,14 +510,14 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .ReturnsAsync(execution2);
 
             _mocker.GetMock<IHubNotifier>()
-                .Setup(x => x.CardProgessAsync(email, card.Id, 100.0, stepTool1.StepId, string.Empty, It.IsAny<bool>()))
+                .Setup(x => x.CardProgessAsync(email, card.Id, 100.0, stepTool1.StepId, string.Empty, It.IsAny<bool>(), null))
                 .Returns(Task.CompletedTask);
 
             // Act
             await _service.HandleExecutionProgress(execution, email);
 
             // Assert
-            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 100.0, stepTool1.StepId, string.Empty, It.IsAny<bool>()), Times.Once);
+            _mocker.GetMock<IHubNotifier>().Verify(x => x.CardProgessAsync(email, card.Id, 100.0, stepTool1.StepId, string.Empty, It.IsAny<bool>(), null), Times.Once);
         }
     }
 }
