@@ -1,17 +1,17 @@
 using System.Net.Http.Headers;
-using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
+using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestCheck;
 
 namespace WoopiAiHub.Application.Utils
 {
     /// <summary>
     /// Sends HTTP requests for API template dry-runs using a named <see cref="IHttpClientFactory"/> client.
     /// </summary>
-    public class ApiTemplateRequestTestsHttpGateway(IHttpClientFactory httpClientFactory) : IApiTemplateRequestTestsHttpGateway
+    public class ApiTemplateRequestCheckHttpGateway(IHttpClientFactory httpClientFactory) : IApiTemplateRequestCheckHttpGateway
     {
         /// <summary>
-        /// Name passed to <see cref="IHttpClientFactory.CreateClient(string)"/> for the template test HTTP client.
+        /// Name passed to <see cref="IHttpClientFactory.CreateClient(string)"/> for the template check HTTP client.
         /// </summary>
-        public const string NamedClient = "ApiTemplateRequestTests";
+        public const string NamedClient = "ApiTemplateRequestCheck";
 
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 

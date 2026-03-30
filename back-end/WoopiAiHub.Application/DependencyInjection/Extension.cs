@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Application.Messaging;
-using WoopiAiHub.Application.ApiTemplateRequestTests;
+using WoopiAiHub.Application.ApiTemplateRequestCheck;
 using WoopiAiHub.Application.Messaging.DeadLetter;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Services.Audit;
@@ -12,7 +12,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Audit;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
-using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
+using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestCheck;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Repository;
 
@@ -22,9 +22,9 @@ namespace WoopiAiHub.Application.DependencyInjection
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            services.AddHttpClient(ApiTemplateRequestTestsHttpGateway.NamedClient);
-            services.AddScoped<IApiTemplateRequestTestsHttpGateway, ApiTemplateRequestTestsHttpGateway>();
-            services.AddScoped<IApiTemplateRequestTestsHandler, ApiTemplateRequestTestsHandler>();
+            services.AddHttpClient(ApiTemplateRequestCheckHttpGateway.NamedClient);
+            services.AddScoped<IApiTemplateRequestCheckHttpGateway, ApiTemplateRequestCheckHttpGateway>();
+            services.AddScoped<IApiTemplateRequestCheckHandler, ApiTemplateRequestCheckHandler>();
 
             services.AddSingleton<IServiceCollection, ServiceCollection>();
             services.AddScoped<IDocumentServices, DocumentServices>();

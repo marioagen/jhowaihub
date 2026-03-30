@@ -1,10 +1,10 @@
-using WoopiAiHub.Application.ApiTemplateRequestTests;
+using WoopiAiHub.Application.ApiTemplateRequestCheck;
 using WoopiAiHub.Domain.Models;
 using Xunit;
 
-namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
+namespace WoopiAiHub.UnitTests.ApiTemplateRequestCheck
 {
-    public class ApiTemplateRequestTestsRequestAssemblerTests
+    public class ApiTemplateRequestCheckRequestAssemblerTests
     {
         private static Dictionary<string, string> Vars(params (string Key, string Value)[] pairs) =>
             pairs.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
@@ -13,7 +13,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_NormalizesMethod_ToUpperTrimmed()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "  post  ",
                 "https://api.example.com/r",
                 null,
@@ -28,7 +28,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_EmptyOrWhitespaceMethod_BecomesEmptyString()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "   ",
                 "https://api.example.com/r",
                 null,
@@ -43,7 +43,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_SubstitutesVariables_InUrlQueryHeaderAndBody()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/v1/{{id}}",
                 """[{"key":"q","value":"{{qval}}"}]""",
@@ -62,7 +62,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_VariableValueEmpty_ReplacesPlaceholderWithEmpty()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/{{x}}end",
                 null,
@@ -77,7 +77,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_NullQueryHeaderBody_ReturnsNullsForOptionalParts()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/z",
                 null,
@@ -94,7 +94,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_QueryTemplate_EmptyJsonArray_LeavesUrlUnchanged()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/a",
                 "[]",
@@ -109,7 +109,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_QueryTemplate_JsonNull_LeavesUrlUnchanged()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/a",
                 "null",
@@ -124,7 +124,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_QueryTemplate_OnlyBlankKeys_LeavesUrlUnchanged()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/a",
                 """[{"key":"","value":"1"},{"key":" ","value":"2"}]""",
@@ -140,7 +140,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_HeaderTemplate_EmptyJsonArray_ReturnsNullHeaders()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/a",
                 null,
@@ -155,7 +155,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_HeaderTemplate_JsonNull_ReturnsNullHeaders()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/a",
                 null,
@@ -170,7 +170,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_HeaderTemplate_OnlyBlankKeys_ReturnsNullHeaders()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/a",
                 null,
@@ -185,7 +185,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_QueryTemplate_SkipsBlankKeys()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/b",
                 """[{"key":"","value":"1"},{"key":"ok","value":"2"}]""",
@@ -201,7 +201,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_HeaderTemplate_CaseInsensitiveKeys()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/c",
                 null,
@@ -218,7 +218,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_HeaderTemplate_NullValue_BecomesEmptyString()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/d",
                 null,
@@ -235,7 +235,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         public void Assemble_InvalidQueryTemplateJson_ThrowsInvalidOperationException()
         {
             var ex = Assert.Throws<InvalidOperationException>(() =>
-                ApiTemplateRequestTestsRequestAssembler.Assemble(
+                ApiTemplateRequestCheckRequestAssembler.Assemble(
                     "GET",
                     "https://api.example.com/e",
                     "not-json",
@@ -252,7 +252,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         public void Assemble_InvalidHeaderTemplateJson_ThrowsInvalidOperationException()
         {
             var ex = Assert.Throws<InvalidOperationException>(() =>
-                ApiTemplateRequestTestsRequestAssembler.Assemble(
+                ApiTemplateRequestCheckRequestAssembler.Assemble(
                     "GET",
                     "https://api.example.com/f",
                     null,
@@ -268,7 +268,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         public void Assemble_UrlNotAbsoluteAfterVariables_Throws()
         {
             var ex = Assert.Throws<InvalidOperationException>(() =>
-                ApiTemplateRequestTestsRequestAssembler.Assemble(
+                ApiTemplateRequestCheckRequestAssembler.Assemble(
                     "GET",
                     "/relative",
                     null,
@@ -283,7 +283,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("Assemble", "Success")]
         public void Assemble_WhitespaceOnlyQueryTemplate_SkipsMerge()
         {
-            var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var r = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 "GET",
                 "https://api.example.com/g",
                 "   ",
@@ -306,7 +306,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 """[{"key":"H","value":"v"}]""",
                 "{}");
 
-            var dto = ApiTemplateRequestTestsRequestAssembler.ToDraft(model);
+            var dto = ApiTemplateRequestCheckRequestAssembler.ToDraft(model);
 
             Assert.Equal("N1", dto.Name);
             Assert.Equal("POST", dto.Method);

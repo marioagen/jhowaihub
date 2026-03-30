@@ -1,9 +1,6 @@
-namespace WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests
+namespace WoopiAiHub.Domain.Interfaces.ApiTemplateRequestCheck
 {
-    /// <summary>
-    /// Abstraction for executing HTTP calls during API template request tests.
-    /// </summary>
-    public interface IApiTemplateRequestTestsHttpGateway
+    public interface IApiTemplateRequestCheckHttpGateway
     {
         Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string>? headers, CancellationToken cancellationToken);
         Task<HttpResponseMessage> PostAsync(string url, HttpContent? body, Dictionary<string, string>? headers, CancellationToken cancellationToken);

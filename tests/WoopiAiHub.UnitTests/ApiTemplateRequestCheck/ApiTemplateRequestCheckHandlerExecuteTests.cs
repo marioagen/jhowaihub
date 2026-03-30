@@ -1,29 +1,29 @@
 using System.Net;
 using Moq;
-using WoopiAiHub.Application.ApiTemplateRequestTests;
+using WoopiAiHub.Application.ApiTemplateRequestCheck;
 using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
+using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestCheck;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using Xunit;
 
-namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
+namespace WoopiAiHub.UnitTests.ApiTemplateRequestCheck
 {
-    public class ApiTemplateRequestTestsHandlerExecuteTests
+    public class ApiTemplateRequestCheckHandlerExecuteTests
     {
-        private readonly Mock<IApiTemplateRequestTestsHttpGateway> _gateway = new();
+        private readonly Mock<IApiTemplateRequestCheckHttpGateway> _gateway = new();
         private readonly Mock<IApiTemplateRepository> _templateRepository = new();
-        private readonly ApiTemplateRequestTestsHandler _handler;
+        private readonly ApiTemplateRequestCheckHandler _handler;
 
-        public ApiTemplateRequestTestsHandlerExecuteTests()
+        public ApiTemplateRequestCheckHandlerExecuteTests()
         {
-            _handler = new ApiTemplateRequestTestsHandler(_gateway.Object, _templateRepository.Object);
+            _handler = new ApiTemplateRequestCheckHandler(_gateway.Object, _templateRepository.Object);
         }
 
         [Fact(DisplayName = "ExecuteAsync should return DTO from gateway response")]
         [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_ReturnsDto_FromGatewayResponse()
         {
-            var request = new ApiTemplateRequestTestsRequestDto
+            var request = new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -55,7 +55,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_PassesCancellationToken_ToGateway()
         {
-            var request = new ApiTemplateRequestTestsRequestDto
+            var request = new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto { Name = "T", Method = "GET", Url = "https://x/" },
                 Variables = new Dictionary<string, string>()
@@ -77,7 +77,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         [Trait("ExecuteAsync", "Fail")]
         public async Task ExecuteAsync_Propagates_WhenGatewayThrows()
         {
-            var request = new ApiTemplateRequestTestsRequestDto
+            var request = new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto { Name = "T", Method = "GET", Url = "https://x/" },
                 Variables = new Dictionary<string, string>()

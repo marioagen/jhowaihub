@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.WebUtilities;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Models;
 
-namespace WoopiAiHub.Application.ApiTemplateRequestTests
+namespace WoopiAiHub.Application.ApiTemplateRequestCheck
 {
     /// <summary>
     /// Builds an assembled HTTP request from URL, query, header, and body templates with variable substitution.
     /// </summary>
-    public static class ApiTemplateRequestTestsRequestAssembler
+    public static class ApiTemplateRequestCheckRequestAssembler
     {
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
@@ -29,7 +29,7 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
         /// <param name="variables">Values to replace for each <c>{{key}}</c> placeholder.</param>
         /// <returns>Method, final URL, headers, and body ready for the HTTP client.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the URL is not a valid absolute HTTP(S) URI, or query/header JSON is invalid.</exception>
-        public static ApiTemplateRequestTestsAssembledRequestDto Assemble(
+        public static ApiTemplateRequestCheckAssembledRequestDto Assemble(
             string method,
             string url,
             string? queryTemplate,
@@ -56,7 +56,7 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
 
             var headers = ParseHeaderTemplate(headerText);
 
-            return new ApiTemplateRequestTestsAssembledRequestDto
+            return new ApiTemplateRequestCheckAssembledRequestDto
             {
                 Method = methodNormalized,
                 Url = finalUrl,
@@ -105,10 +105,10 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             if (string.IsNullOrWhiteSpace(queryTemplateJson))
                 return urlAfterSubstitute;
 
-            List<ApiTemplateRequestTestsJsonKeyValue>? items;
+            List<ApiTemplateRequestCheckJsonKeyValue>? items;
             try
             {
-                items = JsonSerializer.Deserialize<List<ApiTemplateRequestTestsJsonKeyValue>>(queryTemplateJson, JsonOptions);
+                items = JsonSerializer.Deserialize<List<ApiTemplateRequestCheckJsonKeyValue>>(queryTemplateJson, JsonOptions);
             }
             catch (JsonException ex)
             {
@@ -140,10 +140,10 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             if (string.IsNullOrWhiteSpace(headerTemplateJson))
                 return null;
 
-            List<ApiTemplateRequestTestsJsonKeyValue>? items;
+            List<ApiTemplateRequestCheckJsonKeyValue>? items;
             try
             {
-                items = JsonSerializer.Deserialize<List<ApiTemplateRequestTestsJsonKeyValue>>(headerTemplateJson, JsonOptions);
+                items = JsonSerializer.Deserialize<List<ApiTemplateRequestCheckJsonKeyValue>>(headerTemplateJson, JsonOptions);
             }
             catch (JsonException ex)
             {

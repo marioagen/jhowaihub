@@ -3,9 +3,9 @@ using Moq;
 using WoopiAiHub.Application.Utils;
 using Xunit;
 
-namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
+namespace WoopiAiHub.UnitTests.ApiTemplateRequestCheck
 {
-    public class ApiTemplateRequestTestsHttpGatewayTests
+    public class ApiTemplateRequestCheckHttpGatewayTests
     {
         private sealed class CapturingHttpMessageHandler : HttpMessageHandler
         {
@@ -18,16 +18,16 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             }
         }
 
-        private static (ApiTemplateRequestTestsHttpGateway Gateway, CapturingHttpMessageHandler Handler, Mock<IHttpClientFactory> Factory) CreateGateway()
+        private static (ApiTemplateRequestCheckHttpGateway Gateway, CapturingHttpMessageHandler Handler, Mock<IHttpClientFactory> Factory) CreateGateway()
         {
             var handler = new CapturingHttpMessageHandler();
             var client = new HttpClient(handler, disposeHandler: false);
             var factory = new Mock<IHttpClientFactory>();
             factory
-                .Setup(f => f.CreateClient(ApiTemplateRequestTestsHttpGateway.NamedClient))
+                .Setup(f => f.CreateClient(ApiTemplateRequestCheckHttpGateway.NamedClient))
                 .Returns(client);
 
-            var gateway = new ApiTemplateRequestTestsHttpGateway(factory.Object);
+            var gateway = new ApiTemplateRequestCheckHttpGateway(factory.Object);
             return (gateway, handler, factory);
         }
 
@@ -39,7 +39,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
 
             await gateway.GetAsync("https://api.example.com/r", null, CancellationToken.None);
 
-            factoryMock.Verify(f => f.CreateClient(ApiTemplateRequestTestsHttpGateway.NamedClient), Times.Once);
+            factoryMock.Verify(f => f.CreateClient(ApiTemplateRequestCheckHttpGateway.NamedClient), Times.Once);
             Assert.NotNull(capturing.LastRequest);
             Assert.Equal(HttpMethod.Get, capturing.LastRequest.Method);
             Assert.Equal("https://api.example.com/r", capturing.LastRequest.RequestUri!.ToString());

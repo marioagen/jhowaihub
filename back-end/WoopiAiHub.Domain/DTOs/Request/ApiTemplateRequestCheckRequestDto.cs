@@ -1,6 +1,6 @@
 namespace WoopiAiHub.Domain.DTOs.Request
 {
-    public class ApiTemplateRequestTestsRequestDto
+    public class ApiTemplateRequestCheckRequestDto
     {
         public int? TemplateId { get; set; }
         public ApiTemplateCreateDto? Draft { get; set; }

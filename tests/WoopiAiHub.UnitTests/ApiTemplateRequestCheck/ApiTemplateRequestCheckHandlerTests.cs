@@ -1,24 +1,24 @@
 using System.Net;
 using System.Text.Json;
 using Moq;
-using WoopiAiHub.Application.ApiTemplateRequestTests;
+using WoopiAiHub.Application.ApiTemplateRequestCheck;
 using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
+using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestCheck;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
 using Xunit;
 
-namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
+namespace WoopiAiHub.UnitTests.ApiTemplateRequestCheck
 {
-    public class ApiTemplateRequestTestsHandlerTests
+    public class ApiTemplateRequestCheckHandlerTests
     {
-        private readonly Mock<IApiTemplateRequestTestsHttpGateway> _gateway = new();
+        private readonly Mock<IApiTemplateRequestCheckHttpGateway> _gateway = new();
         private readonly Mock<IApiTemplateRepository> _templateRepository = new();
-        private readonly ApiTemplateRequestTestsHandler _handler;
+        private readonly ApiTemplateRequestCheckHandler _handler;
 
-        public ApiTemplateRequestTestsHandlerTests()
+        public ApiTemplateRequestCheckHandlerTests()
         {
-            _handler = new ApiTemplateRequestTestsHandler(_gateway.Object, _templateRepository.Object);
+            _handler = new ApiTemplateRequestCheckHandler(_gateway.Object, _templateRepository.Object);
         }
 
         [Fact(DisplayName = "GetAsync should merge query template into URL")]
@@ -32,7 +32,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("x") });
 
             var queryJson = """[{"key":"a","value":"1"},{"key":"b","value":"two"}]""";
-            var request = new ApiTemplateRequestTestsRequestDto
+            var request = new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -65,7 +65,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Callback<string, HttpContent?, Dictionary<string, string>?, CancellationToken>((_, content, _, _) => capturedContent = content)
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}") });
 
-            var request = new ApiTemplateRequestTestsRequestDto
+            var request = new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -95,7 +95,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Callback<string, HttpContent?, Dictionary<string, string>?, CancellationToken>((_, content, _, _) => capturedContent = content)
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}") });
 
-            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -119,7 +119,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Setup(g => g.DeleteAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new StringContent("gone") });
 
-            var result = await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            var result = await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -147,7 +147,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         public async Task ExecuteAsync_InvalidMethod_Throws()
         {
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
                 {
                     Draft = new ApiTemplateCreateDto
                     {
@@ -169,7 +169,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Callback<string, Dictionary<string, string>?, CancellationToken>((u, _, _) => capturedUrl = u)
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
 
-            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -198,7 +198,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Callback<string, Dictionary<string, string>?, CancellationToken>((u, _, _) => capturedUrl = u)
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
 
-            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 TemplateId = 7,
                 Draft = null,
@@ -221,7 +221,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Setup(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("body") });
 
-            var result = await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            var result = await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 TemplateId = 5,
                 Draft = null,
@@ -252,7 +252,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Setup(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            var result = await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            var result = await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 TemplateId = 5,
                 Draft = null,
@@ -276,7 +276,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         public async Task ExecuteAsync_NoDraftAndNoTemplateId_Throws()
         {
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
                 {
                     Draft = null,
                     TemplateId = null,
@@ -291,7 +291,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         public async Task ExecuteAsync_TemplateIdZero_Throws()
         {
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
                 {
                     Draft = null,
                     TemplateId = 0,
@@ -308,7 +308,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .ReturnsAsync((ApiTemplate?)null);
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
                 {
                     TemplateId = 99,
                     Draft = null,
@@ -327,7 +327,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Setup(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
 
-            var result = await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            var result = await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -352,7 +352,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
 
             var headerJson = """[{"key":"Authorization","value":"Bearer t"},{"key":"X-Custom","value":"v"}]""";
-            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -377,7 +377,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Setup(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("ok") });
 
-            var result = await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            var result = await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -402,7 +402,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Callback<string, HttpContent?, Dictionary<string, string>?, CancellationToken>((_, c, _, _) => capturedContent = c)
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}") });
 
-            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -428,7 +428,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Callback<string, HttpContent?, Dictionary<string, string>?, CancellationToken>((_, c, _, _) => capturedContent = c)
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.NoContent));
 
-            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -456,7 +456,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .Callback<string, HttpContent?, Dictionary<string, string>?, CancellationToken>((_, c, _, _) => capturedContent = c)
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}") });
 
-            await _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+            await _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
             {
                 Draft = new ApiTemplateCreateDto
                 {
@@ -477,7 +477,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         public async Task ExecuteAsync_InvalidQueryTemplateJson_Throws()
         {
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
                 {
                     Draft = new ApiTemplateCreateDto
                     {
@@ -495,7 +495,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         public async Task ExecuteAsync_InvalidHeaderTemplateJson_Throws()
         {
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
                 {
                     Draft = new ApiTemplateCreateDto
                     {
@@ -513,7 +513,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         public async Task ExecuteAsync_NonAbsoluteUrl_Throws()
         {
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
                 {
                     Draft = new ApiTemplateCreateDto
                     {
@@ -534,7 +534,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK));
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _handler.ExecuteAsync(new ApiTemplateRequestTestsRequestDto
+                _handler.ExecuteAsync(new ApiTemplateRequestCheckRequestDto
                 {
                     Draft = new ApiTemplateCreateDto
                     {

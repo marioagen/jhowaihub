@@ -4,21 +4,21 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
+using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestCheck;
 using WoopiAiHub.Domain.Interfaces.Repository;
 
-namespace WoopiAiHub.Application.ApiTemplateRequestTests
+namespace WoopiAiHub.Application.ApiTemplateRequestCheck
 {
     /// <summary>
-    /// Orchestrates API template request tests: resolves draft or stored template, assembles the HTTP request, and invokes the gateway.
+    /// Orchestrates API template request checks: resolves draft or stored template, assembles the HTTP request, and invokes the gateway.
     /// </summary>
     /// <param name="httpGateway">Client used to execute GET/POST/PUT/PATCH/DELETE against the assembled URL.</param>
-    /// <param name="apiTemplateRepository">Repository for loading templates when <see cref="ApiTemplateRequestTestsRequestDto.TemplateId"/> is set.</param>
-    public class ApiTemplateRequestTestsHandler(
-        IApiTemplateRequestTestsHttpGateway httpGateway,
-        IApiTemplateRepository apiTemplateRepository) : IApiTemplateRequestTestsHandler
+    /// <param name="apiTemplateRepository">Repository for loading templates when <see cref="ApiTemplateRequestCheckRequestDto.TemplateId"/> is set.</param>
+    public class ApiTemplateRequestCheckHandler(
+        IApiTemplateRequestCheckHttpGateway httpGateway,
+        IApiTemplateRepository apiTemplateRepository) : IApiTemplateRequestCheckHandler
     {
-        private readonly IApiTemplateRequestTestsHttpGateway _httpGateway = httpGateway;
+        private readonly IApiTemplateRequestCheckHttpGateway _httpGateway = httpGateway;
         private readonly IApiTemplateRepository _apiTemplateRepository = apiTemplateRepository;
         private readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -29,17 +29,17 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
         /// <summary>
         /// Assembles the HTTP request from the template draft (or persisted template), sends it via the gateway, and returns status, body, and metadata.
         /// </summary>
-        /// <param name="request">The test request containing variables, optional inline draft or template id, and correlation fields.</param>
+        /// <param name="request">The check request containing variables, optional inline draft or template id, and correlation fields.</param>
         /// <param name="cancellationToken">Token to cancel the operation.</param>
         /// <returns>The HTTP status code, response content, and echoed template context.</returns>
-        public async Task<ApiTemplateRequestTestsResponseDto> ExecuteAsync(ApiTemplateRequestTestsRequestDto request, CancellationToken cancellationToken = default)
+        public async Task<ApiTemplateRequestCheckResponseDto> ExecuteAsync(ApiTemplateRequestCheckRequestDto request, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(request);
 
             var variables = request.Variables ?? new Dictionary<string, string>(StringComparer.Ordinal);
             var draft = await ResolveDraftAsync(request).ConfigureAwait(false);
 
-            var assembled = ApiTemplateRequestTestsRequestAssembler.Assemble(
+            var assembled = ApiTemplateRequestCheckRequestAssembler.Assemble(
                 draft.Method,
                 draft.Url,
                 draft.QueryTemplate,
@@ -74,7 +74,7 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             };
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            return new ApiTemplateRequestTestsResponseDto
+            return new ApiTemplateRequestCheckResponseDto
             {
                 StatusCode = (int)response.StatusCode,
                 Content = content,
@@ -86,9 +86,9 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
         }
 
         /// <summary>
-        /// Returns the inline draft from the request, or loads and maps the API template by <see cref="ApiTemplateRequestTestsRequestDto.TemplateId"/>.
+        /// Returns the inline draft from the request, or loads and maps the API template by <see cref="ApiTemplateRequestCheckRequestDto.TemplateId"/>.
         /// </summary>
-        private async Task<ApiTemplateCreateDto> ResolveDraftAsync(ApiTemplateRequestTestsRequestDto request)
+        private async Task<ApiTemplateCreateDto> ResolveDraftAsync(ApiTemplateRequestCheckRequestDto request)
         {
             if (request.Draft != null)
                 return request.Draft;
@@ -99,7 +99,7 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
                 if (model == null)
                     throw new InvalidOperationException($"API template with id '{id}' was not found.");
 
-                return ApiTemplateRequestTestsRequestAssembler.ToDraft(model);
+                return ApiTemplateRequestCheckRequestAssembler.ToDraft(model);
             }
 
             throw new InvalidOperationException("Either Draft or a valid TemplateId must be provided.");

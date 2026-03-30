@@ -77,7 +77,7 @@ export default {
     },
     executeRequestTest(request) {
         return api
-            .post("/ApiTemplateRequestTests/execute", request)
+            .post("/ApiTemplateRequestCheck/execute", request)
             .then(({ data }) => {
                 return data;
             })

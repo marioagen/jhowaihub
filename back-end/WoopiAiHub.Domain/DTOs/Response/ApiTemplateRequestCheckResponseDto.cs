@@ -1,6 +1,6 @@
 namespace WoopiAiHub.Domain.DTOs.Response
 {
-    public class ApiTemplateRequestTestsResponseDto
+    public class ApiTemplateRequestCheckResponseDto
     {
         public int StatusCode { get; set; }
         public string? Content { get; set; }
