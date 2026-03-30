@@ -187,6 +187,41 @@
                                             {{ $t("validation.required") }}
                                         </span>
                                     </div>
+                                    <div
+                                        v-if="selectedWorkflows.length > 0"
+                                        class="mb-3"
+                                    >
+                                        <label class="form-label">
+                                            {{ $t("documents.upload.selectionList") }}
+                                        </label>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <div
+                                                v-for="id in selectedWorkflowsOrderedByName"
+                                                :key="id"
+                                                class="badge rounded-pill d-flex align-items-center px-2 py-1 selected-team-chip"
+                                            >
+                                                <LucideIcon
+                                                    icon="Building"
+                                                    class="me-1"
+                                                />
+                                                <span class="me-1">
+                                                    {{ getName(id) }}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    class="chip-remove-btn"
+                                                    :title="$t('documents.upload.removeWorkflowChip')"
+                                                    :aria-label="$t('documents.upload.removeWorkflowChip')"
+                                                    @click.stop="removeWorkflowFromSelection(id)"
+                                                >
+                                                    <LucideIcon
+                                                        icon="X"
+                                                        :size="14"
+                                                    />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="mb-3 rounded">
                                         <div class="input-group">
                                             <span class="input-group-text border-end-0">
@@ -278,41 +313,6 @@
                                                         {{ team.name }}
                                                     </div>
                                                 </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div
-                                        v-if="selectedWorkflows.length > 0"
-                                        class="mt-3"
-                                    >
-                                        <label class="form-label">
-                                            {{ $t("documents.upload.selectionList") }}
-                                        </label>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            <div
-                                                v-for="id in selectedWorkflows"
-                                                :key="id"
-                                                class="badge rounded-pill d-flex align-items-center px-2 py-1 selected-team-chip"
-                                            >
-                                                <LucideIcon
-                                                    icon="Building"
-                                                    class="me-1"
-                                                />
-                                                <span class="me-1">
-                                                    {{ getName(id) }}
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    class="chip-remove-btn"
-                                                    :title="$t('documents.upload.removeWorkflowChip')"
-                                                    :aria-label="$t('documents.upload.removeWorkflowChip')"
-                                                    @click.stop="removeWorkflowFromSelection(id)"
-                                                >
-                                                    <LucideIcon
-                                                        icon="X"
-                                                        :size="14"
-                                                    />
-                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -660,6 +660,13 @@
                 return this.workflowsList.filter((team) =>
                     team.name.toLowerCase().includes(this.searchTerm.toLowerCase())
                 );
+            },
+            selectedWorkflowsOrderedByName() {
+                return [...this.selectedWorkflows].sort((a, b) => {
+                    const nameA = this.getName(a).toLowerCase();
+                    const nameB = this.getName(b).toLowerCase();
+                    return nameA.localeCompare(nameB);
+                });
             },
             validateDocumentsBatch() {
                 if (this.isDocumentsBatch && this.filesList.length > 1) {
