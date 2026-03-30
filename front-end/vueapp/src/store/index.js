@@ -119,6 +119,20 @@ export default new Vuex.Store({
         clearUploadNotifications(state) {
             state.uploadNotifications = [];
         },
+        addAnonimyzationNotification(state, payload) {
+            const {
+                id,
+                title = "Documento anonimizado",
+                fileName,
+                status = "completed",
+                success = true,
+                link,
+            } = payload;
+            const exists = state.uploadNotifications.some((n) => n.id === id);
+            if (!exists) {
+                state.uploadNotifications.unshift({ id, fileName, status, success, link, title });
+            }
+        },
     },
     plugins: [
         createPersistedState({

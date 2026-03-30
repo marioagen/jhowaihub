@@ -66,5 +66,28 @@ namespace WoopiAiHub.Api.Hubs
                 });
             }
         }
+
+        /// <summary>
+        /// Notifies all active connections for the specified user that a document is ready for anonymization.
+        /// </summary>
+        /// <remarks>This method sends a real-time notification to all active SignalR connections
+        /// associated with the specified user. Each connection receives the document ID and URL to indicate that the
+        /// document is ready for further processing.</remarks>
+        /// <param name="userEmail">The email address of the user whose connections will receive the notification. Cannot be null or empty.</param>
+        /// <param name="documentId">The unique identifier of the document that is ready for anonymization.</param>
+        /// <param name="documentUrl">The URL where the document can be accessed for anonymization. Cannot be null or empty.</param>
+        /// <returns>A task that represents the asynchronous notification operation.</returns>
+        public async Task AnonymizationReadyAsync(string userEmail, int documentId, string documentUrl)
+        {
+            var connections = _connectionMapping.GetConnections(userEmail);
+            foreach (var connectionId in connections)
+            {
+                await _hubContext.Clients.Client(connectionId).SendAsync("AnonymizationReady", new
+                {
+                    DocumentId = documentId,
+                    Url = documentUrl
+                });
+            }
+        }
     }
 }

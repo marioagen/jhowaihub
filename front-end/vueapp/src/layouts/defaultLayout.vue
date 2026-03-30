@@ -38,6 +38,7 @@
     </div>
 </template>
 <script>
+    import signalRService from "@/services/signalR/signalRServices.js";
     import GlobalEventService from "@/services/globalEventService";
     import SidebarComponent from "@/components/layout/SidebarComponent.vue";
     import NavbarComponent from "@/components/layout/NavbarComponent.vue";
@@ -61,9 +62,10 @@
                 sidebarData: "",
                 isSidebarCollapsed: window.innerWidth < SIDEBAR_COLLAPSE_WIDTH,
                 isSidebarVisible: false,
+                signalrAnonymizationReady: "AnonymizationReady",
             };
         },
-        mounted() {
+        async mounted() {
             this.$store.commit("clearUploadNotifications");
             this.$nextTick(() => {
                 requestAnimationFrame(() => {
@@ -74,12 +76,23 @@
             GlobalEventService.on("uploadInProgress", this.handleUploadInProgress);
             GlobalEventService.on("uploadComplete", this.handleUploadComplete);
             GlobalEventService.on("uploadStarted", this.handleUploadStarted);
+
+            await signalRService.startConnection();
+            signalRService.on(this.signalrAnonymizationReady, (message) => {
+                this.$store.commit("addAnonimyzationNotification", {
+                    id: `anon-${message.documentId}`,
+                    fileName: `O documento #${message.documentId} foi anonimizado com sucesso e está pronto para visualização.`,
+                    link: message.url,
+                });
+            });
         },
         beforeUnmount() {
             window.removeEventListener("resize", this.checkWindowSize);
             GlobalEventService.off("uploadInProgress", this.handleUploadInProgress);
             GlobalEventService.off("uploadComplete", this.handleUploadComplete);
             GlobalEventService.off("uploadStarted", this.handleUploadStarted);
+            signalRService.off(this.signalrAnonymizationReady);
+            signalRService.stopConnection();
         },
         computed: {
             updatePage() {

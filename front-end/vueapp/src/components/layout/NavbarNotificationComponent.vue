@@ -44,7 +44,7 @@
             >
                 <div
                     :class="[
-                        'notification-row d-flex align-items-center justify-content-between px-3 py-2',
+                        'notification-row row p-2 m-0',
                         notification.status === 'in_progress'
                             ? 'notification-in-progress'
                             : notification.success !== false
@@ -52,31 +52,63 @@
                               : 'notification-failed',
                     ]"
                 >
-                    <span class="notification-file-name text-truncate flex-grow-1 min-width-0">
-                        {{ notification.fileName }}
-                    </span>
-                    <span
-                        v-if="notification.status === 'in_progress'"
-                        class="d-flex align-items-center ms-2 flex-shrink-0"
-                    >
+                    <div class="col-1 d-flex justify-content-center align-items-center p-0">
                         <span
-                            class="spinner-border spinner-border-sm"
-                            role="status"
-                            aria-hidden="true"
-                        ></span>
-                    </span>
-                    <button
-                        v-if="notification.status === 'completed'"
-                        type="button"
-                        class="btn btn-link btn-sm p-0 ms-2 flex-shrink-0 text-muted notification-remove"
-                        :aria-label="$t('common.remove', 'Remove')"
-                        @click.stop="removeNotification(notification.id)"
-                    >
+                            v-if="notification.status === 'in_progress'"
+                            class="d-flex align-items-center ms-2 flex-shrink-0"
+                        >
+                            <span
+                                class="spinner-border spinner-border-sm"
+                                role="status"
+                                aria-hidden="true"
+                            ></span>
+                        </span>
                         <LucideIcon
-                            icon="X"
-                            :size="18"
+                            v-if="notification.status === 'completed'"
+                            icon="CircleCheck"
+                            size="20"
                         />
-                    </button>
+                    </div>
+                    <div class="col-8">
+                        <div class="d-flex flex-column">
+                            <span
+                                v-if="notification.title"
+                                class="fw-bold mb-1"
+                            >
+                                {{ notification.title }}
+                            </span>
+                            <span class="text-sm">
+                                {{ notification.fileName }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-3 d-flex justify-content-end align-items-center">
+                        <span v-if="notification.link">
+                            <a
+                                :href="notification.link"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="ms-2 flex-shrink-0"
+                            >
+                                <LucideIcon
+                                    icon="ExternalLink"
+                                    :size="18"
+                                />
+                            </a>
+                        </span>
+                        <button
+                            v-if="notification.status === 'completed'"
+                            type="button"
+                            class="btn btn-link btn-sm p-0 ms-2 flex-shrink-0 text-danger notification-remove"
+                            :aria-label="$t('common.remove', 'Remove')"
+                            @click.stop="removeNotification(notification.id)"
+                        >
+                            <LucideIcon
+                                icon="X"
+                                :size="18"
+                            />
+                        </button>
+                    </div>
                 </div>
             </li>
         </ul>
@@ -126,13 +158,14 @@
 
     .dropdown-menu-notifications {
         margin-top: 1rem !important;
-        min-width: 320px;
+        min-width: 400px;
         max-height: 360px;
         overflow-y: auto;
+        padding: 0;
     }
 
     .notification-list-header {
-        background-color: var(--color-bg-page-link);
+        background-color: var(--color-bg-navbar);
     }
 
     .notification-item .dropdown-item,
@@ -169,10 +202,6 @@
         background-color: var(--color-bg-btn-danger);
         border-radius: 50%;
         border: 1px solid #fff;
-    }
-
-    .notification-file-name {
-        max-width: 160px;
     }
 
     .notification-remove:hover {

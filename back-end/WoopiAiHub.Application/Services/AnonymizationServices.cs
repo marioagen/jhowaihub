@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Services;
 
@@ -13,6 +14,7 @@ namespace WoopiAiHub.Application.Services
         IAnonymizationApi anonymizationApi,
         IConfiguration configuration,
         IHttpClientFactory httpClientFactory,
+        IHubNotifier hubNotifier,
         ILogger<AnonymizationServices> logger
     ) : IAnonymizationServices
     {
@@ -20,6 +22,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IAnonymizationApi _anonymizationApi = anonymizationApi;
         private readonly IConfiguration _configuration = configuration;
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+        private readonly IHubNotifier _hubNotifier = hubNotifier;
         private readonly ILogger<AnonymizationServices> _logger = logger;
 
         /// <summary>
@@ -61,9 +64,11 @@ namespace WoopiAiHub.Application.Services
                     Upload = $"{document.DocumentName}.pdf"
                 },
                 UserId = userId.Value,
-                UriResponse = _configuration["AnonymizationWebWook"] ?? string.Empty,
+                UriResponse = _configuration["AnonymizationWebhook"] ?? throw new InvalidOperationException("Anonymization Webhook not provided"),
                 AnonymizationType = (int?)requestDto.AnonymizationType,
-                WoopiAiPromptId = requestDto.PromptId?.ToString()
+                WoopiAiPromptId = requestDto.PromptId?.ToString(),
+                WoopiAiDocumentId = requestDto.DocumentId,
+                WoopiAiEmail = headersDto.EmailCreator
             };
 
             var authHeader = $"Basic {token}";
@@ -99,6 +104,16 @@ namespace WoopiAiHub.Application.Services
                                  response.StatusCode, errorContent);
                 throw new HttpRequestException($"Failed to upload document. Status: {response.StatusCode}");
             }
+        }
+
+        /// <summary>
+        /// Notifies connected clients that an anonymization result is ready for processing.
+        /// </summary>
+        /// <param name="result">An object containing the details of the completed anonymization operation. Cannot be null.</param>
+        /// <returns>A task that represents the asynchronous notification operation.</returns>
+        public async Task ProcessAnonymizationResult(AnonymizationResultDto result)
+        {
+            await _hubNotifier.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl);
         }
     }
 }

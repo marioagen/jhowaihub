@@ -11,9 +11,9 @@ namespace WoopiAiHub.Api.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
-    public class AnonymizationController(IAnonymizationServices AnonymizationServices) : ControllerBase
+    public class AnonymizationController(IAnonymizationServices anonymizationServices) : ControllerBase
     {
-        readonly IAnonymizationServices _AnonymizationServices = AnonymizationServices;
+        readonly IAnonymizationServices _anonymizationServices = anonymizationServices;
 
         /// <summary>
         /// Processes the anonymization of a document based on the specified request data.
@@ -24,11 +24,25 @@ namespace WoopiAiHub.Api.Controllers
         /// operation is successful.</returns>
         [HttpPost]
         [SwaggerOperation("Processes the anonymization of a document based on the specified request data.")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ProcessAnonymization([FromBody] ProcessAnonymizationRequestDto request, [FromHeader] HeadersDto headersDto)
         {
-            await _AnonymizationServices.ProcessAnonymization(request, headersDto);
+            await _anonymizationServices.ProcessAnonymization(request, headersDto);
             return Ok();
+        }
+
+        /// <summary>
+        /// Webhook to processes the anonymization result for a document using the specified request data.
+        /// </summary>
+        /// <param name="result">An object containing the anonymization result data to be processed. Cannot be null.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        [HttpPost("ready")]
+        [AllowAnonymous]
+        [SwaggerOperation("Webhook to processes the anonymization result for a document using the specified request data.")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task AnonymizationResult([FromBody] AnonymizationResultDto result)
+        {
+            await _anonymizationServices.ProcessAnonymizationResult(result);
         }
     }
 }

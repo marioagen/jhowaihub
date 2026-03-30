@@ -185,7 +185,6 @@
                 try {
                     this.loading = true;
                     const response = await AnonymizationServices.processAnonymization(params);
-                    console.log(response);
                     if (response && response.status == 200) {
                         this.$emit("success");
                         this.close();
