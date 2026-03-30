@@ -9,6 +9,11 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 
 namespace WoopiAiHub.Application.ApiTemplateRequestTests
 {
+    /// <summary>
+    /// Orchestrates API template request tests: resolves draft or stored template, assembles the HTTP request, and invokes the gateway.
+    /// </summary>
+    /// <param name="httpGateway">Client used to execute GET/POST/PUT/PATCH/DELETE against the assembled URL.</param>
+    /// <param name="apiTemplateRepository">Repository for loading templates when <see cref="ApiTemplateRequestTestsRequestDto.TemplateId"/> is set.</param>
     public class ApiTemplateRequestTestsHandler(
         IApiTemplateRequestTestsHttpGateway httpGateway,
         IApiTemplateRepository apiTemplateRepository) : IApiTemplateRequestTestsHandler

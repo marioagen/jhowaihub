@@ -6,7 +6,10 @@ using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.ApiTemplateRequestTests
 {
-    internal static class ApiTemplateRequestTestsRequestAssembler
+    /// <summary>
+    /// Builds an assembled HTTP request from URL, query, header, and body templates with variable substitution.
+    /// </summary>
+    public static class ApiTemplateRequestTestsRequestAssembler
     {
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
@@ -15,7 +18,18 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
-        internal static ApiTemplateRequestTestsAssembledRequestDto Assemble(
+        /// <summary>
+        /// Substitutes <c>{{variable}}</c> placeholders, merges query and header JSON templates into the URL and header map, normalizes the HTTP method, and validates the final URL.
+        /// </summary>
+        /// <param name="method">HTTP method name (trimmed and uppercased in the result).</param>
+        /// <param name="url">Base URL template; must become an absolute <c>http</c> or <c>https</c> URI after substitution.</param>
+        /// <param name="queryTemplate">Optional JSON array of key/value pairs appended as query string, or <c>null</c>.</param>
+        /// <param name="headerTemplate">Optional JSON array of key/value pairs parsed as headers, or <c>null</c>.</param>
+        /// <param name="bodyTemplate">Optional body string after variable substitution, or <c>null</c>.</param>
+        /// <param name="variables">Values to replace for each <c>{{key}}</c> placeholder.</param>
+        /// <returns>Method, final URL, headers, and body ready for the HTTP client.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when the URL is not a valid absolute HTTP(S) URI, or query/header JSON is invalid.</exception>
+        public static ApiTemplateRequestTestsAssembledRequestDto Assemble(
             string method,
             string url,
             string? queryTemplate,
@@ -51,6 +65,9 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             };
         }
 
+        /// <summary>
+        /// Returns whether <paramref name="urlText"/> is a non-empty absolute URI with scheme <c>http</c> or <c>https</c>.
+        /// </summary>
         private static bool IsHttpOrHttpsAbsoluteUri(string urlText)
         {
             if (string.IsNullOrWhiteSpace(urlText))
@@ -65,6 +82,9 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
                 && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
         }
 
+        /// <summary>
+        /// Replaces every <c>{{key}}</c> in <paramref name="input"/> with the corresponding value from <paramref name="variables"/>.
+        /// </summary>
         private static string ApplyVariables(string input, IReadOnlyDictionary<string, string> variables)
         {
             var result = input;
@@ -77,6 +97,9 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             return result;
         }
 
+        /// <summary>
+        /// Parses <paramref name="queryTemplateJson"/> as a JSON array of key/value pairs and appends them to <paramref name="urlAfterSubstitute"/>.
+        /// </summary>
         private static string MergeQueryTemplate(string urlAfterSubstitute, string? queryTemplateJson)
         {
             if (string.IsNullOrWhiteSpace(queryTemplateJson))
@@ -109,6 +132,9 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             return QueryHelpers.AddQueryString(urlAfterSubstitute, dict);
         }
 
+        /// <summary>
+        /// Deserializes <paramref name="headerTemplateJson"/> as a JSON array of key/value pairs into a case-insensitive header dictionary, or <c>null</c> when empty.
+        /// </summary>
         private static Dictionary<string, string>? ParseHeaderTemplate(string? headerTemplateJson)
         {
             if (string.IsNullOrWhiteSpace(headerTemplateJson))
@@ -135,10 +161,16 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
                 headers[item.Key] = item.Value ?? string.Empty;
             }
 
+
             return headers.Count == 0 ? null : headers;
         }
 
-        internal static ApiTemplateCreateDto ToDraft(ApiTemplate model) =>
+        /// <summary>
+        /// Maps a persisted <see cref="ApiTemplate"/> to a create DTO suitable for request assembly (draft shape).
+        /// </summary>
+        /// <param name="model">The stored API template entity.</param>
+        /// <returns>A draft DTO with name, method, URL, and template strings.</returns>
+        public static ApiTemplateCreateDto ToDraft(ApiTemplate model) =>
             new()
             {
                 Name = model.Name,
