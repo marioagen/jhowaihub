@@ -300,10 +300,34 @@ namespace WoopiAiHub.Application.Services.Automation
                 var payload = await BuildPayloadWithDependenciesAsync(stepTool, enrichedDto, input, resolvedCardId, execution);
                 await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
             }
+            catch (AppException ex)
+            {
+                execution.UpdateStatusExecution(StatusExecution.Pending);
+                await _stepToolExecutionRepository.UpdateAsync(execution);
+
+                await _hubNotifier.CardProgessAsync(
+                    automationServicesDto.Email,
+                    resolvedCardId,
+                    0.0,
+                    automationServicesDto.StepId.GetValueOrDefault(),
+                    stepTool.Tool?.Name ?? string.Empty,
+                    true,
+                    ex.LabelError
+                );
+            }
             catch
             {
                 execution.UpdateStatusExecution(StatusExecution.Pending);
                 await _stepToolExecutionRepository.UpdateAsync(execution);
+
+                await _hubNotifier.CardProgessAsync(
+                    automationServicesDto.Email,
+                    resolvedCardId,
+                    0.0,
+                    automationServicesDto.StepId.GetValueOrDefault(),
+                    stepTool.Tool?.Name ?? string.Empty,
+                    true
+                );
             }
         }
 

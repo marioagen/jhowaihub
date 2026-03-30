@@ -1029,6 +1029,20 @@ const portuguese = {
         importCurl: "Importar cURL",
         requestDetails: "Detalhes da Requisição",
         requestBody: "Corpo da Requisição",
+        tabBody: "Corpo",
+        tabTests: "Testes",
+        tests: {
+            detectedVariables: "Variáveis Detectadas",
+            noVariablesLead: "Nenhuma variável",
+            noVariablesTail: "detectada no template.",
+            simulateRequest: "Simular Requisição",
+            noRunTitle: "Nenhum teste executado",
+            noRunHint: 'Preencha as variáveis e clique em "Simular Requisição".',
+            simulateError: "Não foi possível executar a simulação. Tente novamente.",
+            simulateSuccess: "Simulação concluída com sucesso (HTTP 2xx).",
+            responseHttpStatus: "Status HTTP do destino",
+            variableValues: "Valores de teste para as variáveis",
+        },
         templateName: "Nome do Template",
         templateNamePlaceholder: "ex. Processamento de OCR de Usuário",
         endpointUrl: "URL do Endpoint",
@@ -1256,7 +1270,8 @@ const portuguese = {
         removeSuccess: "Esteira de processamento removida com sucesso",
         removeToolFlow: "Remover Fluxo",
         removeToolValidationTitle: "Remover Ferramentas da Etapa",
-        removeToolValidationMessage: "A etapa {name} possui documentos ou dependências vinculadas. Ao confirmar a remoção estes documentos e dependências serão removidos permanentemente, digite o nome da etapa abaixo para confirmar:",
+        removeToolValidationMessage:
+            "A etapa {name} possui documentos ou dependências vinculadas. Ao confirmar a remoção estes documentos e dependências serão removidos permanentemente, digite o nome da etapa abaixo para confirmar:",
         removeToolValidationPlaceholder: "Digite '{name}' para confirmar",
         confirmRemoveTool: "Confirmar remoção",
         responsableTeam: "Time responsável",
@@ -1292,6 +1307,9 @@ const portuguese = {
         title: "Board de Processamento de Documentos",
         toolFlowsTitle: "Adicionar Fluxo de Ferramentas",
         tools: "Ferramentas",
+        errors: {
+            urlTooLong: "A resposta do prompt é grande demais para a URL. Refine o prompt.",
+        },
     },
 };
 

@@ -1045,6 +1045,20 @@ const spanish = {
         removeError: "Error al eliminar plantilla",
         removeSuccess: "Plantilla eliminada exitosamente",
         requestBody: "Cuerpo de la Solicitud",
+        tabBody: "Cuerpo",
+        tabTests: "Pruebas",
+        tests: {
+            detectedVariables: "Variables detectadas",
+            noVariablesLead: "Ninguna variable",
+            noVariablesTail: "detectada en la plantilla.",
+            simulateRequest: "Simular solicitud",
+            noRunTitle: "No se ejecutaron pruebas",
+            noRunHint: 'Complete las variables y haga clic en "Simular solicitud".',
+            simulateError: "No se pudo ejecutar la simulación. Inténtelo de nuevo.",
+            simulateSuccess: "Simulación completada correctamente (HTTP 2xx).",
+            responseHttpStatus: "Estado HTTP del destino",
+            variableValues: "Valores de prueba para las variables",
+        },
         requestDetails: "Detalles de la Solicitud",
         subtitle: "Administre, pruebe y edite sus plantillas de solicitud de API.",
         tableTitle: "Plantillas",
@@ -1250,7 +1264,8 @@ const spanish = {
         removeSuccess: "Workflow eliminado con éxito",
         removeToolFlow: "Eliminar flujo",
         removeToolValidationTitle: "Eliminar Herramientas de la Etapa",
-        removeToolValidationMessage: "La etapa {name} tiene datos o dependencias vinculadas. Todos los documentos y dependencias serán eliminados permanentemente. Para confirmar la eliminación, escriba el nombre de la etapa a continuación:   ",
+        removeToolValidationMessage:
+            "La etapa {name} tiene datos o dependencias vinculadas. Todos los documentos y dependencias serán eliminados permanentemente. Para confirmar la eliminación, escriba el nombre de la etapa a continuación:   ",
         removeToolValidationPlaceholder: "Escriba '{name}' para confirmar",
         confirmRemoveTool: "Confirmar eliminación",
         responsableTeam: "Equipo Responsable",
@@ -1286,6 +1301,9 @@ const spanish = {
         title: "Tablero de Procesamiento de Documentos",
         toolFlowsTitle: "Agregar flujo de herramientas",
         tools: "Herramientas",
+        errors: {
+            urlTooLong: "La respuesta del prompt es demasiado larga para la URL. Refine el prompt.",
+        },
     },
 };
 

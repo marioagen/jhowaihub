@@ -358,6 +358,10 @@ namespace WoopiAiHub.UnitTests.Services
             var tools = ToolFixture.FindValidTools().AsQueryable();
             var pagedDataDto = ToolFixture.FindValidToolPagedDataDto();
             pagedDataDto.IsAscending = order;
+            pagedDataDto.Page = 1;
+            pagedDataDto.PageSize = 0;
+            pagedDataDto.Search = null;
+            pagedDataDto.ToolTypeId = null;
 
             _toolRepositoryMock.Setup(repo => repo.FindAllPaged()).Returns(tools);
 
@@ -366,7 +370,10 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(tools.Count(), result!.Items!.Count());
+            var expectedNames = order
+                ? tools.OrderBy(t => t.Name).Select(t => t.Name).ToList()
+                : tools.OrderByDescending(t => t.Name).Select(t => t.Name).ToList();
+            Assert.Equal(expectedNames, result!.Items!.Select(t => t.Name));
             _mocker.GetMock<IToolRepository>().Verify(repo => repo.FindAllPaged(), Times.Once);
         }
 

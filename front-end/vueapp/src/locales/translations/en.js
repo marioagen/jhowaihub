@@ -1019,6 +1019,20 @@ const english = {
         importCurl: "Import cURL",
         requestDetails: "Request Details",
         requestBody: "Request Body",
+        tabBody: "Body",
+        tabTests: "Tests",
+        tests: {
+            detectedVariables: "Detected Variables",
+            noVariablesLead: "No variable",
+            noVariablesTail: "detected in the template.",
+            simulateRequest: "Simulate Request",
+            noRunTitle: "No tests executed",
+            noRunHint: 'Fill in the variables and click on "Simulate Request".',
+            simulateError: "Could not run the simulated request. Try again.",
+            simulateSuccess: "Simulated request completed successfully (HTTP 2xx).",
+            responseHttpStatus: "Downstream HTTP status",
+            variableValues: "Test values for variables",
+        },
         templateName: "Template Name",
         templateNamePlaceholder: "e.g. User OCR Processing",
         endpointUrl: "Endpoint URL",
@@ -1245,7 +1259,8 @@ const english = {
         removeSuccess: "Workflow removed successfully",
         removeToolFlow: "Remove Flow",
         removeToolValidationTitle: "Remove Step Tools",
-        removeToolValidationMessage: "The step {name} has linked data or dependencies. All documents and dependencies will be removed permanently. To confirm removal, type the name of the step below:",
+        removeToolValidationMessage:
+            "The step {name} has linked data or dependencies. All documents and dependencies will be removed permanently. To confirm removal, type the name of the step below:",
         removeToolValidationPlaceholder: "Type '{name}' to confirm",
         confirmRemoveTool: "Confirm removal",
         responsableTeam: "Responsible Team",
@@ -1281,6 +1296,9 @@ const english = {
         title: "Document Processing Board",
         toolFlowsTitle: "Add Tool Flow",
         tools: "Tools",
+        errors: {
+            urlTooLong: "Prompt response is too long for the URL. Refine the prompt.",
+        },
     },
 };
 
