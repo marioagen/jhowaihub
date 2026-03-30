@@ -31,7 +31,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             return (gateway, handler, factory);
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetAsync should use named client, GET method and URI")]
+        [Trait("GetAsync", "Success")]
         public async Task GetAsync_UsesNamedClient_GetMethod_AndUri()
         {
             var (gateway, capturing, factoryMock) = CreateGateway();
@@ -44,7 +45,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("https://api.example.com/r", capturing.LastRequest.RequestUri!.ToString());
         }
 
-        [Fact]
+        [Fact(DisplayName = "PostAsync should use POST and attach body")]
+        [Trait("PostAsync", "Success")]
         public async Task PostAsync_UsesPost_AttachesBody()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -57,7 +59,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Same(body, capturing.LastRequest.Content);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PutAsync should use PUT")]
+        [Trait("PutAsync", "Success")]
         public async Task PutAsync_UsesPut()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -67,7 +70,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal(HttpMethod.Put, capturing.LastRequest!.Method);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PutAsync should add headers to request")]
+        [Trait("PutAsync", "Success")]
         public async Task PutAsync_WithHeaders_AddsToRequest()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -79,7 +83,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("1", Assert.Single(v));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PatchAsync should use PATCH")]
+        [Trait("PatchAsync", "Success")]
         public async Task PatchAsync_UsesPatch()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -89,7 +94,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal(HttpMethod.Patch, capturing.LastRequest!.Method);
         }
 
-        [Fact]
+        [Fact(DisplayName = "DeleteAsync should use DELETE without content")]
+        [Trait("DeleteAsync", "Success")]
         public async Task DeleteAsync_UsesDelete_WithoutContent()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -100,7 +106,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Null(capturing.LastRequest.Content);
         }
 
-        [Fact]
+        [Fact(DisplayName = "DeleteAsync should add headers to request")]
+        [Trait("DeleteAsync", "Success")]
         public async Task DeleteAsync_WithHeaders_AddsToRequest()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -112,7 +119,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("z", Assert.Single(v));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetAsync should throw ArgumentNullException for null URL")]
+        [Trait("GetAsync", "Fail")]
         public async Task GetAsync_NullUrl_ThrowsArgumentNullException()
         {
             var (gateway, _, _) = CreateGateway();
@@ -121,7 +129,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 gateway.GetAsync(null!, null, CancellationToken.None));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetAsync should add headers to request")]
+        [Trait("GetAsync", "Success")]
         public async Task GetAsync_AddsHeaders_ToRequest()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -139,7 +148,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("Bearer t", Assert.Single(av));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetAsync should skip Host header")]
+        [Trait("GetAsync", "Success")]
         public async Task GetAsync_SkipsHostHeader()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -150,7 +160,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.False(capturing.LastRequest!.Headers.Contains("Host"));
         }
 
-        [Theory]
+        [Theory(DisplayName = "GetAsync should skip Host header case-insensitively")]
+        [Trait("GetAsync", "Success")]
         [InlineData("host")]
         [InlineData("HOST")]
         [InlineData("HoSt")]
@@ -164,7 +175,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.False(capturing.LastRequest!.Headers.Contains("Host"));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetAsync should not apply custom headers when headers are null")]
+        [Trait("GetAsync", "Success")]
         public async Task GetAsync_NullHeaders_DoesNotApplyCustomHeaders()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -174,7 +186,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.False(capturing.LastRequest!.Headers.TryGetValues("X-None", out _));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetAsync should not apply custom headers when headers are empty")]
+        [Trait("GetAsync", "Success")]
         public async Task GetAsync_EmptyHeaders_DoesNotApplyCustomHeaders()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -185,7 +198,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.False(capturing.LastRequest!.Headers.TryGetValues("X-None", out _));
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetAsync should skip empty header names")]
+        [Trait("GetAsync", "Success")]
         public async Task GetAsync_SkipsEmptyHeaderName()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -196,7 +210,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.True(capturing.LastRequest!.Headers.TryGetValues("Valid", out _));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PostAsync should update body content type from Content-Type header")]
+        [Trait("PostAsync", "Success")]
         public async Task PostAsync_ContentTypeHeader_UpdatesBodyContentType()
         {
             var (gateway, _, _) = CreateGateway();
@@ -211,7 +226,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("application/xml", body.Headers.ContentType!.MediaType);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PostAsync should apply content type and other headers with body")]
+        [Trait("PostAsync", "Success")]
         public async Task PostAsync_WithBody_ContentTypeAndOtherHeaders_AppliesBoth()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -229,7 +245,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("yes", Assert.Single(v));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PostAsync should update body content type for lowercase content-type header")]
+        [Trait("PostAsync", "Success")]
         public async Task PostAsync_ContentTypeHeader_LowercaseName_UpdatesBodyContentType()
         {
             var (gateway, _, _) = CreateGateway();
@@ -244,7 +261,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("application/xml", body.Headers.ContentType!.MediaType);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PostAsync should leave body content type unchanged for invalid Content-Type value")]
+        [Trait("PostAsync", "Success")]
         public async Task PostAsync_InvalidContentTypeValue_LeavesBodyContentTypeUnchanged()
         {
             var (gateway, _, _) = CreateGateway();
@@ -260,7 +278,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal(originalMediaType, body.Headers.ContentType!.MediaType);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PatchAsync should update body content type from Content-Type header")]
+        [Trait("PatchAsync", "Success")]
         public async Task PatchAsync_ContentTypeHeader_UpdatesBodyContentType()
         {
             var (gateway, _, _) = CreateGateway();
@@ -275,7 +294,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("text/plain", body.Headers.ContentType!.MediaType);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PostAsync with null body should not throw when Content-Type is in headers")]
+        [Trait("PostAsync", "Success")]
         public async Task PostAsync_WhenBodyNull_ContentTypeInHeaders_DoesNotThrow_AndLeavesRequestWithoutContent()
         {
             var (gateway, capturing, _) = CreateGateway();
@@ -290,7 +310,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Null(capturing.LastRequest!.Content);
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetAsync should return response message from client")]
+        [Trait("GetAsync", "Success")]
         public async Task GetAsync_Returns_ResponseMessage_FromClient()
         {
             var (gateway, _, _) = CreateGateway();

@@ -21,7 +21,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             _handler = new ApiTemplateRequestTestsHandler(_gateway.Object, _templateRepository.Object);
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetAsync should merge query template into URL")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task GetAsync_MergesQueryTemplateIntoUrl()
         {
             string? capturedUrl = null;
@@ -51,7 +52,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.StartsWith("https://api.example.com/v1/items", capturedUrl, StringComparison.Ordinal);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PostAsync should send unwrapped JSON body")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task PostAsync_SendsUnwrappedJsonBody()
         {
             var innerPayload = """{"k":42}""";
@@ -82,7 +84,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal(innerPayload, body);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PostAsync should leave object JSON body unchanged")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task PostAsync_LeavesObjectJsonBodyUnchanged()
         {
             const string raw = """{"k":42}""";
@@ -108,7 +111,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal(raw, await capturedContent.ReadAsStringAsync());
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should echo metadata")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_EchoesMetadata()
         {
             _gateway
@@ -138,7 +142,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal(99, result.ExecutionId);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should throw for invalid HTTP method")]
+        [Trait("ExecuteAsync", "Fail")]
         public async Task ExecuteAsync_InvalidMethod_Throws()
         {
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -154,7 +159,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 }));
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should substitute variables in URL")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_SubstitutesVariablesInUrl()
         {
             string? capturedUrl = null;
@@ -177,7 +183,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("https://api.example.com/v1/42", capturedUrl);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should load from template id when draft is null")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_LoadsFromTemplateId_WhenDraftIsNull()
         {
             var model = new ApiTemplate("Db", "GET", "https://api.example.com/from-db", null, null, null);
@@ -201,7 +208,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("https://api.example.com/from-db", capturedUrl);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync from template id should echo request metadata including null execution id")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_FromTemplateId_EchoesRequestMetadata_IncludingNullExecutionId()
         {
             var model = new ApiTemplate("DbName", "GET", "https://api.example.com/from-db", null, null, null);
@@ -231,7 +239,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("body", result.Content);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync from template id should echo execution id when set")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_FromTemplateId_EchoesExecutionId_WhenSet()
         {
             var model = new ApiTemplate("DbName", "GET", "https://api.example.com/from-db", null, null, null);
@@ -255,13 +264,15 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("DbName", result.TemplateName);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should throw ArgumentNullException for null request")]
+        [Trait("ExecuteAsync", "Fail")]
         public async Task ExecuteAsync_NullRequest_ThrowsArgumentNullException()
         {
             await Assert.ThrowsAsync<ArgumentNullException>(() => _handler.ExecuteAsync(null!));
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should throw when draft and template id are missing")]
+        [Trait("ExecuteAsync", "Fail")]
         public async Task ExecuteAsync_NoDraftAndNoTemplateId_Throws()
         {
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -275,7 +286,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Contains("Either Draft or a valid TemplateId", ex.Message, StringComparison.Ordinal);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should throw when template id is zero")]
+        [Trait("ExecuteAsync", "Fail")]
         public async Task ExecuteAsync_TemplateIdZero_Throws()
         {
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -287,7 +299,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 }));
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should throw when template is not found")]
+        [Trait("ExecuteAsync", "Fail")]
         public async Task ExecuteAsync_TemplateNotFound_Throws()
         {
             _templateRepository
@@ -306,7 +319,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Contains("not found", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should not throw when variables dictionary is null")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_NullVariables_DoesNotThrow()
         {
             _gateway
@@ -327,7 +341,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal(200, result.StatusCode);
         }
 
-        [Fact]
+        [Fact(DisplayName = "GetAsync should pass parsed headers")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task GetAsync_PassesParsedHeaders()
         {
             Dictionary<string, string>? capturedHeaders = null;
@@ -354,7 +369,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("v", capturedHeaders["X-Custom"]);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should use draft name when template name is null")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_UsesDraftName_WhenTemplateNameIsNull()
         {
             _gateway
@@ -376,7 +392,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("FromDraft", result.TemplateName);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PostAsync should pass null content when body template is null")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task PostAsync_NullBodyTemplate_PassesNullContent()
         {
             HttpContent? capturedContent = null;
@@ -400,7 +417,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Null(capturedContent);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PutAsync should send JSON body")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task PutAsync_SendsJsonBody()
         {
             const string raw = """{"a":1}""";
@@ -427,7 +445,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("application/json", capturedContent.Headers.ContentType?.MediaType);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PatchAsync should send JSON body")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task PatchAsync_SendsJsonBody()
         {
             const string raw = """{"p":true}""";
@@ -453,7 +472,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal(raw, await capturedContent.ReadAsStringAsync());
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should throw for invalid query template JSON")]
+        [Trait("ExecuteAsync", "Fail")]
         public async Task ExecuteAsync_InvalidQueryTemplateJson_Throws()
         {
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -470,7 +490,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 }));
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should throw for invalid header template JSON")]
+        [Trait("ExecuteAsync", "Fail")]
         public async Task ExecuteAsync_InvalidHeaderTemplateJson_Throws()
         {
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -487,7 +508,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 }));
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should throw for non-absolute URL")]
+        [Trait("ExecuteAsync", "Fail")]
         public async Task ExecuteAsync_NonAbsoluteUrl_Throws()
         {
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -503,7 +525,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
                 }));
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should throw when double-encoded JSON body is malformed")]
+        [Trait("ExecuteAsync", "Fail")]
         public async Task ExecuteAsync_MalformedDoubleEncodedJsonBody_ThrowsInvalidOperation_WrappingJsonException()
         {
             _gateway

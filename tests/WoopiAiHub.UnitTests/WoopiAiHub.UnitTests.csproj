@@ -31,10 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\back-end\WoopiAiHub.Api\Controllers\ApiTemplateRequestTestsController.cs" Link="Controllers\ApiTemplateRequestTestsController.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\back-end\WoopiAiHub.Application\WoopiAiHub.Application.csproj" />
     <ProjectReference Include="..\..\back-end\WoopiAiHub.Domain\WoopiAiHub.Domain.csproj" />
     <ProjectReference Include="..\..\back-end\WoopiAiHub.Infrastructure\WoopiAiHub.Infrastructure.csproj" />

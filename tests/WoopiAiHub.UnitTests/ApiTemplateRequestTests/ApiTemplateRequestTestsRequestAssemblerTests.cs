@@ -9,7 +9,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
         private static Dictionary<string, string> Vars(params (string Key, string Value)[] pairs) =>
             pairs.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal);
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should normalize method to upper trimmed")]
+        [Trait("Assemble", "Success")]
         public void Assemble_NormalizesMethod_ToUpperTrimmed()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -23,7 +24,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("POST", r.Method);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should treat empty or whitespace method as empty string")]
+        [Trait("Assemble", "Success")]
         public void Assemble_EmptyOrWhitespaceMethod_BecomesEmptyString()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -37,7 +39,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal(string.Empty, r.Method);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should substitute variables in URL, query, header and body")]
+        [Trait("Assemble", "Success")]
         public void Assemble_SubstitutesVariables_InUrlQueryHeaderAndBody()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -55,7 +58,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("""{"x":"bv"}""", r.Body);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should replace placeholder with empty when variable value is empty")]
+        [Trait("Assemble", "Success")]
         public void Assemble_VariableValueEmpty_ReplacesPlaceholderWithEmpty()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -69,7 +73,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("https://api.example.com/end", r.Url);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should return nulls for optional parts when query, header and body are null")]
+        [Trait("Assemble", "Success")]
         public void Assemble_NullQueryHeaderBody_ReturnsNullsForOptionalParts()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -85,7 +90,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Null(r.Body);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should leave URL unchanged for empty query JSON array")]
+        [Trait("Assemble", "Success")]
         public void Assemble_QueryTemplate_EmptyJsonArray_LeavesUrlUnchanged()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -99,7 +105,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("https://api.example.com/a", r.Url);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should leave URL unchanged when query template JSON is null")]
+        [Trait("Assemble", "Success")]
         public void Assemble_QueryTemplate_JsonNull_LeavesUrlUnchanged()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -113,7 +120,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("https://api.example.com/a", r.Url);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should leave URL unchanged when query template has only blank keys")]
+        [Trait("Assemble", "Success")]
         public void Assemble_QueryTemplate_OnlyBlankKeys_LeavesUrlUnchanged()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -128,7 +136,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.False(r.Url.Contains('?', StringComparison.Ordinal));
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should return null headers for empty header JSON array")]
+        [Trait("Assemble", "Success")]
         public void Assemble_HeaderTemplate_EmptyJsonArray_ReturnsNullHeaders()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -142,7 +151,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Null(r.Headers);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should return null headers when header template JSON is null")]
+        [Trait("Assemble", "Success")]
         public void Assemble_HeaderTemplate_JsonNull_ReturnsNullHeaders()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -156,7 +166,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Null(r.Headers);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should return null headers when header template has only blank keys")]
+        [Trait("Assemble", "Success")]
         public void Assemble_HeaderTemplate_OnlyBlankKeys_ReturnsNullHeaders()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -170,7 +181,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Null(r.Headers);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should skip blank keys in query template")]
+        [Trait("Assemble", "Success")]
         public void Assemble_QueryTemplate_SkipsBlankKeys()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -185,7 +197,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Contains("ok=2", r.Url, StringComparison.Ordinal);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should merge header template keys case-insensitively")]
+        [Trait("Assemble", "Success")]
         public void Assemble_HeaderTemplate_CaseInsensitiveKeys()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -201,7 +214,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("b", r.Headers["authorization"]);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should treat null header value as empty string")]
+        [Trait("Assemble", "Success")]
         public void Assemble_HeaderTemplate_NullValue_BecomesEmptyString()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -216,7 +230,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal(string.Empty, r.Headers["X"]);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should throw for invalid query template JSON")]
+        [Trait("Assemble", "Fail")]
         public void Assemble_InvalidQueryTemplateJson_ThrowsInvalidOperationException()
         {
             var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -232,7 +247,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.IsType<System.Text.Json.JsonException>(ex.InnerException);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should throw for invalid header template JSON")]
+        [Trait("Assemble", "Fail")]
         public void Assemble_InvalidHeaderTemplateJson_ThrowsInvalidOperationException()
         {
             var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -247,7 +263,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Contains("Header template", ex.Message, StringComparison.Ordinal);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should throw when URL is not absolute after substitution")]
+        [Trait("Assemble", "Fail")]
         public void Assemble_UrlNotAbsoluteAfterVariables_Throws()
         {
             var ex = Assert.Throws<InvalidOperationException>(() =>
@@ -262,7 +279,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Contains("absolute URI", ex.Message, StringComparison.OrdinalIgnoreCase);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Assemble should skip query merge for whitespace-only query template")]
+        [Trait("Assemble", "Success")]
         public void Assemble_WhitespaceOnlyQueryTemplate_SkipsMerge()
         {
             var r = ApiTemplateRequestTestsRequestAssembler.Assemble(
@@ -276,7 +294,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal("https://api.example.com/g", r.Url);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ToDraft should map all fields from ApiTemplate")]
+        [Trait("ToDraft", "Success")]
         public void ToDraft_MapsAllFields_FromApiTemplate()
         {
             var model = new ApiTemplate(
