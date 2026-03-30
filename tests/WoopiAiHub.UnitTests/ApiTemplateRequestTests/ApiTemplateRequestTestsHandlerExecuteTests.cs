@@ -19,7 +19,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             _handler = new ApiTemplateRequestTestsHandler(_gateway.Object, _templateRepository.Object);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should return DTO from gateway response")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_ReturnsDto_FromGatewayResponse()
         {
             var request = new ApiTemplateRequestTestsRequestDto
@@ -50,7 +51,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             Assert.Equal(5, result.ExecutionId);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should pass cancellation token to gateway")]
+        [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_PassesCancellationToken_ToGateway()
         {
             var request = new ApiTemplateRequestTestsRequestDto
@@ -71,7 +73,8 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestTests
             _gateway.Verify(g => g.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>?>(), token), Times.Once);
         }
 
-        [Fact]
+        [Fact(DisplayName = "ExecuteAsync should propagate when gateway throws")]
+        [Trait("ExecuteAsync", "Fail")]
         public async Task ExecuteAsync_Propagates_WhenGatewayThrows()
         {
             var request = new ApiTemplateRequestTestsRequestDto
