@@ -90,6 +90,7 @@ namespace WoopiAiHub.Application.ToolsHandler
 
             request.Body = AddReferenceFileToBody(request.Body, automation.ReferenceFile ?? string.Empty);
             request.Body = ConvertOutputsToJson(outputs, request.Body);
+            request.Url = ConvertOutputsToUrl(outputs, request.Url);
             request.Email = automation.Email;
             request.Tenant = automation.Tenant;
             request.Data = new MetaDataAutomationDto(automation.CardId, automation.StepToolId);
@@ -156,6 +157,68 @@ namespace WoopiAiHub.Application.ToolsHandler
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Replaces specific placeholders in a URL string with URL-encoded plain text values from the provided tool outputs.
+        /// </summary>
+        /// <remarks>Only OCR and Prompt tool types are processed for URL replacement; JSON-node types (N8N, API, Quiz)
+        /// are skipped as they are not suitable for URL embedding. Values are URL-encoded using <see cref="Uri.EscapeDataString"/>.</remarks>
+        /// <param name="outputs">A collection of tool output objects whose values are used to replace placeholders in the URL.</param>
+        /// <param name="url">The URL string containing placeholders to be replaced (e.g., "{{prompt}}", "{{ocr}}").</param>
+        /// <returns>The URL with recognized placeholders replaced by URL-encoded output values. If no placeholders are matched, the original URL is returned.</returns>
+        private const int MaxUrlLength = 2048;
+
+        private string ConvertOutputsToUrl(ICollection<StepToolOutput> outputs, string url)
+        {
+            if (string.IsNullOrEmpty(url)) return url;
+
+            var result = url;
+            var groups = outputs
+                .Where(o => o.StepTool?.Tool?.ToolType != null)
+                .GroupBy(o => o.StepTool!.Tool!.ToolType!.Name, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var group in groups)
+            {
+                if (!TryGetToolConfig(group.Key, out var placeholder, out var isJsonNode)) continue;
+                if (isJsonNode) continue;
+                if (!result.Contains(placeholder, StringComparison.OrdinalIgnoreCase)) continue;
+
+                var processedValues = group
+                    .Select(o => Uri.EscapeDataString(ExtractPlainTextValue(group.Key, o.Value)))
+                    .ToList();
+
+                var replacement = processedValues.Count switch
+                {
+                    0 => string.Empty,
+                    1 => processedValues[0],
+                    _ => string.Join(",", processedValues)
+                };
+
+                result = result.Replace(placeholder, replacement, StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (result.Length > MaxUrlLength)
+                throw new AppException(
+                    ErrorCode.InvalidValue,
+                    $"The prompt response is too long to be used in a URL (current size: {result.Length} characters, limit: {MaxUrlLength}). Please refine the prompt to get a shorter response.",
+                    "workflow.errors.urlTooLong");
+
+            return result;
+        }
+
+        /// <summary>
+        /// Extracts a plain-text value from a raw output, without JSON serialization.
+        /// Used for URL context where values must be plain text before encoding.
+        /// </summary>
+        private string ExtractPlainTextValue(string toolType, string? rawValue)
+        {
+            var raw = rawValue ?? string.Empty;
+
+            if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
+                return ExtractOcrText(raw);
+
+            return raw;
         }
 
         /// <summary>
@@ -240,37 +303,33 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// Returns an empty string if no text is found or if the input is invalid.</returns>
         private static string ExtractOcrText(string outputValue)
         {
-            try
+            if (string.IsNullOrEmpty(outputValue))
+                return string.Empty;
+
+            using var document = JsonDocument.Parse(outputValue);
+            var root = document.RootElement;
+
+            if (root.TryGetProperty("DocumentEmbeddings", out var embeddingsArray) &&
+                embeddingsArray.ValueKind == JsonValueKind.Array)
             {
-                using var document = JsonDocument.Parse(outputValue);
-                var root = document.RootElement;
-                
-                if (root.TryGetProperty("DocumentEmbeddings", out var embeddingsArray) && 
-                    embeddingsArray.ValueKind == JsonValueKind.Array)
+                var texts = new List<string>();
+
+                foreach (var embedding in embeddingsArray.EnumerateArray())
                 {
-                    var texts = new List<string>();
-                    
-                    foreach (var embedding in embeddingsArray.EnumerateArray())
+                    if (embedding.TryGetProperty("Text", out var embedTextProperty))
                     {
-                        if (embedding.TryGetProperty("Text", out var embedTextProperty))
+                        var text = embedTextProperty.GetString();
+                        if (!string.IsNullOrEmpty(text))
                         {
-                            var text = embedTextProperty.GetString();
-                            if (!string.IsNullOrEmpty(text))
-                            {
-                                texts.Add(text);
-                            }
+                            texts.Add(text);
                         }
                     }
-                    
-                    return texts.Count > 0 ? string.Join("\n\n", texts) : string.Empty;
                 }
-                
-                return string.Empty;
+
+                return texts.Count > 0 ? string.Join("\n\n", texts) : string.Empty;
             }
-            catch
-            {
-                return string.Empty;
-            }
+
+            return string.Empty;
         }
     }
 }

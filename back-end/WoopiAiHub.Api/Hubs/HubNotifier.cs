@@ -31,7 +31,8 @@ namespace WoopiAiHub.Api.Hubs
                                            double percentage,
                                            int stepId,
                                            string toolName,
-                                           bool failed = false)
+                                           bool failed = false,
+                                           string? labelError = null)
         {
             var connections = _connectionMapping.GetConnections(userEmail);
             foreach (var connectionId in connections)
@@ -42,7 +43,8 @@ namespace WoopiAiHub.Api.Hubs
                     Percentage = (int)percentage,
                     StepId = stepId,
                     ToolName = toolName,
-                    Failed = failed
+                    Failed = failed,
+                    LabelError = labelError
                 });
             }
         }

@@ -1281,6 +1281,9 @@ const english = {
         title: "Document Processing Board",
         toolFlowsTitle: "Add Tool Flow",
         tools: "Tools",
+        errors: {
+            urlTooLong: "Prompt response is too long for the URL. Refine the prompt.",
+        },
     },
 };
 

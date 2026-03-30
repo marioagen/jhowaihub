@@ -1286,6 +1286,9 @@ const spanish = {
         title: "Tablero de Procesamiento de Documentos",
         toolFlowsTitle: "Agregar flujo de herramientas",
         tools: "Herramientas",
+        errors: {
+            urlTooLong: "La respuesta del prompt es demasiado larga para la URL. Refine el prompt.",
+        },
     },
 };
 
