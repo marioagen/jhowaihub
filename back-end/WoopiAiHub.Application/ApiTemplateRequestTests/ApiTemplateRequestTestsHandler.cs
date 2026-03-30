@@ -21,6 +21,12 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
+        /// <summary>
+        /// Assembles the HTTP request from the template draft (or persisted template), sends it via the gateway, and returns status, body, and metadata.
+        /// </summary>
+        /// <param name="request">The test request containing variables, optional inline draft or template id, and correlation fields.</param>
+        /// <param name="cancellationToken">Token to cancel the operation.</param>
+        /// <returns>The HTTP status code, response content, and echoed template context.</returns>
         public async Task<ApiTemplateRequestTestsResponseDto> ExecuteAsync(ApiTemplateRequestTestsRequestDto request, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -74,6 +80,9 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             };
         }
 
+        /// <summary>
+        /// Returns the inline draft from the request, or loads and maps the API template by <see cref="ApiTemplateRequestTestsRequestDto.TemplateId"/>.
+        /// </summary>
         private async Task<ApiTemplateCreateDto> ResolveDraftAsync(ApiTemplateRequestTestsRequestDto request)
         {
             if (request.Draft != null)
@@ -91,6 +100,9 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             throw new InvalidOperationException("Either Draft or a valid TemplateId must be provided.");
         }
 
+        /// <summary>
+        /// Creates UTF-8 JSON <see cref="StringContent"/> for the request body, or <c>null</c> when there is no body.
+        /// </summary>
         private StringContent? BuildJsonHttpContent(string? body)
         {
             if (body is null)
@@ -100,6 +112,9 @@ namespace WoopiAiHub.Application.ApiTemplateRequestTests
             return new StringContent(jsonBody, Encoding.UTF8, "application/json");
         }
 
+        /// <summary>
+        /// If <paramref name="body"/> is a JSON string literal (wrapped in quotes), returns the inner string; otherwise returns <paramref name="body"/> unchanged.
+        /// </summary>
         private string UnwrapDoubleEncodedJsonStringIfNeeded(string body)
         {
             var trimmed = body.Trim();

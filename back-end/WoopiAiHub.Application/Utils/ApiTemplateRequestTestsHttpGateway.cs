@@ -3,27 +3,41 @@ using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestTests;
 
 namespace WoopiAiHub.Application.Utils
 {
+    /// <summary>
+    /// Sends HTTP requests for API template dry-runs using a named <see cref="IHttpClientFactory"/> client.
+    /// </summary>
     public class ApiTemplateRequestTestsHttpGateway(IHttpClientFactory httpClientFactory) : IApiTemplateRequestTestsHttpGateway
     {
+        /// <summary>
+        /// Name passed to <see cref="IHttpClientFactory.CreateClient(string)"/> for the template test HTTP client.
+        /// </summary>
         public const string NamedClient = "ApiTemplateRequestTests";
 
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
+        /// <inheritdoc />
         public Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string>? headers, CancellationToken cancellationToken) =>
             SendAsync(HttpMethod.Get, url, body: null, headers, cancellationToken);
 
+        /// <inheritdoc />
         public Task<HttpResponseMessage> PostAsync(string url, HttpContent? body, Dictionary<string, string>? headers, CancellationToken cancellationToken) =>
             SendAsync(HttpMethod.Post, url, body, headers, cancellationToken);
 
+        /// <inheritdoc />
         public Task<HttpResponseMessage> PutAsync(string url, HttpContent? body, Dictionary<string, string>? headers, CancellationToken cancellationToken) =>
             SendAsync(HttpMethod.Put, url, body, headers, cancellationToken);
 
+        /// <inheritdoc />
         public Task<HttpResponseMessage> PatchAsync(string url, HttpContent? body, Dictionary<string, string>? headers, CancellationToken cancellationToken) =>
             SendAsync(HttpMethod.Patch, url, body, headers, cancellationToken);
 
+        /// <inheritdoc />
         public Task<HttpResponseMessage> DeleteAsync(string url, Dictionary<string, string>? headers, CancellationToken cancellationToken) =>
             SendAsync(HttpMethod.Delete, url, body: null, headers, cancellationToken);
 
+        /// <summary>
+        /// Builds the request, applies headers, and sends it with response headers read as the completion boundary.
+        /// </summary>
         private async Task<HttpResponseMessage> SendAsync(
             HttpMethod method,
             string url,
@@ -43,6 +57,9 @@ namespace WoopiAiHub.Application.Utils
             return await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Adds custom headers to the request; maps <c>Content-Type</c> to <see cref="HttpContent.Headers"/> when a body is present. Skips <c>Host</c>.
+        /// </summary>
         private static void ApplyHeaders(HttpRequestMessage request, HttpContent? body, Dictionary<string, string>? headers)
         {
             if (headers == null || headers.Count == 0)
