@@ -119,8 +119,8 @@ namespace WoopiAiHub.Application.Services
             {
                 var search = toolPagedDataDto.Search.ToLower();
                 query = query.Where(i =>
-                    i.Name.ToLower().Contains(search) ||
-                    i.Id.ToString().Contains(toolPagedDataDto.Search));
+                    i.Name.Contains(search) ||
+                    i.Id.ToString().Contains(search));
             }
 
             if (toolPagedDataDto.ToolTypeId.HasValue)
