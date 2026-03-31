@@ -269,16 +269,13 @@
 
     #tenantDropdownButton {
         width: 100%;
-        /* Ajusta o botão para ser responsivo */
         font-size: 1rem;
-        /* Ajusta o tamanho da fonte */
     }
 
     .circle-icon {
         width: 32px;
         height: 32px;
         background-color: var(--color-bg-btn-primary) !important;
-        /* Cor de fundo padrão */
         text-align: center;
         color: white;
         border-radius: 50%;
@@ -357,16 +354,13 @@
 
         #tenantDropdownButton {
             width: 100%;
-            /* Ajusta o botão para ser responsivo */
             font-size: 1rem;
-            /* Ajusta o tamanho da fonte */
         }
 
         .circle-icon {
             width: 32px;
             height: 32px;
             background-color: var(--color-bg-btn-primary) !important;
-            /* Cor de fundo padrão */
             text-align: center;
             color: white;
             border-radius: 50%;
@@ -401,21 +395,16 @@
 
             #tenantDropdownButton {
                 font-size: 0.9rem;
-                /* Reduz o tamanho da fonte em telas menores */
                 padding: 0.5rem;
-                /* Ajusta o espaçamento interno */
             }
 
             #tenantDropdownMenu {
                 width: 100%;
-                /* Garante que o menu dropdown seja responsivo */
                 font-size: 0.85rem;
-                /* Ajusta o tamanho da fonte */
             }
 
             #tenantDropdownLabel {
                 font-size: 0.9rem;
-                /* Ajusta o tamanho da fonte no label */
             }
 
             .circle-icon {
@@ -436,9 +425,7 @@
             align-items: center;
             justify-content: flex-start;
             white-space: normal;
-            /* Permite quebra de linhas */
             padding: 0.25rem 0.5rem;
-            /* Ajusta o padding dos itens */
         }
 
         .vertical-line {
