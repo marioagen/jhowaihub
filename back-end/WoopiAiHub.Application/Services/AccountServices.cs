@@ -365,12 +365,12 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        private string GenerateToken(string user)
+        public string GenerateToken(string user, int? tokenExpirationTime = null)
         {
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var expirationMinutes = _config.GetValue("JWT:AccessTokenExpirationMinutes", 60);
+            var expirationMinutes = tokenExpirationTime ?? _config.GetValue("JWT:AccessTokenExpirationMinutes", 60);
 
             var claims = new[]
             {
@@ -386,7 +386,7 @@ namespace WoopiAiHub.Application.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
+        
         /// <summary>
         /// Asynchronously generates a new access token and refresh token for the specified user.
         /// </summary>

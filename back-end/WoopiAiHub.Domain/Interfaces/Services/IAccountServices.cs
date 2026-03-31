@@ -1,6 +1,5 @@
 ﻿using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Request.Account;
-using WoopiAiHub.Domain.DTOs.Response.Account;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
 {
@@ -12,5 +11,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         string FindClientId();
         Task<string?> RefreshTokenAsync(string refreshToken, string headerTenant);
         Task<bool> RevokeTokenAsync(string refreshToken);
+        string GenerateToken(string user, int? tokenExpirationTime = null);
     }
 }

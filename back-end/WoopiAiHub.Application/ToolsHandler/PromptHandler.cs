@@ -29,6 +29,7 @@ public class PromptHandler : IToolHandler
     private readonly IResponseApi _responseApi;
     private readonly ResponseOpenAiSettings _responseOpenAiSettings;
     private readonly IApiTemplateServices _apiTemplateServices;
+    private readonly IAccountServices _accountServices;
 
     public PromptHandler(IOptions<MessageQueues> messageQueues,
                          IPromptServices promptServices,
@@ -36,7 +37,8 @@ public class PromptHandler : IToolHandler
                          ITenantCacheServices tenantCacheServices,
                          IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
                          IResponseApi responseApi,
-                         IApiTemplateServices apiTemplateServices)
+                         IApiTemplateServices apiTemplateServices,
+                         IAccountServices accountServices)
     {
         _messageQueues = messageQueues.Value;
         _promptServices = promptServices;
@@ -45,6 +47,7 @@ public class PromptHandler : IToolHandler
         _responseApi = responseApi;
         _responseOpenAiSettings = responseOpenAiSettings.Value;
         _apiTemplateServices = apiTemplateServices;
+        _accountServices = accountServices;
     }
 
     /// <summary>
@@ -73,95 +76,7 @@ public class PromptHandler : IToolHandler
         var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
         var fullText = string.Join("\n", documents!.DocumentEmbeddings.Select(d => d.Text));
 
-
-        var apis = await _apiTemplateServices.FindAll(new ApiTemplateFilterDto());
-
-        var mappedApis = apis.Select(api => new
-        {
-            id = api.Id,
-            address = api.Url,
-            protocol = api.Method == "GET" ? 0 : api.Method == "POST" ? 1 : api.Method == "PUT" ? 2 : 3,
-            description = api.Description,
-            // payload_schema = System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(api.BodyTemplate).RootElement)
-            payload_schema = $"PAYLOAD_API_{api.Id}"
-        });
-
-        var mappedApiString = System.Text.Json.JsonSerializer.Serialize(mappedApis);
-
-        foreach (var item in apis)
-        {
-            mappedApiString = mappedApiString.Replace($"PAYLOAD_API_{item.Id}", System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(item.BodyTemplate).RootElement));
-        }
-
-        var instructions = string.IsNullOrEmpty(mappedApiString) ? "" : @"
-Para atender o prompt acima  use a tool generalista. e siga as instruções abaixo.
-Assinatura: generalista(request: GeneralistaRequestDTO).
-a estrutura do GeneralistaRequestDTO é a seguinte:
-{
-    
-        Protocolo: GeneralistaProtocolMetodo, // O protocolo define a estrutura do payload e o endpoint a ser chamado.
-        BaseRequestURL: string, // URL usado na request do MCP, ex: 'https://localhost:7115/api/usuario/' ou 'https://localhost:7115/api/produto/'
-        RequestData: string, // dados em json em formato de string, que serão enviados no corpo da requisição para o endpoint definido pelo protocolo.
-}
-
-GeneralistaProtocolMetodo {
-        GET=0,
-        POST=1,
-        PUT=2,
-        DELETE=3
-}
-
-com a estrutura definida 
-
-CATALOGO_DE_ENDPOINTS: " + mappedApiString + @"
-
-
-REGRAS DE ROTEAMENTO:
-- Se a resposta depender de dados externos, chame generalista antes de responder.
-- Escolha address somente do CATALOGO_DE_ENDPOINTS, sem inventar.
-- Monte payload_json como string JSON válida conforme payload_schema do endpoint escolhido.
-- Se mais de um endpoint servir, escolha o de maior especificidade e menor número de campos.
-- Analise se a URL não possui parametros customiavies, os paraetros serão reconhecidos pela presença de chaves ({}), caso exista parametros no endereço realize a substitução pelo valor devido.
-- Para parametros na URL caso o valor possua algum simbolo entre os cochetes [.,/:;] rever os simolos. Ex: cpf 000.000.000-00 no parametro da URL deverá passar 00000000000
-- Limite de chamadas: no máximo 2.
-
-REGRAS DE RESPOSTA:
-- Não sugerir ações após o rultado
-- Não indicar como os dados foram obtidos apenas apresentar os dados
-                    ";
-        var dto = new ResponseOpenAiRequestDto
-        {
-            // Temperature = _responseOpenAiSettings.Temperature,
-            Instructions = instructions,
-            Model = "gpt-4.1",
-            MaxToolCalls = 2,
-            Tools = new List<ResponseOpenAiRequestToolsDto> {
-                new ResponseOpenAiRequestToolsDto {
-                    Type = OpenAiResponseToolsType.Mcp,
-                    ServerLabel = "dmcp",
-                    ServerUrl=_responseOpenAiSettings.McpAddress,
-                    Headers= new Dictionary<string, string>{
-                            {"x-session-id", "d354301e-6b4b-4a3f-beef-1f9715dd2dfd"},
-                            {"x-api-key", "d354301e-6b4b-4a3f-beef-1f9715dd2dfd"}
-                        },
-                    RequireApproval="never",
-                    AllowedTools=["generalista"]
-                }
-            },
-            Input = new List<ResponseOpenAiRequestInputDto> {
-                    new ResponseOpenAiRequestInputDto {
-                        Type = OpenAiResponsesTypes.Message,
-                        Role = OpenAiResponseInputRole.User,
-                        Content = new List<ResponseOpenAiRequestInputContentDto> {
-                            new ResponseOpenAiRequestInputContentDto {
-                                Type = OpenAiResponseInputContentType.InputText,
-                                // Text = "busque dados do usuário com o cpf 123.456.789-00"
-                                Text = string.Concat("Baseado no: \"", fullText, "\" e seguindo as orientações a seguir: ", promptDto!.Text)
-                            }
-                        }
-                    }
-                 }
-        };
+        ResponseOpenAiRequestDto dto = await generateTheOpenAiResponseRequestDto(promptDto, fullText);
 
         return new ExecutionMessageDto
         {
@@ -180,5 +95,110 @@ REGRAS DE RESPOSTA:
                 Email = automationServicesDto.Email
             }
         };
+    }
+
+    private async Task<ResponseOpenAiRequestDto> generateTheOpenAiResponseRequestDto(PromptDto? promptDto, string fullText)
+    {
+
+        var dto = new ResponseOpenAiRequestDto
+        {
+            Model = "gpt-4.1",
+            Input = new List<ResponseOpenAiRequestInputDto> {
+                    new ResponseOpenAiRequestInputDto {
+                        Type = OpenAiResponsesTypes.Message,
+                        Role = OpenAiResponseInputRole.User,
+                        Content = new List<ResponseOpenAiRequestInputContentDto> {
+                            new ResponseOpenAiRequestInputContentDto {
+                                Type = OpenAiResponseInputContentType.InputText,
+                                Text = string.Concat("Baseado no: \"", fullText, "\" e seguindo as orientações a seguir: ", promptDto!.Text)
+                            }
+                        }
+                    }
+                 }
+        };
+
+        await VerifyAndAddOrNotMcpSupport(promptDto, dto);
+
+        return dto;
+    }
+
+    private async Task VerifyAndAddOrNotMcpSupport(PromptDto promptDto, ResponseOpenAiRequestDto dto)
+    {
+        if (promptDto.EnableAccessToMcp)
+        {
+
+            var apis = await _apiTemplateServices.FindAll(new ApiTemplateFilterDto() { EnableAccessFromMcp = true, PromptId = promptDto.Id });
+
+            var mappedApis = apis.Select(api => new
+            {
+                id = api.Id,
+                address = api.Url,
+                protocol = api.Method == "GET" ? 0 : api.Method == "POST" ? 1 : api.Method == "PUT" ? 2 : 3,
+                description = api.Description,
+                payload_schema = api.Method == "GET" ? null : $"PAYLOAD_API_{api.Id}"
+            });
+
+            var mappedApiString = System.Text.Json.JsonSerializer.Serialize(mappedApis);
+
+            foreach (var item in apis.Where(a => a.Method != "GET"))
+            {
+                mappedApiString = mappedApiString.Replace($"PAYLOAD_API_{item.Id}", System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(item.BodyTemplate).RootElement));
+            }
+
+            var accessToken = _accountServices.GenerateToken("MCP_SERVER", 5);
+
+            var instructions = string.IsNullOrEmpty(mappedApiString) ? "" : @"
+Para atender o prompt acima  use a tool generalista. e siga as instruções abaixo.
+Assinatura: generalista(request: GeneralistaRequestDTO).
+a estrutura do GeneralistaRequestDTO é a seguinte:
+{
+    Protocolo: GeneralistaProtocolMetodo, // O protocolo define a estrutura do payload e o endpoint a ser chamado.
+    BaseRequestURL: string, // URL usado na request do MCP, ex: 'https://localhost:7115/api/usuario/' ou 'https://localhost:7115/api/produto/'
+    RequestData: string, // dados em json em formato de string, que serão enviados no corpo da requisição para o endpoint definido pelo protocolo.
+}
+
+GeneralistaProtocolMetodo {
+        GET=0,
+        POST=1,
+        PUT=2,
+        DELETE=3
+}
+
+com a estrutura definida 
+
+CATALOGO_DE_ENDPOINTS: " + mappedApiString + @"
+
+
+REGRAS DE ROTEAMENTO:
+- Se a resposta depender de dados externos, chame generalista antes de responder.
+- Escolha o address somente se estiver presente no CATALOGO_DE_ENDPOINTS, sem inventar.
+- Monte payload_json como string JSON válida, conforme payload_schema do endpoint escolhido.
+- Se mais de um endpoint servir, escolha o de maior especificidade e menor número de campos.
+- Analise se a URL não possui parametros customiavies, os paraetros serão reconhecidos pela presença de chaves ({}), caso exista parametros no endereço realize a substitução pelo valor devido.
+- Para parametros na URL caso o valor possua algum simbolo entre os cochetes [.,/:;] rever os simolos. Ex: cpf 000.000.000-00 no parametro da URL deverá passar 00000000000. Isso só deve ser aplicado aos parametros de URL, se o dado pesquisador pode permanecer com os caracteres se forem enviados em consultas dentro do corpo da request
+- Limite de chamadas: no máximo 10.
+
+REGRAS DE RESPOSTA:
+- Não sugerir ações após o rultado
+- Não indicar como os dados foram obtidos apenas apresentar os dados
+                    ";
+
+            dto.Instructions = instructions;
+            dto.MaxToolCalls = 10;
+            dto.Tools = new List<ResponseOpenAiRequestToolsDto> {
+                new ResponseOpenAiRequestToolsDto {
+                    Type = OpenAiResponseToolsType.Mcp,
+                    ServerLabel = "dmcp",
+                    ServerUrl=_responseOpenAiSettings.McpAddress,
+                    Headers= new Dictionary<string, string>{
+                            {"x-session-id", "d354301e-6b4b-4a3f-beef-1f9715dd2dfd"},
+                            {"x-api-key", "d354301e-6b4b-4a3f-beef-1f9715dd2dfd"},
+                            {"Authorization", $"Bearer {accessToken}"}
+                        },
+                    RequireApproval="never",
+                    AllowedTools=["generalista"]
+                }
+            };
+        }
     }
 }

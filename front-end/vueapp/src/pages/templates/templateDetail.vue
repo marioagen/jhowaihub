@@ -618,6 +618,8 @@ export default {
                     this.form.method = data.method || "GET";
                     this.form.url = data.url || "";
                     this.form.body = data.bodyTemplate || "";
+                    this.form.enableAccessFromMcp =  data.enableAccessFromMcp || false;
+                    this.form.description =  data.description || "";
 
                     try {
                         const parsedQueryParams = data.queryTemplate
@@ -647,7 +649,9 @@ export default {
                         name: this.form.name,
                         method: this.form.method,
                         url: this.form.url,
-                        body: this.form.body,
+                        body: this.form.body,                        
+                        enableAccessFromMcp: this.form.enableAccessFromMcp,
+                        description: this.form.description,
                     });
                 })
                 .catch(() => {
