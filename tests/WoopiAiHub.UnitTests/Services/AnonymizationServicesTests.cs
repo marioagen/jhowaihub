@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.AutoMock;
 using Moq.Protected;
@@ -313,6 +314,56 @@ namespace WoopiAiHub.UnitTests.Services
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _sut.ProcessAnonymizationResult(result));
             Assert.Equal("Hub notification failed", exception.Message);
+        }
+
+        #endregion
+
+        #region UploadDocumentToUrl Tests
+
+        [Fact(DisplayName = "ProcessAnonymization - Should throw HttpRequestException when document upload fails")]
+        [Trait("ProcessAnonymization", "UploadFailure")]
+        public async Task ProcessAnonymization_WhenDocumentUploadFails_ThrowsHttpRequestExceptionAndLogsError()
+        {
+            // Arrange
+            var documentDto = AnonymizationFixture.FindValidFindDocumentDto();
+            var requestDto = AnonymizationFixture.FindValidProcessAnonymizationRequestDto();
+            var headersDto = AnonymizationFixture.FindValidHeadersDto();
+            var responseDto = AnonymizationFixture.FindValidAnonymizationResponseDto();
+
+            var documentServicesMock = _mocker.GetMock<IDocumentServices>();
+            var anonymizationApiMock = _mocker.GetMock<IAnonymizationApi>();
+            var httpClientFactoryMock = _mocker.GetMock<IHttpClientFactory>();
+            var loggerMock = _mocker.GetMock<ILogger<AnonymizationServices>>();
+
+            documentServicesMock
+                .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
+                .ReturnsAsync(documentDto);
+
+            anonymizationApiMock
+                .Setup(x => x.InitiateAnonymization(It.IsAny<string>(), It.IsAny<AnonymizationRequestDto>()))
+                .ReturnsAsync(responseDto);
+
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError)
+                {
+                    Content = new StringContent("Server error occurred")
+                });
+
+            using var httpClient = new HttpClient(mockHandler.Object) { BaseAddress = new Uri("http://localhost") };
+            httpClientFactoryMock
+                .Setup(x => x.CreateClient(It.IsAny<string>()))
+                .Returns(httpClient);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<HttpRequestException>(
+                () => _sut.ProcessAnonymization(requestDto, headersDto));
+
+            Assert.Contains("Failed to upload document", exception.Message);
+            Assert.Contains("Status:", exception.Message);
         }
 
         #endregion
