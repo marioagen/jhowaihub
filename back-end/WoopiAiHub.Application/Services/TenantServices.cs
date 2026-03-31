@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -123,10 +124,14 @@ namespace WoopiAiHub.Application.Services
         /// <param name="tenant"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<string> FindPlanByName(string tenant)
+        public async Task<DashboardTenantInfo> FindPlanByName(string tenant)
         {
             var tenantInfo = await _tenantCacheService.FindTenantAsync(tenant);
-            return tenantInfo?.Plan?? string.Empty;
+            return new DashboardTenantInfo
+            {
+                Plan = tenantInfo?.Plan ?? string.Empty,
+                WtcIncluded = tenantInfo?.WtcIncluded ?? 0
+            };
         }
 
         /// <summary>
