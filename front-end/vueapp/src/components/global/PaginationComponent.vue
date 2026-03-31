@@ -1,10 +1,13 @@
 <template>
     <nav v-if="totalPages && totalPages > 1">
         <ul class="pagination justify-content-center">
-            <li class="page-item" :class="{ disabled: current === 1 }">
-                <a 
-                    class="page-link" 
-                    href="#" 
+            <li
+                class="page-item"
+                :class="{ disabled: current === 1 }"
+            >
+                <a
+                    class="page-link"
+                    href="#"
                     @click.prevent="changePage(current - 1)"
                 >
                     <LucideIcon icon="ChevronsLeft" />
@@ -16,7 +19,10 @@
                 v-for="item in pages"
                 :key="item.key"
                 class="page-item"
-                :class="{ active: item.type === 'page' && item.value === current, disabled: item.type === 'ellipsis' }"
+                :class="{
+                    active: item.type === 'page' && item.value === current,
+                    disabled: item.type === 'ellipsis',
+                }"
             >
                 <a
                     v-if="item.type === 'page'"
@@ -34,10 +40,13 @@
                 </span>
             </li>
 
-            <li class="page-item" :class="{ disabled: current === totalPages }">
-                <a 
-                    class="page-link" 
-                    href="#" 
+            <li
+                class="page-item"
+                :class="{ disabled: current === totalPages }"
+            >
+                <a
+                    class="page-link"
+                    href="#"
                     @click.prevent="changePage(current + 1)"
                 >
                     {{ $t("pagination.next") }}
@@ -47,7 +56,6 @@
         </ul>
     </nav>
 </template>
-
 <script>
     export default {
         name: "PaginationComponent",
@@ -99,19 +107,16 @@
                 const current = this.current;
                 const items = [];
 
-                // Always show first page
                 items.push({
                     type: "page",
                     value: firstPage,
                     key: "page-first",
                 });
 
-                // Determine middle window (around current), excluding first/last
                 let start = Math.max(current - 1, firstPage + 1);
                 let end = Math.min(current + 1, lastPage - 1);
 
                 if (start <= end) {
-                    // Ellipsis after first page if there's a gap
                     if (start > firstPage + 1) {
                         items.push({
                             type: "ellipsis",
@@ -127,7 +132,6 @@
                         });
                     }
 
-                    // Ellipsis before last page if there's a gap
                     if (end < lastPage - 1) {
                         items.push({
                             type: "ellipsis",
@@ -135,14 +139,12 @@
                         });
                     }
                 } else if (lastPage - firstPage > 1) {
-                    // No middle window, but there is a gap between first and last
                     items.push({
                         type: "ellipsis",
                         key: "ellipsis-middle",
                     });
                 }
 
-                // Always show last page
                 items.push({
                     type: "page",
                     value: lastPage,
@@ -165,7 +167,6 @@
         },
     };
 </script>
-
 <style scoped>
     .pagination {
         --bs-pagination-padding-x: 0.6rem;
@@ -196,7 +197,7 @@
         border: 1px solid transparent;
         font-weight: 500;
         transition: background-color 0.2s ease;
-        background-color: var(--color-card-content) !important
+        background-color: var(--color-card-content) !important;
     }
 
     .page-item.active .page-link {
