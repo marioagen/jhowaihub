@@ -69,7 +69,7 @@
                             size="20"
                         />
                     </div>
-                    <div class="col-8">
+                    <div class="col-8 my-auto">
                         <div class="d-flex flex-column">
                             <span
                                 v-if="notification.title"
