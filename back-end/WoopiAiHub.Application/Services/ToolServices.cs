@@ -114,11 +114,36 @@ namespace WoopiAiHub.Application.Services
             }
 
             var query = _toolRepository.FindAllPaged();
+
+            if (!string.IsNullOrEmpty(toolPagedDataDto.Search))
+            {
+                var search = toolPagedDataDto.Search.ToLower();
+                query = query.Where(i =>
+                    i.Name.ToLower().Contains(search) ||
+                    i.Id.ToString().Contains(toolPagedDataDto.Search));
+            }
+
+            if (toolPagedDataDto.ToolTypeId.HasValue)
+            {
+                query = query.Where(i => i.ToolTypeId == toolPagedDataDto.ToolTypeId.Value);
+            }
+
             query = toolPagedDataDto.IsAscending
                 ? query.OrderBy(t => t.Name)
                 : query.OrderByDescending(t => t.Name);
 
-            return Pagination(query, toolPagedDataDto);
+            var paginated = PaginationHelper.Paginate(
+                query,
+                toolPagedDataDto.Page,
+                toolPagedDataDto.PageSize);
+
+            return new PagedResponseDto<ToolDto>
+            {
+                Items = paginated.Content,
+                CurrentPage = paginated.CurrentPage,
+                TotalPages = paginated.PageCount,
+                TotalCount = paginated.RowCount
+            };
         }
 
         /// <summary>
@@ -209,57 +234,6 @@ namespace WoopiAiHub.Application.Services
             }
 
             return tool.ConnectorApiKey ?? string.Empty;
-        }
-
-        /// <summary>
-        /// Creates a paginated response from a queryable collection of tools based on the specified pagination and
-        /// search criteria.
-        /// </summary>
-        /// <remarks>If the <paramref name="pagedDataDto"/> specifies a search term, the method filters
-        /// the collection to include only items whose name or ID contains the search term. If the page size is zero,
-        /// the method returns all items in a single page.</remarks>
-        /// <param name="totalList">The queryable collection of <see cref="ToolDto"/> objects to paginate. This collection may be filtered based
-        /// on the search criteria.</param>
-        /// <param name="pagedDataDto"></returns>
-        private static PagedResponseDto<ToolDto> Pagination(IQueryable<ToolDto> totalList,
-                                                            ToolPagedDataDto toolPagedDataDto)
-        {
-            int pageCount, currentPage = 0;
-
-            if (!string.IsNullOrEmpty(toolPagedDataDto.Search))
-            {
-                totalList = totalList.Where(i => i.Name.ToLower().Contains(toolPagedDataDto.Search.ToLower()) ||
-                                                 i.Id.ToString().Contains(toolPagedDataDto.Search));
-            }
-
-            if (toolPagedDataDto.ToolTypeId.HasValue)
-            {
-                totalList = totalList.Where(i => i.ToolTypeId == toolPagedDataDto.ToolTypeId.Value);
-            }
-
-            var totalListCount = totalList.Count();
-
-            if (toolPagedDataDto.PageSize == 0)
-            {
-                pageCount = 1;
-                currentPage = 1;
-                toolPagedDataDto.PageSize = totalListCount;
-            }
-            else
-            {
-                pageCount = (int)Math.Ceiling((double)totalListCount / toolPagedDataDto.PageSize);
-                currentPage = toolPagedDataDto.Page <= pageCount ? toolPagedDataDto.Page : 1;
-                totalList = totalList.Skip((currentPage - 1) * toolPagedDataDto.PageSize)
-                                     .Take(toolPagedDataDto.PageSize);
-            }
-
-            return new PagedResponseDto<ToolDto>()
-            {
-                Items = totalList,
-                CurrentPage = currentPage,
-                TotalPages = pageCount,
-                TotalCount = totalListCount,
-            };
         }
 
         /// <summary>
