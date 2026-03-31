@@ -1,64 +1,277 @@
-using Bogus;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Moq;
+using Moq.AutoMock;
+using Moq.Protected;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.UnitTests.Fixtures;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
 {
     public class AnonymizationServicesTests
     {
-        private readonly Mock<IDocumentServices> _documentServicesMock;
-        private readonly Mock<IAnonymizationApi> _anonymizationApiMock;
-        private readonly Mock<IConfiguration> _configurationMock;
-        private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
-        private readonly Mock<IHubNotifier> _hubNotifierMock;
-        private readonly Mock<ILogger<AnonymizationServices>> _loggerMock;
+        private readonly AutoMocker _mocker;
         private readonly AnonymizationServices _sut;
-        private readonly Faker _faker;
+
+        private const string ValidToken = "validToken";
+        private const string ValidUserId = "123";
+        private const string ValidWebhook = "https://webhook.example.com";
+        private const string DocumentNotFoundMessage = "Document file not found.";
+        private const string TokenNotConfiguredMessage = "Anonymization API token is not configured.";
+        private const string UserIdNotConfiguredMessage = "Anonymization User ID is not configured.";
+        private const string WebhookNotProvidedMessage = "Anonymization Webhook not provided";
+        private const string DownloadUrlNotProvidedMessage = "Download URL not provided in anonymization response";
 
         public AnonymizationServicesTests()
         {
-            _documentServicesMock = new Mock<IDocumentServices>();
-            _anonymizationApiMock = new Mock<IAnonymizationApi>();
-            _configurationMock = new Mock<IConfiguration>();
-            _httpClientFactoryMock = new Mock<IHttpClientFactory>();
-            _hubNotifierMock = new Mock<IHubNotifier>();
-            _loggerMock = new Mock<ILogger<AnonymizationServices>>();
-            _faker = new Faker();
+            _mocker = new AutoMocker();
 
-            _sut = new AnonymizationServices(
-                _documentServicesMock.Object,
-                _anonymizationApiMock.Object,
-                _configurationMock.Object,
-                _httpClientFactoryMock.Object,
-                _hubNotifierMock.Object,
-                _loggerMock.Object
-            );
+            var configBuilder = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "RefitExternalSettings:AnonymizationApiToken", ValidToken },
+                    { "RefitExternalSettings:AnonymizationUserId", ValidUserId },
+                    { "AnonymizationWebhook", ValidWebhook }
+                })
+                .Build();
+
+            _mocker.Use<IConfiguration>(configBuilder);
+
+            _sut = _mocker.CreateInstance<AnonymizationServices>();
         }
 
-        /// <summary>
-        /// Tests that ProcessAnonymizationResult successfully notifies hub with valid result data.
-        /// Verifies that the hub notifier is called exactly once with the correct parameters.
-        /// </summary>
-        [Fact(DisplayName = "ProcessAnonymizationResult - Should successfully notify hub with valid result")]
-        [Trait("ProcessAnonymizationResult", "Success")]
-        public async Task ProcessAnonymizationResult_ValidResult_NotifiesHubSuccessfully()
+        #region ProcessAnonymization Tests
+
+        [Fact(DisplayName = "ProcessAnonymization - Should successfully process valid anonymization request")]
+        [Trait("ProcessAnonymization", "Success")]
+        public async Task ProcessAnonymization_WithValidRequest_SuccessfullyProcesses()
         {
             // Arrange
-            var result = new AnonymizationResultDto
-            {
-                DocumentUrl = _faker.Internet.Url(),
-                WoopiAiDocumentId = _faker.Random.Int(1, 10000),
-                WoopiAiEmail = _faker.Internet.Email()
-            };
+            var documentDto = AnonymizationFixture.FindValidFindDocumentDto();
+            var requestDto = AnonymizationFixture.FindValidProcessAnonymizationRequestDto();
+            var headersDto = AnonymizationFixture.FindValidHeadersDto();
+            var responseDto = AnonymizationFixture.FindValidAnonymizationResponseDto();
 
-            _hubNotifierMock
+            var documentServicesMock = _mocker.GetMock<IDocumentServices>();
+            var anonymizationApiMock = _mocker.GetMock<IAnonymizationApi>();
+            var httpClientFactoryMock = _mocker.GetMock<IHttpClientFactory>();
+
+            documentServicesMock
+                .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
+                .ReturnsAsync(documentDto);
+
+            anonymizationApiMock
+                .Setup(x => x.InitiateAnonymization(It.IsAny<string>(), It.IsAny<AnonymizationRequestDto>()))
+                .ReturnsAsync(responseDto);
+
+            var mockHandler = new Mock<HttpMessageHandler>();
+            mockHandler.Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage(System.Net.HttpStatusCode.OK));
+
+            using (var httpClient = new HttpClient(mockHandler.Object) { BaseAddress = new Uri("http://localhost") })
+            {
+                httpClientFactoryMock
+                    .Setup(x => x.CreateClient(It.IsAny<string>()))
+                    .Returns(httpClient);
+
+                // Act
+                await _sut.ProcessAnonymization(requestDto, headersDto);
+            }
+
+            // Assert
+            documentServicesMock.Verify(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant), Times.Once);
+            anonymizationApiMock.Verify(x => x.InitiateAnonymization(It.IsAny<string>(), It.IsAny<AnonymizationRequestDto>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "ProcessAnonymization - Should throw InvalidOperationException when document bytes are null")]
+        [Trait("ProcessAnonymization", "DocumentNotFound")]
+        public async Task ProcessAnonymization_WithNullDocumentBytes_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var documentDto = AnonymizationFixture.FindValidFindDocumentDto();
+            documentDto.BytesDocument = null;
+
+            var requestDto = AnonymizationFixture.FindValidProcessAnonymizationRequestDto();
+            var headersDto = AnonymizationFixture.FindValidHeadersDto();
+
+            var documentServicesMock = _mocker.GetMock<IDocumentServices>();
+            documentServicesMock
+                .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
+                .ReturnsAsync(documentDto);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => _sut.ProcessAnonymization(requestDto, headersDto));
+            Assert.Equal(DocumentNotFoundMessage, exception.Message);
+        }
+
+        [Fact(DisplayName = "ProcessAnonymization - Should throw InvalidOperationException when document bytes are empty")]
+        [Trait("ProcessAnonymization", "DocumentNotFound")]
+        public async Task ProcessAnonymization_WithEmptyDocumentBytes_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var documentDto = AnonymizationFixture.FindValidFindDocumentDto();
+            documentDto.BytesDocument = Array.Empty<byte>();
+
+            var requestDto = AnonymizationFixture.FindValidProcessAnonymizationRequestDto();
+            var headersDto = AnonymizationFixture.FindValidHeadersDto();
+
+            var documentServicesMock = _mocker.GetMock<IDocumentServices>();
+            documentServicesMock
+                .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
+                .ReturnsAsync(documentDto);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => _sut.ProcessAnonymization(requestDto, headersDto));
+            Assert.Equal(DocumentNotFoundMessage, exception.Message);
+        }
+
+        [Fact(DisplayName = "ProcessAnonymization - Should throw InvalidOperationException when API token is missing")]
+        [Trait("ProcessAnonymization", "Configuration")]
+        public async Task ProcessAnonymization_WithMissingApiToken_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var configBuilder = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "RefitExternalSettings:AnonymizationApiToken", string.Empty },
+                    { "RefitExternalSettings:AnonymizationUserId", ValidUserId },
+                    { "AnonymizationWebhook", ValidWebhook }
+                })
+                .Build();
+
+            var mocker = new AutoMocker();
+            mocker.Use<IConfiguration>(configBuilder);
+            var sut = mocker.CreateInstance<AnonymizationServices>();
+
+            var documentDto = AnonymizationFixture.FindValidFindDocumentDto();
+            var requestDto = AnonymizationFixture.FindValidProcessAnonymizationRequestDto();
+            var headersDto = AnonymizationFixture.FindValidHeadersDto();
+
+            var documentServicesMock = mocker.GetMock<IDocumentServices>();
+            documentServicesMock
+                .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
+                .ReturnsAsync(documentDto);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => sut.ProcessAnonymization(requestDto, headersDto));
+            Assert.Equal(TokenNotConfiguredMessage, exception.Message);
+        }
+
+        [Fact(DisplayName = "ProcessAnonymization - Should throw InvalidOperationException when User ID is missing")]
+        [Trait("ProcessAnonymization", "Configuration")]
+        public async Task ProcessAnonymization_WithMissingUserId_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var configBuilder = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "RefitExternalSettings:AnonymizationApiToken", ValidToken },
+                    { "AnonymizationWebhook", ValidWebhook }
+                })
+                .Build();
+
+            var mocker = new AutoMocker();
+            mocker.Use<IConfiguration>(configBuilder);
+            var sut = mocker.CreateInstance<AnonymizationServices>();
+
+            var documentDto = AnonymizationFixture.FindValidFindDocumentDto();
+            var requestDto = AnonymizationFixture.FindValidProcessAnonymizationRequestDto();
+            var headersDto = AnonymizationFixture.FindValidHeadersDto();
+
+            var documentServicesMock = mocker.GetMock<IDocumentServices>();
+            documentServicesMock
+                .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
+                .ReturnsAsync(documentDto);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => sut.ProcessAnonymization(requestDto, headersDto));
+            Assert.Equal(UserIdNotConfiguredMessage, exception.Message);
+        }
+
+        [Fact(DisplayName = "ProcessAnonymization - Should throw InvalidOperationException when webhook is missing")]
+        [Trait("ProcessAnonymization", "Configuration")]
+        public async Task ProcessAnonymization_WithMissingWebhook_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var configBuilder = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "RefitExternalSettings:AnonymizationApiToken", ValidToken },
+                    { "RefitExternalSettings:AnonymizationUserId", ValidUserId }
+                })
+                .Build();
+
+            var mocker = new AutoMocker();
+            mocker.Use<IConfiguration>(configBuilder);
+            var sut = mocker.CreateInstance<AnonymizationServices>();
+
+            var documentDto = AnonymizationFixture.FindValidFindDocumentDto();
+            var requestDto = AnonymizationFixture.FindValidProcessAnonymizationRequestDto();
+            var headersDto = AnonymizationFixture.FindValidHeadersDto();
+
+            var documentServicesMock = mocker.GetMock<IDocumentServices>();
+            documentServicesMock
+                .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
+                .ReturnsAsync(documentDto);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => sut.ProcessAnonymization(requestDto, headersDto));
+            Assert.Equal(WebhookNotProvidedMessage, exception.Message);
+        }
+
+        [Fact(DisplayName = "ProcessAnonymization - Should throw InvalidOperationException when download URL is missing in response")]
+        [Trait("ProcessAnonymization", "Response")]
+        public async Task ProcessAnonymization_WithMissingDownloadUrl_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var documentDto = AnonymizationFixture.FindValidFindDocumentDto();
+            var requestDto = AnonymizationFixture.FindValidProcessAnonymizationRequestDto();
+            var headersDto = AnonymizationFixture.FindValidHeadersDto();
+            var responseDto = AnonymizationFixture.FindAnonymizationResponseDtoWithoutDownloadUrl();
+
+            var documentServicesMock = _mocker.GetMock<IDocumentServices>();
+            var anonymizationApiMock = _mocker.GetMock<IAnonymizationApi>();
+
+            documentServicesMock
+                .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
+                .ReturnsAsync(documentDto);
+
+            anonymizationApiMock
+                .Setup(x => x.InitiateAnonymization(It.IsAny<string>(), It.IsAny<AnonymizationRequestDto>()))
+                .ReturnsAsync(responseDto);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => _sut.ProcessAnonymization(requestDto, headersDto));
+            Assert.Equal(DownloadUrlNotProvidedMessage, exception.Message);
+        }
+
+        #endregion
+
+        #region ProcessAnonymizationResult Tests
+
+        [Fact(DisplayName = "ProcessAnonymizationResult - Should successfully notify hub with valid result")]
+        [Trait("ProcessAnonymizationResult", "Success")]
+        public async Task ProcessAnonymizationResult_WithValidResult_NotifiesHubSuccessfully()
+        {
+            // Arrange
+            var result = AnonymizationFixture.FindValidAnonymizationResultDto();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+
+            hubNotifierMock
                 .Setup(x => x.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl))
                 .Returns(Task.CompletedTask);
 
@@ -66,206 +279,33 @@ namespace WoopiAiHub.UnitTests.Services
             await _sut.ProcessAnonymizationResult(result);
 
             // Assert
-            _hubNotifierMock.Verify(
+            hubNotifierMock.Verify(
                 x => x.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl),
                 Times.Once);
         }
 
-        /// <summary>
-        /// Tests that ProcessAnonymizationResult throws NullReferenceException when result parameter is null.
-        /// This ensures proper null handling is in place.
-        /// </summary>
         [Fact(DisplayName = "ProcessAnonymizationResult - Should throw NullReferenceException when result is null")]
         [Trait("ProcessAnonymizationResult", "NullHandling")]
-        public async Task ProcessAnonymizationResult_NullResult_ThrowsNullReferenceException()
+        public async Task ProcessAnonymizationResult_WithNullResult_ThrowsNullReferenceException()
         {
             // Arrange
             AnonymizationResultDto? result = null;
 
             // Act & Assert
-            await Assert.ThrowsAsync<NullReferenceException>(() => _sut.ProcessAnonymizationResult(result!));
+            await Assert.ThrowsAsync<NullReferenceException>(
+                () => _sut.ProcessAnonymizationResult(result!));
         }
 
-        /// <summary>
-        /// Tests ProcessAnonymizationResult with various edge case string values for email and document URL.
-        /// Verifies that the method correctly passes through all parameter values including edge cases.
-        /// </summary>
-        /// <param name="email">The email address to test.</param>
-        /// <param name="documentUrl">The document URL to test.</param>
-        /// <param name="documentId">The document ID to test.</param>
-        [Theory(DisplayName = "ProcessAnonymizationResult - Should handle edge case values for properties")]
-        [Trait("ProcessAnonymizationResult", "EdgeCases")]
-        [InlineData("", "", 0)]
-        [InlineData("user@example.com", "http://example.com", 1)]
-        [InlineData("test@test.com", "https://example.com/very/long/path/to/document.pdf", int.MaxValue)]
-        [InlineData("special+chars@example.com", "http://example.com?param=value&other=123", -1)]
-        [InlineData("user with spaces@example.com", "http://example.com/path with spaces", int.MinValue)]
-        public async Task ProcessAnonymizationResult_EdgeCaseValues_PassesValuesToHubNotifier(
-            string email,
-            string documentUrl,
-            int documentId)
-        {
-            // Arrange
-            var result = new AnonymizationResultDto
-            {
-                DocumentUrl = documentUrl,
-                WoopiAiDocumentId = documentId,
-                WoopiAiEmail = email
-            };
-
-            _hubNotifierMock
-                .Setup(x => x.AnonymizationReadyAsync(email, documentId, documentUrl))
-                .Returns(Task.CompletedTask);
-
-            // Act
-            await _sut.ProcessAnonymizationResult(result);
-
-            // Assert
-            _hubNotifierMock.Verify(
-                x => x.AnonymizationReadyAsync(email, documentId, documentUrl),
-                Times.Once);
-        }
-
-        /// <summary>
-        /// Tests that ProcessAnonymizationResult correctly handles very long string values.
-        /// Verifies that the method does not truncate or modify the input values.
-        /// </summary>
-        [Fact(DisplayName = "ProcessAnonymizationResult - Should handle very long strings")]
-        [Trait("ProcessAnonymizationResult", "EdgeCases")]
-        public async Task ProcessAnonymizationResult_VeryLongStrings_PassesValuesToHubNotifier()
-        {
-            // Arrange
-            var longEmail = new string('a', 500) + "@example.com";
-            var longUrl = "http://example.com/" + new string('x', 2000);
-            var result = new AnonymizationResultDto
-            {
-                DocumentUrl = longUrl,
-                WoopiAiDocumentId = _faker.Random.Int(1, 1000),
-                WoopiAiEmail = longEmail
-            };
-
-            _hubNotifierMock
-                .Setup(x => x.AnonymizationReadyAsync(longEmail, result.WoopiAiDocumentId, longUrl))
-                .Returns(Task.CompletedTask);
-
-            // Act
-            await _sut.ProcessAnonymizationResult(result);
-
-            // Assert
-            _hubNotifierMock.Verify(
-                x => x.AnonymizationReadyAsync(longEmail, result.WoopiAiDocumentId, longUrl),
-                Times.Once);
-        }
-
-        /// <summary>
-        /// Tests that ProcessAnonymizationResult correctly handles special and control characters in strings.
-        /// Verifies proper handling of Unicode characters, newlines, tabs, and other special characters.
-        /// </summary>
-        [Fact(DisplayName = "ProcessAnonymizationResult - Should handle special characters in strings")]
-        [Trait("ProcessAnonymizationResult", "EdgeCases")]
-        public async Task ProcessAnonymizationResult_SpecialCharacters_PassesValuesToHubNotifier()
-        {
-            // Arrange
-            var specialEmail = "user+tag@example.com";
-            var specialUrl = "http://example.com/path?query=value&special=<>&\"'";
-            var result = new AnonymizationResultDto
-            {
-                DocumentUrl = specialUrl,
-                WoopiAiDocumentId = 123,
-                WoopiAiEmail = specialEmail
-            };
-
-            _hubNotifierMock
-                .Setup(x => x.AnonymizationReadyAsync(specialEmail, 123, specialUrl))
-                .Returns(Task.CompletedTask);
-
-            // Act
-            await _sut.ProcessAnonymizationResult(result);
-
-            // Assert
-            _hubNotifierMock.Verify(
-                x => x.AnonymizationReadyAsync(specialEmail, 123, specialUrl),
-                Times.Once);
-        }
-
-        /// <summary>
-        /// Tests that ProcessAnonymizationResult properly handles whitespace-only strings.
-        /// Verifies that whitespace values are passed through without modification.
-        /// </summary>
-        [Fact(DisplayName = "ProcessAnonymizationResult - Should handle whitespace-only strings")]
-        [Trait("ProcessAnonymizationResult", "EdgeCases")]
-        public async Task ProcessAnonymizationResult_WhitespaceStrings_PassesValuesToHubNotifier()
-        {
-            // Arrange
-            var whitespaceEmail = "   ";
-            var whitespaceUrl = "\t\n";
-            var result = new AnonymizationResultDto
-            {
-                DocumentUrl = whitespaceUrl,
-                WoopiAiDocumentId = 42,
-                WoopiAiEmail = whitespaceEmail
-            };
-
-            _hubNotifierMock
-                .Setup(x => x.AnonymizationReadyAsync(whitespaceEmail, 42, whitespaceUrl))
-                .Returns(Task.CompletedTask);
-
-            // Act
-            await _sut.ProcessAnonymizationResult(result);
-
-            // Assert
-            _hubNotifierMock.Verify(
-                x => x.AnonymizationReadyAsync(whitespaceEmail, 42, whitespaceUrl),
-                Times.Once);
-        }
-
-        /// <summary>
-        /// Tests that ProcessAnonymizationResult does not call hub notifier more than once.
-        /// Verifies idempotent behavior and ensures no duplicate notifications.
-        /// </summary>
-        [Fact(DisplayName = "ProcessAnonymizationResult - Should call hub notifier exactly once")]
-        [Trait("ProcessAnonymizationResult", "Verification")]
-        public async Task ProcessAnonymizationResult_ValidResult_CallsHubNotifierExactlyOnce()
-        {
-            // Arrange
-            var result = new AnonymizationResultDto
-            {
-                DocumentUrl = _faker.Internet.Url(),
-                WoopiAiDocumentId = _faker.Random.Int(1, 10000),
-                WoopiAiEmail = _faker.Internet.Email()
-            };
-
-            _hubNotifierMock
-                .Setup(x => x.AnonymizationReadyAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
-                .Returns(Task.CompletedTask);
-
-            // Act
-            await _sut.ProcessAnonymizationResult(result);
-
-            // Assert
-            _hubNotifierMock.Verify(
-                x => x.AnonymizationReadyAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()),
-                Times.Once);
-        }
-
-        /// <summary>
-        /// Tests that ProcessAnonymizationResult correctly propagates exceptions from hub notifier.
-        /// Verifies that exceptions thrown by the dependency are not swallowed.
-        /// </summary>
         [Fact(DisplayName = "ProcessAnonymizationResult - Should propagate exception from hub notifier")]
         [Trait("ProcessAnonymizationResult", "ExceptionHandling")]
-        public async Task ProcessAnonymizationResult_HubNotifierThrows_PropagatesException()
+        public async Task ProcessAnonymizationResult_WhenHubNotifierThrows_PropagatesException()
         {
             // Arrange
-            var result = new AnonymizationResultDto
-            {
-                DocumentUrl = _faker.Internet.Url(),
-                WoopiAiDocumentId = _faker.Random.Int(1, 10000),
-                WoopiAiEmail = _faker.Internet.Email()
-            };
-
+            var result = AnonymizationFixture.FindValidAnonymizationResultDto();
             var expectedException = new InvalidOperationException("Hub notification failed");
-            _hubNotifierMock
+
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+            hubNotifierMock
                 .Setup(x => x.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl))
                 .ThrowsAsync(expectedException);
 
@@ -274,5 +314,7 @@ namespace WoopiAiHub.UnitTests.Services
                 () => _sut.ProcessAnonymizationResult(result));
             Assert.Equal("Hub notification failed", exception.Message);
         }
+
+        #endregion
     }
 }
