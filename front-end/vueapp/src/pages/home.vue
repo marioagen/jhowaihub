@@ -144,7 +144,6 @@
     </main>
     <WhatsAppComponent v-if="showWhatsAppLink" />
 </template>
-
 <script>
     import store from "@/store";
     import DashboardServices from "@/services/dashboard/DashboardServices";
@@ -184,7 +183,6 @@
         },
     };
 </script>
-
 <style scoped>
     .home-container {
         max-width: 1200px;
@@ -226,7 +224,7 @@
     }
 
     .plan-thanks {
-        color:  var(--color-body-content) !important;
+        color: var(--color-body-content) !important;
     }
 
     .quick-start-section {
@@ -236,7 +234,7 @@
     .quick-start-title {
         font-size: 1.5rem;
         font-weight: bold;
-        color: var( --color-card-title) !important;
+        color: var(--color-card-title) !important;
     }
 
     .quick-start-card {

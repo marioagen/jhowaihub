@@ -362,6 +362,7 @@
     import api from "@/services/api";
     import Dropzone from "dropzone";
     import uploadFileWorker from "@/workers";
+    import GlobalEventService from "@/services/globalEventService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
 
@@ -583,6 +584,10 @@
 
                 Promise.all(promises)
                     .then((fileDataChunksArray) => {
+                        GlobalEventService.emit("uploadStarted", {
+                            success: true,
+                            namesFiles: filesNames,
+                        });
                         fileDataChunksArray.forEach((chunks) => {
                             chunks.forEach((chunkData) => {
                                 uploadFileWorker.send({
@@ -590,7 +595,6 @@
                                 });
                             });
                         });
-                        localStorage.setItem("showToast", "true");
                     })
                     .finally(() => {
                         this.$router.push({
@@ -601,7 +605,7 @@
             backToListDocuments() {
                 this.$router.push({
                     name: "Documents",
-                    query: { page: "1", showToast: "true" },
+                    query: { page: "1" },
                 });
             },
             readFileAsArrayBuffer(file) {
@@ -729,9 +733,9 @@
         border-color: #dc3545 !important;
     }
 
-        .team-selector-container.is-valid {
-            border-color: var(--color-bg-primary-badge) !important;
-        }
+    .team-selector-container.is-valid {
+        border-color: var(--color-bg-primary-badge) !important;
+    }
 
     .selected-count {
         background-color: var(--color-bg-primary-badge) !important;
@@ -944,5 +948,4 @@
         background-color: var(--color-card-content) !important;
         border-color: var(--color-border-form-control) !important;
     }
-
 </style>

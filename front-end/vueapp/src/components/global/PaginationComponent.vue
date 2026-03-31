@@ -1,10 +1,13 @@
 <template>
     <nav v-if="totalPages > 1">
         <ul class="pagination justify-content-center">
-            <li class="page-item" :class="{ disabled: current === 1 }">
-                <a 
-                    class="page-link" 
-                    href="#" 
+            <li
+                class="page-item"
+                :class="{ disabled: current === 1 }"
+            >
+                <a
+                    class="page-link"
+                    href="#"
                     @click.prevent="changePage(current - 1)"
                 >
                     <LucideIcon icon="ChevronsLeft" />
@@ -12,16 +15,28 @@
                 </a>
             </li>
 
-            <li v-for="page in pages" :key="page" :class="{ active: page === current }" class="page-item">
-                <a class="page-link" href="#" @click.prevent="changePage(page)">
+            <li
+                v-for="page in pages"
+                :key="page"
+                :class="{ active: page === current }"
+                class="page-item"
+            >
+                <a
+                    class="page-link"
+                    href="#"
+                    @click.prevent="changePage(page)"
+                >
                     {{ page }}
                 </a>
             </li>
 
-            <li class="page-item" :class="{ disabled: current === totalPages }">
-                <a 
-                    class="page-link" 
-                    href="#" 
+            <li
+                class="page-item"
+                :class="{ disabled: current === totalPages }"
+            >
+                <a
+                    class="page-link"
+                    href="#"
                     @click.prevent="changePage(current + 1)"
                 >
                     {{ $t("pagination.next") }}
@@ -31,7 +46,6 @@
         </ul>
     </nav>
 </template>
-
 <script>
     export default {
         name: "PaginationComponent",
@@ -99,7 +113,6 @@
         },
     };
 </script>
-
 <style scoped>
     .pagination {
         --bs-pagination-padding-x: 0.6rem;
@@ -130,7 +143,7 @@
         border: 1px solid transparent;
         font-weight: 500;
         transition: background-color 0.2s ease;
-        background-color: var(--color-card-content) !important
+        background-color: var(--color-card-content) !important;
     }
 
     .page-item.active .page-link {

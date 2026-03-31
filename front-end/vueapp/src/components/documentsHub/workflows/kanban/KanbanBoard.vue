@@ -239,17 +239,17 @@
         background-color: var(--color-bg-kanban-primary) !important;
     }
 
-        .first-steps > span > span {
-            background-color: var(--color-bg-kanban-primary-accent) !important;
-        }
+    .first-steps > span > span {
+        background-color: var(--color-bg-kanban-primary-accent) !important;
+    }
 
     .last-step {
         background-color: var(--color-bg-kanban-success) !important;
     }
 
-        .last-step > span > span {
-            background-color: var(--color-bg-kanban-success-accent) !important;
-        }
+    .last-step > span > span {
+        background-color: var(--color-bg-kanban-success-accent) !important;
+    }
 
     .bg-primary {
         background-color: var(--color-bg-kanban-primary) !important;
@@ -304,6 +304,4 @@
         color: unset;
         background-color: var(--color-hover-transfer) !important;
     }
-
-
 </style>

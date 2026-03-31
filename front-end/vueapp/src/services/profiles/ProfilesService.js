@@ -20,14 +20,15 @@ export default {
             });
     },
     getProfilesList() {
-        return api.get("/Profile")
+        return api
+            .get("/Profile")
             .then(({ data }) => {
                 return data;
             })
             .catch((error) => {
                 return {
                     error: error,
-                }
+                };
             });
     },
     deleteProfileById(ids) {
@@ -86,14 +87,15 @@ export default {
             });
     },
     getProfileById(profileId) {
-        return api.get(`/Profile/${profileId}`)
+        return api
+            .get(`/Profile/${profileId}`)
             .then(({ data }) => {
                 return data;
             })
             .catch((error) => {
                 return {
                     error: error,
-                }
+                };
             });
     },
 };
