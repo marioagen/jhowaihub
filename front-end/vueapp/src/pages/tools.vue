@@ -9,32 +9,33 @@
                             <small class="text-muted">{{ $t("tools.subtitle") }}</small>
                         </p>
                     </div>
-                    <button class="btn btn-primary btn-sm" @click="openModalTool">
-                        <LucideIcon icon="Plus" :size="17" />
+                    <button
+                        class="btn btn-primary btn-sm"
+                        @click="openModalTool"
+                    >
+                        <LucideIcon
+                            icon="Plus"
+                            :size="17"
+                        />
                         {{ $t("tools.createBtn") }}
                     </button>
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <ToolFilters 
-                            @filter="filterData"
-                        />
+                        <ToolFilters @filter="filterData" />
                     </div>
                 </div>
             </div>
-            <ToolsTable 
-                ref="ToolsTable"
-            />
+            <ToolsTable ref="ToolsTable" />
             <ToolsModal
-                :isEdit="false" 
-                :type="modalTool" 
+                :isEdit="false"
+                :type="modalTool"
                 @reload="reloadData"
-                ref="ToolsModal" 
+                ref="ToolsModal"
             />
         </div>
     </main>
 </template>
-
 <script>
     import ToolFilters from "@/components/tools/ToolFilters.vue";
     import ToolsTable from "@/components/tools/ToolsTable.vue";
@@ -59,6 +60,7 @@
                 this.$refs.ToolsModal.open();
             },
             reloadData() {
+                this.$refs.ToolsTable.table.pagination.currentPage = 1;
                 this.$refs.ToolsTable.getTools();
             },
             filterData(filters) {
@@ -68,7 +70,6 @@
         },
     };
 </script>
-
 <style scoped>
     .team-list {
         display: flex;
