@@ -1,10 +1,13 @@
 <template>
-    <nav v-if="totalPages > 1">
+    <nav v-if="totalPages && totalPages > 1">
         <ul class="pagination justify-content-center">
-            <li class="page-item" :class="{ disabled: current === 1 }">
-                <a 
-                    class="page-link" 
-                    href="#" 
+            <li
+                class="page-item"
+                :class="{ disabled: current === 1 }"
+            >
+                <a
+                    class="page-link"
+                    href="#"
                     @click.prevent="changePage(current - 1)"
                 >
                     <LucideIcon icon="ChevronsLeft" />
@@ -12,16 +15,38 @@
                 </a>
             </li>
 
-            <li v-for="page in pages" :key="page" :class="{ active: page === current }" class="page-item">
-                <a class="page-link" href="#" @click.prevent="changePage(page)">
-                    {{ page }}
+            <li
+                v-for="item in pages"
+                :key="item.key"
+                class="page-item"
+                :class="{
+                    active: item.type === 'page' && item.value === current,
+                    disabled: item.type === 'ellipsis',
+                }"
+            >
+                <a
+                    v-if="item.type === 'page'"
+                    class="page-link"
+                    href="#"
+                    @click.prevent="changePage(item.value)"
+                >
+                    {{ item.value }}
                 </a>
+                <span
+                    v-else
+                    class="page-link"
+                >
+                    ...
+                </span>
             </li>
 
-            <li class="page-item" :class="{ disabled: current === totalPages }">
-                <a 
-                    class="page-link" 
-                    href="#" 
+            <li
+                class="page-item"
+                :class="{ disabled: current === totalPages }"
+            >
+                <a
+                    class="page-link"
+                    href="#"
                     @click.prevent="changePage(current + 1)"
                 >
                     {{ $t("pagination.next") }}
@@ -31,7 +56,6 @@
         </ul>
     </nav>
 </template>
-
 <script>
     export default {
         name: "PaginationComponent",
@@ -66,24 +90,68 @@
         },
         computed: {
             pages() {
-                const range = [];
-                let start = this.current - 1;
-                let end = this.current + 1;
+                const total = this.totalPages;
 
-                if (start < 1) {
-                    start = 1;
-                    end = Math.min(3, this.totalPages);
+                if (!total || total <= 1) {
+                    return [
+                        {
+                            type: "page",
+                            value: 1,
+                            key: "page-1",
+                        },
+                    ];
                 }
 
-                if (end > this.totalPages) {
-                    end = this.totalPages;
-                    start = Math.max(1, end - 2);
+                const firstPage = 1;
+                const lastPage = total;
+                const current = this.current;
+                const items = [];
+
+                items.push({
+                    type: "page",
+                    value: firstPage,
+                    key: "page-first",
+                });
+
+                let start = Math.max(current - 1, firstPage + 1);
+                let end = Math.min(current + 1, lastPage - 1);
+
+                if (start <= end) {
+                    if (start > firstPage + 1) {
+                        items.push({
+                            type: "ellipsis",
+                            key: "ellipsis-left",
+                        });
+                    }
+
+                    for (let i = start; i <= end; i++) {
+                        items.push({
+                            type: "page",
+                            value: i,
+                            key: `page-${i}`,
+                        });
+                    }
+
+                    if (end < lastPage - 1) {
+                        items.push({
+                            type: "ellipsis",
+                            key: "ellipsis-right",
+                        });
+                    }
+                } else if (lastPage - firstPage > 1) {
+                    items.push({
+                        type: "ellipsis",
+                        key: "ellipsis-middle",
+                    });
                 }
 
-                for (let i = start; i <= end; i++) {
-                    range.push(i);
-                }
-                return range;
+                items.push({
+                    type: "page",
+                    value: lastPage,
+                    key: "page-last",
+                });
+
+                return items;
             },
         },
         methods: {
@@ -99,7 +167,6 @@
         },
     };
 </script>
-
 <style scoped>
     .pagination {
         --bs-pagination-padding-x: 0.6rem;
@@ -130,7 +197,7 @@
         border: 1px solid transparent;
         font-weight: 500;
         transition: background-color 0.2s ease;
-        background-color: var(--color-card-content) !important
+        background-color: var(--color-card-content) !important;
     }
 
     .page-item.active .page-link {
