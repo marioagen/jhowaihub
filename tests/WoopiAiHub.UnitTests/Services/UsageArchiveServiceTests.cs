@@ -372,7 +372,7 @@ namespace WoopiAiHub.UnitTests.Services
             var mockMarketPlaceApi = _mocker.GetMock<IMarketPlaceApi>();
 
             mockMarketPlaceApi
-                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
+                .Setup(x => x.ProcessSubcriptionPeriodConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
                 .ReturnsAsync(sendStatus);
             mockSubscriptionPeriodService.Setup(x => x.FindLastUnprocessedAsync())
                 .ReturnsAsync(subscriptionPeriod);
@@ -515,7 +515,7 @@ namespace WoopiAiHub.UnitTests.Services
                     false));
 
             _marketPlaceApiMock
-                .SetupSequence(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
+                .SetupSequence(x => x.ProcessSubcriptionPeriodConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
                 .ThrowsAsync(new HttpRequestException("Network error"))
                 .ThrowsAsync(new HttpRequestException("Network error"))
                 .ReturnsAsync(true);
@@ -540,7 +540,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             _marketPlaceApiMock
-                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Exactly(3));
+                .Verify(x => x.ProcessSubcriptionPeriodConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Exactly(3));
         }
 
         [Fact(DisplayName = "Resilience pipeline circuit breaker should open after failures")]
@@ -584,7 +584,7 @@ namespace WoopiAiHub.UnitTests.Services
                     false));
 
             _marketPlaceApiMock
-                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
+                .Setup(x => x.ProcessSubcriptionPeriodConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
                 .ThrowsAsync(new HttpRequestException("Service unavailable"));
 
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -713,7 +713,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             _marketPlaceApiMock
-                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Never);
+                .Verify(x => x.ProcessSubcriptionPeriodConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Never);
         }
 
         [Fact(DisplayName = "SendMonthlyUsageIfExpiredAsync should send usage when subscription expired")]
@@ -759,7 +759,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(Task.CompletedTask);
 
             _marketPlaceApiMock
-                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
+                .Setup(x => x.ProcessSubcriptionPeriodConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
                 .ReturnsAsync(true);
 
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -782,7 +782,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             _marketPlaceApiMock
-                .Verify(x => x.ProcessConsumption(
+                .Verify(x => x.ProcessSubcriptionPeriodConsumption(
                     "test-key",
                     It.Is<TenantConsumptionDto>(dto => dto.Tenant == "Tenant1" && dto.UsageCount == 150)),
                     Times.Once);
@@ -831,7 +831,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(Task.CompletedTask);
 
             _marketPlaceApiMock
-                .Setup(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
+                .Setup(x => x.ProcessSubcriptionPeriodConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()))
                 .ReturnsAsync(true);
 
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -854,7 +854,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             _marketPlaceApiMock
-                .Verify(x => x.ProcessConsumption(
+                .Verify(x => x.ProcessSubcriptionPeriodConsumption(
                     "test-key",
                     It.Is<TenantConsumptionDto>(dto => dto.Tenant == "Tenant1" && dto.UsageCount == 0)),
                     Times.Once);
@@ -914,7 +914,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             _marketPlaceApiMock
-                .Verify(x => x.ProcessConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Never);
+                .Verify(x => x.ProcessSubcriptionPeriodConsumption(It.IsAny<string>(), It.IsAny<TenantConsumptionDto>()), Times.Never);
         }
     }
 }

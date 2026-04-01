@@ -1,8 +1,9 @@
-﻿using WoopiAiHub.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Interfaces.Services;
 
 namespace WoopiAiHub.Api.Controllers
 {
@@ -51,7 +52,7 @@ namespace WoopiAiHub.Api.Controllers
         /// <returns></returns>
         [HttpGet("FindPlanByName/{tenant}")]
         [SwaggerOperation("EndPoint that finds a tenants by an email")]
-        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(DashboardTenantInfo), StatusCodes.Status200OK)]
         public async Task<IActionResult> FindPlanByName(string tenant)
         {
             var result = await _tenantServices.FindPlanByName(tenant);
