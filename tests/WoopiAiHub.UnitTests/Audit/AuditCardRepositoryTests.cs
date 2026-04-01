@@ -25,7 +25,7 @@ namespace WoopiAiHub.UnitTests.Audit
             var repository = new AuditCardRepository(context);
 
             var occurredAt = DateTime.UtcNow;
-            var auditCard = new AuditCard(0, occurredAt, cardId: 1, workflowId: 1, AuditCardActionType.Assign, Guid.NewGuid());
+            var auditCard = new AuditCard(0, occurredAt, cardId: 1, workflowId: 1, documentId: 1, AuditCardActionType.Assign, Guid.NewGuid());
 
             await repository.AddAsync(auditCard, CancellationToken.None);
 
@@ -42,7 +42,7 @@ namespace WoopiAiHub.UnitTests.Audit
 
             var userId = Guid.NewGuid();
             var occurredAt = DateTime.UtcNow;
-            var auditCard = new AuditCard(0, occurredAt, cardId: 1, workflowId: 1, AuditCardActionType.Advancement, userId);
+            var auditCard = new AuditCard(0, occurredAt, cardId: 1, workflowId: 1, documentId: 1, AuditCardActionType.Advancement, userId);
 
             await repository.AddAsync(auditCard, CancellationToken.None);
 
@@ -50,6 +50,7 @@ namespace WoopiAiHub.UnitTests.Audit
             Assert.NotNull(saved);
             Assert.Equal(1, saved.CardId);
             Assert.Equal(1, saved.WorkflowId);
+            Assert.Equal(1, saved.DocumentId);
             Assert.Equal(AuditCardActionType.Advancement, saved.ActionType);
             Assert.Equal(userId, saved.UserId);
         }
@@ -65,8 +66,8 @@ namespace WoopiAiHub.UnitTests.Audit
             var guid2 = Guid.NewGuid();
             var auditCards = new[]
             {
-                new AuditCard(0, DateTime.UtcNow, 1, 1, AuditCardActionType.Assign, guid1),
-                new AuditCard(0, DateTime.UtcNow, 2, 1, AuditCardActionType.Unassign, guid2)
+                new AuditCard(0, DateTime.UtcNow, 1, 1, 1, AuditCardActionType.Assign, guid1),
+                new AuditCard(0, DateTime.UtcNow, 2, 1, 1, AuditCardActionType.Unassign, guid2)
             };
 
             await repository.AddRangeAsync(auditCards, CancellationToken.None);

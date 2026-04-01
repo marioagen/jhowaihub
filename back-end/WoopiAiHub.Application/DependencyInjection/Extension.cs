@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Application.Messaging;
+using WoopiAiHub.Application.ApiTemplateRequestCheck;
 using WoopiAiHub.Application.Messaging.DeadLetter;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Services.Audit;
@@ -9,7 +10,9 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Services.Audit;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using WoopiAiHub.Domain.Interfaces.ApiTemplateRequestCheck;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Repository;
 
@@ -19,6 +22,10 @@ namespace WoopiAiHub.Application.DependencyInjection
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            services.AddHttpClient(ApiTemplateRequestCheckHttpGateway.NamedClient);
+            services.AddScoped<IApiTemplateRequestCheckHttpGateway, ApiTemplateRequestCheckHttpGateway>();
+            services.AddScoped<IApiTemplateRequestCheckHandler, ApiTemplateRequestCheckHandler>();
+
             services.AddSingleton<IServiceCollection, ServiceCollection>();
             services.AddScoped<IDocumentServices, DocumentServices>();
             services.AddScoped<IDocumentUploadServices, DocumentUploadServices>();
@@ -51,6 +58,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IValidateWorkflow, ValidateWorkflow>();
             services.AddScoped<ICardServices, CardServices>();
             services.AddScoped<IAuditCardService, AuditCardService>();
+            services.AddScoped<IAuditorServices, AuditorServices>();
             services.AddScoped<IToolServices, ToolServices>();
             services.AddScoped<IToolTypeServices, ToolTypeServices>();
             services.AddScoped<IToolDataServices, ToolDataServices>();

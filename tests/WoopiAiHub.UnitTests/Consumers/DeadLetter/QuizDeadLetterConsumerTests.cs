@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,7 @@ using WoopiAiHub.Application.Messaging.DeadLetter;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Interfaces.Messaging;
+using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.UnitTests.Fixture;
@@ -48,9 +50,20 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
                 AnswerQueue = "answer-queue"
             });
 
+            var tenantCacheServicesMock = new Mock<ITenantCacheServices>();
+            tenantCacheServicesMock.Setup(s => s.FindTenantAsync(It.IsAny<string>()))
+                .ReturnsAsync(new TenantInfoDto { DatabaseName = "TestDB" });
+
+            var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            httpContextAccessorMock.Setup(h => h.HttpContext).Returns(new DefaultHttpContext());
+
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(ICardServices)))
                 .Returns(_cardServicesMock.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IHttpContextAccessor)))
+                .Returns(httpContextAccessorMock.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(ITenantCacheServices)))
+                .Returns(tenantCacheServicesMock.Object);
 
             var serviceScopeMock = new Mock<IServiceScope>();
             serviceScopeMock.Setup(s => s.ServiceProvider).Returns(serviceProviderMock.Object);

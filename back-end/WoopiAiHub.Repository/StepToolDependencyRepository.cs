@@ -55,5 +55,22 @@ namespace WoopiAiHub.Repository
                 .Where(d => d.StepToolId == stepToolId)
                 .ToListAsync();
         }
+
+        /// <summary>
+        /// Returns true if any dependency record exists where the specified step tool IDs appear
+        /// as source (StepToolId) or target (DependsOnStepToolId).
+        /// Used to validate whether a tool flow can be removed from a step.
+        /// </summary>
+        /// <param name="stepToolIds">A collection of StepTool IDs to check.</param>
+        /// <returns>True if at least one dependency exists; otherwise, false.</returns>
+        public async Task<bool> HasDependenciesByStepToolIdsAsync(IEnumerable<int> stepToolIds)
+        {
+            if (!stepToolIds?.Any() ?? true)
+                return false;
+
+            return await _context.Set<StepToolDependency>()
+                .AnyAsync(d => stepToolIds!.Contains(d.StepToolId)
+                            || stepToolIds!.Contains(d.DependsOnStepToolId));
+        }
     }
 }

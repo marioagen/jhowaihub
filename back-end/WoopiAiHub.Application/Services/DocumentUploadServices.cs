@@ -120,7 +120,7 @@ namespace WoopiAiHub.Application.Services
 
                 var workflowsList = workflows!.ToList();
                 var cardsList = documentForDataBase.Cards.ToList();
-                var cardWorkflows = cardsList.Zip(workflowsList, (card, workflow) => (card.Id, workflow.Id)).ToList();
+                var cardWorkflows = cardsList.Zip(workflowsList, (card, workflow) => (card.Id, workflow.Id, card.DocumentId)).ToList();
                 if (cardWorkflows.Count > 0)
                 {
                     await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Upload);

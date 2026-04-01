@@ -188,5 +188,42 @@ namespace WoopiAiHub.Repository
                     .ThenInclude(e => e!.Document)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
+
+        /// <summary>
+        /// Deletes all step tool executions associated with the specified step tool IDs.
+        /// </summary>
+        /// <param name="stepToolIds">A collection of step tool IDs whose executions are to be deleted.</param>
+        /// <returns><see langword="true"/> if one or more records were deleted; otherwise, <see langword="false"/>.</returns>
+        public async Task<bool> DeleteByStepToolIdsAsync(IEnumerable<int> stepToolIds)
+        {
+            if (!stepToolIds?.Any() ?? true)
+                return false;
+
+            var executions = await _context.StepToolExecutions
+                .Where(e => stepToolIds!.Contains(e.StepToolId))
+                .ToListAsync();
+
+            if (executions.Count == 0)
+                return false;
+
+            _context.StepToolExecutions.RemoveRange(executions);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// Returns true if any execution record exists for the specified step tool IDs.
+        /// Used to validate whether a tool flow can be removed from a step.
+        /// </summary>
+        /// <param name="stepToolIds">A collection of StepTool IDs to check.</param>
+        /// <returns>True if at least one execution exists; otherwise, false.</returns>
+        public async Task<bool> HasExecutionsByStepToolIdsAsync(IEnumerable<int> stepToolIds)
+        {
+            if (!stepToolIds?.Any() ?? true)
+                return false;
+
+            return await _context.StepToolExecutions
+                .AnyAsync(e => stepToolIds!.Contains(e.StepToolId));
+        }
     }
 }

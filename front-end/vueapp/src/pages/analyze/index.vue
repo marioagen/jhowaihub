@@ -11,13 +11,26 @@
                         >
                             <LucideIcon icon="ArrowLeft" />
                         </button>
-                        <div>
-                            <h4 class="fw-bold mb-0">
-                                {{ $t("analyze.title") }}
-                            </h4>
-                            <div class="text-muted small">
-                                {{ $t("analyze.subtitle") }}
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <div>
+                                <h4 class="fw-bold mb-0">
+                                    {{ $t("analyze.title") }}
+                                </h4>
+                                <div class="text-muted small">
+                                    {{ $t("analyze.subtitle") }}
+                                </div>
                             </div>
+                            <button
+                                class="btn btn-outline-secondary btn-sm"
+                                type="button"
+                                @click="openDocumentHistoryModal"
+                            >
+                                <LucideIcon
+                                    icon="History"
+                                    :size="15"
+                                />
+                                {{ $t("analyze.checkHistoric") }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -205,15 +218,17 @@
         v-if="isRejected"
         ref="modalViewRejection"
     />
+    <DocumentHistoryModal ref="documentHistoryModal" />
 </template>
 <script>
     import { hasPermission } from "@/utils/permissions";
-    import DocumentRejectionModal from "@/components/analyze/DocumentRejectionModal.vue";
-    import DocumentViewRejectionModal from "@/components/analyze/DocumentViewRejectionModal.vue";
+    import DocumentRejectionModal from "@/components/analyze/modals/DocumentRejectionModal.vue";
+    import DocumentViewRejectionModal from "@/components/analyze/modals/DocumentViewRejectionModal.vue";
     import ResizeColumnsComponent from "@/components/global/ResizeColumnsComponent.vue";
     import PermissionGroups from "@/constants/PermissionGroups";
     import PermissionNames from "@/constants/PermissionNames";
     import DocumentViewer from "@/components/analyze/DocumentViewer.vue";
+    import DocumentHistoryModal from "@/components/analyze/modals/DocumentHistoryModal.vue";
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import CardsServices from "@/services/cards/CardsServices";
@@ -254,6 +269,7 @@
         },
         components: {
             DocumentViewer,
+            DocumentHistoryModal,
             AnalysisStepsSection,
             NormalizeIndex,
             ResizeColumnsComponent,
@@ -362,6 +378,9 @@
                     },
                     query: { page: this.backPage },
                 });
+            },
+            openDocumentHistoryModal() {
+                this.$refs.documentHistoryModal?.open(this.documentId, this.workflowId);
             },
         },
         async created() {

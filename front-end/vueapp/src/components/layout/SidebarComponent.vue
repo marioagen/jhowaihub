@@ -5,27 +5,7 @@
             :class="isCollapsed ? 'justify-content-center' : 'justify-content-start'"
             style="height: 60px; padding: 0 10px"
         >
-            <router-link
-                class="d-flex align-items-center text-decoration-none"
-                :class="isCollapsed ? 'justify-content-center' : 'w-100'"
-                :to="{ name: 'Home' }"
-            >
-                <img
-                    v-if="isCollapsed"
-                    :src="logoSmallSrc"
-                    :title="$t('common.home')"
-                    width="35"
-                    height="35"
-                />
-                <img
-                    v-else
-                    :src="logoSrc"
-                    :title="$t('common.home')"
-                    height="35"
-                    alt="WOOPI AI"
-                    style="margin-left: 0px"
-                />
-            </router-link>
+            <LogoComponent :collapsed="isCollapsed" />
         </div>
         <div class="horizontal-separator-fixed"></div>
         <div
@@ -48,47 +28,23 @@
             </button>
         </div>
         <div class="sidebar-horizontal-separator"></div>
-        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-            <li
-                v-for="(item, index) in filteredMenuItems"
-                :key="item.labelKey"
-                class="mb-1 sidebar-menu-item-enter"
-                :class="{
-                    'is-active': isRouteActive(item),
-                }"
-                :style="{ '--item-index': index }"
-            >
-                <router-link
-                    :class="[
-                        'd-flex align-items-center custom-menu-item link-dark rounded',
-                        isRouteActive(item) ? 'active' : '',
-                        isCollapsed ? 'justify-content-center' : '',
-                    ]"
-                    :to="item.to"
-                >
-                    <LucideIcon
-                        strokeWidth="2"
-                        :icon="item.icon.name"
-                        :color="item.icon.color"
-                    />
-                    <span
-                        v-show="!isCollapsed"
-                        class="ms-2"
-                    >
-                        {{ $t(item.labelKey) }}
-                    </span>
-                </router-link>
-            </li>
-        </ul>
+        <RouteListComponent
+            :items="visibleMenuItems"
+            :isCollapsed="isCollapsed"
+        />
     </aside>
 </template>
 <script>
     import { hasPermission } from "@/utils/permissions";
-    import logoDark from "@/assets/img/woopiai-logo-dark.png";
-    import logoLight from "@/assets/img/woopiai-logo-light.png";
-    import logoSmall from "@/assets/img/woopiai-hub-small-logo.png";
+    import LogoComponent from "@/components/layout/LogoComponent.vue";
+    import RouteListComponent from "@/components/layout/RouteListComponent.vue";
+
     export default {
         name: "SideBar",
+        components: {
+            LogoComponent,
+            RouteListComponent,
+        },
         props: {
             menuActive: {
                 required: true,
@@ -102,7 +58,6 @@
         },
         data() {
             return {
-                title: "SideBarComponent",
                 menuItems: [
                     {
                         activeKey: "Home",
@@ -112,16 +67,6 @@
                             color: "#0d6efd",
                         },
                         labelKey: "common.home",
-                    },
-                    {
-                        permission: "Dashboard",
-                        activeKey: "Dashboard",
-                        to: "/dashboard",
-                        icon: {
-                            name: "ChartColumn",
-                            color: "#40b04d",
-                        },
-                        labelKey: "pages.dashboard",
                     },
                     {
                         permission: "Management",
@@ -134,24 +79,14 @@
                         labelKey: "pages.management",
                     },
                     {
-                        permission: "Prompts",
-                        activeKey: "Prompts",
-                        to: "/prompts",
+                        permission: "Workflow",
+                        activeKey: "Workflow",
+                        to: "/workflow",
                         icon: {
-                            name: "Braces",
-                            color: "#8e51ff",
+                            name: "Kanban",
+                            color: "#615FFF",
                         },
-                        labelKey: "pages.prompts",
-                    },
-                    {
-                        permission: "Quizzes",
-                        activeKey: "ManagementQuizzes",
-                        to: "/management-quizzes",
-                        icon: {
-                            name: "ClipboardList",
-                            color: "#a259ff",
-                        },
-                        labelKey: "pages.quizzes",
+                        labelKey: "pages.workflows",
                     },
                     {
                         permission: "WorkflowManagement",
@@ -159,66 +94,111 @@
                         to: "/workflow/management",
                         icon: {
                             name: "Workflow",
-                            color: "#00bba7",
+                            color: "#06b6d4",
                         },
                         labelKey: "pages.workflowManagement",
                     },
                     {
-                        permission: "Workflow",
-                        activeKey: "Workflow",
-                        to: "/workflow",
-                        icon: {
-                            name: "Workflow",
-                            color: "#615FFF",
-                        },
-                        labelKey: "pages.workflows",
-                    },
-                    {
                         permission: "Tools",
                         activeKey: "Tools",
-                        to: "/tools",
                         icon: {
                             name: "PocketKnife",
-                            color: "#f59e0b",
+                            color: "#8b5cf6",
                         },
                         labelKey: "pages.tools",
+                        group: [
+                            {
+                                permission: "Prompts",
+                                activeKey: "Prompts",
+                                to: "/prompts",
+                                icon: {
+                                    name: "Bot",
+                                    color: "#8b5cf6",
+                                },
+                                labelKey: "pages.prompts",
+                            },
+                            {
+                                permission: "Tools",
+                                activeKey: "Connectors",
+                                to: "/tools",
+                                icon: {
+                                    name: "Plug",
+                                    color: "#8b5cf6",
+                                },
+                                labelKey: "pages.connectors",
+                            },
+                            {
+                                permission: "Templates",
+                                activeKey: "Templates",
+                                to: "/templates",
+                                icon: {
+                                    name: "Zap",
+                                    color: "#8b5cf6",
+                                },
+                                labelKey: "pages.templates",
+                            },
+                            {
+                                permission: "Quizzes",
+                                activeKey: "ManagementQuizzes",
+                                to: "/management-quizzes",
+                                icon: {
+                                    name: "ClipboardList",
+                                    color: "#8b5cf6",
+                                },
+                                labelKey: "pages.quizzes",
+                            },
+                        ],
                     },
                     {
-                        permission: "Templates",
-                        activeKey: "Templates",
-                        to: "/templates",
+                        permission: "Dashboard",
+                        activeKey: "Dashboard",
+                        to: "/dashboard",
                         icon: {
-                            name: "Zap",
-                            color: "#2f80ed",
+                            name: "ChartColumn",
+                            color: "#40b04d",
                         },
-                        labelKey: "pages.templates",
+                        labelKey: "pages.dashboard",
+                    },
+                    {
+                        permission: "Auditor",
+                        activeKey: "Auditor",
+                        to: "/auditor",
+                        icon: {
+                            name: "ShieldUser",
+                            color: "#f56565",
+                        },
+                        labelKey: "pages.auditor",
                     },
                 ],
             };
         },
         computed: {
-            isDarkMode() {
-                const theme = this.$store.state.theme || localStorage.getItem("theme") || "css-theme-light";
-                return theme === "css-theme-dark";
+            visibleMenuItems() {
+                return this.filterByPermission(this.menuItems)
+                    .map((item) => {
+                        if (!item.group?.length) {
+                            return item;
+                        }
+                        const visibleGroup = this.filterByPermission(item.group);
+                        if (!visibleGroup.length) {
+                            return null;
+                        }
+                        return { ...item, visibleGroup };
+                    })
+                    .filter(Boolean);
             },
-            logoSrc() {
-                return this.isDarkMode ? logoLight : logoDark;
-            },
-            logoSmallSrc() {
-                return logoSmall;
-            },
-            filteredMenuItems() {
-                return this.menuItems.filter((item) => {
+        },
+        methods: {
+            filterByPermission(list) {
+                if (!list?.length) {
+                    return [];
+                }
+                return list.filter((item) => {
                     if (!item.permission) {
                         return true;
                     }
                     return hasPermission(item.permission, "View");
                 });
-            },
-        },
-        methods: {
-            isRouteActive(item) {
-                return this.$route.path === item.to;
             },
         },
     };
@@ -231,48 +211,10 @@
         cursor: pointer;
     }
 
-    .btn-toggle-nav a:hover {
-        color: var( --color-body-content) !important;
-        background-color: var(--color-sidebar-li-collapsed-hover) !important;
-        cursor: pointer;
-    }
-
-    .btn-toggle-nav a.active {
-        background-color: var(--color-bg-sidebar-li-selected) !important;
-        color: #007bff !important;
-        font-weight: 600;
-        cursor: default;
-    }
-
-    .btn-toggle-nav a {
-        margin-left: 0 !important;
-        color: #676879;
-        transition:
-            background-color 0.2s ease,
-            color 0.2s ease;
-    }
-
-    .btn-toggle-nav {
-        padding: 10px !important;
-    }
-
     .toggle-button:focus {
         outline: none;
         box-shadow: none;
     }
-
-    .custom-menu-item {
-        border-radius: 10px;
-        transition: background-color 0.2s ease;
-        height: 44px;
-        /* ou 48px se quiser mais */
-        line-height: 1.5;
-    }
-
-        .custom-menu-item:hover {
-            background-color: var(--color-sidebar-li-collapsed-hover) !important;
-            text-decoration: none;
-        }
 
     .collapse-toggle-container {
         display: flex;
@@ -303,78 +245,6 @@
         padding: 0;
     }
 
-    .offcanvas-start {
-        width: initial;
-    }
-
-    .offcanvas-header {
-        padding: 0;
-    }
-
-    .offcanvas-header .btn-close {
-        padding: 0.5rem 1rem;
-    }
-
-    .btn-toggle {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.25rem 0.5rem;
-        font-weight: 600;
-        color: rgba(0, 0, 0, 0.65);
-        background-color: transparent;
-        border: 0;
-    }
-
-    .btn-toggle:hover,
-    .btn-toggle:focus {
-        color: rgba(0, 0, 0, 0.85);
-        background-color: #d2f4ea;
-    }
-
-    .btn-toggle:active {
-        background-color: transparent;
-    }
-
-    .btn-toggle::before {
-        width: 1.25em;
-        line-height: 0;
-        content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%280,0,0,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
-        transition: transform 0.35s ease;
-        transform-origin: 0.5em 50%;
-    }
-
-    .btn-toggle[aria-expanded="true"] {
-        color: rgba(0, 0, 0, 0.85);
-    }
-
-    .btn-toggle[aria-expanded="true"]::before {
-        transform: rotate(90deg);
-    }
-
-    .btn-toggle-nav a {
-        display: inline-flex;
-        padding: 0.1875rem 0.5rem;
-        margin-top: 0.125rem;
-        margin-left: 1.25rem;
-        text-decoration: none;
-    }
-
-        .btn-toggle-nav a:hover,
-        .btn-toggle-nav a:focus {
-            background-color: var(--color-sidebar-li-collapsed-hover);
-        }
-
-    .btn-toggle-nav > li > .active {
-        background-color: #d2f4ea;
-    }
-
-    @media (max-height: 500px) {
-        .scroll-area {
-            display: list-item;
-            overflow-y: auto;
-        }
-    }
-
     .text-black {
         color: black;
     }
@@ -389,33 +259,6 @@
 
     .title {
         color: black;
-    }
-
-    .custom-menu-item.active {
-        background-color: var(--bs-primary-bg-subtle);
-        font-weight: 600;
-    }
-
-    .custom-menu-item:not(.active) {
-        opacity: 0.8;
-    }
-
-    .sidebar-menu-item-enter {
-        opacity: 0;
-        transform: translateX(-12px);
-        animation: sidebar-item-enter 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        animation-delay: calc(var(--item-index) * 45ms);
-    }
-
-    @keyframes sidebar-item-enter {
-        from {
-            opacity: 0;
-            transform: translateX(-12px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
     }
 
     .collapse-toggle-container:hover {

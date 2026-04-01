@@ -24,6 +24,7 @@
                             icon="ChevronLeft"
                             :size="17"
                             :class="currentIAIndex === 0 ? 'disabled' : ''"
+                            class="text-muted"
                         />
                     </button>
                     <span class="mb-0">
@@ -37,6 +38,7 @@
                             icon="ChevronRight"
                             :size="17"
                             :class="currentIAIndex === IAList.length - 1 ? 'disabled' : ''"
+                            class="text-muted"
                         />
                     </button>
                 </div>

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using Moq;
 using Moq.AutoMock;
 using Newtonsoft.Json;
@@ -143,6 +143,44 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentException>(() => _handler.BuildPayload(automationServiceDto, It.IsAny<StepToolParameter>(), [output]));
+        }
+
+        [Fact(DisplayName = "BuildPayload should use previous Prompt output when dependency is another Prompt")]
+        [Trait("BuildPayload", "Success")]
+        public async Task BuildPayload_WhenDependencyIsPrompt_UsesPromptOutputAsContext()
+        {
+            // Arrange: dependency is another Prompt (plain text output)
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var tenantInfo = new TenantInfoDto
+            {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = "key"
+            };
+            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var previousPromptOutput = "Resumo do documento: este é o texto gerado pelo prompt anterior.";
+            var output = AutomationFixture.FindValidStepToolOutput(previousPromptOutput);
+            output.StepTool = new StepTool(1, DateTime.UtcNow, 1, 1, 1, 1, 1)
+            {
+                Tool = new Tool(1, DateTime.UtcNow, "Prompt", true, 1, 1, 1, false, null, null)
+                {
+                    ToolType = new ToolType(1, DateTime.UtcNow, "Prompt", string.Empty, true)
+                }
+            };
+
+            _mockTenantCacheServices
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
+                .ReturnsAsync(tenantInfo);
+            _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
+                .Returns(PromptFixture.FindValidPromptDto());
+
+            // Act
+            var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
+
+            // Assert
+            Assert.Equal(_messageQueues.ChatCompletionQueue, result.Queue);
+            var message = result.Message as ChatCompletionQueryDto;
+            Assert.NotNull(message);
+            Assert.Contains(previousPromptOutput, message!.ChatCompletion!.Messages![0].Content);
         }
     }
 }

@@ -33,6 +33,57 @@
                 </Field>
             </div>
         </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <label
+                    for="workflowPhase1Description"
+                    class="form-label mb-1"
+                >
+                    {{ $t("common.description") }}
+                    <span class="text-muted small fw-normal ms-1">
+                        {{ $t("workflow.descriptionOptional") }}
+                    </span>
+                </label>
+                <Field
+                    name="description"
+                    rules="max:500"
+                    v-slot="{ field, errorMessage }"
+                >
+                    <textarea
+                        id="workflowPhase1Description"
+                        v-bind="field"
+                        :value="workflowData.description"
+                        class="form-control"
+                        rows="3"
+                        maxlength="500"
+                        name="description"
+                        aria-describedby="workflowPhase1DescriptionCounter"
+                        :class="{
+                            'is-invalid': errorMessage,
+                        }"
+                        @input="handleDescriptionInput($event, field)"
+                    />
+                    <div
+                        id="workflowPhase1DescriptionCounter"
+                        class="form-text text-end"
+                    >
+                        {{ (workflowData.description || "").length }}/500
+                    </div>
+                    <p
+                        v-if="(workflowData.description || '').length === 500 && !errorMessage"
+                        class="form-text text-end small text-muted mb-0"
+                    >
+                        {{ $t("validation.max", { limit: 500 }) }}
+                    </p>
+                    <span
+                        class="validation-message text-danger"
+                        v-if="errorMessage"
+                    >
+                        {{ errorMessage }}
+                    </span>
+                </Field>
+            </div>
+        </div>
         <div class="row mt-4">
             <div class="col-12">
                 <label>
@@ -125,6 +176,7 @@
             return {
                 workflowData: {
                     name: this.initialData?.name || "",
+                    description: this.initialData?.description || "",
                 },
                 selectedTeams:
                     this.initialData?.teams || [],
@@ -168,8 +220,13 @@
             getData() {
                 return {
                     name: this.workflowData.name,
+                    description: this.workflowData.description || "",
                     teams: this.selectedTeams,
                 };
+            },
+            handleDescriptionInput(event, field) {
+                this.workflowData.description = event?.target?.value ?? "";
+                field.onInput(event);
             },
         },
         created() {
@@ -181,10 +238,13 @@
                     if (newVal) {
                         this.workflowData.name =
                             newVal.name ?? "";
+                        this.workflowData.description =
+                            newVal.description ?? "";
                         this.selectedTeams =
                             newVal.teams ?? [];
                     } else {
                         this.workflowData.name = "";
+                        this.workflowData.description = "";
                         this.selectedTeams = [];
                     }
                 },
