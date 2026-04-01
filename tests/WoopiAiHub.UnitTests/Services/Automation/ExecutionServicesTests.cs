@@ -56,13 +56,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .Setup(x => x.FindByIdWithTools(stepTool1.StepId))
                 .ReturnsAsync(step);
 
+            var allExecutions = new List<StepToolExecution> { execution1, execution2 };
             _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool1.Id, card.Id))
-                .ReturnsAsync(execution1);
-
-            _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool2.Id, card.Id))
-                .ReturnsAsync(execution2);
+                .Setup(x => x.FindByStepToolIdsAndCardIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<IEnumerable<int>>()))
+                .ReturnsAsync(allExecutions);
 
             _mocker.GetMock<IWorkflowRepository>()
                 .Setup(x => x.FindToolByStepToolId(stepTool2.Id))
@@ -121,13 +118,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .Setup(x => x.FindByIdWithTools(stepTool.StepId))
                 .ReturnsAsync(step);
 
+            var allExecutions = new List<StepToolExecution> { execution1, execution2 };
             _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool.Id, batchCard1.Id))
-                .ReturnsAsync(execution1);
-
-            _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool.Id, batchCard2.Id))
-                .ReturnsAsync(execution2);
+                .Setup(x => x.FindByStepToolIdsAndCardIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<IEnumerable<int>>()))
+                .ReturnsAsync(allExecutions);
 
             _mocker.GetMock<IHubNotifier>()
                 .Setup(x => x.CardProgessAsync(email, It.IsAny<int>(), It.IsAny<double>(), stepTool.StepId, It.IsAny<string>(), It.IsAny<bool>(), null))
@@ -280,21 +274,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .Setup(x => x.FindByIdWithTools(stepTool1.StepId))
                 .ReturnsAsync(step);
 
+            var allExecutions = new List<StepToolExecution> { execution1, execution2, execution3, execution4 };
             _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool1.Id, card.Id))
-                .ReturnsAsync(execution1);
-
-            _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool2.Id, card.Id))
-                .ReturnsAsync(execution2);
-
-            _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool3.Id, card.Id))
-                .ReturnsAsync(execution3);
-
-            _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool4.Id, card.Id))
-                .ReturnsAsync(execution4);
+                .Setup(x => x.FindByStepToolIdsAndCardIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<IEnumerable<int>>()))
+                .ReturnsAsync(allExecutions);
 
             _mocker.GetMock<IWorkflowRepository>()
                 .Setup(x => x.FindToolByStepToolId(stepTool3.Id))
@@ -346,13 +329,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .Setup(x => x.FindByIdWithTools(stepTool1.StepId))
                 .ReturnsAsync(step);
 
+            var allExecutions = new List<StepToolExecution> { execution1, execution2 };
             _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool1.Id, card.Id))
-                .ReturnsAsync(execution1);
-
-            _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool2.Id, card.Id))
-                .ReturnsAsync(execution2);
+                .Setup(x => x.FindByStepToolIdsAndCardIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<IEnumerable<int>>()))
+                .ReturnsAsync(allExecutions);
 
             _mocker.GetMock<IWorkflowRepository>()
                 .Setup(x => x.FindToolByStepToolId(stepTool2.Id))
@@ -399,9 +379,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .Setup(x => x.FindByIdWithTools(stepTool.StepId))
                 .ReturnsAsync(step);
 
+            var allExecutions = new List<StepToolExecution> { exec };
             _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool.Id, card.Id))
-                .ReturnsAsync(exec);
+                .Setup(x => x.FindByStepToolIdsAndCardIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<IEnumerable<int>>()))
+                .ReturnsAsync(allExecutions);
 
             _mocker.GetMock<IWorkflowRepository>()
                 .Setup(x => x.FindToolByStepToolId(stepTool.Id))
@@ -449,13 +430,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .Setup(x => x.FindByIdWithTools(stepTool1.StepId))
                 .ReturnsAsync(step);
 
+            var allExecutions = new List<StepToolExecution> { execution1 };
             _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool1.Id, card.Id))
-                .ReturnsAsync(execution1);
-
-            _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool2.Id, card.Id))
-                .ReturnsAsync((StepToolExecution?)null);
+                .Setup(x => x.FindByStepToolIdsAndCardIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<IEnumerable<int>>()))
+                .ReturnsAsync(allExecutions);
 
             _mocker.GetMock<IHubNotifier>()
                 .Setup(x => x.CardProgessAsync(email, card.Id, It.IsAny<double>(), stepTool1.StepId, It.IsAny<string>(), It.IsAny<bool>(), null))
@@ -501,13 +479,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
                 .Setup(x => x.FindByIdWithTools(stepTool1.StepId))
                 .ReturnsAsync(step);
 
+            var allExecutions = new List<StepToolExecution> { execution1, execution2 };
             _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool1.Id, card.Id))
-                .ReturnsAsync(execution1);
-
-            _mocker.GetMock<IStepToolExecutionRepository>()
-                .Setup(x => x.FindByStepToolIdAndCardIdAsync(stepTool2.Id, card.Id))
-                .ReturnsAsync(execution2);
+                .Setup(x => x.FindByStepToolIdsAndCardIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<IEnumerable<int>>()))
+                .ReturnsAsync(allExecutions);
 
             _mocker.GetMock<IHubNotifier>()
                 .Setup(x => x.CardProgessAsync(email, card.Id, 100.0, stepTool1.StepId, string.Empty, It.IsAny<bool>(), null))
