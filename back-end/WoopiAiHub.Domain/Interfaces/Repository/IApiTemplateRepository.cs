@@ -13,5 +13,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> DeleteById(int id);
         Task<bool> CreateAsync(ApiTemplate template);
         Task<bool> UpdateAsync(ApiTemplate template);
+        Task<bool> RemovePromptLinked(int templateId);
     }
 }

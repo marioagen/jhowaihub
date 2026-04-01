@@ -131,6 +131,11 @@ namespace WoopiAiHub.Application.Services
 
             existingTemplate.Validate();
 
+            var templateUpdated =  await _templateRepository.UpdateAsync(existingTemplate);
+            if(!existingTemplate.EnableAccessFromMcp && templateUpdated) {
+                await _templateRepository.RemovePromptLinked(existingTemplate.Id);
+            }
+
             return await _templateRepository.UpdateAsync(existingTemplate);
         }
     }

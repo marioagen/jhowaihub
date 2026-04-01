@@ -323,7 +323,9 @@ export default {
                     name: response.name + " " + this.$t("prompts.cloneSuffix"),
                     description: response.description,
                     text: response.text,
+                    enableAccessToMcp: response.enableAccessToMcp
                 };
+                this.apiTemplatesSelected = response.promptApiTemplates.map(x => x.apiTemplateId);
                 this.setValues(this.form);
             });
         },

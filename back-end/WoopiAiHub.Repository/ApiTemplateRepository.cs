@@ -129,6 +129,13 @@ namespace WoopiAiHub.Repository
                 EnableAccessFromMcp = w.EnableAccessFromMcp
             });
         }
+        
+        public async Task<bool> RemovePromptLinked(int templateId)
+        {
+            var promptLinked = _context.PromptApiTemplates.Where(p => p.ApiTemplateId == templateId).ToListAsync();
+            _context.RemoveRange(promptLinked);
+            return await _context.SaveChangesAsync() > 0;
+        }
 
         /// <summary>
         /// Filters and orders the collection of API templates based on the specified input, HTTP method, and ordering
