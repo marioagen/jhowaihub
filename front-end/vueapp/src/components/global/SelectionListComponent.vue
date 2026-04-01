@@ -24,6 +24,42 @@
                         </button>
                     </div>
                 </div>
+                <div
+                    v-if="selected.length > 0"
+                    class="mb-3 px-1"
+                >
+                    <label class="form-label small fw-semibold mb-2 d-block">
+                        {{ $t("common.selectionList") }}
+                    </label>
+                    <div class="d-flex flex-wrap gap-2">
+                        <div
+                            v-for="itemId in selecteOrderedByName"
+                            :key="itemId"
+                            class="badge rounded-pill d-flex align-items-center px-2 py-1 selected-item-chip"
+                        >
+                            <LucideIcon
+                                :icon="resolvedChipIcon"
+                                class="me-1 chip-leading-icon"
+                                :size="14"
+                            />
+                            <span class="me-1">
+                                {{ getItemName(itemId) }}
+                            </span>
+                            <button
+                                type="button"
+                                class="chip-remove-btn"
+                                :title="$t('common.removeSelectionChip')"
+                                :aria-label="$t('common.removeSelectionChip')"
+                                @click.stop="removeItemFromSelection(itemId)"
+                            >
+                                <LucideIcon
+                                    icon="X"
+                                    :size="14"
+                                />
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div class="mb-3">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-search text-secondary"></i></span>
@@ -74,42 +110,6 @@
                                     <div class="fw-semibold">{{ item.name }}</div>
                                 </label>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div
-                    v-if="selected.length > 0"
-                    class="mt-3 px-1"
-                >
-                    <label class="form-label small fw-semibold mb-2 d-block">
-                        {{ $t("common.selectionList") }}
-                    </label>
-                    <div class="d-flex flex-wrap gap-2">
-                        <div
-                            v-for="itemId in selected"
-                            :key="itemId"
-                            class="badge rounded-pill d-flex align-items-center px-2 py-1 selected-item-chip"
-                        >
-                            <LucideIcon
-                                :icon="resolvedChipIcon"
-                                class="me-1 chip-leading-icon"
-                                :size="14"
-                            />
-                            <span class="me-1">
-                                {{ getItemName(itemId) }}
-                            </span>
-                            <button
-                                type="button"
-                                class="chip-remove-btn"
-                                :title="$t('common.removeSelectionChip')"
-                                :aria-label="$t('common.removeSelectionChip')"
-                                @click.stop="removeItemFromSelection(itemId)"
-                            >
-                                <LucideIcon
-                                    icon="X"
-                                    :size="14"
-                                />
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -187,6 +187,13 @@
                     return this.chipIcon;
                 }
                 return this.type === "user-list" ? "User" : "UsersRound";
+            },
+            selecteOrderedByName() {
+                return [...this.selected].sort((a, b) => {
+                    const nameA = this.getItemName(a).toLowerCase();
+                    const nameB = this.getItemName(b).toLowerCase();
+                    return nameA.localeCompare(nameB);
+                });
             },
         },
         methods: {

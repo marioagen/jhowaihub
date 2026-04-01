@@ -377,6 +377,38 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.GetMock<IToolRepository>().Verify(repo => repo.FindAllPaged(), Times.Once);
         }
 
+        [Fact(DisplayName = "FindAllPaged should filter by ToolTypeId when provided")]
+        [Trait("FindAllPaged", "Success")]
+        public void FindAllPaged_FilterByToolTypeId_ReturnsOnlyMatchingToolType()
+        {
+            // Arrange
+            var tools = new List<ToolDto>
+            {
+                new ToolDto { Id = 1, Name = "Tool A", ToolTypeId = 1 },
+                new ToolDto { Id = 2, Name = "Tool B", ToolTypeId = 2 }
+            }.AsQueryable();
+
+            var pagedDataDto = new ToolPagedDataDto
+            {
+                Page = 1,
+                PageSize = 0,
+                IsAscending = true,
+                ToolTypeId = 1,
+                Search = null
+            };
+
+            _toolRepositoryMock.Setup(repo => repo.FindAllPaged()).Returns(tools);
+
+            // Act
+            var result = _toolServices.FindAllPaged(pagedDataDto);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result!.Items!);
+            Assert.All(result.Items!, t => Assert.Equal(pagedDataDto.ToolTypeId.Value, t.ToolTypeId));
+            _mocker.GetMock<IToolRepository>().Verify(repo => repo.FindAllPaged(), Times.Once);
+        }
+
         [Fact(DisplayName = "ValidateConnector should throw exception when connector Url is empty")]
         [Trait("ValidateConnector", "Fail")]
         public async Task ValidateConnector_ShouldThrowException_WhenConnectorUrlIsEmpty()
@@ -445,6 +477,59 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.False(result);
+        }
+
+        [Fact(DisplayName = "UpdateAsync should encrypt new ApiKey when tool type is n8n")]
+        [Trait("UpdateAsync", "Success")]
+        public async Task UpdateAsync_N8nWithNewApiKey_EncryptsAndUpdates()
+        {
+            // Arrange
+            var toolUpdateDto = ToolFixture.FindValidToolUpdateDto();
+            var tool = ToolFixture.FindValidToolModel();
+            var toolType = ToolTypeFixture.FindValidToolTypeWithName("n8n");
+
+            _toolTypeRepositoryMock.Setup(tt => tt.FindModelByIdAsync(It.IsAny<int>()))
+                                   .ReturnsAsync(toolType);
+            _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(toolUpdateDto.Id))
+                               .ReturnsAsync(tool);
+            _toolRepositoryMock.Setup(repo => repo.UpdateAsync(It.IsAny<Tool>()))
+                               .ReturnsAsync(true);
+
+            // Act
+            var result = await _toolServices.UpdateAsync(toolUpdateDto);
+
+            // Assert
+            Assert.True(result);
+            _encryptionServiceMock.Verify(e => e.Encrypt(toolUpdateDto.ConnectorApiKey!), Times.Once);
+            _toolRepositoryMock.Verify(repo => repo.UpdateAsync(It.Is<Tool>(t => t.ConnectorApiKey == $"encrypted_{toolUpdateDto.ConnectorApiKey}")), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdateAsync should keep existing ApiKey when new ApiKey is not provided for n8n tool")]
+        [Trait("UpdateAsync", "Success")]
+        public async Task UpdateAsync_N8nWithoutNewApiKey_KeepsExistingApiKey()
+        {
+            // Arrange
+            var toolUpdateDto = ToolFixture.FindValidToolUpdateDto();
+            toolUpdateDto.ConnectorApiKey = null;
+
+            var tool = ToolFixture.FindValidToolModel();
+            var existingApiKey = tool.ConnectorApiKey;
+            var toolType = ToolTypeFixture.FindValidToolTypeWithName("n8n");
+
+            _toolTypeRepositoryMock.Setup(tt => tt.FindModelByIdAsync(It.IsAny<int>()))
+                                   .ReturnsAsync(toolType);
+            _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(toolUpdateDto.Id))
+                               .ReturnsAsync(tool);
+            _toolRepositoryMock.Setup(repo => repo.UpdateAsync(It.IsAny<Tool>()))
+                               .ReturnsAsync(true);
+
+            // Act
+            var result = await _toolServices.UpdateAsync(toolUpdateDto);
+
+            // Assert
+            Assert.True(result);
+            _encryptionServiceMock.Verify(e => e.Encrypt(It.IsAny<string>()), Times.Never);
+            _toolRepositoryMock.Verify(repo => repo.UpdateAsync(It.Is<Tool>(t => t.ConnectorApiKey == existingApiKey)), Times.Once);
         }
     }
 }

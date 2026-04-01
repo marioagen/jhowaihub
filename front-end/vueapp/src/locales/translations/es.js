@@ -1055,7 +1055,7 @@ const spanish = {
             noRunTitle: "No se ejecutaron pruebas",
             noRunHint: 'Complete las variables y haga clic en "Simular solicitud".',
             simulateError: "No se pudo ejecutar la simulación. Inténtelo de nuevo.",
-            simulateSuccess: "Simulación completada correctamente (HTTP 2xx).",
+            simulateSuccess: "Simulación completada correctamente (HTTP 200).",
             responseHttpStatus: "Estado HTTP del destino",
             variableValues: "Valores de prueba para las variables",
         },

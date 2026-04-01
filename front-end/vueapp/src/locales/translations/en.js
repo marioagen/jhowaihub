@@ -1029,7 +1029,7 @@ const english = {
             noRunTitle: "No tests executed",
             noRunHint: 'Fill in the variables and click on "Simulate Request".',
             simulateError: "Could not run the simulated request. Try again.",
-            simulateSuccess: "Simulated request completed successfully (HTTP 2xx).",
+            simulateSuccess: "Simulated request completed successfully (HTTP 200).",
             responseHttpStatus: "Downstream HTTP status",
             variableValues: "Test values for variables",
         },

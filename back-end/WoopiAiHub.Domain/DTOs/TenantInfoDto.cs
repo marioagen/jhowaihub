@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Domain.DTOs
+namespace WoopiAiHub.Domain.DTOs
 {
     public class TenantInfoDto
     {
@@ -21,5 +21,6 @@
         public string AiGatewayKey { get; set; } = string.Empty;
         public string BillingId { get; set; } = string.Empty;
         public Guid? AiGatewayApplicationId { get; set; }
+        public int WtcIncluded { get; set; }
     }
 }

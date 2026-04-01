@@ -21,6 +21,10 @@
                         <span class="plan-title">
                             {{ plan }}
                         </span>
+                        <br />
+                        <span class="plan-subtitle">
+                            {{ wtcIncluded }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -182,6 +186,7 @@
                 totalWTC: 0,
                 usageUnits: [],
                 plan: "",
+                wtcIncluded: 0,
             };
         },
         methods: {
@@ -214,7 +219,8 @@
             },
             getPlan() {
                 DashboardServices.GetPlan(store.state.userProfile.tenant).then((response) => {
-                    this.plan = response.toUpperCase();
+                    this.wtcIncluded = response.wtcIncluded;
+                    this.plan = response.plan.toUpperCase();
                 });
             },
             setTotalWTC(total) {
@@ -251,6 +257,12 @@
         color: var(--color-title-subscription-card) !important;
         font-weight: 600;
         font-size: 1rem;
+    }
+
+    .plan-subtitle {
+        color: var(--color-text-subscription-card) !important;
+        font-weight: 400;
+        font-size: 0.8rem;
     }
 
     .plan-right {
