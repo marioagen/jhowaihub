@@ -833,10 +833,6 @@ const spanish = {
         workflows: "Flujos de Trabajo de Documentos",
         auditor: "Auditoría",
     },
-    pagination: {
-        next: "Siguiente",
-        previous: "Anterior",
-    },
     permissions: {
         descriptions: {
             auditor: "Ver Auditoría",

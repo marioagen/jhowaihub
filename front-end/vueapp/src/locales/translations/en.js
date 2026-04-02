@@ -823,10 +823,6 @@ const english = {
         workflows: "Document Workflows",
         auditor: "Audit",
     },
-    pagination: {
-        next: "Next",
-        previous: "Previous",
-    },
     permissions: {
         descriptions: {
             auditor: "View Audit",
