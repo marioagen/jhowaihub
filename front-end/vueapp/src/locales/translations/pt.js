@@ -832,10 +832,6 @@ const portuguese = {
         workflows: "Esteiras de Processamento",
         auditor: "Auditoria",
     },
-    pagination: {
-        next: "Próximo",
-        previous: "Anterior",
-    },
     permissions: {
         descriptions: {
             auditor: "Visualizar Auditoria",
