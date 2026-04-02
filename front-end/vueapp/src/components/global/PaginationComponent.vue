@@ -6,12 +6,31 @@
                 :class="{ disabled: current === 1 }"
             >
                 <a
-                    class="page-link"
+                    class="page-link page-link--icon"
                     href="#"
+                    aria-label="First page"
+                    @click.prevent="changePage(1)"
+                >
+                    <LucideIcon
+                        icon="ChevronsLeft"
+                        :size="16"
+                    />
+                </a>
+            </li>
+            <li
+                class="page-item"
+                :class="{ disabled: current === 1 }"
+            >
+                <a
+                    class="page-link page-link--icon"
+                    href="#"
+                    aria-label="Previous page"
                     @click.prevent="changePage(current - 1)"
                 >
-                    <LucideIcon icon="ChevronsLeft" />
-                    {{ $t("pagination.previous") }}
+                    <LucideIcon
+                        icon="ChevronLeft"
+                        :size="16"
+                    />
                 </a>
             </li>
 
@@ -19,25 +38,15 @@
                 v-for="item in pages"
                 :key="item.key"
                 class="page-item"
-                :class="{
-                    active: item.type === 'page' && item.value === current,
-                    disabled: item.type === 'ellipsis',
-                }"
+                :class="{ active: item.value === current }"
             >
                 <a
-                    v-if="item.type === 'page'"
-                    class="page-link"
+                    class="page-link page-link--num"
                     href="#"
                     @click.prevent="changePage(item.value)"
                 >
                     {{ item.value }}
                 </a>
-                <span
-                    v-else
-                    class="page-link"
-                >
-                    ...
-                </span>
             </li>
 
             <li
@@ -45,12 +54,31 @@
                 :class="{ disabled: current === totalPages }"
             >
                 <a
-                    class="page-link"
+                    class="page-link page-link--icon"
                     href="#"
+                    aria-label="Next page"
                     @click.prevent="changePage(current + 1)"
                 >
-                    {{ $t("pagination.next") }}
-                    <LucideIcon icon="ChevronsRight" />
+                    <LucideIcon
+                        icon="ChevronRight"
+                        :size="16"
+                    />
+                </a>
+            </li>
+            <li
+                class="page-item"
+                :class="{ disabled: current === totalPages }"
+            >
+                <a
+                    class="page-link page-link--icon"
+                    href="#"
+                    aria-label="Last page"
+                    @click.prevent="changePage(totalPages)"
+                >
+                    <LucideIcon
+                        icon="ChevronsRight"
+                        :size="16"
+                    />
                 </a>
             </li>
         </ul>
@@ -91,65 +119,35 @@
         computed: {
             pages() {
                 const total = this.totalPages;
-
                 if (!total || total <= 1) {
-                    return [
-                        {
-                            type: "page",
-                            value: 1,
-                            key: "page-1",
-                        },
-                    ];
+                    return [];
                 }
 
-                const firstPage = 1;
-                const lastPage = total;
-                const current = this.current;
+                const c = this.current;
+                let start;
+                let end;
+
+                if (total <= 3) {
+                    start = 1;
+                    end = total;
+                } else if (c <= 2) {
+                    start = 1;
+                    end = 3;
+                } else if (c >= total - 1) {
+                    start = total - 2;
+                    end = total;
+                } else {
+                    start = c - 1;
+                    end = c + 1;
+                }
+
                 const items = [];
-
-                items.push({
-                    type: "page",
-                    value: firstPage,
-                    key: "page-first",
-                });
-
-                let start = Math.max(current - 1, firstPage + 1);
-                let end = Math.min(current + 1, lastPage - 1);
-
-                if (start <= end) {
-                    if (start > firstPage + 1) {
-                        items.push({
-                            type: "ellipsis",
-                            key: "ellipsis-left",
-                        });
-                    }
-
-                    for (let i = start; i <= end; i++) {
-                        items.push({
-                            type: "page",
-                            value: i,
-                            key: `page-${i}`,
-                        });
-                    }
-
-                    if (end < lastPage - 1) {
-                        items.push({
-                            type: "ellipsis",
-                            key: "ellipsis-right",
-                        });
-                    }
-                } else if (lastPage - firstPage > 1) {
+                for (let i = start; i <= end; i++) {
                     items.push({
-                        type: "ellipsis",
-                        key: "ellipsis-middle",
+                        value: i,
+                        key: `page-${i}`,
                     });
                 }
-
-                items.push({
-                    type: "page",
-                    value: lastPage,
-                    key: "page-last",
-                });
 
                 return items;
             },
@@ -169,6 +167,7 @@
 </script>
 <style scoped>
     .pagination {
+        --bs-pagination-margin-bottom: 0;
         --bs-pagination-padding-x: 0.6rem;
         --bs-pagination-padding-y: 0.35rem;
         --bs-pagination-font-size: 0.875rem;
@@ -186,6 +185,12 @@
         --bs-pagination-disabled-color: #8c959f;
         --bs-pagination-disabled-bg: transparent;
         --bs-pagination-disabled-border-color: transparent;
+        margin-bottom: 0;
+    }
+
+    nav {
+        margin-bottom: 0;
+        padding-bottom: 0;
     }
 
     .page-item {
@@ -215,5 +220,21 @@
     .page-link:hover {
         background-color: var(--color-sidebar-li-collapsed-hover) !important;
         border-color: var(--color-sidebar-li-collapsed-hover) !important;
+    }
+
+    .page-link--icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pagination .page-link--num {
+        font-size: 0.75rem;
+        line-height: 1.2;
+        padding: 0.2rem 0.4rem;
+        min-width: 1.55rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 </style>

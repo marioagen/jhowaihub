@@ -14,7 +14,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<Card?> FindByIdWithStepWorkflow(int id);
         bool Update(Card card);
         bool UpdateList(List<Card> cards);
-        bool DisableByIds(List<int> cardIds);
+        Task<bool> DisableByIds(List<int> cardIds);
         Task<bool> DeleteByDocumentIds(List<int> documentIds);
         Task<int> CountByStepsInUse(ICollection<int> ids);
         Task<ICollection<int>> FindActiveCardIdsInFirstStepAsync(IEnumerable<int> cardIds);

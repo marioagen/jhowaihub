@@ -445,11 +445,11 @@
                                                     class="d-flex flex-wrap gap-2 justify-content-center w-100"
                                                 >
                                                     <span
-                                                        v-for="v in detectedTemplateVariables"
-                                                        :key="v"
+                                                        v-for="variable in detectedTemplateVariables"
+                                                        :key="variable"
                                                         class="badge bg-light text-dark border font-monospace"
                                                     >
-                                                        {{ v }}
+                                                        {{ variable }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -461,19 +461,19 @@
                                                     {{ $t("template.tests.variableValues") }}
                                                 </h6>
                                                 <div
-                                                    v-for="v in detectedTemplateVariables"
-                                                    :key="'var-input-' + v"
+                                                    v-for="variable in detectedTemplateVariables"
+                                                    :key="'var-input-' + variable"
                                                     class="mb-2"
                                                 >
                                                     <label
                                                         class="form-label small font-monospace mb-1"
-                                                        :for="'test-var-' + v"
+                                                        :for="'test-var-' + variable"
                                                     >
-                                                        {{ v }}
+                                                        {{ variable }}
                                                     </label>
                                                     <input
-                                                        :id="'test-var-' + v"
-                                                        v-model="variableValues[v]"
+                                                        :id="'test-var-' + variable"
+                                                        v-model="variableValues[variable]"
                                                         type="text"
                                                         class="form-control form-control-sm"
                                                         autocomplete="off"
@@ -696,7 +696,9 @@
             },
         },
         setup() {
-            const { validate, setValues, values, resetForm } = useForm();
+            const { validate, setValues, values, resetForm } = useForm({
+                keepValuesOnUnmount: true,
+            });
             return {
                 validate,
                 setValues,
