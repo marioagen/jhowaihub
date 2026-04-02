@@ -2399,10 +2399,6 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
                 .ReturnsAsync(1);
 
-            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Returns(Task.CompletedTask);
-
             // Act
             var result = await _workflowServices.CloneAsync(dto);
 
@@ -2445,10 +2441,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
                 .ReturnsAsync(1);
-
-            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Returns(Task.CompletedTask);
 
             // Act
             await _workflowServices.CloneAsync(dto);
@@ -2494,10 +2486,6 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
                 .ReturnsAsync(1);
 
-            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Returns(Task.CompletedTask);
-
             // Act
             await _workflowServices.CloneAsync(dto);
 
@@ -2540,19 +2528,22 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(1);
 
             var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            var createdDependencies = new List<StepToolDependency>();
-            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Callback<StepToolDependency>(dep => createdDependencies.Add(dep))
-                .Returns(Task.CompletedTask);
+            List<StepToolDependency>? createdBatch = null;
+            _stepToolDependencyRepositoryMock
+                .Setup(r => r.CreateRangeAsync(It.IsAny<List<StepToolDependency>>()))
+                .Callback<List<StepToolDependency>>(list => createdBatch = list.ToList())
+                .ReturnsAsync(true);
 
             // Act
             await _workflowServices.CloneAsync(dto);
 
             // Assert
             // Source has 2 StepToolDependency records (stepTool2 depends on stepTool1, stepTool3 depends on stepTool2)
-            Assert.Equal(2, createdDependencies.Count);
-            _stepToolDependencyRepositoryMock.Verify(r => r.CreateAsync(It.IsAny<StepToolDependency>()),
-                Times.Exactly(2));
+            Assert.NotNull(createdBatch);
+            Assert.Equal(2, createdBatch.Count);
+            _stepToolDependencyRepositoryMock.Verify(
+                r => r.CreateRangeAsync(It.Is<List<StepToolDependency>>(l => l.Count == 2)),
+                Times.Once);
         }
 
         [Fact(DisplayName = "CloneAsync should rollback transaction on error")]
@@ -2880,10 +2871,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
                 .ReturnsAsync(1);
-
-            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Returns(Task.CompletedTask);
 
             // Act
             await _workflowServices.CloneAsync(dto);
