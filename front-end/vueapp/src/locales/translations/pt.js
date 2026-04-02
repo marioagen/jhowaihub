@@ -875,6 +875,7 @@ const portuguese = {
         enterprise: "Plano Enterprise",
     },
     prompts: {
+        createdShort: "Criação -",
         cloneAction: "Clonar",
         cloneSuffix: "- Clone",
         createError: "Falha ao criar agente",

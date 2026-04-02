@@ -876,6 +876,7 @@ const spanish = {
         enterprise: "Plan Enterprise",
     },
     prompts: {
+        createdShort: "Creación -",
         cloneAction: "Clonar",
         cloneSuffix: "- Clon",
         createError: "Error al crear agente",
