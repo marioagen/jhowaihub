@@ -71,118 +71,120 @@
         </div>
     </div>
     <div
-        class="prompts-card-grid pb-3"
+        class="prompts-cards-scroll-host"
         v-if="!loading"
     >
-        <div
-            v-for="item in filteredPrompts"
-            :key="item.id"
-            class="card prompt-card"
-        >
-            <div class="card-body prompt-card-body">
-                <div class="icons-card">
-                    <LucideIcon
-                        v-if="item.isImported && !item.isEdited"
-                        icon="Globe"
-                        :size="16"
-                        class="text-primary prompt-card-header-icon"
-                    />
-                    <span
-                        v-else
-                        class="dot prompt-card-header-icon m-1"
-                    ></span>
-                    <span class="prompt-card-title m-1">
-                        {{ item.name }}
-                    </span>
-                    <div class="custom-margin">
-                        <input
-                            class="form-check-input checkbox m-2"
-                            type="checkbox"
-                            value=""
-                            :id="item.id"
-                            @click="countChecks(item.id)"
-                            v-if="item.isOwner"
-                        />
-                        <a
-                            href="#"
-                            class="m-1"
-                            id="dropdownIcon"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        >
-                            <i class="fas fa-ellipsis-v icon-ellipsis"></i>
-                        </a>
-                        <ul
-                            class="dropdown-menu"
-                            aria-labelledby="dropdownIcon"
-                        >
-                            <li
-                                @click="redirectToEditPrompt(item.id)"
-                                v-if="item.isOwner"
-                            >
-                                <a class="dropdown-item">
-                                    {{ $t("common.edit") }}
-                                </a>
-                            </li>
-                            <li @click="redirectToClonePrompt(item.id)">
-                                <a class="dropdown-item">
-                                    {{ $t("prompts.cloneAction") }}
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <p
-                    class="card-text prompt-card-description d-flex align-items-start gap-1 text-muted"
-                >
-                    <span>
-                        {{
-                            item.description && item.description.length > 100
-                                ? item.description.slice(0, 100) + "..."
-                                : item.description
-                        }}
-                    </span>
-                    <span
-                        v-if="item.description && item.description.length > 100"
-                        class="description-view-icon"
-                        v-tooltip="item.description"
-                        tabindex="0"
-                    >
+        <div class="prompts-card-grid pb-3">
+            <div
+                v-for="item in filteredPrompts"
+                :key="item.id"
+                class="card prompt-card"
+            >
+                <div class="card-body prompt-card-body">
+                    <div class="icons-card">
                         <LucideIcon
-                            icon="Eye"
-                            :size="14"
+                            v-if="item.isImported && !item.isEdited"
+                            icon="Globe"
+                            :size="16"
+                            class="text-primary prompt-card-header-icon"
                         />
-                    </span>
-                </p>
-            </div>
-            <div class="card-footer prompt-card-footer">
-                <div class="date-info">
-                    <i class="far fa-clock mt-1"></i>
-                    <span>
-                        &ensp;{{ $t("prompts.createdShort") }}
-                        {{ this.formatDate(item.created) }}
-                    </span>
+                        <span
+                            v-else
+                            class="dot prompt-card-header-icon m-1"
+                        ></span>
+                        <span class="prompt-card-title m-1">
+                            {{ item.name }}
+                        </span>
+                        <div class="custom-margin">
+                            <input
+                                class="form-check-input checkbox m-2"
+                                type="checkbox"
+                                value=""
+                                :id="item.id"
+                                @click="countChecks(item.id)"
+                                v-if="item.isOwner"
+                            />
+                            <a
+                                href="#"
+                                class="m-1"
+                                id="dropdownIcon"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                            >
+                                <i class="fas fa-ellipsis-v icon-ellipsis"></i>
+                            </a>
+                            <ul
+                                class="dropdown-menu"
+                                aria-labelledby="dropdownIcon"
+                            >
+                                <li
+                                    @click="redirectToEditPrompt(item.id)"
+                                    v-if="item.isOwner"
+                                >
+                                    <a class="dropdown-item">
+                                        {{ $t("common.edit") }}
+                                    </a>
+                                </li>
+                                <li @click="redirectToClonePrompt(item.id)">
+                                    <a class="dropdown-item">
+                                        {{ $t("prompts.cloneAction") }}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p
+                        class="card-text prompt-card-description d-flex align-items-start gap-1 text-muted"
+                    >
+                        <span>
+                            {{
+                                item.description && item.description.length > 100
+                                    ? item.description.slice(0, 100) + "..."
+                                    : item.description
+                            }}
+                        </span>
+                        <span
+                            v-if="item.description && item.description.length > 100"
+                            class="description-view-icon"
+                            v-tooltip="item.description"
+                            tabindex="0"
+                        >
+                            <LucideIcon
+                                icon="Eye"
+                                :size="14"
+                            />
+                        </span>
+                    </p>
                 </div>
-                <div class="owner-info d-flex align-items-center">
-                    <span class="owner-label">{{ $t("common.owner") }}:</span>
-                    <span
-                        v-if="item.ownerName || item.ownerEmail"
-                        class="owner-avatar-wrapper"
-                        v-tooltip="ownerTooltip(item)"
-                    >
-                        <AvatarComponent
-                            :name="item.ownerName || item.ownerEmail || ''"
-                            variant="primary"
-                            :size="28"
-                        />
-                    </span>
-                    <span
-                        v-else
-                        class="owner-avatar-placeholder"
-                        v-tooltip="'-'"
-                    >
-                        —
-                    </span>
+                <div class="card-footer prompt-card-footer">
+                    <div class="date-info">
+                        <i class="far fa-clock mt-1"></i>
+                        <span>
+                            &ensp;{{ $t("prompts.createdShort") }}
+                            {{ this.formatDate(item.created) }}
+                        </span>
+                    </div>
+                    <div class="owner-info d-flex align-items-center">
+                        <span class="owner-label">{{ $t("common.owner") }}:</span>
+                        <span
+                            v-if="item.ownerName || item.ownerEmail"
+                            class="owner-avatar-wrapper"
+                            v-tooltip="ownerTooltip(item)"
+                        >
+                            <AvatarComponent
+                                :name="item.ownerName || item.ownerEmail || ''"
+                                variant="primary"
+                                :size="28"
+                            />
+                        </span>
+                        <span
+                            v-else
+                            class="owner-avatar-placeholder"
+                            v-tooltip="'-'"
+                        >
+                            —
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -521,6 +523,21 @@
         max-height: 400px;
         overflow-y: auto;
         min-height: 20%;
+    }
+
+    .prompts-cards-scroll-host {
+        --prompts-scroll-top-offset: 22rem;
+        max-height: calc(100vh - var(--prompts-scroll-top-offset));
+        min-height: 10rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 991px) {
+        .prompts-cards-scroll-host {
+            --prompts-scroll-top-offset: 24rem;
+        }
     }
 
     .prompts-card-grid {
