@@ -38,25 +38,15 @@
                 v-for="item in pages"
                 :key="item.key"
                 class="page-item"
-                :class="{
-                    active: item.type === 'page' && item.value === current,
-                    disabled: item.type === 'ellipsis',
-                }"
+                :class="{ active: item.value === current }"
             >
                 <a
-                    v-if="item.type === 'page'"
                     class="page-link page-link--num"
                     href="#"
                     @click.prevent="changePage(item.value)"
                 >
                     {{ item.value }}
                 </a>
-                <span
-                    v-else
-                    class="page-link page-link--num"
-                >
-                    ...
-                </span>
             </li>
 
             <li
@@ -129,65 +119,35 @@
         computed: {
             pages() {
                 const total = this.totalPages;
-
                 if (!total || total <= 1) {
-                    return [
-                        {
-                            type: "page",
-                            value: 1,
-                            key: "page-1",
-                        },
-                    ];
+                    return [];
                 }
 
-                const firstPage = 1;
-                const lastPage = total;
-                const current = this.current;
+                const c = this.current;
+                let start;
+                let end;
+
+                if (total <= 3) {
+                    start = 1;
+                    end = total;
+                } else if (c <= 2) {
+                    start = 1;
+                    end = 3;
+                } else if (c >= total - 1) {
+                    start = total - 2;
+                    end = total;
+                } else {
+                    start = c - 1;
+                    end = c + 1;
+                }
+
                 const items = [];
-
-                items.push({
-                    type: "page",
-                    value: firstPage,
-                    key: "page-first",
-                });
-
-                let start = Math.max(current - 1, firstPage + 1);
-                let end = Math.min(current + 1, lastPage - 1);
-
-                if (start <= end) {
-                    if (start > firstPage + 1) {
-                        items.push({
-                            type: "ellipsis",
-                            key: "ellipsis-left",
-                        });
-                    }
-
-                    for (let i = start; i <= end; i++) {
-                        items.push({
-                            type: "page",
-                            value: i,
-                            key: `page-${i}`,
-                        });
-                    }
-
-                    if (end < lastPage - 1) {
-                        items.push({
-                            type: "ellipsis",
-                            key: "ellipsis-right",
-                        });
-                    }
-                } else if (lastPage - firstPage > 1) {
+                for (let i = start; i <= end; i++) {
                     items.push({
-                        type: "ellipsis",
-                        key: "ellipsis-middle",
+                        value: i,
+                        key: `page-${i}`,
                     });
                 }
-
-                items.push({
-                    type: "page",
-                    value: lastPage,
-                    key: "page-last",
-                });
 
                 return items;
             },
