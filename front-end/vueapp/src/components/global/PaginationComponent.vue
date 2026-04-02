@@ -6,12 +6,31 @@
                 :class="{ disabled: current === 1 }"
             >
                 <a
-                    class="page-link"
+                    class="page-link page-link--icon"
                     href="#"
+                    aria-label="First page"
+                    @click.prevent="changePage(1)"
+                >
+                    <LucideIcon
+                        icon="ChevronsLeft"
+                        :size="16"
+                    />
+                </a>
+            </li>
+            <li
+                class="page-item"
+                :class="{ disabled: current === 1 }"
+            >
+                <a
+                    class="page-link page-link--icon"
+                    href="#"
+                    aria-label="Previous page"
                     @click.prevent="changePage(current - 1)"
                 >
-                    <LucideIcon icon="ChevronsLeft" />
-                    {{ $t("pagination.previous") }}
+                    <LucideIcon
+                        icon="ChevronLeft"
+                        :size="16"
+                    />
                 </a>
             </li>
 
@@ -26,7 +45,7 @@
             >
                 <a
                     v-if="item.type === 'page'"
-                    class="page-link"
+                    class="page-link page-link--num"
                     href="#"
                     @click.prevent="changePage(item.value)"
                 >
@@ -34,7 +53,7 @@
                 </a>
                 <span
                     v-else
-                    class="page-link"
+                    class="page-link page-link--num"
                 >
                     ...
                 </span>
@@ -45,12 +64,31 @@
                 :class="{ disabled: current === totalPages }"
             >
                 <a
-                    class="page-link"
+                    class="page-link page-link--icon"
                     href="#"
+                    aria-label="Next page"
                     @click.prevent="changePage(current + 1)"
                 >
-                    {{ $t("pagination.next") }}
-                    <LucideIcon icon="ChevronsRight" />
+                    <LucideIcon
+                        icon="ChevronRight"
+                        :size="16"
+                    />
+                </a>
+            </li>
+            <li
+                class="page-item"
+                :class="{ disabled: current === totalPages }"
+            >
+                <a
+                    class="page-link page-link--icon"
+                    href="#"
+                    aria-label="Last page"
+                    @click.prevent="changePage(totalPages)"
+                >
+                    <LucideIcon
+                        icon="ChevronsRight"
+                        :size="16"
+                    />
                 </a>
             </li>
         </ul>
@@ -169,6 +207,7 @@
 </script>
 <style scoped>
     .pagination {
+        --bs-pagination-margin-bottom: 0;
         --bs-pagination-padding-x: 0.6rem;
         --bs-pagination-padding-y: 0.35rem;
         --bs-pagination-font-size: 0.875rem;
@@ -186,6 +225,12 @@
         --bs-pagination-disabled-color: #8c959f;
         --bs-pagination-disabled-bg: transparent;
         --bs-pagination-disabled-border-color: transparent;
+        margin-bottom: 0;
+    }
+
+    nav {
+        margin-bottom: 0;
+        padding-bottom: 0;
     }
 
     .page-item {
@@ -215,5 +260,21 @@
     .page-link:hover {
         background-color: var(--color-sidebar-li-collapsed-hover) !important;
         border-color: var(--color-sidebar-li-collapsed-hover) !important;
+    }
+
+    .page-link--icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .pagination .page-link--num {
+        font-size: 0.75rem;
+        line-height: 1.2;
+        padding: 0.2rem 0.4rem;
+        min-width: 1.55rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 </style>
