@@ -86,7 +86,6 @@
     import SpecialEdge from "@/components/flow/SpecialEdge.vue";
     import LogService from "@/services/log/logService";
     import ToolsServices from "@/services/tools/ToolsServices";
-    import WorkflowService from "@/services/workflow/WorkflowService";
     import PromptService from "@/services/prompts/PromptsService";
     import ToolType from "@/constants/ToolType";
 
