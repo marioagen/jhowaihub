@@ -3,6 +3,7 @@ const ToolType = Object.freeze({
     Prompt: "Prompt",
     API: "API",
     Quiz: "Quiz",
+    Embeddings: "Embeddings",
 });
 
 export default ToolType;
