@@ -251,7 +251,7 @@
                     v-else
                     class="mb-3"
                 >
-                    <template v-if="!isEmbeddingTool">
+                    <div v-if="!isEmbeddingTool">
                         <h6>
                             {{ $t("flow.sidebar.inputs") }}
                         </h6>
@@ -267,7 +267,7 @@
                                 v-model="parameters[index].value"
                             ></textarea>
                         </div>
-                    </template>
+                    </div>
                     <div class="mt-4">
                         <button
                             type="button"
@@ -401,6 +401,35 @@
             };
         },
         methods: {
+            parameterRowHasUserContent(p) {
+                if (!p || typeof p !== "object") return false;
+                if (p.requiredFile === true) return true;
+                if (p.webhookId != null && p.webhookId !== "") return true;
+                if (p.value != null && p.value !== "") return true;
+                return false;
+            },
+            parametersHaveUserContent(params) {
+                return (
+                    Array.isArray(params) && params.some((p) => this.parameterRowHasUserContent(p))
+                );
+            },
+            cloneParameterList(params) {
+                if (!Array.isArray(params)) return [];
+                return params.map((p) => ({ ...p }));
+            },
+            resolveParametersForNodeSave(nodeId, sidebarParams) {
+                const list = Array.isArray(sidebarParams) ? sidebarParams : [];
+                if (this.parametersHaveUserContent(list)) {
+                    return this.cloneParameterList(list);
+                }
+                const vue = this.$refs.VueflowComponent;
+                const node = vue?.nodes?.find((n) => String(n.id) === String(nodeId));
+                const existing = node?.data?.parameters;
+                if (this.parametersHaveUserContent(existing)) {
+                    return this.cloneParameterList(existing);
+                }
+                return this.cloneParameterList(list);
+            },
             markFlowDirty() {
                 this.canLeave = false;
             },
@@ -513,6 +542,9 @@
             async openNodeConfig(nodes, selectedNode) {
                 this.nodes = nodes;
                 this.nodeFlow = selectedNode;
+                if (!Array.isArray(selectedNode.data.parameters)) {
+                    selectedNode.data.parameters = [];
+                }
                 this.parameters = selectedNode.data.parameters;
                 this.toolType = selectedNode.data.toolType;
                 await this.loadPreviousStepTools(selectedNode);
@@ -577,7 +609,7 @@
                     } else {
                         this.idSelected = parseInt(this.parameters[0]?.value);
                     }
-                } else if (this.parameters.length === 0) {
+                } else if (this.parameters.length === 0 && !this.isEmbeddingTool) {
                     this.parameters.push({
                         stepToolId: 0,
                         value: null,
@@ -643,9 +675,13 @@
                     return;
                 }
 
+                const parametersToSave = this.resolveParametersForNodeSave(
+                    this.nodeFlow.id,
+                    this.parameters
+                );
                 this.$refs.VueflowComponent.updateNodeInput(
                     this.nodeFlow.id,
-                    this.parameters,
+                    parametersToSave,
                     depsToSave
                 );
                 this.markFlowDirty();
@@ -680,9 +716,13 @@
                 const depsToSave = this.filterDependenciesToValidOnly(
                     this.selectedDependencies || []
                 );
+                const parametersToSave = this.resolveParametersForNodeSave(
+                    this.nodeFlow.id,
+                    this.parameters
+                );
                 this.$refs.VueflowComponent.updateNodeInput(
                     this.nodeFlow.id,
-                    this.parameters,
+                    parametersToSave,
                     depsToSave
                 );
                 this.markFlowDirty();
