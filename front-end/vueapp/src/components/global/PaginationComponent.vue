@@ -195,12 +195,24 @@
 
     .page-item {
         margin: 0 4px;
+        display: flex;
+        align-items: center;
     }
 
     .page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 2rem;
+        padding-top: 0;
+        padding-bottom: 0;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        box-sizing: border-box;
         border-radius: 8px;
         border: 1px solid transparent;
         font-weight: 500;
+        line-height: 1;
         transition: background-color 0.2s ease;
         background-color: var(--color-card-content) !important;
     }
@@ -223,18 +235,19 @@
     }
 
     .page-link--icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
+        padding-left: 0.45rem;
+        padding-right: 0.45rem;
+    }
+
+    .page-link--icon :deep(svg) {
+        display: block;
+        flex-shrink: 0;
     }
 
     .pagination .page-link--num {
         font-size: 0.75rem;
-        line-height: 1.2;
-        padding: 0.2rem 0.4rem;
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
         min-width: 1.55rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
     }
 </style>
