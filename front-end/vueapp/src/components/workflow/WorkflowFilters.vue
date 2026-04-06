@@ -127,6 +127,7 @@
         </div>
     </div>
 </template>
+
 <script>
     import Multiselect from "@vueform/multiselect";
     export default {
@@ -207,6 +208,7 @@
         },
     };
 </script>
+
 <style scoped>
     .custom-input {
         font-size: 12px;
@@ -217,8 +219,6 @@
         color: #999;
     }
 
-    /* Do not set overflow on .multiselect root — dropdown renders inside it when appendToBody is false.
-       append-to-body keeps the list out of the control; here only .multiselect-wrapper clips long text. */
     .workflow-filters-team-select {
         --ms-font-size: 0.875rem;
         --ms-option-font-size: 0.875rem;
