@@ -23,7 +23,7 @@
                         </span>
                         <br />
                         <span class="plan-subtitle">
-                            {{ wtcIncluded }}
+                            WTCs:{{ wtcIncluded }}
                         </span>
                     </div>
                 </div>

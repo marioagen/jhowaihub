@@ -130,7 +130,7 @@ namespace WoopiAiHub.Application.Services
             return new DashboardTenantInfo
             {
                 Plan = tenantInfo?.Plan ?? string.Empty,
-                WtcIncluded = tenantInfo?.WtcIncluded ?? 0
+                WtcIncluded = tenantInfo?.WtcsIncluded ?? 0
             };
         }
 
