@@ -88,16 +88,9 @@
                     :placeholder="$t('filters.teamsSelect.all')"
                     mode="single"
                     :canClear="true"
+                    :append-to-body="true"
                     @change="filterData"
-                    class="border-start-0"
-                    style="
-                        --ms-font-size: 0.875rem;
-                        --ms-option-font-size: 0.875rem;
-                        min-height: 31px;
-                        width: auto;
-                        --ms-py: 1px;
-                        flex: 1 1 auto;
-                    "
+                    class="border-start-0 workflow-filters-team-select"
                 />
             </div>
         </div>
@@ -134,6 +127,7 @@
         </div>
     </div>
 </template>
+
 <script>
     import Multiselect from "@vueform/multiselect";
     export default {
@@ -214,7 +208,8 @@
         },
     };
 </script>
-<style scooped>
+
+<style scoped>
     .custom-input {
         font-size: 12px;
     }
@@ -222,5 +217,35 @@
     .custom-input::placeholder {
         font-size: 12px;
         color: #999;
+    }
+
+    .workflow-filters-team-select {
+        --ms-font-size: 0.875rem;
+        --ms-option-font-size: 0.875rem;
+        min-height: 31px;
+        --ms-py: 1px;
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+    }
+
+    .workflow-filters-team-select :deep(.multiselect-wrapper) {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .workflow-filters-team-select :deep(.multiselect-placeholder) {
+        right: 0;
+        min-width: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        justify-content: flex-start;
+    }
+
+    .workflow-filters-team-select :deep(.multiselect-single-label) {
+        right: 0;
+        min-width: 0;
     }
 </style>
