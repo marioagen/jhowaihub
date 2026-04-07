@@ -177,10 +177,10 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
 
             // Assert
-            Assert.Equal(_messageQueues.ChatCompletionQueue, result.Queue);
-            var message = result.Message as ChatCompletionQueryDto;
+            Assert.Equal(_messageQueues.OpenAiResponseQueue, result.Queue);
+            var message = result.Message as OpenAiResponseQueryDto;
             Assert.NotNull(message);
-            Assert.Contains(previousPromptOutput, message!.ChatCompletion!.Messages![0].Content);
+            Assert.Contains(previousPromptOutput, message!.OpenAiResponse!.Input![0].Content[0].Text);
         }
     }
 }

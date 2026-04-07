@@ -136,7 +136,7 @@ namespace WoopiAiHub.Application.Services
                 await _templateRepository.RemovePromptLinked(existingTemplate.Id);
             }
 
-            return await _templateRepository.UpdateAsync(existingTemplate);
+            return templateUpdated;
         }
     }
 }
