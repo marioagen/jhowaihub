@@ -137,7 +137,8 @@ namespace WoopiAiHub.Application.Services
 
                 if (result is false)
                 {
-                    var questionDto = _questionServices.FindById(questionId);
+                    var questionDto = _questionServices.FindById(questionId)
+                        ?? throw new ArgumentException($"Question with id {questionId} was not found.");
                     var question =
                          new Question
                         (
@@ -170,7 +171,8 @@ namespace WoopiAiHub.Application.Services
 
             foreach (var questionId in createQuestionnaireDto.QuestionsId)
             {
-                var questionDto = _questionServices.FindById(questionId);
+                var questionDto = _questionServices.FindById(questionId)
+                    ?? throw new ArgumentException($"Question with id {questionId} was not found.");
                 var question =
                      new Question
                     (

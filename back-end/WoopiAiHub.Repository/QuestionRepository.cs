@@ -18,7 +18,6 @@ namespace WoopiAiHub.Repository
 
         public bool CreateUniqueQuestion(Question question)
         {
-
             var existQuestion = _context.Questions.Any(p => p.Description == question.Description);
             if(!existQuestion)
             {
@@ -28,7 +27,6 @@ namespace WoopiAiHub.Repository
                 return true;
             }
             return false;
-
         }
 
         /// <summary>
@@ -62,7 +60,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="desc"></param>
         /// <returns></returns>
-        public QuestionDto FindByDescriptionAndEmail(string desc,
+        public QuestionDto? FindByDescriptionAndEmail(string desc,
                                                      string email)
         {
             return _context.Questions
@@ -90,7 +88,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public QuestionDto FindById(int id)
+        public QuestionDto? FindById(int id)
         {
             return _context.Questions
                 .AsNoTracking()
