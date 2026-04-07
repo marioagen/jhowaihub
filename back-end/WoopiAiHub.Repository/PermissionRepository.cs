@@ -52,6 +52,7 @@ namespace WoopiAiHub.Repository
         public ICollection<PermissionDto> FindWorkflowPermissions()
         {
             return _context.Permissions
+                .AsNoTracking()
                 .Where(p => p.Group == WorkflowStepGroup)
                 .Select(p => new PermissionDto
                 {

@@ -42,6 +42,7 @@ namespace WoopiAiHub.Repository
         public ICollection<QuestionnaireDto> FindAll()
         {
             return _context.Questionnaires
+                 .AsNoTracking()
                  .Select(q => new QuestionnaireDto
                  {
                      Id = q.Id,
@@ -75,8 +76,10 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public QuestionnaireDto FindById(int id)
         {
-            return _context.Questionnaires.Where(a => a.Id.Equals(id))
-                                          .Select(q => new QuestionnaireDto
+            return _context.Questionnaires
+                .AsNoTracking()
+                .Where(a => a.Id.Equals(id))
+                .Select(q => new QuestionnaireDto
                                           {
                                               Id = q.Id,
                                               Questions = q.QuestionQuestionnaire.Select(qq => new Question

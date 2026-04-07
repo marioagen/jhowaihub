@@ -69,8 +69,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public TypeDoc FindByName(string name)
         {
-            return _context.TypeDoc.Where(a => a.Name.Equals(name))
-                                     .FirstOrDefault();
+            return _context.TypeDoc
+                .AsNoTracking()
+                .FirstOrDefault(a => a.Name.Equals(name));
         }
 
         /// <summary>

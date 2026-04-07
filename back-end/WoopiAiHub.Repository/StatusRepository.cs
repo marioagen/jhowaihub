@@ -23,7 +23,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Status?> FindById(int id)
         {
-            return await _context.Status.FindAsync(id);
+            return await _context.Status
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == id);
         }
 
         /// <summary>
@@ -74,7 +76,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Status?> FindByName(string name)
         {
-            return await _context.Status.FirstOrDefaultAsync(s => s.Name == name);
+            return await _context.Status
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Name == name);
         }
     }
 }

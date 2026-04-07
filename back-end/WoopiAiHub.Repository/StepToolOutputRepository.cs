@@ -98,6 +98,7 @@ namespace WoopiAiHub.Repository
         public async Task<List<StepToolOutput>> FindByCardIdAsync(int cardId)
         {
             return await _context.StepToolOutputs
+                .AsNoTracking()
                 .Where(o => o.CardId == cardId)
                 .Include(o => o.StepTool)
                 .ThenInclude(st => st.Tool)

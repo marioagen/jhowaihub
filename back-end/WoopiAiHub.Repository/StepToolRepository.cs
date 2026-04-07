@@ -44,6 +44,7 @@ namespace WoopiAiHub.Repository
         public Task<StepToolDto?> FindById(int id)
         {
             return _context.StepTools
+            .AsNoTracking()
             .Select(q => new StepToolDto
             {
                 Id = q.Id,
@@ -234,12 +235,14 @@ namespace WoopiAiHub.Repository
         /// cref="StepTool"/> that depends on the specified ID, or <see langword="null"/> if no such  dependent exists.</returns>
         public async Task<StepTool?> FindDependentAsync(int id)
         {
-            return await _context.StepTools.Include(u => u.Tool)
-                                             .ThenInclude(t => t!.ToolType)
-                                           .Include(s => s.Step)
-                                           .Include(d => d.DependsOnStepTool)
-                                           .Include(st => st.Dependencies)
-                                           .FirstOrDefaultAsync(s => s.DependsOnStepToolId.Equals(id));
+            return await _context.StepTools
+                .AsNoTracking()
+                .Include(u => u.Tool)
+                    .ThenInclude(t => t!.ToolType)
+                .Include(s => s.Step)
+                .Include(d => d.DependsOnStepTool)
+                .Include(st => st.Dependencies)
+                .FirstOrDefaultAsync(s => s.DependsOnStepToolId.Equals(id));
         }
 
         /// <summary>
@@ -252,11 +255,13 @@ namespace WoopiAiHub.Repository
         /// <returns>A <see cref="StepTool"/> object if a matching entity is found; otherwise, <see langword="null"/>.</returns>
         public async Task<StepTool?> FindByStepIdAndOrderAsync(int stepId, int order)
         {
-            return await _context.StepTools.Include(u => u.DependsOnStepTool)
-                                           .Include(t => t.Tool)
-                                            .ThenInclude(s => s!.ToolType)
-                                           .Include(st => st.Dependencies)
-                                           .FirstOrDefaultAsync(s => s.StepId == stepId && s.Order == order);
+            return await _context.StepTools
+                .AsNoTracking()
+                .Include(u => u.DependsOnStepTool)
+                .Include(t => t.Tool)
+                    .ThenInclude(s => s!.ToolType)
+                .Include(st => st.Dependencies)
+                .FirstOrDefaultAsync(s => s.StepId == stepId && s.Order == order);
         }
 
         /// <summary>
@@ -271,6 +276,7 @@ namespace WoopiAiHub.Repository
         public async Task<StepTool?> FindNextPending(int stepId, int cardId)
         {
             return await _context.StepTools
+                .AsNoTracking()
                 .Include(st => st.DependsOnStepTool)
                 .Include(st => st.Dependencies)
                 .Include(st => st.Executions)

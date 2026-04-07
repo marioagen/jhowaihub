@@ -38,6 +38,7 @@ namespace WoopiAiHub.Repository
         public ICollection<QuestionDto> FindAll()
         {
             return _context.Questions
+                .AsNoTracking()
                 .Select(q => new QuestionDto
                 {
                     Id = q.Id,
@@ -64,8 +65,10 @@ namespace WoopiAiHub.Repository
         public QuestionDto FindByDescriptionAndEmail(string desc,
                                                      string email)
         {
-            return _context.Questions.Where(a => a.Description.Equals(desc) && a.EmailCreator.Equals(email))
-                                     .Select(q => new QuestionDto
+            return _context.Questions
+                .AsNoTracking()
+                .Where(a => a.Description.Equals(desc) && a.EmailCreator.Equals(email))
+                .Select(q => new QuestionDto
                                      {
                                          Id = q.Id,
                                          Questionnaires = q.QuestionQuestionnaire.Select(qq => new Questionnaire
@@ -89,8 +92,10 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public QuestionDto FindById(int id)
         {
-            return _context.Questions.Where(u => u.Id.Equals(id))
-                                     .Select(q => new QuestionDto
+            return _context.Questions
+                .AsNoTracking()
+                .Where(u => u.Id.Equals(id))
+                .Select(q => new QuestionDto
                                      {
                                          Id = q.Id,
                                          Questionnaires = q.QuestionQuestionnaire.Select(qq => new Questionnaire
