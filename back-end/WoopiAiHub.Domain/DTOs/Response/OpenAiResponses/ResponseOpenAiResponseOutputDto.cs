@@ -8,14 +8,14 @@ namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
 {
     public class ResponseOpenAiResponseOutputDto
     {
-        public string Id { get; set; }
-        public string Type { get; set; }
-        public string Status { get; set; }
-        public List<ResponseOpenAiResponseOutputMessageContentDto> Content { get; set; }
-        public string Output { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public List<ResponseOpenAiResponseOutputMessageContentDto> Content { get; set; } = new();
+        public string Output { get; set; } = string.Empty;
         [JsonPropertyName("server_label")]
-        public string ServerLabel { get; set; }
-        public string Arguments { get; set; }
-        public JsonElement Tools { get; set; }
+        public string ServerLabel { get; set; } = string.Empty;
+        public string Arguments { get; set; } = string.Empty;
+        public JsonElement Tools { get; set; } = new();
     }
 }

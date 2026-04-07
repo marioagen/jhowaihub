@@ -13,10 +13,10 @@ namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
         [JsonPropertyName("server_url")]
         public string ServerUrl { get; set; } = string.Empty;
         [JsonPropertyName("headers")]
-        public Dictionary<string, string> Headers { get; set; } = new ();
+        public Dictionary<string, string> Headers { get; set; } = new();
         [JsonPropertyName("require_approval")]
         public string RequireApproval { get; set; } = string.Empty;
         [JsonPropertyName("allowed_tools")]
-        public List<string> AllowedTools { get; set; } = null;        
+        public List<string> AllowedTools { get; set; } = new();
     }
 }

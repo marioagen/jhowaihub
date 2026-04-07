@@ -148,7 +148,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public PromptDto? FindById(int id)
         {
-            var x = _context.Prompts
+            var promptEntity = _context.Prompts
                             .Include(x => x.PromptApiTemplates)
                             .AsNoTracking()
                             .FirstOrDefault(p => p.Id == id);
@@ -168,11 +168,11 @@ namespace WoopiAiHub.Repository
                     EnableAccessToMcp = p.EnableAccessToMcp,
                     OwnerName = p.User != null ? p.User.Name : string.Empty,
                     OwnerEmail = p.User != null ? p.User.Email : string.Empty,
-                    PromptApiTemplates = p.PromptApiTemplates.Select(x => new PromptApiTemplateDTO
+                    PromptApiTemplates = p.PromptApiTemplates.Select(promptApi => new PromptApiTemplateDto
                     {
-                        ApiTemplateId = x.ApiTemplateId,
-                        PromptId = x.PromptId,
-                        Id = x.Id
+                        ApiTemplateId = promptApi.ApiTemplateId,
+                        PromptId = promptApi.PromptId,
+                        Id = promptApi.Id
                     }).ToList()
                 }).FirstOrDefault(p => p.Id == id);
         }
@@ -205,14 +205,14 @@ namespace WoopiAiHub.Repository
             }
 
             var existPromptApiTemplates = await _context.PromptApiTemplates.Where(p => data.Contains(p.Id)).ToListAsync();
-            if (data.Any() && !existPromptApiTemplates.Any())
+            if (data.Count > 0 && existPromptApiTemplates.Count == 0)
             {
                 return false;
             }
 
             _context.Prompts.Update(prompt);
             _context.PromptApiTemplates.RemoveRange(existPromptApiTemplates);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return true;
         }

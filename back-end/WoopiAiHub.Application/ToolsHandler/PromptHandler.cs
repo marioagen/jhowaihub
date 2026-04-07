@@ -148,7 +148,8 @@ public class PromptHandler : IToolHandler
 
         foreach (var item in apis.Where(a => a.Method != "GET"))
         {
-            mappedApiString = mappedApiString.Replace($"PAYLOAD_API_{item.Id}", System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(item.BodyTemplate).RootElement));
+            var bodyContent = string.IsNullOrEmpty(item.BodyTemplate) ? "{}" : item.BodyTemplate;
+            mappedApiString = mappedApiString.Replace($"PAYLOAD_API_{item.Id}", System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(bodyContent).RootElement));
         }
 
         var accessToken = _accountServices.GenerateToken("MCP_SERVER", 5);
