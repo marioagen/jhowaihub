@@ -5,17 +5,23 @@
             :key="item.activeKey ? `${item.activeKey}-${index}` : `nav-${index}`"
             class="mb-1 sidebar-menu-item-enter"
             :class="{
-                'is-active': !item.visibleGroup && isRouteActive(item),
+                'is-active':
+                    (!item.visibleGroup && isRouteActive(item)) ||
+                    (item.visibleGroup && isGroupActive(item)),
             }"
             :style="{ '--item-index': index }"
         >
-            <div v-if="item.visibleGroup">
+            <div
+                v-if="item.visibleGroup"
+                class="sidebar-group-root"
+            >
                 <button
                     type="button"
                     class="d-flex align-items-center custom-menu-item sidebar-group-toggle link-dark rounded border-0 bg-transparent w-100 text-start"
                     :class="[
                         isGroupExpanded(item) ? 'is-expanded' : '',
                         isCollapsed ? 'justify-content-center' : '',
+                        { active: isGroupActive(item) },
                     ]"
                     :aria-expanded="isGroupExpanded(item)"
                     :aria-controls="'sidebar-submenu-' + item.activeKey"
@@ -41,9 +47,12 @@
                     />
                 </button>
                 <ul
-                    v-show="isGroupExpanded(item) && !isCollapsed"
+                    v-show="isGroupExpanded(item)"
                     :id="'sidebar-submenu-' + item.activeKey"
-                    class="list-unstyled mb-0 mt-1 sidebar-group-submenu"
+                    :class="[
+                        'list-unstyled mb-0 mt-1 sidebar-group-submenu',
+                        { 'sidebar-group-submenu--collapsed-inline': isCollapsed },
+                    ]"
                 >
                     <li
                         v-for="(sub, subIndex) in item.visibleGroup"
@@ -52,15 +61,25 @@
                     >
                         <router-link
                             class="d-flex align-items-center custom-menu-item link-dark rounded sidebar-group-link"
-                            :class="{ active: matchesMenuPath(sub.to) }"
+                            :class="{
+                                'justify-content-center': isCollapsed,
+                                active: matchesMenuPath(sub.to),
+                                'sidebar-group-link--collapsed': isCollapsed,
+                            }"
                             :to="sub.to"
                         >
                             <LucideIcon
                                 strokeWidth="2"
+                                :size="isCollapsed ? 16 : 20"
                                 :icon="sub.icon.name"
                                 :color="sub.icon.color"
                             />
-                            <span class="ms-2">{{ $t(sub.labelKey) }}</span>
+                            <span
+                                v-show="!isCollapsed"
+                                class="ms-2"
+                            >
+                                {{ $t(sub.labelKey) }}
+                            </span>
                         </router-link>
                     </li>
                 </ul>
@@ -130,8 +149,7 @@
                 if (!routeInGroup) {
                     return false;
                 }
-                const submenuVisible = !this.isCollapsed && this.isGroupExpanded(item);
-                return !submenuVisible;
+                return !this.isGroupExpanded(item);
             },
             isRouteActive(item) {
                 return this.matchesMenuPath(item.to);
@@ -140,6 +158,10 @@
     };
 </script>
 <style scoped>
+    .sidebar-group-root {
+        position: relative;
+    }
+
     .btn-toggle-nav a:hover:not(.active),
     .btn-toggle-nav button.custom-menu-item:not(.sidebar-group-toggle):hover {
         color: var(--color-body-content) !important;
@@ -147,7 +169,7 @@
         cursor: pointer;
     }
 
-    .btn-toggle-nav button.sidebar-group-toggle:hover {
+    .btn-toggle-nav button.sidebar-group-toggle:hover:not(.active) {
         color: var(--color-body-content) !important;
         background-color: rgba(13, 110, 253, 0.08) !important;
         cursor: pointer;
@@ -168,6 +190,20 @@
         cursor: default;
     }
 
+    .btn-toggle-nav button.sidebar-group-toggle.active {
+        background-color: rgba(13, 110, 253, 0.12) !important;
+        color: #0d6efd !important;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+        cursor: pointer;
+    }
+
+    .btn-toggle-nav button.sidebar-group-toggle.active:hover {
+        background-color: rgba(13, 110, 253, 0.14) !important;
+        color: #0d6efd !important;
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+    }
+
     .btn-toggle-nav button.sidebar-group-toggle.is-expanded:not(.active) {
         background-color: transparent !important;
         color: #676879 !important;
@@ -177,24 +213,6 @@
     }
 
     .btn-toggle-nav button.sidebar-group-toggle.is-expanded:not(.active) .sidebar-group-chevron {
-        color: #676879;
-    }
-
-    .btn-toggle-nav button.sidebar-group-toggle.active:hover {
-        background-color: transparent !important;
-        color: var(--color-body-content) !important;
-        box-shadow: none;
-    }
-
-    .btn-toggle-nav button.sidebar-group-toggle.active {
-        background-color: transparent !important;
-        color: #676879 !important;
-        font-weight: 400;
-        box-shadow: none;
-        cursor: pointer;
-    }
-
-    .btn-toggle-nav button.sidebar-group-toggle.active .sidebar-group-chevron {
         color: #676879;
     }
 
@@ -242,6 +260,28 @@
         padding-left: 0.75rem;
         margin-left: 0.25rem;
         border-left: 2px solid var(--color-border-form-control, #dee2e6);
+    }
+
+    .sidebar-group-submenu--collapsed-inline {
+        padding-left: 0;
+        margin-left: 0;
+        margin-top: 0.25rem;
+        border-left: none;
+        border-top: 1px solid var(--color-border-form-control, #dee2e6);
+        padding-top: 0.25rem;
+    }
+
+    .sidebar-group-submenu--collapsed-inline .sidebar-group-link {
+        margin-left: 0 !important;
+        margin-top: 0;
+        width: 100%;
+    }
+
+    .sidebar-group-link--collapsed {
+        min-height: 36px;
+        height: auto;
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
     }
 
     .sidebar-group-link {
