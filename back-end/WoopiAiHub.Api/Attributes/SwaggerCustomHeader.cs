@@ -1,5 +1,5 @@
-using WoopiAiHub.Domain.Utils;
-using Microsoft.OpenApi;
+﻿using WoopiAiHub.Domain.Utils;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace WoopiAiHub.Api.Attributes
@@ -10,7 +10,7 @@ namespace WoopiAiHub.Api.Attributes
         {
             if (operation.Parameters is null)
             {
-                operation.Parameters = new List<IOpenApiParameter>();
+                operation.Parameters = new List<OpenApiParameter>();
             }
 
             var hasOptionalTenantHeader = context.MethodInfo

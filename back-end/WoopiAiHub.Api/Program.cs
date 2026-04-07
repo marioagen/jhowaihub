@@ -5,7 +5,7 @@ using WoopiAiHub.Repository.DependencyInjection;
 using WoopiAiHub.Repository.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using WoopiAiHub.Api.Exceptions;
 using System.Text.Json.Serialization;
@@ -45,9 +45,19 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "JWT Authorization header using the Bearer scheme."
     });
-    c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
-                    [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+                    {
+                          new OpenApiSecurityScheme
+                          {
+                              Reference = new OpenApiReference
+                              {
+                                  Type = ReferenceType.SecurityScheme,
+                                  Id = "Bearer"
+                              }
+                          },
+                         new string[] {}
+                    }
                 });
     c.OperationFilter<SwaggerCustomHeader>();
 });
