@@ -550,4 +550,7 @@
         flex: 1 1 100%;
         min-width: 0;
     }
+    .border {
+        border: 1px solid var(--color-border-form-control) !important;
+    }
 </style>
