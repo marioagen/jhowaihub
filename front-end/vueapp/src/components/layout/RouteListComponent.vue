@@ -126,35 +126,7 @@
                 expandedGroupKey: null,
             };
         },
-        watch: {
-            $route() {
-                if (this.isCollapsed) {
-                    this.expandedGroupKey = null;
-                }
-            },
-        },
-        mounted() {
-            document.addEventListener("pointerdown", this.handleDocumentPointerDown, true);
-        },
-        beforeUnmount() {
-            document.removeEventListener("pointerdown", this.handleDocumentPointerDown, true);
-        },
         methods: {
-            handleDocumentPointerDown(event) {
-                if (!this.isCollapsed || !this.expandedGroupKey) {
-                    return;
-                }
-                const roots = this.$el?.querySelectorAll?.(".sidebar-group-root");
-                if (!roots?.length) {
-                    return;
-                }
-                for (const root of roots) {
-                    if (root.contains(event.target)) {
-                        return;
-                    }
-                }
-                this.expandedGroupKey = null;
-            },
             toggleGroup(item) {
                 const key = item.activeKey;
                 if (this.expandedGroupKey === key) {
