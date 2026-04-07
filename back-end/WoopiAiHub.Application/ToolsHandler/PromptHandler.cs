@@ -9,7 +9,6 @@ using WoopiAiHub.Domain.DTOs.Request.Automation;
 using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
-using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -25,26 +24,20 @@ public class PromptHandler : IToolHandler
     private readonly MessageQueues _messageQueues;
     private readonly IPromptServices _promptServices;
     private readonly ITenantCacheServices _tenantCacheServices;
-    private readonly ChatCompletionSettings _chatCompletionSettings;
-    private readonly IResponseApi _responseApi;
     private readonly ResponseOpenAiSettings _responseOpenAiSettings;
     private readonly IApiTemplateServices _apiTemplateServices;
     private readonly IAccountServices _accountServices;
 
     public PromptHandler(IOptions<MessageQueues> messageQueues,
                          IPromptServices promptServices,
-                         IOptions<ChatCompletionSettings> chatCompletionSettings,
                          ITenantCacheServices tenantCacheServices,
                          IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
-                         IResponseApi responseApi,
                          IApiTemplateServices apiTemplateServices,
                          IAccountServices accountServices)
     {
         _messageQueues = messageQueues.Value;
         _promptServices = promptServices;
-        _chatCompletionSettings = chatCompletionSettings.Value;
         _tenantCacheServices = tenantCacheServices;
-        _responseApi = responseApi;
         _responseOpenAiSettings = responseOpenAiSettings.Value;
         _apiTemplateServices = apiTemplateServices;
         _accountServices = accountServices;
@@ -127,44 +120,54 @@ public class PromptHandler : IToolHandler
 
     private async Task VerifyAndAddOrNotMcpSupport(PromptDto promptDto, ResponseOpenAiRequestDto dto)
     {
-        if (promptDto.EnableAccessToMcp)
+        if (!promptDto.EnableAccessToMcp)
+            return;
+
+        var apis = await _apiTemplateServices.FindAll(new ApiTemplateFilterDto() { EnableAccessFromMcp = true, PromptId = promptDto.Id });
+
+        var mappedApis = apis.Select(api => new
         {
-
-            var apis = await _apiTemplateServices.FindAll(new ApiTemplateFilterDto() { EnableAccessFromMcp = true, PromptId = promptDto.Id });
-
-            var mappedApis = apis.Select(api => new
+            id = api.Id,
+            address = api.Url,
+            protocol = api.Method switch 
             {
-                id = api.Id,
-                address = api.Url,
-                protocol = api.Method == "GET" ? 0 : api.Method == "POST" ? 1 : api.Method == "PUT" ? 2 : 3,
-                description = api.Description,
-                payload_schema = api.Method == "GET" ? null : $"PAYLOAD_API_{api.Id}"
-            });
-
-            var mappedApiString = System.Text.Json.JsonSerializer.Serialize(mappedApis);
-
-            foreach (var item in apis.Where(a => a.Method != "GET"))
+                "GET" => 0,
+                "POST" => 1, 
+                "PUT" => 2,
+                _ => 3
+            },
+            description = api.Description,
+            payload_schema =  api.Method switch 
             {
-                mappedApiString = mappedApiString.Replace($"PAYLOAD_API_{item.Id}", System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(item.BodyTemplate).RootElement));
-            }
+                "GET" => null,
+                _ => $"PAYLOAD_API_{api.Id}"
+            },
+        });
 
-            var accessToken = _accountServices.GenerateToken("MCP_SERVER", 5);
+        var mappedApiString = System.Text.Json.JsonSerializer.Serialize(mappedApis);
 
-            var instructions = string.IsNullOrEmpty(mappedApiString) ? "" : @"
+        foreach (var item in apis.Where(a => a.Method != "GET"))
+        {
+            mappedApiString = mappedApiString.Replace($"PAYLOAD_API_{item.Id}", System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(item.BodyTemplate).RootElement));
+        }
+
+        var accessToken = _accountServices.GenerateToken("MCP_SERVER", 5);
+
+        var instructions = string.IsNullOrEmpty(mappedApiString) ? "" : @"
 Para atender o prompt acima  use a tool generalista. e siga as instruções abaixo.
 Assinatura: generalista(request: GeneralistaRequestDTO).
 a estrutura do GeneralistaRequestDTO é a seguinte:
 {
-    Protocolo: GeneralistaProtocolMetodo, // O protocolo define a estrutura do payload e o endpoint a ser chamado.
-    BaseRequestURL: string, // URL usado na request do MCP, ex: 'https://localhost:7115/api/usuario/' ou 'https://localhost:7115/api/produto/'
-    RequestData: string, // dados em json em formato de string, que serão enviados no corpo da requisição para o endpoint definido pelo protocolo.
+Protocolo: GeneralistaProtocolMetodo, // O protocolo define a estrutura do payload e o endpoint a ser chamado.
+BaseRequestURL: string, // URL usado na request do MCP, ex: 'https://localhost:7115/api/usuario/' ou 'https://localhost:7115/api/produto/'
+RequestData: string, // dados em json em formato de string, que serão enviados no corpo da requisição para o endpoint definido pelo protocolo.
 }
 
 GeneralistaProtocolMetodo {
-        GET=0,
-        POST=1,
-        PUT=2,
-        DELETE=3
+    GET=0,
+    POST=1,
+    PUT=2,
+    DELETE=3
 }
 
 com a estrutura definida 
@@ -184,26 +187,25 @@ REGRAS DE ROTEAMENTO:
 REGRAS DE RESPOSTA:
 - Não sugerir ações após o rultado
 - Não indicar como os dados foram obtidos apenas apresentar os dados
-                    ";
+                ";
 
-            dto.Instructions = instructions;
-            dto.MaxToolCalls = 10;
-            dto.Tools = new List<ResponseOpenAiRequestToolsDto> {
-                new ResponseOpenAiRequestToolsDto {
-                    Type = OpenAiResponseToolsType.Mcp,
-                    ServerLabel = "dmcp",
-                    ServerUrl=_responseOpenAiSettings.McpAddress,
-                    Headers= new Dictionary<string, string>{
-                            {"x-session-id", "d354301e-6b4b-4a3f-beef-1f9715dd2dfd"},
-                            {"x-api-key", "d354301e-6b4b-4a3f-beef-1f9715dd2dfd"},
-                            {"Authorization", $"Bearer {accessToken}"}
-                        },
-                    RequireApproval="never",
-                    AllowedTools=["generalista"]
-                }
-            };
-        }
-    }
+        dto.Instructions = instructions;
+        dto.MaxToolCalls = 10;
+        dto.Tools = new List<ResponseOpenAiRequestToolsDto> {
+            new ResponseOpenAiRequestToolsDto {
+                Type = OpenAiResponseToolsType.Mcp,
+                ServerLabel = "dmcp",
+                ServerUrl=_responseOpenAiSettings.McpAddress,
+                Headers= new Dictionary<string, string>{
+                        {"x-session-id", "d354301e-6b4b-4a3f-beef-1f9715dd2dfd"},
+                        {"x-api-key", "d354301e-6b4b-4a3f-beef-1f9715dd2dfd"},
+                        {"Authorization", $"Bearer {accessToken}"}
+                    },
+                RequireApproval="never",
+                AllowedTools=["generalista"]
+            }
+        };
+}
 
     /// <summary>
     /// Extracts and concatenates text from dependency outputs. OCR output is parsed from DocumentEmbeddings; Prompt output is used as plain text.

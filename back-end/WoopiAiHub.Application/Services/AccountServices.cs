@@ -19,8 +19,6 @@ using WoopiAiHub.Infrastructure.Multitenancy;
 using Newtonsoft.Json;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Interfaces.Refit.Functions;
-using Microsoft.Extensions.Options;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -37,9 +35,6 @@ namespace WoopiAiHub.Application.Services
         private readonly IPasswordHasher _passwordHasher;
         private readonly IRefreshTokenServices _refreshTokenServices;
         private const string _messageHttpContextNotAvailable = "HttpContext is not available.";
-        private readonly IResponseApi _responseApi;
-        private readonly ResponseOpenAiSettings _responseOpenAiSettings;
-        private readonly IApiTemplateServices _apiTemplateServices;
 
         public AccountServices(IGraphApi graphApi,
                                IMarketPlaceApi marketPlaceApi,
@@ -50,10 +45,7 @@ namespace WoopiAiHub.Application.Services
                                ITenantContextService tenantContextService,
                                IHttpContextAccessor httpContextAccessor,
                                IPasswordHasher passwordHasher,
-                               IRefreshTokenServices refreshTokenServices,
-                                IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
-                               IResponseApi responseApi,
-                               IApiTemplateServices apiTemplateServices)
+                               IRefreshTokenServices refreshTokenServices)
         {
             _graphApi = graphApi;
             _marketPlaceApi = marketPlaceApi;
@@ -65,9 +57,6 @@ namespace WoopiAiHub.Application.Services
             _httpContextAccessor = httpContextAccessor;
             _passwordHasher = passwordHasher;
             _refreshTokenServices = refreshTokenServices;
-            _responseApi = responseApi;
-            _responseOpenAiSettings = responseOpenAiSettings.Value;
-            _apiTemplateServices = apiTemplateServices;
         }
 
         /// <summary>
