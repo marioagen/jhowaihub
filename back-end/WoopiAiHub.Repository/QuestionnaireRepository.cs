@@ -74,7 +74,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public QuestionnaireDto FindById(int id)
+        public QuestionnaireDto? FindById(int id)
         {
             return _context.Questionnaires
                 .AsNoTracking()

@@ -63,7 +63,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="title"></param>
         /// <returns></returns>
-        public QuestionnaireDto FindById(int id)
+        public QuestionnaireDto? FindById(int id)
         {
             return _questionnaireRepository.FindById(id);
         }
@@ -88,7 +88,8 @@ namespace WoopiAiHub.Application.Services
             _unitOfWork.BeginTransaction();
             try
             {
-                var questionnaireIdResult = _questionnaireRepository.FindById(updateQuestionnaireDto.Id);
+                var questionnaireIdResult = _questionnaireRepository.FindById(updateQuestionnaireDto.Id)
+                    ?? throw new ArgumentException($"Questionnaire with id {updateQuestionnaireDto.Id} was not found.");
                 var questionnaire = GenerateQuestionnaireToUpdate(updateQuestionnaireDto, questionnaireIdResult);
                 bool questionsDeleted = DeleteQuestions(updateQuestionnaireDto, questionnaireIdResult);
 

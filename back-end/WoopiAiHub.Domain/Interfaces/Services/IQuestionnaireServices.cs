@@ -8,7 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         bool CreateUniqueQuestionnaire(CreateQuestionnaireDto createQuestionnaireDto,
                                        string email);
         ICollection<QuestionnaireDto> FindAll();
-        QuestionnaireDto FindById(int id);
+        QuestionnaireDto? FindById(int id);
         bool DeleteByIds(List<int> ids);
         bool Update(UpdateQuestionnaireDto updateQuestionnaireDto);
         QuestionnairePagedResultDto FindAllPaged(QuestionnairePagedDataDto questionnairePagedDataDto);

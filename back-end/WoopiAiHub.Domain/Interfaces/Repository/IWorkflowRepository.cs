@@ -23,12 +23,12 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<List<Workflow>> FindByIdsAsync(ICollection<int> ids);
         IQueryable<WorkflowDto> FindAllWithFilter(WorkflowPagedDto workflowPagedDto);
         Task<bool> UpdateStepToolOutput(StepToolOutput stepToolOutput);
-        StepToolOutput FindByStepToolOutputById(int id);
+        StepToolOutput? FindByStepToolOutputById(int id);
         Task<List<StepDto>> FindPhase2ById(int id);
         Task<List<StepDto>> FindPhase3ById(int id);
         Task<Phase1Dto> FindPhase1ById(int id);
-        StepDto FindStepById(int id);
-        Task<ToolDto> FindToolByStepToolId(int id);
+        StepDto? FindStepById(int id);
+        Task<ToolDto?> FindToolByStepToolId(int id);
         Task<ICollection<ResponseWorkflowByDocumentDto>> FindWorkflowsByDocument(RequestWorkFlowByDocumentDto dto, CancellationToken ct = default);
         Task<bool> IsValidTeamUser(int cardId,
                                    Guid userId);

@@ -67,7 +67,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public TypeDoc FindByName(string name)
+        public TypeDoc? FindByName(string name)
         {
             return _context.TypeDoc
                 .AsNoTracking()

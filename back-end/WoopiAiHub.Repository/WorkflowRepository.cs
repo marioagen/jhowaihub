@@ -122,7 +122,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public StepDto FindStepById(int id)
+        public StepDto? FindStepById(int id)
         {
             var step = _context.Steps
             .AsNoTracking()
@@ -768,7 +768,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public StepToolOutput FindByStepToolOutputById(int id)
+        public StepToolOutput? FindByStepToolOutputById(int id)
         {
             var stepToolOutput = _context.StepToolOutputs.Where(p => p.Id == id)
                                                          .FirstOrDefault();
@@ -780,14 +780,14 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<ToolDto> FindToolByStepToolId(int id)
+        public async Task<ToolDto?> FindToolByStepToolId(int id)
         {
             return await _context.StepTools
                 .AsNoTracking()
                 .Where(p => p.Id == id)
                 .Select(s => new ToolDto
                 {
-                    Id = s.Tool.Id,
+                    Id = s.Tool!.Id,
                     Name = s.Tool.Name,
                 })
                 .FirstOrDefaultAsync();
