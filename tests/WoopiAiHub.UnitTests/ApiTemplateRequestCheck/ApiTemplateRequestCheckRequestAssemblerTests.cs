@@ -304,7 +304,9 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestCheck
                 "https://x/",
                 """[{"key":"q","value":"1"}]""",
                 """[{"key":"H","value":"v"}]""",
-                "{}");
+                "{}",
+                null,
+                false);
 
             var dto = ApiTemplateRequestCheckRequestAssembler.ToDraft(model);
 

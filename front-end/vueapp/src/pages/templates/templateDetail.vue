@@ -671,6 +671,8 @@
                     queryParams: [],
                     headers: [],
                     body: "",
+                    enableAccessFromMcp: false,
+                    description: "",
                 },
                 isSaving: false,
                 isLoading: false,
@@ -1058,7 +1060,7 @@
                 this.form.queryParams.splice(index, 1);
             },
             addHeader() {
-                this.form.headers.push({ key: "" });
+                this.form.headers.push({ key: "", value: ""});
             },
             removeHeader(index) {
                 this.form.headers.splice(index, 1);
@@ -1163,7 +1165,7 @@
                         .filter((h) => h.key.trim() !== "")
                         .map((h) => ({
                             key: h.key,
-                            value: `{{${h.key}}}`,
+                            value: !!h.value ? h.value : `{{${h.key}}}`,
                         }));
 
                     const templateData = {
@@ -1174,6 +1176,8 @@
                         queryTemplate:
                             queryParams.length === 0 ? null : JSON.stringify(queryParams),
                         headerTemplate: headers.length === 0 ? null : JSON.stringify(headers),
+                        enableAccessFromMcp:  this.values.enableAccessFromMcp,
+                        description:  this.values.enableAccessFromMcp ? this.values.description : null,
                     };
 
                     if (this.isEditMode) {
