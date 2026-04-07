@@ -86,7 +86,6 @@
     import SpecialEdge from "@/components/flow/SpecialEdge.vue";
     import LogService from "@/services/log/logService";
     import ToolsServices from "@/services/tools/ToolsServices";
-    import WorkflowService from "@/services/workflow/WorkflowService";
     import PromptService from "@/services/prompts/PromptsService";
     import ToolType from "@/constants/ToolType";
 
@@ -183,7 +182,9 @@
                             order: stepTool.order,
                             icon: "Activity",
                             color: "blue",
-                            parameters: stepTool.parameters,
+                            parameters: Array.isArray(stepTool.parameters)
+                                ? stepTool.parameters
+                                : [],
                             isEditableInput: stepTool.tool.isEditableInput,
                             toolType: stepTool.tool.toolType,
                             toolId: stepTool.toolId,
@@ -359,6 +360,17 @@
                 });
                 return order.map((id) => nodeMap[id]).filter(Boolean);
             },
+            isPlaceholderParameterRow(p) {
+                if (!p || typeof p !== "object") return true;
+                const emptyValue = p.value == null || p.value === "";
+                const emptyWebhook = p.webhookId == null || p.webhookId === "";
+                return emptyValue && emptyWebhook && !p.requiredFile;
+            },
+            sanitizeParametersForPayload(parameters) {
+                if (!Array.isArray(parameters) || parameters.length === 0) return [];
+                const kept = parameters.filter((p) => !this.isPlaceholderParameterRow(p));
+                return kept.map((p) => ({ ...p }));
+            },
             buildFlowPayload() {
                 const orderedNodes = this.getNodesOrderedByEdges();
                 return orderedNodes.map((node, index) => ({
@@ -373,7 +385,7 @@
                     positionY: parseFloat(node.position.y.toFixed(2)),
                     order: index + 1,
                     status: "Active",
-                    parameters: node.data.parameters,
+                    parameters: this.sanitizeParametersForPayload(node.data.parameters),
                     dependsOnStepToolId:
                         node.data.stepToolId && node.data.stepToolId > 0
                             ? node.data.stepToolId

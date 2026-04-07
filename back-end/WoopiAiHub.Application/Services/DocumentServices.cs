@@ -72,8 +72,18 @@ namespace WoopiAiHub.Application.Services
                 if (documentPagedDataDto.Page > 0)
                 {
                     var totalList = _documentRepository.FindAllOrdered(documentPagedDataDto, emailCreator);
-                    var result = DocumentPagination(totalList, documentPagedDataDto);
-                    return result;
+                    var paginated = PaginationHelper.Paginate(
+                        totalList,
+                        documentPagedDataDto.Page,
+                        documentPagedDataDto.PageSize);
+
+                    return new DocumentPagedResultDto
+                    {
+                        Content = paginated.Content,
+                        CurrentPage = paginated.CurrentPage,
+                        PageCount = paginated.PageCount,
+                        RowCount = paginated.RowCount
+                    };
                 }
                 else
                 {
@@ -197,41 +207,6 @@ namespace WoopiAiHub.Application.Services
 
             return await this.ChangeStatus(id, status, emailCreator);
         }
-
-        /// <summary>
-        /// Ordenates the list of documents and returns a paged result
-        /// </summary>
-        /// <param name="totalList"></param>
-        /// <param name="DocumentPagedDataDto"></param>
-        /// <returns></returns>
-        private DocumentPagedResultDto DocumentPagination(IQueryable<DocumentListItemDto> query,
-            DocumentPagedDataDto dto)
-        {
-            int pageCount, currentPage;
-            var totalListCount = query.Count();
-            if (dto.PageSize == 0)
-            {
-                pageCount = 1;
-                currentPage = 1;
-                dto.PageSize = totalListCount;
-            }
-            else
-            {
-                pageCount = (int)Math.Ceiling((double)totalListCount / dto.PageSize);
-                currentPage = dto.Page <= pageCount ? dto.Page : 1;
-
-                query = query.Skip((currentPage - 1) * dto.PageSize)
-                    .Take(dto.PageSize);
-            }
-
-            return new DocumentPagedResultDto
-            {
-                Content = query,
-                CurrentPage = currentPage,
-                PageCount = pageCount,
-                RowCount = totalListCount
-            };
-        }       
 
     }
 }

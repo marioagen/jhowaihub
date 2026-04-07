@@ -5,7 +5,7 @@
             :key="item.activeKey ? `${item.activeKey}-${index}` : `nav-${index}`"
             class="mb-1 sidebar-menu-item-enter"
             :class="{
-                'is-active': item.visibleGroup ? isGroupActive(item) : isRouteActive(item),
+                'is-active': !item.visibleGroup && isRouteActive(item),
             }"
             :style="{ '--item-index': index }"
         >
@@ -14,7 +14,6 @@
                     type="button"
                     class="d-flex align-items-center custom-menu-item sidebar-group-toggle link-dark rounded border-0 bg-transparent w-100 text-start"
                     :class="[
-                        isGroupActive(item) ? 'active' : '',
                         isGroupExpanded(item) ? 'is-expanded' : '',
                         isCollapsed ? 'justify-content-center' : '',
                     ]"
@@ -155,15 +154,9 @@
     }
 
     .btn-toggle-nav button.sidebar-group-toggle.is-expanded:not(.active):hover {
-        background-color: rgba(13, 110, 253, 0.1) !important;
+        background-color: transparent !important;
         color: var(--color-body-content) !important;
         box-shadow: none;
-    }
-
-    .btn-toggle-nav button.sidebar-group-toggle.active:hover {
-        background-color: rgba(13, 110, 253, 0.16) !important;
-        color: #0d6efd !important;
-        box-shadow: 0 2px 10px rgba(13, 110, 253, 0.22);
     }
 
     .btn-toggle-nav a.custom-menu-item.active,
@@ -176,7 +169,7 @@
     }
 
     .btn-toggle-nav button.sidebar-group-toggle.is-expanded:not(.active) {
-        background-color: rgba(13, 110, 253, 0.06) !important;
+        background-color: transparent !important;
         color: #676879 !important;
         font-weight: 400;
         box-shadow: none;
@@ -187,16 +180,22 @@
         color: #676879;
     }
 
+    .btn-toggle-nav button.sidebar-group-toggle.active:hover {
+        background-color: transparent !important;
+        color: var(--color-body-content) !important;
+        box-shadow: none;
+    }
+
     .btn-toggle-nav button.sidebar-group-toggle.active {
-        background-color: rgba(13, 110, 253, 0.12) !important;
-        color: #0d6efd !important;
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
-        cursor: default;
+        background-color: transparent !important;
+        color: #676879 !important;
+        font-weight: 400;
+        box-shadow: none;
+        cursor: pointer;
     }
 
     .btn-toggle-nav button.sidebar-group-toggle.active .sidebar-group-chevron {
-        color: #0d6efd;
+        color: #676879;
     }
 
     .btn-toggle-nav a {

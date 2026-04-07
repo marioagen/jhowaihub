@@ -833,10 +833,6 @@ const portuguese = {
         workflows: "Esteiras de Processamento",
         auditor: "Auditoria",
     },
-    pagination: {
-        next: "Próximo",
-        previous: "Anterior",
-    },
     permissions: {
         descriptions: {
             auditor: "Visualizar Auditoria",
@@ -1040,7 +1036,7 @@ const portuguese = {
             noRunTitle: "Nenhum teste executado",
             noRunHint: 'Preencha as variáveis e clique em "Simular Requisição".',
             simulateError: "Não foi possível executar a simulação. Tente novamente.",
-            simulateSuccess: "Simulação concluída com sucesso (HTTP 2xx).",
+            simulateSuccess: "Simulação concluída com sucesso (HTTP 200).",
             responseHttpStatus: "Status HTTP do destino",
             variableValues: "Valores de teste para as variáveis",
         },

@@ -54,9 +54,9 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         Task<bool> DeactivateUsersEnabledByReference([Header("KeyAccess")] string KeyAccess,
                                                     [FromBody] DeactivateUsersDto deactivateUsersDto);
 
-        [Post("/api/Tenant/ProcessConsumption")]
-        Task<bool> ProcessConsumption([Header("KeyAccess")] string KeyAccess,
-                                      TenantConsumptionDto request);
+        [Post("/api/Tenant/Subcription/ProcessPeriodConsumption")]
+        Task<bool> ProcessSubcriptionPeriodConsumption([Header("KeyAccess")] string KeyAccess,
+                                                       TenantConsumptionDto request);
 
         [Get("/api/Tenant/all/{module}")]
         Task<List<TenantListDto>> FindAllTenantsByModuleAsync([Header("KeyAccess")] string KeyAccess,

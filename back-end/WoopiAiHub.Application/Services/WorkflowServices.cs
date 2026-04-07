@@ -818,7 +818,7 @@ namespace WoopiAiHub.Application.Services
         {
             await DeleteStepToolRelatedData(allStepToolIds);
 
-            DeleteRelatedStepsCardData(allCardIds);
+            await DeleteRelatedStepsCardData(allCardIds);
         }
 
         /// <summary>
@@ -830,13 +830,13 @@ namespace WoopiAiHub.Application.Services
         /// <param name="allCardIds">A list of card IDs for which related step and card data will be deleted. Must not be null; if empty, no data
         /// will be deleted.</param>
         /// <returns>A task that represents the asynchronous delete operation.</returns>
-        private void DeleteRelatedStepsCardData(List<int> allCardIds)
+        private async Task DeleteRelatedStepsCardData(List<int> allCardIds)
         {
             if (allCardIds.Count > 0)
             {
                 _stepToolExecutionRepository.DeleteByCardIds(allCardIds);
                 _stepToolOutputRepository.DeleteByCardIds(allCardIds);
-                _cardRepository.DisableByIds(allCardIds);
+                await _cardRepository.DisableByIds(allCardIds);
             }
         }
 
@@ -1004,7 +1004,7 @@ namespace WoopiAiHub.Application.Services
                 var stepWithCards = await _stepRepository.FindById(step.Id);
                 if (stepWithCards != null)
                 {
-                    DeleteRelatedStepsCardData(stepWithCards.Cards.Select(c => c.Id).ToList());
+                    await DeleteRelatedStepsCardData(stepWithCards.Cards.Select(c => c.Id).ToList());
                 }
             }
             if (stepToolIdsToRemove.Any())
