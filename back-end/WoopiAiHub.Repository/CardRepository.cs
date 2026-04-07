@@ -72,7 +72,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Card?> FindByIdWithDocument(int id)
         {
-            return await _context.Cards.Where(c => c.Id == id)
+            return await _context.Cards
+                .AsNoTracking()
+                .Where(c => c.Id == id)
                 .Include(d => d.Document)
                 .FirstOrDefaultAsync();
         }
@@ -229,6 +231,7 @@ namespace WoopiAiHub.Repository
         public async Task<Card?> FindByDocumentIdCardAsync(int documentId)
         {
             return await _context.Cards
+                .AsNoTracking()
                 .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Executions)
                     .ThenInclude(e => e.StepTool)
@@ -262,6 +265,7 @@ namespace WoopiAiHub.Repository
         public async Task<List<Card>> FindByDocumentIdCardListAsync(int documentId)
         {
             return await _context.Cards
+                .AsNoTracking()
                 .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Step)
                 .Include(c => c.Outputs)
@@ -316,6 +320,7 @@ namespace WoopiAiHub.Repository
         public async Task<List<Card>> FindByDocumentBatchId(int documentBatchId)
         {
             return await _context.Cards
+                .AsNoTracking()
                 .Include(c => c.Document)
                 .Include(c => c.Step)
                 .Where(c => c.DocumentBatchId == documentBatchId)
