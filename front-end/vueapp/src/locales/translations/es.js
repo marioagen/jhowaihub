@@ -1199,6 +1199,8 @@ const spanish = {
         associatedTeams: "Equipos asociados",
         basicInfo: "Información Básica",
         boardView: "Visualizando workflow:",
+        refreshBoard: "Actualizar tablero",
+        editWorkflowBoard: "Editar workflow",
         clone: "Clonar",
         cloneConfirm: "Clonar",
         cloneError: "Error al clonar workflow",
@@ -1290,7 +1292,8 @@ const spanish = {
         steps: "Etapas del Workflow",
         stepsTitle: "Pasos del flujo de trabajo",
         stepHasDocumentsTitle: "Etapa con documentos en progreso",
-        stepHasDocumentsMessage: "Hay documentos en procesamiento en este flujo de trabajo. Para eliminar una etapa, es necesario que no haya documentos en progreso.",
+        stepHasDocumentsMessage:
+            "Hay documentos en procesamiento en este flujo de trabajo. Para eliminar una etapa, es necesario que no haya documentos en progreso.",
         stepSubtitle: "Configura las reglas y responsables",
         stepTitle: "Etapa del Workflow",
         subtitle: "Visualiza el flujo de documentos a través de las etapas de procesamiento",
