@@ -54,7 +54,7 @@
                 <span v-if="data.row.lastLoginAt">{{
                     formatDateWithTime(data.row.lastLoginAt)
                 }}</span>
-                <span v-else>—</span>
+                <span v-else>"N/A"</span>
             </template>
             <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
