@@ -57,6 +57,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IValidateStep, ValidateStep>();
             services.AddScoped<IValidateWorkflow, ValidateWorkflow>();
             services.AddScoped<ICardServices, CardServices>();
+            services.AddScoped<IFailingCardService, FailingCardService>();
             services.AddScoped<IAuditCardService, AuditCardService>();
             services.AddScoped<IAuditorServices, AuditorServices>();
             services.AddScoped<IToolServices, ToolServices>();

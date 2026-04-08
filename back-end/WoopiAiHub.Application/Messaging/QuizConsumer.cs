@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
-using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -12,7 +11,6 @@ using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
-using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.Infrastructure.Messaging.Consumers;
 
@@ -79,6 +77,20 @@ namespace WoopiAiHub.Application.Messaging
                                                                        DocumentStatus.Failure);
 
                     _logger.LogError(ex, "Failed to process the answer response.");
+
+                    try
+                    {
+                        var failingCardService = scope.ServiceProvider.GetRequiredService<IFailingCardService>();
+                        var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(message.Data.ToString());
+                        if (dataDto.CardId > 0)
+                        {
+                            await failingCardService.SetFailingCard(dataDto.CardId, message.Email);
+                        }
+                    }
+                    catch (Exception failingEx)
+                    {
+                        _logger.LogError(failingEx, "Erro ao marcar card como failing após exception do consumer");
+                    }
                 }
             });
 

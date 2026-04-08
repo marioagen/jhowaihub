@@ -25,6 +25,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         private readonly DocumentEmbeddingsResultDto _documentEmbeddingsResultDto;
         private readonly Mock<IDocumentServices> _documentServices;
         private readonly Mock<IDocumentPipelineServices> _documentPipelineServices;
+        private readonly Mock<IFailingCardService> _failingCardServiceMock;
         private readonly Mock<IMessageConsumer<DocumentEmbeddingsResultDto>> _consumerMock;
         private readonly Mock<ILogger<DocumentEmbeddingsConsumer>> _loggerMock;
         private readonly Mock<ITenantCacheServices> _tenantCacheServices;
@@ -58,9 +59,16 @@ namespace WoopiAiHub.UnitTests.Consumers
             _automationServices = new Mock<IAutomationServices>();
             _usageDailyServices = new Mock<IUsageDailyServices>();
 
-            _tenantCacheServices = new Mock<ITenantCacheServices>();
+             _tenantCacheServices = new Mock<ITenantCacheServices>();
             _tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
                              .ReturnsAsync(tenant);
+
+            _failingCardServiceMock = new Mock<IFailingCardService>();
+            _failingCardServiceMock.Setup(f => f.SetFailingCard(It.IsAny<int>(), It.IsAny<string>()))
+                .Returns(Task.CompletedTask);
+
+            var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            httpContextAccessorMock.SetupProperty(x => x.HttpContext, null);
 
             var serviceProviderMock = new Mock<IServiceProvider>();
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
@@ -71,6 +79,12 @@ namespace WoopiAiHub.UnitTests.Consumers
                                .Returns(_automationServices.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IUsageDailyServices)))
                                .Returns(_usageDailyServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(ITenantCacheServices)))
+                               .Returns(_tenantCacheServices.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IFailingCardService)))
+                               .Returns(_failingCardServiceMock.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IHttpContextAccessor)))
+                               .Returns(httpContextAccessorMock.Object);
 
             var serviceScopeMock = new Mock<IServiceScope>();
             serviceScopeMock.Setup(s => s.ServiceProvider).Returns(serviceProviderMock.Object);
@@ -78,18 +92,6 @@ namespace WoopiAiHub.UnitTests.Consumers
             var scopeFactoryMock = new Mock<IServiceScopeFactory>();
             scopeFactoryMock.Setup(f => f.CreateScope()).Returns(serviceScopeMock.Object);
             _mocker.Use(scopeFactoryMock.Object);
-
-            var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
-            httpContextAccessorMock.SetupProperty(x => x.HttpContext, null);
-
-            serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentServices)))
-                               .Returns(_documentServices.Object);
-            serviceProviderMock.Setup(sp => sp.GetService(typeof(IDocumentPipelineServices)))
-                               .Returns(_documentPipelineServices.Object);
-            serviceProviderMock.Setup(sp => sp.GetService(typeof(ITenantCacheServices)))
-                               .Returns(_tenantCacheServices.Object);
-            serviceProviderMock.Setup(sp => sp.GetService(typeof(IHttpContextAccessor)))
-                               .Returns(httpContextAccessorMock.Object);
 
             _consumerMock = new Mock<IMessageConsumer<DocumentEmbeddingsResultDto>>();
             _loggerMock = new Mock<ILogger<DocumentEmbeddingsConsumer>>();
@@ -130,8 +132,9 @@ namespace WoopiAiHub.UnitTests.Consumers
             var exceptionExpected = new Exception("Error processing Embeddings response");
 
             _documentPipelineServices
-                .Setup(x => x.ProcessEmbeddingsResult(It.IsAny<DocumentEmbeddingsResultDto>()))
-                .ThrowsAsync(exceptionExpected);
+                .SetupSequence(x => x.ProcessEmbeddingsResult(It.IsAny<DocumentEmbeddingsResultDto>()))
+                .ThrowsAsync(exceptionExpected)
+                .ReturnsAsync(new MetaDataAutomationDto { CardId = 10, StepToolId = 1 });
 
             _consumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<DocumentEmbeddingsResultDto, Task>>()))
 
@@ -148,7 +151,8 @@ namespace WoopiAiHub.UnitTests.Consumers
 
             // Assert
             Assert.Null(exception);
-            _documentPipelineServices.Verify(x => x.ProcessEmbeddingsResult(_documentEmbeddingsResultDto), Times.Once);
+            _documentPipelineServices.Verify(x => x.ProcessEmbeddingsResult(_documentEmbeddingsResultDto), Times.Exactly(2));
+            _failingCardServiceMock.Verify(x => x.SetFailingCard(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
 
             _loggerMock.Verify(x =>
                 x.Log(

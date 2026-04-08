@@ -38,6 +38,7 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly IExecutionServices _executionServices;
         private readonly IWorkflowRepository _workflowRepository;
+        private readonly IFailingCardService _failingCardService;
 
         public AutomationServices(IStepToolExecutionRepository stepToolExecutionRepository,
                                   IStepToolRepository stepToolRepository,
@@ -55,7 +56,8 @@ namespace WoopiAiHub.Application.Services.Automation
                                   IEncryptionService encryptionService,
                                   IUsageDailyServices usageDailyServices,
                                   IExecutionServices executionServices,
-                                  IWorkflowRepository workflowRepository)
+                                  IWorkflowRepository workflowRepository,
+                                  IFailingCardService failingCardService)
         {
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolRepository = stepToolRepository;
@@ -74,6 +76,7 @@ namespace WoopiAiHub.Application.Services.Automation
             _usageDailyServices = usageDailyServices;
             _executionServices = executionServices;
             _workflowRepository = workflowRepository;
+            _failingCardService = failingCardService;
         }
 
         /// <summary>
@@ -206,12 +209,22 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns></returns>
         public async Task StartExecutionByStepAsync(Step step, AutomationServicesDto automationServicesDto)
         {
-            var tasks = step.StepTools
-                            .Where(st => !st.DependsOnStepToolId.HasValue)
-                            .OrderBy(st => st.Order)
-                            .SelectMany(st => step.Cards.Select(card => RunStepToolExecutionAsync(st, automationServicesDto, card.Id)));
+            try
+            {
+                var tasks = step.StepTools
+                                .Where(st => !st.DependsOnStepToolId.HasValue)
+                                .OrderBy(st => st.Order)
+                                .SelectMany(st => step.Cards.Select(card =>
+                                    RunStepToolExecutionAsync(st, automationServicesDto, card.Id)))
+                                .ToList();
 
-            await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro crítico ao processar Step {StepId}", step.Id);
+                await MarkCardsAsFailingAsync(step.Cards, automationServicesDto.Email);
+            }
         }
 
         /// <summary>
@@ -225,25 +238,33 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task StartExecutionByCardAsync(AutomationServicesDto automationServicesDto)
         {
-            var stepTool = await _stepToolRepository.FindByStepIdAndOrderAsync(automationServicesDto.StepId.GetValueOrDefault(), 1);
-
-            if (stepTool != null)
+            try
             {
-                var tool = await _workflowRepository.FindToolByStepToolId(stepTool.Id);
-                var toolName = tool?.Name ?? string.Empty;
+                var stepTool = await _stepToolRepository.FindByStepIdAndOrderAsync(automationServicesDto.StepId.GetValueOrDefault(), 1);
 
-                await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 0.0, automationServicesDto.StepId.GetValueOrDefault(), toolName);
-                await RunStepToolExecutionAsync(stepTool, automationServicesDto, 0);
-            }
-            else
-            {
-                var step = await _stepRepository.FindByIdWithTools(automationServicesDto.StepId.GetValueOrDefault());
-                var hasTools = step?.StepTools?.Count > 0;
-
-                if (!hasTools)
+                if (stepTool != null)
                 {
-                    await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, automationServicesDto.StepId.GetValueOrDefault(), string.Empty);
+                    var tool = await _workflowRepository.FindToolByStepToolId(stepTool.Id);
+                    var toolName = tool?.Name ?? string.Empty;
+
+                    await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 0.0, automationServicesDto.StepId.GetValueOrDefault(), toolName);
+                    await RunStepToolExecutionAsync(stepTool, automationServicesDto, 0);
                 }
+                else
+                {
+                    var step = await _stepRepository.FindByIdWithTools(automationServicesDto.StepId.GetValueOrDefault());
+                    var hasTools = step?.StepTools?.Count > 0;
+
+                    if (!hasTools)
+                    {
+                        await _hubNotifier.CardProgessAsync(automationServicesDto.Email, automationServicesDto.CardId, 100.0, automationServicesDto.StepId.GetValueOrDefault(), string.Empty);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao iniciar execução do StepId {StepId} para CardId {CardId}", automationServicesDto.StepId, automationServicesDto.CardId);
+                await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
             }
         }
 
@@ -264,9 +285,17 @@ namespace WoopiAiHub.Application.Services.Automation
                 throw new AppException(ErrorCode.InvalidValue, "StepId is required for reprocessing", null);
             }
 
-            var stepTool = await _stepToolRepository.FindNextPending(automationServicesDto.StepId.Value, automationServicesDto.CardId);
-            if (stepTool != null)
-                await RunStepToolExecutionAsync(stepTool, automationServicesDto, 0);
+            try
+            {
+                var stepTool = await _stepToolRepository.FindNextPending(automationServicesDto.StepId.Value, automationServicesDto.CardId);
+                if (stepTool != null)
+                    await RunStepToolExecutionAsync(stepTool, automationServicesDto, 0);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao reprocessar StepId {StepId} para CardId {CardId}", automationServicesDto.StepId, automationServicesDto.CardId);
+                await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
+            }
         }
 
         /// <summary>
@@ -283,51 +312,28 @@ namespace WoopiAiHub.Application.Services.Automation
         private async Task RunStepToolExecutionAsync(StepTool stepTool, AutomationServicesDto automationServicesDto, int cardId)
         {
             var resolvedCardId = cardId > 0 ? cardId : automationServicesDto.CardId;
-            var execution = await _stepToolExecutionRepository
-                                  .FindByStepToolIdAndCardIdAsync(stepTool.Id, resolvedCardId);
-
-            if (execution is null)
-                return;
-
-            execution.UpdateStatusExecution(StatusExecution.Running);
-            await _stepToolExecutionRepository.UpdateAsync(execution);
 
             try
             {
+                var execution = await _stepToolExecutionRepository
+                                      .FindByStepToolIdAndCardIdAsync(stepTool.Id, resolvedCardId);
+
+                if (execution is null)
+                    return;
+
+                execution.UpdateStatusExecution(StatusExecution.Running);
+                await _stepToolExecutionRepository.UpdateAsync(execution);
+
                 var input = _stepToolParameterRepository.FindByStepToolId(stepTool.Id);
                 var enrichedDto = EnrichDtoWithExecutionData(automationServicesDto, stepTool.Id, resolvedCardId);
 
                 var payload = await BuildPayloadWithDependenciesAsync(stepTool, enrichedDto, input, resolvedCardId, execution);
                 await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
             }
-            catch (AppException ex)
+            catch (Exception ex)
             {
-                execution.UpdateStatusExecution(StatusExecution.Pending);
-                await _stepToolExecutionRepository.UpdateAsync(execution);
-
-                await _hubNotifier.CardProgessAsync(
-                    automationServicesDto.Email,
-                    resolvedCardId,
-                    0.0,
-                    automationServicesDto.StepId.GetValueOrDefault(),
-                    stepTool.Tool?.Name ?? string.Empty,
-                    true,
-                    ex.LabelError
-                );
-            }
-            catch
-            {
-                execution.UpdateStatusExecution(StatusExecution.Pending);
-                await _stepToolExecutionRepository.UpdateAsync(execution);
-
-                await _hubNotifier.CardProgessAsync(
-                    automationServicesDto.Email,
-                    resolvedCardId,
-                    0.0,
-                    automationServicesDto.StepId.GetValueOrDefault(),
-                    stepTool.Tool?.Name ?? string.Empty,
-                    true
-                );
+                _logger.LogError(ex, "Erro ao executar StepToolId {StepToolId} para CardId {CardId}", stepTool.Id, resolvedCardId);
+                await _failingCardService.SetFailingCard(resolvedCardId, automationServicesDto.Email);
             }
         }
 
@@ -406,47 +412,55 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task ContinueExecution(AutomationServicesDto automationServicesDto)
         {
-            var card = await _cardRepository.FindByIdWithStatus(automationServicesDto.CardId);
-            if (card != null && card.IsRejected())
-                return;
-
-            var currentExecution = await _stepToolExecutionRepository
-                .FindByStepToolIdAndCardIdAsync(automationServicesDto.StepToolId, automationServicesDto.CardId);
-
-            if (currentExecution != null)
+            try
             {
-                currentExecution.UpdateStatusExecution(StatusExecution.Ready);
-                await _stepToolExecutionRepository.UpdateAsync(currentExecution);
+                var card = await _cardRepository.FindByIdWithStatus(automationServicesDto.CardId);
+                if (card != null && card.IsRejected())
+                    return;
+
+                var currentExecution = await _stepToolExecutionRepository
+                    .FindByStepToolIdAndCardIdAsync(automationServicesDto.StepToolId, automationServicesDto.CardId);
+
+                if (currentExecution != null)
+                {
+                    currentExecution.UpdateStatusExecution(StatusExecution.Ready);
+                    await _stepToolExecutionRepository.UpdateAsync(currentExecution);
+                }
+
+                var stepTool = await _stepToolRepository.FindById(automationServicesDto.StepToolId);
+                var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
+
+                if (dependentStepTool == null ||
+                    stepTool!.Step!.Order.Equals(dependentStepTool!.Step!.Order) is false)
+                {
+                    await CheckAndAdvanceAiProfileStepAsync(automationServicesDto, dependentStepTool!);
+                    return;
+                }
+
+                var execution = await _stepToolExecutionRepository
+                    .FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, automationServicesDto.CardId);
+                if (execution == null)
+                    return;
+
+                execution.UpdateStatusExecution(StatusExecution.Running);
+                await _stepToolExecutionRepository.UpdateAsync(execution);
+
+                if (currentExecution != null)
+                {
+                    await _executionServices.HandleExecutionProgress(currentExecution, automationServicesDto.Email);
+                }
+                var input = _stepToolParameterRepository.FindByStepToolId(dependentStepTool.Id);
+                var nextAutomationDto = automationServicesDto with { StepToolId = dependentStepTool.Id };
+
+                var payload = await BuildPayloadWithDependenciesAsync(dependentStepTool, nextAutomationDto, input, execution.CardId, execution);
+
+                await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
             }
-
-            var stepTool = await _stepToolRepository.FindById(automationServicesDto.StepToolId);
-            var dependentStepTool = await _stepToolRepository.FindDependentAsync(automationServicesDto.StepToolId);
-
-            if (dependentStepTool == null ||
-                stepTool!.Step!.Order.Equals(dependentStepTool!.Step!.Order) is false)
+            catch (Exception ex)
             {
-                await CheckAndAdvanceAiProfileStepAsync(automationServicesDto, dependentStepTool!);
-                return;
+                _logger.LogError(ex, "Erro ao continuar execução do StepToolId {StepToolId} para CardId {CardId}", automationServicesDto.StepToolId, automationServicesDto.CardId);
+                await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
             }
-
-            var execution = await _stepToolExecutionRepository
-                .FindByStepToolIdAndCardIdAsync(dependentStepTool.Id, automationServicesDto.CardId);
-            if (execution == null)
-                return;
-
-            execution.UpdateStatusExecution(StatusExecution.Running);
-            await _stepToolExecutionRepository.UpdateAsync(execution);
-
-            if (currentExecution != null)
-            {
-                await _executionServices.HandleExecutionProgress(currentExecution, automationServicesDto.Email);
-            }
-            var input = _stepToolParameterRepository.FindByStepToolId(dependentStepTool.Id);
-            var nextAutomationDto = automationServicesDto with { StepToolId = dependentStepTool.Id };
-
-            var payload = await BuildPayloadWithDependenciesAsync(dependentStepTool, nextAutomationDto, input, execution.CardId, execution);
-
-            await _messagePublisher.PublishAsync(payload.Queue, payload.Message!);
         }
 
         /// <summary>
@@ -469,8 +483,8 @@ namespace WoopiAiHub.Application.Services.Automation
                 throw new AppException(ErrorCode.NotFound, "Tool connector api-key not found", null);
             }
 
-            var api = _apiClientFactory.Create(tool.ConnectorUrl!);    
-            
+            var api = _apiClientFactory.Create(tool.ConnectorUrl!);
+
             var response = await api.FindWorkflows(apiKey);
 
             if (!response.IsSuccessStatusCode)
@@ -500,7 +514,7 @@ namespace WoopiAiHub.Application.Services.Automation
 
             if (!response.IsSuccessStatusCode)
                 throw new AppException(ErrorCode.RefitApiError, "Connector fails listing workflows", null);
-            
+
             return JsonSchemaToFormMapper.MapToFormFields(response.Content!);
         }
 
@@ -511,7 +525,8 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns></returns>
         private static ICollection<ConnectorDto> MapToConnectorDtos(WebhookDataDto? root)
         {
-            if (root?.Data == null) return Array.Empty<ConnectorDto>();
+            if (root?.Data == null)
+                return Array.Empty<ConnectorDto>();
 
             return root.Data
                 .Select(w => new
@@ -537,46 +552,95 @@ namespace WoopiAiHub.Application.Services.Automation
         /// <returns>Task que representa a operação assíncrona</returns>
         private async Task CheckAndAdvanceAiProfileStepAsync(AutomationServicesDto automationServicesDto, StepTool dependentStepTool)
         {
-            var card = await _cardRepository.FindByIdWithStepAndProfile(automationServicesDto.CardId);
-            if (card?.Step?.Profile == null)
-                return;
-
-            if (card.Step.Profile.Name != Profile.IAFileName)
-                return;
-
-            var nextStepOrder = card.Step.Order + 1;
-            var nextStep = await _stepRepository.FindByOrderAndWorkflowId(nextStepOrder, card.Step.WorkflowId);
-
-            if (nextStep == null)
+            try
             {
-                return;
+                var card = await _cardRepository.FindByIdWithStepAndProfile(automationServicesDto.CardId);
+                if (card?.Step?.Profile == null)
+                    return;
+
+                if (card.Step.Profile.Name != Profile.IAFileName)
+                    return;
+
+                var nextStepOrder = card.Step.Order + 1;
+                var nextStep = await _stepRepository.FindByOrderAndWorkflowId(nextStepOrder, card.Step.WorkflowId);
+
+                if (nextStep == null)
+                {
+                    return;
+                }
+
+                card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
+                var cardWorkflows = new List<(int cardId, int workflowId, int documentId)> { (card.Id, card.Step!.WorkflowId, card.DocumentId) };
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, automationServicesDto.Email);
+                var updated = _cardRepository.Update(card);
+
+                if (updated)
+                {
+                    if (dependentStepTool != null)
+                    {
+                        var nextStepDto = automationServicesDto with
+                        {
+                            StepId = nextStep.Id,
+                            StepToolId = dependentStepTool.Id
+                        };
+                        await StartExecutionByCardAsync(nextStepDto);
+                    }
+                    else
+                    {
+                        var nextStepDto = automationServicesDto with
+                        {
+                            StepId = nextStep.Id,
+                            StepToolId = 0
+                        };
+                        await StartExecutionByCardAsync(nextStepDto);
+                    }
+                }
             }
-
-            card.UpdateStepAndStatus(nextStep.Id, nextStep.StatusId);
-            var cardWorkflows = new List<(int cardId, int workflowId, int documentId)> { (card.Id, card.Step!.WorkflowId, card.DocumentId) };
-            await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement, automationServicesDto.Email);
-            var updated = _cardRepository.Update(card);
-
-            if (updated)
+            catch (Exception ex)
             {
-                if (dependentStepTool != null)
-                {
-                    var nextStepDto = automationServicesDto with
-                    {
-                        StepId = nextStep.Id,
-                        StepToolId = dependentStepTool.Id
-                    };
-                    await StartExecutionByCardAsync(nextStepDto);
-                }
-                else
-                {
-                    var nextStepDto = automationServicesDto with
-                    {
-                        StepId = nextStep.Id,
-                        StepToolId = 0
-                    };
-                    await StartExecutionByCardAsync(nextStepDto);
-                }
+                _logger.LogError(ex, "Erro ao avançar card {CardId} para o próximo step após execução de ferramenta sem dependências", automationServicesDto.CardId);
+                await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
+            }
+        }
+
+        /// <summary>
+        /// Marks the specified collection of cards as failing asynchronously.
+        /// </summary>
+        /// <remarks>All cards in the collection are processed in parallel. If the collection is null or
+        /// empty, the method completes immediately without performing any actions.</remarks>
+        /// <param name="cards">A collection of cards to be marked as failing. If null or empty, no action is taken.</param>
+        /// <param name="email">The email address associated with the operation, or null if not applicable.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        private async Task MarkCardsAsFailingAsync(ICollection<Card>? cards, string? email)
+        {
+            if (cards == null || cards.Count == 0)
+                return;
+
+            var tasks = cards.Select(card =>
+                MarkCardAsFailingSafelyAsync(card.Id, email)
+            );
+
+            await Task.WhenAll(tasks);
+        }
+
+        /// <summary>
+        /// Attempts to mark the specified card as failing in a safe manner, logging any errors that occur during the
+        /// operation.
+        /// </summary>
+        /// <remarks>Any exceptions thrown during the operation are caught and logged; the method does not
+        /// propagate exceptions to the caller.</remarks>
+        /// <param name="cardId">The unique identifier of the card to be marked as failing.</param>
+        /// <param name="email">The email address associated with the card, or null if not applicable.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        private async Task MarkCardAsFailingSafelyAsync(int cardId, string? email)
+        {
+            try
+            {
+                await _failingCardService.SetFailingCard(cardId, email);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao marcar card {CardId} como failing", cardId);
             }
         }
     }

@@ -779,11 +779,12 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var labelError = "Créditos insuficientes";
             var appException = new AppException(ErrorCode.NoCreditsAvailable, "No credits", labelError);
 
-            var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+             var stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             var stepToolExecutionRepositoryMock = _mocker.GetMock<IStepToolExecutionRepository>();
             var toolFactoryHandlerMock = _mocker.GetMock<IToolFactoryHandler>();
             var handlerMock = _mocker.GetMock<IToolHandler>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+            var failingCardServiceMock = _mocker.GetMock<IFailingCardService>();
 
             stepToolRepositoryMock
                 .Setup(r => r.FindNextPending(It.IsAny<int>(), It.IsAny<int>()))
@@ -803,21 +804,17 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             hubNotifierMock
                 .Setup(h => h.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<string?>()))
                 .Returns(Task.CompletedTask);
+            failingCardServiceMock
+                .Setup(f => f.SetFailingCard(It.IsAny<int>(), It.IsAny<string>()))
+                .Returns(Task.CompletedTask);
 
             // Act
             var exception = await Record.ExceptionAsync(() => _service.ReprocessStepTool(automationDto));
 
             // Assert
             Assert.Null(exception);
-            stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Exactly(2));
-            hubNotifierMock.Verify(h => h.CardProgessAsync(
-                automationDto.Email,
-                automationDto.CardId,
-                0.0,
-                automationDto.StepId.GetValueOrDefault(),
-                It.IsAny<string>(),
-                true,
-                labelError), Times.Once);
+            stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
+            failingCardServiceMock.Verify(f => f.SetFailingCard(automationDto.CardId, automationDto.Email), Times.Once);
         }
 
         [Fact(DisplayName = "ReprocessStepTool should revert execution to Pending and notify hub without LabelError when unexpected exception is thrown")]
@@ -838,6 +835,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var toolFactoryHandlerMock = _mocker.GetMock<IToolFactoryHandler>();
             var handlerMock = _mocker.GetMock<IToolHandler>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+            var failingCardServiceMock = _mocker.GetMock<IFailingCardService>();
 
             stepToolRepositoryMock
                 .Setup(r => r.FindNextPending(It.IsAny<int>(), It.IsAny<int>()))
@@ -857,21 +855,17 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             hubNotifierMock
                 .Setup(h => h.CardProgessAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<double>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<bool>(), null))
                 .Returns(Task.CompletedTask);
+            failingCardServiceMock
+                .Setup(f => f.SetFailingCard(It.IsAny<int>(), It.IsAny<string>()))
+                .Returns(Task.CompletedTask);
 
             // Act
             var exception = await Record.ExceptionAsync(() => _service.ReprocessStepTool(automationDto));
 
             // Assert
             Assert.Null(exception);
-            stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Exactly(2));
-            hubNotifierMock.Verify(h => h.CardProgessAsync(
-                automationDto.Email,
-                automationDto.CardId,
-                0.0,
-                automationDto.StepId.GetValueOrDefault(),
-                It.IsAny<string>(),
-                true,
-                null), Times.Once);
+            stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Once);
+            failingCardServiceMock.Verify(f => f.SetFailingCard(automationDto.CardId, automationDto.Email), Times.Once);
         }
     }
 }
