@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -3348,6 +3349,142 @@ namespace WoopiAiHub.UnitTests.Services
                 ids.Count == 3 && ids.Contains(5) && ids.Contains(15) && ids.Contains(25))), Times.Once);
             _stepToolDependencyRepositoryMock.Verify(r => r.HasDependenciesByStepToolIdsAsync(It.Is<List<int>>(ids =>
                 ids.Count == 3 && ids.Contains(5) && ids.Contains(15) && ids.Contains(25))), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdatePhase2 should create Removed audit entries when auditRemovedPairs is non-empty")]
+        [Trait("UpdatePhase2", "Success")]
+        public async Task UpdatePhase2_WithAuditPairs_CreatesAuditRemovedEntries()
+        {
+            // Arrange
+            var step1 = new Step(1, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var step2 = new Step(2, DateTime.Now, 1, "Step 2", 2, 1, 1);
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Test Workflow")
+            {
+                Steps = new List<Step> { step1, step2 }
+            };
+
+            var workflowPhase2Dto = new WorkflowPhase2Dto
+            {
+                WorkflowId = 1,
+                Steps = new List<StepPhase2Dto>
+                {
+                    new StepPhase2Dto { Id = 1, Name = "Step 1", Order = 1, ProfileId = 1, StatusId = 1 }
+                },
+                ResetDocuments = true
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(1)).ReturnsAsync(workflow);
+
+            // First call: allResetStepIds (steps with Order >= 2) → non-empty → auditRemovedPairs
+            // Second call: stepsToRemove ids → empty → orphanCandidatePairs (so HandleOrphanDocumentsWithAuditAsync returns early)
+            _cardRepositoryMock.SetupSequence(r => r.FindCardDocumentPairsByStepIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(new List<(int cardId, int documentId)> { (5, 10) })
+                .ReturnsAsync(new List<(int cardId, int documentId)>());
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<ICollection<int>>())).ReturnsAsync(0);
+
+            _profileRepositoryMock.Setup(r => r.FindById(1)).ReturnsAsync(WorkflowFixture.FindValidProfileDto());
+            _statusRepositoryMock.Setup(r => r.FindById(1)).ReturnsAsync(WorkflowFixture.FindValidStatus());
+
+            var auditServiceMock = _mocker.GetMock<IAuditCardService>();
+            auditServiceMock
+                .Setup(s => s.CreateBatchAndSaveAsync(
+                    It.IsAny<IReadOnlyList<(int, int, int)>>(),
+                    It.IsAny<AuditCardActionType>(),
+                    It.IsAny<string?>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto, new HeadersDto());
+
+            // Assert
+            Assert.True(result);
+            auditServiceMock.Verify(
+                s => s.CreateBatchAndSaveAsync(
+                    It.Is<IReadOnlyList<(int, int, int)>>(list =>
+                        list.Count == 1 && list[0].Item1 == 5 && list[0].Item2 == 1 && list[0].Item3 == 10),
+                    AuditCardActionType.Removed,
+                    It.IsAny<string?>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 should create DocumentDeleted audit and delete orphan documents when orphans exist")]
+        [Trait("UpdatePhase3", "Success")]
+        public async Task UpdatePhase3_WithOrphanDocuments_CreatesDocumentDeletedAuditAndDeletes()
+        {
+            // Arrange
+            var workflowId = 1;
+            var stepId = 1;
+            var cardId = 5;
+            var documentId = 10;
+
+            var step = new Step(stepId, DateTime.UtcNow, workflowId, "Step 1", 1, 1, 1);
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow");
+            workflow.Steps.Add(step);
+
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = workflowId,
+                Steps = new List<StepPhase3Dto>
+                {
+                    new StepPhase3Dto { Id = stepId, Order = 1, StepTools = new List<StepToolUpdateDto>() }
+                },
+                ResetDocuments = true
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForFlow(workflowId)).ReturnsAsync(workflow);
+
+            _cardRepositoryMock.Setup(r => r.FindCardDocumentPairsByStepIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(new List<(int cardId, int documentId)> { (cardId, documentId) });
+
+            var stepWithNoCards = new Step(stepId, DateTime.Now, workflowId, "Step 1", 1, 1, 1);
+            _stepRepositoryMock.Setup(r => r.FindById(stepId)).ReturnsAsync(stepWithNoCards);
+
+            var auditServiceMock = _mocker.GetMock<IAuditCardService>();
+            auditServiceMock
+                .Setup(s => s.CreateBatchAndSaveAsync(
+                    It.IsAny<IReadOnlyList<(int, int, int)>>(),
+                    It.IsAny<AuditCardActionType>(),
+                    It.IsAny<string?>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            documentRepositoryMock
+                .Setup(r => r.FindOrphanDocumentIdsByWorkflowAsync(workflowId, It.IsAny<List<int>?>()))
+                .ReturnsAsync(new List<int> { documentId });
+
+            var documentDeletionServicesMock = _mocker.GetMock<IDocumentDeletionServices>();
+            documentDeletionServicesMock
+                .Setup(s => s.Delete(It.IsAny<List<int>>(), It.IsAny<HeadersDto>()))
+                .ReturnsAsync(true);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
+
+            // Assert
+            Assert.True(result);
+            documentRepositoryMock.Verify(
+                r => r.FindOrphanDocumentIdsByWorkflowAsync(workflowId, It.IsAny<List<int>?>()),
+                Times.Once);
+            auditServiceMock.Verify(
+                s => s.CreateBatchAndSaveAsync(
+                    It.IsAny<IReadOnlyList<(int, int, int)>>(),
+                    AuditCardActionType.DocumentDeleted,
+                    It.IsAny<string?>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+            documentDeletionServicesMock.Verify(
+                s => s.Delete(
+                    It.Is<List<int>>(ids => ids.Count == 1 && ids.Contains(documentId)),
+                    It.IsAny<HeadersDto>()),
+                Times.Once);
         }
     }
 }
