@@ -1289,6 +1289,8 @@ const spanish = {
         stepNamePlaceholder: "Nombre del paso",
         steps: "Etapas del Workflow",
         stepsTitle: "Pasos del flujo de trabajo",
+        stepHasDocumentsTitle: "Etapa con documentos en progreso",
+        stepHasDocumentsMessage: "Hay documentos en procesamiento en este flujo de trabajo. Para eliminar una etapa, es necesario que no haya documentos en progreso.",
         stepSubtitle: "Configura las reglas y responsables",
         stepTitle: "Etapa del Workflow",
         subtitle: "Visualiza el flujo de documentos a través de las etapas de procesamiento",

@@ -10,7 +10,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<WorkflowDto> FindByTeamId(int teamId, WorkflowFilterDto workflowFilterDto);
         Task<WorkflowDto> FindById(int id, WorkflowFilterDto? workflowFilterDto);
         Task<ICollection<StepDto>> FindStepsById(int id, WorkflowFilterDto? workflowFilterDto);
-        Task<bool> DeleteById(int id);
+        Task<bool> DeleteById(int id, HeadersDto headersDto);
         ICollection<WorkflowDto> FindAllByUser(string email);
         ICollection<WorkflowDto> FindAll();
         Task<ICollection<Workflow>> FindByProfileStep(ICollection<Profile> profiles);
@@ -22,8 +22,8 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task RemoveTeamWorkflowRelationship(List<TeamsWorkflowsDto> teamsWorkflowsDto);
         Task<TeamsWorkflowsDto> VerifyWorkflowMatchInOtherTeamProfile(int profileId, int teamId, List<Workflow> workflows);
         Task<int> CreatePhase1(WorkflowPhase1Dto workflowPhase1Dto);
-        Task<bool> UpdatePhase2(WorkflowPhase2Dto workflowPhase2Dto);
-        Task<bool> UpdatePhase3(WorkflowPhase3Dto workflowPhase3Dto);
+        Task<bool> UpdatePhase2(WorkflowPhase2Dto workflowPhase2Dto, HeadersDto headersDto);
+        Task<bool> UpdatePhase3(WorkflowPhase3Dto workflowPhase3Dto, HeadersDto headersDto);
         Task <Phase1Dto> FindPhase1ById(int id);
         Task <List<StepDto>> FindPhase2ById(int id);
         Task <List<StepDto>> FindPhase3ById(int id);

@@ -34,8 +34,9 @@ namespace WoopiAiHub.Repository
             var login = documentPagedDataDto.Login?.ToLower();
             var query = _context.Documents
                 .Include(t => t.Workflows)
+                .Where(d => d.Enable)
                 .AsNoTracking();
-
+            
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(i =>
@@ -95,19 +96,23 @@ namespace WoopiAiHub.Repository
                 Status = d.Status,
                 Created = d.Created,
                 HasBatch = d.HasBatch,
-                WorkflowProgress = d.Workflows.Where(w => w.Enable).Select(w => new DocumentWorkflowProgressDto
-                {
-                    WorkflowName = w.Name,
-                    TotalSteps = w.Steps.Count(),
-                    CurrentStep = d.Status == DocumentStatus.Analyzed
-                        ? w.Steps.Count()
-                        : (d.Cards.Any(c => c.Step.WorkflowId == w.Id)
-                            ? d.Cards.Where(c => c.Step.WorkflowId == w.Id)
+                WorkflowProgress = d.Workflows
+                    .Where(w => w.Enable
+                        && w.Steps.Any()
+                        && (d.Status == DocumentStatus.Analyzed
+                            || d.Cards.Any(c => c.Enable && c.Step.WorkflowId == w.Id)))
+                    .Select(w => new DocumentWorkflowProgressDto
+                    {
+                        WorkflowName = w.Name,
+                        TotalSteps = w.Steps.Count(),
+                        CurrentStep = d.Status == DocumentStatus.Analyzed
+                            ? w.Steps.Count()
+                            : d.Cards
+                                .Where(c => c.Enable && c.Step.WorkflowId == w.Id)
                                 .OrderByDescending(c => c.Created)
                                 .Select(c => c.Step.Order)
                                 .FirstOrDefault()
-                            : 0)
-                }).ToList()
+                    }).ToList()
             });
         }
 
@@ -262,6 +267,22 @@ namespace WoopiAiHub.Repository
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Returns IDs of enabled documents that are linked exclusively to the specified workflow
+        /// (i.e. have exactly one entry in WorkflowDocuments, pointing to <paramref name="workflowId"/>).
+        /// When <paramref name="candidateDocumentIds"/> is provided, only those documents are evaluated.
+        /// </summary>
+        public async Task<List<int>> FindOrphanDocumentIdsByWorkflowAsync(int workflowId, List<int>? candidateDocumentIds = null)
+        {
+            return await _context.Documents
+                .Where(d =>
+                    d.Workflows.Count == 1 &&
+                    d.Workflows.Any(w => w.Id == workflowId) &&
+                    (candidateDocumentIds == null || candidateDocumentIds.Contains(d.Id)))
+                .Select(d => d.Id)
+                .ToListAsync();
         }
     }
 }
