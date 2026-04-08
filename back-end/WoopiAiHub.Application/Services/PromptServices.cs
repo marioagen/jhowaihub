@@ -179,11 +179,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public bool ImportPrompts(List<ImportedPromptDto> importedPrompts, string email)
         {
-            if (importedPrompts == null || importedPrompts.Count == 0)
-            {
-                return false;
-            }
-
             var idUser = _userServices.FindIdByEmail(email);
             if (idUser == Guid.Empty)
             {

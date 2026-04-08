@@ -152,7 +152,7 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
-        public static OpenAiResponseConsumerResponseDto FindValidOpenAiResponseConsumerResponseDto()
+        public static OpenAiResponseConsumerResponseDto FindValidOpenAiResponseConsumerResponseDto(bool emptyMessage = false)
         {
             JObject mockJObject = new JObject();
             mockJObject.Add("CardId", 1);
@@ -179,7 +179,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                                 Arguments = f.Lorem.Paragraph(),
                                 Content = new List<ResponseOpenAiResponseOutputMessageContentDto> {
                                     new ResponseOpenAiResponseOutputMessageContentDto {
-                                        Text  =  f.Lorem.Paragraph(),
+                                        Text  = emptyMessage ? string.Empty : f.Lorem.Paragraph(),
                                         Type = OpenAiResponseInputContentType.OutputText
                                     }
                                 }
