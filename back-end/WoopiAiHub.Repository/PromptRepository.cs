@@ -148,11 +148,6 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public PromptDto? FindById(int id)
         {
-            var promptEntity = _context.Prompts
-                            .Include(x => x.PromptApiTemplates)
-                            .AsNoTracking()
-                            .FirstOrDefault(p => p.Id == id);
-
             return _context.Prompts
                 .Include(x => x.PromptApiTemplates)
                 .Select(p => new PromptDto
@@ -198,7 +193,7 @@ namespace WoopiAiHub.Repository
 
         public async Task<bool> UpdateAndRemovePromptApisFromPrompt(Prompt prompt, List<int> data)
         {
-            var existPrompt = _context.Prompts.Any(p => p.Id == prompt.Id);
+            var existPrompt = await _context.Prompts.AnyAsync(p => p.Id == prompt.Id);
             if (!existPrompt)
             {
                 return false;

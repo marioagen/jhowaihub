@@ -35,11 +35,8 @@ namespace WoopiAiHub.Application.Services
         private readonly PromptSettings _promptSettings;
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly IChatCompletionApi _chatCompletionApi;
-        private readonly IResponseApi _responseApi;
         private readonly ChatCompletionSettings _chatCompletionSettings;
-        private readonly ResponseOpenAiSettings _responseOpenAiSettings;
         private readonly IUsageDailyServices _usageDailyServices;
-        private readonly IApiTemplateServices _apiTemplateServices;
         private readonly IExecutionServices _executionServices;
 
         public PromptServices(IUnitOfWork unitOfWork,
@@ -55,10 +52,7 @@ namespace WoopiAiHub.Application.Services
             ITenantCacheServices tenantCacheServices,
             IChatCompletionApi chatCompletionApi,
             IOptions<ChatCompletionSettings> chatCompletionSettings,
-            IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
             IUsageDailyServices usageDailyServices,
-            IResponseApi responseApi,
-            IApiTemplateServices apiTemplateServices,
             IExecutionServices executionServices)
         {
             _unitOfWork = unitOfWork;
@@ -74,10 +68,7 @@ namespace WoopiAiHub.Application.Services
             _tenantCacheServices = tenantCacheServices;
             _chatCompletionApi = chatCompletionApi;
             _chatCompletionSettings = chatCompletionSettings.Value;
-            _responseOpenAiSettings = responseOpenAiSettings.Value;
             _usageDailyServices = usageDailyServices;
-            _responseApi = responseApi;
-            _apiTemplateServices = apiTemplateServices;
             _executionServices = executionServices;
         }
 
