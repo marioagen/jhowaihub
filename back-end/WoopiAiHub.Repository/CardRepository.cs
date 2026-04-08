@@ -375,5 +375,23 @@ namespace WoopiAiHub.Repository
                 .Include(c => c.Step)
                 .FirstOrDefaultAsync(c => c.Id == cardId);
         }
+
+        /// <summary>
+        /// Returns (cardId, documentId) pairs for active cards belonging to any of the specified steps.
+        /// Used to collect audit data and orphan-document candidates before cards are disabled.
+        /// The global query filter (Enable = true) ensures only active cards are returned.
+        /// </summary>
+        public async Task<List<(int cardId, int documentId)>> FindCardDocumentPairsByStepIdsAsync(List<int> stepIds)
+        {
+            if (stepIds == null || stepIds.Count == 0)
+                return [];
+
+            var rows = await _context.Cards
+                .Where(c => stepIds.Contains(c.StepId))
+                .Select(c => new { c.Id, c.DocumentId })
+                .ToListAsync();
+
+            return rows.Select(r => (r.Id, r.DocumentId)).ToList();
+        }
     }
 }

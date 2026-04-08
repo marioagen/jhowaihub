@@ -1,5 +1,23 @@
 <template>
     <div class="phase-container">
+        <ModalComponent
+            id="step-documents-modal"
+            ref="stepDocumentsModal"
+            title="workflow.stepHasDocumentsTitle"
+        >
+            <p>{{ $t("workflow.stepHasDocumentsMessage") }}</p>
+            <template #footer>
+                <div class="modal-footer justify-content-center">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        {{ $t("common.close") }}
+                    </button>
+                </div>
+            </template>
+        </ModalComponent>
         <div class="row">
             <div class="col">
                 <p class="section-title">
@@ -72,6 +90,7 @@
                             type="button"
                             class="btn btn-link btn-sm"
                             @click="removeStep(step)"
+                            :disabled="isCheckingDocuments"
                         >
                             <LucideIcon icon="X" />
                         </button>
@@ -195,11 +214,14 @@
     import { Field } from "vee-validate";
     import ProfilesService from "@/services/profiles/ProfilesService";
     import StatusService from "@/services/status/StatusService";
+    import WorkflowService from "@/services/workflow/WorkflowService";
+    import ModalComponent from "@/components/global/ModalComponent.vue";
 
     export default {
         name: "Phase2Steps",
         components: {
             Field,
+            ModalComponent,
         },
         props: {
             initialSteps: {
@@ -222,6 +244,7 @@
                 isLoadingProfiles: true,
                 isLoadingStatus: true,
                 tempStepCounter: 1,
+                isCheckingDocuments: false,
             };
         },
 
@@ -249,7 +272,22 @@
                 });
             },
 
-            removeStep(step) {
+            async removeStep(step) {
+                if (step.id > 0) {
+                    const workflowId = this.$route.params.id ?? this.$route.params.workflowId;
+                    if (workflowId) {
+                        this.isCheckingDocuments = true;
+                        try {
+                            const count = await WorkflowService.countDocuments(workflowId);
+                            if (count > 0) {
+                                this.$refs.stepDocumentsModal.open();
+                                return;
+                            }
+                        } finally {
+                            this.isCheckingDocuments = false;
+                        }
+                    }
+                }
                 const idx = this.steps.findIndex(
                     (s) => (s.id && s.id === step.id) || (s.tempId && s.tempId === step.tempId)
                 );

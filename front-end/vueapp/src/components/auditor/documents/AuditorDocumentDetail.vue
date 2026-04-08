@@ -810,4 +810,10 @@
     .cursor-pointer {
         cursor: pointer;
     }
+    .border-bottom {
+        border-bottom: 1px solid var(--color-border-form-control) !important;
+    }
+    .border {
+        border: 1px solid var(--color-border-form-control) !important;
+    }
 </style>

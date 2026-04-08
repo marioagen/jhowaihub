@@ -71,9 +71,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpDelete("{id}")]
         [SwaggerOperation("Endpoint that receives the request to delete a workflow by its ID")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> DeleteById(int id)
+        public async Task<IActionResult> DeleteById(int id, [FromHeader] HeadersDto headersDto)
         {
-            var result = await _workflowServices.DeleteById(id);
+            var result = await _workflowServices.DeleteById(id, headersDto);
             return Ok(result);
         }
 
@@ -170,9 +170,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPut("Phase2")]
         [SwaggerOperation("Endpoint for Phase 2 of workflow creation: Steps Management")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdatePhase2([FromBody] WorkflowPhase2Dto workflowPhase2Dto)
+        public async Task<IActionResult> UpdatePhase2([FromBody] WorkflowPhase2Dto workflowPhase2Dto, [FromHeader] HeadersDto headersDto)
         {
-            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto);
+            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto, headersDto);
             return Ok(result);
         }
 
@@ -184,9 +184,9 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPut("Phase3")]
         [SwaggerOperation("Endpoint for Phase 3 of workflow creation: Tool Flows Configuration")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UpdatePhase3([FromBody] WorkflowPhase3Dto workflowPhase3Dto)
+        public async Task<IActionResult> UpdatePhase3([FromBody] WorkflowPhase3Dto workflowPhase3Dto, [FromHeader] HeadersDto headersDto)
         {
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, headersDto);
             return Ok(result);
         }
 
