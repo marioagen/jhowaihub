@@ -5,15 +5,17 @@
                 <div class="row align-items-center gap-3">
                     <div class="col-12">
                         <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
-                            <div>
-                                <LucideIcon
-                                    icon="Clock"
-                                    :size="14"
-                                    class="me-2"
-                                />
-                                <span>
-                                    {{ $t("workflow.boardView") }}
-                                </span>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <div class="d-flex align-items-center">
+                                    <LucideIcon
+                                        icon="Clock"
+                                        :size="14"
+                                        class="me-2"
+                                    />
+                                    <span>
+                                        {{ $t("workflow.boardView") }}
+                                    </span>
+                                </div>
                             </div>
                             <div class="dropdown">
                                 <button
@@ -89,6 +91,20 @@
                                     {{ selectedOption.name || $t("workflow.selectWorkflow") }}
                                 </span>
                             </div>
+                            <button
+                                v-if="canManageWorkflow"
+                                type="button"
+                                class="btn btn-primary borderless p-0 d-inline-flex align-items-center"
+                                :disabled="!selectedOption.id || isLoadingKanban"
+                                v-tooltip="$t('workflow.editWorkflowBoard')"
+                                :aria-label="$t('workflow.editWorkflowBoard')"
+                                @click="redirectToWorkflowEditPage"
+                            >
+                                <LucideIcon
+                                    icon="SquarePen"
+                                    :size="14"
+                                />
+                            </button>
                         </div>
                     </div>
                     <div class="col-12 d-flex align-items-center">
@@ -153,6 +169,7 @@
     import UserService from "@/services/users/UserService";
     import LogService from "@/services/log/logService";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import { hasPermission } from "@/utils/permissions";
 
     export default {
         name: "WorkflowPage",
@@ -197,6 +214,9 @@
         computed: {
             hasList() {
                 return this.workflowList.length > 0;
+            },
+            canManageWorkflow() {
+                return hasPermission("WorkflowManagement", "View");
             },
         },
         methods: {
@@ -462,6 +482,18 @@
                         (o.teams && o.teams.name && o.teams.name.toLowerCase().includes(searchText))
                 );
             },
+            redirectToWorkflowEditPage() {
+                if (!this.canManageWorkflow || !this.selectedOption.id) {
+                    return;
+                }
+
+                this.$router.push({
+                    name: "EditWorkflow",
+                    params: {
+                        id: this.selectedOption.id,
+                    },
+                });
+            },
         },
         created() {
             this.getWorkflowByUser();
@@ -597,5 +629,31 @@
     .bg-secondary {
         background-color: var(--color-hover-transfer) !important;
         border-color: var(--color-hover-transfer) !important;
+    }
+
+    .borderless {
+        background-color: transparent !important;
+        border: none !important;
+        color: var(--bs-primary) !important;
+        line-height: 1;
+        box-shadow: none !important;
+    }
+
+    .borderless:hover:not(:disabled) {
+        background-color: transparent !important;
+        border: none !important;
+        color: var(--bs-primary) !important;
+        filter: brightness(0.92);
+        cursor: pointer;
+    }
+
+    .borderless:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .borderless:focus-visible {
+        outline: 2px solid var(--bs-primary);
+        outline-offset: 2px;
     }
 </style>
