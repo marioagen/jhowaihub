@@ -157,10 +157,8 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Find all teams with pagination and include their users.
+        /// Active users projected for listing with optional search filter; ordering and paging are applied in the application service.
         /// </summary>
-        /// <param name="pagedDataDto"></param>
-        /// <returns></returns>
         public IQueryable<UserPagedDto> FindAllPaged(PagedDataDto pagedDataDto)
         {
             var query = _context.Users.Where(p => p.IsActive == true)
@@ -183,10 +181,24 @@ namespace WoopiAiHub.Repository
                         .OrderBy(t => t.Name)
                         .ToList(),
                 })
-                .AsQueryable()
                 .AsNoTracking();
 
-            return query;
+            return ApplySearchFilter(query, pagedDataDto);
+        }
+
+        private static IQueryable<UserPagedDto> ApplySearchFilter(
+            IQueryable<UserPagedDto> query,
+            PagedDataDto pagedDataDto)
+        {
+            if (string.IsNullOrEmpty(pagedDataDto.Search))
+                return query;
+
+            var searchLower = pagedDataDto.Search.ToLower();
+            return query.Where(i =>
+                i.Name.ToLower().Contains(searchLower) ||
+                i.Email.ToLower().Contains(searchLower) ||
+                i.Id.ToString().Contains(pagedDataDto.Search) ||
+                i.Teams.Any(t => t.Name.ToLower().Contains(searchLower)));
         }
 
         /// <summary>
