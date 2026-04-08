@@ -1284,6 +1284,8 @@ const english = {
         stepNamePlaceholder: "Step Name",
         steps: "Workflow Steps",
         stepsTitle: "Workflow Steps",
+        stepHasDocumentsTitle: "Step has documents in progress",
+        stepHasDocumentsMessage: "There are documents being processed in this workflow. To remove a step, all documents must be fully processed first.",
         stepSubtitle: "Set up rules and responsibilities",
         stepTitle: "Workflow Step",
         subtitle: "View the flow of documents through the processing stages",
