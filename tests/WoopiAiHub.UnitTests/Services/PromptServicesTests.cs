@@ -30,12 +30,16 @@ namespace WoopiAiHub.UnitTests.Services
             var mockPromptSettings = new Mock<IOptions<PromptSettings>>();
             mockPromptSettings.Setup(x => x.Value).Returns(new PromptSettings
             {
-                TemplateFileName = "name.json", Folder = "folder"
+                TemplateFileName = "name.json",
+                Folder = "folder"
             });
             var mockChatSettings = new Mock<IOptions<ChatCompletionSettings>>();
             mockChatSettings.Setup(x => x.Value).Returns(new ChatCompletionSettings
             {
-                Model = "model", ApiVersion = "v1", MaxTokens = 100, Temperature = 0.5f
+                Model = "model",
+                ApiVersion = "v1",
+                MaxTokens = 100,
+                Temperature = 0.5f
             });
 
             _mocker.Use(mockPromptSettings);
@@ -131,7 +135,7 @@ namespace WoopiAiHub.UnitTests.Services
             _validatePrompt.Setup(v => v.ValidateOwnership(1, email));
             _promptRepository.Setup(r => r.FindById(1)).Returns(promptDto);
             _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>()));
-            _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(),It.IsAny<List<int>>())).ReturnsAsync(true);
+            _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<int>>())).ReturnsAsync(true);
             _unitOfWork.Setup(u => u.BeginTransaction());
             _unitOfWork.Setup(u => u.Commit());
 
@@ -156,7 +160,7 @@ namespace WoopiAiHub.UnitTests.Services
             _promptRepository.Setup(r => r.FindById(1)).Returns((PromptDto)null);
 
             //Act/Assert
-            await Assert.ThrowsAsync<ArgumentException>(() =>  _promptServices.Update(dto, email));
+            await Assert.ThrowsAsync<ArgumentException>(() => _promptServices.Update(dto, email));
         }
 
         [Fact(DisplayName = "Delete prompts by ids success")]
@@ -473,6 +477,104 @@ namespace WoopiAiHub.UnitTests.Services
             //Assert
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
+        }
+
+        [Theory(DisplayName = "Find prompt templates ordering")]
+        [Trait("FindPromptTemplates", "Ordering")]
+        [InlineData("name_asc")]
+        [InlineData("name_desc")]
+        [InlineData("created_asc")]
+        [InlineData(null)]
+        [InlineData("invalid")]
+        public async Task FindPromptTemplates_Ordering(string? orderBy)
+        {
+            // Arrange
+            var templatesResponse = new PromptTemplatesResponse
+            {
+                Prompts = new List<PromptTemplateDto>
+                {
+                    new PromptTemplateDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "B",
+                        Description = "Desc",
+                        Text = "Text",
+                        Created = new DateTime(2026, 1, 2)
+                    },
+                    new PromptTemplateDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "A",
+                        Description = "Desc",
+                        Text = "Text",
+                        Created = new DateTime(2026, 1, 3)
+                    },
+                    new PromptTemplateDto
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "C",
+                        Description = "Desc",
+                        Text = "Text",
+                        Created = new DateTime(2026, 1, 1)
+                    }
+                }
+            };
+
+            var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
+            var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            {
+                Content = new StringContent(jsonContent)
+            };
+
+            _mocker.GetMock<IConfiguration>()
+                .Setup(c => c["RefitExternalSettings:FunctionApiKey"])
+                .Returns("key");
+
+            _mocker.GetMock<IFunctionFileRetriever>()
+                .Setup(f => f.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(responseMessage);
+
+            // Act
+            var result = await _promptServices.FindPromptTemplates(null, orderBy);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(3, result.Count);
+
+            switch (orderBy?.ToLower())
+            {
+                case "name_asc":
+                    Assert.Equal(new[] { "A", "B", "C" }, result.Select(x => x.Name));
+                    break;
+
+                case "name_desc":
+                    Assert.Equal(new[] { "C", "B", "A" }, result.Select(x => x.Name));
+                    break;
+
+                case "created_asc":
+                    Assert.Equal(
+                        new[]
+                        {
+                            new DateTime(2026, 1, 1),
+                            new DateTime(2026, 1, 2),
+                            new DateTime(2026, 1, 3)
+                        },
+                        result.Select(x => x.Created)
+                    );
+                    break;
+
+                default:
+                    Assert.Equal(
+                        new[]
+                        {
+                            new DateTime(2026, 1, 3),
+                            new DateTime(2026, 1, 2),
+                            new DateTime(2026, 1, 1)
+                        },
+                        result.Select(x => x.Created)
+                    );
+                    break;
+            }
         }
 
         [Fact(DisplayName = "Find prompt templates should throw app exception when request fails")]
