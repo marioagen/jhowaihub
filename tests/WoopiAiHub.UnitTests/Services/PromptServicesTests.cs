@@ -639,10 +639,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             //Arrange
             
-            var templatesResponse = new PromptTemplatesResponse
-            {
-                Prompts = null
-            };
+            var templatesResponse = new PromptTemplatesResponse();
             var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
             var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
@@ -660,7 +657,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(0, result.Count);
+            Assert.Empty(result);
         }
 
         [Fact(DisplayName = "Import prompts by ids success")]
@@ -714,10 +711,7 @@ namespace WoopiAiHub.UnitTests.Services
             var promptId = Guid.NewGuid();
             var templateIds = new List<Guid> { promptId };
             var email = "test@example.com";
-            var templatesResponse = new PromptTemplatesResponse
-            {
-                Prompts = null
-            };
+            var templatesResponse = new PromptTemplatesResponse();
             var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
             var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
@@ -908,7 +902,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _mocker.GetMock<IStepToolExecutionRepository>()
                 .Setup(x => x.FindByStepToolIdAndCardIdAsync(metadata.StepToolId, metadata.CardId))
-                .ReturnsAsync((StepToolExecution)null);
+                .ReturnsAsync((StepToolExecution?)null);
 
             // Act
             var act = async () => await _promptServices.ProcessOpenAiResponseResult(responseDto);

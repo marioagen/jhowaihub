@@ -10,6 +10,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.UnitTests.Fixture;
@@ -25,6 +26,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         private readonly MessageQueues _messageQueues;
         private readonly Mock<ITenantCacheServices> _mockTenantCacheServices;
         private readonly Mock<IPromptServices> _mockPromptServices;
+        private readonly Mock<IApiTemplateServices> _mockApiTemplateServices;
+        private readonly Mock<IAccountServices> _mockAccountServices;
         private readonly ChatCompletionSettings _chatCompletionSettings;
         private readonly ResponseOpenAiSettings _responseOpenAiSettings;
         public PromptHandlerTests()
@@ -39,6 +42,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             _mocker.Use<IOptions<MessageQueues>>(options);
             _mockTenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
             _mockPromptServices = _mocker.GetMock<IPromptServices>();
+            _mockApiTemplateServices = _mocker.GetMock<IApiTemplateServices>();
+            _mockAccountServices = _mocker.GetMock<IAccountServices>();
             _chatCompletionSettings = new ChatCompletionSettings
             {
                 Model = "gpt-4",
@@ -51,10 +56,10 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 Model = "gpt-4",
                 ApiVersion = "",
                 McpAddress = "",
+                SessionIdKey= "SessionIdKey"
             };
             _mocker.Use<IOptions<ChatCompletionSettings>>(Options.Create(_chatCompletionSettings));
             _mocker.Use<IOptions<ResponseOpenAiSettings>>(Options.Create(_responseOpenAiSettings));
-
 
             _handler = _mocker.CreateInstance<PromptHandler>();
         }
@@ -83,12 +88,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
                                .Returns(PromptFixture.FindValidPromptDto());
 
-
-            _mocker
-                .GetMock<IApiTemplateServices>()
-                .Setup(s =>
-                    s
-                    .FindAll(new ApiTemplateFilterDto())
+            _mockApiTemplateServices.Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>())
                 )
                 .ReturnsAsync(new List<ApiTemplateDto> {
                     new ApiTemplateDto {
@@ -172,6 +172,30 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 .ReturnsAsync(tenantInfo);
             _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
                 .Returns(PromptFixture.FindValidPromptDto());
+            _mockApiTemplateServices
+                .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
+                .ReturnsAsync(new List<ApiTemplateDto> {
+                    new ApiTemplateDto {
+                        Id = 1,
+                        Created = DateTime.Now,
+                        Name = "Api 1",
+                        Method = "GET",
+                        Url = "http://localhost",
+                        Description = "",
+                        EnableAccessFromMcp = true,
+                        BodyTemplate = "{}"
+                    },
+                    new ApiTemplateDto {
+                        Id = 2,
+                        Created = DateTime.Now,
+                        Name = "Api 2",
+                        Method = "POST",
+                        Url = "http://localhost",
+                        Description = "",
+                        EnableAccessFromMcp = true,
+                        BodyTemplate = "{}"
+                    }
+                });
 
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
@@ -181,6 +205,153 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var message = result.Message as OpenAiResponseQueryDto;
             Assert.NotNull(message);
             Assert.Contains(previousPromptOutput, message!.OpenAiResponse!.Input![0].Content[0].Text);
+        }
+
+        [Fact(DisplayName = "Verify And Add Or Not Mcp Support When EnableAccessToMcp Is False Should Do Nothing")]
+        [Trait("BuildPayload", "Success")]
+        public async Task VerifyAndAddOrNotMcpSupport_WhenEnableAccessToMcpIsFalse_ShouldDoNothing()
+        {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+
+            var tenantInfo = new TenantInfoDto
+            {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = "key"
+            };
+
+            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
+            var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
+
+            _mockTenantCacheServices
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
+                .ReturnsAsync(tenantInfo);
+
+            _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
+                               .Returns(PromptFixture.FindValidPromptDto(false));
+
+            _mockApiTemplateServices
+                .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
+                .ReturnsAsync(new List<ApiTemplateDto> {
+                    new ApiTemplateDto {
+                        Id = 1,
+                        Created = DateTime.Now,
+                        Name = "Api 1",
+                        Method = "GET",
+                        Url = "http://localhost",
+                        Description = "",
+                        EnableAccessFromMcp = true,
+                        BodyTemplate = "{}"
+                    },
+                    new ApiTemplateDto {
+                        Id = 2,
+                        Created = DateTime.Now,
+                        Name = "Api 2",
+                        Method = "POST",
+                        Url = "http://localhost",
+                        Description = "",
+                        EnableAccessFromMcp = true,
+                        BodyTemplate = "{}"
+                    }
+                });
+
+            // Act
+            var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
+
+            // Assert
+            Assert.IsType<OpenAiResponseQueryDto>(result.Message);
+            var message = (OpenAiResponseQueryDto)result.Message;
+
+            Assert.NotNull(message.OpenAiResponse);
+            Assert.Empty(message.OpenAiResponse.Instructions);
+            Assert.Empty(((OpenAiResponseQueryDto)result.Message).OpenAiResponse.Instructions);
+            Assert.Equal(0, message.OpenAiResponse.MaxToolCalls);
+            Assert.Empty(message.OpenAiResponse.Tools);
+        }
+
+        [Fact(DisplayName = "Verify And Add Or Not Mcp Support When EnableAccessToMcp Is True Should Do add instructions")]
+        [Trait("BuildPayload", "Success")]
+        public async Task VerifyAndAddOrNotMcpSupport_WhenEnabledAndApisExist_ShouldConfigureDto()
+        {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+
+            var tenantInfo = new TenantInfoDto
+            {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = "key"
+            };
+
+            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
+            var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
+
+            _mockTenantCacheServices
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
+                .ReturnsAsync(tenantInfo);
+
+            var promptDto = PromptFixture.FindValidPromptDto();
+            _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
+                               .Returns(promptDto);
+
+            _mockApiTemplateServices
+                .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
+                .ReturnsAsync(new List<ApiTemplateDto> {
+                    new ApiTemplateDto {
+                        Id = 1,
+                        Created = DateTime.Now,
+                        Name = "Api 1",
+                        Method = "GET",
+                        Url = "http://localhost",
+                        Description = "Api 1",
+                        EnableAccessFromMcp = true,
+                        BodyTemplate = "{}"
+                    },
+                    new ApiTemplateDto {
+                        Id = 2,
+                        Created = DateTime.Now,
+                        Name = "Api 2",
+                        Method = "POST",
+                        Url = "http://localhost",
+                        Description = "Api 2",
+                        EnableAccessFromMcp = true,
+                        BodyTemplate = "{}"
+                    }
+                });
+
+            _mockAccountServices
+                .Setup(x => x.GenerateToken("MCP_SERVER", 5))
+                .Returns("token-test");
+
+            // Act
+            var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
+
+            // Assert
+            Assert.IsType<OpenAiResponseQueryDto>(result.Message);
+            var message = (OpenAiResponseQueryDto)result.Message;
+            
+            Assert.NotNull(message.OpenAiResponse);
+            Assert.NotEmpty(message.OpenAiResponse.Instructions);
+
+            Assert.Contains("instruções", message.OpenAiResponse.Instructions);
+            Assert.Contains("http://localhost", message.OpenAiResponse.Instructions);
+            Assert.Contains("Api 1", message.OpenAiResponse.Instructions);
+            Assert.Contains("Api 2", message.OpenAiResponse.Instructions);
+
+            Assert.Equal(10, message.OpenAiResponse.MaxToolCalls);
+
+            Assert.NotNull(message.OpenAiResponse.Tools);
+            Assert.Single(message.OpenAiResponse.Tools);
+
+            var tool = message.OpenAiResponse.Tools[0];
+            Assert.Equal(OpenAiResponseToolsType.Mcp, tool.Type);
+            Assert.Single(tool.AllowedTools);
+            Assert.Equal("generalista", tool.AllowedTools[0]);
+
+            Assert.NotNull(tool.Headers);
+            Assert.Equal(_responseOpenAiSettings.SessionIdKey, tool.Headers["x-api-key"]);
+            Assert.Equal("Bearer token-test", tool.Headers["Authorization"]);
         }
     }
 }

@@ -128,13 +128,7 @@ namespace WoopiAiHub.Application.Services
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
 
-            var templates = items?.Prompts;
-            if (templates == null)
-            {
-                return new List<PromptTemplateDto>();
-            }
-
-            return templates;
+            return items?.Prompts ?? new List<PromptTemplateDto>();
         }
 
         /// <summary>

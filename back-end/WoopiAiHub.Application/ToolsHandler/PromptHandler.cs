@@ -98,7 +98,7 @@ public class PromptHandler : IToolHandler
 
         var dto = new ResponseOpenAiRequestDto
         {
-            Model = "gpt-4.1",
+            Model = _responseOpenAiSettings.Model,
             Input = new List<ResponseOpenAiRequestInputDto> {
                     new ResponseOpenAiRequestInputDto {
                         Type = OpenAiResponsesTypes.Message,
@@ -198,8 +198,7 @@ REGRAS DE RESPOSTA:
                 ServerLabel = "dmcp",
                 ServerUrl=_responseOpenAiSettings.McpAddress,
                 Headers= new Dictionary<string, string>{
-                        {"x-session-id", "d354301e-6b4b-4a3f-beef-1f9715dd2dfd"},
-                        {"x-api-key", "d354301e-6b4b-4a3f-beef-1f9715dd2dfd"},
+                        {"x-api-key", _responseOpenAiSettings.SessionIdKey},
                         {"Authorization", $"Bearer {accessToken}"}
                     },
                 RequireApproval="never",

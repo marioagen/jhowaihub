@@ -6,5 +6,6 @@ namespace WoopiAiHub.Application.Utils
         public string Model { get; set; } = string.Empty;
         public string ApiVersion { get; set; } = string.Empty;
         public string McpAddress { get; set; } = string.Empty;
+        public string SessionIdKey { get; set; } = string.Empty;
     }
 }
