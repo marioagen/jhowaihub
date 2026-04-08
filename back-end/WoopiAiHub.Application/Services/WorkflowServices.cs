@@ -726,7 +726,7 @@ namespace WoopiAiHub.Application.Services
                     workflow.AddStep(newStep);
                 }
 
-                if (auditRemovedPairs.Any())
+                if (auditRemovedPairs.Count > 0)
                 {
                     var removedTuples = auditRemovedPairs
                         .Select(p => (p.cardId, workflowPhase2Dto.WorkflowId, p.documentId))
@@ -906,7 +906,7 @@ namespace WoopiAiHub.Application.Services
         {
             var orphanIds = await _documentRepository
                 .FindOrphanDocumentIdsByWorkflowAsync(workflowId, candidateDocumentIds);
-            if (orphanIds.Any())
+            if (orphanIds.Count > 0)
                 await _documentDeletionServices.Delete(orphanIds, headersDto);
         }
 
@@ -926,7 +926,7 @@ namespace WoopiAiHub.Application.Services
             var candidateDocumentIds = cardDocumentPairs.Select(p => p.documentId).Distinct().ToList();
             var orphanIds = await _documentRepository
                 .FindOrphanDocumentIdsByWorkflowAsync(workflowId, candidateDocumentIds);
-            if (!orphanIds.Any()) return;
+            if (orphanIds.Count == 0) return;
 
             var documentDeletedTuples = cardDocumentPairs
                 .Where(p => orphanIds.Contains(p.documentId))
@@ -934,7 +934,7 @@ namespace WoopiAiHub.Application.Services
                 .Select(g => (g.First().cardId, workflowId, g.Key))
                 .ToList<(int, int, int)>();
 
-            if (documentDeletedTuples.Any())
+            if (documentDeletedTuples.Count > 0)
                 await _auditCardService.CreateBatchAndSaveAsync(documentDeletedTuples, AuditCardActionType.DocumentDeleted);
 
             await _documentDeletionServices.Delete(orphanIds, headersDto);
@@ -990,7 +990,7 @@ namespace WoopiAiHub.Application.Services
                 var stepToolMap = await ProcessStepTools(workflow, workflowPhase3Dto.Steps, workflowPhase3Dto.ResetDocuments);
                 await ResolveDependencies(workflow, workflowPhase3Dto.Steps, stepToolMap);
 
-                if (cardDocumentPairs.Any())
+                if (cardDocumentPairs.Count > 0)
                 {
                     var removedTuples = cardDocumentPairs
                         .Select(p => (p.cardId, workflowPhase3Dto.WorkflowId, p.documentId))

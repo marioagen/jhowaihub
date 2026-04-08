@@ -98,9 +98,9 @@ namespace WoopiAiHub.Repository
                 HasBatch = d.HasBatch,
                 WorkflowProgress = d.Workflows
                     .Where(w => w.Enable
-                        && w.Steps.Any()
+                        && w.Steps.Count > 0
                         && (d.Status == DocumentStatus.Analyzed
-                            || d.Cards.Any(c => c.Enable && c.Step.WorkflowId == w.Id)))
+                            || d.Cards.Any(c => c.Enable && c.Step!.WorkflowId == w.Id)))
                     .Select(w => new DocumentWorkflowProgressDto
                     {
                         WorkflowName = w.Name,
@@ -108,9 +108,9 @@ namespace WoopiAiHub.Repository
                         CurrentStep = d.Status == DocumentStatus.Analyzed
                             ? w.Steps.Count()
                             : d.Cards
-                                .Where(c => c.Enable && c.Step.WorkflowId == w.Id)
+                                .Where(c => c.Enable && c.Step!.WorkflowId == w.Id)
                                 .OrderByDescending(c => c.Created)
-                                .Select(c => c.Step.Order)
+                                .Select(c => c.Step!.Order)
                                 .FirstOrDefault()
                     }).ToList()
             });
