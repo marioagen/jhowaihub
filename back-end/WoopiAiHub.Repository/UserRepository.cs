@@ -193,12 +193,11 @@ namespace WoopiAiHub.Repository
             if (string.IsNullOrEmpty(pagedDataDto.Search))
                 return query;
 
-            var searchLower = pagedDataDto.Search.ToLower();
             return query.Where(i =>
-                i.Name.ToLower().Contains(searchLower) ||
-                i.Email.ToLower().Contains(searchLower) ||
+                i.Name.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase) ||
+                i.Email.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase) ||
                 i.Id.ToString().Contains(pagedDataDto.Search) ||
-                i.Teams.Any(t => t.Name.ToLower().Contains(searchLower)));
+                i.Teams.Any(t => t.Name.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase)));
         }
 
         /// <summary>
