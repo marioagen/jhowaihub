@@ -977,8 +977,6 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
 
-            // Collect card-document pairs BEFORE any changes while cards are still active.
-            // In Phase 3 all steps are affected when resetDocuments=true, so all step IDs are candidates.
             var cardDocumentPairs = new List<(int cardId, int documentId)>();
             if (workflowPhase3Dto.ResetDocuments)
             {
