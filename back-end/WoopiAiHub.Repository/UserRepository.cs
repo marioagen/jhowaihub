@@ -172,6 +172,7 @@ namespace WoopiAiHub.Repository
                     Created = t.Created,
                     Email = t.Email,
                     IsActive = t.IsActive,
+                    LastLoginAt = t.LastLoginAt,
                     Teams = t.Teams!
                         .Select(u => new TeamDto
                         {

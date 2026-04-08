@@ -113,6 +113,9 @@ namespace WoopiAiHub.UnitTests.Services
             _mockUserRepository
                 .Setup(x => x.FindUserProfilesByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(profiles);
+            _mockUserRepository
+                .Setup(x => x.Update(It.IsAny<User>()))
+                .Returns(true);
             _passwordHasherMock.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()))
                 .Returns(true);
 
@@ -127,6 +130,7 @@ namespace WoopiAiHub.UnitTests.Services
             iGraphApi.Verify(r => r.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
             iMarketPlaceApi.Verify(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             _passwordHasherMock.Verify(a => a.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()), Times.Never);
+            _mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Once);
         }
 
         [Fact(DisplayName = "Test authenticate Sucess")]
@@ -180,6 +184,9 @@ namespace WoopiAiHub.UnitTests.Services
             _mockUserRepository
                 .Setup(x => x.FindUserProfilesByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(profiles);
+            _mockUserRepository
+                .Setup(x => x.Update(It.IsAny<User>()))
+                .Returns(true);
             _mockPasswordHasher.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()))
                 .Returns(true);
 
@@ -189,6 +196,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             iMarketPlaceApi.Verify(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             _mockPasswordHasher.Verify(a => a.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()), Times.Once);
+            _mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Once);
         }
 
         [Fact(DisplayName = "Test Authenticate fail")]
