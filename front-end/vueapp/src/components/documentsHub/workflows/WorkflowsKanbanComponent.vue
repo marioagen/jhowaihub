@@ -492,6 +492,7 @@
                     params: {
                         id: this.selectedOption.id,
                     },
+                    query: { from: "kanban" },
                 });
             },
         },
