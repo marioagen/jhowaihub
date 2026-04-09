@@ -186,6 +186,12 @@ namespace WoopiAiHub.Repository
             return ApplySearchFilter(query, pagedDataDto);
         }
 
+        /// <summary>
+        /// When <see cref="PagedDataDto.Search"/> is non-empty, restricts the query to users whose name, email, id, or any team name contains the search text (case-insensitive for text fields). Returns the query unchanged when search is null or empty.
+        /// </summary>
+        /// <param name="query">The projected user listing query to filter.</param>
+        /// <param name="pagedDataDto">Paging options; <see cref="PagedDataDto.Search"/> supplies the filter text.</param>
+        /// <returns>The filtered query, or the original query if there is no search term.</returns>
         private static IQueryable<UserPagedDto> ApplySearchFilter(
             IQueryable<UserPagedDto> query,
             PagedDataDto pagedDataDto)
