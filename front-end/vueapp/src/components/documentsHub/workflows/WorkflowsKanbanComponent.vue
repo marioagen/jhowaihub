@@ -137,14 +137,19 @@
                 <div class="card-body d-flex flex-column p-2 card-container">
                     <div class="kanban-wrapper">
                         <KanbanBoard
-                            ref="kanbanBoardRef"
+                            v-if="isKanbanView"
                             :kanbanData="kanbanCards"
                             :users="users"
+                            :isLoading="isLoadingKanban"
+                            :cardIdsToUpdate="cardIdsToUpdate"
                             @reload="reloadKanban"
                             @cardMoved="handleCardMoved"
                             @cardUpdated="updateCard"
-                            :isLoading="isLoadingKanban"
-                            :cardIdsToUpdate="cardIdsToUpdate"
+                            ref="kanbanBoardRef"
+                        />
+                        <WorkflowAccordionComponent
+                            v-else
+                            :data="kanbanCards"
                         />
                     </div>
                 </div>
@@ -161,6 +166,7 @@
     </div>
 </template>
 <script>
+    import { hasPermission } from "@/utils/permissions";
     import signalRService from "@/services/signalR/signalRServices.js";
     import GlobalEventService from "@/services/globalEventService.js";
     import WorkflowService from "@/services/workflow/WorkflowService.js";
@@ -169,17 +175,11 @@
     import UserService from "@/services/users/UserService";
     import LogService from "@/services/log/logService";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
-    import { hasPermission } from "@/utils/permissions";
-
+    import WorkflowAccordionComponent from "@/components/documentsHub/workflows/WorkflowAccordionComponent.vue";
     export default {
         name: "WorkflowPage",
         data() {
             return {
-                crumbsData: [],
-                entitySearch: {},
-                modalQuestion: {
-                    name: "",
-                },
                 workflowList: [],
                 workflowSearchText: "",
                 filteredWorkflows: [],
@@ -190,9 +190,6 @@
                     teamId: 0,
                 },
                 kanbanCards: [],
-                numDocs: 0,
-                isLoaded: false,
-                isLoadedUsers: false,
                 isLoadingKanban: true,
                 signalrEventExecutionChanged: "CardExecutionChanged",
                 filters: {
@@ -204,12 +201,14 @@
                 users: [],
                 cardIdsToUpdate: [],
                 updateCardsDebounceTimer: null,
+                isKanbanView: true,
             };
         },
         components: {
             LoadingComponent,
             WorkflowViewFilters,
             KanbanBoard,
+            WorkflowAccordionComponent,
         },
         computed: {
             hasList() {
@@ -282,11 +281,9 @@
             getUsersByTeams(teams) {
                 if (!teams || teams.length === 0) {
                     this.users = [];
-                    this.isLoading = false;
                     return;
                 }
 
-                this.isLoading = true;
                 const teamIds = teams.map((t) => t.id);
 
                 UserService.getUsersByTeamIds(teamIds)
@@ -296,16 +293,10 @@
                     .catch((error) => {
                         LogService.showMessage("Error loading users:", error);
                         this.users = [];
-                    })
-                    .finally(() => {
-                        this.isLoading = false;
                     });
             },
             selectOption(workflow) {
                 if (!workflow?.id) return;
-
-                this.isLoaded = false;
-                this.isLoadedUsers = false;
 
                 this.$store.commit("setLastSelectedWorkflow", {
                     id: workflow.id,
