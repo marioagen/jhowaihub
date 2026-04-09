@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using WoopiAiHub.Application.Utils;
@@ -27,13 +28,15 @@ public class PromptHandler : IToolHandler
     private readonly ResponseOpenAiSettings _responseOpenAiSettings;
     private readonly IApiTemplateServices _apiTemplateServices;
     private readonly IAccountServices _accountServices;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public PromptHandler(IOptions<MessageQueues> messageQueues,
                          IPromptServices promptServices,
                          ITenantCacheServices tenantCacheServices,
                          IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
                          IApiTemplateServices apiTemplateServices,
-                         IAccountServices accountServices)
+                         IAccountServices accountServices,
+                         IHttpContextAccessor httpContextAccessor)
     {
         _messageQueues = messageQueues.Value;
         _promptServices = promptServices;
@@ -41,6 +44,7 @@ public class PromptHandler : IToolHandler
         _responseOpenAiSettings = responseOpenAiSettings.Value;
         _apiTemplateServices = apiTemplateServices;
         _accountServices = accountServices;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     /// <summary>
@@ -72,7 +76,7 @@ public class PromptHandler : IToolHandler
         var promptId = int.Parse(input!.Value);
         var promptDto = _promptServices.FindById(promptId);
 
-        ResponseOpenAiRequestDto dto = await generateTheOpenAiResponseRequestDto(promptDto, fullText);
+        ResponseOpenAiRequestDto dto = await GenerateTheOpenAiResponseRequestDto(promptDto, fullText);
 
         return new ExecutionMessageDto
         {
@@ -93,7 +97,7 @@ public class PromptHandler : IToolHandler
         };
     }
 
-    private async Task<ResponseOpenAiRequestDto> generateTheOpenAiResponseRequestDto(PromptDto? promptDto, string fullText)
+    private async Task<ResponseOpenAiRequestDto> GenerateTheOpenAiResponseRequestDto(PromptDto? promptDto, string fullText)
     {
 
         var dto = new ResponseOpenAiRequestDto
@@ -123,21 +127,52 @@ public class PromptHandler : IToolHandler
         if (!promptDto.EnableAccessToMcp)
             return;
 
+        if (string.IsNullOrEmpty(_responseOpenAiSettings.Instructions))
+            throw new ApplicationException("The agent with a external access enabled need has the instructions filled in the appSettings");
+
+        string instructions = await GenerateInstructionsWithMappedApisToAgent(promptDto);
+
+        var accessToken = _accountServices.GenerateTokenWithParameters(
+            _responseOpenAiSettings.JWTKey,
+            _responseOpenAiSettings.JWTIssuer,
+            _responseOpenAiSettings.JWTAudience,
+            _responseOpenAiSettings.JWTUser,
+            _responseOpenAiSettings.JWTExpirationTime);
+
+        dto.Instructions = instructions;
+        dto.MaxToolCalls = _responseOpenAiSettings.MaxToolCalls;
+        dto.Tools = new List<ResponseOpenAiRequestToolsDto> {
+            new ResponseOpenAiRequestToolsDto {
+                Type = OpenAiResponseToolsType.Mcp,
+                ServerLabel = "dmcp",
+                ServerUrl= _responseOpenAiSettings.McpAddress,
+                Headers= new Dictionary<string, string>{
+                        {"x-session-id", _httpContextAccessor.HttpContext?.Session.Id ?? Guid.NewGuid().ToString()},
+                        {"Authorization", $"Bearer {accessToken}"}
+                    },
+                RequireApproval="never",
+                AllowedTools=["generalista"]
+            }
+        };
+    }
+
+    private async Task<string> GenerateInstructionsWithMappedApisToAgent(PromptDto promptDto)
+    {
         var apis = await _apiTemplateServices.FindAll(new ApiTemplateFilterDto() { EnableAccessFromMcp = true, PromptId = promptDto.Id });
 
         var mappedApis = apis.Select(api => new
         {
             id = api.Id,
             address = api.Url,
-            protocol = api.Method switch 
+            protocol = api.Method switch
             {
                 "GET" => 0,
-                "POST" => 1, 
+                "POST" => 1,
                 "PUT" => 2,
                 _ => 3
             },
             description = api.Description,
-            payload_schema =  api.Method switch 
+            payload_schema = api.Method switch
             {
                 "GET" => null,
                 _ => $"PAYLOAD_API_{api.Id}"
@@ -152,60 +187,9 @@ public class PromptHandler : IToolHandler
             mappedApiString = mappedApiString.Replace($"PAYLOAD_API_{item.Id}", System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(bodyContent).RootElement));
         }
 
-        var accessToken = _accountServices.GenerateToken("MCP_SERVER", 5);
-
-        var instructions = string.IsNullOrEmpty(mappedApiString) ? "" : @"
-Para atender o prompt acima  use a tool generalista. e siga as instruções abaixo.
-Assinatura: generalista(request: GeneralistaRequestDTO).
-a estrutura do GeneralistaRequestDTO é a seguinte:
-{
-Protocolo: GeneralistaProtocolMetodo, // O protocolo define a estrutura do payload e o endpoint a ser chamado.
-BaseRequestURL: string, // URL usado na request do MCP, ex: 'https://localhost:7115/api/usuario/' ou 'https://localhost:7115/api/produto/'
-RequestData: string, // dados em json em formato de string, que serão enviados no corpo da requisição para o endpoint definido pelo protocolo.
-}
-
-GeneralistaProtocolMetodo {
-    GET=0,
-    POST=1,
-    PUT=2,
-    DELETE=3
-}
-
-com a estrutura definida 
-
-CATALOGO_DE_ENDPOINTS: " + mappedApiString + @"
-
-
-REGRAS DE ROTEAMENTO:
-- Se a resposta depender de dados externos, chame generalista antes de responder.
-- Escolha o address somente se estiver presente no CATALOGO_DE_ENDPOINTS, sem inventar.
-- Monte payload_json como string JSON válida, conforme payload_schema do endpoint escolhido.
-- Se mais de um endpoint servir, escolha o de maior especificidade e menor número de campos.
-- Analise se a URL não possui parametros customiavies, os paraetros serão reconhecidos pela presença de chaves ({}), caso exista parametros no endereço realize a substitução pelo valor devido.
-- Para parametros na URL caso o valor possua algum simbolo entre os cochetes [.,/:;] rever os simolos. Ex: cpf 000.000.000-00 no parametro da URL deverá passar 00000000000. Isso só deve ser aplicado aos parametros de URL, se o dado pesquisador pode permanecer com os caracteres se forem enviados em consultas dentro do corpo da request
-- Limite de chamadas: no máximo 10.
-
-REGRAS DE RESPOSTA:
-- Não sugerir ações após o rultado
-- Não indicar como os dados foram obtidos apenas apresentar os dados
-                ";
-
-        dto.Instructions = instructions;
-        dto.MaxToolCalls = 10;
-        dto.Tools = new List<ResponseOpenAiRequestToolsDto> {
-            new ResponseOpenAiRequestToolsDto {
-                Type = OpenAiResponseToolsType.Mcp,
-                ServerLabel = "dmcp",
-                ServerUrl=_responseOpenAiSettings.McpAddress,
-                Headers= new Dictionary<string, string>{
-                        {"x-api-key", _responseOpenAiSettings.SessionIdKey},
-                        {"Authorization", $"Bearer {accessToken}"}
-                    },
-                RequireApproval="never",
-                AllowedTools=["generalista"]
-            }
-        };
-}
+        var instructions = string.IsNullOrEmpty(mappedApiString) ? "" : string.Format(_responseOpenAiSettings.Instructions, mappedApiString);
+        return instructions;
+    }
 
     /// <summary>
     /// Extracts and concatenates text from dependency outputs. OCR output is parsed from DocumentEmbeddings; Prompt output is used as plain text.
@@ -213,13 +197,15 @@ REGRAS DE RESPOSTA:
     /// </summary>
     private static string ExtractFullTextFromOutputs(ICollection<StepToolOutput> outputs)
     {
-        if (outputs == null || outputs.Count == 0) return string.Empty;
+        if (outputs == null || outputs.Count == 0)
+            return string.Empty;
 
         var parts = new List<string>();
         foreach (var output in outputs)
         {
             var value = output.Value;
-            if (string.IsNullOrWhiteSpace(value)) continue;
+            if (string.IsNullOrWhiteSpace(value))
+                continue;
 
             var toolType = output.StepTool?.Tool?.ToolType?.Name;
             if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
@@ -243,12 +229,12 @@ REGRAS DE RESPOSTA:
     /// <returns></returns>
     private static bool TryAddOcrText(string value, List<string> parts)
     {
-       var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(value);
-       if (documents?.DocumentEmbeddings != null && documents.DocumentEmbeddings.Count > 0)
-       {
-           parts.Add(string.Join("\n", documents.DocumentEmbeddings.Select(d => d.Text)));
-           return true;
-       }
+        var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(value);
+        if (documents?.DocumentEmbeddings != null && documents.DocumentEmbeddings.Count > 0)
+        {
+            parts.Add(string.Join("\n", documents.DocumentEmbeddings.Select(d => d.Text)));
+            return true;
+        }
         return false;
     }
 }

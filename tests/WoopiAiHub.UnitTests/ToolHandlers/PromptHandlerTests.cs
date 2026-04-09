@@ -1,3 +1,4 @@
+using Bogus;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.AutoMock;
@@ -44,6 +45,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             _mockPromptServices = _mocker.GetMock<IPromptServices>();
             _mockApiTemplateServices = _mocker.GetMock<IApiTemplateServices>();
             _mockAccountServices = _mocker.GetMock<IAccountServices>();
+            var faker = new Faker("pt_BR");;
             _chatCompletionSettings = new ChatCompletionSettings
             {
                 Model = "gpt-4",
@@ -56,7 +58,14 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 Model = "gpt-4",
                 ApiVersion = "",
                 McpAddress = "",
-                SessionIdKey= "SessionIdKey"
+                SessionIdKey= "SessionIdKey",
+                Instructions = "instructions {0} instructions",
+                JWTKey = Guid.NewGuid().ToString(),
+                JWTIssuer =  faker.Internet.Url(),
+                JWTAudience = faker.Internet.Url(),
+                JWTUser = faker.Internet.UserName(),
+                JWTExpirationTime = 5
+
             };
             _mocker.Use<IOptions<ChatCompletionSettings>>(Options.Create(_chatCompletionSettings));
             _mocker.Use<IOptions<ResponseOpenAiSettings>>(Options.Create(_responseOpenAiSettings));
@@ -321,7 +330,15 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 });
 
             _mockAccountServices
-                .Setup(x => x.GenerateToken("MCP_SERVER", 5))
+                .Setup(x =>
+                    x.GenerateTokenWithParameters(
+                        _responseOpenAiSettings.JWTKey,
+                        _responseOpenAiSettings.JWTIssuer,
+                        _responseOpenAiSettings.JWTAudience,
+                        _responseOpenAiSettings.JWTUser,
+                        _responseOpenAiSettings.JWTExpirationTime
+                    )
+                )
                 .Returns("token-test");
 
             // Act
@@ -334,12 +351,12 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.NotNull(message.OpenAiResponse);
             Assert.NotEmpty(message.OpenAiResponse.Instructions);
 
-            Assert.Contains("instruções", message.OpenAiResponse.Instructions);
+            Assert.Contains("instructions", message.OpenAiResponse.Instructions);
             Assert.Contains("http://localhost", message.OpenAiResponse.Instructions);
             Assert.Contains("Api 1", message.OpenAiResponse.Instructions);
             Assert.Contains("Api 2", message.OpenAiResponse.Instructions);
 
-            Assert.Equal(10, message.OpenAiResponse.MaxToolCalls);
+            Assert.Equal(_responseOpenAiSettings.MaxToolCalls, message.OpenAiResponse.MaxToolCalls);
 
             Assert.NotNull(message.OpenAiResponse.Tools);
             Assert.Single(message.OpenAiResponse.Tools);
@@ -350,7 +367,6 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.Equal("generalista", tool.AllowedTools[0]);
 
             Assert.NotNull(tool.Headers);
-            Assert.Equal(_responseOpenAiSettings.SessionIdKey, tool.Headers["x-api-key"]);
             Assert.Equal("Bearer token-test", tool.Headers["Authorization"]);
         }
     }

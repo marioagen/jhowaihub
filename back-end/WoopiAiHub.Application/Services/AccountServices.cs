@@ -357,6 +357,12 @@ namespace WoopiAiHub.Application.Services
         public string GenerateToken(string user, int? tokenExpirationTime = null)
         {
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
+            return GenerateTokenWithParameters(key, _config["Jwt:Issuer"], _config["Jwt:Audience"], user, tokenExpirationTime);
+        }
+
+        public string GenerateTokenWithParameters(string jwtKey, string jwtIssuer, string jwtAudience, string user, int? tokenExpirationTime = null)
+        {
+            var key = jwtKey ?? throw new ArgumentException("JWT key is not configured.");
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
             var expirationMinutes = tokenExpirationTime ?? _config.GetValue("JWT:AccessTokenExpirationMinutes", 60);
@@ -367,8 +373,8 @@ namespace WoopiAiHub.Application.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var token = new JwtSecurityToken(_config["Jwt:Issuer"],
-                _config["Jwt:Audience"],
+            var token = new JwtSecurityToken(jwtIssuer,
+                jwtAudience,
                 claims,
                 expires: DateTime.Now.AddMinutes(expirationMinutes),
                 signingCredentials: credentials);
