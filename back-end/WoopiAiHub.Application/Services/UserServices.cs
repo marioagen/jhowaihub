@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -147,20 +147,32 @@ namespace WoopiAiHub.Application.Services
         {
             if (pagedDataDto.Page > 0)
             {
-                var totalList = _userRepository.FindAllPaged(pagedDataDto);
+                var query = _userRepository.FindAllPaged(pagedDataDto);
+                var ordered = OrderUsersList(query, pagedDataDto);
+                var paginated = PaginationHelper.Paginate(
+                    ordered,
+                    pagedDataDto.Page,
+                    pagedDataDto.PageSize);
 
-                totalList = pagedDataDto.IsAscending ?
-                    totalList.OrderBy(user => user.Name) :
-                    totalList.OrderByDescending(user => user.Name);
+                return new UserPagedResultDto
+                {
+                    Content = paginated.Content,
+                    CurrentPage = paginated.CurrentPage,
+                    PageCount = paginated.PageCount,
+                    RowCount = paginated.RowCount,
+                };
+            }
 
-                var result = Pagination(totalList, pagedDataDto);
-                return result;
-            }
-            else
-            {
-                var ex = new ArgumentException("The number of pages must be greater than 0");
-                throw ex;
-            }
+            throw new ArgumentException("The number of pages must be greater than 0");
+        }
+
+        private static IQueryable<UserPagedDto> OrderUsersList(
+            IQueryable<UserPagedDto> query,
+            PagedDataDto pagedDataDto)
+        {
+            return pagedDataDto.IsAscending
+                ? query.OrderBy(user => user.Name)
+                : query.OrderByDescending(user => user.Name);
         }
 
         /// <summary>
@@ -198,52 +210,6 @@ namespace WoopiAiHub.Application.Services
         public Guid FindIdByEmail(string email)
         {
             return _userRepository.FindIdByEmail(email);
-        }
-
-        /// <summary>
-        /// Ordenates the list of users and returns a paged result.
-        /// </summary>
-        /// <param name="totalList"></param>
-        /// <param name="pagedDataDto"></param>
-        /// <returns></returns>
-        private static UserPagedResultDto Pagination(IQueryable<UserPagedDto> totalList,
-                                                     PagedDataDto pagedDataDto)
-        {
-            int pageCount, currentPage = 0;
-
-            if (!string.IsNullOrEmpty(pagedDataDto.Search))
-            {
-                totalList = totalList.Where(i =>
-                    i.Name.ToLower().Contains(pagedDataDto.Search.ToLower()) ||
-                    i.Email.ToLower().Contains(pagedDataDto.Search.ToLower()) ||
-                    i.Id.ToString().Contains(pagedDataDto.Search) ||
-                    i.Teams.Any(t => t.Name.ToLower().Contains(pagedDataDto.Search.ToLower())
-                ));
-            }
-
-            var totalListCount = totalList.Count();
-
-            if (pagedDataDto.PageSize == 0)
-            {
-                pageCount = 1;
-                currentPage = 1;
-                pagedDataDto.PageSize = totalListCount;
-            }
-            else
-            {
-                pageCount = (int)Math.Ceiling((double)totalListCount / pagedDataDto.PageSize);
-                currentPage = pagedDataDto.Page <= pageCount ? pagedDataDto.Page : 1;
-                totalList = totalList.Skip((currentPage - 1) * pagedDataDto.PageSize)
-                                     .Take(pagedDataDto.PageSize);
-            }
-
-            return new UserPagedResultDto()
-            {
-                Content = totalList,
-                CurrentPage = currentPage,
-                PageCount = pageCount,
-                RowCount = totalListCount,
-            };
         }
 
         /// <summary>

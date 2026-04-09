@@ -70,30 +70,29 @@
             &nbsp;{{ $t("common.loading") }}..
         </div>
     </div>
-    <div></div>
     <div
-        class="row card-list scroll-area pb-3"
+        class="prompts-cards-scroll-host"
         v-if="!loading"
     >
-        <div
-            v-for="item in filteredPrompts"
-            :key="item.id"
-            class="card"
-        >
-            <div class="card-body mt-2">
-                <div class="row">
-                    <div class="col-12 icons-card">
+        <div class="prompts-card-grid pb-3">
+            <div
+                v-for="item in filteredPrompts"
+                :key="item.id"
+                class="card prompt-card"
+            >
+                <div class="card-body prompt-card-body">
+                    <div class="icons-card">
                         <LucideIcon
                             v-if="item.isImported && !item.isEdited"
                             icon="Globe"
                             :size="16"
-                            class="text-primary mt-2"
+                            class="text-primary prompt-card-header-icon"
                         />
                         <span
                             v-else
-                            class="dot mt-2 m-1"
+                            class="dot prompt-card-header-icon m-1"
                         ></span>
-                        <span class="m-1">
+                        <span class="prompt-card-title m-1">
                             {{ item.name }}
                         </span>
                         <div class="custom-margin">
@@ -134,56 +133,58 @@
                             </ul>
                         </div>
                     </div>
+                    <p
+                        class="card-text prompt-card-description d-flex align-items-start gap-1 text-muted"
+                    >
+                        <span>
+                            {{
+                                item.description && item.description.length > 100
+                                    ? item.description.slice(0, 100) + "..."
+                                    : item.description
+                            }}
+                        </span>
+                        <span
+                            v-if="item.description && item.description.length > 100"
+                            class="description-view-icon"
+                            v-tooltip="item.description"
+                            tabindex="0"
+                        >
+                            <LucideIcon
+                                icon="Eye"
+                                :size="14"
+                            />
+                        </span>
+                    </p>
                 </div>
-                <p class="card-text d-flex align-items-start gap-1">
-                    <span>
-                        {{
-                            item.description && item.description.length > 100
-                                ? item.description.slice(0, 100) + "..."
-                                : item.description
-                        }}
-                    </span>
-                    <span
-                        v-if="item.description && item.description.length > 100"
-                        class="description-view-icon"
-                        v-tooltip="item.description"
-                        tabindex="0"
-                    >
-                        <LucideIcon
-                            icon="Eye"
-                            :size="14"
-                        />
-                    </span>
-                </p>
-            </div>
-            <div class="card-footer">
-                <div class="date-info">
-                    <i class="far fa-clock mt-1"></i>
-                    <span>
-                        &ensp;{{ $t("dashboard.created") }}
-                        {{ this.formatDate(item.created) }}
-                    </span>
-                </div>
-                <div class="owner-info d-flex align-items-center">
-                    <span class="owner-label">{{ $t("common.owner") }}:</span>
-                    <span
-                        v-if="item.ownerName || item.ownerEmail"
-                        class="owner-avatar-wrapper"
-                        v-tooltip="ownerTooltip(item)"
-                    >
-                        <AvatarComponent
-                            :name="item.ownerName || item.ownerEmail || ''"
-                            variant="primary"
-                            :size="28"
-                        />
-                    </span>
-                    <span
-                        v-else
-                        class="owner-avatar-placeholder"
-                        v-tooltip="'-'"
-                    >
-                        —
-                    </span>
+                <div class="card-footer prompt-card-footer">
+                    <div class="date-info">
+                        <i class="far fa-clock mt-1"></i>
+                        <span>
+                            &ensp;{{ $t("prompts.createdShort") }}
+                            {{ this.formatDate(item.created) }}
+                        </span>
+                    </div>
+                    <div class="owner-info d-flex align-items-center">
+                        <span class="owner-label">{{ $t("common.owner") }}:</span>
+                        <span
+                            v-if="item.ownerName || item.ownerEmail"
+                            class="owner-avatar-wrapper"
+                            v-tooltip="ownerTooltip(item)"
+                        >
+                            <AvatarComponent
+                                :name="item.ownerName || item.ownerEmail || ''"
+                                variant="primary"
+                                :size="28"
+                            />
+                        </span>
+                        <span
+                            v-else
+                            class="owner-avatar-placeholder"
+                            v-tooltip="'-'"
+                        >
+                            —
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -196,7 +197,7 @@
             <div class="pagination justify-content-center">
                 <button
                     type="button"
-                    class="btn btn-primary"
+                    class="btn btn-load-more-prompts"
                     @click="loadMore"
                 >
                     {{ $t("prompts.labelLoadMore") }}
@@ -524,33 +525,79 @@
         min-height: 20%;
     }
 
-    .card-list {
-        display: flex;
-        flex-wrap: wrap;
+    .prompts-cards-scroll-host {
+        --prompts-scroll-top-offset: 22rem;
+        max-height: calc(100vh - var(--prompts-scroll-top-offset));
+        min-height: 10rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 991px) {
+        .prompts-cards-scroll-host {
+            --prompts-scroll-top-offset: 24rem;
+        }
+    }
+
+    .prompts-card-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 1rem;
+        padding: 0 10px;
+    }
+
+    @media (max-width: 991px) {
+        .prompts-card-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
     }
 
     @media (max-width: 768px) {
         .lines {
             display: none !important;
         }
+
+        .prompts-card-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
-    .card {
-        flex: 0 1 calc(33.333% - 1rem);
+    .prompt-card {
+        min-width: 0;
         height: auto;
         background-color: var(--color-card-content) !important;
         color: var(--color-body-content) !important;
-        border-color: var(--color-border-form-control) !important;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 38%);
+        border: 1px solid var(--color-bg-table-outline) !important;
+        border-radius: 8px;
     }
 
-    .card-body {
-        padding: 0;
+    .prompt-card-body {
+        padding: 1rem 1.25rem 0.75rem;
+    }
+
+    .prompt-card-description {
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
     }
 
     .icons-card {
         display: flex;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .prompt-card-header-icon {
+        flex-shrink: 0;
+        align-self: center;
+    }
+
+    .prompt-card-title {
+        flex: 1;
+        min-width: 0;
+        font-size: 1rem;
+        line-height: 1.3;
     }
 
     #dropdownIcon {
@@ -563,7 +610,8 @@
         color: #0073ea !important;
     }
 
-    .card-footer {
+    .card-footer,
+    .prompt-card-footer {
         background-color: initial;
         border-top: none;
         display: flex;
@@ -571,8 +619,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 0.5rem;
-        padding-left: 0;
-        padding-right: 0;
+        padding: 0 1.25rem 1rem;
     }
 
     .owner-info {
@@ -606,14 +653,22 @@
         opacity: 0.7;
     }
 
-    .card-list {
-        padding: 0px 10px;
+    .btn-load-more-prompts {
+        background-color: var(--color-bg-nav-button);
+        color: #0073ea;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 0.5rem 1.25rem;
     }
 
-    @media (max-width: 768px) {
-        .card-list {
-            display: list-item;
-        }
+    .btn-load-more-prompts:hover {
+        background-color: #e0edff;
+        color: #0062c4;
+    }
+
+    .btn-load-more-prompts:focus-visible {
+        box-shadow: 0 0 0 0.2rem rgba(0, 115, 234, 0.25);
     }
 
     .data-load {
@@ -637,7 +692,7 @@
     }
 
     .icon-ellipsis {
-        margin-top: 8px;
+        margin-top: 0;
     }
 
     .custom-margin {

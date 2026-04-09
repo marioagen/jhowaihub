@@ -803,6 +803,7 @@ const spanish = {
             editTitle: "Editar Usuario",
             editUser: "Editar usuario",
             email: "Correo electrónico",
+            lastLoginAt: "Último acceso",
             errors: {
                 emailDuplicated: "Correo electrónico ya registrado",
                 invalid: "Usuario inválido",
@@ -905,6 +906,7 @@ const spanish = {
         enterprise: "Plan Enterprise",
     },
     prompts: {
+        createdShort: "Creación -",
         cloneAction: "Clonar",
         cloneSuffix: "- Clon",
         createError: "Error al crear agente",
