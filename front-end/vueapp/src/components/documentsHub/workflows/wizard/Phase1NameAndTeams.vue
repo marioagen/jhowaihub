@@ -18,9 +18,7 @@
                 >
                     <input
                         class="form-control form-control-sm"
-                        :placeholder="
-                            $t('workflow.namePlaceholder')
-                        "
+                        :placeholder="$t('workflow.namePlaceholder')"
                         v-bind="field"
                         :value="workflowData.name"
                     />
@@ -90,9 +88,7 @@
                     {{ $t("workflow.associatedTeams") }}
                 </label>
                 <div v-if="isLoadingTeams">
-                    <div
-                        class="d-flex justify-content-center"
-                    >
+                    <div class="d-flex justify-content-center">
                         <div
                             class="spinner-border text-primary"
                             role="status"
@@ -104,11 +100,7 @@
                         <input
                             type="text"
                             class="form-control form-control-sm"
-                            :placeholder="
-                                $t(
-                                    'management.teams.searchTeams'
-                                )
-                            "
+                            :placeholder="$t('management.teams.searchTeams')"
                             v-model="searchTeam"
                         />
                     </div>
@@ -124,17 +116,13 @@
                                 :key="team.id"
                                 class="col-3 p-1"
                             >
-                                <div
-                                    class="form-check d-flex align-items-center"
-                                >
+                                <div class="form-check d-flex align-items-center">
                                     <input
                                         class="form-check-input me-3"
                                         type="checkbox"
                                         :id="`team-${team.id}`"
                                         :value="team.id"
-                                        v-model="
-                                            selectedTeams
-                                        "
+                                        v-model="selectedTeams"
                                     />
                                     <label
                                         class="form-check-label fw-semibold"
@@ -178,8 +166,7 @@
                     name: this.initialData?.name || "",
                     description: this.initialData?.description || "",
                 },
-                selectedTeams:
-                    this.initialData?.teams || [],
+                selectedTeams: this.initialData?.teams || [],
                 teamsList: [],
                 searchTeam: "",
                 isLoadingTeams: true,
@@ -191,11 +178,7 @@
                     return this.teamsList;
                 }
                 return this.teamsList.filter((team) =>
-                    team.text
-                        .toLowerCase()
-                        .includes(
-                            this.searchTeam.toLowerCase()
-                        )
+                    team.text.toLowerCase().includes(this.searchTeam.toLowerCase())
                 );
             },
         },
@@ -204,14 +187,11 @@
                 this.isLoadingTeams = true;
                 TeamsService.getTeamListSimple()
                     .then((response) => {
-                        if (response.error !== undefined)
-                            return;
-                        this.teamsList = response.map(
-                            (r) => ({
-                                id: r.id,
-                                text: r.name,
-                            })
-                        );
+                        if (response.error !== undefined) return;
+                        this.teamsList = response.map((r) => ({
+                            id: r.id,
+                            text: r.name,
+                        }));
                     })
                     .finally(() => {
                         this.isLoadingTeams = false;
@@ -236,12 +216,9 @@
             initialData: {
                 handler(newVal) {
                     if (newVal) {
-                        this.workflowData.name =
-                            newVal.name ?? "";
-                        this.workflowData.description =
-                            newVal.description ?? "";
-                        this.selectedTeams =
-                            newVal.teams ?? [];
+                        this.workflowData.name = newVal.name ?? "";
+                        this.workflowData.description = newVal.description ?? "";
+                        this.selectedTeams = newVal.teams ?? [];
                     } else {
                         this.workflowData.name = "";
                         this.workflowData.description = "";

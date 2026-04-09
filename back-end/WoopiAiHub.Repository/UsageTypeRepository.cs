@@ -21,7 +21,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<UsageType?> FindByNameAsync(string name)
         {
-            return await _context.UsageTypes.FirstOrDefaultAsync(x => x.Name == name);
+            return await _context.UsageTypes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Name == name);
         }
 
         /// <summary>

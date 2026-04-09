@@ -150,6 +150,7 @@ namespace WoopiAiHub.Repository
         {
             return _context.Prompts
                 .Include(x => x.PromptApiTemplates)
+                .AsNoTracking()
                 .Select(p => new PromptDto
                 {
                     Id = p.Id,

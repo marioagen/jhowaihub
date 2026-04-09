@@ -8,7 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         ResponseCreateTypeDto CreateUniqueTypeDoc(TypeDoc typeDoc);
         ICollection<TypeDoc> FindAll();
-        TypeDoc FindByName(string name);
+        TypeDoc? FindByName(string name);
         public bool DeleteByIds(List<int> ids);
         bool Update(TypeDocUpdateDto updateTypeDocDto);
         IQueryable<TypeDocDto> FindAllPaged(TypeDocPagedDataDto typedocPagedDataDto);

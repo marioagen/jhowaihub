@@ -275,5 +275,5 @@ export default {
             .get(`/Workflow/Step/${stepId}/HasConstraints`)
             .then(({ data }) => data)
             .catch((error) => ({ error }));
-    }
+    },
 };

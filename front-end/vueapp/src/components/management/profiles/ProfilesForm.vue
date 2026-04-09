@@ -1,8 +1,6 @@
 <template>
     <main>
-        <div
-            class="container-fluid scroll-area mx-4 mt-4 mb-4"
-        >
+        <div class="container-fluid scroll-area mx-4 mt-4 mb-4">
             <div class="row align-items-center">
                 <div class="col-6">
                     <div class="row">
@@ -11,9 +9,7 @@
                                 class="btn btn-outline-primary btn-table btn-sm table-btn"
                                 @click="returnToTable"
                             >
-                                <LucideIcon
-                                    icon="ArrowLeft"
-                                />
+                                <LucideIcon icon="ArrowLeft" />
                             </button>
                         </div>
                         <div class="col-10">
@@ -22,12 +18,8 @@
                                     {{ $t(formTitle) }}
                                 </h5>
                                 <p>
-                                    <small
-                                        class="text-muted"
-                                    >
-                                        {{
-                                            $t(formSubtitle)
-                                        }}
+                                    <small class="text-muted">
+                                        {{ $t(formSubtitle) }}
                                     </small>
                                 </p>
                             </div>
@@ -53,11 +45,7 @@
                     <input
                         v-model="profileData.name"
                         class="form-control form-control-sm"
-                        @blur="
-                            nameError = profileData.name
-                                ? ''
-                                : $t('validation.required')
-                        "
+                        @blur="nameError = profileData.name ? '' : $t('validation.required')"
                         @input="nameError = ''"
                     />
                     <div
@@ -67,40 +55,24 @@
                         {{ nameError }}
                     </div>
                     <div class="mb-3">
-                        <div
-                            class="d-flex justify-content-between align-items-center mb-2"
-                        >
+                        <div class="d-flex justify-content-between align-items-center mb-2">
                             <label class="form-label mb-0">
-                                {{
-                                    $t(
-                                        "management.profiles.permissions"
-                                    )
-                                }}
+                                {{ $t("management.profiles.permissions") }}
                             </label>
                             <span class="text-muted">
-                                {{
-                                    selectedPermissions.length
-                                }}
+                                {{ selectedPermissions.length }}
                                 {{ $t("common.selected") }}
                             </span>
                         </div>
                         <div class="mb-3">
                             <div class="input-group">
-                                <span
-                                    class="input-group-text"
-                                >
-                                    <i
-                                        class="fas fa-search text-secondary"
-                                    ></i>
+                                <span class="input-group-text">
+                                    <i class="fas fa-search text-secondary"></i>
                                 </span>
                                 <input
                                     type="text"
                                     class="form-control form-control-sm"
-                                    :placeholder="
-                                        $t(
-                                            'management.profiles.searchPermissions'
-                                        )
-                                    "
+                                    :placeholder="$t('management.profiles.searchPermissions')"
                                     v-model="searchTerm"
                                 />
                             </div>
@@ -126,11 +98,7 @@
                                     icon="CircleX"
                                     :size="15"
                                 />
-                                {{
-                                    $t(
-                                        "common.clearSelection"
-                                    )
-                                }}
+                                {{ $t("common.clearSelection") }}
                             </button>
                         </div>
                         <div v-if="isLoadingPermissions">
@@ -141,9 +109,7 @@
                             class="accordion-wrapper-scroll border rounded p-2 user-list"
                         >
                             <div
-                                v-for="(
-                                    group, index
-                                ) in filteredPermissions"
+                                v-for="(group, index) in filteredPermissions"
                                 :key="group.group"
                                 class="mb-2 border rounded"
                             >
@@ -154,42 +120,21 @@
                                         <strong>
                                             {{
                                                 $t(
-                                                    'permissions.groups.'+group.group.toLowerCase().replace(/-/g, "")
+                                                    "permissions.groups." +
+                                                        group.group.toLowerCase().replace(/-/g, "")
                                                 )
                                             }}
                                         </strong>
-                                        <span
-                                            class="text-muted ms-1"
-                                        >
-                                            ({{
-                                                checkedCount(
-                                                    group.permissions
-                                                )
-                                            }}
+                                        <span class="text-muted ms-1">
+                                            ({{ checkedCount(group.permissions) }}
                                             /
-                                            {{
-                                                group
-                                                    .permissions
-                                                    .length
-                                            }})
+                                            {{ group.permissions.length }})
                                         </span>
                                     </div>
 
-                                    <a
-                                        @click="
-                                            toggleCollapse(
-                                                index
-                                            )
-                                        "
-                                    >
+                                    <a @click="toggleCollapse(index)">
                                         <LucideIcon
-                                            :icon="
-                                                opened[
-                                                    index
-                                                ]
-                                                    ? 'ChevronUp'
-                                                    : 'ChevronDown'
-                                            "
+                                            :icon="opened[index] ? 'ChevronUp' : 'ChevronDown'"
                                             :size="20"
                                         />
                                     </a>
@@ -203,47 +148,31 @@
                                         <div class="row">
                                             <div
                                                 v-for="permission in group.permissions"
-                                                :key="
-                                                    permission.id
-                                                "
+                                                :key="permission.id"
                                                 class="col-md-3 p-1"
                                             >
-                                                <div
-                                                    class="form-check d-flex align-items-center"
-                                                >
+                                                <div class="form-check d-flex align-items-center">
                                                     <input
                                                         class="form-check-input me-2"
                                                         type="checkbox"
                                                         :id="`permission-${permission.id}`"
-                                                        :value="
-                                                            permission.id
-                                                        "
-                                                        v-model="
-                                                            selectedPermissions
-                                                        "
+                                                        :value="permission.id"
+                                                        v-model="selectedPermissions"
                                                     />
                                                     <label
                                                         class="form-check-label fw-semibold"
                                                         :for="`permission-${permission.id}`"
                                                     >
-                                                        {{
-                                                            $t(
-                                                                permission.description
-                                                            )
-                                                        }}
+                                                        {{ $t(permission.description) }}
                                                     </label>
                                                 </div>
                                             </div>
                                         </div>
                                         <div
-                                            v-if="
-                                                permissionError
-                                            "
+                                            v-if="permissionError"
                                             class="invalid-feedback d-block"
                                         >
-                                            {{
-                                                permissionError
-                                            }}
+                                            {{ permissionError }}
                                         </div>
                                     </div>
                                 </CollapseComponent>
@@ -254,9 +183,7 @@
             </div>
             <div class="row mt-1">
                 <div class="main-div shadow-sm mt-2">
-                    <div
-                        class="row align-items-center mb-3"
-                    >
+                    <div class="row align-items-center mb-3">
                         <div class="col-6">
                             <div class="row">
                                 <div class="col-1">
@@ -267,23 +194,15 @@
                                 </div>
                                 <div class="col-10">
                                     <div>
-                                        <h6
-                                            class="mb-0 fw-bold"
-                                        >
-                                            {{
-                                                $t(
-                                                    "management.profiles.permissionsWorkflow"
-                                                )
-                                            }}
+                                        <h6 class="mb-0 fw-bold">
+                                            {{ $t("management.profiles.permissionsWorkflow") }}
                                         </h6>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div
-                        v-if="isLoadingWorkflowPermissions"
-                    >
+                    <div v-if="isLoadingWorkflowPermissions">
                         <LoadingComponent />
                     </div>
                     <div
@@ -305,44 +224,30 @@
                             >
                                 <div class="row">
                                     <div class="col-2">
-                                        <span
-                                            class="fw-semibold"
-                                        >
-                                            {{ step.name }} 
+                                        <span class="fw-semibold">
+                                            {{ step.name }}
                                         </span>
                                     </div>
                                     <div class="col-10">
-                                        <div
-                                            class="row ms-2 justify-content-end"
-                                        >
+                                        <div class="row ms-2 justify-content-end">
                                             <div
                                                 v-for="permission in permissionsWorkflowList"
-                                                :key="
-                                                    permission.id
-                                                "
+                                                :key="permission.id"
                                                 class="col-md-3 p-1"
                                             >
-                                                <div
-                                                    class="form-check d-flex align-items-center"
-                                                >
+                                                <div class="form-check d-flex align-items-center">
                                                     <input
                                                         class="form-check-input me-2"
                                                         type="checkbox"
                                                         :id="`permission-${profileData.id ?? 'new'}-${step.id}-${permission.id}`"
                                                         :value="`${step.id}:${permission.id}`"
-                                                        v-model="
-                                                            selectedWorkflowPermissions
-                                                        "
+                                                        v-model="selectedWorkflowPermissions"
                                                     />
                                                     <label
                                                         class="form-check-label"
                                                         :for="`permission-${profileData.id ?? 'new'}-${step.id}-${permission.id}`"
                                                     >
-                                                        {{
-                                                            $t(
-                                                                permission.description
-                                                            )
-                                                        }}
+                                                        {{ $t(permission.description) }}
                                                     </label>
                                                 </div>
                                             </div>
@@ -428,26 +333,18 @@
                 const term = this.searchTerm.toLowerCase();
                 return this.permissionsList
                     .map((group) => {
-                        const filtered =
-                            group.permissions.filter(
-                                (p) =>
-                                    p.name
-                                        .toLowerCase()
-                                        .includes(term) ||
-                                    this.$t(p.description)
-                                        .toLowerCase()
-                                        .includes(term)
-                            );
+                        const filtered = group.permissions.filter(
+                            (p) =>
+                                p.name.toLowerCase().includes(term) ||
+                                this.$t(p.description).toLowerCase().includes(term)
+                        );
 
                         return {
                             ...group,
                             permissions: filtered,
                         };
                     })
-                    .filter(
-                        (group) =>
-                            group.permissions.length > 0
-                    );
+                    .filter((group) => group.permissions.length > 0);
             },
         },
         mounted() {
@@ -467,13 +364,13 @@
                 PermissionsService.getPermissions()
                     .then((response) => {
                         const workflowStepGroup = response.permissions.find(
-                            group => group.group === 'Workflow-Step'
+                            (group) => group.group === "Workflow-Step"
                         );
-                        
+
                         this.permissionsWorkflowList = workflowStepGroup?.permissions || [];
-                        
+
                         this.permissionsList = response.permissions.filter(
-                            group => group.group !== 'Workflow-Step'
+                            (group) => group.group !== "Workflow-Step"
                         );
                     })
                     .finally(() => {
@@ -485,57 +382,40 @@
                 this.isLoadingWorkflowPermissions = true;
                 PermissionsService.getWorkflowPermissions()
                     .then((response) => {
-                        this.permissionsWorkflowList =
-                            response.permissions;
+                        this.permissionsWorkflowList = response.permissions;
                     })
                     .finally(() => {
                         this.isLoadingWorkflowPermissions = false;
                     });
             },
             getWorkflows() {
-                WorkflowService.getWorkflowCompleteList().then(
-                    (response) => {
-                        this.workflowList = response;
-                    }
-                );
+                WorkflowService.getWorkflowCompleteList().then((response) => {
+                    this.workflowList = response;
+                });
             },
             setupEdit() {
                 if (!this.isEdit) return;
-                ProfilesService.getProfileById(
-                    this.id
-                ).then((response) => {
+                ProfilesService.getProfileById(this.id).then((response) => {
                     this.profileData = response;
-                    this.selectedPermissions =
-                        response.permissions.map(
-                            (p) => p.id
-                        );
+                    this.selectedPermissions = response.permissions.map((p) => p.id);
                     // this.selectedWorkflowPermissions = response.workflowPermission;
-                    this.selectedWorkflowPermissions =
-                        response.workflowPermission.map(
-                            (wp) =>
-                                `${wp.stepId}:${wp.permissionId}`
-                        );
+                    this.selectedWorkflowPermissions = response.workflowPermission.map(
+                        (wp) => `${wp.stepId}:${wp.permissionId}`
+                    );
                 });
             },
             validateForm() {
                 let valid = true;
 
-                if (
-                    !this.profileData.name ||
-                    this.profileData.name.length < 2
-                ) {
-                    this.nameError = this.$t(
-                        "validation.required"
-                    );
+                if (!this.profileData.name || this.profileData.name.length < 2) {
+                    this.nameError = this.$t("validation.required");
                     valid = false;
                 } else {
                     this.nameError = "";
                 }
 
                 if (this.selectedPermissions.length === 0) {
-                    this.permissionError = this.$t(
-                        "validation.required"
-                    );
+                    this.permissionError = this.$t("validation.required");
                     valid = false;
                 } else {
                     this.permissionError = "";
@@ -544,14 +424,9 @@
                 return valid;
             },
             selectAll() {
-                this.selectedPermissions =
-                    this.filteredPermissions.flatMap(
-                        (group) =>
-                            group.permissions.map(
-                                (permission) =>
-                                    permission.id
-                            )
-                    );
+                this.selectedPermissions = this.filteredPermissions.flatMap((group) =>
+                    group.permissions.map((permission) => permission.id)
+                );
             },
             clearSelection() {
                 this.selectedPermissions = [];
@@ -567,10 +442,8 @@
                 if (!this.validateForm()) return;
                 var paramsReq = {
                     name: this.profileData.name,
-                    permissionsIds:
-                        this.selectedPermissions,
-                    permissionsWorkflow:
-                        this.formatWorkflowPermissions(),
+                    permissionsIds: this.selectedPermissions,
+                    permissionsWorkflow: this.formatWorkflowPermissions(),
                 };
 
                 ProfilesService.addProfile(paramsReq)
@@ -579,9 +452,7 @@
                             this.returnToTable();
                             return this.$notify({
                                 title: "Profiles",
-                                message: this.$t(
-                                    "management.profiles.saveSuccess"
-                                ),
+                                message: this.$t("management.profiles.saveSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
@@ -591,9 +462,10 @@
                             }
                             this.$notify({
                                 title: "Profiles",
-                                message: result.errorCode === ErrorCode.Duplicated
-                                    ? this.$t("management.profiles.errors.duplicated")
-                                    : this.$t("management.profiles.errors.saveError"),
+                                message:
+                                    result.errorCode === ErrorCode.Duplicated
+                                        ? this.$t("management.profiles.errors.duplicated")
+                                        : this.$t("management.profiles.errors.saveError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -609,10 +481,8 @@
                 var paramsReq = {
                     id: this.profileData.id,
                     name: this.profileData.name,
-                    permissionsIds:
-                        this.selectedPermissions,
-                    permissionsWorkflow:
-                        this.formatWorkflowPermissions(),
+                    permissionsIds: this.selectedPermissions,
+                    permissionsWorkflow: this.formatWorkflowPermissions(),
                 };
                 ProfilesService.updateProfile(paramsReq)
                     .then((result) => {
@@ -620,9 +490,7 @@
                             this.returnToTable();
                             return this.$notify({
                                 title: this.$t("management.profiles.title"),
-                                message: this.$t(
-                                    "management.profiles.editSuccess"
-                                ),
+                                message: this.$t("management.profiles.editSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
@@ -632,9 +500,10 @@
                             }
                             this.$notify({
                                 title: this.$t("management.profiles.title"),
-                                message: result.errorCode === ErrorCode.Duplicated
-                                    ? this.$t("management.profiles.errors.duplicated")
-                                    : this.$t("management.profiles.errors.editError"),
+                                message:
+                                    result.errorCode === ErrorCode.Duplicated
+                                        ? this.$t("management.profiles.errors.duplicated")
+                                        : this.$t("management.profiles.errors.editError"),
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -645,20 +514,14 @@
                     });
             },
             formatWorkflowPermissions() {
-                return this.selectedWorkflowPermissions.map(
-                    (v) => {
-                        const [stepId, permissionId] =
-                            v.split(":");
-                        return {
-                            profileId: this.isEdit
-                                ? this.profileData.id
-                                : null,
-                            stepId: parseInt(stepId),
-                            permissionId:
-                                parseInt(permissionId),
-                        };
-                    }
-                );
+                return this.selectedWorkflowPermissions.map((v) => {
+                    const [stepId, permissionId] = v.split(":");
+                    return {
+                        profileId: this.isEdit ? this.profileData.id : null,
+                        stepId: parseInt(stepId),
+                        permissionId: parseInt(permissionId),
+                    };
+                });
             },
             resetForm() {
                 this.profileData = {
@@ -668,23 +531,15 @@
                 };
             },
             checkedCount(permissions) {
-                return permissions.filter((p) =>
-                    this.selectedPermissions.includes(p.id)
-                ).length;
+                return permissions.filter((p) => this.selectedPermissions.includes(p.id)).length;
             },
             toggleCollapse(index) {
-                const collapse =
-                    this.$refs.collapseComponents[index];
+                const collapse = this.$refs.collapseComponents[index];
                 if (collapse && collapse.toggle) {
                     collapse.toggle();
                     this.$set
-                        ? this.$set(
-                              this.opened,
-                              index,
-                              !this.opened[index]
-                          )
-                        : (this.opened[index] =
-                              !this.opened[index]);
+                        ? this.$set(this.opened, index, !this.opened[index])
+                        : (this.opened[index] = !this.opened[index]);
                 }
             },
         },

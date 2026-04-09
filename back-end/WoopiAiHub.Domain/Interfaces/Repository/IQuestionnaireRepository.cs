@@ -13,7 +13,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         bool CreateUniqueQuestionnaire(Questionnaire questionnaire);
         ICollection<QuestionnaireDto> FindAll();
-        QuestionnaireDto FindById(int id);
+        QuestionnaireDto? FindById(int id);
         bool DeleteByIds(List<int> ids);
         bool DeleteById(int id);
         List<int> FindByQuestionIds(List<int> ids);

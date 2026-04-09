@@ -129,10 +129,19 @@ namespace WoopiAiHub.Repository
                 EnableAccessFromMcp = w.EnableAccessFromMcp
             });
         }
-        
+
+        /// <summary>
+        /// Remove the apitemplates from the prompts where the entities are linked
+        /// </summary>
+        /// <param name="templateId"></param>
+        /// <returns></returns>
         public async Task<bool> RemovePromptLinked(int templateId)
         {
-            var promptLinked = _context.PromptApiTemplates.Where(p => p.ApiTemplateId == templateId).ToListAsync();
+            var promptLinked = await _context.PromptApiTemplates.Where(p => p.ApiTemplateId == templateId).ToListAsync();
+
+            if (!promptLinked.Any())
+                return true;
+
             _context.RemoveRange(promptLinked);
             return await _context.SaveChangesAsync() > 0;
         }

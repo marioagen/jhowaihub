@@ -225,5 +225,23 @@ namespace WoopiAiHub.Repository
             return await _context.StepToolExecutions
                 .AnyAsync(e => stepToolIds!.Contains(e.StepToolId));
         }
+
+        /// <summary>
+        /// Retrieves all step tool executions for the specified step tool IDs and card IDs in a single query.
+        /// </summary>
+        /// <remarks>This method is optimized for bulk retrieval of executions and should be used when you need
+        /// to evaluate the status of multiple step tools across multiple cards to avoid N+M query patterns.</remarks>
+        /// <param name="stepToolIds">A collection of step tool IDs to retrieve executions for.</param>
+        /// <param name="cardIds">A collection of card IDs to retrieve executions for.</param>
+        /// <returns>A collection of StepToolExecution entities matching the specified step tool and card IDs.</returns>
+        public async Task<ICollection<StepToolExecution>> FindByStepToolIdsAndCardIdsAsync(IEnumerable<int> stepToolIds, IEnumerable<int> cardIds)
+        {
+            var stepToolIdsList = stepToolIds.ToList();
+            var cardIdsList = cardIds.ToList();
+
+            return await _context.StepToolExecutions
+                .Where(e => stepToolIdsList.Contains(e.StepToolId) && cardIdsList.Contains(e.CardId))
+                .ToListAsync();
+        }
     }
 }

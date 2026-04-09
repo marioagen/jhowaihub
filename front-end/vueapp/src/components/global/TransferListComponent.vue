@@ -87,7 +87,6 @@
         </div>
     </div>
 </template>
-
 <script>
     export default {
         name: "TransferListComponent",
@@ -193,7 +192,6 @@
         },
     };
 </script>
-
 <style scoped>
     .selectable-item {
         padding: 8px;

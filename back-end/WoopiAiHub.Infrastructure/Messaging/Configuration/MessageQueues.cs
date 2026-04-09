@@ -14,7 +14,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Configuration
         public string AutomationQueueResponse { get; set; } = string.Empty;
         public string ChatCompletionQueueAiHubResponse { get; set; } = string.Empty;
         public string OpenAiResponseQueueAiHubResponse { get; set; } = string.Empty;
-        public string OcrAnonimizationQueueConsumer { get; set; } = string.Empty;
+        public string OcrAnonymizationQueueConsumer { get; set; } = string.Empty;
         public string DeleteQueueConsumer { get; set; } = string.Empty;
         public string DeleteQueuePublisher { get; set; } = string.Empty;
         public string MarketplaceSubscriptionQueue { get; set; } = string.Empty;
@@ -37,7 +37,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Configuration
                 AutomationQueueConsumer,
                 AutomationQueueResponse,
                 ChatCompletionQueueAiHubResponse,
-                OcrAnonimizationQueueConsumer,
+                OcrAnonymizationQueueConsumer,
                 DeleteQueueConsumer,
                 DeleteQueuePublisher,
                 MarketplaceSubscriptionQueue,

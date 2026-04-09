@@ -8,10 +8,11 @@
             style="margin-top: 12px !important"
         >
             <div v-if="viewMode === $options.VIEW_MODE_PDF">
-                <strong class="form-label mb-1">PDF ORIGINAL&nbsp;&nbsp;</strong>
+                <strong class="form-label mb-1">{{ $t("documents.originalPdf") }}</strong>
                 <a
                     @click="openTab"
                     v-if="srcPdf"
+                    class="ms-2"
                 >
                     <i
                         class="fas fa-expand text-primary"

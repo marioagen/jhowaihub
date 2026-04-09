@@ -50,7 +50,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<ToolType?> FindModelByIdAsync(int id)
         {
-            return await _context.ToolTypes.FirstOrDefaultAsync(t => t.Id == id);
+            return await _context.ToolTypes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
     }
 }

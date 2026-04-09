@@ -5,6 +5,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -31,6 +32,9 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolRepository _stepToolRepository;
         private readonly IEncryptionService _encryptationService;
         private readonly ILogger<WorkflowServices> _logger;
+        private readonly IDocumentRepository _documentRepository;
+        private readonly IDocumentDeletionServices _documentDeletionServices;
+        private readonly IAuditCardService _auditCardService;
         private const string NotFoundMessage = "Workflow not found";
         private const int WorkflowDescriptionMaxLength = 500;
 
@@ -49,6 +53,9 @@ namespace WoopiAiHub.Application.Services
             IUnitOfWork unitOfWork,
             IToolRepository toolRepository,
             IEncryptionService encryptationService,
+            IDocumentRepository documentRepository,
+            IDocumentDeletionServices documentDeletionServices,
+            IAuditCardService auditCardService,
             ILogger<WorkflowServices> logger 
         )
         {
@@ -66,6 +73,9 @@ namespace WoopiAiHub.Application.Services
             _teamRepository = teamRepository;
             _toolRepository = toolRepository;
             _encryptationService = encryptationService;
+            _documentRepository = documentRepository;
+            _documentDeletionServices = documentDeletionServices;
+            _auditCardService = auditCardService;
             _logger = logger;
         }
 
@@ -159,12 +169,15 @@ namespace WoopiAiHub.Application.Services
 
         /// <summary>
         /// Deletes a workflow by its ID, including all associated steps.
+        /// Documents that are exclusively linked to this workflow are also deleted to avoid orphans.
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="headersDto"></param>
         /// <returns></returns>
         /// <exception cref="AppException"></exception>
-        public async Task<bool> DeleteById(int id)
+        public async Task<bool> DeleteById(int id, HeadersDto headersDto)
         {
+            await HandleOrphanDocumentsAsync(id, headersDto);
             return await _workflowRepository.DeleteById(id);
         }
 
@@ -534,7 +547,8 @@ namespace WoopiAiHub.Application.Services
         ///<returns></returns>
         public async Task<bool> UpdateStepToolOutput(OutputUpdateDto outputUpdateDto)
         {
-            var stepToolOutput = this.FindByStepToolOutputById(outputUpdateDto.Id);
+            var stepToolOutput = this.FindByStepToolOutputById(outputUpdateDto.Id)
+                ?? throw new AppException(ErrorCode.NotFound, "Step tool output not found", null);
             stepToolOutput.ChangeValue(outputUpdateDto.Value);
             var result = await _workflowRepository.UpdateStepToolOutput(stepToolOutput);
             return result;
@@ -545,10 +559,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public StepToolOutput FindByStepToolOutputById(int id)
+        public StepToolOutput? FindByStepToolOutputById(int id)
         {
-            var stepToolOutput = _workflowRepository.FindByStepToolOutputById(id);
-            return stepToolOutput;
+            return _workflowRepository.FindByStepToolOutputById(id);
         }
 
         /// <summary>
@@ -596,7 +609,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public StepDto FindStepById(int id)
         {
-            var step = _workflowRepository.FindStepById(id);
+            var step = _workflowRepository.FindStepById(id)
+                ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
 
             var apiTools = step.StepTools.Where(w => w.Tool?.ToolType == HandlersTypes.API).ToList();
             if (apiTools is not null && apiTools.Count > 0)
@@ -626,10 +640,12 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Phase 2: Updates a workflow with steps information (without step tools).
         /// Validates and creates/updates steps with their profiles and statuses.
+        /// Documents exclusively linked to removed steps and this workflow are deleted to avoid orphans.
         /// </summary>
         /// <param name="workflowPhase2Dto"></param>
+        /// <param name="headersDto"></param>
         /// <returns></returns>
-        public async Task<bool> UpdatePhase2(WorkflowPhase2Dto workflowPhase2Dto)
+        public async Task<bool> UpdatePhase2(WorkflowPhase2Dto workflowPhase2Dto, HeadersDto headersDto)
         {
             var workflow = await _workflowRepository.FindByIdReturnModel(workflowPhase2Dto.WorkflowId);
             if (workflow == null)
@@ -637,29 +653,41 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
 
+            var existingSteps = workflow.Steps.ToList();
+
+            var newStepsDict = workflowPhase2Dto.Steps
+                .Where(s => s.Id > 0)
+                .ToDictionary(s => s.Id);
+
+            var stepsToRemove = existingSteps
+                .Where(es => !newStepsDict.ContainsKey(es.Id))
+                .ToList();
+
+            var auditRemovedPairs = new List<(int cardId, int documentId)>();
+            var orphanCandidatePairs = new List<(int cardId, int documentId)>();
+            if (stepsToRemove.Count > 0 && workflowPhase2Dto.ResetDocuments)
+            {
+                var minRemovedOrder = stepsToRemove.Min(s => s.Order);
+                var allResetStepIds = workflow.Steps
+                    .Where(s => s.Order >= minRemovedOrder)
+                    .Select(s => s.Id).ToList();
+                auditRemovedPairs = await _cardRepository.FindCardDocumentPairsByStepIdsAsync(allResetStepIds);
+                orphanCandidatePairs = await _cardRepository
+                    .FindCardDocumentPairsByStepIdsAsync(stepsToRemove.Select(s => s.Id).ToList());
+            }
+
+            var stepsToUpdate = existingSteps
+                .Where(es => newStepsDict.ContainsKey(es.Id))
+                .ToList();
+
+            var stepsToAdd = workflowPhase2Dto.Steps
+                .Where(s => s.Id == 0 || !existingSteps.Any(es => es.Id == s.Id))
+                .ToList();
+
             _unitOfWork.BeginTransaction();
             try
             {
-                var existingSteps = workflow.Steps.ToList();
-
-                var newStepsDict = workflowPhase2Dto.Steps
-                    .Where(s => s.Id > 0)
-                    .ToDictionary(s => s.Id);
-
-                var stepsToRemove = existingSteps
-                    .Where(es => !newStepsDict.ContainsKey(es.Id))
-                    .ToList();
-
                 await ResetStepToolDataAsync(workflow, workflowPhase2Dto.ResetDocuments, stepsToRemove);
-
-                var stepsToUpdate = existingSteps
-                    .Where(es => newStepsDict.ContainsKey(es.Id))
-                    .ToList();
-
-                var stepsToAdd = workflowPhase2Dto.Steps
-                    .Where(s => s.Id == 0 || !existingSteps.Any(es => es.Id == s.Id))
-                    .ToList();
-
 
                 if (stepsToRemove.Count > 0)
                 {
@@ -678,7 +706,6 @@ namespace WoopiAiHub.Application.Services
                     if (existingStep != null)
                     {
                         await ValidateProfileAndStatusStepPhase2(stepDto);
-
                         existingStep.Update(stepDto.Name, stepDto.Order, stepDto.ProfileId, stepDto.StatusId);
                     }
                 }
@@ -700,16 +727,27 @@ namespace WoopiAiHub.Application.Services
                     workflow.AddStep(newStep);
                 }
 
+                if (auditRemovedPairs.Count > 0)
+                {
+                    var removedTuples = auditRemovedPairs
+                        .Select(p => (p.cardId, workflowPhase2Dto.WorkflowId, p.documentId))
+                        .ToList<(int, int, int)>();
+                    await _auditCardService.CreateBatchAndSaveAsync(removedTuples, AuditCardActionType.Removed);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
                 _unitOfWork.Commit();
-
-                return true;
             }
             catch
             {
                 _unitOfWork.Rollback();
                 throw;
             }
+
+            await HandleOrphanDocumentsWithAuditAsync(
+                workflowPhase2Dto.WorkflowId, headersDto, orphanCandidatePairs);
+
+            return true;
         }
 
         /// <summary>
@@ -860,6 +898,50 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Detects documents that are exclusively linked to the given workflow (orphans) and deletes them
+        /// via <see cref="IDocumentDeletionServices"/>. Used in Scenario 1 (DeleteById) where cards are
+        /// still active — the deletion service handles audit internally.
+        /// </summary>
+        private async Task HandleOrphanDocumentsAsync(int workflowId, HeadersDto headersDto,
+            List<int>? candidateDocumentIds = null)
+        {
+            var orphanIds = await _documentRepository
+                .FindOrphanDocumentIdsByWorkflowAsync(workflowId, candidateDocumentIds);
+            if (orphanIds.Count > 0)
+                await _documentDeletionServices.Delete(orphanIds, headersDto);
+        }
+
+        /// <summary>
+        /// Detects orphan documents from <paramref name="cardDocumentPairs"/>, creates the
+        /// <see cref="AuditCardActionType.DocumentDeleted"/> audit events (cards are already disabled at
+        /// this point so the deletion service's internal audit would be a no-op), then physically deletes
+        /// the orphan documents. Used in Scenarios 2 and 3 where cards are disabled before this runs.
+        /// </summary>
+        private async Task HandleOrphanDocumentsWithAuditAsync(
+            int workflowId,
+            HeadersDto headersDto,
+            IReadOnlyList<(int cardId, int documentId)> cardDocumentPairs)
+        {
+            if (!cardDocumentPairs.Any()) return;
+
+            var candidateDocumentIds = cardDocumentPairs.Select(p => p.documentId).Distinct().ToList();
+            var orphanIds = await _documentRepository
+                .FindOrphanDocumentIdsByWorkflowAsync(workflowId, candidateDocumentIds);
+            if (orphanIds.Count == 0) return;
+
+            var documentDeletedTuples = cardDocumentPairs
+                .Where(p => orphanIds.Contains(p.documentId))
+                .GroupBy(p => p.documentId)
+                .Select(g => (g.First().cardId, workflowId, g.Key))
+                .ToList<(int, int, int)>();
+
+            if (documentDeletedTuples.Count > 0)
+                await _auditCardService.CreateBatchAndSaveAsync(documentDeletedTuples, AuditCardActionType.DocumentDeleted);
+
+            await _documentDeletionServices.Delete(orphanIds, headersDto);
+        }
+
+        /// <summary>
         /// Validates that the profile and status associated with a step DTO exist.
         /// </summary>
         /// <param name="stepDto"></param>
@@ -883,10 +965,12 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Phase 3: Updates workflow steps with their tool flows (step tools).
         /// Handles dependencies between step tools.
+        /// Documents exclusively linked to this workflow whose cards are disabled by the reset are deleted to avoid orphans.
         /// </summary>
         /// <param name="workflowPhase3Dto"></param>
+        /// <param name="headersDto"></param>
         /// <returns></returns>
-        public async Task<bool> UpdatePhase3(WorkflowPhase3Dto workflowPhase3Dto)
+        public async Task<bool> UpdatePhase3(WorkflowPhase3Dto workflowPhase3Dto, HeadersDto headersDto)
         {
             var workflow = await _workflowRepository.FindByIdForFlow(workflowPhase3Dto.WorkflowId);
             if (workflow == null)
@@ -894,23 +978,40 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, NotFoundMessage, WorkflowLabel.NotFound);
             }
 
+            var cardDocumentPairs = new List<(int cardId, int documentId)>();
+            if (workflowPhase3Dto.ResetDocuments)
+            {
+                var affectedStepIds = workflow.Steps.Select(s => s.Id).ToList();
+                cardDocumentPairs = await _cardRepository.FindCardDocumentPairsByStepIdsAsync(affectedStepIds);
+            }
+
             _unitOfWork.BeginTransaction();
             try
             {
-                
                 var stepToolMap = await ProcessStepTools(workflow, workflowPhase3Dto.Steps, workflowPhase3Dto.ResetDocuments);
                 await ResolveDependencies(workflow, workflowPhase3Dto.Steps, stepToolMap);
 
+                if (cardDocumentPairs.Count > 0)
+                {
+                    var removedTuples = cardDocumentPairs
+                        .Select(p => (p.cardId, workflowPhase3Dto.WorkflowId, p.documentId))
+                        .ToList<(int, int, int)>();
+                    await _auditCardService.CreateBatchAndSaveAsync(removedTuples, AuditCardActionType.Removed);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
                 _unitOfWork.Commit();
-
-                return true;
             }
             catch
             {
                 _unitOfWork.Rollback();
                 throw;
             }
+
+            await HandleOrphanDocumentsWithAuditAsync(
+                workflowPhase3Dto.WorkflowId, headersDto, cardDocumentPairs);
+
+            return true;
         }
 
         /// <summary>
@@ -1415,6 +1516,7 @@ namespace WoopiAiHub.Application.Services
                 sourceIdToIndex[sourceStepToolsList[i].Id] = i;
             }
 
+            var newDependencies = new List<StepToolDependency>();
             for (var i = 0; i < sourceStepToolsList.Count; i++)
             {
                 var sourceStepTool = sourceStepToolsList[i];
@@ -1424,14 +1526,18 @@ namespace WoopiAiHub.Application.Services
                 {
                     if (sourceIdToIndex.TryGetValue(dep.DependsOnStepToolId, out var depIndex))
                     {
-                        var newDependency = new StepToolDependency(
+                        newDependencies.Add(new StepToolDependency(
                             0,
                             DateTime.UtcNow,
                             newStepTool.Id,
-                            newStepToolsList[depIndex].Id);
-                        await _stepToolDependencyRepository.CreateAsync(newDependency);
+                            newStepToolsList[depIndex].Id));
                     }
                 }
+            }
+
+            if (newDependencies.Count > 0)
+            {
+                await _stepToolDependencyRepository.CreateRangeAsync(newDependencies);
             }
         }
 

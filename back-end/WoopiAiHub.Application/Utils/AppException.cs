@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum;
 
 namespace WoopiAiHub.Application.Utils
 {

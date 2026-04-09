@@ -34,115 +34,130 @@
                         </div>
                     </div>
                 </div>
-                <div class="d-flex align-items-center mt-1">
-                    <div
-                        v-if="documentsBatch"
-                        class="input-group w-auto me-2 analyze-document-select"
-                    >
-                        <span class="input-group-text border-end-0">
-                            <LucideIcon
-                                icon="FileText"
-                                size="16"
-                            />
-                        </span>
-                        <select
-                            class="form-select form-select-sm border-start-0"
-                            v-model="cardId"
-                            @change="changeDocument"
-                        >
-                            <option
-                                v-for="document in documentsBatch"
-                                :key="document.cardId"
-                                :value="document.cardId"
+                <div class="d-flex align-items-center my-1">
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <div
+                                    v-if="documentsBatch"
+                                    class="input-group w-auto me-2 analyze-document-select"
+                                >
+                                    <span class="input-group-text border-end-0">
+                                        <LucideIcon
+                                            icon="FileText"
+                                            size="16"
+                                        />
+                                    </span>
+                                    <select
+                                        class="form-select form-select-sm border-start-0"
+                                        v-model="cardId"
+                                        @change="changeDocument"
+                                    >
+                                        <option
+                                            v-for="document in documentsBatch"
+                                            :key="document.cardId"
+                                            :value="document.cardId"
+                                        >
+                                            {{ document.documentName }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <span class="badge bg-light text-primary">
+                                    <LucideIcon
+                                        icon="Waypoints"
+                                        :size="15"
+                                    />
+                                    {{ workflowName }}
+                                </span>
+                                /
+                                <span class="badge bg-light text-primary">
+                                    <LucideIcon
+                                        icon="FileText"
+                                        :size="15"
+                                    />
+                                    {{ documentName }}
+                                </span>
+                            </div>
+                            <button
+                                class="btn btn-outline-primary btn-sm"
+                                @click="openAnonymizationModal"
                             >
-                                {{ document.documentName }}
-                            </option>
-                        </select>
+                                <LucideIcon icon="ShieldCheck" />
+                                {{ $t("analyze.anonymizeDocument") }}
+                            </button>
+                        </div>
                     </div>
-                    <span class="badge bg-light text-primary">
-                        <LucideIcon
-                            icon="Waypoints"
-                            :size="15"
-                        />
-                        {{ workflowName }}
-                    </span>
-                    /
-                    <span class="badge bg-light text-primary">
-                        <LucideIcon
-                            icon="FileText"
-                            :size="15"
-                        />
-                        {{ documentName }}
-                    </span>
-                    <div
-                        class="btn-group btn-group-sm ms-auto section-buttons"
-                        role="group"
-                    >
-                        <input
-                            type="radio"
-                            class="btn-check"
-                            name="view"
-                            id="view-doc"
-                            autocomplete="off"
-                            v-model="viewMode"
-                            value="doc"
-                        />
-                        <label
-                            class="btn btn-outline-primary"
-                            for="view-doc"
+                    <div class="col-6 d-flex justify-content-end align-items-center">
+                        <div
+                            class="btn-group btn-group-sm ms-auto section-buttons"
+                            role="group"
                         >
-                            <LucideIcon icon="PanelLeft" />
-                        </label>
+                            <input
+                                type="radio"
+                                class="btn-check"
+                                name="view"
+                                id="view-doc"
+                                autocomplete="off"
+                                v-model="viewMode"
+                                value="doc"
+                            />
+                            <label
+                                class="btn btn-outline-primary"
+                                for="view-doc"
+                            >
+                                <LucideIcon icon="PanelLeft" />
+                            </label>
 
-                        <input
-                            type="radio"
-                            class="btn-check"
-                            name="view"
-                            id="view-both"
-                            autocomplete="off"
-                            v-model="viewMode"
-                            value="both"
-                        />
-                        <label
-                            class="btn btn-outline-primary"
-                            for="view-both"
-                        >
-                            <LucideIcon icon="Columns2" />
-                        </label>
+                            <input
+                                type="radio"
+                                class="btn-check"
+                                name="view"
+                                id="view-both"
+                                autocomplete="off"
+                                v-model="viewMode"
+                                value="both"
+                            />
+                            <label
+                                class="btn btn-outline-primary"
+                                for="view-both"
+                            >
+                                <LucideIcon icon="Columns2" />
+                            </label>
 
-                        <input
-                            type="radio"
-                            class="btn-check"
-                            name="view"
-                            id="view-history"
-                            autocomplete="off"
-                            v-model="viewMode"
-                            value="history"
-                        />
-                        <label
-                            class="btn btn-outline-primary"
-                            for="view-history"
+                            <input
+                                type="radio"
+                                class="btn-check"
+                                name="view"
+                                id="view-history"
+                                autocomplete="off"
+                                v-model="viewMode"
+                                value="history"
+                            />
+                            <label
+                                class="btn btn-outline-primary"
+                                for="view-history"
+                            >
+                                <LucideIcon icon="PanelRight" />
+                            </label>
+                        </div>
+                        <button
+                            v-if="canReject"
+                            class="btn btn-outline-danger btn-sm ms-3"
+                            @click="openRejectModal"
+                            :disabled="!workflowId"
                         >
-                            <LucideIcon icon="PanelRight" />
-                        </label>
+                            <i class="fas fa-times-circle me-1"></i>
+                            {{ $t("analyze.rejection.reject") }}
+                        </button>
+                        <button
+                            v-if="isRejected"
+                            class="btn btn-outline-warning btn-sm ms-3"
+                            @click="openViewRejectionModal"
+                        >
+                            <i class="fas fa-info-circle me-1"></i>
+                            {{ $t("analyze.justification.viewJustification") }}
+                        </button>
                     </div>
-                    <button
-                        v-if="canReject"
-                        class="btn btn-outline-danger btn-sm ms-2"
-                        @click="openRejectModal"
-                        :disabled="!workflowId"
-                    >
-                        <i class="fas fa-times-circle me-1"></i>
-                        {{ $t("analyze.rejection.reject") }}
-                    </button>
-                    <button
-                        v-if="isRejected"
-                        class="btn btn-outline-warning btn-sm ms-2"
-                        @click="openViewRejectionModal"
-                    >
-                        <i class="fas fa-info-circle me-1"></i>
-                        {{ $t("analyze.justification.viewJustification") }}
-                    </button>
                 </div>
                 <ResizeColumnsComponent
                     v-if="viewMode === 'both'"
@@ -219,11 +234,17 @@
         ref="modalViewRejection"
     />
     <DocumentHistoryModal ref="documentHistoryModal" />
+    <AnonymizationModal
+        ref="modalAnonymization"
+        :documentId="documentId"
+        @success="handleAnonymizationSuccess"
+    />
 </template>
 <script>
     import { hasPermission } from "@/utils/permissions";
     import DocumentRejectionModal from "@/components/analyze/modals/DocumentRejectionModal.vue";
     import DocumentViewRejectionModal from "@/components/analyze/modals/DocumentViewRejectionModal.vue";
+    import AnonymizationModal from "@/components/analyze/modals/AnonymizationModal.vue";
     import ResizeColumnsComponent from "@/components/global/ResizeColumnsComponent.vue";
     import PermissionGroups from "@/constants/PermissionGroups";
     import PermissionNames from "@/constants/PermissionNames";
@@ -275,6 +296,7 @@
             ResizeColumnsComponent,
             DocumentRejectionModal,
             DocumentViewRejectionModal,
+            AnonymizationModal,
         },
         computed: {
             canReject() {
@@ -351,6 +373,9 @@
                     this.goBack();
                 }, 2000);
             },
+            async handleAnonymizationSuccess() {
+                await this.getCardHeaderInfo();
+            },
             openViewRejectionModal() {
                 this.$refs.modalViewRejection.open(this.cardId);
             },
@@ -381,6 +406,9 @@
             },
             openDocumentHistoryModal() {
                 this.$refs.documentHistoryModal?.open(this.documentId, this.workflowId);
+            },
+            openAnonymizationModal() {
+                this.$refs.modalAnonymization.open();
             },
         },
         async created() {

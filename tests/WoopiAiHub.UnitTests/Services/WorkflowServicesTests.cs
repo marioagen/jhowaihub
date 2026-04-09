@@ -6,6 +6,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -162,9 +163,12 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             _workflowRepositoryMock.Setup(repo => repo.DeleteById(It.IsAny<int>())).ReturnsAsync(true);
+            _mocker.GetMock<IDocumentRepository>()
+                .Setup(r => r.FindOrphanDocumentIdsByWorkflowAsync(It.IsAny<int>(), It.IsAny<List<int>?>()))
+                .ReturnsAsync(new List<int>());
 
             // Act
-            var result = await _workflowServices.DeleteById(1);
+            var result = await _workflowServices.DeleteById(1, new HeadersDto());
 
             // Assert
             Assert.True(result);
@@ -178,9 +182,12 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             _workflowRepositoryMock.Setup(repo => repo.DeleteById(It.IsAny<int>()))
                 .ThrowsAsync(new AppException(ErrorCode.NotFound, "Workflow not found", WorkflowLabel.NotFound));
+            _mocker.GetMock<IDocumentRepository>()
+                .Setup(r => r.FindOrphanDocumentIdsByWorkflowAsync(It.IsAny<int>(), It.IsAny<List<int>?>()))
+                .ReturnsAsync(new List<int>());
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.DeleteById(1));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.DeleteById(1, new HeadersDto()));
 
             _workflowRepositoryMock.Verify(repo => repo.DeleteById(It.IsAny<int>()), Times.Once);
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
@@ -548,7 +555,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync((Workflow?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(phase2Dto));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(phase2Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
         }
@@ -587,7 +594,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(steps);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(phase2Dto));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(phase2Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(ProfileLabel.NotFound, exception.LabelError);
         }
@@ -629,7 +636,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(steps);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(phase2Dto));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(phase2Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(StatusLabel.NotFound, exception.LabelError);
         }
@@ -645,7 +652,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync((Workflow?)null);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(phase3Dto));
+            var exception = await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(phase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal(WorkflowLabel.NotFound, exception.LabelError);
         }
@@ -773,7 +780,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             var exception =
-                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("Tool not found", exception.Message);
             Assert.Equal(ToolLabel.NotFound, exception.LabelError);
@@ -813,7 +820,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             var exception =
-                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
             Assert.Equal("Prompt tool must have at least one dependency", exception.Message);
             Assert.Equal(ToolLabel.DependecyRequired, exception.LabelError);
@@ -861,7 +868,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
             // Act
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
 
             // Assert
             Assert.True(result);
@@ -917,11 +924,14 @@ namespace WoopiAiHub.UnitTests.Services
             _stepRepositoryMock.Setup(x => x.FindById(It.IsAny<int>()))
                 .ReturnsAsync(step);
 
+            _cardRepositoryMock.Setup(r => r.FindCardDocumentPairsByStepIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(new List<(int cardId, int documentId)>());
+
             var stepToolMap = new Dictionary<int, int>();
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
             // Act
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
 
             // Assert
             Assert.True(result);
@@ -966,7 +976,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act / Assert
             var exception =
-                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.ExistingStepToolOutput, exception.ErrorCode);
 
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
@@ -1049,10 +1059,13 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(x => x.FindByIdReturnModel(workflowPhase2Dto.WorkflowId))
                 .ReturnsAsync(workflow);
 
+            _cardRepositoryMock.Setup(r => r.FindCardDocumentPairsByStepIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(new List<(int cardId, int documentId)>());
+
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
             // Act
-            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto);
+            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto, new HeadersDto());
 
             // Assert
             Assert.True(result);
@@ -1105,7 +1118,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             var exception =
-                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(workflowPhase2Dto));
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase2(workflowPhase2Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.DefaultError, exception.ErrorCode);
             Assert.Equal("Can't delete with cards related", exception.Message);
         }
@@ -1487,7 +1500,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             var exception =
-                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
             Assert.Equal("Prompt tool must have at least one dependency", exception.Message);
             Assert.Equal(ToolLabel.DependecyRequired, exception.LabelError);
@@ -1547,7 +1560,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
             // Act
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
 
             // Assert
             Assert.True(result);
@@ -1619,7 +1632,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
             // Act
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
 
             // Assert
             Assert.True(result);
@@ -1668,7 +1681,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             var exception =
-                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("Tool not found", exception.Message);
             Assert.Equal(ToolLabel.NotFound, exception.LabelError);
@@ -1731,7 +1744,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
             // Act
-            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto);
+            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto, new HeadersDto());
 
             // Assert
             Assert.True(result);
@@ -1818,7 +1831,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             var exception =
-                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Contains($"Step with order {stepOrder} not found", exception.Message);
             Assert.Equal(StepLabel.NotFound, exception.LabelError);
@@ -1963,7 +1976,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
 
             Assert.True(result);
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
@@ -2022,7 +2035,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
 
             Assert.True(result);
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
@@ -2092,7 +2105,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
             var exception =
-                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
             Assert.Equal("Prompt tool must have at least one OCR or Prompt dependency", exception.Message);
             Assert.Equal(ToolLabel.OcrOrPromptDependencyRequired, exception.LabelError);
@@ -2165,7 +2178,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
             var exception =
-                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
             Assert.Equal("Quiz tool must have at least one Embedding dependency", exception.Message);
             Assert.Equal(ToolLabel.EmbeddingDependencyRequired, exception.LabelError);
@@ -2226,7 +2239,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
 
             Assert.True(result);
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
@@ -2297,7 +2310,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             var exception =
-                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto));
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
             Assert.Equal("Prompt tool must have at least one OCR or Prompt dependency", exception.Message);
             Assert.Equal(ToolLabel.OcrOrPromptDependencyRequired, exception.LabelError);
@@ -2399,10 +2412,6 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
                 .ReturnsAsync(1);
 
-            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Returns(Task.CompletedTask);
-
             // Act
             var result = await _workflowServices.CloneAsync(dto);
 
@@ -2445,10 +2454,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
                 .ReturnsAsync(1);
-
-            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Returns(Task.CompletedTask);
 
             // Act
             await _workflowServices.CloneAsync(dto);
@@ -2494,10 +2499,6 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
                 .ReturnsAsync(1);
 
-            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Returns(Task.CompletedTask);
-
             // Act
             await _workflowServices.CloneAsync(dto);
 
@@ -2540,19 +2541,22 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(1);
 
             var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            var createdDependencies = new List<StepToolDependency>();
-            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Callback<StepToolDependency>(dep => createdDependencies.Add(dep))
-                .Returns(Task.CompletedTask);
+            List<StepToolDependency>? createdBatch = null;
+            _stepToolDependencyRepositoryMock
+                .Setup(r => r.CreateRangeAsync(It.IsAny<List<StepToolDependency>>()))
+                .Callback<List<StepToolDependency>>(list => createdBatch = list.ToList())
+                .ReturnsAsync(true);
 
             // Act
             await _workflowServices.CloneAsync(dto);
 
             // Assert
             // Source has 2 StepToolDependency records (stepTool2 depends on stepTool1, stepTool3 depends on stepTool2)
-            Assert.Equal(2, createdDependencies.Count);
-            _stepToolDependencyRepositoryMock.Verify(r => r.CreateAsync(It.IsAny<StepToolDependency>()),
-                Times.Exactly(2));
+            Assert.NotNull(createdBatch);
+            Assert.Equal(2, createdBatch.Count);
+            _stepToolDependencyRepositoryMock.Verify(
+                r => r.CreateRangeAsync(It.Is<List<StepToolDependency>>(l => l.Count == 2)),
+                Times.Once);
         }
 
         [Fact(DisplayName = "CloneAsync should rollback transaction on error")]
@@ -2657,7 +2661,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // Act
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
 
             // Assert
             Assert.True(result);
@@ -2728,7 +2732,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // Act
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
 
             // Assert
             Assert.True(result);
@@ -2787,7 +2791,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // Act
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
 
             // Assert
             Assert.True(result);
@@ -2835,7 +2839,7 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // Act
-            await _workflowServices.UpdatePhase3(workflowPhase3Dto);
+            await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
 
             // Assert
             var createdStepTool = step.StepTools.First();
@@ -2880,10 +2884,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
                 .ReturnsAsync(1);
-
-            var _stepToolDependencyRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            _stepToolDependencyRepositoryMock.Setup(r => r.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Returns(Task.CompletedTask);
 
             // Act
             await _workflowServices.CloneAsync(dto);
@@ -3336,6 +3336,142 @@ namespace WoopiAiHub.UnitTests.Services
                 ids.Count == 3 && ids.Contains(5) && ids.Contains(15) && ids.Contains(25))), Times.Once);
             _stepToolDependencyRepositoryMock.Verify(r => r.HasDependenciesByStepToolIdsAsync(It.Is<List<int>>(ids =>
                 ids.Count == 3 && ids.Contains(5) && ids.Contains(15) && ids.Contains(25))), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdatePhase2 should create Removed audit entries when auditRemovedPairs is non-empty")]
+        [Trait("UpdatePhase2", "Success")]
+        public async Task UpdatePhase2_WithAuditPairs_CreatesAuditRemovedEntries()
+        {
+            // Arrange
+            var step1 = new Step(1, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var step2 = new Step(2, DateTime.Now, 1, "Step 2", 2, 1, 1);
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Test Workflow")
+            {
+                Steps = new List<Step> { step1, step2 }
+            };
+
+            var workflowPhase2Dto = new WorkflowPhase2Dto
+            {
+                WorkflowId = 1,
+                Steps = new List<StepPhase2Dto>
+                {
+                    new StepPhase2Dto { Id = 1, Name = "Step 1", Order = 1, ProfileId = 1, StatusId = 1 }
+                },
+                ResetDocuments = true
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(1)).ReturnsAsync(workflow);
+
+            // First call: allResetStepIds (steps with Order >= 2) → non-empty → auditRemovedPairs
+            // Second call: stepsToRemove ids → empty → orphanCandidatePairs (so HandleOrphanDocumentsWithAuditAsync returns early)
+            _cardRepositoryMock.SetupSequence(r => r.FindCardDocumentPairsByStepIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(new List<(int cardId, int documentId)> { (5, 10) })
+                .ReturnsAsync(new List<(int cardId, int documentId)>());
+
+            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<ICollection<int>>())).ReturnsAsync(0);
+
+            _profileRepositoryMock.Setup(r => r.FindById(1)).ReturnsAsync(WorkflowFixture.FindValidProfileDto());
+            _statusRepositoryMock.Setup(r => r.FindById(1)).ReturnsAsync(WorkflowFixture.FindValidStatus());
+
+            var auditServiceMock = _mocker.GetMock<IAuditCardService>();
+            auditServiceMock
+                .Setup(s => s.CreateBatchAndSaveAsync(
+                    It.IsAny<IReadOnlyList<(int, int, int)>>(),
+                    It.IsAny<AuditCardActionType>(),
+                    It.IsAny<string?>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase2(workflowPhase2Dto, new HeadersDto());
+
+            // Assert
+            Assert.True(result);
+            auditServiceMock.Verify(
+                s => s.CreateBatchAndSaveAsync(
+                    It.Is<IReadOnlyList<(int, int, int)>>(list =>
+                        list.Count == 1 && list[0].Item1 == 5 && list[0].Item2 == 1 && list[0].Item3 == 10),
+                    AuditCardActionType.Removed,
+                    It.IsAny<string?>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 should create DocumentDeleted audit and delete orphan documents when orphans exist")]
+        [Trait("UpdatePhase3", "Success")]
+        public async Task UpdatePhase3_WithOrphanDocuments_CreatesDocumentDeletedAuditAndDeletes()
+        {
+            // Arrange
+            var workflowId = 1;
+            var stepId = 1;
+            var cardId = 5;
+            var documentId = 10;
+
+            var step = new Step(stepId, DateTime.UtcNow, workflowId, "Step 1", 1, 1, 1);
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow");
+            workflow.Steps.Add(step);
+
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = workflowId,
+                Steps = new List<StepPhase3Dto>
+                {
+                    new StepPhase3Dto { Id = stepId, Order = 1, StepTools = new List<StepToolUpdateDto>() }
+                },
+                ResetDocuments = true
+            };
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdForFlow(workflowId)).ReturnsAsync(workflow);
+
+            _cardRepositoryMock.Setup(r => r.FindCardDocumentPairsByStepIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(new List<(int cardId, int documentId)> { (cardId, documentId) });
+
+            var stepWithNoCards = new Step(stepId, DateTime.Now, workflowId, "Step 1", 1, 1, 1);
+            _stepRepositoryMock.Setup(r => r.FindById(stepId)).ReturnsAsync(stepWithNoCards);
+
+            var auditServiceMock = _mocker.GetMock<IAuditCardService>();
+            auditServiceMock
+                .Setup(s => s.CreateBatchAndSaveAsync(
+                    It.IsAny<IReadOnlyList<(int, int, int)>>(),
+                    It.IsAny<AuditCardActionType>(),
+                    It.IsAny<string?>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            documentRepositoryMock
+                .Setup(r => r.FindOrphanDocumentIdsByWorkflowAsync(workflowId, It.IsAny<List<int>?>()))
+                .ReturnsAsync(new List<int> { documentId });
+
+            var documentDeletionServicesMock = _mocker.GetMock<IDocumentDeletionServices>();
+            documentDeletionServicesMock
+                .Setup(s => s.Delete(It.IsAny<List<int>>(), It.IsAny<HeadersDto>()))
+                .ReturnsAsync(true);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
+
+            // Assert
+            Assert.True(result);
+            documentRepositoryMock.Verify(
+                r => r.FindOrphanDocumentIdsByWorkflowAsync(workflowId, It.IsAny<List<int>?>()),
+                Times.Once);
+            auditServiceMock.Verify(
+                s => s.CreateBatchAndSaveAsync(
+                    It.IsAny<IReadOnlyList<(int, int, int)>>(),
+                    AuditCardActionType.DocumentDeleted,
+                    It.IsAny<string?>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+            documentDeletionServicesMock.Verify(
+                s => s.Delete(
+                    It.Is<List<int>>(ids => ids.Count == 1 && ids.Contains(documentId)),
+                    It.IsAny<HeadersDto>()),
+                Times.Once);
         }
     }
 }

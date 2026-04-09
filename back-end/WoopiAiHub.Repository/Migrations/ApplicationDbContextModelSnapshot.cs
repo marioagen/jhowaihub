@@ -1417,6 +1417,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("IsActive");
 
+                    b.Property<DateTime?>("LastLoginAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("LastLoginAt");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("varchar(150)")

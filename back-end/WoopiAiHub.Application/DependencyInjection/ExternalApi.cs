@@ -32,6 +32,9 @@ namespace WoopiAiHub.Application.DependencyInjection
             else if (string.IsNullOrWhiteSpace(externalSettings.AiGatewayApiBaseAddress))
                 throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.AiGatewayApiBaseAddress)}");
 
+            else if (string.IsNullOrWhiteSpace(externalSettings.AnonymizationApiBaseAddress))
+                throw new ArgumentNullException($"{nameof(RefitExternalSettings)}_{nameof(externalSettings.AnonymizationApiBaseAddress)}");
+
             services.AddRefitClient<IEmbeddingsApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.IndexerApiBaseAddress));
             services.AddRefitClient<IFileRepositoryApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.FileRepositoryApiBaseAddress));
             services.AddRefitClient<IFunctionFileRetriever>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.FunctionGetFileBaseAddress));
@@ -39,6 +42,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddRefitClient<IMarketPlaceApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.MarketPlaceBaseAddress));
             services.AddRefitClient<IChatCompletionApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.AiGatewayApiBaseAddress));
             services.AddRefitClient<IResponseApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.AiGatewayApiBaseAddress));
+            services.AddRefitClient<IAnonymizationApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.AnonymizationApiBaseAddress));
 
             services.Configure<EncryptionSettings>(configuration.GetSection("EncryptionSettings"));
             services.Configure<PromptSettings>(configuration.GetSection("PromptSettings"));

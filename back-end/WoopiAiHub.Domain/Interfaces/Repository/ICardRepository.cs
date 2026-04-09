@@ -28,5 +28,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<List<Card>?> FindCardOrBatchWithDocumentAsync(int cardId);
         Task<Card?> FindByIdWithExecutions(int cardId);
         Task<Card?> FindByIdWithDocumentAndStep(int cardId);
+        Task<List<(int cardId, int documentId)>> FindCardDocumentPairsByStepIdsAsync(List<int> stepIds);
     }
 }
