@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using WoopiAiHub.Api.Attributes;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Interfaces.Services;
 
 namespace WoopiAiHub.Api.Controllers
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     [ApiController]
     public class AnonymizationController(IAnonymizationServices anonymizationServices) : ControllerBase
@@ -23,6 +23,7 @@ namespace WoopiAiHub.Api.Controllers
         /// <returns>An IActionResult indicating the result of the anonymization process. Returns a status code 200 (OK) if the
         /// operation is successful.</returns>
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [SwaggerOperation("Processes the anonymization of a document based on the specified request data.")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ProcessAnonymization([FromBody] ProcessAnonymizationRequestDto request, [FromHeader] HeadersDto headersDto)
@@ -37,7 +38,7 @@ namespace WoopiAiHub.Api.Controllers
         /// <param name="result">An object containing the anonymization result data to be processed. Cannot be null.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
         [HttpPost("ready")]
-        [AllowAnonymous]
+        [KeyExternalAccessAuthorization]
         [SwaggerOperation("Webhook to processes the anonymization result for a document using the specified request data.")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task AnonymizationResult([FromBody] AnonymizationResultDto result)
