@@ -196,17 +196,17 @@
         transition: background 0.15s;
     }
 
-    .resize-columns__resizer::before {
-        content: "";
-        position: absolute;
-        left: 50%;
-        top: 0;
-        bottom: 0;
-        width: 0;
-        margin-left: -2px;
-        border-left: 4px dotted var(--bs-border-color, #dee2e6);
-        transition: border-color 0.15s;
-    }
+        .resize-columns__resizer::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            margin-left: -2px;
+            border-left: 4px dotted var(--color-border-form-control);
+            transition: border-color 0.15s;
+        }
 
     .resize-columns__resizer:hover::before,
     .resize-columns__resizer.resize-columns__resizer--dragging::before {

@@ -774,6 +774,7 @@ const spanish = {
             editTitle: "Editar Usuario",
             editUser: "Editar usuario",
             email: "Correo electrónico",
+            lastLoginAt: "Último acceso",
             errors: {
                 emailDuplicated: "Correo electrónico ya registrado",
                 invalid: "Usuario inválido",
@@ -876,6 +877,7 @@ const spanish = {
         enterprise: "Plan Enterprise",
     },
     prompts: {
+        createdShort: "Creación -",
         cloneAction: "Clonar",
         cloneSuffix: "- Clon",
         createError: "Error al crear agente",
@@ -1199,6 +1201,8 @@ const spanish = {
         associatedTeams: "Equipos asociados",
         basicInfo: "Información Básica",
         boardView: "Visualizando workflow:",
+        refreshBoard: "Actualizar tablero",
+        editWorkflowBoard: "Editar workflow",
         clone: "Clonar",
         cloneConfirm: "Clonar",
         cloneError: "Error al clonar workflow",
@@ -1289,6 +1293,9 @@ const spanish = {
         stepNamePlaceholder: "Nombre del paso",
         steps: "Etapas del Workflow",
         stepsTitle: "Pasos del flujo de trabajo",
+        stepHasDocumentsTitle: "Etapa con documentos en progreso",
+        stepHasDocumentsMessage:
+            "Hay documentos en procesamiento en este flujo de trabajo. Para eliminar una etapa, es necesario que no haya documentos en progreso.",
         stepSubtitle: "Configura las reglas y responsables",
         stepTitle: "Etapa del Workflow",
         subtitle: "Visualiza el flujo de documentos a través de las etapas de procesamiento",
