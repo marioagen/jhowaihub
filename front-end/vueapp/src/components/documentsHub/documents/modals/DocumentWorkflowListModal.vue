@@ -262,11 +262,11 @@
         cursor: pointer;
     }
 
-        .workflow-card:hover {
-            border-color: var(--color-sidebar-li-collapsed-hover) !important;
-            background-color: var(--color-sidebar-li-collapsed-hover) !important;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
+    .workflow-card:hover {
+        border-color: var(--color-sidebar-li-collapsed-hover) !important;
+        background-color: var(--color-sidebar-li-collapsed-hover) !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
 
     .icon-circle {
         width: 40px;

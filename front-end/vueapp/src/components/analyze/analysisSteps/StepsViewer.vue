@@ -34,7 +34,6 @@
         </button>
     </div>
 </template>
-
 <script>
     export default {
         name: "StepStepper",
@@ -109,7 +108,6 @@
         },
     };
 </script>
-
 <style scoped>
     .step-stepper-container {
         display: flex;
@@ -212,6 +210,4 @@
             max-width: 250px;
         }
     }
-
-
 </style>

@@ -1,12 +1,13 @@
-﻿namespace WoopiAiHub.Domain.Utils
+namespace WoopiAiHub.Domain.Utils
 {
     public class RefitExternalSettings
     {
-        public string IndexerApiBaseAddress { get; set; }
-        public string FileRepositoryApiBaseAddress { get; set; }
-        public string FunctionGetFileBaseAddress { get; set; }
-        public string GraphApiBaseAddress { get; set; }
-        public string MarketPlaceBaseAddress { get; set; }
-        public string AiGatewayApiBaseAddress { get; set; }
+        public string IndexerApiBaseAddress { get; set; } = string.Empty;
+        public string FileRepositoryApiBaseAddress { get; set; } = string.Empty;
+        public string FunctionGetFileBaseAddress { get; set; } = string.Empty;
+        public string GraphApiBaseAddress { get; set; } = string.Empty; 
+        public string MarketPlaceBaseAddress { get; set; } = string.Empty;
+        public string AiGatewayApiBaseAddress { get; set; } = string.Empty;
+        public string AnonymizationApiBaseAddress { get; set; } = string.Empty;
     }
 }
