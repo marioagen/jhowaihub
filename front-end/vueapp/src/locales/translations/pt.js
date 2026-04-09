@@ -1205,6 +1205,8 @@ const portuguese = {
         associatedTeams: "Times Associados",
         basicInfo: "Informações Básicas",
         boardView: "Visualizando esteira de processamento:",
+        refreshBoard: "Atualizar quadro",
+        editWorkflowBoard: "Editar esteira",
         clone: "Clonar",
         cloneConfirm: "Clonar",
         cloneError: "Erro ao clonar esteira de processamento",
@@ -1296,7 +1298,8 @@ const portuguese = {
         steps: "Etapas da Esteira de Processamento",
         stepsTitle: "Etapas da Esteira de Processamento",
         stepHasDocumentsTitle: "Etapa com documentos em andamento",
-        stepHasDocumentsMessage: "Existem documentos em processamento nesta esteira. Para remover uma etapa é necessário que não haja documentos em andamento.",
+        stepHasDocumentsMessage:
+            "Existem documentos em processamento nesta esteira. Para remover uma etapa é necessário que não haja documentos em andamento.",
         stepSubtitle: "Configure as regras e responsáveis",
         stepTitle: "Etapa da Esteira de Processamento",
         subtitle: "Visualize o fluxo de documentos através das etapas de processamento",
