@@ -19,5 +19,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> ImportPromptsByIds(List<Guid> templateIds, string email);
         Task<ICollection<PromptInternalDto>> FindAllInternal();
         Task<string> AiPromptRefinement(string prompt, string tenantId, string email);
+        Task<string> TestPromptWithContextAsync(string promptText, string contextText, string tenantId, string email);
     }
 }

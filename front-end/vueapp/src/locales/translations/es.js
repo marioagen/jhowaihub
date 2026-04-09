@@ -910,6 +910,12 @@ const spanish = {
         updateError: "Error al actualizar agente",
         updateSuccess: "Agente actualizado exitosamente",
         viewComplete: "Ver completo",
+        playgroundTitle: "Área de prueba (Playground)",
+        playgroundContextLabel: "Contexto (texto del PDF)",
+        playgroundResultLabel: "Resultado (salida)",
+        playgroundTestButton: "Probar prompt en el contexto",
+        playgroundContextPlaceholder: "Pegue o escriba el texto de contexto (p. ej. extracto del PDF)",
+        playgroundTestError: "Error al probar el prompt en el contexto",
     },
     questions: {
         availableList: "Preguntas disponibles",

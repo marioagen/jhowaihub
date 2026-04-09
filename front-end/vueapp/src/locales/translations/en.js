@@ -904,6 +904,12 @@ const english = {
         updateError: "Agent update failed",
         updateSuccess: "Agent updated successfully",
         viewComplete: "View complete",
+        playgroundTitle: "Test area (Playground)",
+        playgroundContextLabel: "Context (PDF text)",
+        playgroundResultLabel: "Result (output)",
+        playgroundTestButton: "Test prompt in context",
+        playgroundContextPlaceholder: "Paste or type context text (e.g. PDF excerpt)",
+        playgroundTestError: "Failed to test prompt in context",
     },
     questions: {
         availableList: "Available questions",
