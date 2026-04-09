@@ -7,6 +7,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using Xunit;
