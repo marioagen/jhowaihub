@@ -234,6 +234,18 @@ namespace WoopiAiHub.UnitTests.Fixture
             );
         }
 
+        public static CreateDocumentAnalysisRejectionRangeDto FindValidCreateDocumentAnalysisRejectionRangeDto(
+            Guid? userId = null)
+        {
+            var faker = new Faker("pt_BR");
+            return new CreateDocumentAnalysisRejectionRangeDto(
+                Justification: faker.Lorem.Paragraph(),
+                StepId: 1,
+                CardIds: new List<int> { 1, 2 },
+                UserId: userId
+            );
+        }
+
         public static DocumentAnalysisRejectionDto FindValidDocumentAnalysisRejectionDto()
         {
             var faker = new Faker("pt_BR");
