@@ -1515,6 +1515,7 @@ namespace WoopiAiHub.Application.Services
                 sourceIdToIndex[sourceStepToolsList[i].Id] = i;
             }
 
+            var newDependencies = new List<StepToolDependency>();
             for (var i = 0; i < sourceStepToolsList.Count; i++)
             {
                 var sourceStepTool = sourceStepToolsList[i];
@@ -1524,14 +1525,18 @@ namespace WoopiAiHub.Application.Services
                 {
                     if (sourceIdToIndex.TryGetValue(dep.DependsOnStepToolId, out var depIndex))
                     {
-                        var newDependency = new StepToolDependency(
+                        newDependencies.Add(new StepToolDependency(
                             0,
                             DateTime.UtcNow,
                             newStepTool.Id,
-                            newStepToolsList[depIndex].Id);
-                        await _stepToolDependencyRepository.CreateAsync(newDependency);
+                            newStepToolsList[depIndex].Id));
                     }
                 }
+            }
+
+            if (newDependencies.Count > 0)
+            {
+                await _stepToolDependencyRepository.CreateRangeAsync(newDependencies);
             }
         }
 
