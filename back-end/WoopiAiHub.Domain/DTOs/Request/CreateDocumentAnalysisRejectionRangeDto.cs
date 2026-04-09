@@ -3,6 +3,7 @@ namespace WoopiAiHub.Domain.DTOs.Request
     public record CreateDocumentAnalysisRejectionRangeDto(
         string Justification,
         int StepId,
-        List<int> CardIds
+        List<int> CardIds,
+        Guid? UserId
     );
 }

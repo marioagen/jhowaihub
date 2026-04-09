@@ -113,6 +113,40 @@ namespace WoopiAiHub.Application.Services
             return _cardRepository.UpdateList(cards);
         }
 
+        public async Task<bool> AssignRangeUser(Guid userId, int cardId)
+        {
+            var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
+            if (cards == null || cards.Count == 0)
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
+
+            Card.UpdateAssignedUser(cards, userId);
+
+            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
+            if (cardWorkflows.Count > 0)
+            {
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
+            }
+
+            return _cardRepository.UpdateList(cards);
+        }
+
+        public async Task<bool> UnassignRangeUser(int cardId)
+        {
+            var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
+            if (cards == null || cards.Count == 0)
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
+
+            Card.UpdateAssignedUser(cards, null);
+
+            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
+            if (cardWorkflows.Count > 0)
+            {
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign);
+            }
+
+            return _cardRepository.UpdateList(cards);
+        }
+
         /// <summary>
         /// Updates the step and status of a card.
         /// </summary>

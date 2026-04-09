@@ -12,6 +12,8 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> UpdateStatus(UpdateCardStatusDto updateCardStatusDto);
         Task<bool> AssignUser(UpdateAssignedUserDto updateAssingnedUserDto);
         Task<bool> UnassignUser(int cardId);
+        Task<bool> AssignRangeUser(Guid userId, int cardId);
+        Task<bool> UnassignRangeUser(int cardId);
         Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
             HeadersDto headersDto);
         Task<CardHeaderDto> FindHeaderInfoAsync(int cardId);
