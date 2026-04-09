@@ -18,7 +18,6 @@ namespace WoopiAiHub.Repository
 
         public bool CreateUniqueQuestion(Question question)
         {
-
             var existQuestion = _context.Questions.Any(p => p.Description == question.Description);
             if(!existQuestion)
             {
@@ -28,7 +27,6 @@ namespace WoopiAiHub.Repository
                 return true;
             }
             return false;
-
         }
 
         /// <summary>
@@ -38,6 +36,7 @@ namespace WoopiAiHub.Repository
         public ICollection<QuestionDto> FindAll()
         {
             return _context.Questions
+                .AsNoTracking()
                 .Select(q => new QuestionDto
                 {
                     Id = q.Id,
@@ -61,11 +60,13 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="desc"></param>
         /// <returns></returns>
-        public QuestionDto FindByDescriptionAndEmail(string desc,
+        public QuestionDto? FindByDescriptionAndEmail(string desc,
                                                      string email)
         {
-            return _context.Questions.Where(a => a.Description.Equals(desc) && a.EmailCreator.Equals(email))
-                                     .Select(q => new QuestionDto
+            return _context.Questions
+                .AsNoTracking()
+                .Where(a => a.Description.Equals(desc) && a.EmailCreator.Equals(email))
+                .Select(q => new QuestionDto
                                      {
                                          Id = q.Id,
                                          Questionnaires = q.QuestionQuestionnaire.Select(qq => new Questionnaire
@@ -87,10 +88,12 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public QuestionDto FindById(int id)
+        public QuestionDto? FindById(int id)
         {
-            return _context.Questions.Where(u => u.Id.Equals(id))
-                                     .Select(q => new QuestionDto
+            return _context.Questions
+                .AsNoTracking()
+                .Where(u => u.Id.Equals(id))
+                .Select(q => new QuestionDto
                                      {
                                          Id = q.Id,
                                          Questionnaires = q.QuestionQuestionnaire.Select(qq => new Questionnaire

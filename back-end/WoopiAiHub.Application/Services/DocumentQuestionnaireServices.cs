@@ -70,7 +70,8 @@ namespace WoopiAiHub.Application.Services
             try
             {
                 var documentDb = _documentRepository.FindById(documentQuestionnaireDto.IdDocument);
-                var questionnaire = _questionnaireRepository.FindById(documentQuestionnaireDto.IdQuestionnaire);
+                var questionnaire = _questionnaireRepository.FindById(documentQuestionnaireDto.IdQuestionnaire)
+                    ?? throw new AppException(ErrorCode.NotFound, "Questionnaire not found", null);
 
                 foreach (var description in questionnaire.Questions.Select(u => u.Description))
                 {

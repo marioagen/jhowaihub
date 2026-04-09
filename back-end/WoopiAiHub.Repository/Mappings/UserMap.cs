@@ -42,6 +42,10 @@ namespace WoopiAiHub.Repository.Mappings
                    .HasColumnType("datetime")
                    .IsRequired();
 
+            builder.Property(u => u.LastLoginAt)
+                   .HasColumnName("LastLoginAt")
+                   .HasColumnType("datetime");
+
             builder.Property(u => u.PasswordHash)
                    .HasColumnName("PasswordHash")
                    .HasColumnType("varbinary(64)")

@@ -139,6 +139,9 @@ namespace WoopiAiHub.Application.Services
             var tokenJWT = await GenerateTokensAsync(user.Id, user.Email, permissions);
             this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
 
+            user.RecordLogin();
+            _userRepository.Update(user);
+
             return new AccessDataAuthDto
             {
                 Tenant = tenant,

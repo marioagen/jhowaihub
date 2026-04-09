@@ -92,9 +92,9 @@ namespace WoopiAiHub.Application.Services.Automation
         /// Asynchronously calculates the number of completed step tools and determines the name of the currently
         /// running tool.
         /// </summary>
-        /// <remarks>This method evaluates each step tool's status based on the provided related card IDs.
-        /// The evaluation is performed asynchronously, and only the first running tool's name is returned if multiple
-        /// tools are running.</remarks>
+        /// <remarks>This method evaluates each step tool's status based on the provided related card IDs by loading
+        /// all executions in a single database query and processing them in memory. This approach avoids the N+M query
+        /// pattern and significantly improves performance when dealing with multiple step tools and card combinations.</remarks>
         /// <param name="stepTools">A collection of step tools to evaluate for completion and running status.</param>
         /// <param name="relatedCardIds">A list of related card IDs that influence the evaluation of each step tool's status.</param>
         /// <returns>A tuple containing the count of completed step tools and the name of the currently running tool. The tool
@@ -103,12 +103,21 @@ namespace WoopiAiHub.Application.Services.Automation
             ICollection<StepTool> stepTools, 
             List<int> relatedCardIds)
         {
+            var stepToolIds = stepTools.Select(st => st.Id).ToList();
+
+            var executions = await _stepToolExecutionRepository.FindByStepToolIdsAndCardIdsAsync(stepToolIds, relatedCardIds) ?? [];
+
             int completedStepTools = 0;
             string currentToolName = string.Empty;
 
             foreach (var stepTool in stepTools)
             {
-                var (isCompleted, isRunning) = await EvaluateStepToolStatus(stepTool.Id, relatedCardIds);
+                var toolExecutions = executions.Where(e => e.StepToolId == stepTool.Id).ToList();
+
+                bool isCompleted = relatedCardIds.All(cardId => 
+                    toolExecutions.Any(e => e.CardId == cardId && e.Status == StatusExecution.Ready));
+
+                bool isRunning = toolExecutions.Any(e => e.Status == StatusExecution.Running);
 
                 if (isCompleted)
                     completedStepTools++;
@@ -118,38 +127,6 @@ namespace WoopiAiHub.Application.Services.Automation
             }
 
             return (completedStepTools, currentToolName);
-        }
-
-        /// <summary>
-        /// Asynchronously evaluates the status of a step tool and its associated cards, indicating whether all cards
-        /// are ready and if any card is currently running.
-        /// </summary>
-        /// <remarks>This method checks the execution status of each related card to determine the overall
-        /// readiness and running state of the step tool. The method performs asynchronous lookups for each card and
-        /// aggregates their statuses.</remarks>
-        /// <param name="stepToolId">The unique identifier of the step tool whose status is being evaluated.</param>
-        /// <param name="relatedCardIds">A list of unique identifiers for the cards related to the specified step tool.</param>
-        /// <returns>A tuple containing two boolean values: the first is <see langword="true"/> if all related cards are ready;
-        /// the second is <see langword="true"/> if any related card is currently running.</returns>
-        private async Task<(bool isCompleted, bool isRunning)> EvaluateStepToolStatus(
-            int stepToolId, 
-            List<int> relatedCardIds)
-        {
-            bool allCardsReady = true;
-            bool anyCardRunning = false;
-
-            foreach (var cardId in relatedCardIds)
-            {
-                var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(stepToolId, cardId);
-
-                if (execution == null || execution.Status != StatusExecution.Ready)
-                    allCardsReady = false;
-
-                if (execution?.Status == StatusExecution.Running)
-                    anyCardRunning = true;
-            }
-
-            return (allCardsReady, anyCardRunning);
         }
 
         /// <summary>

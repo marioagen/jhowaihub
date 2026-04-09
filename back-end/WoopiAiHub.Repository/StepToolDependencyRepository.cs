@@ -45,6 +45,21 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Adds multiple StepToolDependency records in a single save.
+        /// </summary>
+        public async Task<bool> CreateRangeAsync(List<StepToolDependency> dependencies)
+        {
+            ArgumentNullException.ThrowIfNull(dependencies);
+            if (dependencies.Count == 0)
+            {
+                return true;
+            }
+
+            await _context.Set<StepToolDependency>().AddRangeAsync(dependencies);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        /// <summary>
         /// Finds all StepToolDependency records associated with the specified step tool ID.
         /// </summary>
         /// <param name="stepToolId"></param>

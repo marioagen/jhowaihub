@@ -69,6 +69,7 @@ namespace WoopiAiHub.Repository
         public async Task<Step?> FindByIdWithTools(int id)
         {
             return await _context.Steps
+                .AsNoTracking()
                 .Include(s => s.StepTools)
                 .FirstOrDefaultAsync(s => s.Id == id);
         }
