@@ -547,7 +547,8 @@ namespace WoopiAiHub.Application.Services
         ///<returns></returns>
         public async Task<bool> UpdateStepToolOutput(OutputUpdateDto outputUpdateDto)
         {
-            var stepToolOutput = this.FindByStepToolOutputById(outputUpdateDto.Id);
+            var stepToolOutput = this.FindByStepToolOutputById(outputUpdateDto.Id)
+                ?? throw new AppException(ErrorCode.NotFound, "Step tool output not found", null);
             stepToolOutput.ChangeValue(outputUpdateDto.Value);
             var result = await _workflowRepository.UpdateStepToolOutput(stepToolOutput);
             return result;
@@ -558,10 +559,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public StepToolOutput FindByStepToolOutputById(int id)
+        public StepToolOutput? FindByStepToolOutputById(int id)
         {
-            var stepToolOutput = _workflowRepository.FindByStepToolOutputById(id);
-            return stepToolOutput;
+            return _workflowRepository.FindByStepToolOutputById(id);
         }
 
         /// <summary>
@@ -609,7 +609,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public StepDto FindStepById(int id)
         {
-            var step = _workflowRepository.FindStepById(id);
+            var step = _workflowRepository.FindStepById(id)
+                ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
 
             var apiTools = step.StepTools.Where(w => w.Tool?.ToolType == HandlersTypes.API).ToList();
             if (apiTools is not null && apiTools.Count > 0)

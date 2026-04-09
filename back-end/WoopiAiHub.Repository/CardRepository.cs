@@ -34,8 +34,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Card?> FindById(int id)
         {
-            return await _context.Cards.Where(c => c.Id == id)
-                .FirstOrDefaultAsync();
+            return await _context.Cards
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         /// <summary>
@@ -46,9 +47,9 @@ namespace WoopiAiHub.Repository
         public async Task<Card?> FindByIdWithStatus(int id)
         {
             return await _context.Cards
+                .AsNoTracking()
                 .Include(s => s.Status)
-                .Where(c => c.Id == id)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         /// <summary>
@@ -86,7 +87,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<CardAnalysisDto?> FindByIdWithDocumentAndWorkflow(int id)
         {
-            return await _context.Cards.Where(c => c.Id == id)
+            return await _context.Cards
+                .AsNoTracking()
+                .Where(c => c.Id == id)
                 .Select(c => new CardAnalysisDto
                 {
                     Id = c.Id,
@@ -141,7 +144,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Card?> FindByIdWithStepAndProfile(int id)
         {
-            return await _context.Cards.Where(c => c.Id == id)
+            return await _context.Cards
+                .AsNoTracking()
+                .Where(c => c.Id == id)
                 .Include(s => s.Step)
                     .ThenInclude(p => p!.Profile)
                 .FirstOrDefaultAsync();

@@ -61,7 +61,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="desc"></param>
         /// <returns></returns>
-        public QuestionDto FindByDescriptionAndEmail(string desc,
+        public QuestionDto? FindByDescriptionAndEmail(string desc,
                                                      string emailCreator)
         {
             return _questionRepository.FindByDescriptionAndEmail(desc,
@@ -73,7 +73,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public QuestionDto FindById(int id)
+        public QuestionDto? FindById(int id)
         {
             return _questionRepository.FindById(id);
         }

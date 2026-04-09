@@ -92,6 +92,7 @@ namespace WoopiAiHub.Repository
         public async Task<List<WorkflowDto>> FindByUsersTeams(List<int> teamIds)
         {
             return await _context.Workflows
+                .AsNoTracking()
                 .Include(w => w.Teams)
                 .Where(s => s.Teams.Any(t => teamIds.Contains(t.Id)) && s.Enable.Equals(true))
                 .Select(w => new WorkflowDto
@@ -121,7 +122,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public StepDto FindStepById(int id)
+        public StepDto? FindStepById(int id)
         {
             var step = _context.Steps
             .AsNoTracking()
@@ -767,7 +768,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public StepToolOutput FindByStepToolOutputById(int id)
+        public StepToolOutput? FindByStepToolOutputById(int id)
         {
             var stepToolOutput = _context.StepToolOutputs.Where(p => p.Id == id)
                                                          .FirstOrDefault();
@@ -779,14 +780,17 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<ToolDto> FindToolByStepToolId(int id)
+        public async Task<ToolDto?> FindToolByStepToolId(int id)
         {
-            return await _context.StepTools.Where(p => p.Id == id)
-                                            .Select(s => new ToolDto
-                                            {
-                                                Id = s.Tool.Id,
-                                                Name = s.Tool.Name,
-                                            }).FirstOrDefaultAsync();
+            return await _context.StepTools
+                .AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(s => new ToolDto
+                {
+                    Id = s.Tool!.Id,
+                    Name = s.Tool.Name,
+                })
+                .FirstOrDefaultAsync();
         }
 
         /// <summary>

@@ -136,6 +136,7 @@ namespace WoopiAiHub.Repository
         public async Task<UserDto?> FindUserByEmail(string email)
         {
             return await _context.Users
+                .AsNoTracking()
                 .Include(u => u.Teams)
                 .Where(u => u.Email == email)
                 .Select(u => new UserDto
@@ -283,6 +284,7 @@ namespace WoopiAiHub.Repository
         public async Task<ICollection<UserDto>> FindByTeamIdsAsync(int[] teamIds)
         {
             return await _context.Users
+                .AsNoTracking()
                 .Where(u => u.Teams.Any(t => teamIds.Contains(t.Id)))
                 .Select(u => new UserDto
                 {
