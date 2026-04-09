@@ -113,7 +113,7 @@ namespace WoopiAiHub.Application.Services
             return _cardRepository.UpdateList(cards);
         }
 
-        public async Task<bool> AssignRangeUser(Guid userId, int cardId)
+        public async Task<bool> AssignRange(Guid userId, int cardId)
         {
             var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
             if (cards == null || cards.Count == 0)
@@ -130,7 +130,7 @@ namespace WoopiAiHub.Application.Services
             return _cardRepository.UpdateList(cards);
         }
 
-        public async Task<bool> UnassignRangeUser(int cardId)
+        public async Task<bool> UnassignRange(int cardId)
         {
             var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
             if (cards == null || cards.Count == 0)

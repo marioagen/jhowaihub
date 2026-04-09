@@ -79,18 +79,9 @@ namespace WoopiAiHub.Application.Services
                 return;
             }
 
-            var seenBatchOrCard = new HashSet<string>();
             foreach (var card in cards)
             {
-                var key = card.DocumentBatchId.HasValue
-                    ? $"b:{card.DocumentBatchId.Value}"
-                    : $"c:{card.Id}";
-                if (!seenBatchOrCard.Add(key))
-                {
-                    continue;
-                }
-
-                await _cardServices.AssignRangeUser(userIdToAssign.Value, card.Id);
+                await _cardServices.AssignRange(userIdToAssign.Value, card.Id);
             }
         }
 
