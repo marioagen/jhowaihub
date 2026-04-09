@@ -14,7 +14,7 @@ COPY . .
 RUN npm run build
 
 
-FROM nginx:alpine as production-build
+FROM acrapplications.azurecr.io/external/nginx:latest as production-build
 COPY ./.nginx/nginx.conf /etc/nginx/nginx.conf
 
 ## Remove default nginx index page
