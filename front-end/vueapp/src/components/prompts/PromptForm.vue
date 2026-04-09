@@ -220,13 +220,13 @@
                                     class="playground-title-icon flex-shrink-0"
                                 />
                                 <h6 class="mb-0 fw-semibold">
-                                    {{ $t("prompts.playgroundTitle") }}
+                                    {{ $t("prompts.playground.title") }}
                                 </h6>
                             </div>
 
                             <div class="mb-2 d-flex justify-content-between align-items-center">
                                 <label class="form-label small mb-0 fw-semibold">
-                                    {{ $t("prompts.playgroundContextLabel") }}
+                                    {{ $t("prompts.playground.contextLabel") }}
                                 </label>
                                 <button
                                     type="button"
@@ -245,7 +245,7 @@
                                 v-model="testContext"
                                 class="form-control mb-3 playground-textarea"
                                 rows="6"
-                                :placeholder="$t('prompts.playgroundContextPlaceholder')"
+                                :placeholder="$t('prompts.playground.contextPlaceholder')"
                             />
 
                             <button
@@ -266,13 +266,13 @@
                                     class="animate-spin"
                                 />
                                 <span class="fw-semibold">
-                                    {{ $t("prompts.playgroundTestButton") }}
+                                    {{ $t("prompts.playground.testButton") }}
                                 </span>
                             </button>
 
                             <div class="mb-2 d-flex justify-content-between align-items-center">
                                 <label class="form-label small mb-0 fw-semibold">
-                                    {{ $t("prompts.playgroundResultLabel") }}
+                                    {{ $t("prompts.playground.resultLabel") }}
                                 </label>
                                 <button
                                     type="button"
@@ -341,8 +341,8 @@
                 return this.idEdit !== undefined && this.idEdit !== null && this.idEdit !== 0;
             },
             canTestPrompt() {
-                const t = this.values?.text;
-                return typeof t === "string" && t.trim().length > 0;
+                const textInput = this.values?.text;
+                return typeof textInput === "string" && textInput.trim().length > 0;
             },
         },
         setup() {
@@ -475,37 +475,29 @@
                 this.testResult = "";
             },
             testPromptInContext() {
-                if (!this.values || !this.values.text || this.values.text.trim() === "") {
-                    return this.$notify({
-                        title: "prompts.title",
-                        message: "prompts.emptyPromptError",
-                        variant: "warning",
-                        icon: "AlertCircle",
-                    });
+                if (!this.canTestPrompt) {
+                    return;
                 }
                 this.isTesting = true;
                 PromptService.testPrompt({
                     promptText: this.values.text,
                     contextText: this.testContext,
-                })
-                    .then((response) => {
-                        if (response && response.error) {
-                            throw new Error("Test failed");
-                        }
+                }).then(
+                    (response) => {
                         this.testResult =
                             typeof response === "string" ? response : String(response ?? "");
-                    })
-                    .catch(() => {
+                    },
+                    () => {
                         this.$notify({
                             title: "prompts.title",
-                            message: "prompts.playgroundTestError",
+                            message: "prompts.playground.testError",
                             variant: "danger",
                             icon: "CircleX",
                         });
-                    })
-                    .finally(() => {
-                        this.isTesting = false;
-                    });
+                    }
+                ).finally(() => {
+                    this.isTesting = false;
+                });
             },
             refinePrompt: function () {
                 if (!this.values || !this.values.text || this.values.text.trim() === "") {

@@ -111,13 +111,10 @@ export default {
             });
     },
     testPrompt({ promptText, contextText }) {
-        return api
-            .post("/v1/prompts/test", {
-                promptText: promptText ?? "",
-                contextText: contextText ?? "",
-            })
-            .then(({ data }) => data)
-            .catch((error) => ({ error }));
+        return api.post("/v1/prompts/test", {
+            promptText: promptText ?? "",
+            contextText: contextText ?? "",
+        }).then(({ data }) => data);
     },
 }
 

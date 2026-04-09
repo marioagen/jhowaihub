@@ -541,53 +541,5 @@ namespace WoopiAiHub.Application.Services
 
             return response.Choices[0].Message.Content;
         }
-
-        /// <summary>
-        /// Runs a synchronous chat completion with the same system message shape as the automation Prompt tool (context + instructions), logs token usage, and does not persist anything.
-        /// </summary>
-        public async Task<string> TestPromptWithContextAsync(string promptText, string contextText, string tenantId, string email)
-        {
-            if (string.IsNullOrWhiteSpace(promptText))
-            {
-                throw new ArgumentException("Prompt text is required");
-            }
-
-            var tenantInfo = await _tenantCacheServices.FindTenantAsync(tenantId);
-            if (tenantInfo!.AiGatewayApplicationId.HasValue is false || string.IsNullOrEmpty(tenantInfo.AiGatewayKey))
-            {
-                throw new ArgumentException("AiGateway ApplicationId not found");
-            }
-
-            var fullText = contextText ?? string.Empty;
-            var systemContent = string.Concat("Baseado no: \"", fullText, "\" e seguindo as orientações a seguir: ", promptText);
-
-            var chatCompletionDto = new ChatCompletionDto
-            {
-                Temperature = _chatCompletionSettings.Temperature,
-                MaxTokens = _chatCompletionSettings.MaxTokens,
-                Messages = new List<ChatMessageDto>
-                {
-                    new ChatMessageDto { Role = "system", Content = systemContent }
-                }
-            };
-
-            var response = await _chatCompletionApi.GetChatCompletion(
-                tenantInfo.AiGatewayApplicationId.Value.ToString(),
-                _chatCompletionSettings.Model,
-                _chatCompletionSettings.ApiVersion,
-                tenantInfo.AiGatewayKey,
-                chatCompletionDto);
-
-            var tokens = response.Usage?.TotalTokens ?? 0;
-            await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model);
-
-            var content = response.Choices.FirstOrDefault()?.Message?.Content;
-            if (string.IsNullOrEmpty(content))
-            {
-                throw new AppException(ErrorCode.DefaultError, "Empty response from AI Gateway", null);
-            }
-
-            return content;
-        }
     }
 }

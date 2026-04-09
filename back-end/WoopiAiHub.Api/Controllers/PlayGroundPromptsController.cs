@@ -10,13 +10,13 @@ namespace WoopiAiHub.Api.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/v1/prompts")]
     [ApiController]
-    public class PromptsV1Controller : ControllerBase
+    public class PlayGroundPromptsController : ControllerBase
     {
-        private readonly IPromptServices _promptServices;
+        private readonly IPlaygroundServices _playgroundServices;
 
-        public PromptsV1Controller(IPromptServices promptServices)
+        public PlayGroundPromptsController(IPlaygroundServices playgroundServices)
         {
-            _promptServices = promptServices;
+            _playgroundServices = playgroundServices;
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace WoopiAiHub.Api.Controllers
                 return BadRequest();
             }
 
-            var result = await _promptServices.TestPromptWithContextAsync(
+            var result = await _playgroundServices.TestPromptWithContextAsync(
                 request.PromptText ?? string.Empty,
                 request.ContextText ?? string.Empty,
                 headersDto.Tenant,
