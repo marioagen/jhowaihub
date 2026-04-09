@@ -32,6 +32,17 @@ namespace WoopiAiHub.Api.Controllers
             return Ok(result);
         }
 
+        [HttpPost("range")]
+        [SwaggerOperation("Creates document analysis rejections for multiple cards (strict list, no batch expansion)")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> CreateRejectionRange(
+            [FromBody] CreateDocumentAnalysisRejectionRangeDto dto,
+            [FromHeader] HeadersDto headersDto)
+        {
+            var result = await _services.CreateRejectionRangeAsync(dto, headersDto.EmailCreator);
+            return Ok(result);
+        }
+
         [HttpGet]
         [SwaggerOperation("Retrieves document analysis rejections by card ID")]
         [ProducesResponseType(typeof(List<DocumentAnalysisRejectionDto>), StatusCodes.Status200OK)]
