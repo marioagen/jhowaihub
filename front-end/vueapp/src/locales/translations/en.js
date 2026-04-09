@@ -764,6 +764,7 @@ const english = {
             editTitle: "Edit User",
             editUser: "Edit user",
             email: "Email",
+            lastLoginAt: "Last login",
             errors: {
                 emailDuplicated: "Email already registered",
                 invalid: "Invalid user",

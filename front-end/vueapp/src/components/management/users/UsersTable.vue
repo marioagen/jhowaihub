@@ -50,6 +50,12 @@
                 </div>
                 <span v-else>-</span>
             </template>
+            <template #cell-lastLoginAt="{ data }">
+                <span v-if="data.row.lastLoginAt">{{
+                    formatDateWithTime(data.row.lastLoginAt)
+                }}</span>
+                <span v-else>"N/A"</span>
+            </template>
             <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
                     <a
@@ -85,6 +91,7 @@
 </template>
 <script>
     import AvatarComponent from "@/components/global/AvatarComponent.vue";
+    import date from "@/helpers/date";
     import UserService from "@/services/users/UserService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import TableComponent from "@/components/global/TableComponent.vue";
@@ -110,6 +117,7 @@
                     { key: "name", label: "management.users.user" },
                     { key: "profiles", label: "management.profiles.profiles" },
                     { key: "teams", label: "management.teams.title" },
+                    { key: "lastLoginAt", label: "management.users.lastLoginAt" },
                     { key: "actions", label: "common.actions" },
                 ],
                 data: [],
@@ -129,6 +137,9 @@
             isDeleting: false,
         }),
         methods: {
+            formatDateWithTime(value) {
+                return date.formatDateWithTime(value);
+            },
             getUsers(obj) {
                 this.table.isLoading = true;
                 this.searching = false;

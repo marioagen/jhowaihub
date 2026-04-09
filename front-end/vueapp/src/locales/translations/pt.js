@@ -773,6 +773,7 @@ const portuguese = {
             editTitle: "Editar Usuário",
             editUser: "Editar usuário",
             email: "Email",
+            lastLoginAt: "Último acesso",
             errors: {
                 emailDuplicated: "Email já cadastrado",
                 invalid: "Usuário inválido",

@@ -157,10 +157,8 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Find all teams with pagination and include their users.
+        /// Active users projected for listing with optional search filter; ordering and paging are applied in the application service.
         /// </summary>
-        /// <param name="pagedDataDto"></param>
-        /// <returns></returns>
         public IQueryable<UserPagedDto> FindAllPaged(PagedDataDto pagedDataDto)
         {
             var query = _context.Users.Where(p => p.IsActive == true)
@@ -172,6 +170,7 @@ namespace WoopiAiHub.Repository
                     Created = t.Created,
                     Email = t.Email,
                     IsActive = t.IsActive,
+                    LastLoginAt = t.LastLoginAt,
                     Teams = t.Teams!
                         .Select(u => new TeamDto
                         {
@@ -182,10 +181,29 @@ namespace WoopiAiHub.Repository
                         .OrderBy(t => t.Name)
                         .ToList(),
                 })
-                .AsQueryable()
                 .AsNoTracking();
 
-            return query;
+            return ApplySearchFilter(query, pagedDataDto);
+        }
+
+        /// <summary>
+        /// When <see cref="PagedDataDto.Search"/> is non-empty, restricts the query to users whose name, email, id, or any team name contains the search text (case-insensitive for text fields). Returns the query unchanged when search is null or empty.
+        /// </summary>
+        /// <param name="query">The projected user listing query to filter.</param>
+        /// <param name="pagedDataDto">Paging options; <see cref="PagedDataDto.Search"/> supplies the filter text.</param>
+        /// <returns>The filtered query, or the original query if there is no search term.</returns>
+        private static IQueryable<UserPagedDto> ApplySearchFilter(
+            IQueryable<UserPagedDto> query,
+            PagedDataDto pagedDataDto)
+        {
+            if (string.IsNullOrEmpty(pagedDataDto.Search))
+                return query;
+
+            return query.Where(i =>
+                i.Name.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase) ||
+                i.Email.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase) ||
+                i.Id.ToString().Contains(pagedDataDto.Search) ||
+                i.Teams.Any(t => t.Name.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase)));
         }
 
         /// <summary>

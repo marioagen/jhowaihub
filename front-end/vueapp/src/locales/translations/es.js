@@ -774,6 +774,7 @@ const spanish = {
             editTitle: "Editar Usuario",
             editUser: "Editar usuario",
             email: "Correo electrónico",
+            lastLoginAt: "Último acceso",
             errors: {
                 emailDuplicated: "Correo electrónico ya registrado",
                 invalid: "Usuario inválido",

@@ -29,6 +29,9 @@ namespace WoopiAiHub.Domain.Models
         [Column("Created", TypeName = "datetime")]
         public DateTime Created { get; private set; }
 
+        [Column("LastLoginAt", TypeName = "datetime")]
+        public DateTime? LastLoginAt { get; private set; }
+
         public virtual ICollection<Permission> Permissions { get; set; } = [];
 
         public virtual ICollection<Prompt> Prompts { get; set; } = [];
@@ -92,6 +95,11 @@ namespace WoopiAiHub.Domain.Models
 
             PasswordHash = passwordHash;
             Salt = salt;
+        }
+
+        public void RecordLogin()
+        {
+            LastLoginAt = DateTime.UtcNow;
         }
     }
 }
