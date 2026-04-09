@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WoopiAiHub.Domain.Models;
 
@@ -37,6 +37,9 @@ namespace WoopiAiHub.Repository.Mappings
             builder.Property(p => p.Created)
                    .HasColumnType("datetime")
                    .IsRequired();
+
+            builder.HasIndex(e => new { e.StepToolId, e.CardId})
+                   .HasDatabaseName("IX_StepToolExecution_StepToolId_CardId");
         }
     }
 }

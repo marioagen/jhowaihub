@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -82,11 +83,17 @@ namespace WoopiAiHub.Application.Services
 
             dbContext.Database.GetDbConnection().ConnectionString = connectionString;
 
+            var password = tenantSubscriptionDto.Password;
+            if (string.IsNullOrEmpty(password))
+            {
+                password = tenantSubscriptionDto.Name;
+            }
+
             var userCreateDto = new UserCreateDto
             {
                 Name = tenantSubscriptionDto.Name!,
                 Email = tenantSubscriptionDto.Email,
-                Password = tenantSubscriptionDto.Name,
+                Password = password,
                 TeamIds = new List<int> { 1 }
             };
             var headerDto = new HeadersDto
@@ -117,10 +124,14 @@ namespace WoopiAiHub.Application.Services
         /// <param name="tenant"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<string> FindPlanByName(string tenant)
+        public async Task<DashboardTenantInfo> FindPlanByName(string tenant)
         {
             var tenantInfo = await _tenantCacheService.FindTenantAsync(tenant);
-            return tenantInfo?.Plan?? string.Empty;
+            return new DashboardTenantInfo
+            {
+                Plan = tenantInfo?.Plan ?? string.Empty,
+                WtcIncluded = tenantInfo?.WtcsIncluded ?? 0
+            };
         }
 
         /// <summary>

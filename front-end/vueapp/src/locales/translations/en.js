@@ -852,10 +852,6 @@ const english = {
         workflows: "Document Workflows",
         auditor: "Audit",
     },
-    pagination: {
-        next: "Next",
-        previous: "Previous",
-    },
     permissions: {
         descriptions: {
             auditor: "View Audit",
@@ -1058,7 +1054,7 @@ const english = {
             noRunTitle: "No tests executed",
             noRunHint: 'Fill in the variables and click on "Simulate Request".',
             simulateError: "Could not run the simulated request. Try again.",
-            simulateSuccess: "Simulated request completed successfully (HTTP 2xx).",
+            simulateSuccess: "Simulated request completed successfully (HTTP 200).",
             responseHttpStatus: "Downstream HTTP status",
             variableValues: "Test values for variables",
         },
@@ -1228,6 +1224,8 @@ const english = {
         associatedTeams: "Associated Teams",
         basicInfo: "Basic Information",
         boardView: "Viewing workflow:",
+        refreshBoard: "Refresh board",
+        editWorkflowBoard: "Edit workflow",
         clone: "Clone",
         cloneConfirm: "Clone",
         cloneError: "Error cloning workflow",
@@ -1317,6 +1315,9 @@ const english = {
         stepNamePlaceholder: "Step Name",
         steps: "Workflow Steps",
         stepsTitle: "Workflow Steps",
+        stepHasDocumentsTitle: "Step has documents in progress",
+        stepHasDocumentsMessage:
+            "There are documents being processed in this workflow. To remove a step, all documents must be fully processed first.",
         stepSubtitle: "Set up rules and responsibilities",
         stepTitle: "Workflow Step",
         subtitle: "View the flow of documents through the processing stages",

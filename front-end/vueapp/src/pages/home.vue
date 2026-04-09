@@ -170,7 +170,7 @@
         methods: {
             getPlan() {
                 DashboardServices.GetPlan(store.state.userProfile.tenant).then((response) => {
-                    this.plan = response.toUpperCase();
+                    this.plan = response.plan.toUpperCase();
                 });
             },
         },

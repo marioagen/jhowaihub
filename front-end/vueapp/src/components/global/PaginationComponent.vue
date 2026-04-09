@@ -1,32 +1,51 @@
 <template>
-    <nav v-if="totalPages > 1">
+    <nav v-if="totalPages && totalPages > 1">
         <ul class="pagination justify-content-center">
             <li
                 class="page-item"
                 :class="{ disabled: current === 1 }"
             >
                 <a
-                    class="page-link"
+                    class="page-link page-link--icon"
                     href="#"
+                    aria-label="First page"
+                    @click.prevent="changePage(1)"
+                >
+                    <LucideIcon
+                        icon="ChevronsLeft"
+                        :size="16"
+                    />
+                </a>
+            </li>
+            <li
+                class="page-item"
+                :class="{ disabled: current === 1 }"
+            >
+                <a
+                    class="page-link page-link--icon"
+                    href="#"
+                    aria-label="Previous page"
                     @click.prevent="changePage(current - 1)"
                 >
-                    <LucideIcon icon="ChevronsLeft" />
-                    {{ $t("pagination.previous") }}
+                    <LucideIcon
+                        icon="ChevronLeft"
+                        :size="16"
+                    />
                 </a>
             </li>
 
             <li
-                v-for="page in pages"
-                :key="page"
-                :class="{ active: page === current }"
+                v-for="item in pages"
+                :key="item.key"
                 class="page-item"
+                :class="{ active: item.value === current }"
             >
                 <a
-                    class="page-link"
+                    class="page-link page-link--num"
                     href="#"
-                    @click.prevent="changePage(page)"
+                    @click.prevent="changePage(item.value)"
                 >
-                    {{ page }}
+                    {{ item.value }}
                 </a>
             </li>
 
@@ -35,12 +54,31 @@
                 :class="{ disabled: current === totalPages }"
             >
                 <a
-                    class="page-link"
+                    class="page-link page-link--icon"
                     href="#"
+                    aria-label="Next page"
                     @click.prevent="changePage(current + 1)"
                 >
-                    {{ $t("pagination.next") }}
-                    <LucideIcon icon="ChevronsRight" />
+                    <LucideIcon
+                        icon="ChevronRight"
+                        :size="16"
+                    />
+                </a>
+            </li>
+            <li
+                class="page-item"
+                :class="{ disabled: current === totalPages }"
+            >
+                <a
+                    class="page-link page-link--icon"
+                    href="#"
+                    aria-label="Last page"
+                    @click.prevent="changePage(totalPages)"
+                >
+                    <LucideIcon
+                        icon="ChevronsRight"
+                        :size="16"
+                    />
                 </a>
             </li>
         </ul>
@@ -80,24 +118,38 @@
         },
         computed: {
             pages() {
-                const range = [];
-                let start = this.current - 1;
-                let end = this.current + 1;
+                const total = this.totalPages;
+                if (!total || total <= 1) {
+                    return [];
+                }
 
-                if (start < 1) {
+                const c = this.current;
+                let start;
+                let end;
+
+                if (total <= 3) {
                     start = 1;
-                    end = Math.min(3, this.totalPages);
+                    end = total;
+                } else if (c <= 2) {
+                    start = 1;
+                    end = 3;
+                } else if (c >= total - 1) {
+                    start = total - 2;
+                    end = total;
+                } else {
+                    start = c - 1;
+                    end = c + 1;
                 }
 
-                if (end > this.totalPages) {
-                    end = this.totalPages;
-                    start = Math.max(1, end - 2);
-                }
-
+                const items = [];
                 for (let i = start; i <= end; i++) {
-                    range.push(i);
+                    items.push({
+                        value: i,
+                        key: `page-${i}`,
+                    });
                 }
-                return range;
+
+                return items;
             },
         },
         methods: {
@@ -115,6 +167,7 @@
 </script>
 <style scoped>
     .pagination {
+        --bs-pagination-margin-bottom: 0;
         --bs-pagination-padding-x: 0.6rem;
         --bs-pagination-padding-y: 0.35rem;
         --bs-pagination-font-size: 0.875rem;
@@ -132,16 +185,34 @@
         --bs-pagination-disabled-color: #8c959f;
         --bs-pagination-disabled-bg: transparent;
         --bs-pagination-disabled-border-color: transparent;
+        margin-bottom: 0;
+    }
+
+    nav {
+        margin-bottom: 0;
+        padding-bottom: 0;
     }
 
     .page-item {
         margin: 0 4px;
+        display: flex;
+        align-items: center;
     }
 
     .page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 2rem;
+        padding-top: 0;
+        padding-bottom: 0;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        box-sizing: border-box;
         border-radius: 8px;
         border: 1px solid transparent;
         font-weight: 500;
+        line-height: 1;
         transition: background-color 0.2s ease;
         background-color: var(--color-card-content) !important;
     }
@@ -161,5 +232,22 @@
     .page-link:hover {
         background-color: var(--color-sidebar-li-collapsed-hover) !important;
         border-color: var(--color-sidebar-li-collapsed-hover) !important;
+    }
+
+    .page-link--icon {
+        padding-left: 0.45rem;
+        padding-right: 0.45rem;
+    }
+
+    .page-link--icon :deep(svg) {
+        display: block;
+        flex-shrink: 0;
+    }
+
+    .pagination .page-link--num {
+        font-size: 0.75rem;
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
+        min-width: 1.55rem;
     }
 </style>

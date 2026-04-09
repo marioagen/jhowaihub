@@ -48,209 +48,210 @@
                 :stepId="stepId"
                 :step="step"
                 :stepOrder="stepOrder"
+                :workflowId="workflowId"
                 @openNodeConfig="openNodeConfig"
                 @nodeDeleted="onNodeDeleted"
                 @flowChanged="markFlowDirty"
                 ref="VueflowComponent"
                 :hasStepTools="hasStepTools"
             />
-
-            <div
-                class="offcanvas offcanvas-end"
-                tabindex="-1"
+            <OffcanvasComponent
+                ref="flowOffcanvas"
                 id="offcanvasRight"
-                aria-labelledby="offcanvasRightLabel"
-                ref="sidebar"
+                label-id="offcanvasRightLabel"
+                placement="end"
             >
-                <div class="offcanvas-header">
-                    <h5 id="offcanvasRightLabel">
-                        {{ $t("flow.sidebarTitle") }}
-                        {{ nodeFlow.label }}
-                    </h5>
-                    <button
-                        type="button"
-                        class="btn-close text-reset"
-                        data-bs-dismiss="offcanvas"
-                        aria-label="Close"
-                        @click="closeSidebar"
-                    ></button>
+                <template #header>
+                    <div class="offcanvas-header">
+                        <h5 id="offcanvasRightLabel">
+                            {{ $t("flow.sidebarTitle") }}
+                            {{ nodeFlow.label }}
+                        </h5>
+                        <button
+                            type="button"
+                            class="btn-close text-reset"
+                            data-bs-dismiss="offcanvas"
+                            aria-label="Close"
+                            @click="closeSidebar"
+                        ></button>
+                    </div>
+                </template>
+                <div
+                    class="cover"
+                    v-if="loadingWebhooks || loadingInputs"
+                >
+                    <div class="spinner-cover">
+                        <LucideIcon
+                            icon="Loader"
+                            :size="24"
+                            class="me-1 animate-spin"
+                        />
+                    </div>
                 </div>
-                <div class="offcanvas-body">
-                    <div
-                        class="cover"
-                        v-if="loadingWebhooks || loadingInputs"
+                <DependencySelector
+                    :previousStepTools="previousStepTools"
+                    v-model:selectedDependencies="selectedDependencies"
+                    ref="dependencyTools"
+                />
+                <hr />
+                <div
+                    v-if="isN8NTool"
+                    class="mb-3"
+                >
+                    <select
+                        class="form-select form-select-sm w-auto mb-3"
+                        v-model="connector"
+                        @change="changeWebhook"
                     >
-                        <div class="spinner-cover">
-                            <LucideIcon
-                                icon="Loader"
-                                :size="24"
-                                class="me-1 animate-spin"
+                        <option
+                            value=""
+                            disabled
+                        >
+                            {{ $t("flow.sidebar.filter") }}
+                        </option>
+                        <option
+                            v-for="connector in connectors"
+                            :key="connector.id"
+                            :value="connector.webhookId"
+                        >
+                            {{ connector.name }}
+                        </option>
+                    </select>
+                    <div
+                        v-for="field in formFields"
+                        :key="field.name"
+                    >
+                        <div
+                            class="mb-3"
+                            v-if="field.type === 'string' || field.type === 'integer'"
+                            :type="field.type === 'integer' ? 'number' : 'string'"
+                        >
+                            <label
+                                :for="field.name"
+                                class="form-label"
+                            >
+                                {{ field.label }}
+                            </label>
+                            <input
+                                class="form-control form-control-sm"
+                                :id="field.name"
+                                v-model="formData[field.name]"
+                            />
+                        </div>
+                        <div
+                            v-else-if="field.type === 'boolean'"
+                            class="form-check mb-3"
+                            :disabled="loadingWebhooks || loadingInputs"
+                        >
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                :id="field.name"
+                                v-model="formData[field.name]"
+                                :disabled="loadingWebhooks || loadingInputs"
+                            />
+                            <label
+                                class="form-check-label"
+                                for="flexCheckDefault"
+                            >
+                                {{ field.label }}
+                            </label>
+                        </div>
+                        <div v-else-if="field.type === 'array'">
+                            <h6>{{ field.label }}</h6>
+                            <div
+                                v-for="(item, index) in formData[field.name]"
+                                :key="index"
+                            >
+                                <div
+                                    class="mb-3"
+                                    v-for="child in field.children"
+                                    :key="child.name"
+                                >
+                                    <label
+                                        v-if="child.label"
+                                        :for="child.name"
+                                        class="form-label"
+                                        :disabled="loadingWebhooks || loadingInputs"
+                                    >
+                                        {{ child.label }}
+                                    </label>
+                                    <label
+                                        v-else
+                                        :for="child.name"
+                                        class="form-label text-capitalize"
+                                    >
+                                        {{ child.name }}
+                                    </label>
+                                    <input
+                                        :id="child.name"
+                                        v-model="formData[field.name][index][child.name]"
+                                        :disabled="loadingWebhooks || loadingInputs"
+                                        class="form-control form-control-sm"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else-if="field.type === 'text'">
+                            <label
+                                :for="field.name"
+                                class="form-label"
+                            >
+                                {{ field.label }}
+                            </label>
+                            <textarea
+                                class="form-control form-control-sm text-long"
+                                :id="field.name"
+                                v-model="formData[field.name]"
+                                rows="4"
                             />
                         </div>
                     </div>
-                    <DependencySelector
-                        :previousStepTools="previousStepTools"
-                        v-model:selectedDependencies="selectedDependencies"
-                        ref="dependencyTools"
-                    />
-                    <hr />
-                    <div
-                        v-if="isN8NTool"
-                        class="mb-3"
-                    >
+
+                    <div class="mt-4">
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            @click="updateNodeWithForm"
+                            :disabled="loadingWebhooks || loadingInputs"
+                        >
+                            {{ $t("common.save") }}
+                        </button>
+                    </div>
+                </div>
+                <div v-else-if="isQuizTool">
+                    <h6>Quiz</h6>
+                    <div class="background-div">
                         <select
-                            class="form-select form-select-sm w-auto mb-3"
-                            v-model="connector"
-                            @change="changeWebhook"
+                            class="form-select"
+                            v-model="idSelected"
+                            @change="onQuizSelect"
                         >
                             <option
-                                value=""
-                                disabled
+                                v-for="item in quizlist"
+                                :key="item.id"
+                                :value="item.id"
                             >
-                                {{ $t("flow.sidebar.filter") }}
-                            </option>
-                            <option
-                                v-for="connector in connectors"
-                                :key="connector.id"
-                                :value="connector.webhookId"
-                            >
-                                {{ connector.name }}
+                                {{ item.title }}
                             </option>
                         </select>
-                        <div
-                            v-for="field in formFields"
-                            :key="field.name"
+                    </div>
+
+                    <div class="mt-4">
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            @click="updateNode"
                         >
-                            <div
-                                class="mb-3"
-                                v-if="field.type === 'string' || field.type === 'integer'"
-                                :type="field.type === 'integer' ? 'number' : 'string'"
-                            >
-                                <label
-                                    :for="field.name"
-                                    class="form-label"
-                                >
-                                    {{ field.label }}
-                                </label>
-                                <input
-                                    class="form-control form-control-sm"
-                                    :id="field.name"
-                                    v-model="formData[field.name]"
-                                />
-                            </div>
-                            <div
-                                v-else-if="field.type === 'boolean'"
-                                class="form-check mb-3"
-                                :disabled="loadingWebhooks || loadingInputs"
-                            >
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    :id="field.name"
-                                    v-model="formData[field.name]"
-                                    :disabled="loadingWebhooks || loadingInputs"
-                                />
-                                <label
-                                    class="form-check-label"
-                                    for="flexCheckDefault"
-                                >
-                                    {{ field.label }}
-                                </label>
-                            </div>
-                            <div v-else-if="field.type === 'array'">
-                                <h6>{{ field.label }}</h6>
-                                <div
-                                    v-for="(item, index) in formData[field.name]"
-                                    :key="index"
-                                >
-                                    <div
-                                        class="mb-3"
-                                        v-for="child in field.children"
-                                        :key="child.name"
-                                    >
-                                        <label
-                                            v-if="child.label"
-                                            :for="child.name"
-                                            class="form-label"
-                                            :disabled="loadingWebhooks || loadingInputs"
-                                        >
-                                            {{ child.label }}
-                                        </label>
-                                        <label
-                                            v-else
-                                            :for="child.name"
-                                            class="form-label text-capitalize"
-                                        >
-                                            {{ child.name }}
-                                        </label>
-                                        <input
-                                            :id="child.name"
-                                            v-model="formData[field.name][index][child.name]"
-                                            :disabled="loadingWebhooks || loadingInputs"
-                                            class="form-control form-control-sm"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div v-else-if="field.type === 'text'">
-                                <label
-                                    :for="field.name"
-                                    class="form-label"
-                                >
-                                    {{ field.label }}
-                                </label>
-                                <textarea
-                                    class="form-control form-control-sm text-long"
-                                    :id="field.name"
-                                    v-model="formData[field.name]"
-                                    rows="4"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="mt-4">
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                @click="updateNodeWithForm"
-                                :disabled="loadingWebhooks || loadingInputs"
-                            >
-                                {{ $t("common.save") }}
-                            </button>
-                        </div>
+                            {{ $t("common.save") }}
+                        </button>
                     </div>
-                    <div v-else-if="isQuizTool">
-                        <h6>Quiz</h6>
-                        <div class="background-div">
-                            <select
-                                class="form-select"
-                                v-model="idSelected"
-                                @change="onQuizSelect"
-                            >
-                                <option
-                                    v-for="item in quizlist"
-                                    :key="item.id"
-                                    :value="item.id"
-                                >
-                                    {{ item.title }}
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="mt-4">
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                @click="updateNode"
-                            >
-                                {{ $t("common.save") }}
-                            </button>
-                        </div>
-                    </div>
-                    <div
-                        v-else
-                        class="mb-3"
-                    >
+                </div>
+                <div
+                    v-else
+                    class="mb-3"
+                >
+                    <div v-if="!isEmbeddingTool">
                         <h6>
                             {{ $t("flow.sidebar.inputs") }}
                         </h6>
@@ -266,19 +267,18 @@
                                 v-model="parameters[index].value"
                             ></textarea>
                         </div>
-
-                        <div class="mt-4">
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                @click="updateNode"
-                            >
-                                {{ $t("common.save") }}
-                            </button>
-                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            @click="updateNode"
+                        >
+                            {{ $t("common.save") }}
+                        </button>
                     </div>
                 </div>
-            </div>
+            </OffcanvasComponent>
         </div>
         <ConfirmModalValidationInput
             id="removeToolValidationConfirm"
@@ -322,12 +322,15 @@
     import ToolType from "@/constants/ToolType";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidationInput.vue";
+    import OffcanvasComponent from "@/components/global/OffcanvasComponent.vue";
 
     export default {
         name: "FlowPage",
         components: {
             VueFlowComponent,
             DependencySelector,
+            OffcanvasComponent,
+            ConfirmModal,
             ConfirmModalValidationInput,
         },
         props: {
@@ -380,7 +383,6 @@
                 connector: "",
                 formFields: [],
                 formData: [],
-                sidebar: null,
                 loadingWebhooks: false,
                 loadingInputs: false,
                 valueInput: "",
@@ -398,13 +400,36 @@
                 isLoading: false,
             };
         },
-        components: {
-            VueFlowComponent,
-            DependencySelector,
-            ConfirmModal,
-            ConfirmModalValidationInput,
-        },
         methods: {
+            parameterRowHasUserContent(p) {
+                if (!p || typeof p !== "object") return false;
+                if (p.requiredFile === true) return true;
+                if (p.webhookId != null && p.webhookId !== "") return true;
+                if (p.value != null && p.value !== "") return true;
+                return false;
+            },
+            parametersHaveUserContent(params) {
+                return (
+                    Array.isArray(params) && params.some((p) => this.parameterRowHasUserContent(p))
+                );
+            },
+            cloneParameterList(params) {
+                if (!Array.isArray(params)) return [];
+                return params.map((p) => ({ ...p }));
+            },
+            resolveParametersForNodeSave(nodeId, sidebarParams) {
+                const list = Array.isArray(sidebarParams) ? sidebarParams : [];
+                if (this.parametersHaveUserContent(list)) {
+                    return this.cloneParameterList(list);
+                }
+                const vue = this.$refs.VueflowComponent;
+                const node = vue?.nodes?.find((n) => String(n.id) === String(nodeId));
+                const existing = node?.data?.parameters;
+                if (this.parametersHaveUserContent(existing)) {
+                    return this.cloneParameterList(existing);
+                }
+                return this.cloneParameterList(list);
+            },
             markFlowDirty() {
                 this.canLeave = false;
             },
@@ -517,6 +542,9 @@
             async openNodeConfig(nodes, selectedNode) {
                 this.nodes = nodes;
                 this.nodeFlow = selectedNode;
+                if (!Array.isArray(selectedNode.data.parameters)) {
+                    selectedNode.data.parameters = [];
+                }
                 this.parameters = selectedNode.data.parameters;
                 this.toolType = selectedNode.data.toolType;
                 await this.loadPreviousStepTools(selectedNode);
@@ -581,7 +609,7 @@
                     } else {
                         this.idSelected = parseInt(this.parameters[0]?.value);
                     }
-                } else if (this.parameters.length === 0) {
+                } else if (this.parameters.length === 0 && !this.isEmbeddingTool) {
                     this.parameters.push({
                         stepToolId: 0,
                         value: null,
@@ -590,15 +618,10 @@
                     });
                 }
                 this.$refs.dependencyTools.reloadData();
-                this.sidebar = new bootstrap.Offcanvas(this.$refs.sidebar);
-                this.sidebar.show();
+                this.$refs.flowOffcanvas?.open();
             },
             closeSidebar() {
-                const sidebarEl = this.$refs.sidebar;
-                const sidebar = bootstrap.Offcanvas.getInstance(sidebarEl);
-                if (sidebar) {
-                    sidebar.hide();
-                }
+                this.$refs.flowOffcanvas?.close();
             },
             saveFlowStateLocal(selectedNode, nodes) {
                 const edges = this.$refs.VueflowComponent.edges;
@@ -652,9 +675,13 @@
                     return;
                 }
 
+                const parametersToSave = this.resolveParametersForNodeSave(
+                    this.nodeFlow.id,
+                    this.parameters
+                );
                 this.$refs.VueflowComponent.updateNodeInput(
                     this.nodeFlow.id,
-                    this.parameters,
+                    parametersToSave,
                     depsToSave
                 );
                 this.markFlowDirty();
@@ -689,9 +716,13 @@
                 const depsToSave = this.filterDependenciesToValidOnly(
                     this.selectedDependencies || []
                 );
+                const parametersToSave = this.resolveParametersForNodeSave(
+                    this.nodeFlow.id,
+                    this.parameters
+                );
                 this.$refs.VueflowComponent.updateNodeInput(
                     this.nodeFlow.id,
-                    this.parameters,
+                    parametersToSave,
                     depsToSave
                 );
                 this.markFlowDirty();
@@ -1032,6 +1063,9 @@
             },
             isQuizTool() {
                 return this.isTargetTool(ToolType.Quiz);
+            },
+            isEmbeddingTool() {
+                return this.isTargetTool(ToolType.Embeddings);
             },
         },
     };

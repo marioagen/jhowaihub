@@ -50,6 +50,10 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.HasIndex(c => c.Name);
             builder.HasIndex(c => c.Created);
+
+            builder.HasIndex(c => c.DocumentBatchId)
+                .HasDatabaseName("IX_Cards_DocumentBatchId")
+                .HasFilter("[DocumentBatchId] IS NOT NULL");
         }
     }
 }

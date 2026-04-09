@@ -862,10 +862,6 @@ const spanish = {
         workflows: "Flujos de Trabajo de Documentos",
         auditor: "Auditoría",
     },
-    pagination: {
-        next: "Siguiente",
-        previous: "Anterior",
-    },
     permissions: {
         descriptions: {
             auditor: "Ver Auditoría",
@@ -1084,7 +1080,7 @@ const spanish = {
             noRunTitle: "No se ejecutaron pruebas",
             noRunHint: 'Complete las variables y haga clic en "Simular solicitud".',
             simulateError: "No se pudo ejecutar la simulación. Inténtelo de nuevo.",
-            simulateSuccess: "Simulación completada correctamente (HTTP 2xx).",
+            simulateSuccess: "Simulación completada correctamente (HTTP 200).",
             responseHttpStatus: "Estado HTTP del destino",
             variableValues: "Valores de prueba para las variables",
         },
@@ -1232,6 +1228,8 @@ const spanish = {
         associatedTeams: "Equipos asociados",
         basicInfo: "Información Básica",
         boardView: "Visualizando workflow:",
+        refreshBoard: "Actualizar tablero",
+        editWorkflowBoard: "Editar workflow",
         clone: "Clonar",
         cloneConfirm: "Clonar",
         cloneError: "Error al clonar workflow",
@@ -1322,6 +1320,9 @@ const spanish = {
         stepNamePlaceholder: "Nombre del paso",
         steps: "Etapas del Workflow",
         stepsTitle: "Pasos del flujo de trabajo",
+        stepHasDocumentsTitle: "Etapa con documentos en progreso",
+        stepHasDocumentsMessage:
+            "Hay documentos en procesamiento en este flujo de trabajo. Para eliminar una etapa, es necesario que no haya documentos en progreso.",
         stepSubtitle: "Configura las reglas y responsables",
         stepTitle: "Etapa del Workflow",
         subtitle: "Visualiza el flujo de documentos a través de las etapas de procesamiento",

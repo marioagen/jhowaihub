@@ -188,7 +188,7 @@ namespace WoopiAiHub.Application.Services
 
             await _resiliencePipeline.ExecuteAsync(async token =>
             {
-                var result = await _marketPlaceApi.ProcessConsumption(keyAccess, tenantConsumption);
+                var result = await _marketPlaceApi.ProcessSubcriptionPeriodConsumption(keyAccess, tenantConsumption);
                 if (result)
                 {
                     _logger.LogInformation("Successfully sent usage charge for tenant {TenantName}", tenant.Name);

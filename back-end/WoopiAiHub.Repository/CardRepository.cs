@@ -72,7 +72,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Card?> FindByIdWithDocument(int id)
         {
-            return await _context.Cards.Where(c => c.Id == id)
+            return await _context.Cards
+                .AsNoTracking()
+                .Where(c => c.Id == id)
                 .Include(d => d.Document)
                 .FirstOrDefaultAsync();
         }
@@ -171,23 +173,18 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Deletes the specified collection of card entities from the database by their ids.
+        /// Logically disables the specified collection of card entities by their ids.
         /// </summary>
-        /// <param name="cardIds">A list of card ids to delete. Cannot be null or empty.</param>
-        /// <returns>true if one or more records were deleted successfully; otherwise, false.</returns>
-        public bool DisableByIds(List<int> cardIds)
+        /// <param name="cardIds">A list of card ids to disable. Cannot be null or empty.</param>
+        /// <returns>True if one or more records were updated successfully; otherwise, false.</returns>
+        public async Task<bool> DisableByIds(List<int> cardIds)
         {
-            if (cardIds == null || cardIds.Count == 0)
-                return false;
+            var disabledCardsList = await _context.Cards
+                .Where(c => cardIds.Contains(c.Id))
+                .ExecuteUpdateAsync(updates => updates
+                    .SetProperty(card => card.Enable, card => false));
 
-            var cards = _context.Cards.Where(c => cardIds.Contains(c.Id)).ToList();
-
-            if (cards.Count == 0)
-                return false;
-
-            cards.ForEach(c => c.Disable());
-            _context.Cards.UpdateRange(cards);
-            return _context.SaveChanges() > 0;
+            return disabledCardsList > 0;
         }
 
         /// <summary>
@@ -198,15 +195,15 @@ namespace WoopiAiHub.Repository
         /// <returns>True if any card was updated; otherwise false.</returns>
         public async Task<bool> DeleteByDocumentIds(List<int> documentIds)
         {
-            var cards = await _context.Cards.Where(c => documentIds.Contains(c.DocumentId)).ToListAsync();
-            if (cards.Count > 0)
-            {
-                foreach (var card in cards)
-                    card.Disable();
-                return await _context.SaveChangesAsync() > 0;
-            }
+            if (documentIds == null || documentIds.Count == 0)
+                return false;
 
-            return false;
+            var disabledCardsList = await _context.Cards
+                .Where(c => documentIds.Contains(c.DocumentId))
+                .ExecuteUpdateAsync(updates => updates
+                    .SetProperty(card => card.Enable, card => false));
+
+            return disabledCardsList > 0;
         }
 
         /// <summary>
@@ -234,6 +231,7 @@ namespace WoopiAiHub.Repository
         public async Task<Card?> FindByDocumentIdCardAsync(int documentId)
         {
             return await _context.Cards
+                .AsNoTracking()
                 .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Executions)
                     .ThenInclude(e => e.StepTool)
@@ -267,6 +265,7 @@ namespace WoopiAiHub.Repository
         public async Task<List<Card>> FindByDocumentIdCardListAsync(int documentId)
         {
             return await _context.Cards
+                .AsNoTracking()
                 .Where(c => c.DocumentId == documentId)
                 .Include(c => c.Step)
                 .Include(c => c.Outputs)
@@ -321,6 +320,7 @@ namespace WoopiAiHub.Repository
         public async Task<List<Card>> FindByDocumentBatchId(int documentBatchId)
         {
             return await _context.Cards
+                .AsNoTracking()
                 .Include(c => c.Document)
                 .Include(c => c.Step)
                 .Where(c => c.DocumentBatchId == documentBatchId)
@@ -379,6 +379,24 @@ namespace WoopiAiHub.Repository
                 .Include(c => c.Document)
                 .Include(c => c.Step)
                 .FirstOrDefaultAsync(c => c.Id == cardId);
+        }
+
+        /// <summary>
+        /// Returns (cardId, documentId) pairs for active cards belonging to any of the specified steps.
+        /// Used to collect audit data and orphan-document candidates before cards are disabled.
+        /// The global query filter (Enable = true) ensures only active cards are returned.
+        /// </summary>
+        public async Task<List<(int cardId, int documentId)>> FindCardDocumentPairsByStepIdsAsync(List<int> stepIds)
+        {
+            if (stepIds == null || stepIds.Count == 0)
+                return [];
+
+            var rows = await _context.Cards
+                .Where(c => stepIds.Contains(c.StepId))
+                .Select(c => new { c.Id, c.DocumentId })
+                .ToListAsync();
+
+            return rows.Select(r => (r.Id, r.DocumentId)).ToList();
         }
     }
 }

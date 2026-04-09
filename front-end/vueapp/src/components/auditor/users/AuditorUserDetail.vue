@@ -516,4 +516,7 @@
         font-size: 0.7rem;
         color: var(--bs-secondary);
     }
+    .border {
+        border: 1px solid var(--color-border-form-control) !important;
+    }
 </style>

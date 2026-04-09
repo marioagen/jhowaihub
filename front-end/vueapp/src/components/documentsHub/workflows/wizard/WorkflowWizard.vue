@@ -244,6 +244,7 @@
                 pendingNavegation: null,
                 documentCountToEdit: 0,
                 pendingStepToRemove: null,
+                fromKanban: false,
             };
         },
         computed: {
@@ -498,15 +499,24 @@
                 if (!this.canLeave) {
                     this.checkNavigation(() => {
                         this.canLeave = true;
-                        this.$router.push({
-                            name: "WorkflowPage",
-                        });
+                        this.$router.push(this.resolveRedirectToIndexRoute());
                     });
                 } else {
-                    this.$router.push({
-                        name: "WorkflowPage",
-                    });
+                    this.canLeave = true;
+                    this.$router.push(this.resolveRedirectToIndexRoute());
                 }
+            },
+            resolveRedirectToIndexRoute() {
+                if (this.fromKanban && this.workflowIdInternal) {
+                    return {
+                        name: "Workflow",
+                        query: {
+                            id: this.workflowIdInternal,
+                            tab: "workflows",
+                        },
+                    };
+                }
+                return { name: "WorkflowPage" };
             },
             checkNavigation(next) {
                 this.pendingNavegation = next;
@@ -803,6 +813,9 @@
             this.loadWorkflowData();
         },
         async mounted() {
+            if (this.$route.query.from === "kanban") {
+                this.fromKanban = true;
+            }
             const phase1 = localStorage.getItem("wizardPhase1Data");
             const phase2 = localStorage.getItem("wizardPhase2Data");
             const phase3 = localStorage.getItem("wizardPhase3Data");

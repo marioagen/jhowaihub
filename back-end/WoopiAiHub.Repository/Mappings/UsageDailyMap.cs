@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WoopiAiHub.Domain.Models;
 
@@ -50,6 +50,9 @@ namespace WoopiAiHub.Repository.Mappings
             builder.HasOne(ud => ud.User)
                    .WithMany(me => me.UsageDailies)
                    .HasForeignKey(ud => ud.UserId);
+
+            builder.HasIndex(ud => new { ud.Processed, ud.UsageTypeId })
+                   .HasDatabaseName("IX_UsageDaily_Processed_UsageTypeId");
         }
     }
 }

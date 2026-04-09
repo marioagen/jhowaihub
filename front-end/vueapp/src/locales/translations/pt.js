@@ -861,10 +861,6 @@ const portuguese = {
         workflows: "Esteiras de Processamento",
         auditor: "Auditoria",
     },
-    pagination: {
-        next: "Próximo",
-        previous: "Anterior",
-    },
     permissions: {
         descriptions: {
             auditor: "Visualizar Auditoria",
@@ -1068,7 +1064,7 @@ const portuguese = {
             noRunTitle: "Nenhum teste executado",
             noRunHint: 'Preencha as variáveis e clique em "Simular Requisição".',
             simulateError: "Não foi possível executar a simulação. Tente novamente.",
-            simulateSuccess: "Simulação concluída com sucesso (HTTP 2xx).",
+            simulateSuccess: "Simulação concluída com sucesso (HTTP 200).",
             responseHttpStatus: "Status HTTP do destino",
             variableValues: "Valores de teste para as variáveis",
         },
@@ -1238,6 +1234,8 @@ const portuguese = {
         associatedTeams: "Times Associados",
         basicInfo: "Informações Básicas",
         boardView: "Visualizando esteira de processamento:",
+        refreshBoard: "Atualizar quadro",
+        editWorkflowBoard: "Editar esteira",
         clone: "Clonar",
         cloneConfirm: "Clonar",
         cloneError: "Erro ao clonar esteira de processamento",
@@ -1328,6 +1326,9 @@ const portuguese = {
         stepNamePlaceholder: "Nome da etapa",
         steps: "Etapas da Esteira de Processamento",
         stepsTitle: "Etapas da Esteira de Processamento",
+        stepHasDocumentsTitle: "Etapa com documentos em andamento",
+        stepHasDocumentsMessage:
+            "Existem documentos em processamento nesta esteira. Para remover uma etapa é necessário que não haja documentos em andamento.",
         stepSubtitle: "Configure as regras e responsáveis",
         stepTitle: "Etapa da Esteira de Processamento",
         subtitle: "Visualize o fluxo de documentos através das etapas de processamento",
