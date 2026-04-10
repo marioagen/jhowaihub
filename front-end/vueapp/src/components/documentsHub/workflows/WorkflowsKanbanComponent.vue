@@ -108,11 +108,47 @@
                         </div>
                     </div>
                     <div class="col-12 d-flex align-items-center">
-                        <div class="row w-100 m-0">
-                            <div class="col-10 p-0">
+                        <div class="row w-100 m-0 g-2">
+                            <div class="col-9 p-0">
                                 <WorkflowViewFilters @filter="filterData" />
                             </div>
-                            <div class="col-2 pe-0 ps-4">
+                            <div class="col-1 d-flex justify-content-center align-items-center p-0">
+                                <div
+                                    class="btn-group btn-group-sm"
+                                    role="group"
+                                    :aria-label="$t('workflow.viewModeGroupLabel')"
+                                >
+                                    <button
+                                        type="button"
+                                        class="btn d-inline-flex align-items-center justify-content-center"
+                                        :class="isKanbanView ? 'btn-primary' : 'btn-outline-primary'"
+                                        :aria-pressed="isKanbanView"
+                                        v-tooltip="$t('workflow.viewModeBoard')"
+                                        :aria-label="$t('workflow.viewModeBoard')"
+                                        @click="isKanbanView = true"
+                                    >
+                                        <LucideIcon
+                                            icon="SquareKanban"
+                                            :size="16"
+                                        />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn d-inline-flex align-items-center justify-content-center"
+                                        :class="!isKanbanView ? 'btn-primary' : 'btn-outline-primary'"
+                                        :aria-pressed="!isKanbanView"
+                                        v-tooltip="$t('workflow.viewModeList')"
+                                        :aria-label="$t('workflow.viewModeList')"
+                                        @click="isKanbanView = false"
+                                    >
+                                        <LucideIcon
+                                            icon="Rows4"
+                                            :size="16"
+                                        />
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-2 d-flex align-items-center justify-content-end pe-0">
                                 <button
                                     class="btn btn-primary new-doc-btn py-1 px-2"
                                     @click="redirectToNewUpload"
