@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -130,6 +131,32 @@ namespace WoopiAiHub.Application.Services
             return _cardRepository.UpdateList(cards);
         }
 
+        /// <summary>
+        /// Assigns a user to each distinct card id (one <see cref="AssignRange"/> call per id).
+        /// </summary>
+        public async Task<bool> AssignRangeAsync(AssignRangeDto request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            if (request.CardIds == null || request.CardIds.Count == 0)
+            {
+                throw new ArgumentException("CardIds cannot be empty.", nameof(request));
+            }
+
+            var last = true;
+            var seen = new HashSet<int>();
+            foreach (var cardId in request.CardIds)
+            {
+                if (!seen.Add(cardId))
+                {
+                    continue;
+                }
+
+                last = await AssignRange(request.UserId, cardId);
+            }
+
+            return last;
+        }
+
         public async Task<bool> UnassignRange(int cardId)
         {
             var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
@@ -145,6 +172,32 @@ namespace WoopiAiHub.Application.Services
             }
 
             return _cardRepository.UpdateList(cards);
+        }
+
+        /// <summary>
+        /// Unassigns users from each distinct card id (one <see cref="UnassignRange"/> call per id).
+        /// </summary>
+        public async Task<bool> UnassignRangeAsync(UnassignRangeDto request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            if (request.CardIds == null || request.CardIds.Count == 0)
+            {
+                throw new ArgumentException("CardIds cannot be empty.", nameof(request));
+            }
+
+            var last = true;
+            var seen = new HashSet<int>();
+            foreach (var cardId in request.CardIds)
+            {
+                if (!seen.Add(cardId))
+                {
+                    continue;
+                }
+
+                last = await UnassignRange(cardId);
+            }
+
+            return last;
         }
 
         /// <summary>

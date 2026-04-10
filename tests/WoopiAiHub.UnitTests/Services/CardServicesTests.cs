@@ -1363,6 +1363,74 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Verify(repo => repo.UpdateList(It.Is<List<Card>>(l => l.Count == 2)), Times.Once);
         }
 
+        [Fact(DisplayName = "AssignRangeAsync throws ArgumentException when CardIds is empty")]
+        [Trait("AssignRangeAsync", "Fail")]
+        public async Task AssignRangeAsync_EmptyCardIds_ThrowsArgumentException()
+        {
+            var request = new AssignRangeDto(Guid.NewGuid(), new List<int>());
+            await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.AssignRangeAsync(request));
+        }
+
+        [Fact(DisplayName = "AssignRangeAsync throws ArgumentNullException when request is null")]
+        [Trait("AssignRangeAsync", "Fail")]
+        public async Task AssignRangeAsync_NullRequest_ThrowsArgumentNullException()
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _cardServices.AssignRangeAsync(null!));
+        }
+
+        [Fact(DisplayName = "AssignRangeAsync processes distinct card ids only once each")]
+        [Trait("AssignRangeAsync", "Success")]
+        public async Task AssignRangeAsync_DuplicateCardIds_CallsAssignPerDistinctId()
+        {
+            var userId = Guid.NewGuid();
+            var request = new AssignRangeDto(userId, new List<int> { 1, 1, 2 });
+
+            var card1 = new Card(1, DateTime.UtcNow, 1, 1, "C1", 1, null, null);
+            card1.Step = new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+            var card2 = new Card(2, DateTime.UtcNow, 1, 2, "C2", 1, null, null);
+            card2.Step = new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+
+            _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(1))
+                .ReturnsAsync(new List<Card> { card1 });
+            _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(2))
+                .ReturnsAsync(new List<Card> { card2 });
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
+            auditCardServiceMock.Setup(s => s.CreateBatchAndSaveAsync(
+                It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                It.IsAny<AuditCardActionType>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            var result = await _cardServices.AssignRangeAsync(request);
+
+            Assert.True(result);
+            _cardRepositoryMock.Verify(repo => repo.FindCardOrBatchWithStepWorkflowAsync(1), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.FindCardOrBatchWithStepWorkflowAsync(2), Times.Once);
+        }
+
+        [Fact(DisplayName = "UnassignRangeAsync throws ArgumentException when CardIds is empty")]
+        [Trait("UnassignRangeAsync", "Fail")]
+        public async Task UnassignRangeAsync_EmptyCardIds_ThrowsArgumentException()
+        {
+            var request = new UnassignRangeDto(new List<int>());
+            await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.UnassignRangeAsync(request));
+        }
+
+        [Fact(DisplayName = "UnassignRangeAsync throws ArgumentNullException when request is null")]
+        [Trait("UnassignRangeAsync", "Fail")]
+        public async Task UnassignRangeAsync_NullRequest_ThrowsArgumentNullException()
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _cardServices.UnassignRangeAsync(null!));
+        }
+
         [Fact(DisplayName = "ReprocessCard should return true on success")]
         [Trait("ReprocessCard", "Success")]
         public async Task ReprocessCard_ReturnsTrue()

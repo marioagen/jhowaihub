@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -84,51 +83,19 @@ namespace WoopiAiHub.Api.Controllers
         [HttpPut("AssignRange")]
         [SwaggerOperation("Assigns a user to multiple cards (AssignRange per distinct card id)")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> AssignRange([FromBody] AssignRangeDto dto)
+        public async Task<IActionResult> AssignRange([FromBody] AssignRangeDto request)
         {
-            if (dto.CardIds == null || dto.CardIds.Count == 0)
-            {
-                return BadRequest("CardIds cannot be empty.");
-            }
-
-            var last = true;
-            var seen = new HashSet<int>();
-            foreach (var cardId in dto.CardIds)
-            {
-                if (!seen.Add(cardId))
-                {
-                    continue;
-                }
-
-                last = await _cardServices.AssignRange(dto.UserId, cardId);
-            }
-
-            return Ok(last);
+            var result = await _cardServices.AssignRangeAsync(request);
+            return Ok(result);
         }
 
         [HttpPut("UnassignRange")]
         [SwaggerOperation("Unassigns users from multiple cards (UnassignRange per distinct card id)")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UnassignRange([FromBody] UnassignRangeDto dto)
+        public async Task<IActionResult> UnassignRange([FromBody] UnassignRangeDto request)
         {
-            if (dto.CardIds == null || dto.CardIds.Count == 0)
-            {
-                return BadRequest("CardIds cannot be empty.");
-            }
-
-            var last = true;
-            var seen = new HashSet<int>();
-            foreach (var cardId in dto.CardIds)
-            {
-                if (!seen.Add(cardId))
-                {
-                    continue;
-                }
-
-                last = await _cardServices.UnassignRange(cardId);
-            }
-
-            return Ok(last);
+            var result = await _cardServices.UnassignRangeAsync(request);
+            return Ok(result);
         }
 
         /// <summary>

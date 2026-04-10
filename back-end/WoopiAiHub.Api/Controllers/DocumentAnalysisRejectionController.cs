@@ -25,21 +25,21 @@ namespace WoopiAiHub.Api.Controllers
         [SwaggerOperation("Creates a document analysis rejection")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateRejection(
-            [FromBody] CreateDocumentAnalysisRejectionDto dto,
+            [FromBody] CreateDocumentAnalysisRejectionDto request,
             [FromHeader] HeadersDto headersDto)
         {
-            var result = await _services.CreateRejectionAsync(dto, headersDto.EmailCreator);
+            var result = await _services.CreateRejectionAsync(request, headersDto.EmailCreator);
             return Ok(result);
         }
 
-        [HttpPost("range")]
+        [HttpPost("Range")]
         [SwaggerOperation("Creates document analysis rejections for multiple cards (strict list, no batch expansion)")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateRejectionRange(
-            [FromBody] CreateDocumentAnalysisRejectionRangeDto dto,
+            [FromBody] CreateDocumentAnalysisRejectionRangeDto request,
             [FromHeader] HeadersDto headersDto)
         {
-            var result = await _services.CreateRejectionRangeAsync(dto, headersDto.EmailCreator);
+            var result = await _services.CreateRejectionRangeAsync(request, headersDto.EmailCreator);
             return Ok(result);
         }
 
