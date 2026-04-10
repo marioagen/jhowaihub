@@ -463,7 +463,7 @@ namespace WoopiAiHub.UnitTests.Consumers
 
         #region Helper Methods
 
-        private ApiOutputDto CreateValidApiOutputDto()
+        private static ApiOutputDto CreateValidApiOutputDto()
         {
             return new ApiOutputDto
             {
@@ -476,7 +476,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             };
         }
 
-        private AutomationOutputDto CreateValidAutomationOutputDto()
+        private static AutomationOutputDto CreateValidAutomationOutputDto()
         {
             return new AutomationOutputDto
             {
@@ -487,7 +487,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             };
         }
 
-        private AutomationServicesDto CreateValidAutomationServicesDto()
+        private static AutomationServicesDto CreateValidAutomationServicesDto()
         {
             return new AutomationServicesDto(1, 1, "tenant-123", "test@example.com", "ref-123", 1);
         }
