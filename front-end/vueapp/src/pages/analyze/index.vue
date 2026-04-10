@@ -225,8 +225,7 @@
     <DocumentRejectionModal
         v-if="canReject"
         ref="modalReject"
-        :cardId="cardId"
-        :documentId="documentId"
+        :card-ids="[parseInt(String(cardId), 10)]"
         @success="handleRejectSuccess"
     />
     <DocumentViewRejectionModal

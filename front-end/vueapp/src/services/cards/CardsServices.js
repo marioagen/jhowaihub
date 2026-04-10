@@ -37,9 +37,9 @@ export default {
                 };
             });
     },
-    assignRange(payload) {
+    assignRange(params) {
         return api
-            .put(`/Card/AssignRange`, payload)
+            .put(`/Card/AssignRange`, params)
             .then((result) => {
                 return result.data;
             })

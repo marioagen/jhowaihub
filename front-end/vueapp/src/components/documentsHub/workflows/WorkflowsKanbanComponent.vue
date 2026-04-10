@@ -257,6 +257,12 @@
                 {{ $t("workflow.notFound") }}
             </span>
         </div>
+        <DocumentRejectionModal
+            v-if="canBulkReject"
+            ref="documentRejectionModalRef"
+            :card-ids="selectedCardIds"
+            @success="onBulkRejectSuccess"
+        />
     </div>
 </template>
 <script>
@@ -272,6 +278,7 @@
     import LogService from "@/services/log/logService";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import WorkflowAccordionComponent from "@/components/documentsHub/workflows/accordion/WorkflowAccordionComponent.vue";
+    import DocumentRejectionModal from "@/components/analyze/modals/DocumentRejectionModal.vue";
     export default {
         name: "WorkflowPage",
         data() {
@@ -306,6 +313,7 @@
             WorkflowViewFilters,
             KanbanBoard,
             WorkflowAccordionComponent,
+            DocumentRejectionModal,
         },
         computed: {
             hasList() {
@@ -332,7 +340,14 @@
                 // TODO: bulk assign selected cards (selectedCardIds)
             },
             rejectRange() {
-                // TODO: bulk reject selected cards (selectedCardIds)
+                if (!this.canBulkReject || this.selectedCardIds.length === 0) {
+                    return;
+                }
+                this.$refs.documentRejectionModalRef?.open(this.selectedOption?.id);
+            },
+            onBulkRejectSuccess() {
+                this.reloadKanban();
+                this.clearBulkSelection();
             },
             onSelectKanbanView() {
                 this.isKanbanView = true;
