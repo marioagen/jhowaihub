@@ -482,22 +482,24 @@
                 PromptService.testPrompt({
                     promptText: this.values.text,
                     contextText: this.testContext,
-                }).then(
-                    (response) => {
+                })
+                    .then((response) => {
+                        if (!response || response.error) throw new Error("Test failed");
+
                         this.testResult =
                             typeof response === "string" ? response : String(response ?? "");
-                    },
-                    () => {
+                    })
+                    .catch(() => {
                         this.$notify({
                             title: "prompts.title",
                             message: "prompts.playground.testError",
                             variant: "danger",
                             icon: "CircleX",
                         });
-                    }
-                ).finally(() => {
-                    this.isTesting = false;
-                });
+                    })
+                    .finally(() => {
+                        this.isTesting = false;
+                    });
             },
             refinePrompt: function () {
                 if (!this.values || !this.values.text || this.values.text.trim() === "") {

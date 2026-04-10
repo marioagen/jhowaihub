@@ -114,7 +114,9 @@ export default {
         return api.post("/PlayGroundPrompts/test", {
             promptText: promptText ?? "",
             contextText: contextText ?? "",
-        }).then(({ data }) => data);
+        })
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
     },
 }
 
