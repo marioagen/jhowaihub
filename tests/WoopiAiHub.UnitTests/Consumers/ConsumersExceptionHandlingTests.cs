@@ -112,8 +112,8 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task ApiOutputConsumer_ShouldMarkCardAsFailingWhenContinueExecutionThrows()
         {
             // Arrange
-            var apiOutputDto = CreateValidApiOutputDto();
-            var automationServicesDto = CreateValidAutomationServicesDto();
+            var apiOutputDto = MessagingFixture.FindValidApiOutputDto();
+            var automationServicesDto = MessagingFixture.FindValidAutomationServicesDto();
 
             _apiOutputServices
                 .Setup(x => x.ProcessMessage(It.IsAny<ApiOutputDto>()))
@@ -164,8 +164,8 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task ApiOutputConsumer_ShouldHandleFailingCardServiceException()
         {
             // Arrange
-            var apiOutputDto = CreateValidApiOutputDto();
-            var automationServicesDto = CreateValidAutomationServicesDto();
+            var apiOutputDto = MessagingFixture.FindValidApiOutputDto();
+            var automationServicesDto = MessagingFixture.FindValidAutomationServicesDto();
 
             _apiOutputServices
                 .Setup(x => x.ProcessMessage(It.IsAny<ApiOutputDto>()))
@@ -212,7 +212,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task ApiOutputConsumer_ShouldNotMarkCardAsFailingWhenCardIdIsInvalid()
         {
             // Arrange
-            var apiOutputDto = CreateValidApiOutputDto();
+            var apiOutputDto = MessagingFixture.FindValidApiOutputDto();
             var automationServicesDto = new AutomationServicesDto(0, 0, "tenant", "test@example.com", "ref", 1);
 
             _apiOutputServices
@@ -251,7 +251,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task ApiOutputConsumer_ShouldLogErrorWhenProcessMessageThrows()
         {
             // Arrange
-            var apiOutputDto = CreateValidApiOutputDto();
+            var apiOutputDto = MessagingFixture.FindValidApiOutputDto();
             var expectedException = new Exception("Process message error");
 
             _apiOutputServices
@@ -290,8 +290,8 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task N8NConsumer_ShouldMarkCardAsFailingWhenContinueExecutionThrows()
         {
             // Arrange
-            var automationOutputDto = CreateValidAutomationOutputDto();
-            var automationServicesDto = CreateValidAutomationServicesDto();
+            var automationOutputDto = MessagingFixture.FindValidAutomationOutputDto();
+            var automationServicesDto = MessagingFixture.FindValidAutomationServicesDto();
 
             _n8nServices
                 .Setup(x => x.ProcessMessage(It.IsAny<AutomationOutputDto>()))
@@ -342,8 +342,8 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task N8NConsumer_ShouldHandleFailingCardServiceException()
         {
             // Arrange
-            var automationOutputDto = CreateValidAutomationOutputDto();
-            var automationServicesDto = CreateValidAutomationServicesDto();
+            var automationOutputDto = MessagingFixture.FindValidAutomationOutputDto();
+            var automationServicesDto = MessagingFixture.FindValidAutomationServicesDto();
 
             _n8nServices
                 .Setup(x => x.ProcessMessage(It.IsAny<AutomationOutputDto>()))
@@ -390,7 +390,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task N8NConsumer_ShouldNotMarkCardAsFailingWhenCardIdIsInvalid()
         {
             // Arrange
-            var automationOutputDto = CreateValidAutomationOutputDto();
+            var automationOutputDto = MessagingFixture.FindValidAutomationOutputDto();
             var automationServicesDto = new AutomationServicesDto(0, 0, "tenant", "test@example.com", "ref", 1);
 
             _n8nServices
@@ -429,7 +429,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task N8NConsumer_ShouldLogErrorWhenProcessMessageThrows()
         {
             // Arrange
-            var automationOutputDto = CreateValidAutomationOutputDto();
+            var automationOutputDto = MessagingFixture.FindValidAutomationOutputDto();
             var expectedException = new Exception("Process message error");
 
             _n8nServices
@@ -457,39 +457,6 @@ namespace WoopiAiHub.UnitTests.Consumers
                     expectedException,
                     It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.Once);
-        }
-
-        #endregion
-
-        #region Helper Methods
-
-        private static ApiOutputDto CreateValidApiOutputDto()
-        {
-            return new ApiOutputDto
-            {
-                TemplateName = "test-template",
-                Tenant = "tenant-123",
-                Email = "test@example.com",
-                ExecutionId = 1,
-                StatusCode = 200,
-                Content = "{}"
-            };
-        }
-
-        private static AutomationOutputDto CreateValidAutomationOutputDto()
-        {
-            return new AutomationOutputDto
-            {
-                Tenant = "tenant-123",
-                Email = "test@example.com",
-                ExecutionId = 1,
-                Content = new { cardId = 1, stepToolId = 1 }
-            };
-        }
-
-        private static AutomationServicesDto CreateValidAutomationServicesDto()
-        {
-            return new AutomationServicesDto(1, 1, "tenant-123", "test@example.com", "ref-123", 1);
         }
 
         #endregion
