@@ -21,21 +21,18 @@ namespace WoopiAiHub.Repository.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_UsageDaily_Processed_UsageTypeId",
                 table: "UsageDailies",
-                columns: new[] { "Processed", "UsageTypeId" })
-                .Annotation("SqlServer:Online", true);
+                columns: new[] { "Processed", "UsageTypeId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_StepToolExecution_StepToolId_CardId",
                 table: "StepToolExecutions",
-                columns: new[] { "StepToolId", "CardId" })
-                .Annotation("SqlServer:Online", true);
+                columns: new[] { "StepToolId", "CardId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Cards_DocumentBatchId",
                 table: "Cards",
                 column: "DocumentBatchId",
-                filter: "[DocumentBatchId] IS NOT NULL")
-                .Annotation("SqlServer:Online", true);
+                filter: "[DocumentBatchId] IS NOT NULL");
         }
 
         /// <inheritdoc />
