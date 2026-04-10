@@ -1289,6 +1289,7 @@ const portuguese = {
         namePlaceholder: "Ex: Aprovação de Contratos",
         next: "Próximo",
         noStepsAvailable: "Nenhuma etapa disponível. Por favor, adicione etapas na fase anterior.",
+        noCardsForStep: "Nenhum documento nesta etapa",
         notFound: "Nenhuma esteira de processamento foi encontrada",
         phase1Error: "Erro ao salvar informações básicas",
         phase1Success: "Informações básicas salvas com sucesso",

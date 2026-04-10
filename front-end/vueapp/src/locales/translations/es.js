@@ -1283,6 +1283,7 @@ const spanish = {
         namePlaceholder: "Ex: Contract Approval",
         next: "Próximo",
         noStepsAvailable: "No hay pasos disponibles. Agregue los pasos de la fase anterior.",
+        noCardsForStep: "No hay documentos en este paso",
         notFound: "No se encontró ningún workflow",
         phase1Error: "Error al guardar información básica.",
         phase1Success: "Información básica guardada exitosamente.",

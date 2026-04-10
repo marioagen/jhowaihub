@@ -1278,6 +1278,7 @@ const english = {
         namePlaceholder: "Ex: Contract Approval",
         next: "Next",
         noStepsAvailable: "No steps available. Please add steps in the previous phase.",
+        noCardsForStep: "No cards for the step",
         notFound: "No workflow was found",
         phase1Error: "Error saving basic information",
         phase1Success: "Basic information saved successfully",

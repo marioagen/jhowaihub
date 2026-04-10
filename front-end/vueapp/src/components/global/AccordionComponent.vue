@@ -28,6 +28,10 @@
                 type: Boolean,
                 default: false,
             },
+            itemClass: {
+                type: String,
+                default: "",
+            },
         },
         data() {
             return {
@@ -81,7 +85,8 @@
             },
         },
         render() {
-            return h("div", { class: "accordion-item" }, [
+            const rootClass = ["accordion-item", this.itemClass].filter(Boolean);
+            return h("div", { class: rootClass }, [
                 h("h2", { class: "accordion-header", id: this.headingId }, [
                     h(
                         "button",
