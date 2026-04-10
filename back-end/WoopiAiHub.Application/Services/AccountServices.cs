@@ -360,7 +360,9 @@ namespace WoopiAiHub.Application.Services
         public string GenerateToken(string user, int? tokenExpirationTime = null)
         {
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
-            return GenerateTokenWithParameters(key, _config["Jwt:Issuer"], _config["Jwt:Audience"], user, tokenExpirationTime);
+            var issuer = _config["Jwt:Issuer"] ?? throw new ArgumentException("JWT Issuer is not configured.");
+            var audience = _config["Jwt:Audience"] ?? throw new ArgumentException("JWT Audience is not configured.");
+            return GenerateTokenWithParameters(key, issuer, audience, user, tokenExpirationTime);
         }
 
         public string GenerateTokenWithParameters(string jwtKey, string jwtIssuer, string jwtAudience, string user, int? tokenExpirationTime = null)

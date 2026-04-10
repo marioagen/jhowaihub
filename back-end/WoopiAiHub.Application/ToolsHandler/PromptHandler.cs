@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using WoopiAiHub.Application.Utils;
@@ -28,15 +27,13 @@ public class PromptHandler : IToolHandler
     private readonly ResponseOpenAiSettings _responseOpenAiSettings;
     private readonly IApiTemplateServices _apiTemplateServices;
     private readonly IAccountServices _accountServices;
-    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public PromptHandler(IOptions<MessageQueues> messageQueues,
                          IPromptServices promptServices,
                          ITenantCacheServices tenantCacheServices,
                          IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
                          IApiTemplateServices apiTemplateServices,
-                         IAccountServices accountServices,
-                         IHttpContextAccessor httpContextAccessor)
+                         IAccountServices accountServices)
     {
         _messageQueues = messageQueues.Value;
         _promptServices = promptServices;
@@ -44,7 +41,6 @@ public class PromptHandler : IToolHandler
         _responseOpenAiSettings = responseOpenAiSettings.Value;
         _apiTemplateServices = apiTemplateServices;
         _accountServices = accountServices;
-        _httpContextAccessor = httpContextAccessor;
     }
 
     /// <summary>
@@ -128,7 +124,7 @@ public class PromptHandler : IToolHandler
             return;
 
         if (string.IsNullOrEmpty(_responseOpenAiSettings.Instructions))
-            throw new ApplicationException("The agent with a external access enabled need has the instructions filled in the appSettings");
+            throw new ArgumentException("The agent with a external access enabled need has the instructions filled in the appSettings");
 
         string instructions = await GenerateInstructionsWithMappedApisToAgent(promptDto);
 
@@ -146,8 +142,7 @@ public class PromptHandler : IToolHandler
                 Type = OpenAiResponseToolsType.Mcp,
                 ServerLabel = "dmcp",
                 ServerUrl= _responseOpenAiSettings.McpAddress,
-                Headers= new Dictionary<string, string>{
-                        {"x-session-id", _httpContextAccessor.HttpContext?.Session.Id ?? Guid.NewGuid().ToString()},
+                Headers= new Dictionary<string, string> {
                         {"Authorization", $"Bearer {accessToken}"}
                     },
                 RequireApproval="never",
