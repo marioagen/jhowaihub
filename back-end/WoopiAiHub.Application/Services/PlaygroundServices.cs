@@ -34,8 +34,8 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         public async Task<string> TestPromptWithContextAsync(string promptText, string contextText, string tenantId, string email)
         {
-            ArgumentNullException.ThrowIfNull(promptText, nameof(promptText));
-            ArgumentNullException.ThrowIfNull(contextText, nameof(contextText));
+            ArgumentNullException.ThrowIfNull(promptText, "Prompt is null");
+            ArgumentNullException.ThrowIfNull(contextText, "Context is null");
 
             if (string.IsNullOrWhiteSpace(promptText))
             {
