@@ -69,6 +69,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IN8NServices, N8NServices>();
             services.AddScoped<IApiOutputServices, ApiOutputServices>();
             services.AddScoped<IPromptServices, PromptServices>();
+            services.AddScoped<IPlaygroundServices, PlaygroundServices>();
             services.AddScoped<IValidatePrompt, ValidatePrompt>();
             services.AddScoped<IToolHandler, EmbeddingsHandler>();
             services.AddScoped<IToolHandler, OcrHandler>();
