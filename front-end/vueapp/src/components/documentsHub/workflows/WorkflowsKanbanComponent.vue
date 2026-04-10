@@ -121,7 +121,9 @@
                                     <button
                                         type="button"
                                         class="btn d-inline-flex align-items-center justify-content-center"
-                                        :class="isKanbanView ? 'btn-primary' : 'btn-outline-primary'"
+                                        :class="
+                                            isKanbanView ? 'btn-primary' : 'btn-outline-primary'
+                                        "
                                         :aria-pressed="isKanbanView"
                                         v-tooltip="$t('workflow.viewModeBoard')"
                                         :aria-label="$t('workflow.viewModeBoard')"
@@ -135,7 +137,9 @@
                                     <button
                                         type="button"
                                         class="btn d-inline-flex align-items-center justify-content-center"
-                                        :class="!isKanbanView ? 'btn-primary' : 'btn-outline-primary'"
+                                        :class="
+                                            !isKanbanView ? 'btn-primary' : 'btn-outline-primary'
+                                        "
                                         :aria-pressed="!isKanbanView"
                                         v-tooltip="$t('workflow.viewModeList')"
                                         :aria-label="$t('workflow.viewModeList')"
@@ -186,6 +190,9 @@
                         <WorkflowAccordionComponent
                             v-else
                             :data="kanbanCards"
+                            :users="users"
+                            @reload="reloadKanban"
+                            @cardUpdated="updateCard"
                         />
                     </div>
                 </div>
@@ -211,7 +218,7 @@
     import UserService from "@/services/users/UserService";
     import LogService from "@/services/log/logService";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
-    import WorkflowAccordionComponent from "@/components/documentsHub/workflows/WorkflowAccordionComponent.vue";
+    import WorkflowAccordionComponent from "@/components/documentsHub/workflows/accordion/WorkflowAccordionComponent.vue";
     export default {
         name: "WorkflowPage",
         data() {
