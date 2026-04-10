@@ -96,7 +96,7 @@ namespace WoopiAiHub.Application.Messaging
                     }
                     catch (Exception failingEx)
                     {
-                        _logger.LogError(failingEx, "Erro ao marcar card como failing após exception do consumer");
+                        _logger.LogError(failingEx, "Error marking card as failing after exception in consumer");
                     }
                 }
             });

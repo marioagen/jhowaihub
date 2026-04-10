@@ -222,7 +222,7 @@ namespace WoopiAiHub.Application.Services.Automation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro crítico ao processar Step {StepId}", step.Id);
+                _logger.LogError(ex, "Critical error on processing Step {StepId}", step.Id);
                 await MarkCardsAsFailingAsync(step.Cards, automationServicesDto.Email);
             }
         }
@@ -263,14 +263,14 @@ namespace WoopiAiHub.Application.Services.Automation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao iniciar execução do StepId {StepId} para CardId {CardId}", automationServicesDto.StepId, automationServicesDto.CardId);
+                _logger.LogError(ex, "Error starting execution for StepId {StepId} and CardId {CardId}", automationServicesDto.StepId, automationServicesDto.CardId);
                 try
                 {
                     await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
                 }
                 catch (Exception failingEx)
                 {
-                    _logger.LogError(failingEx, "Erro ao marcar card {CardId} como failing após exception", automationServicesDto.CardId);
+                    _logger.LogError(failingEx, "Error marking card {CardId} as failing after exception", automationServicesDto.CardId);
                 }
             }
         }
@@ -300,14 +300,14 @@ namespace WoopiAiHub.Application.Services.Automation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao reprocessar StepId {StepId} para CardId {CardId}", automationServicesDto.StepId, automationServicesDto.CardId);
+                _logger.LogError(ex, "Error reprocessing StepId {StepId} for CardId {CardId}", automationServicesDto.StepId, automationServicesDto.CardId);
                 try
                 {
                     await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
                 }
                 catch (Exception failingEx)
                 {
-                    _logger.LogError(failingEx, "Erro ao marcar card {CardId} como failing após exception", automationServicesDto.CardId);
+                    _logger.LogError(failingEx, "Error marking card {CardId} as failing after exception", automationServicesDto.CardId);
                 }
             }
         }
@@ -472,7 +472,7 @@ namespace WoopiAiHub.Application.Services.Automation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao continuar execução do StepToolId {StepToolId} para CardId {CardId}", automationServicesDto.StepToolId, automationServicesDto.CardId);
+                _logger.LogError(ex, "Error continuing execution for StepToolId {StepToolId} and CardId {CardId}", automationServicesDto.StepToolId, automationServicesDto.CardId);
                 await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
             }
         }
@@ -612,14 +612,14 @@ namespace WoopiAiHub.Application.Services.Automation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Erro ao avançar card {CardId} para o próximo step após execução de ferramenta sem dependências", automationServicesDto.CardId);
+                _logger.LogError(ex, "Error advancing card {CardId} to the next step after executing tool without dependencies", automationServicesDto.CardId);
                 try
                 {
                     await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
                 }
                 catch (Exception failingEx)
                 {
-                    _logger.LogError(failingEx, "Erro ao marcar card {CardId} como failing após exception", automationServicesDto.CardId);
+                    _logger.LogError(failingEx, "Error marking card {CardId} as failing after exception", automationServicesDto.CardId);
                 }
             }
         }
