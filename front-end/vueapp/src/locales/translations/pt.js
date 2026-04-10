@@ -596,6 +596,7 @@ const portuguese = {
             none: "Selecione uma esteira de processamento",
             withWorkflow: "Todos com esteira associadas",
         },
+        search: "Buscar...",
         statusSelect: {
             none: "Status do card",
         },
