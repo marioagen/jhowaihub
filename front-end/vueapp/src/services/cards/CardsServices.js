@@ -37,6 +37,18 @@ export default {
                 };
             });
     },
+    assignRange(payload) {
+        return api
+            .put(`/Card/AssignRange`, payload)
+            .then((result) => {
+                return result.data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
     unassignUser(cardId) {
         return api
             .put(`/Card/UnassignUser/${cardId}`)
