@@ -167,6 +167,7 @@ public class PromptHandler : IToolHandler
                 _ => 3
             },
             description = api.Description,
+            headers=api.HeaderTemplate,
             payload_schema = api.Method switch
             {
                 "GET" => null,
