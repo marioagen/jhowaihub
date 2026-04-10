@@ -58,10 +58,12 @@ namespace WoopiAiHub.Application.Messaging
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex,
+                    _logger.LogError(
+                        ex,
                         "Failed to process message from {QueueName}. Execution id: {ExecutionId}",
                         _queues.ApiRequestQueueResponse,
-                        message.ExecutionId);
+                        message.ExecutionId
+                    );
 
                     if (automationServicesDto?.CardId > 0)
                     {
