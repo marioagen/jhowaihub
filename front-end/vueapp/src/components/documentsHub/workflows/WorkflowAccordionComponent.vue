@@ -122,8 +122,12 @@
     .workflow-accordion :deep(.accordion-item:last-of-type) {
         margin-bottom: 0;
     }
+    .workflow-accordion :deep(.accordion-header) {
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+    }
 
-    /* Match Kanban column header typography (KanbanBoard .card-header: body-sized title text) */
     .workflow-accordion :deep(.accordion-header .accordion-button) {
         word-wrap: break-word;
         overflow-wrap: break-word;
@@ -131,9 +135,17 @@
         hyphens: auto;
         flex-shrink: 0;
         font-family: inherit;
-        font-size: 1rem;
+        font-size: 0.875rem;
         font-weight: 400;
         line-height: 1.5;
+        padding: 0.25rem 0.5rem;
+        min-height: 0;
+    }
+
+    .workflow-accordion :deep(.accordion-header .accordion-button::after) {
+        width: 0.875rem;
+        height: 0.875rem;
+        background-size: 0.875rem;
     }
 
     .workflow-accordion :deep(.workflow-accordion-step-title) {
@@ -141,7 +153,13 @@
         text-align: start;
     }
 
-    /* Kanban column header backgrounds on accordion trigger (KanbanBoard .first-steps / .last-step) */
+    .workflow-accordion :deep(.workflow-accordion-step-title > .badge) {
+        font-size: 0.65rem;
+        padding: 0.2em 0.45em;
+        font-weight: 500;
+        vertical-align: middle;
+    }
+
     .workflow-accordion :deep(.accordion-item.first-steps .accordion-button) {
         background-color: var(--color-bg-kanban-primary) !important;
         color: #212529 !important;
@@ -164,7 +182,6 @@
         color: unset;
     }
 
-    /* Middle columns: neutral header like default .card-header */
     .workflow-accordion :deep(.accordion-item.middle-step .accordion-button) {
         background-color: rgba(0, 0, 0, 0.03) !important;
         color: #212529 !important;
