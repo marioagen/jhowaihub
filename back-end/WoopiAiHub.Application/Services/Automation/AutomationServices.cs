@@ -264,7 +264,14 @@ namespace WoopiAiHub.Application.Services.Automation
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao iniciar execução do StepId {StepId} para CardId {CardId}", automationServicesDto.StepId, automationServicesDto.CardId);
-                await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
+                try
+                {
+                    await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
+                }
+                catch (Exception failingEx)
+                {
+                    _logger.LogError(failingEx, "Erro ao marcar card {CardId} como failing após exception", automationServicesDto.CardId);
+                }
             }
         }
 
@@ -294,7 +301,14 @@ namespace WoopiAiHub.Application.Services.Automation
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao reprocessar StepId {StepId} para CardId {CardId}", automationServicesDto.StepId, automationServicesDto.CardId);
-                await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
+                try
+                {
+                    await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
+                }
+                catch (Exception failingEx)
+                {
+                    _logger.LogError(failingEx, "Erro ao marcar card {CardId} como failing após exception", automationServicesDto.CardId);
+                }
             }
         }
 
@@ -599,7 +613,14 @@ namespace WoopiAiHub.Application.Services.Automation
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erro ao avançar card {CardId} para o próximo step após execução de ferramenta sem dependências", automationServicesDto.CardId);
-                await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
+                try
+                {
+                    await _failingCardService.SetFailingCard(automationServicesDto.CardId, automationServicesDto.Email);
+                }
+                catch (Exception failingEx)
+                {
+                    _logger.LogError(failingEx, "Erro ao marcar card {CardId} como failing após exception", automationServicesDto.CardId);
+                }
             }
         }
 
