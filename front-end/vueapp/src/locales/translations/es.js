@@ -1294,6 +1294,29 @@ const spanish = {
             colResponsible: "Responsable",
             colActions: "Acciones",
         },
+        bulk: {
+            selectedDocuments: "documentos seleccionados",
+            assign: "Asignar",
+            toolbarAria: "Acciones masivas para documentos seleccionados",
+            selectStepRows: "Seleccionar todos los documentos de este paso",
+            assignSuccess: "Asignación realizada correctamente.",
+            assignError: "No se pudo asignar a los documentos seleccionados.",
+            rejectTitle: "Rechazar documentos seleccionados",
+            rejectConfirmSimple:
+                "¿Rechazar los documentos seleccionados? Se utilizará la justificación de rechazo predeterminada.",
+            defaultRejectJustification: "Rechazo masivo desde la lista del flujo.",
+            rejectSuccess: "Documentos rechazados correctamente.",
+            rejectError: "No se pudieron rechazar los documentos seleccionados.",
+            deleteTitle: "Eliminar documentos",
+            deleteConfirmSimple:
+                "¿Eliminar los documentos seleccionados? Esta acción no se puede deshacer.",
+            deleteMessage:
+                "Está a punto de eliminar {count} documento(s). Esta acción no se puede deshacer. ¿Continuar?",
+            deleteSuccess: "Documentos eliminados correctamente.",
+            deleteError: "No se pudieron eliminar los documentos seleccionados.",
+            noDocumentsToDelete:
+                "No se pudieron resolver documentos para las tarjetas seleccionadas.",
+        },
         notFound: "No se encontró ningún workflow",
         phase1Error: "Error al guardar información básica.",
         phase1Success: "Información básica guardada exitosamente.",

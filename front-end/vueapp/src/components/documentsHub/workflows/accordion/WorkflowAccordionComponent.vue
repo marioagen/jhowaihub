@@ -37,9 +37,9 @@
                 </p>
                 <div
                     v-else
-                    class="table-responsive border rounded workflow-accordion-table-wrap"
+                    class="table-responsive w-100 workflow-accordion-table-wrap"
                 >
-                    <table class="table table-sm align-middle mb-0 small">
+                    <table class="table table-sm align-middle mb-0 small w-100">
                         <thead>
                             <tr class="text-secondary">
                                 <th
@@ -47,12 +47,10 @@
                                     class="text-center border-bottom"
                                     style="width: 2.5rem"
                                 >
-                                    <input
-                                        type="checkbox"
-                                        class="form-check-input m-0"
-                                        disabled
-                                        :tabindex="-1"
-                                        :aria-hidden="true"
+                                    <AccordionStepHeaderCheckbox
+                                        :visible-card-ids="visibleCardIdsForStep(step)"
+                                        :selected-card-ids="selectedCardIds"
+                                        @toggle-step="onToggleStepSelection"
                                     />
                                 </th>
                                 <th
@@ -114,10 +112,12 @@
                                 :data-step="step"
                                 :is-first-step="step.order === minOrder"
                                 :is-last-step="isLastStep(step)"
+                                :is-card-selected="isCardSelected(card.id)"
                                 :users="users"
                                 @reload="onReload"
                                 @card-updated="onCardUpdated"
                                 @card-moved="onCardMoved"
+                                @toggle-card-selection="onToggleCardSelection"
                             />
                         </tbody>
                     </table>
@@ -129,6 +129,7 @@
 <script>
     import AccordionComponent, { AccordionItem } from "@/components/global/AccordionComponent.vue";
     import AccordionCardComponent from "@/components/documentsHub/workflows/accordion/AccordionCardComponent.vue";
+    import AccordionStepHeaderCheckbox from "@/components/documentsHub/workflows/accordion/AccordionStepHeaderCheckbox.vue";
 
     const LAST_COLUMN_VISIBILITY_KEY = "kanban_last_column_visibility";
 
@@ -138,6 +139,7 @@
             AccordionComponent,
             AccordionItem,
             AccordionCardComponent,
+            AccordionStepHeaderCheckbox,
         },
         props: {
             data: {
@@ -149,8 +151,19 @@
                 required: false,
                 default: () => [],
             },
+            selectedCardIds: {
+                type: Array,
+                required: false,
+                default: () => [],
+            },
         },
-        emits: ["reload", "cardUpdated", "cardMoved"],
+        emits: [
+            "reload",
+            "cardUpdated",
+            "cardMoved",
+            "toggle-card-selection",
+            "toggle-step-selection",
+        ],
         data: () => ({
             isLastColumnVisible: true,
         }),
@@ -204,6 +217,18 @@
             },
             visibleCardCount(step) {
                 return this.visibleCardsForStep(step).length;
+            },
+            visibleCardIdsForStep(step) {
+                return this.visibleCardsForStep(step).map((c) => c.id);
+            },
+            isCardSelected(cardId) {
+                return this.selectedCardIds.includes(cardId);
+            },
+            onToggleCardSelection(payload) {
+                this.$emit("toggle-card-selection", payload);
+            },
+            onToggleStepSelection(payload) {
+                this.$emit("toggle-step-selection", payload);
             },
             onReload() {
                 this.$emit("reload");

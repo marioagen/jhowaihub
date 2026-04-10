@@ -107,8 +107,8 @@
                             </button>
                         </div>
                     </div>
-                    <div class="col-12 d-flex align-items-center">
-                        <div class="row w-100 m-0 g-2">
+                    <div class="col-12">
+                        <div class="row w-100 m-0 g-2 align-items-center">
                             <div class="col-9 p-0">
                                 <WorkflowViewFilters @filter="filterData" />
                             </div>
@@ -127,7 +127,7 @@
                                         :aria-pressed="isKanbanView"
                                         v-tooltip="$t('workflow.viewModeBoard')"
                                         :aria-label="$t('workflow.viewModeBoard')"
-                                        @click="isKanbanView = true"
+                                        @click="onSelectKanbanView"
                                     >
                                         <LucideIcon
                                             icon="SquareKanban"
@@ -143,7 +143,7 @@
                                         :aria-pressed="!isKanbanView"
                                         v-tooltip="$t('workflow.viewModeList')"
                                         :aria-label="$t('workflow.viewModeList')"
-                                        @click="isKanbanView = false"
+                                        @click="onSelectListView"
                                     >
                                         <LucideIcon
                                             icon="Rows4"
@@ -163,6 +163,53 @@
                                     />
                                     {{ $t("documents.createBtn") }}
                                 </button>
+                            </div>
+                        </div>
+                        <div
+                            v-if="showMassiveBtns"
+                            class="w-100 mt-2 pt-2 border-top"
+                        >
+                            <div
+                                class="d-flex align-items-center justify-content-between flex-wrap gap-2"
+                            >
+                                <div
+                                    class="d-flex align-items-center gap-2 workflow-bulk-selection-meta"
+                                >
+                                    <span
+                                        class="badge rounded-pill bg-primary px-2 py-1 d-inline-flex align-items-center justify-content-center"
+                                    >
+                                        {{ selectedCardIds.length }}
+                                    </span>
+                                    <span class="text-secondary small mb-0">
+                                        {{ $t("workflow.bulk.selectedDocuments") }}
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <button
+                                        v-if="canBulkAssign"
+                                        type="button"
+                                        class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1"
+                                        @click="assignRange"
+                                    >
+                                        <LucideIcon
+                                            icon="UserPlus"
+                                            :size="16"
+                                        />
+                                        {{ $t("workflow.bulk.assign") }}
+                                    </button>
+                                    <button
+                                        v-if="canBulkReject"
+                                        type="button"
+                                        class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
+                                        @click="rejectRange"
+                                    >
+                                        <LucideIcon
+                                            icon="XCircle"
+                                            :size="16"
+                                        />
+                                        {{ $t("analyze.rejection.reject") }}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -191,9 +238,12 @@
                             v-else
                             :data="kanbanCards"
                             :users="users"
+                            :selected-card-ids="selectedCardIds"
                             @reload="reloadKanban"
                             @cardUpdated="updateCard"
                             @cardMoved="handleCardMoved"
+                            @toggle-card-selection="onToggleAccordionCardSelection"
+                            @toggle-step-selection="onToggleAccordionStepSelection"
                         />
                     </div>
                 </div>
@@ -211,6 +261,8 @@
 </template>
 <script>
     import { hasPermission } from "@/utils/permissions";
+    import PermissionGroups from "@/constants/PermissionGroups";
+    import PermissionNames from "@/constants/PermissionNames";
     import signalRService from "@/services/signalR/signalRServices.js";
     import GlobalEventService from "@/services/globalEventService.js";
     import WorkflowService from "@/services/workflow/WorkflowService.js";
@@ -246,6 +298,7 @@
                 cardIdsToUpdate: [],
                 updateCardsDebounceTimer: null,
                 isKanbanView: true,
+                selectedCardIds: [],
             };
         },
         components: {
@@ -261,8 +314,51 @@
             canManageWorkflow() {
                 return hasPermission("WorkflowManagement", "View");
             },
+            showMassiveBtns() {
+                return !this.isKanbanView && this.selectedCardIds.length > 0;
+            },
+            canBulkAssign() {
+                return this.users.length > 0;
+            },
+            canBulkReject() {
+                return hasPermission(PermissionGroups.Documents, PermissionNames.Reject);
+            },
         },
         methods: {
+            clearBulkSelection() {
+                this.selectedCardIds = [];
+            },
+            assignRange() {
+                // TODO: bulk assign selected cards (selectedCardIds)
+            },
+            rejectRange() {
+                // TODO: bulk reject selected cards (selectedCardIds)
+            },
+            onSelectKanbanView() {
+                this.isKanbanView = true;
+                this.clearBulkSelection();
+            },
+            onSelectListView() {
+                this.isKanbanView = false;
+            },
+            onToggleAccordionCardSelection({ cardId, selected }) {
+                const set = new Set(this.selectedCardIds);
+                if (selected) {
+                    set.add(cardId);
+                } else {
+                    set.delete(cardId);
+                }
+                this.selectedCardIds = Array.from(set);
+            },
+            onToggleAccordionStepSelection({ cardIds, selectAll }) {
+                const set = new Set(this.selectedCardIds);
+                if (selectAll) {
+                    cardIds.forEach((id) => set.add(id));
+                } else {
+                    cardIds.forEach((id) => set.delete(id));
+                }
+                this.selectedCardIds = Array.from(set);
+            },
             getWorkflowByUser() {
                 this.isLoadingKanban = true;
                 var email = this.$store.state.userProfile.login;
@@ -352,6 +448,7 @@
                     name: workflow.name,
                 };
 
+                this.clearBulkSelection();
                 this.getWorkflowStepsById(workflow.id);
                 this.getUsersByTeams(workflow.teams);
             },
@@ -502,6 +599,7 @@
             },
             filterData(filters) {
                 this.filters = filters;
+                this.clearBulkSelection();
                 this.reloadKanban();
             },
             redirectToNewUpload() {
@@ -637,6 +735,10 @@
         display: flex;
         align-items: stretch;
         -webkit-overflow-scrolling: touch;
+    }
+
+    .workflow-bulk-selection-meta {
+        min-height: 2rem;
     }
 
     .workflow-list {

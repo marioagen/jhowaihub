@@ -1,12 +1,11 @@
 <template>
-    <tr class="accordion-card-row">
+    <tr class="accordion-card-row w-100">
         <td class="text-center align-middle py-2">
             <input
                 type="checkbox"
                 class="form-check-input m-0"
-                disabled
-                :tabindex="-1"
-                :aria-hidden="true"
+                :checked="isCardSelected"
+                @change="onRowCheckboxChange"
             />
         </td>
         <td class="align-middle py-2 small">
@@ -20,16 +19,12 @@
             </button>
         </td>
         <td
-            class="align-middle py-2 small text-truncate"
-            style="max-width: 12rem"
+            class="align-middle py-2 small min-w-0"
             :title="dataCard.name"
         >
             {{ truncateText(dataCard.name) }}
         </td>
-        <td
-            class="align-middle py-2 small"
-            style="max-width: 16rem"
-        >
+        <td class="align-middle py-2 small min-w-0">
             <span class="d-inline-block text-truncate w-100">
                 {{ dataCard.description || "—" }}
             </span>
@@ -46,15 +41,13 @@
             </span>
         </td>
         <td
-            class="align-middle py-2 small text-truncate"
-            style="max-width: 10rem"
+            class="align-middle py-2 small text-truncate min-w-0"
             :title="dataCard.owner"
         >
             {{ dataCard.owner || "—" }}
         </td>
         <td
-            class="align-middle py-2 small text-truncate"
-            style="max-width: 10rem"
+            class="align-middle py-2 small text-truncate min-w-0"
             :title="assignedName"
         >
             {{ assignedName }}
@@ -128,8 +121,12 @@
 
     export default {
         name: "AccordionCardComponent",
-        emits: ["reload", "cardUpdated", "cardMoved"],
+        emits: ["reload", "cardUpdated", "cardMoved", "toggle-card-selection"],
         props: {
+            isCardSelected: {
+                type: Boolean,
+                default: false,
+            },
             dataCard: {
                 type: Object,
                 required: true,
@@ -219,6 +216,12 @@
             onAnalyzeClick() {
                 this.redirectToAnalyzer();
             },
+            onRowCheckboxChange(e) {
+                this.$emit("toggle-card-selection", {
+                    cardId: this.dataCard.id,
+                    selected: e.target.checked,
+                });
+            },
             async updateStatus(nextStepOrder = null) {
                 const targetOrder = nextStepOrder ?? this.dataStep.order + 1;
                 if (this.isLastStep && nextStepOrder === null) {
@@ -260,6 +263,10 @@
     };
 </script>
 <style scoped>
+    .accordion-card-row {
+        width: 100%;
+    }
+
     .accordion-card-row .status-badge {
         font-size: 0.65rem;
         font-weight: 500;

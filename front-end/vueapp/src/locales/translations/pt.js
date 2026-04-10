@@ -1300,6 +1300,29 @@ const portuguese = {
             colResponsible: "Responsável",
             colActions: "Ações",
         },
+        bulk: {
+            selectedDocuments: "documentos selecionados",
+            assign: "Atribuir",
+            toolbarAria: "Ações em massa para documentos selecionados",
+            selectStepRows: "Selecionar todos os documentos desta etapa",
+            assignSuccess: "Atribuição realizada com sucesso.",
+            assignError: "Não foi possível atribuir aos documentos selecionados.",
+            rejectTitle: "Reprovar documentos selecionados",
+            rejectConfirmSimple:
+                "Reprovar os documentos selecionados? Será usada a justificativa padrão de reprovação.",
+            defaultRejectJustification: "Reprovação em massa pela lista da esteira.",
+            rejectSuccess: "Documentos reprovados com sucesso.",
+            rejectError: "Não foi possível reprovar os documentos selecionados.",
+            deleteTitle: "Excluir documentos",
+            deleteConfirmSimple:
+                "Excluir os documentos selecionados? Esta ação não pode ser desfeita.",
+            deleteMessage:
+                "Você está prestes a excluir {count} documento(s). Esta ação não pode ser desfeita. Continuar?",
+            deleteSuccess: "Documentos excluídos com sucesso.",
+            deleteError: "Não foi possível excluir os documentos selecionados.",
+            noDocumentsToDelete:
+                "Nenhum documento pôde ser identificado para os cartões selecionados.",
+        },
         notFound: "Nenhuma esteira de processamento foi encontrada",
         phase1Error: "Erro ao salvar informações básicas",
         phase1Success: "Informações básicas salvas com sucesso",
