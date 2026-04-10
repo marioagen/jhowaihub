@@ -8,7 +8,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 namespace WoopiAiHub.Api.Controllers
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [Route("api/v1/prompts")]
+    [Route("api/[controller]")]
     [ApiController]
     public class PlayGroundPromptsController : ControllerBase
     {
@@ -26,17 +26,12 @@ namespace WoopiAiHub.Api.Controllers
         [SwaggerOperation("Tests a prompt with context using AI Gateway and returns the model output")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         public async Task<IActionResult> Test(
-            [FromBody] PromptTestRequestDto? request,
+            [FromBody] PromptTestRequestDto request,
             [FromHeader] HeadersDto headersDto)
         {
-            if (request == null)
-            {
-                return BadRequest();
-            }
-
             var result = await _playgroundServices.TestPromptWithContextAsync(
-                request.PromptText ?? string.Empty,
-                request.ContextText ?? string.Empty,
+                request.PromptText,
+                request.ContextText,
                 headersDto.Tenant,
                 headersDto.EmailCreator);
             return Ok(result);

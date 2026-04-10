@@ -34,6 +34,9 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         public async Task<string> TestPromptWithContextAsync(string promptText, string contextText, string tenantId, string email)
         {
+            ArgumentNullException.ThrowIfNull(promptText, nameof(promptText));
+            ArgumentNullException.ThrowIfNull(contextText, nameof(contextText));
+
             if (string.IsNullOrWhiteSpace(promptText))
             {
                 throw new ArgumentException("Prompt text is required");

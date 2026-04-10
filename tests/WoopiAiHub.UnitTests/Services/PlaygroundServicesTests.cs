@@ -82,9 +82,25 @@ namespace WoopiAiHub.UnitTests.Services
                 Times.Once);
         }
 
-        [Fact(DisplayName = "TestPromptWithContextAsync should throw argument exception when prompt text is empty")]
+        [Fact(DisplayName = "TestPromptWithContextAsync should throw ArgumentNullException when prompt text is null")]
         [Trait("TestPromptWithContext", "Fail")]
-        public async Task TestPromptWithContextAsync_ShouldThrowArgumentException_WhenPromptTextEmpty()
+        public async Task TestPromptWithContextAsync_ShouldThrowArgumentNullException_WhenPromptTextNull()
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+                await _playgroundServices.TestPromptWithContextAsync(null!, "ctx", "tenant", "email@test.com"));
+        }
+
+        [Fact(DisplayName = "TestPromptWithContextAsync should throw ArgumentNullException when context text is null")]
+        [Trait("TestPromptWithContext", "Fail")]
+        public async Task TestPromptWithContextAsync_ShouldThrowArgumentNullException_WhenContextTextNull()
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+                await _playgroundServices.TestPromptWithContextAsync("prompt", null!, "tenant", "email@test.com"));
+        }
+
+        [Fact(DisplayName = "TestPromptWithContextAsync should throw ArgumentException when prompt text is whitespace")]
+        [Trait("TestPromptWithContext", "Fail")]
+        public async Task TestPromptWithContextAsync_ShouldThrowArgumentException_WhenPromptTextWhitespace()
         {
             var exception = await Assert.ThrowsAsync<ArgumentException>(async () =>
                 await _playgroundServices.TestPromptWithContextAsync("   ", "ctx", "tenant", "email@test.com"));
