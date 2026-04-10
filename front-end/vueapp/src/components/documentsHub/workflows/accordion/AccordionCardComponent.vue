@@ -128,7 +128,7 @@
 
     export default {
         name: "AccordionCardComponent",
-        emits: ["reload", "cardUpdated"],
+        emits: ["reload", "cardUpdated", "cardMoved"],
         props: {
             dataCard: {
                 type: Object,
@@ -237,9 +237,14 @@
             async onAdvanceClick() {
                 if (!this.showAdvance || this.isLoadingAnalysis) return;
                 this.isLoadingAnalysis = true;
+                const nextStepOrder = this.dataStep.order + 1;
                 try {
                     await this.updateStatus();
-                    this.$emit("reload");
+                    this.$emit("cardMoved", {
+                        card: { ...this.dataCard },
+                        currentStepOrder: this.dataStep.order,
+                        nextStepOrder,
+                    });
                 } catch (e) {
                     this.$notify({
                         title: "Error",

@@ -117,6 +117,7 @@
                                 :users="users"
                                 @reload="onReload"
                                 @card-updated="onCardUpdated"
+                                @card-moved="onCardMoved"
                             />
                         </tbody>
                     </table>
@@ -149,7 +150,7 @@
                 default: () => [],
             },
         },
-        emits: ["reload", "cardUpdated"],
+        emits: ["reload", "cardUpdated", "cardMoved"],
         data: () => ({
             isLastColumnVisible: true,
         }),
@@ -209,6 +210,9 @@
             },
             onCardUpdated(payload) {
                 this.$emit("cardUpdated", payload);
+            },
+            onCardMoved(payload) {
+                this.$emit("cardMoved", payload);
             },
         },
     };

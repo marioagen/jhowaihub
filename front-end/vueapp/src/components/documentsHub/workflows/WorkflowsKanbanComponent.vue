@@ -193,6 +193,7 @@
                             :users="users"
                             @reload="reloadKanban"
                             @cardUpdated="updateCard"
+                            @cardMoved="handleCardMoved"
                         />
                     </div>
                 </div>
