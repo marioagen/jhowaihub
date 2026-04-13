@@ -1,7 +1,5 @@
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using System.Linq.Dynamic.Core;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -130,7 +128,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public Document FindById(int id)
+        public Document? FindById(int id)
         {
             return _context.Documents.Where(a => a.Id.Equals(id))
                 .AsNoTracking()

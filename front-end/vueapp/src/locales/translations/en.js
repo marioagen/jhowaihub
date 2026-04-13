@@ -164,7 +164,6 @@ const english = {
                 actionDelete: "Delete",
                 loadMore: "Load more",
                 document: "Document",
-                // AuditCardActionType enum labels (badge)
                 actionTypes: {
                     Upload: "Upload",
                     Assign: "Assign",
@@ -180,8 +179,9 @@ const english = {
                     Rejection: "Rejection",
                     InputQuestionnaire: "Questionnaire",
                     InputDocument: "Input document",
+                    Failed: "Failed",
+                    AnonymizationRequest: "Anonymization request",
                 },
-                // Full sentence per action (row description)
                 actionSentences: {
                     Upload: "Document loaded into the system.",
                     Assign: "Document assigned.",
@@ -197,6 +197,8 @@ const english = {
                     Rejection: "Document rejected.",
                     InputQuestionnaire: "Questionnaire completed.",
                     InputDocument: "Document loaded into the system.",
+                    Failed: "Operation failed.",
+                    AnonymizationRequest: "Anonymization request sent.",
                 },
             },
         },

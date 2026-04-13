@@ -9,7 +9,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         bool Create(Document document);
         bool Delete(List<int> ids);
-        Document FindById(int id);
+        Document? FindById(int id);
 
         bool ChangeStatus(int id,
             DocumentStatus documentStatus);

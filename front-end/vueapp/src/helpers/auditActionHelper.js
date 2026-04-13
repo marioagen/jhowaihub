@@ -16,6 +16,8 @@ export const AuditActionTypeNames = [
     "Rejection",
     "InputQuestionnaire",
     "InputDocument",
+    "Failed",
+    "AnonymizationRequest",
 ];
 
 export const AuditActionTypeOptions = [
@@ -33,6 +35,8 @@ export const AuditActionTypeOptions = [
     { value: 11, name: "Rejection" },
     { value: 12, name: "InputQuestionnaire" },
     { value: 13, name: "InputDocument" },
+    { value: 14, name: "Failed" },
+    { value: 15, name: "AnonymizationRequest" },
 ];
 
 export function getAuditActionDisplay(actionTypeName, options = {}) {
