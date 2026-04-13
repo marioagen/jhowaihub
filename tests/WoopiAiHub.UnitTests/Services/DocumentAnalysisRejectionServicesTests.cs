@@ -48,6 +48,7 @@ namespace WoopiAiHub.UnitTests.Services
             _auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
 
             _cardServicesMock.Setup(s => s.AssignRange(It.IsAny<Guid>(), It.IsAny<int>())).ReturnsAsync(true);
+            _cardServicesMock.Setup(s => s.AssignRangeAsync(It.IsAny<AssignRangeDto>())).ReturnsAsync(true);
             _auditCardServiceMock.Setup(s => s.CreateBatchAndSaveAsync(
                 It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
                 It.IsAny<AuditCardActionType>(),
@@ -827,6 +828,9 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Setup(u => u.BeginTransaction());
             _unitOfWorkMock.Setup(u => u.Commit());
 
+            _cardRepositoryMock.Setup(repo => repo.FindRangeByIdsWithStepWorkflowTracked(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+
             var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
             currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
             currentUserServiceMock.Setup(s => s.Id).Returns(assignUserId);
@@ -834,8 +838,9 @@ namespace WoopiAiHub.UnitTests.Services
             var result = await _rejectionServices.CreateRejectionRangeAsync(dto, email);
 
             Assert.True(result);
-            _cardServicesMock.Verify(s => s.AssignRange(assignUserId, 1), Times.Once);
-            _cardServicesMock.Verify(s => s.AssignRange(assignUserId, 2), Times.Once);
+            _cardServicesMock.Verify(s => s.AssignRangeAsync(It.Is<AssignRangeDto>(r =>
+                r.UserId == assignUserId && r.CardIds.Count == 2 && r.CardIds.Contains(1) && r.CardIds.Contains(2))), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.FindRangeByIdsWithStepWorkflowTracked(It.IsAny<IReadOnlyList<int>>()), Times.Once);
         }
 
         [Fact(DisplayName = "CreateRejectionRangeAsync without UserId should not call AssignRange")]
@@ -883,7 +888,8 @@ namespace WoopiAiHub.UnitTests.Services
             var result = await _rejectionServices.CreateRejectionRangeAsync(dto, email);
 
             Assert.True(result);
-            _cardServicesMock.Verify(s => s.AssignRange(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
+            _cardServicesMock.Verify(s => s.AssignRangeAsync(It.IsAny<AssignRangeDto>()), Times.Never);
+            _cardRepositoryMock.Verify(repo => repo.FindRangeByIdsWithStepWorkflowTracked(It.IsAny<IReadOnlyList<int>>()), Times.Never);
         }
 
         [Fact(DisplayName = "CreateRejectionRangeAsync should succeed and use email user id when UserId is null")]
@@ -975,6 +981,9 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction());
             _unitOfWorkMock.Setup(u => u.Commit());
+
+            _cardRepositoryMock.Setup(repo => repo.FindRangeByIdsWithStepWorkflowTracked(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
 
             List<DocumentAnalysisRejection>? captured = null;
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))

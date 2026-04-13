@@ -62,11 +62,25 @@ namespace WoopiAiHub.Application.Services
             return await CommitRejectionsAsync(cards, dto.StepId, dto.Justification, userId, status);
         }
 
+        /// <summary>
+        /// Creates document analysis rejection records for multiple cards in one operation.
+        /// </summary>
+        /// <remarks>When a user id is supplied for assignment, assigns that user to the cards first (persisted), then reloads
+        /// cards as tracked entities so the rejection update does not conflict with Entity Framework tracking from assign.</remarks>
+        /// <param name="dto">Justification, step id, card ids, and optional user to assign before rejecting.</param>
+        /// <param name="emailCreator">Email of the user performing the operation; used for permission checks and for the rejection user id when <paramref name="dto"/> has no user id.</param>
+        /// <returns><see langword="true"/> if rejections were committed successfully; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="AppException">Thrown when validation fails (permission, missing card, step, or status).</exception>
         public async Task<bool> CreateRejectionRangeAsync(CreateDocumentAnalysisRejectionRangeDto dto, string emailCreator)
         {
             (List<Card> cards, Status status) = await ValidateRangeAsync(dto, emailCreator);
 
-            await AssignRangeAsync(dto.UserId, cards);
+            if (dto.UserId.HasValue)
+            {
+                await AssignRangeAsync(dto.UserId, cards);
+                var cardIds = cards.Select(c => c.Id).Distinct().ToList();
+                cards = await _cardRepository.FindRangeByIdsWithStepWorkflowTracked(cardIds);
+            }
 
             var userId = dto.UserId ?? _userRepository.FindIdByEmail(emailCreator);
             return await CommitRejectionsAsync(cards, dto.StepId, dto.Justification, userId, status);

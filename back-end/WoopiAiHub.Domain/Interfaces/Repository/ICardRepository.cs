@@ -12,6 +12,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<CardAnalysisDto?> FindByIdWithDocumentAndWorkflow(int id);
         Task<Card?> FindByIdWithStepAndProfile(int id);
         Task<Card?> FindByIdWithStepWorkflow(int id);
+        Task<List<Card>> FindRangeByIdsWithStepWorkflowTracked(IReadOnlyList<int> cardIds);
         bool Update(Card card);
         bool UpdateList(List<Card> cards);
         Task<bool> DisableByIds(List<int> cardIds);

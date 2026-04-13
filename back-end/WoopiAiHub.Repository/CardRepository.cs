@@ -67,6 +67,19 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Loads multiple cards by id with step and workflow navigation properties, tracked by the current context.
+        /// </summary>
+        /// <param name="cardIds">Card identifiers to load.</param>
+        public async Task<List<Card>> FindRangeByIdsWithStepWorkflowTracked(IReadOnlyList<int> cardIds)
+        {
+            return await _context.Cards
+                .Where(c => cardIds.Contains(c.Id))
+                .Include(s => s.Step)
+                    .ThenInclude(st => st!.Workflow)
+                .ToListAsync();
+        }
+
+        /// <summary>
         /// Returns a card by its ID.
         /// </summary>
         /// <param name="id"></param>
