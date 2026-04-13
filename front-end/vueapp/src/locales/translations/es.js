@@ -167,7 +167,6 @@ const spanish = {
                 actionDelete: "Eliminar",
                 loadMore: "Ver más",
                 document: "Documento",
-                // AuditCardActionType enum labels (badge)
                 actionTypes: {
                     Upload: "Subir",
                     Assign: "Asignar",
@@ -183,8 +182,9 @@ const spanish = {
                     Rejection: "Rechazo",
                     InputQuestionnaire: "Cuestionario",
                     InputDocument: "Documento de entrada",
+                    Failed: "Fallido",
+                    AnonymizationRequest: "Solicitud de anonimización",
                 },
-                // Full sentence per action (row description)
                 actionSentences: {
                     Upload: "Documento cargado en el sistema.",
                     Assign: "Documento asignado.",
@@ -200,6 +200,8 @@ const spanish = {
                     Rejection: "Documento rechazado.",
                     InputQuestionnaire: "Cuestionario completado.",
                     InputDocument: "Documento cargado en el sistema.",
+                    Failed: "Operación fallida.",
+                    AnonymizationRequest: "Solicitud de anonimización enviada.",
                 },
             },
         },

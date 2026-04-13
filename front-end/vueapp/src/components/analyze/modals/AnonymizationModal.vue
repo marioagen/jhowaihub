@@ -112,6 +112,14 @@
                 type: [Number, String],
                 required: true,
             },
+            cardId: {
+                type: [Number, String],
+                required: true,
+            },
+            workflowId: {
+                type: [Number, String],
+                required: true,
+            },
         },
         data() {
             return {
@@ -174,6 +182,8 @@
             async confirm() {
                 const params = {
                     documentId: Number(this.documentId) || parseInt(this.documentId, 10),
+                    cardId: Number(this.cardId) || parseInt(this.cardId, 10),
+                    workflowId: Number(this.workflowId) || parseInt(this.workflowId, 10),
                     anonymizationType: this.anonymizationType
                         ? Number(this.anonymizationType)
                         : null,

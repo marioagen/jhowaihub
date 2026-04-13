@@ -16,6 +16,7 @@ namespace WoopiAiHub.Domain.Enum.Audit
         Rejection = 11,
         InputQuestionnaire = 12,
         InputDocument = 13,
-        Failed = 14
+        Failed = 14,
+        AnonymizationRequest = 15
     }
 }
