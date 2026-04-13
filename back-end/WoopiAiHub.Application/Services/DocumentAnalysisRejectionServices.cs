@@ -79,10 +79,13 @@ namespace WoopiAiHub.Application.Services
                 return;
             }
 
-            foreach (var card in cards)
+            var cardIds = cards.Select(c => c.Id).Distinct().ToList();
+            if (cardIds.Count == 0)
             {
-                await _cardServices.AssignRange(userIdToAssign.Value, card.Id);
+                return;
             }
+
+            await _cardServices.AssignRangeAsync(new AssignRangeDto(userIdToAssign.Value, cardIds));
         }
 
         private async Task<bool> CommitRejectionsAsync(

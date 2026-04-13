@@ -185,18 +185,76 @@
                                     </span>
                                 </div>
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <button
+                                    <div
                                         v-if="canBulkAssign"
-                                        type="button"
-                                        class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1"
-                                        @click="assignRange"
+                                        class="dropdown"
                                     >
-                                        <LucideIcon
-                                            icon="UserPlus"
-                                            :size="16"
-                                        />
-                                        {{ $t("workflow.bulk.assign") }}
-                                    </button>
+                                        <button
+                                            type="button"
+                                            class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1 dropdown-toggle"
+                                            data-bs-toggle="dropdown"
+                                            data-bs-auto-close="true"
+                                            aria-expanded="false"
+                                            :disabled="isBulkAssigning"
+                                            :aria-label="$t('workflow.bulk.assign')"
+                                        >
+                                            <LucideIcon
+                                                v-if="!isBulkAssigning"
+                                                icon="UserPlus"
+                                                :size="16"
+                                            />
+                                            <LucideIcon
+                                                v-else
+                                                icon="Loader"
+                                                :size="16"
+                                                class="animate-spin"
+                                            />
+                                            {{ $t("workflow.bulk.assign") }}
+                                        </button>
+                                        <ul
+                                            class="dropdown-menu dropdown-menu-end shadow-sm p-2 bulk-assign-users-list"
+                                            style="
+                                                min-width: 12rem;
+                                                max-height: 20rem;
+                                                overflow-y: auto;
+                                            "
+                                        >
+                                            <li
+                                                v-if="users.length > 5"
+                                                class="mb-1"
+                                            >
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text p-1">
+                                                        <LucideIcon
+                                                            icon="Search"
+                                                            :size="16"
+                                                            class="me-1"
+                                                        />
+                                                    </span>
+                                                    <input
+                                                        v-model="bulkAssignUserSearchText"
+                                                        type="search"
+                                                        class="form-control"
+                                                        autocomplete="off"
+                                                        @click.stop=""
+                                                    />
+                                                </div>
+                                            </li>
+                                            <li
+                                                v-for="user in filteredBulkAssignUsers"
+                                                :key="user.id"
+                                            >
+                                                <button
+                                                    type="button"
+                                                    class="dropdown-item text-start"
+                                                    :disabled="isBulkAssigning"
+                                                    @click="assignRangeToUser(user.id)"
+                                                >
+                                                    {{ user.name }}
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
                                     <button
                                         v-if="canBulkReject"
                                         type="button"
@@ -279,6 +337,7 @@
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import WorkflowAccordionComponent from "@/components/documentsHub/workflows/accordion/WorkflowAccordionComponent.vue";
     import DocumentRejectionModal from "@/components/analyze/modals/DocumentRejectionModal.vue";
+    import CardsServices from "@/services/cards/CardsServices";
     export default {
         name: "WorkflowPage",
         data() {
@@ -306,6 +365,8 @@
                 updateCardsDebounceTimer: null,
                 isKanbanView: true,
                 selectedCardIds: [],
+                isBulkAssigning: false,
+                bulkAssignUserSearchText: "",
             };
         },
         components: {
@@ -331,13 +392,71 @@
             canBulkReject() {
                 return hasPermission(PermissionGroups.Documents, PermissionNames.Reject);
             },
+            filteredBulkAssignUsers() {
+                const q = (this.bulkAssignUserSearchText || "").toLowerCase().trim();
+                if (!q) {
+                    return this.users;
+                }
+                return this.users.filter((u) => u.name && u.name.toLowerCase().includes(q));
+            },
         },
         methods: {
             clearBulkSelection() {
                 this.selectedCardIds = [];
+                this.bulkAssignUserSearchText = "";
             },
-            assignRange() {
-                // TODO: bulk assign selected cards (selectedCardIds)
+            assignRangeErrorMessage(error) {
+                const data = error?.response?.data;
+                if (typeof data === "string" && data) {
+                    return data;
+                }
+                if (data?.labelError) {
+                    return data.labelError;
+                }
+                if (data?.message) {
+                    return data.message;
+                }
+                return this.$t("workflow.bulk.assignError");
+            },
+            async assignRangeToUser(userId) {
+                if (!this.canBulkAssign || this.selectedCardIds.length === 0 || !userId) {
+                    return;
+                }
+                const cardIds = [...new Set(this.selectedCardIds)];
+                const params = {
+                    UserId: userId,
+                    CardIds: cardIds,
+                };
+                this.isBulkAssigning = true;
+                try {
+                    const response = await CardsServices.assignRange(params);
+                    if (response?.error !== undefined) {
+                        this.$notify({
+                            title: this.$t("common.error"),
+                            message: this.assignRangeErrorMessage(response.error),
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                        return;
+                    }
+                    this.$notify({
+                        title: this.$t("common.success"),
+                        message: this.$t("workflow.bulk.assignSuccess"),
+                        variant: "success",
+                        icon: "CircleCheckBig",
+                    });
+                    this.reloadKanban();
+                    this.clearBulkSelection();
+                } catch (e) {
+                    this.$notify({
+                        title: this.$t("common.error"),
+                        message: this.$t("workflow.bulk.assignError"),
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isBulkAssigning = false;
+                }
             },
             rejectRange() {
                 if (!this.canBulkReject || this.selectedCardIds.length === 0) {
@@ -808,5 +927,15 @@
     .borderless:focus-visible {
         outline: 2px solid var(--bs-primary);
         outline-offset: 2px;
+    }
+
+    .animate-spin {
+        animation: bulk-assign-spin 1s linear infinite;
+    }
+
+    @keyframes bulk-assign-spin {
+        100% {
+            transform: rotate(360deg);
+        }
     }
 </style>

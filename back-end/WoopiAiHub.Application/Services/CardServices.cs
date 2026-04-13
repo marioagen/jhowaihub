@@ -88,6 +88,7 @@ namespace WoopiAiHub.Application.Services
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
             }
 
+            ClearCardNavigationsBeforeUpdate(cards);
             return _cardRepository.UpdateList(cards);
         }
 
@@ -111,6 +112,7 @@ namespace WoopiAiHub.Application.Services
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign);
             }
 
+            ClearCardNavigationsBeforeUpdate(cards);
             return _cardRepository.UpdateList(cards);
         }
 
@@ -128,6 +130,7 @@ namespace WoopiAiHub.Application.Services
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
             }
 
+            ClearCardNavigationsBeforeUpdate(cards);
             return _cardRepository.UpdateList(cards);
         }
 
@@ -171,6 +174,7 @@ namespace WoopiAiHub.Application.Services
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign);
             }
 
+            ClearCardNavigationsBeforeUpdate(cards);
             return _cardRepository.UpdateList(cards);
         }
 
@@ -639,6 +643,19 @@ namespace WoopiAiHub.Application.Services
 
             await _automationServices.ReprocessStepTool(automationServicesDto);
             return true;
+        }
+
+        /// <summary>
+        /// Detaches navigation graphs before <see cref="ICardRepository.UpdateList"/> so EF Core does not attach
+        /// duplicate tracked instances (e.g. the same <see cref="Step"/> Id on every card in a document batch).
+        /// </summary>
+        private static void ClearCardNavigationsBeforeUpdate(IEnumerable<Card> cards)
+        {
+            foreach (var card in cards)
+            {
+                card.Step = null;
+                card.Status = null;
+            }
         }
     }
 }
