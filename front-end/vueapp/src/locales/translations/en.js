@@ -593,6 +593,7 @@ const english = {
             none: "Select a workflow",
             withWorkflow: "All with associated workflow",
         },
+        search: "Search...",
         statusSelect: {
             none: "Card status",
         },
@@ -936,6 +937,14 @@ const english = {
         updateError: "Agent update failed",
         updateSuccess: "Agent updated successfully",
         viewComplete: "View complete",
+        playground: {
+            title: "Test area (Playground)",
+            contextLabel: "Context (PDF text)",
+            resultLabel: "Result (output)",
+            testButton: "Test prompt in context",
+            contextPlaceholder: "Paste or type context text (e.g. PDF excerpt)",
+            testError: "Failed to test prompt in context",
+        },
     },
     questions: {
         availableList: "Available questions",

@@ -53,8 +53,8 @@ namespace WoopiAiHub.Application.Messaging.DeadLetter
                     httpAccessor.HttpContext ??= new DefaultHttpContext();
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
-                    var cardServices = scope.ServiceProvider.GetRequiredService<ICardServices>();
-                    await cardServices.SetFailingCard(message.Data.CardId, message.DocumentEmbeddings.First().Email);
+                    var failingCardService = scope.ServiceProvider.GetRequiredService<IFailingCardService>();
+                    await failingCardService.SetFailingCard(message.Data.CardId, message.DocumentEmbeddings.First().Email);
                 }
                 catch (Exception ex)
                 {

@@ -28,8 +28,8 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-12">
+            <div class="row align-items-start g-3">
+                <div class="col-lg-7 col-xl-8">
                     <div class="card mt-3">
                         <div class="card-body">
                             <h6 class="card-title mb-3" v-if="!embedded">
@@ -216,6 +216,92 @@
                         </div>
                     </div>
                 </div>
+
+                <div
+                    v-if="!embedded"
+                    class="col-lg-5 col-xl-4"
+                >
+                    <div class="card mt-3 playground-sticky">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <LucideIcon
+                                    icon="Play"
+                                    :size="22"
+                                    class="playground-title-icon flex-shrink-0"
+                                />
+                                <h6 class="mb-0 fw-semibold">
+                                    {{ $t("prompts.playground.title") }}
+                                </h6>
+                            </div>
+
+                            <div class="mb-2 d-flex justify-content-between align-items-center">
+                                <label class="form-label small mb-0 fw-semibold">
+                                    {{ $t("prompts.playground.contextLabel") }}
+                                </label>
+                                <button
+                                    type="button"
+                                    class="btn btn-link btn-sm text-danger text-decoration-none p-0 d-inline-flex align-items-center"
+                                    @click="clearTestContext"
+                                >
+                                    <LucideIcon
+                                        icon="Trash2"
+                                        :size="14"
+                                        class="me-1"
+                                    />
+                                    {{ $t("common.clearSelection") }}
+                                </button>
+                            </div>
+                            <textarea
+                                v-model="testContext"
+                                class="form-control mb-3 playground-textarea"
+                                rows="6"
+                                :placeholder="$t('prompts.playground.contextPlaceholder')"
+                            />
+
+                            <button
+                                type="button"
+                                class="btn btn-success w-100 d-inline-flex align-items-center justify-content-center gap-2 mb-3"
+                                :disabled="isTesting || !canTestPrompt"
+                                @click="testPromptInContext"
+                            >
+                                <LucideIcon
+                                    v-if="!isTesting"
+                                    icon="Play"
+                                    :size="18"
+                                />
+                                <LucideIcon
+                                    v-else
+                                    icon="LoaderCircle"
+                                    :size="18"
+                                    class="animate-spin"
+                                />
+                                <span class="fw-semibold">
+                                    {{ $t("prompts.playground.testButton") }}
+                                </span>
+                            </button>
+
+                            <div class="mb-2 d-flex justify-content-between align-items-center">
+                                <label class="form-label small mb-0 fw-semibold">
+                                    {{ $t("prompts.playground.resultLabel") }}
+                                </label>
+                                <button
+                                    type="button"
+                                    class="btn btn-link btn-sm text-muted text-decoration-none p-0"
+                                    @click="clearTestResult"
+                                >
+                                    {{ $t("common.clearSelection") }}
+                                </button>
+                            </div>
+                            <textarea
+                                v-model="testResult"
+                                class="form-control playground-output"
+                                rows="10"
+                                readonly
+                                placeholder=""
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
         </form>
     </div>
@@ -273,6 +359,10 @@ export default {
             return this.apiTemplates.filter((team) =>
                 team.name.toLowerCase().includes(this.searchTerm.toLowerCase())
             );
+        },
+        canTestPrompt() {
+            const textInput = this.values?.text;
+            return typeof textInput === "string" && textInput.trim().length > 0;
         },
     },
     setup() {
@@ -407,10 +497,11 @@ export default {
                     name: "",
                     description: "",
                     text: "",
+                    enableAccessToMcp: false
                 },
             });
         },
-        refinePrompt: function () {
+         refinePrompt: function () {
             if (!this.values || !this.values.text || this.values.text.trim() === "") {
                 return this.$notify({
                     title: "prompts.title",
@@ -456,6 +547,39 @@ export default {
                 })
                 .finally(() => {
                     this.isRefining = false;
+                });
+        },
+        clearTestContext() {
+            this.testContext = "";
+        },
+        clearTestResult() {
+            this.testResult = "";
+        },
+        testPromptInContext() {
+            if (!this.canTestPrompt) {
+                return;
+            }
+            this.isTesting = true;
+            PromptService.testPrompt({
+                promptText: this.values.text,
+                contextText: this.testContext,
+            })
+                .then((response) => {
+                    if (!response || response.error) throw new Error("Test failed");
+
+                    this.testResult =
+                        typeof response === "string" ? response : String(response ?? "");
+                })
+                .catch(() => {
+                    this.$notify({
+                        title: "prompts.title",
+                        message: "prompts.playground.testError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                })
+                .finally(() => {
+                    this.isTesting = false;
                 });
         },
         getTemplatesEnableAccessToMcp() {
@@ -792,4 +916,24 @@ export default {
         color: #777;
     }
 
+    .playground-sticky {
+        position: sticky;
+        top: 1rem;
+        align-self: flex-start;
+    }
+
+    .playground-title-icon {
+        color: var(--bs-success, #198754);
+    }
+
+    .playground-textarea {
+        border-radius: 10px;
+    }
+
+    .playground-output {
+        border-radius: 10px;
+        background-color: var(--bs-light, #f8f9fa);
+        resize: vertical;
+        min-height: 12rem;
+    }
 </style>

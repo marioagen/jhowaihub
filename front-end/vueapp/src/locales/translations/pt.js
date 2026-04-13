@@ -596,6 +596,7 @@ const portuguese = {
             none: "Selecione uma esteira de processamento",
             withWorkflow: "Todos com esteira associadas",
         },
+        search: "Buscar...",
         statusSelect: {
             none: "Status do card",
         },
@@ -945,6 +946,14 @@ const portuguese = {
         updateError: "Falha ao atualizar agente",
         updateSuccess: "Agente atualizado com sucesso",
         viewComplete: "Ver completo",
+        playground: {
+            title: "Área de Teste (Playground)",
+            contextLabel: "Contexto (Texto do PDF)",
+            resultLabel: "Resultado (Output)",
+            testButton: "Testar Prompt no Contexto",
+            contextPlaceholder: "Cole ou digite o texto de contexto (ex.: trecho do PDF)",
+            testError: "Falha ao testar o prompt no contexto",
+        },
     },
     questions: {
         availableList: "Perguntas disponíveis",

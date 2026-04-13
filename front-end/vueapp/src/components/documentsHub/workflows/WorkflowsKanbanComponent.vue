@@ -39,10 +39,7 @@
                                     />
                                 </button>
                                 <ul class="dropdown-menu p-2 workflow-list">
-                                    <li
-                                        v-if="workflowList.length > 5"
-                                        class="mb-1"
-                                    >
+                                    <li class="mb-1">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text p-1">
                                                 <LucideIcon

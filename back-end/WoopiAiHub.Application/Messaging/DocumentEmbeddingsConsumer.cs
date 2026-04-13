@@ -78,6 +78,22 @@ namespace WoopiAiHub.Application.Messaging
                                                                        DocumentStatus.Failure);
 
                     _logger.LogError(ex, "Failed to process the answer response.");
+
+                    try
+                    {
+                        var documentPipelineServices = scope.ServiceProvider.GetRequiredService<IDocumentPipelineServices>();
+                        var result = await documentPipelineServices.ProcessEmbeddingsResult(message);
+
+                        if (result.CardId > 0)
+                        {
+                            var failingCardService = scope.ServiceProvider.GetRequiredService<IFailingCardService>();
+                            await failingCardService.SetFailingCard(result.CardId, message.Email);
+                        }
+                    }
+                    catch (Exception failingEx)
+                    {
+                        _logger.LogError(failingEx, "Error marking card as failing after exception in consumer");
+                    }
                 }
             });
         }
