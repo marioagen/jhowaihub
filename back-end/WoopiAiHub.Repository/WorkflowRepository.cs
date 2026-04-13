@@ -631,6 +631,7 @@ namespace WoopiAiHub.Repository
             return _context.Workflows
                            .AsNoTracking()
                            .Where(w => w.Teams.Any(t => t.Users.Any(u => u.Email == userEmail)) && w.Enable.Equals(true))
+                           .OrderBy(w => w.Name)
                            .Select(t => new WorkflowDto
                            {
                                Id = t.Id,
@@ -659,6 +660,7 @@ namespace WoopiAiHub.Repository
             return _context.Workflows
                            .AsNoTracking()
                            .Where(w => w.Enable.Equals(true))
+                           .OrderBy(w => w.Name)
                            .Select(t => new WorkflowDto
                            {
                                Id = t.Id,

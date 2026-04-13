@@ -593,6 +593,7 @@ const english = {
             none: "Select a workflow",
             withWorkflow: "All with associated workflow",
         },
+        search: "Search...",
         statusSelect: {
             none: "Card status",
         },

@@ -599,6 +599,7 @@ const spanish = {
             none: "Selecciona un flujo de trabajo",
             withWorkflow: "Todos con workflow asociado",
         },
+        search: "Buscar...",
         statusSelect: {
             none: "Estado del card",
         },
