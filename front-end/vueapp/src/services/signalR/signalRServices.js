@@ -93,8 +93,6 @@ class SignalRService {
             logService.showMessage("SignalR reconnected.");
         });
 
-        // onclose fires when: retries exhausted OR stopConnection() was called.
-        // Only restart automatically if the stop was unintentional.
         this.connection.onclose((error) => {
             if (this._intentionalStop) return;
 
