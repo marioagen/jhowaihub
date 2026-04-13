@@ -22,14 +22,14 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
     public class QuizDeadLetterConsumerTests
     {
         private readonly AutoMocker _mocker;
-        private readonly Mock<ICardServices> _cardServicesMock;
+        private readonly Mock<IFailingCardService> _failingCardServiceMock;
         private readonly Mock<IMessageConsumer<DocumentEmbeddingsQueryDto>> _consumerMock;
         private readonly Mock<ILogger<QuizDeadLetterConsumer>> _loggerMock;
 
         public QuizDeadLetterConsumerTests()
         {
             _mocker = new AutoMocker();
-            _cardServicesMock = new Mock<ICardServices>();
+            _failingCardServiceMock = new Mock<IFailingCardService>();
             _consumerMock = new Mock<IMessageConsumer<DocumentEmbeddingsQueryDto>>();
             _loggerMock = new Mock<ILogger<QuizDeadLetterConsumer>>();
 
@@ -58,8 +58,8 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
             httpContextAccessorMock.Setup(h => h.HttpContext).Returns(new DefaultHttpContext());
 
             var serviceProviderMock = new Mock<IServiceProvider>();
-            serviceProviderMock.Setup(sp => sp.GetService(typeof(ICardServices)))
-                .Returns(_cardServicesMock.Object);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IFailingCardService)))
+                .Returns(_failingCardServiceMock.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(IHttpContextAccessor)))
                 .Returns(httpContextAccessorMock.Object);
             serviceProviderMock.Setup(sp => sp.GetService(typeof(ITenantCacheServices)))
@@ -93,7 +93,7 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
                 Email = email
             };
 
-            _cardServicesMock.Setup(s => s.SetFailingCard(cardId, email))
+            _failingCardServiceMock.Setup(s => s.SetFailingCard(cardId, email))
                 .Returns(Task.CompletedTask);
 
             _consumerMock.Setup(c => c.ConsumerAsync(
@@ -111,7 +111,7 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
             await consumer.StartAsync(CancellationToken.None);
 
             // Assert
-            _cardServicesMock.Verify(s => s.SetFailingCard(cardId, email), Times.Once);
+            _failingCardServiceMock.Verify(s => s.SetFailingCard(cardId, email), Times.Once);
         }
 
         [Fact(DisplayName = "ExecuteAsync should handle null email gracefully")]
@@ -129,7 +129,7 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
                 Email = email
             };
 
-            _cardServicesMock.Setup(s => s.SetFailingCard(cardId, null))
+            _failingCardServiceMock.Setup(s => s.SetFailingCard(cardId, null))
                 .Returns(Task.CompletedTask);
 
             _consumerMock.Setup(c => c.ConsumerAsync(
@@ -147,7 +147,7 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
             await consumer.StartAsync(CancellationToken.None);
 
             // Assert
-            _cardServicesMock.Verify(s => s.SetFailingCard(cardId, null), Times.Once);
+            _failingCardServiceMock.Verify(s => s.SetFailingCard(cardId, null), Times.Once);
         }
 
         [Fact(DisplayName = "ExecuteAsync should log error when SetFailingCard throws exception")]
@@ -166,7 +166,7 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
             };
 
             var expectedException = new Exception("Test error");
-            _cardServicesMock.Setup(s => s.SetFailingCard(cardId, email))
+            _failingCardServiceMock.Setup(s => s.SetFailingCard(cardId, email))
                 .ThrowsAsync(expectedException);
 
             _consumerMock.Setup(c => c.ConsumerAsync(
@@ -191,7 +191,7 @@ namespace WoopiAiHub.UnitTests.Consumers.DeadLetter
             await consumer.StartAsync(CancellationToken.None);
 
             // Assert
-            _cardServicesMock.Verify(s => s.SetFailingCard(cardId, email), Times.Once);
+            _failingCardServiceMock.Verify(s => s.SetFailingCard(cardId, email), Times.Once);
         }
     }
 }

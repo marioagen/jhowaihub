@@ -47,8 +47,8 @@ namespace WoopiAiHub.Application.Messaging.DeadLetter
 
                     var data = message.Data.ToObject<MetaDataAutomationDto>();
 
-                    var cardServices = scope.ServiceProvider.GetRequiredService<ICardServices>();
-                    await cardServices.SetFailingCard(data.CardId, message.Email);
+                    var failingCardService = scope.ServiceProvider.GetRequiredService<IFailingCardService>();
+                    await failingCardService.SetFailingCard(data.CardId, message.Email);
                 }
                 catch (Exception ex)
                 {
