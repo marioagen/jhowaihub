@@ -15,6 +15,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<List<Card>> FindRangeByIdsWithStepWorkflowTracked(IReadOnlyList<int> cardIds);
         bool Update(Card card);
         bool UpdateList(List<Card> cards);
+        bool UpdateRange(List<Card> cards);
         Task<bool> DisableByIds(List<int> cardIds);
         Task<bool> DeleteByDocumentIds(List<int> documentIds);
         Task<int> CountByStepsInUse(ICollection<int> ids);

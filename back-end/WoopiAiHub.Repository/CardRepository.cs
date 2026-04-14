@@ -176,15 +176,18 @@ namespace WoopiAiHub.Repository
             return _context.SaveChanges() > 0;
         }
 
+        /// <inheritdoc cref="UpdateRange(List{Card})"/>
+        public bool UpdateList(List<Card> cards) => UpdateRange(cards);
+
         /// <summary>
-        /// Updates the specified collection of card entities in the database.
+        /// Updates the specified collection of card entities in the database using EF Core <c>UpdateRange</c>.
         /// </summary>
         /// <remarks>Throws an exception if any card in the list is invalid or if a database error occurs.
         /// All changes are committed in a single transaction.</remarks>
         /// <param name="cards">A list of <see cref="Card"/> objects to update. Each card must have a valid identifier corresponding to an
         /// existing record in the database. Cannot be null.</param>
         /// <returns>true if one or more records were updated successfully; otherwise, false.</returns>
-        public bool UpdateList(List<Card> cards)
+        public bool UpdateRange(List<Card> cards)
         {
             _context.Cards.UpdateRange(cards);
             return _context.SaveChanges() > 0;

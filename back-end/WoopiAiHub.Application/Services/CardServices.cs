@@ -116,6 +116,13 @@ namespace WoopiAiHub.Application.Services
             return _cardRepository.UpdateList(cards);
         }
 
+        /// <summary>
+        /// Assigns a user to every card in the batch containing <paramref name="cardId"/> (same scope as a single-card assign).
+        /// </summary>
+        /// <param name="userId">The user to assign.</param>
+        /// <param name="cardId">Any card id in the batch; all cards in that batch are updated.</param>
+        /// <returns>True if the persistence update succeeded.</returns>
+        /// <exception cref="AppException">Thrown when the card or batch cannot be found.</exception>
         public async Task<bool> AssignRange(Guid userId, int cardId)
         {
             var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
@@ -131,7 +138,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             ClearCardNavigationsBeforeUpdate(cards);
-            return _cardRepository.UpdateList(cards);
+            return _cardRepository.UpdateRange(cards);
         }
 
         /// <summary>
@@ -160,6 +167,12 @@ namespace WoopiAiHub.Application.Services
             return last;
         }
 
+        /// <summary>
+        /// Clears the assigned user on every card in the batch containing <paramref name="cardId"/>.
+        /// </summary>
+        /// <param name="cardId">Any card id in the batch; all cards in that batch are updated.</param>
+        /// <returns>True if the persistence update succeeded.</returns>
+        /// <exception cref="AppException">Thrown when the card or batch cannot be found.</exception>
         public async Task<bool> UnassignRange(int cardId)
         {
             var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
@@ -646,7 +659,7 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Detaches navigation graphs before <see cref="ICardRepository.UpdateList"/> so EF Core does not attach
+        /// Detaches navigation graphs before <see cref="ICardRepository.UpdateList"/> or <see cref="ICardRepository.UpdateRange"/> so EF Core does not attach
         /// duplicate tracked instances (e.g. the same <see cref="Step"/> Id on every card in a document batch).
         /// </summary>
         private static void ClearCardNavigationsBeforeUpdate(IEnumerable<Card> cards)

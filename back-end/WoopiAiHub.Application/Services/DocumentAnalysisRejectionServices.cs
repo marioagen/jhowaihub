@@ -86,6 +86,10 @@ namespace WoopiAiHub.Application.Services
             return await CommitRejectionsAsync(cards, dto.StepId, dto.Justification, userId, status);
         }
 
+        /// <summary>
+        /// When <paramref name="userIdToAssign"/> is set, assigns that user to every distinct card in <paramref name="cards"/> via <see cref="ICardServices.AssignRangeAsync"/>.
+        /// </summary>
+        /// <remarks>No-ops when the user id is null or when there are no card ids.</remarks>
         private async Task AssignRangeAsync(Guid? userIdToAssign, List<Card> cards)
         {
             if (!userIdToAssign.HasValue)
@@ -102,6 +106,16 @@ namespace WoopiAiHub.Application.Services
             await _cardServices.AssignRangeAsync(new AssignRangeDto(userIdToAssign.Value, cardIds));
         }
 
+        /// <summary>
+        /// Persists rejection records for all <paramref name="cards"/>, moves them to the rejection <paramref name="stepId"/> and <paramref name="status"/>, writes audit entries, and saves card updates in a single transaction.
+        /// </summary>
+        /// <param name="cards">Cards to reject; step and status navigations are cleared before update.</param>
+        /// <param name="stepId">Target step id for the rejection.</param>
+        /// <param name="justification">Rejection justification stored on each new rejection row.</param>
+        /// <param name="userId">User id associated with the rejection records.</param>
+        /// <param name="status">Rejected status to apply.</param>
+        /// <returns><see langword="true"/> if the transaction committed successfully.</returns>
+        /// <exception cref="AppException">Thrown when the operation fails; the transaction is rolled back first.</exception>
         private async Task<bool> CommitRejectionsAsync(
             List<Card> cards,
             int stepId,
@@ -190,6 +204,13 @@ namespace WoopiAiHub.Application.Services
             return (cards, status);
         }
 
+        /// <summary>
+        /// Ensures the creator may reject documents, loads each distinct card id from <paramref name="dto"/>, and resolves the rejection step and <see cref="StatusNames.Rejected"/> status.
+        /// </summary>
+        /// <param name="dto">Card ids and step id for the range rejection.</param>
+        /// <param name="emailCreator">Email used for permission checks.</param>
+        /// <returns>The loaded cards and the rejected <see cref="Status"/>.</returns>
+        /// <exception cref="AppException">Thrown when permission is denied, card ids are missing, a card or step is not found, or the rejected status does not exist.</exception>
         private async Task<(List<Card> card, Status status)> ValidateRangeAsync(CreateDocumentAnalysisRejectionRangeDto dto, string emailCreator)
         {
             await ValidateRejectionPermissionsAsync(emailCreator);

@@ -1165,7 +1165,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(cardId))
                 .ReturnsAsync(new List<Card> { card });
-            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateRange(It.IsAny<List<Card>>())).Returns(true);
 
             var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
             currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
@@ -1182,7 +1182,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             Assert.True(result);
             Assert.Equal(userId, card.AssignedUserId);
-            _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.UpdateRange(It.IsAny<List<Card>>()), Times.Once);
             auditCardServiceMock.Verify(s => s.CreateBatchAndSaveAsync(
                 It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
                 AuditCardActionType.Assign,
@@ -1217,7 +1217,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(1))
                 .ReturnsAsync(batchCards);
-            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateRange(It.IsAny<List<Card>>())).Returns(true);
 
             var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
             currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
@@ -1234,12 +1234,12 @@ namespace WoopiAiHub.UnitTests.Services
 
             Assert.True(result);
             Assert.All(batchCards, c => Assert.Equal(userId, c.AssignedUserId));
-            _cardRepositoryMock.Verify(repo => repo.UpdateList(It.Is<List<Card>>(l => l.Count == 3)), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.UpdateRange(It.Is<List<Card>>(l => l.Count == 3)), Times.Once);
         }
 
-        [Fact(DisplayName = "AssignRange returns false when UpdateList returns false")]
+        [Fact(DisplayName = "AssignRange returns false when UpdateRange returns false")]
         [Trait("AssignRange", "Success")]
-        public async Task AssignRange_UpdateListReturnsFalse_ReturnsFalse()
+        public async Task AssignRange_UpdateRangeReturnsFalse_ReturnsFalse()
         {
             var userId = Guid.NewGuid();
             var cardId = 1;
@@ -1251,7 +1251,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(cardId))
                 .ReturnsAsync(new List<Card> { card });
-            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(false);
+            _cardRepositoryMock.Setup(repo => repo.UpdateRange(It.IsAny<List<Card>>())).Returns(false);
 
             var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
             currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
@@ -1400,7 +1400,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(new List<Card> { card1 });
             _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(2))
                 .ReturnsAsync(new List<Card> { card2 });
-            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateRange(It.IsAny<List<Card>>())).Returns(true);
 
             var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
             auditCardServiceMock.Setup(s => s.CreateBatchAndSaveAsync(
