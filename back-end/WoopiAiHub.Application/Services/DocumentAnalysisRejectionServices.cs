@@ -244,7 +244,11 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
             }
 
-            _ = await _stepRepository.FindById(dto.StepId) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
+            var step = await _stepRepository.FindById(dto.StepId);
+            if (step == null)
+            {
+                throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);
+            }
             var status = await _statusRepository.FindByName(StatusNames.Rejected) ?? throw new AppException(ErrorCode.NotFound, "Status not found", StatusLabel.NotFound);
 
             return (cards, status);
