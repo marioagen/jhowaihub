@@ -14,8 +14,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> UnassignUser(int cardId);
         Task<bool> AssignRange(Guid userId, int cardId);
         Task<bool> AssignRangeAsync(AssignRangeDto request);
-        Task<bool> UnassignRange(int cardId);
-        Task<bool> UnassignRangeAsync(UnassignRangeDto request);
         Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
             HeadersDto headersDto);
         Task<CardHeaderDto> FindHeaderInfoAsync(int cardId);

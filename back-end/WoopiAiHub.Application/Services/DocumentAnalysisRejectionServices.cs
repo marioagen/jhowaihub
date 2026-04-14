@@ -156,7 +156,7 @@ namespace WoopiAiHub.Application.Services
                 }
 
                 await _repository.CreateRangeAsync(rejections);
-                _cardRepository.UpdateList(cards);
+                await _cardRepository.UpdateList(cards);
                 _unitOfWork.Commit();
                 return true;
             }

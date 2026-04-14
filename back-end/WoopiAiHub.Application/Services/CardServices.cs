@@ -89,7 +89,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             ClearCardNavigationsBeforeUpdate(cards);
-            return _cardRepository.UpdateList(cards);
+            return await _cardRepository.UpdateList(cards);
         }
 
         /// <summary>
@@ -113,108 +113,41 @@ namespace WoopiAiHub.Application.Services
             }
 
             ClearCardNavigationsBeforeUpdate(cards);
-            return _cardRepository.UpdateList(cards);
+            return await _cardRepository.UpdateList(cards);
         }
 
+        /// <inheritdoc />
+        public Task<bool> AssignRange(Guid userId, int cardId) =>
+            AssignRangeAsync(new AssignRangeDto(userId, [cardId]));
+
         /// <summary>
-        /// Assigns a user to every card in the batch containing <paramref name="cardId"/> (same scope as a single-card assign).
+        /// Assigns a user to all cards resolved from the distinct ids in <paramref name="request"/> in one operation.
         /// </summary>
-        /// <param name="userId">The user to assign.</param>
-        /// <param name="cardId">Any card id in the batch; all cards in that batch are updated.</param>
-        /// <returns>True if the persistence update succeeded.</returns>
-        /// <exception cref="AppException">Thrown when the card or batch cannot be found.</exception>
-        public async Task<bool> AssignRange(Guid userId, int cardId)
+        public async Task<bool> AssignRangeAsync(AssignRangeDto assignRangeDto)
         {
-            var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
+            ArgumentNullException.ThrowIfNull(assignRangeDto);
+            if (assignRangeDto.CardIds == null || assignRangeDto.CardIds.Count == 0)
+            {
+                throw new ArgumentException("CardIds cannot be empty.", nameof(assignRangeDto));
+            }
+
+            var uniqueCardIds = assignRangeDto.CardIds.Distinct().ToList();
+
+            var isValidTeamUser = await _workflowRepository.IsValidTeamUser(uniqueCardIds, assignRangeDto.UserId);
+            if (!isValidTeamUser)
+            {
+                throw new AppException(ErrorCode.NotFound, "User not found",
+                    CardLabel.UserCannotBeAssigned);
+            }
+
+            var cards = await _cardRepository.FindByCardIdsAsync(uniqueCardIds);
             if (cards == null || cards.Count == 0)
                 throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
 
-            Card.UpdateAssignedUser(cards, userId);
-
-            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
-            if (cardWorkflows.Count > 0)
-            {
-                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
-            }
-
-            ClearCardNavigationsBeforeUpdate(cards);
-            return _cardRepository.UpdateRange(cards);
-        }
-
-        /// <summary>
-        /// Assigns a user to each distinct card id (one <see cref="AssignRange"/> call per id).
-        /// </summary>
-        public async Task<bool> AssignRangeAsync(AssignRangeDto request)
-        {
-            ArgumentNullException.ThrowIfNull(request);
-            if (request.CardIds == null || request.CardIds.Count == 0)
-            {
-                throw new ArgumentException("CardIds cannot be empty.", nameof(request));
-            }
-
-            var last = true;
-            var seen = new HashSet<int>();
-            foreach (var cardId in request.CardIds)
-            {
-                if (!seen.Add(cardId))
-                {
-                    continue;
-                }
-
-                last = await AssignRange(request.UserId, cardId);
-            }
-
-            return last;
-        }
-
-        /// <summary>
-        /// Clears the assigned user on every card in the batch containing <paramref name="cardId"/>.
-        /// </summary>
-        /// <param name="cardId">Any card id in the batch; all cards in that batch are updated.</param>
-        /// <returns>True if the persistence update succeeded.</returns>
-        /// <exception cref="AppException">Thrown when the card or batch cannot be found.</exception>
-        public async Task<bool> UnassignRange(int cardId)
-        {
-            var cards = await _cardRepository.FindCardOrBatchWithStepWorkflowAsync(cardId);
-            if (cards == null || cards.Count == 0)
+            if (cards.Count != uniqueCardIds.Count)
                 throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
 
-            Card.UpdateAssignedUser(cards, null);
-
-            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
-            if (cardWorkflows.Count > 0)
-            {
-                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign);
-            }
-
-            ClearCardNavigationsBeforeUpdate(cards);
-            return _cardRepository.UpdateList(cards);
-        }
-
-        /// <summary>
-        /// Unassigns users from each distinct card id (one <see cref="UnassignRange"/> call per id).
-        /// </summary>
-        public async Task<bool> UnassignRangeAsync(UnassignRangeDto request)
-        {
-            ArgumentNullException.ThrowIfNull(request);
-            if (request.CardIds == null || request.CardIds.Count == 0)
-            {
-                throw new ArgumentException("CardIds cannot be empty.", nameof(request));
-            }
-
-            var last = true;
-            var seen = new HashSet<int>();
-            foreach (var cardId in request.CardIds)
-            {
-                if (!seen.Add(cardId))
-                {
-                    continue;
-                }
-
-                last = await UnassignRange(cardId);
-            }
-
-            return last;
+            return await ApplyAssignRangeAsync(assignRangeDto.UserId, cards);
         }
 
         /// <summary>
@@ -250,7 +183,8 @@ namespace WoopiAiHub.Application.Services
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement);
             }
 
-            var result = _cardRepository.UpdateList(cards);
+            ClearCardNavigationsBeforeUpdate(cards);
+            var result = await _cardRepository.UpdateList(cards);
             if (result)
             {
                 foreach (var tempCard in cards)
@@ -302,8 +236,8 @@ namespace WoopiAiHub.Application.Services
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Finalize);
             }
 
-            var result = _cardRepository.UpdateList(cards);
-            return result;
+            ClearCardNavigationsBeforeUpdate(cards);
+            return await _cardRepository.UpdateList(cards);
         }
 
         /// <summary>
@@ -659,7 +593,25 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Detaches navigation graphs before <see cref="ICardRepository.UpdateList"/> or <see cref="ICardRepository.UpdateRange"/> so EF Core does not attach
+        /// Assigns <paramref name="userId"/> to every card in <paramref name="cards"/>, writes assign audit entries,
+        /// clears navigation properties before persistence, and saves with <see cref="ICardRepository.UpdateList"/>.
+        /// </summary>
+        private async Task<bool> ApplyAssignRangeAsync(Guid userId, List<Card> cards)
+        {
+            Card.UpdateAssignedUser(cards, userId);
+
+            var cardWorkflows = cards.Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId)).ToList();
+            if (cardWorkflows.Count > 0)
+            {
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
+            }
+
+            ClearCardNavigationsBeforeUpdate(cards);
+            return await _cardRepository.UpdateList(cards);
+        }
+
+        /// <summary>
+        /// Detaches navigation graphs before <see cref="ICardRepository.UpdateList"/> so EF Core does not attach
         /// duplicate tracked instances (e.g. the same <see cref="Step"/> Id on every card in a document batch).
         /// </summary>
         private static void ClearCardNavigationsBeforeUpdate(IEnumerable<Card> cards)

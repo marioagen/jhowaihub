@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -77,6 +76,14 @@ namespace WoopiAiHub.Repository
                 .Include(s => s.Step)
                     .ThenInclude(st => st!.Workflow)
                 .ToListAsync();
+        }
+
+        /// <inheritdoc />
+        public async Task<List<Card>?> FindByCardIdsAsync(IReadOnlyList<int> cardIds)
+        {
+            if (cardIds == null || cardIds.Count == 0)
+                return [];
+            return await FindRangeByIdsWithStepWorkflowTracked(cardIds);
         }
 
         /// <summary>
@@ -176,8 +183,10 @@ namespace WoopiAiHub.Repository
             return _context.SaveChanges() > 0;
         }
 
-        /// <inheritdoc cref="UpdateRange(List{Card})"/>
-        public bool UpdateList(List<Card> cards) => UpdateRange(cards);
+        /// <summary>
+        /// Updates the specified collection of card entities; equivalent to <see cref="UpdateRange"/>.
+        /// </summary>
+        public Task<bool> UpdateList(List<Card> cards) => UpdateRange(cards);
 
         /// <summary>
         /// Updates the specified collection of card entities in the database using EF Core <c>UpdateRange</c>.
@@ -187,10 +196,10 @@ namespace WoopiAiHub.Repository
         /// <param name="cards">A list of <see cref="Card"/> objects to update. Each card must have a valid identifier corresponding to an
         /// existing record in the database. Cannot be null.</param>
         /// <returns>true if one or more records were updated successfully; otherwise, false.</returns>
-        public bool UpdateRange(List<Card> cards)
+        public async Task<bool> UpdateRange(List<Card> cards)
         {
             _context.Cards.UpdateRange(cards);
-            return _context.SaveChanges() > 0;
+            return await _context.SaveChangesAsync() > 0;
         }
 
         /// <summary>

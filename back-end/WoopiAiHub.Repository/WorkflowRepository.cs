@@ -816,6 +816,26 @@ namespace WoopiAiHub.Repository
             return isValidTeamUser;
         }
 
+        /// <inheritdoc cref="IWorkflowRepository.IsValidTeamUser(IReadOnlyList{int}, Guid)" />
+        public async Task<bool> IsValidTeamUser(IReadOnlyList<int> cardIds, Guid userId)
+        {
+            if (cardIds == null || cardIds.Count == 0)
+                return false;
+
+            var distinctIds = cardIds.Distinct().ToList();
+
+            var matchingIds = await _context.Cards
+                .Where(c => distinctIds.Contains(c.Id))
+                .Where(c => c.Document!.Workflows
+                    .SelectMany(w => w.Teams)
+                    .SelectMany(t => t.Users)
+                    .Any(u => u.Id == userId))
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            return matchingIds.Count == distinctIds.Count;
+        }
+
         /// <summary>
         /// Retrieves all enabled workflows as internal data transfer objects.
         /// </summary>

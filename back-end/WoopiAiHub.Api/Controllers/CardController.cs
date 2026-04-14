@@ -89,15 +89,6 @@ namespace WoopiAiHub.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPut("UnassignRange")]
-        [SwaggerOperation("Unassigns users from multiple cards (UnassignRange per distinct card id)")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> UnassignRange([FromBody] UnassignRangeDto request)
-        {
-            var result = await _cardServices.UnassignRangeAsync(request);
-            return Ok(result);
-        }
-
         /// <summary>
         /// It receives a card id and returns document information grouped by processing steps.
         /// </summary>
