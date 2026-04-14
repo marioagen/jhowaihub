@@ -531,9 +531,8 @@
                 clearTimeout(this.updateCardsDebounceTimer);
             }
             signalRService.off(this.signalrEventExecutionChanged);
-            signalRService.stopConnection();
-            GlobalEventService.off("all-uploads-complete", this.reloadKanban);
-            GlobalEventService.off("refresh-once", this.reloadKanban);
+            GlobalEventService.off("all-uploads-complete", this.getWorkflowByUser);
+            GlobalEventService.off("refresh-once", this.getWorkflowByUser);
         },
     };
 </script>
