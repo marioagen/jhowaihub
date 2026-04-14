@@ -468,10 +468,13 @@
             right: 0 !important;
             left: auto !important;
         }
-        .bg-light {
-            background-color: var(--color-bg-body-content) !important;
-            border: 1px solid var(--color-border-form-control) !important;
-            color: var(--color-body-content) !important;
-        }
+    }
+    .bg-light {
+        background-color: var(--color-bg-body-content) !important;
+        color: var(--color-body-content) !important;
+    }
+
+    .border {
+        border: 1px solid var(--color-border-form-control) !important;
     }
 </style>

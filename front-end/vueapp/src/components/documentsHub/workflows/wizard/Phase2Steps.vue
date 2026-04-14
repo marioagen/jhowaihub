@@ -492,4 +492,7 @@
     .dropdown-toggle::after {
         display: none;
     }
+    .border {
+        border-color: var(--color-border-form-control) !important;
+    }
 </style>
