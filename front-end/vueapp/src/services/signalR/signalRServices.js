@@ -17,12 +17,14 @@ class SignalRService {
         this.hubUrl = `${ENV_CONFIG.VUE_APP_BASE_URL_API}/hubs/notifications`;
         this._intentionalStop = false;
         this._registeredHandlers = new Map();
+        this._startRetryTimer = null;
+        this._visibilityHandler = this._onVisibilityChange.bind(this);
+        document.addEventListener("visibilitychange", this._visibilityHandler);
     }
 
     async startConnection() {
+        if (this._intentionalStop) return;
         if (this._isConnectedOrConnecting()) return;
-
-        this._intentionalStop = false;
 
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(this.hubUrl, {
@@ -39,12 +41,15 @@ class SignalRService {
         try {
             await this.connection.start();
         } catch (error) {
-            logService.showMessage("Error starting SignalR connection: " + error);
+            logService.showMessage("SignalR start failed. Retrying in 5s: " + error);
+            this._scheduleRestart();
         }
     }
 
     stopConnection() {
         this._intentionalStop = true;
+        this._clearRestartTimer();
+        document.removeEventListener("visibilitychange", this._visibilityHandler);
         if (this.connection) {
             this.connection.stop();
             this.connection = null;
@@ -52,16 +57,33 @@ class SignalRService {
     }
 
     on(eventName, callback) {
-        this._registeredHandlers.set(eventName, callback);
+        if (!this._registeredHandlers.has(eventName)) {
+            this._registeredHandlers.set(eventName, new Set());
+        }
+        this._registeredHandlers.get(eventName).add(callback);
+
         if (this.connection) {
             this.connection.on(eventName, callback);
         }
     }
 
-    off(eventName) {
-        this._registeredHandlers.delete(eventName);
+    off(eventName, callback) {
+        const callbacks = this._registeredHandlers.get(eventName);
+        if (callbacks) {
+            if (callback) {
+                callbacks.delete(callback);
+                if (callbacks.size === 0) {
+                    this._registeredHandlers.delete(eventName);
+                }
+            } else {
+                this._registeredHandlers.delete(eventName);
+            }
+        }
+
         if (this.connection) {
-            this.connection.off(eventName);
+            callback
+                ? this.connection.off(eventName, callback)
+                : this.connection.off(eventName);
         }
     }
 
@@ -95,18 +117,42 @@ class SignalRService {
 
         this.connection.onclose((error) => {
             if (this._intentionalStop) return;
-
             logService.showMessage("SignalR connection closed. Restarting in 5s...");
-            setTimeout(() => {
-                this.connection = null;
-                this.startConnection();
-            }, 5000);
+            this._scheduleRestart();
         });
     }
 
+    _scheduleRestart(delayMs = 5000) {
+        this._clearRestartTimer();
+        this._startRetryTimer = setTimeout(() => {
+            this._startRetryTimer = null;
+            this.connection = null;
+            this.startConnection();
+        }, delayMs);
+    }
+
+    _clearRestartTimer() {
+        if (this._startRetryTimer) {
+            clearTimeout(this._startRetryTimer);
+            this._startRetryTimer = null;
+        }
+    }
+
     _reattachRegisteredHandlers() {
-        for (const [eventName, callback] of this._registeredHandlers) {
-            this.connection.on(eventName, callback);
+        for (const [eventName, callbacks] of this._registeredHandlers) {
+            for (const callback of callbacks) {
+                this.connection.on(eventName, callback);
+            }
+        }
+    }
+
+    _onVisibilityChange() {
+        if (document.visibilityState !== "visible") return;
+        if (this._intentionalStop) return;
+        if (!this._isConnectedOrConnecting()) {
+            logService.showMessage("SignalR: tab visible, reconnecting...");
+            this.connection = null;
+            this.startConnection();
         }
     }
 }
