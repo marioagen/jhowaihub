@@ -1079,7 +1079,8 @@
     }
 
     .background-div {
-        background-color: rgb(249 250 251);
+        background-color: var(--color-bg-body-content) !important;
+        color: var(--color-body-content) !important;
         border-width: 1px;
         border-radius: 0.375rem;
         padding: 15px;
