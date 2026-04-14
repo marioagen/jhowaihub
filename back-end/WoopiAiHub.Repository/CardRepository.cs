@@ -88,7 +88,7 @@ namespace WoopiAiHub.Repository
         public async Task<List<Card>?> FindByCardIdsAsync(IReadOnlyList<int> cardIds)
         {
             if (cardIds == null || cardIds.Count == 0)
-                return [];
+                return new List<Card>();
             return await FindRangeByIdsWithStepWorkflowTracked(cardIds);
         }
 

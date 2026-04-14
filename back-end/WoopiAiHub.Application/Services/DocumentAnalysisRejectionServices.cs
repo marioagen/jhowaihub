@@ -91,21 +91,22 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// When <paramref name="userIdToAssign"/> is set, assigns that user to every distinct card in <paramref name="cards"/> via <see cref="ICardServices.AssignRangeAsync"/>.
         /// </summary>
-        /// <remarks>No-ops when the user id is null or when there are no card ids.</remarks>
+        /// <exception cref="InvalidOperationException">Thrown when <paramref name="userIdToAssign"/> has no value.</exception>
+        /// <exception cref="ArgumentException">Thrown when there are no card ids to assign.</exception>
         private async Task AssignRangeAsync(Guid? userIdToAssign, List<Card> cards)
         {
             if (!userIdToAssign.HasValue)
             {
-                return;
+                throw new InvalidOperationException("User id is required for assignment.");
             }
 
             var cardIds = cards.Select(c => c.Id).Distinct().ToList();
-            if (cardIds.Count == 0)
+            if (cardIds.Count > 0)
             {
-                return;
+                return await _cardServices.AssignRangeAsync(new AssignRangeDto(userIdToAssign.Value, cardIds));                
             }
 
-            await _cardServices.AssignRangeAsync(new AssignRangeDto(userIdToAssign.Value, cardIds));
+            throw new ArgumentException("CardIds cannot be empty.", nameof(cards));
         }
 
         /// <summary>
