@@ -31,6 +31,9 @@ namespace WoopiAiHub.Application.Services
 
         private const string CardNotFoundMessage = "Card not found";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CardServices"/> class with card, workflow, audit, and automation dependencies.
+        /// </summary>
         public CardServices(ICardRepository cardRepository,
                             IAuditCardService auditCardService,
                             IStepRepository stepRepository,
@@ -116,6 +119,9 @@ namespace WoopiAiHub.Application.Services
             return await _cardRepository.UpdateList(cards);
         }
 
+        /// <summary>
+        /// Assigns a user to a single card by delegating to <see cref="AssignRangeAsync"/> with that card id.
+        /// </summary>
         /// <inheritdoc />
         public Task<bool> AssignRange(Guid userId, int cardId) =>
             AssignRangeAsync(new AssignRangeDto(userId, [cardId]));

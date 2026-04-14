@@ -11,6 +11,9 @@ namespace WoopiAiHub.Repository
     {
         private readonly ApplicationDbContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CardRepository"/> class with the EF Core database context.
+        /// </summary>
         public CardRepository(ApplicationDbContext context)
         {
             _context = context;
@@ -78,6 +81,9 @@ namespace WoopiAiHub.Repository
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Loads cards by id with step and workflow navigation properties tracked; returns an empty list when <paramref name="cardIds"/> is null or empty.
+        /// </summary>
         /// <inheritdoc />
         public async Task<List<Card>?> FindByCardIdsAsync(IReadOnlyList<int> cardIds)
         {
@@ -358,6 +364,9 @@ namespace WoopiAiHub.Repository
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Returns the card with step and workflow, or all cards in the same document batch when the card belongs to a batch.
+        /// </summary>
         /// <inheritdoc />
         public async Task<List<Card>?> FindCardOrBatchWithStepWorkflowAsync(int cardId)
         {
@@ -369,6 +378,9 @@ namespace WoopiAiHub.Repository
             return [card];
         }
 
+        /// <summary>
+        /// Returns the card with document loaded, or all cards in the same document batch when the card belongs to a batch.
+        /// </summary>
         /// <inheritdoc />
         public async Task<List<Card>?> FindCardOrBatchWithDocumentAsync(int cardId)
         {
