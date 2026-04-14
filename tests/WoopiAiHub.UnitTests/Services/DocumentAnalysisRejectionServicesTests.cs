@@ -47,7 +47,6 @@ namespace WoopiAiHub.UnitTests.Services
             _cardServicesMock = _mocker.GetMock<ICardServices>();
             _auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
 
-            _cardServicesMock.Setup(s => s.AssignRange(It.IsAny<Guid>(), It.IsAny<int>())).ReturnsAsync(true);
             _cardServicesMock.Setup(s => s.AssignRangeAsync(It.IsAny<AssignRangeDto>())).ReturnsAsync(true);
             _auditCardServiceMock.Setup(s => s.CreateBatchAndSaveAsync(
                 It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
@@ -610,7 +609,7 @@ namespace WoopiAiHub.UnitTests.Services
                 _rejectionServices.CreateRejectionRangeAsync(dto, email));
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("User does not have permission to reject documents", exception.Message);
-            _cardServicesMock.Verify(s => s.AssignRange(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
+            _cardServicesMock.Verify(s => s.AssignRangeAsync(It.IsAny<AssignRangeDto>()), Times.Never);
         }
 
         [Fact(DisplayName = "CreateRejectionRangeAsync should throw when CardIds is empty")]
@@ -804,12 +803,12 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             _cardRepositoryMock.Verify(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2 && ids.Contains(1) && ids.Contains(2))), Times.Once);
             _rejectionRepositoryMock.Verify(repo => repo.CreateRangeAsync(It.Is<List<DocumentAnalysisRejection>>(l => l.Count == 2)), Times.Once);
-            _cardServicesMock.Verify(s => s.AssignRange(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
+            _cardServicesMock.Verify(s => s.AssignRangeAsync(It.IsAny<AssignRangeDto>()), Times.Never);
         }
 
         [Fact(DisplayName = "CreateRejectionRangeAsync with UserId should call AssignRangeAsync once with all card ids")]
         [Trait("CreateRejectionRangeAsync", "Success")]
-        public async Task CreateRejectionRangeAsync_WithUserId_CallsAssignRangePerCard()
+        public async Task CreateRejectionRangeAsync_WithUserId_CallsAssignRangeAsyncOnce()
         {
             var assignUserId = Guid.NewGuid();
             var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto(assignUserId);
@@ -859,9 +858,9 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Verify(repo => repo.FindRangeByIdsWithStepWorkflowTracked(It.IsAny<IReadOnlyList<int>>()), Times.Once);
         }
 
-        [Fact(DisplayName = "CreateRejectionRangeAsync without UserId should not call AssignRange")]
+        [Fact(DisplayName = "CreateRejectionRangeAsync without UserId should not call AssignRangeAsync")]
         [Trait("CreateRejectionRangeAsync", "Success")]
-        public async Task CreateRejectionRangeAsync_WithoutUserId_DoesNotCallAssignRange()
+        public async Task CreateRejectionRangeAsync_WithoutUserId_DoesNotCallAssignRangeAsync()
         {
             var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto(userId: null);
             var email = "test@example.com";

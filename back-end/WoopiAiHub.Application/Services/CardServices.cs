@@ -109,13 +109,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Assigns a user to a single card by delegating to <see cref="AssignRangeAsync"/> with that card id.
-        /// </summary>
-        /// <inheritdoc />
-        public Task<bool> AssignRange(Guid userId, int cardId) =>
-            AssignRangeAsync(new AssignRangeDto(userId, [cardId]));
-
-        /// <summary>
         /// Assigns a user to all cards resolved from the distinct ids in <paramref name="request"/> in one operation.
         /// </summary>
         public async Task<bool> AssignRangeAsync(AssignRangeDto assignRangeDto)

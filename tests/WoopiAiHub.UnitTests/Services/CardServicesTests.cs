@@ -1001,9 +1001,9 @@ namespace WoopiAiHub.UnitTests.Services
             _automationServices.Verify(s => s.ReprocessStepTool(It.IsAny<AutomationServicesDto>()), Times.Once);
         }
 
-        [Fact(DisplayName = "AssignRange throws AppException when card batch is not found (null)")]
-        [Trait("AssignRange", "Fail")]
-        public async Task AssignRange_CardNotFound_Null_ThrowsAppException()
+        [Fact(DisplayName = "AssignRangeAsync throws AppException when card batch is not found (null)")]
+        [Trait("AssignRangeAsync", "Fail")]
+        public async Task AssignRangeAsync_CardNotFound_Null_ThrowsAppException()
         {
             var cardId = 1;
             var userId = Guid.NewGuid();
@@ -1013,14 +1013,15 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
                 .ReturnsAsync((List<Card>?)null);
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignRange(userId, cardId));
+            var request = new AssignRangeDto(userId, new List<int> { cardId });
+            var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignRangeAsync(request));
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
             Assert.Equal(CardLabel.NotFound, ex.LabelError);
         }
 
-        [Fact(DisplayName = "AssignRange throws AppException when card batch is empty")]
-        [Trait("AssignRange", "Fail")]
-        public async Task AssignRange_CardNotFound_EmptyList_ThrowsAppException()
+        [Fact(DisplayName = "AssignRangeAsync throws AppException when card batch is empty")]
+        [Trait("AssignRangeAsync", "Fail")]
+        public async Task AssignRangeAsync_CardNotFound_EmptyList_ThrowsAppException()
         {
             var cardId = 1;
             var userId = Guid.NewGuid();
@@ -1030,14 +1031,15 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
                 .ReturnsAsync(new List<Card>());
 
-            var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignRange(userId, cardId));
+            var request = new AssignRangeDto(userId, new List<int> { cardId });
+            var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignRangeAsync(request));
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
             Assert.Equal(CardLabel.NotFound, ex.LabelError);
         }
 
-        [Fact(DisplayName = "AssignRange assigns user on single card and audits Assign")]
-        [Trait("AssignRange", "Success")]
-        public async Task AssignRange_ValidSingleCard_ReturnsTrue_AndAuditsAssign()
+        [Fact(DisplayName = "AssignRangeAsync assigns user on single card and audits Assign")]
+        [Trait("AssignRangeAsync", "Success")]
+        public async Task AssignRangeAsync_ValidSingleCard_ReturnsTrue_AndAuditsAssign()
         {
             var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
             var cardId = 1;
@@ -1066,7 +1068,7 @@ namespace WoopiAiHub.UnitTests.Services
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
-            var result = await _cardServices.AssignRange(userId, cardId);
+            var result = await _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { cardId }));
 
             Assert.True(result);
             Assert.Equal(userId, card.AssignedUserId);
@@ -1078,9 +1080,9 @@ namespace WoopiAiHub.UnitTests.Services
                 It.IsAny<CancellationToken>()), Times.Once);
         }
 
-        [Fact(DisplayName = "AssignRange assigns user to all cards in document batch")]
-        [Trait("AssignRange", "DocumentBatch")]
-        public async Task AssignRange_WithDocumentBatch_UpdatesAllBatchCards()
+        [Fact(DisplayName = "AssignRangeAsync assigns user to all cards in document batch")]
+        [Trait("AssignRangeAsync", "DocumentBatch")]
+        public async Task AssignRangeAsync_WithDocumentBatch_UpdatesAllBatchCards()
         {
             var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
             var documentBatchId = 100;
@@ -1119,9 +1121,9 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Verify(repo => repo.UpdateList(It.Is<List<Card>>(l => l.Count == 3)), Times.Once);
         }
 
-        [Fact(DisplayName = "AssignRange returns false when UpdateRange returns false")]
-        [Trait("AssignRange", "Success")]
-        public async Task AssignRange_UpdateRangeReturnsFalse_ReturnsFalse()
+        [Fact(DisplayName = "AssignRangeAsync returns false when UpdateList returns false")]
+        [Trait("AssignRangeAsync", "Success")]
+        public async Task AssignRangeAsync_UpdateListReturnsFalse_ReturnsFalse()
         {
             var userId = Guid.NewGuid();
             var cardId = 1;
@@ -1147,7 +1149,7 @@ namespace WoopiAiHub.UnitTests.Services
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
-            var result = await _cardServices.AssignRange(userId, cardId);
+            var result = await _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { cardId }));
 
             Assert.False(result);
         }
