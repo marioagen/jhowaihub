@@ -169,6 +169,11 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Ensures the user has permission to create document rejections; throws if not authorized.
+        /// </summary>
+        /// <param name="emailCreator">Email of the user to validate.</param>
+        /// <exception cref="AppException">Thrown when the user does not have rejection permission.</exception>
         private async Task ValidateRejectionPermissionsAsync(string emailCreator)
         {
             var hasPermission = await _permissionServices.UserHasPermissionAsync(
@@ -254,11 +259,12 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// 
+        /// Loads the card's current step and returns prior steps in the workflow (by step order) that come before that step.
         /// </summary>
-        /// <param name="workflowId"></param>
-        /// <param name="cardId"></param>
-        /// <returns></returns>
+        /// <param name="workflowId">Workflow identifier.</param>
+        /// <param name="cardId">Card whose current step is used to resolve previous steps.</param>
+        /// <returns>Previous steps ordered by <see cref="StepDto.Order"/>.</returns>
+        /// <exception cref="AppException">Thrown when no step is found for the card.</exception>
         public async Task<List<StepDto>> FindWorkflowPreviousStepsAsync(int workflowId, int cardId)
         {
             var step = await _stepRepository.FindStepByCardId(cardId);

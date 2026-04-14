@@ -80,6 +80,11 @@ namespace WoopiAiHub.Api.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Assigns a user to multiple cards (one assignment per distinct card id).
+        /// </summary>
+        /// <param name="request">User id and card ids to assign.</param>
+        /// <returns><see langword="true"/> if the assignment completed successfully.</returns>
         [HttpPut("AssignRange")]
         [SwaggerOperation("Assigns a user to multiple cards (AssignRange per distinct card id)")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
