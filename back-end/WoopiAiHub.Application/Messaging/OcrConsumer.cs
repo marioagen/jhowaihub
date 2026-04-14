@@ -42,7 +42,7 @@ namespace WoopiAiHub.Application.Messaging
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await _consumer.ConsumerAsync(_queues.OcrQueueAiHubResponse, async message =>
-            {                
+            {
                 using var scope = _scopeFactory.CreateScope();
                 try
                 {
@@ -58,7 +58,8 @@ namespace WoopiAiHub.Application.Messaging
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
 
                     var pages = message.AnalyzeResult?.Pages?.Count() ?? 0;
-                    if (pages == 0) pages = 1;
+                    if (pages == 0)
+                        pages = 1;
 
                     await usageDailyServices.AddByValuesAsync(MetricNames.Page, message.Email, pages);
 
@@ -81,6 +82,22 @@ namespace WoopiAiHub.Application.Messaging
                                                                        DocumentStatus.Failure);
 
                     _logger.LogError(ex, "Failed to process the answer response.");
+
+                    try
+                    {
+                        var documentPipelineServices = scope.ServiceProvider.GetRequiredService<IDocumentPipelineServices>();
+                        var result = await documentPipelineServices.ProcessOcrResult(message);
+
+                        if (result.CardId > 0)
+                        {
+                            var failingCardService = scope.ServiceProvider.GetRequiredService<IFailingCardService>();
+                            await failingCardService.SetFailingCard(result.CardId, message.Email);
+                        }
+                    }
+                    catch (Exception failingEx)
+                    {
+                        _logger.LogError(failingEx, "Error marking card as failing after exception in consumer");
+                    }
                 }
             });
         }

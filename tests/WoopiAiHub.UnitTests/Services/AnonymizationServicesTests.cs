@@ -6,6 +6,7 @@ using Moq.Protected;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -61,6 +62,7 @@ namespace WoopiAiHub.UnitTests.Services
             var documentServicesMock = _mocker.GetMock<IDocumentServices>();
             var anonymizationApiMock = _mocker.GetMock<IAnonymizationApi>();
             var httpClientFactoryMock = _mocker.GetMock<IHttpClientFactory>();
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
 
             documentServicesMock
                 .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
@@ -69,6 +71,10 @@ namespace WoopiAiHub.UnitTests.Services
             anonymizationApiMock
                 .Setup(x => x.InitiateAnonymization(It.IsAny<string>(), It.IsAny<AnonymizationRequestDto>()))
                 .ReturnsAsync(responseDto);
+
+            auditCardServiceMock
+                .Setup(x => x.CreateAndSaveAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AuditCardActionType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
             var mockHandler = new Mock<HttpMessageHandler>();
             mockHandler.Protected()
@@ -90,6 +96,9 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             documentServicesMock.Verify(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant), Times.Once);
             anonymizationApiMock.Verify(x => x.InitiateAnonymization(It.IsAny<string>(), It.IsAny<AnonymizationRequestDto>()), Times.Once);
+            auditCardServiceMock.Verify(
+                x => x.CreateAndSaveAsync(requestDto.CardId, requestDto.WorkflowId, requestDto.DocumentId, AuditCardActionType.AnonymizationRequest, headersDto.EmailCreator, It.IsAny<CancellationToken>()),
+                Times.Once);
         }
 
         [Fact(DisplayName = "ProcessAnonymization - Should throw InvalidOperationException when document bytes are null")]
@@ -104,6 +113,8 @@ namespace WoopiAiHub.UnitTests.Services
             var headersDto = AnonymizationFixture.FindValidHeadersDto();
 
             var documentServicesMock = _mocker.GetMock<IDocumentServices>();
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
+
             documentServicesMock
                 .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
                 .ReturnsAsync(documentDto);
@@ -112,6 +123,9 @@ namespace WoopiAiHub.UnitTests.Services
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _sut.ProcessAnonymization(requestDto, headersDto));
             Assert.Equal(DocumentNotFoundMessage, exception.Message);
+            auditCardServiceMock.Verify(
+                x => x.CreateAndSaveAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AuditCardActionType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                Times.Never);
         }
 
         [Fact(DisplayName = "ProcessAnonymization - Should throw InvalidOperationException when document bytes are empty")]
@@ -126,6 +140,8 @@ namespace WoopiAiHub.UnitTests.Services
             var headersDto = AnonymizationFixture.FindValidHeadersDto();
 
             var documentServicesMock = _mocker.GetMock<IDocumentServices>();
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
+
             documentServicesMock
                 .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
                 .ReturnsAsync(documentDto);
@@ -134,6 +150,9 @@ namespace WoopiAiHub.UnitTests.Services
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _sut.ProcessAnonymization(requestDto, headersDto));
             Assert.Equal(DocumentNotFoundMessage, exception.Message);
+            auditCardServiceMock.Verify(
+                x => x.CreateAndSaveAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AuditCardActionType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                Times.Never);
         }
 
         [Fact(DisplayName = "ProcessAnonymization - Should throw InvalidOperationException when API token is missing")]
@@ -245,6 +264,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             var documentServicesMock = _mocker.GetMock<IDocumentServices>();
             var anonymizationApiMock = _mocker.GetMock<IAnonymizationApi>();
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
 
             documentServicesMock
                 .Setup(x => x.FindDocumentById(requestDto.DocumentId, headersDto.Tenant))
@@ -258,6 +278,9 @@ namespace WoopiAiHub.UnitTests.Services
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _sut.ProcessAnonymization(requestDto, headersDto));
             Assert.Equal(DownloadUrlNotProvidedMessage, exception.Message);
+            auditCardServiceMock.Verify(
+                x => x.CreateAndSaveAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AuditCardActionType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                Times.Never);
         }
 
         #endregion
@@ -333,6 +356,7 @@ namespace WoopiAiHub.UnitTests.Services
             var documentServicesMock = _mocker.GetMock<IDocumentServices>();
             var anonymizationApiMock = _mocker.GetMock<IAnonymizationApi>();
             var httpClientFactoryMock = _mocker.GetMock<IHttpClientFactory>();
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
             var loggerMock = _mocker.GetMock<ILogger<AnonymizationServices>>();
 
             documentServicesMock
@@ -364,6 +388,9 @@ namespace WoopiAiHub.UnitTests.Services
 
             Assert.Contains("Failed to upload document", exception.Message);
             Assert.Contains("Status:", exception.Message);
+            auditCardServiceMock.Verify(
+                x => x.CreateAndSaveAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<AuditCardActionType>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                Times.Never);
         }
 
         #endregion

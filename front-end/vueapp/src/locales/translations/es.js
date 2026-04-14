@@ -185,7 +185,6 @@ const spanish = {
                 actionDelete: "Eliminar",
                 loadMore: "Ver más",
                 document: "Documento",
-                // AuditCardActionType enum labels (badge)
                 actionTypes: {
                     Upload: "Subir",
                     Assign: "Asignar",
@@ -201,8 +200,9 @@ const spanish = {
                     Rejection: "Rechazo",
                     InputQuestionnaire: "Cuestionario",
                     InputDocument: "Documento de entrada",
+                    Failed: "Fallido",
+                    AnonymizationRequest: "Solicitud de anonimización",
                 },
-                // Full sentence per action (row description)
                 actionSentences: {
                     Upload: "Documento cargado en el sistema.",
                     Assign: "Documento asignado.",
@@ -218,6 +218,8 @@ const spanish = {
                     Rejection: "Documento rechazado.",
                     InputQuestionnaire: "Cuestionario completado.",
                     InputDocument: "Documento cargado en el sistema.",
+                    Failed: "Operación fallida.",
+                    AnonymizationRequest: "Solicitud de anonimización enviada.",
                 },
             },
         },
@@ -617,6 +619,7 @@ const spanish = {
             none: "Selecciona un flujo de trabajo",
             withWorkflow: "Todos con workflow asociado",
         },
+        search: "Buscar...",
         statusSelect: {
             none: "Estado del card",
         },
@@ -959,6 +962,14 @@ const spanish = {
         updateError: "Error al actualizar agente",
         updateSuccess: "Agente actualizado exitosamente",
         viewComplete: "Ver completo",
+        playground: {
+            title: "Área de prueba (Playground)",
+            contextLabel: "Contexto (texto del PDF)",
+            resultLabel: "Resultado (salida)",
+            testButton: "Probar prompt en el contexto",
+            contextPlaceholder: "Pegue o escriba el texto de contexto (p. ej. extracto del PDF)",
+            testError: "Error al probar el prompt en el contexto",
+        },
     },
     questions: {
         availableList: "Preguntas disponibles",

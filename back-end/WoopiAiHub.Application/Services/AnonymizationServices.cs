@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -15,6 +16,7 @@ namespace WoopiAiHub.Application.Services
         IConfiguration configuration,
         IHttpClientFactory httpClientFactory,
         IHubNotifier hubNotifier,
+        IAuditCardService auditCardService,
         ILogger<AnonymizationServices> logger
     ) : IAnonymizationServices
     {
@@ -23,6 +25,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IConfiguration _configuration = configuration;
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
         private readonly IHubNotifier _hubNotifier = hubNotifier;
+        private readonly IAuditCardService _auditCardService = auditCardService;
         private readonly ILogger<AnonymizationServices> _logger = logger;
 
         /// <summary>
@@ -80,6 +83,8 @@ namespace WoopiAiHub.Application.Services
             }
 
             await UploadDocumentToUrl(response.Document.Download, document.BytesDocument);
+
+            await _auditCardService.CreateAndSaveAsync(requestDto.CardId, requestDto.WorkflowId, requestDto.DocumentId, AuditCardActionType.AnonymizationRequest, headersDto.EmailCreator);
         }
 
         /// <summary>

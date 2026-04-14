@@ -48,6 +48,7 @@ namespace WoopiAiHub.Repository
         {
             return await _context.Profiles
                 .AsNoTracking()
+                .OrderBy(t => t.Name)
                 .Select(t => new ProfileDto
                 {
                     Id = t.Id,

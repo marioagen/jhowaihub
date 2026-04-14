@@ -236,6 +236,8 @@
     <AnonymizationModal
         ref="modalAnonymization"
         :documentId="documentId"
+        :cardId="cardId"
+        :workflowId="workflowId"
         @success="handleAnonymizationSuccess"
     />
 </template>

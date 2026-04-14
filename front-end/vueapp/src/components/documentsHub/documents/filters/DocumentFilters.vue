@@ -52,25 +52,70 @@
             </select>
         </div>
         <div class="col-3">
-            <select
-                v-model="filters.workflowId"
-                class="form-select form-select-sm w-100"
-                @change="filterData"
-            >
-                <option value="">
-                    {{ $t("filters.workflowSelect.none") }}
-                </option>
-                <option :value="0">
-                    {{ $t("filters.workflowSelect.withWorkflow") }}
-                </option>
-                <option
-                    v-for="workflow in workflowsList"
-                    :key="workflow.id"
-                    :value="workflow.id"
+            <div class="dropdown workflow-filter-dropdown">
+                <button
+                    class="btn btn-light border form-select-sm text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle pe-1"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
                 >
-                    {{ workflow.name }}
-                </option>
-            </select>
+                    <span class="text-truncate workflow-filter-label">{{ selectedWorkflowLabel }}</span>
+                    <LucideIcon
+                        icon="ChevronDown"
+                        :size="14"
+                        class="ms-1 text-muted flex-shrink-0"
+                    />
+                </button>
+                <ul class="dropdown-menu p-2 workflow-filter-menu">
+                    <li class="mb-1">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text p-1">
+                                <LucideIcon
+                                    icon="Search"
+                                    :size="14"
+                                />
+                            </span>
+                            <input
+                                v-model="workflowSearch"
+                                type="text"
+                                class="form-control form-control-sm"
+                                :placeholder="$t('filters.search')"
+                                @click.stop=""
+                            />
+                        </div>
+                    </li>
+                    <li v-if="!workflowSearch">
+                        <a
+                            class="dropdown-item small"
+                            :class="{ active: filters.workflowId === '' }"
+                            @click="selectWorkflow('')"
+                        >
+                            {{ $t("filters.workflowSelect.none") }}
+                        </a>
+                    </li>
+                    <li v-if="!workflowSearch">
+                        <a
+                            class="dropdown-item small"
+                            :class="{ active: filters.workflowId === 0 }"
+                            @click="selectWorkflow(0)"
+                        >
+                            {{ $t("filters.workflowSelect.withWorkflow") }}
+                        </a>
+                    </li>
+                    <li
+                        v-for="workflow in filteredWorkflowsList"
+                        :key="workflow.id"
+                    >
+                        <a
+                            class="dropdown-item small"
+                            :class="{ active: filters.workflowId === workflow.id }"
+                            @click="selectWorkflow(workflow.id)"
+                        >
+                            {{ workflow.name }}
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div class="col-2">
             <div class="input-group">
@@ -140,6 +185,7 @@
                     statusId: "",
                     document: "1",
                 },
+                workflowSearch: "",
             };
         },
         watch: {
@@ -169,6 +215,11 @@
 
                 this.$emit("filter", { ...this.filters });
             },
+            selectWorkflow(id) {
+                this.filters.workflowId = id;
+                this.workflowSearch = "";
+                this.filterData();
+            },
             filterUsers() {
                 this.filters.isAllUsers = !this.filters.isAllUsers;
                 this.filterData();
@@ -182,6 +233,23 @@
             showCleanBtn() {
                 return this.filters.input !== "";
             },
+            filteredWorkflowsList() {
+                const search = this.workflowSearch.toLowerCase();
+                if (!search) return this.workflowsList;
+                return this.workflowsList.filter((w) =>
+                    w.name.toLowerCase().includes(search)
+                );
+            },
+            selectedWorkflowLabel() {
+                if (this.filters.workflowId === "") {
+                    return this.$t("filters.workflowSelect.none");
+                }
+                if (this.filters.workflowId === 0) {
+                    return this.$t("filters.workflowSelect.withWorkflow");
+                }
+                const found = this.workflowsList.find((w) => w.id === this.filters.workflowId);
+                return found ? found.name : this.$t("filters.workflowSelect.none");
+            },
         },
     };
 </script>
@@ -193,5 +261,30 @@
     .custom-input::placeholder {
         font-size: 12px;
         color: #999;
+    }
+
+    .workflow-filter-dropdown .btn {
+        font-size: 0.875rem;
+        height: calc(1.5em + 0.5rem + 2px);
+        padding: 0.25rem 0.5rem;
+    }
+
+    .workflow-filter-label {
+        font-size: 0.8rem;
+        max-width: calc(100% - 20px);
+    }
+
+    .workflow-filter-menu {
+        min-width: 100%;
+        max-height: 260px;
+        overflow-y: auto;
+    }
+
+    .dropdown-toggle::after {
+        display: none;
+    }
+
+    .border {
+       border-color: var(--color-border-form-control) !important;
     }
 </style>
