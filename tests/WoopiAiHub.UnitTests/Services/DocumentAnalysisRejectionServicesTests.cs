@@ -191,7 +191,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(user.Id);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
@@ -239,7 +239,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(user.Id);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ThrowsAsync(new Exception("Database error"));
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
@@ -428,7 +428,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
@@ -469,7 +469,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
@@ -519,7 +519,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
@@ -581,7 +581,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Throws(new Exception("Database error during batch update"));
+                .ThrowsAsync(new Exception("Database error during batch update"));
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
             _unitOfWorkMock.Setup(u => u.Rollback()).Verifiable();
 
@@ -770,7 +770,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction());
@@ -822,7 +822,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(Guid.NewGuid());
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction());
@@ -875,7 +875,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction());
@@ -924,7 +924,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(expectedUserId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction());
@@ -978,7 +978,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(Guid.NewGuid());
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction());
             _unitOfWorkMock.Setup(u => u.Commit());
 
