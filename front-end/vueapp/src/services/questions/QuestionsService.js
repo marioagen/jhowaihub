@@ -32,7 +32,7 @@ export default {
             });
     },
     createQuestion(description) {
-        return api.post(`/Question?description=${description}`)
+        return api.post(`/Question`, null, { params: { description } })
             .then(() => {
                 return true;
             })
