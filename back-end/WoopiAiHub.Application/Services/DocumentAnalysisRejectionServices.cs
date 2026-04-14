@@ -103,10 +103,13 @@ namespace WoopiAiHub.Application.Services
             var cardIds = cards.Select(c => c.Id).Distinct().ToList();
             if (cardIds.Count > 0)
             {
-                return await _cardServices.AssignRangeAsync(new AssignRangeDto(userIdToAssign.Value, cardIds));                
+                await _cardServices.AssignRangeAsync(new AssignRangeDto(userIdToAssign.Value, cardIds));                
+            }
+            else
+            {
+                throw new ArgumentException("CardIds cannot be empty.", nameof(cards));
             }
 
-            throw new ArgumentException("CardIds cannot be empty.", nameof(cards));
         }
 
         /// <summary>
