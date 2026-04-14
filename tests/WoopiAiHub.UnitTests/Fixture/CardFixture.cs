@@ -55,6 +55,19 @@ namespace WoopiAiHub.UnitTests.Fixture
             return new Step(1, DateTime.Now, 1, "Step", 1, 1, 1);
         }
 
+        public static Step FindValidStepWithWorkflow()
+        {
+            return new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+        }
+
+        public static Card FindCard(int id, int documentId, string name, int? documentBatchId = null)
+        {
+            return new Card(id, DateTime.UtcNow, 1, documentId, name, 1, null, documentBatchId);
+        }
+
         public static Status FindValidStatus()
         {
             return new Status("Status", "#FFFFFF", 1, DateTime.Now);

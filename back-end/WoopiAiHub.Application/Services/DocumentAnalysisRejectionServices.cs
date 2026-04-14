@@ -14,6 +14,8 @@ namespace WoopiAiHub.Application.Services
 {
     public class DocumentAnalysisRejectionServices : IDocumentAnalysisRejectionServices
     {
+        private const string CardNotFoundMessage = "Card not found";
+
         private readonly IDocumentAnalysisRejectionRepository _repository;
         private readonly IStepRepository _stepRepository;
         private readonly IPermissionServices _permissionServices;
@@ -205,7 +207,8 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Ensures the creator may reject documents, loads each distinct card id from <paramref name="dto"/>, and resolves the rejection step and <see cref="StatusNames.Rejected"/> status.
+        /// Ensures the creator may reject documents, deduplicates card ids, loads all matching cards in one repository call
+        /// (same pattern as <see cref="ICardServices.AssignRangeAsync"/>), and resolves the rejection step and <see cref="StatusNames.Rejected"/> status.
         /// </summary>
         /// <param name="dto">Card ids and step id for the range rejection.</param>
         /// <param name="emailCreator">Email used for permission checks.</param>
@@ -220,18 +223,16 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.NotFound, "CardIds cannot be empty", CardLabel.NotFound);
             }
 
-            var seen = new HashSet<int>();
-            var cards = new List<Card>();
-            foreach (var id in dto.CardIds)
+            var uniqueCardIds = dto.CardIds.Distinct().ToList();
+            var cards = await _cardRepository.FindByCardIdsAsync(uniqueCardIds);
+            if (cards == null || cards.Count == 0)
             {
-                if (!seen.Add(id))
-                {
-                    continue;
-                }
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
+            }
 
-                var card = await _cardRepository.FindByIdWithStepWorkflow(id)
-                    ?? throw new AppException(ErrorCode.NotFound, $"Card not found: {id}", CardLabel.NotFound);
-                cards.Add(card);
+            if (cards.Count != uniqueCardIds.Count)
+            {
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
             }
 
             _ = await _stepRepository.FindById(dto.StepId) ?? throw new AppException(ErrorCode.NotFound, "Step not found", StepLabel.NotFound);

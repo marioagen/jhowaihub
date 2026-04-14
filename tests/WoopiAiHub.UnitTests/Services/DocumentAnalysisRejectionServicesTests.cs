@@ -661,8 +661,32 @@ namespace WoopiAiHub.UnitTests.Services
             var email = "test@example.com";
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(It.IsAny<int>()))
-                .ReturnsAsync((Card?)null);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card>());
+
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _rejectionServices.CreateRejectionRangeAsync(dto, email));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, exception.LabelError);
+            Assert.Contains("Card not found", exception.Message);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync should throw when a requested card id does not exist (count mismatch)")]
+        [Trait("CreateRejectionRangeAsync", "Fail")]
+        public async Task CreateRejectionRangeAsync_CardCountMismatch_ThrowsAppException()
+        {
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto();
+            var email = "test@example.com";
+            var card1 = CardFixture.FindValidCard();
+            card1.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1 });
 
             var exception = await Assert.ThrowsAsync<AppException>(() =>
                 _rejectionServices.CreateRejectionRangeAsync(dto, email));
@@ -685,13 +709,12 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(1))
-                .ReturnsAsync(card);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(2))
-                .ReturnsAsync(new Card(2, DateTime.Now, 1, 2, "C2", 1, null)
-                {
-                    Step = card.Step
-                });
+            var card2 = new Card(2, DateTime.Now, 1, 2, "C2", 1, null)
+            {
+                Step = card.Step
+            };
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card, card2 });
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync((Step?)null);
 
@@ -720,10 +743,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(1))
-                .ReturnsAsync(card1);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(2))
-                .ReturnsAsync(card2);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
             _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
@@ -759,10 +780,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(1))
-                .ReturnsAsync(card1);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(2))
-                .ReturnsAsync(card2);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2 && ids.Contains(1) && ids.Contains(2))))
+                .ReturnsAsync(new List<Card> { card1, card2 });
             _stepRepositoryMock.Setup(repo => repo.FindById(stepId))
                 .ReturnsAsync(step);
             _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
@@ -783,13 +802,12 @@ namespace WoopiAiHub.UnitTests.Services
             var result = await _rejectionServices.CreateRejectionRangeAsync(dto, email);
 
             Assert.True(result);
-            _cardRepositoryMock.Verify(repo => repo.FindByIdWithStepWorkflow(1), Times.Once);
-            _cardRepositoryMock.Verify(repo => repo.FindByIdWithStepWorkflow(2), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2 && ids.Contains(1) && ids.Contains(2))), Times.Once);
             _rejectionRepositoryMock.Verify(repo => repo.CreateRangeAsync(It.Is<List<DocumentAnalysisRejection>>(l => l.Count == 2)), Times.Once);
             _cardServicesMock.Verify(s => s.AssignRange(It.IsAny<Guid>(), It.IsAny<int>()), Times.Never);
         }
 
-        [Fact(DisplayName = "CreateRejectionRangeAsync with UserId should call AssignRange once per card")]
+        [Fact(DisplayName = "CreateRejectionRangeAsync with UserId should call AssignRangeAsync once with all card ids")]
         [Trait("CreateRejectionRangeAsync", "Success")]
         public async Task CreateRejectionRangeAsync_WithUserId_CallsAssignRangePerCard()
         {
@@ -811,10 +829,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(1))
-                .ReturnsAsync(card1);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(2))
-                .ReturnsAsync(card2);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
             _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
@@ -864,10 +880,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(1))
-                .ReturnsAsync(card1);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(2))
-                .ReturnsAsync(card2);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
             _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
@@ -913,10 +927,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(1))
-                .ReturnsAsync(card1);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(2))
-                .ReturnsAsync(card2);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
             _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
@@ -967,10 +979,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(1))
-                .ReturnsAsync(card1);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(2))
-                .ReturnsAsync(card2);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
             _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
@@ -1022,10 +1032,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(true);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(1))
-                .ReturnsAsync(card1);
-            _cardRepositoryMock.Setup(repo => repo.FindByIdWithStepWorkflow(2))
-                .ReturnsAsync(card2);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
             _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
                 .ReturnsAsync(step);
             _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))

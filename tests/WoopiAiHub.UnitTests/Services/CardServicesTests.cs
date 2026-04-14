@@ -1215,24 +1215,14 @@ namespace WoopiAiHub.UnitTests.Services
         {
             var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
             var documentBatchId = 100;
-            var card = new Card(1, DateTime.UtcNow, 1, 1, "Card 1", 1, null, documentBatchId);
-            card.Step = new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1)
-            {
-                Workflow = WorkflowFixture.FindValidWorkflow()
-            };
-
             var batchCards = new List<Card>
             {
-                card,
-                new Card(2, DateTime.UtcNow, 1, 2, "Card 2", 1, null, documentBatchId)
-                {
-                    Step = new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1) { Workflow = WorkflowFixture.FindValidWorkflow() }
-                },
-                new Card(3, DateTime.UtcNow, 1, 3, "Card 3", 1, null, documentBatchId)
-                {
-                    Step = new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1) { Workflow = WorkflowFixture.FindValidWorkflow() }
-                }
+                CardFixture.FindCard(1, 1, "Card 1", documentBatchId),
+                CardFixture.FindCard(2, 2, "Card 2", documentBatchId),
+                CardFixture.FindCard(3, 3, "Card 3", documentBatchId)
             };
+            foreach (var c in batchCards)
+                c.Step = CardFixture.FindValidStepWithWorkflow();
 
             _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
                 .ReturnsAsync(batchCards);
@@ -1267,10 +1257,7 @@ namespace WoopiAiHub.UnitTests.Services
             var userId = Guid.NewGuid();
             var cardId = 1;
             var card = CardFixture.FindValidCard();
-            card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1)
-            {
-                Workflow = WorkflowFixture.FindValidWorkflow()
-            };
+            card.Step = CardFixture.FindValidStepWithWorkflow();
 
             _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 1 && ids[0] == cardId)))
                 .ReturnsAsync(new List<Card> { card });
@@ -1318,16 +1305,10 @@ namespace WoopiAiHub.UnitTests.Services
             var userId = Guid.NewGuid();
             var request = new AssignRangeDto(userId, new List<int> { 1, 1, 2 });
 
-            var card1 = new Card(1, DateTime.UtcNow, 1, 1, "C1", 1, null, null);
-            card1.Step = new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1)
-            {
-                Workflow = WorkflowFixture.FindValidWorkflow()
-            };
-            var card2 = new Card(2, DateTime.UtcNow, 1, 2, "C2", 1, null, null);
-            card2.Step = new Step(1, DateTime.UtcNow, 1, "Step", 1, 1, 1)
-            {
-                Workflow = WorkflowFixture.FindValidWorkflow()
-            };
+            var card1 = CardFixture.FindCard(1, 1, "C1");
+            card1.Step = CardFixture.FindValidStepWithWorkflow();
+            var card2 = CardFixture.FindCard(2, 2, "C2");
+            card2.Step = CardFixture.FindValidStepWithWorkflow();
 
             _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2 && ids.Contains(1) && ids.Contains(2))))
                 .ReturnsAsync(new List<Card> { card1, card2 });
