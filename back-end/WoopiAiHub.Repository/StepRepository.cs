@@ -396,11 +396,10 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public Task<Step?> FindStepByCardId(int cardId)
         {
-            // Query starts from Cards to avoid loading entire Step.Cards collections.
             return _context.Cards
+                .AsNoTracking()
                 .Where(c => c.Id == cardId)
                 .Select(c => c.Step)
-                .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
 
