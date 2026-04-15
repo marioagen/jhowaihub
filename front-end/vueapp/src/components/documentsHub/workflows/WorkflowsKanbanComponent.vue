@@ -43,11 +43,21 @@
                                         :size="20"
                                         class="ms-2 text-muted"
                                     />
+                                    <LucideIcon
+                                        icon="ChevronDown"
+                                        :size="20"
+                                        class="ms-2 text-muted"
+                                    />
                                 </button>
                                 <ul class="dropdown-menu p-2 workflow-list">
                                     <li class="mb-1">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text p-1">
+                                                <LucideIcon
+                                                    icon="Search"
+                                                    :size="16"
+                                                    class="me-1"
+                                                />
                                                 <LucideIcon
                                                     icon="Search"
                                                     :size="16"
@@ -63,8 +73,25 @@
                                                 @input="searchWorkflow"
                                                 @click.stop=""
                                             />
+                                            <input
+                                                id="filter-workflow"
+                                                v-model="workflowSearchText"
+                                                type="text"
+                                                name="filter"
+                                                class="form-control"
+                                                @input="searchWorkflow"
+                                                @click.stop=""
+                                            />
                                         </div>
                                     </li>
+                                    <li
+                                        v-for="item in filteredWorkflows"
+                                        :key="item.id"
+                                    >
+                                        <a
+                                            class="dropdown-item"
+                                            @click="selectOption(item)"
+                                        >
                                     <li
                                         v-for="item in filteredWorkflows"
                                         :key="item.id"
