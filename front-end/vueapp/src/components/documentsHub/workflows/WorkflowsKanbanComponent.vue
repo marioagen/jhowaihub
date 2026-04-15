@@ -92,14 +92,6 @@
                                             class="dropdown-item"
                                             @click="selectOption(item)"
                                         >
-                                    <li
-                                        v-for="item in filteredWorkflows"
-                                        :key="item.id"
-                                    >
-                                        <a
-                                            class="dropdown-item"
-                                            @click="selectOption(item)"
-                                        >
                                             <div class="fw-bold">
                                                 {{ item.teams.name }}
                                             </div>
