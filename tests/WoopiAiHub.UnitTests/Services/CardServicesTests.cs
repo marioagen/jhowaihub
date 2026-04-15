@@ -1,3 +1,4 @@
+using System.Linq;
 using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
@@ -6,9 +7,10 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
+using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
-using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Domain.Models;
@@ -35,6 +37,14 @@ namespace WoopiAiHub.UnitTests.Services
             _stepRepositoryMock = _mocker.GetMock<IStepRepository>();
             _stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             _automationServices = _mocker.GetMock<IAutomationServices>();
+
+            _mocker.GetMock<IAuditCardService>()
+                .Setup(s => s.CreateBatchAndSaveAsync(
+                    It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                    It.IsAny<AuditCardActionType>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
             _cardServices = _mocker.CreateInstance<CardServices>();
         }
@@ -88,7 +98,7 @@ namespace WoopiAiHub.UnitTests.Services
             _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
                 updateDto.WorkflowId)).ReturnsAsync(step);
 
-            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
 
 
             _stepToolRepositoryMock.Setup(repo => repo.FindByStepIdAndOrderAsync(1, 1))
@@ -139,7 +149,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(cardId))
                 .ReturnsAsync(new List<Card> { card });
-            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
 
             var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
             currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
@@ -240,7 +250,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(updateAssignedUserDto.CardId))
                 .ReturnsAsync(new List<Card> { card });
-            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
 
             var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
             workflowRepositoryMock.Setup(r => r.IsValidTeamUser(updateAssignedUserDto.CardId, userId)).ReturnsAsync(true);
@@ -282,7 +292,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(cardId))
                 .ReturnsAsync(batchCards);
-            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
 
             var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
             currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
@@ -330,7 +340,7 @@ namespace WoopiAiHub.UnitTests.Services
 
                 _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(updateAssignedUserDto.CardId))
                     .ReturnsAsync(batchCards);
-                _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+                _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
 
                 var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
                 workflowRepositoryMock.Setup(r => r.IsValidTeamUser(updateAssignedUserDto.CardId, userId)).ReturnsAsync(true);
@@ -374,7 +384,7 @@ namespace WoopiAiHub.UnitTests.Services
                 };
 
                 _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(cardId)).ReturnsAsync(batchCards);
-                _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+                _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
 
                 var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
                 currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
@@ -843,7 +853,7 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithDocumentAsync(updateDto.CardId)).ReturnsAsync(new List<Card> { card });
             _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
                 updateDto.WorkflowId)).ReturnsAsync(step);
-            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
             _cardRepositoryMock.Setup(repo => repo.Update(It.IsAny<Card>())).Returns(true);
 
             _automationServices.Setup(s => s.StartExecutionByCardAsync(It.IsAny<AutomationServicesDto>()))
@@ -878,7 +888,7 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(repo => repo.FindCardOrBatchWithDocumentAsync(updateDto.CardId)).ReturnsAsync(new List<Card> { card });
             _stepRepositoryMock.Setup(repo => repo.FindByOrderAndWorkflowId(updateDto.NextStepOrder,
                 updateDto.WorkflowId)).ReturnsAsync(step);
-            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(false);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(false);
 
             var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
             currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
@@ -926,7 +936,7 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock
                 .Setup(repo => repo.FindCardOrBatchWithStepWorkflowAsync(cardId))
                 .ReturnsAsync(new List<Card> { card });
-            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).Returns(true);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
 
             var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
             currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
@@ -989,6 +999,208 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             _cardRepositoryMock.Verify(repo => repo.Update(It.IsAny<Card>()), Times.Once);
             _automationServices.Verify(s => s.ReprocessStepTool(It.IsAny<AutomationServicesDto>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "AssignRangeAsync throws AppException when card batch is not found (null)")]
+        [Trait("AssignRangeAsync", "Fail")]
+        public async Task AssignRangeAsync_CardNotFound_Null_ThrowsAppException()
+        {
+            var cardId = 1;
+            var userId = Guid.NewGuid();
+            _mocker.GetMock<IWorkflowRepository>()
+                .Setup(r => r.IsValidTeamUser(It.IsAny<IReadOnlyList<int>>(), It.IsAny<Guid>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync((List<Card>?)null);
+
+            var request = new AssignRangeDto(userId, new List<int> { cardId });
+            var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignRangeAsync(request));
+            Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, ex.LabelError);
+        }
+
+        [Fact(DisplayName = "AssignRangeAsync throws AppException when card batch is empty")]
+        [Trait("AssignRangeAsync", "Fail")]
+        public async Task AssignRangeAsync_CardNotFound_EmptyList_ThrowsAppException()
+        {
+            var cardId = 1;
+            var userId = Guid.NewGuid();
+            _mocker.GetMock<IWorkflowRepository>()
+                .Setup(r => r.IsValidTeamUser(It.IsAny<IReadOnlyList<int>>(), It.IsAny<Guid>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card>());
+
+            var request = new AssignRangeDto(userId, new List<int> { cardId });
+            var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignRangeAsync(request));
+            Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, ex.LabelError);
+        }
+
+        [Fact(DisplayName = "AssignRangeAsync assigns user on single card and audits Assign")]
+        [Trait("AssignRangeAsync", "Success")]
+        public async Task AssignRangeAsync_ValidSingleCard_ReturnsTrue_AndAuditsAssign()
+        {
+            var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
+            var cardId = 1;
+            var card = CardFixture.FindValidCard();
+            card.Step = new Step(1, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 1 && ids[0] == cardId)))
+                .ReturnsAsync(new List<Card> { card });
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
+
+            _mocker.GetMock<IWorkflowRepository>()
+                .Setup(r => r.IsValidTeamUser(It.IsAny<IReadOnlyList<int>>(), It.IsAny<Guid>()))
+                .ReturnsAsync(true);
+
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
+            auditCardServiceMock.Setup(s => s.CreateBatchAndSaveAsync(
+                It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                It.IsAny<AuditCardActionType>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            var result = await _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { cardId }));
+
+            Assert.True(result);
+            Assert.Equal(userId, card.AssignedUserId);
+            _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
+            auditCardServiceMock.Verify(s => s.CreateBatchAndSaveAsync(
+                It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                AuditCardActionType.Assign,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "AssignRangeAsync assigns user to all cards in document batch")]
+        [Trait("AssignRangeAsync", "DocumentBatch")]
+        public async Task AssignRangeAsync_WithDocumentBatch_UpdatesAllBatchCards()
+        {
+            var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
+            var documentBatchId = 100;
+            var batchCards = new List<Card>
+            {
+                CardFixture.FindCard(1, 1, "Card 1", documentBatchId),
+                CardFixture.FindCard(2, 2, "Card 2", documentBatchId),
+                CardFixture.FindCard(3, 3, "Card 3", documentBatchId)
+            };
+            foreach (var c in batchCards)
+                c.Step = CardFixture.FindValidStepWithWorkflow();
+
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(batchCards);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
+
+            _mocker.GetMock<IWorkflowRepository>()
+                .Setup(r => r.IsValidTeamUser(It.IsAny<IReadOnlyList<int>>(), It.IsAny<Guid>()))
+                .ReturnsAsync(true);
+
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
+            auditCardServiceMock.Setup(s => s.CreateBatchAndSaveAsync(
+                It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                It.IsAny<AuditCardActionType>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            var result = await _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { 1, 2, 3 }));
+
+            Assert.True(result);
+            Assert.All(batchCards, c => Assert.Equal(userId, c.AssignedUserId));
+            _cardRepositoryMock.Verify(repo => repo.UpdateList(It.Is<List<Card>>(l => l.Count == 3)), Times.Once);
+        }
+
+        [Fact(DisplayName = "AssignRangeAsync returns false when UpdateList returns false")]
+        [Trait("AssignRangeAsync", "Success")]
+        public async Task AssignRangeAsync_UpdateListReturnsFalse_ReturnsFalse()
+        {
+            var userId = Guid.NewGuid();
+            var cardId = 1;
+            var card = CardFixture.FindValidCard();
+            card.Step = CardFixture.FindValidStepWithWorkflow();
+
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 1 && ids[0] == cardId)))
+                .ReturnsAsync(new List<Card> { card });
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(false);
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(Guid.NewGuid());
+
+            _mocker.GetMock<IWorkflowRepository>()
+                .Setup(r => r.IsValidTeamUser(It.IsAny<IReadOnlyList<int>>(), It.IsAny<Guid>()))
+                .ReturnsAsync(true);
+
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
+            auditCardServiceMock.Setup(s => s.CreateBatchAndSaveAsync(
+                It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                It.IsAny<AuditCardActionType>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            var result = await _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { cardId }));
+
+            Assert.False(result);
+        }
+
+        [Fact(DisplayName = "AssignRangeAsync throws ArgumentException when CardIds is empty")]
+        [Trait("AssignRangeAsync", "Fail")]
+        public async Task AssignRangeAsync_EmptyCardIds_ThrowsArgumentException()
+        {
+            var request = new AssignRangeDto(Guid.NewGuid(), new List<int>());
+            await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.AssignRangeAsync(request));
+        }
+
+        [Fact(DisplayName = "AssignRangeAsync throws ArgumentNullException when request is null")]
+        [Trait("AssignRangeAsync", "Fail")]
+        public async Task AssignRangeAsync_NullRequest_ThrowsArgumentNullException()
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _cardServices.AssignRangeAsync(null!));
+        }
+
+        [Fact(DisplayName = "AssignRangeAsync expands distinct ids once and persists in a single update")]
+        [Trait("AssignRangeAsync", "Success")]
+        public async Task AssignRangeAsync_DistinctCardIds_SingleExpandAndSingleUpdate()
+        {
+            var userId = Guid.NewGuid();
+            var request = new AssignRangeDto(userId, new List<int> { 1, 1, 2 });
+
+            var card1 = CardFixture.FindCard(1, 1, "C1");
+            card1.Step = CardFixture.FindValidStepWithWorkflow();
+            var card2 = CardFixture.FindCard(2, 2, "C2");
+            card2.Step = CardFixture.FindValidStepWithWorkflow();
+
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2 && ids.Contains(1) && ids.Contains(2))))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
+
+            _mocker.GetMock<IWorkflowRepository>()
+                .Setup(r => r.IsValidTeamUser(It.IsAny<IReadOnlyList<int>>(), It.IsAny<Guid>()))
+                .ReturnsAsync(true);
+
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
+            auditCardServiceMock.Setup(s => s.CreateBatchAndSaveAsync(
+                It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                It.IsAny<AuditCardActionType>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            var result = await _cardServices.AssignRangeAsync(request);
+
+            Assert.True(result);
+            _cardRepositoryMock.Verify(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2 && ids.Contains(1) && ids.Contains(2))), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
         }
 
         [Fact(DisplayName = "ReprocessCard should return true on success")]

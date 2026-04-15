@@ -12,8 +12,10 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<CardAnalysisDto?> FindByIdWithDocumentAndWorkflow(int id);
         Task<Card?> FindByIdWithStepAndProfile(int id);
         Task<Card?> FindByIdWithStepWorkflow(int id);
+        Task<List<Card>> FindRangeByIdsWithStepWorkflowTracked(IReadOnlyList<int> cardIds);
         bool Update(Card card);
-        bool UpdateList(List<Card> cards);
+        Task<bool> UpdateList(List<Card> cards);
+        Task<bool> UpdateRange(List<Card> cards);
         Task<bool> DisableByIds(List<int> cardIds);
         Task<bool> DeleteByDocumentIds(List<int> documentIds);
         Task<int> CountByStepsInUse(ICollection<int> ids);
@@ -25,6 +27,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<ICollection<int>> FindCardIdsByDocumentIdsAsync(IEnumerable<int> documentIds);
         Task<List<Card>> FindByDocumentBatchId(int documentBatchId);
         Task<List<Card>?> FindCardOrBatchWithStepWorkflowAsync(int cardId);
+        Task<List<Card>?> FindByCardIdsAsync(IReadOnlyList<int> cardIds);
         Task<List<Card>?> FindCardOrBatchWithDocumentAsync(int cardId);
         Task<Card?> FindByIdWithExecutions(int cardId);
         Task<Card?> FindByIdWithDocumentAndStep(int cardId);
