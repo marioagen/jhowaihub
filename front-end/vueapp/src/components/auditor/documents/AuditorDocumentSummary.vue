@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="d-flex flex-column flex-grow-1 min-h-0 overflow-hidden">
         <div
             v-if="isLoading"
             class="audit-list-wrapper d-flex flex-column flex-grow-1 min-h-0 align-items-center justify-content-center py-5"
@@ -260,7 +260,6 @@
     }
     .audit-list-wrapper {
         min-height: 0;
-        max-height: calc(100vh - 430px);
     }
     .audit-list-wrapper .audit-list {
         min-height: 0;
