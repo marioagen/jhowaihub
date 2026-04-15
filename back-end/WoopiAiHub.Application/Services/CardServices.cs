@@ -80,7 +80,6 @@ namespace WoopiAiHub.Application.Services
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
             }
 
-            ClearCardNavigationsBeforeUpdate(cards);
             return await _cardRepository.UpdateList(cards);
         }
 
@@ -104,7 +103,6 @@ namespace WoopiAiHub.Application.Services
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Unassign);
             }
 
-            ClearCardNavigationsBeforeUpdate(cards);
             return await _cardRepository.UpdateList(cards);
         }
 
@@ -171,7 +169,6 @@ namespace WoopiAiHub.Application.Services
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Advancement);
             }
 
-            ClearCardNavigationsBeforeUpdate(cards);
             var result = await _cardRepository.UpdateList(cards);
             if (result)
             {
@@ -224,7 +221,6 @@ namespace WoopiAiHub.Application.Services
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Finalize);
             }
 
-            ClearCardNavigationsBeforeUpdate(cards);
             return await _cardRepository.UpdateList(cards);
         }
 
@@ -539,8 +535,8 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Assigns <paramref name="userId"/> to every card in <paramref name="cards"/>, writes assign audit entries,
-        /// clears navigation properties before persistence, and saves with <see cref="ICardRepository.UpdateList"/>.
+        /// Assigns <paramref name="userId"/> to every card in <paramref name="cards"/>, writes assign audit entries
+        /// and persists with <see cref="ICardRepository.UpdateList"/>.
         /// </summary>
         private async Task<bool> ApplyAssignRangeAsync(Guid userId, List<Card> cards)
         {
@@ -552,21 +548,7 @@ namespace WoopiAiHub.Application.Services
                 await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Assign);
             }
 
-            ClearCardNavigationsBeforeUpdate(cards);
             return await _cardRepository.UpdateList(cards);
-        }
-
-        /// <summary>
-        /// Detaches navigation graphs before <see cref="ICardRepository.UpdateList"/> so EF Core does not attach
-        /// duplicate tracked instances (e.g. the same <see cref="Step"/> Id on every card in a document batch).
-        /// </summary>
-        private static void ClearCardNavigationsBeforeUpdate(IEnumerable<Card> cards)
-        {
-            foreach (var card in cards)
-            {
-                card.Step = null;
-                card.Status = null;
-            }
         }
     }
 }

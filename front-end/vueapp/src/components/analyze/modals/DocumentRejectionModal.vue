@@ -252,7 +252,9 @@
                 }
                 this.loadingUsers = true;
                 try {
-                    const workflow = await WorkflowService.getWorkflowById(workflowId, {});
+                    // Use Phase1 endpoint because we only need team ids for the assignee list.
+                    // getWorkflowById returns full workflow data and is significantly heavier.
+                    const workflow = await WorkflowService.getPhase1ById(workflowId);
                     if (workflow?.error || !workflow?.teams?.length) {
                         this.fetchedUsers = [];
                         return;

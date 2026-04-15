@@ -26,10 +26,6 @@ namespace WoopiAiHub.Domain.Interfaces.Refit
         Task<bool> CheckExceededPages([Header("KeyAccess")] string KeyAccess,
                                       [Query] string email);
 
-        [Get("/user/TenantsByUserEmail")]
-        Task<IEnumerable<string>> FindTenantsByUserEmail([Header("KeyAccess")] string KeyAccess,
-                                                         [Query] string email);
-
         [Get("/user/CheckIsAdmin")]
         Task<bool> CheckIsAdmin([Header("KeyAccess")] string KeyAccess,
                                 RequestCheckIsAdminDto requestCheckIsAdmin);

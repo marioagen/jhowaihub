@@ -195,17 +195,39 @@ namespace WoopiAiHub.Repository
         public Task<bool> UpdateList(List<Card> cards) => UpdateRange(cards);
 
         /// <summary>
-        /// Updates the specified collection of card entities in the database using EF Core <c>UpdateRange</c>.
+        /// Updates StepId, StatusId and AssignedUserId for the given cards directly in the database,
+        /// bypassing the EF ChangeTracker entirely.
         /// </summary>
-        /// <remarks>Throws an exception if any card in the list is invalid or if a database error occurs.
-        /// All changes are committed in a single transaction.</remarks>
-        /// <param name="cards">A list of <see cref="Card"/> objects to update. Each card must have a valid identifier corresponding to an
-        /// existing record in the database. Cannot be null.</param>
-        /// <returns>true if one or more records were updated successfully; otherwise, false.</returns>
+        /// <remarks>
+        /// Using ExecuteUpdateAsync avoids the InvalidOperationException thrown when a navigation property
+        /// for a required relationship (e.g. Card.Step) is null on a tracked entity.
+        /// Cards with the same scalar values are batched into a single UPDATE statement.
+        /// </remarks>
         public async Task<bool> UpdateRange(List<Card> cards)
         {
-            _context.Cards.UpdateRange(cards);
-            return await _context.SaveChangesAsync() > 0;
+            if (cards == null || cards.Count == 0)
+                return false;
+
+            var totalUpdated = 0;
+
+            // Batch cards that share the same target values into a single UPDATE.
+            var groups = cards.GroupBy(c => new { c.StepId, c.StatusId, c.AssignedUserId });
+            foreach (var group in groups)
+            {
+                var ids = group.Select(c => c.Id).ToList();
+                var stepId = group.Key.StepId;
+                var statusId = group.Key.StatusId;
+                var assignedUserId = group.Key.AssignedUserId;
+
+                totalUpdated += await _context.Cards
+                    .Where(c => ids.Contains(c.Id))
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(c => c.StepId, stepId)
+                        .SetProperty(c => c.StatusId, statusId)
+                        .SetProperty(c => c.AssignedUserId, assignedUserId));
+            }
+
+            return totalUpdated > 0;
         }
 
         /// <summary>
