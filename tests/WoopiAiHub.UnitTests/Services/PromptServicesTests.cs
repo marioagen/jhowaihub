@@ -866,6 +866,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
             _mocker.GetMock<IDocumentHistoryRepository>().Verify(x => x.Create(It.Is<DocumentHistory>(d =>
+                execution.Card!= null  &&
                 d.IdDocument == execution.Card.DocumentId &&
                 d.Input == "Prompt"
             )), Times.Once);

@@ -277,8 +277,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
 
             Assert.Contains("instructions", message.OpenAiResponse.Instructions);
             Assert.Contains(apis[0].Url, message.OpenAiResponse.Instructions);
-            Assert.Contains(apis[0].Description, message.OpenAiResponse.Instructions);
-            Assert.Contains(apis[1].Description, message.OpenAiResponse.Instructions);
+            Assert.Contains(apis[0].Description ?? "", message.OpenAiResponse.Instructions);
+            Assert.Contains(apis[1].Description ?? "", message.OpenAiResponse.Instructions);
 
             Assert.Equal(_mcpSettings.MaxToolCalls, message.OpenAiResponse.MaxToolCalls);
 
