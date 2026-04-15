@@ -13,6 +13,18 @@ export default {
                 };
             });
     },
+    async createRejectionRange(payload) {
+        return await api
+            .post("/DocumentAnalysisRejection/Range", payload)
+            .then((response) => {
+                return response.data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
     async findRejections(cardId) {
         return await api
             .get(`/DocumentAnalysisRejection?cardId=${cardId}`)

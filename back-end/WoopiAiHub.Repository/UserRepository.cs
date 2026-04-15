@@ -200,11 +200,11 @@ namespace WoopiAiHub.Repository
             if (string.IsNullOrEmpty(pagedDataDto.Search))
                 return query;
 
-            return query.Where(i =>
+            return query.AsEnumerable().Where(i =>
                 i.Name.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase) ||
                 i.Email.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase) ||
                 i.Id.ToString().Contains(pagedDataDto.Search) ||
-                i.Teams.Any(t => t.Name.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase)));
+                i.Teams.Any(t => t.Name.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase))).AsQueryable();
         }
 
         /// <summary>

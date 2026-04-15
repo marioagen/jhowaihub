@@ -78,7 +78,13 @@ builder.Services.Configure<ChatCompletionSettings>(builder.Configuration.GetSect
 builder.Services.Configure<ResponseOpenAiSettings>(builder.Configuration.GetSection("ResponseOpenAiSettings"));
 builder.Services.Configure<OpenAiSettings>(builder.Configuration.GetSection("OpenAiSettings"));
 builder.Services.Configure<McpSettings>(builder.Configuration.GetSection("McpSettings"));
-builder.Services.AddSignalR();
+
+builder.Services.AddSignalR(options =>
+{
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {

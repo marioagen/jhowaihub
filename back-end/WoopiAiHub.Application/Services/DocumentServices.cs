@@ -156,7 +156,7 @@ namespace WoopiAiHub.Application.Services
         {
             try
             {
-                var documentDb = _documentRepository.FindById(id);
+                var documentDb = _documentRepository.FindById(id) ?? throw new AppException(ErrorCode.NotFound, "Document not found", null);
                 var functionApiKeyAuth = _config["RefitExternalSettings:FunctionApiKey"];
 
                 if (string.IsNullOrEmpty(functionApiKeyAuth))

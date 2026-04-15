@@ -1334,4 +1334,11 @@
         border-radius: 50%;
         background-color: var(--color-bg-body-content, #e9ecef);
     }
+    .bg-light {
+        background-color: var(--color-bg-body-content) !important;
+        color: var(--color-body-content) !important;
+    }
+    .border {
+        border: 1px solid var(--color-border-form-control) !important;
+    }
 </style>

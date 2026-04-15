@@ -34,6 +34,8 @@ namespace WoopiAiHub.UnitTests.Fixtures
                 .CustomInstantiator(f => new ProcessAnonymizationRequestDto
                 {
                     DocumentId = f.Random.Int(1, 10000),
+                    CardId = f.Random.Int(1, 10000),
+                    WorkflowId = f.Random.Int(1, 10000),
                     AnonymizationType = AnonymizationType.PartialMasking,
                     PromptId = f.Random.Int(1, 1000)
                 })
