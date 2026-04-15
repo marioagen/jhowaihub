@@ -9,7 +9,6 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Hubs;
-using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
@@ -34,7 +33,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IConfiguration _config;
         private readonly PromptSettings _promptSettings;
         private readonly ITenantCacheServices _tenantCacheServices;
-        private readonly IChatCompletionApi _chatCompletionApi;
+        private readonly IRagInvocationRouter _ragInvocationRouter;
         private readonly ChatCompletionSettings _chatCompletionSettings;
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly IExecutionServices _executionServices;
@@ -50,7 +49,7 @@ namespace WoopiAiHub.Application.Services
             IOptions<PromptSettings> promptSettingsOptions,
             IConfiguration config,
             ITenantCacheServices tenantCacheServices,
-            IChatCompletionApi chatCompletionApi,
+            IRagInvocationRouter ragInvocationRouter,
             IOptions<ChatCompletionSettings> chatCompletionSettings,
             IUsageDailyServices usageDailyServices,
             IExecutionServices executionServices)
@@ -66,7 +65,7 @@ namespace WoopiAiHub.Application.Services
             _config = config;
             _promptSettings = promptSettingsOptions.Value;
             _tenantCacheServices = tenantCacheServices;
-            _chatCompletionApi = chatCompletionApi;
+            _ragInvocationRouter = ragInvocationRouter;
             _chatCompletionSettings = chatCompletionSettings.Value;
             _usageDailyServices = usageDailyServices;
             _executionServices = executionServices;
@@ -529,12 +528,13 @@ namespace WoopiAiHub.Application.Services
                 MaxTokens = _chatCompletionSettings.MaxTokens,
                 Messages = new List<ChatMessageDto> { new ChatMessageDto { Role = "system", Content = fullPrompt } }
             };
-            var response = await _chatCompletionApi.GetChatCompletion(
-                tenantInfo.AiGatewayApplicationId.Value.ToString(),
+            var response = await _ragInvocationRouter.ExecuteChatCompletionAsync(
+                tenantInfo,
+                email,
+                chatCompletionDto,
                 _chatCompletionSettings.Model,
                 _chatCompletionSettings.ApiVersion,
-                tenantInfo.AiGatewayKey,
-                chatCompletionDto);
+                CancellationToken.None);
 
             var tokens = response.Usage?.TotalTokens ?? 0;
             await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model);

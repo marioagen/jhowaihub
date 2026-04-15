@@ -6,7 +6,6 @@ using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -638,13 +637,17 @@ namespace WoopiAiHub.UnitTests.Services
             };
             _mocker.GetMock<IConfiguration>().Setup(c => c["PromptSettings:RefinementPrompt"]).Returns("Texto a ser convertido: {{Regra de negócio}}");
             _mocker.GetMock<ITenantCacheServices>().Setup(s => s.FindTenantAsync(tenantId)).ReturnsAsync(tenantInfo);
-            _mocker.GetMock<IChatCompletionApi>()
-                .Setup(a => a.GetChatCompletion(
+            _mocker.GetMock<IUsageDailyServices>()
+                .Setup(s => s.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _mocker.GetMock<IRagInvocationRouter>()
+                .Setup(a => a.ExecuteChatCompletionAsync(
+                    It.IsAny<TenantInfoDto>(),
+                    It.IsAny<string>(),
+                    It.IsAny<ChatCompletionDto>(),
                     It.IsAny<string>(),
                     It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<ChatCompletionDto>()))
+                    It.IsAny<CancellationToken>()))
                 .ReturnsAsync(chatCompletionResponse);
 
             //Act

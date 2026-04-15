@@ -1,16 +1,17 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.AutoMock;
-using System.Net;
-using System.Text;
 using System.Threading;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
@@ -32,6 +33,10 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x["IndexerApiKey"]).Returns(Guid.NewGuid().ToString());
             _mocker.Use(configMock.Object);
 
+            _mocker.GetMock<ITenantCacheServices>()
+                .Setup(x => x.FindTenantAsync(It.IsAny<string>()))
+                .ReturnsAsync(new TenantInfoDto { Name = "test", RagProvider = RagProviderNames.Indexer });
+
             _documentDeletionServices = _mocker.CreateInstance<WoopiAiHub.Application.Services.DocumentDeletionServices>();
         }
 
@@ -49,7 +54,7 @@ namespace WoopiAiHub.UnitTests.Services
             var cardRepository = _mocker.GetMock<ICardRepository>();
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             var stepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
+            var ragRouter = _mocker.GetMock<IRagInvocationRouter>();
             var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var unitOfWork = _mocker.GetMock<IUnitOfWork>();
             var cardServices = _mocker.GetMock<ICardServices>();
@@ -62,8 +67,12 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(r => r.Delete(ids)).Returns(true);
             documentRepository.Setup(r => r.FindHashById(ids)).Returns(hashes.AsQueryable());
 
-            embeddingsApi.Setup(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                         .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
+            ragRouter.Setup(api => api.DeleteEmbeddingsAsync(
+                    It.IsAny<TenantInfoDto>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
             fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
                             .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
@@ -91,7 +100,11 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(r => r.ClearWorkflowRelationships(ids), Times.Once);
             documentRepository.Verify(r => r.Delete(ids), Times.Once);
             documentRepository.Verify(r => r.FindHashById(ids), Times.Once);
-            embeddingsApi.Verify(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(hashes.Count));
+            ragRouter.Verify(api => api.DeleteEmbeddingsAsync(
+                It.IsAny<TenantInfoDto>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()), Times.Exactly(hashes.Count));
             fileRepositoryApi.Verify(api => api.Delete(It.IsAny<string>()), Times.Exactly(hashes.Count));
             cardRepository.Verify(r => r.FindCardIdsByDocumentIdsAsync(ids), Times.Once);
             cardRepository.Verify(r => r.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
@@ -119,7 +132,7 @@ namespace WoopiAiHub.UnitTests.Services
             var cardRepository = _mocker.GetMock<ICardRepository>();
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             var stepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
+            var ragRouter = _mocker.GetMock<IRagInvocationRouter>();
             var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var unitOfWork = _mocker.GetMock<IUnitOfWork>();
             var cardServices = _mocker.GetMock<ICardServices>();
@@ -132,8 +145,12 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(r => r.Delete(ids)).Returns(true);
             documentRepository.Setup(r => r.FindHashById(ids)).Returns(hashes.AsQueryable());
 
-            embeddingsApi.Setup(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
+            ragRouter.Setup(api => api.DeleteEmbeddingsAsync(
+                    It.IsAny<TenantInfoDto>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
             fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
                 .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
@@ -184,7 +201,7 @@ namespace WoopiAiHub.UnitTests.Services
             var cardRepository = _mocker.GetMock<ICardRepository>();
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
             var stepToolOutputRepository = _mocker.GetMock<IStepToolOutputRepository>();
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
+            var ragRouter = _mocker.GetMock<IRagInvocationRouter>();
             var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var unitOfWork = _mocker.GetMock<IUnitOfWork>();
             var cardServices = _mocker.GetMock<ICardServices>();
@@ -197,8 +214,12 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(r => r.Delete(ids)).Returns(true);
             documentRepository.Setup(r => r.FindHashById(ids)).Returns(hashes.AsQueryable());
 
-            embeddingsApi.Setup(api => api.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
+            ragRouter.Setup(api => api.DeleteEmbeddingsAsync(
+                    It.IsAny<TenantInfoDto>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
             fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
                 .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
@@ -243,7 +264,7 @@ namespace WoopiAiHub.UnitTests.Services
             var headers = DocumentFixture.FindValidHeadersDto();
 
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
-            var embeddingRepository = _mocker.GetMock<IEmbeddingsApi>();
+            var ragRouter = _mocker.GetMock<IRagInvocationRouter>();
             var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
             var cardRepository = _mocker.GetMock<ICardRepository>();
             var stepToolExecutionRepository = _mocker.GetMock<IStepToolExecutionRepository>();
@@ -258,9 +279,13 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(a => a.ClearWorkflowRelationships(list)).Returns(true);
             documentRepository.Setup(a => a.Delete(list)).Returns(false);
             documentRepository.Setup(a => a.FindHashById(list)).Returns(stringArray.AsQueryable());
-            embeddingRepository
-                .Setup(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
+            ragRouter
+                .Setup(a => a.DeleteEmbeddingsAsync(
+                    It.IsAny<TenantInfoDto>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
             fileRepositoryApi.Setup(api => api.Delete(It.IsAny<string>()))
                             .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
             cardRepository
@@ -286,7 +311,11 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Verify(a => a.ClearWorkflowRelationships(list), Times.Once);
             documentRepository.Verify(a => a.Delete(list), Times.Once);
             documentRepository.Verify(a => a.FindHashById(list), Times.Once);
-            embeddingRepository.Verify(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            ragRouter.Verify(a => a.DeleteEmbeddingsAsync(
+                It.IsAny<TenantInfoDto>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()), Times.Once);
             fileRepositoryApi.Verify(api => api.Delete(It.IsAny<string>()), Times.Once);
             cardRepository.Verify(a => a.FindCardIdsByDocumentIdsAsync(list), Times.Once);
             cardRepository.Verify(a => a.DeleteByDocumentIds(It.IsAny<List<int>>()), Times.Once);
@@ -304,9 +333,13 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             bool result;
-            var embeddingsRepository = _mocker.GetMock<IEmbeddingsApi>();
-            embeddingsRepository.Setup(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                                .ReturnsAsync(DocumentFixture.FindHttpResponseMessage());
+            var ragRouter = _mocker.GetMock<IRagInvocationRouter>();
+            ragRouter.Setup(a => a.DeleteEmbeddingsAsync(
+                    It.IsAny<TenantInfoDto>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
             // Act
             try
@@ -328,13 +361,13 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task DeleteHash_Fail()
         {
             // Arrange
-            var embeddingsRepository = _mocker.GetMock<IEmbeddingsApi>();
-            var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
-            {
-                Content = new StringContent("{'response':'value'}", Encoding.UTF8, "application/json")
-            };
-            embeddingsRepository.Setup(a => a.DeleteHash(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                                .ReturnsAsync(DocumentFixture.FindInvalidHttpResponseMessage());
+            var ragRouter = _mocker.GetMock<IRagInvocationRouter>();
+            ragRouter.Setup(a => a.DeleteEmbeddingsAsync(
+                    It.IsAny<TenantInfoDto>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new ArgumentException("Error while sending delete hash in Embeddings API"));
 
             // Act // Assert
             await Assert.ThrowsAsync<ArgumentException>(() => _documentDeletionServices.DeleteHash("test", "test"));

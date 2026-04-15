@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Domain.Utils
+namespace WoopiAiHub.Domain.Utils
 {
     public class RefitExternalSettings
     {
@@ -8,5 +8,6 @@
         public string GraphApiBaseAddress { get; set; }
         public string MarketPlaceBaseAddress { get; set; }
         public string AiGatewayApiBaseAddress { get; set; }
+        public string IntegrationApiBaseAddress { get; set; }
     }
 }

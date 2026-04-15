@@ -34,6 +34,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IDocumentHistoryServices, DocumentHistoryServices>();
             services.AddScoped<IDocumentMetadataServices, DocumentMetadataServices>();
             services.AddScoped<IDocumentQuestionnaireServices, DocumentQuestionnaireServices>();
+            services.AddScoped<IRagInvocationRouter, RagInvocationRouter>();
             services.AddScoped<IDocumentNormalizedServices, DocumentNormalizedServices>();
             services.AddScoped<IAccountServices, AccountServices>();
             services.AddScoped<ITenantServices, TenantServices>();

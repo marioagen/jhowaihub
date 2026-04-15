@@ -31,6 +31,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                   Model = f.Random.String(),
                   Name = f.Random.String(),
                   OcrModel = f.Random.String(),
+                  RagProvider = f.Random.String(),
                   RefineTemplate = f.Random.String(),
                   SearchMode = f.Random.String(),
                   Template = f.Random.String(),

@@ -1,13 +1,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System.Net;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
-using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -21,7 +19,7 @@ namespace WoopiAiHub.Application.Services
     {
         private readonly IDocumentRepository _documentRepository;
         private readonly IQuestionnaireRepository _questionnaireRepository;
-        private readonly IEmbeddingsApi _embbedingsApi;
+        private readonly IRagInvocationRouter _ragInvocationRouter;
         private readonly IConfiguration _config;
         private readonly IDocumentHistoryServices _documentHistoryServices;
         private readonly ITenantCacheServices _tenantCacheServices;
@@ -37,7 +35,7 @@ namespace WoopiAiHub.Application.Services
         public DocumentQuestionnaireServices(
             IDocumentRepository documentRepository,
             IQuestionnaireRepository questionnaireRepository,
-            IEmbeddingsApi embbedingsApi,
+            IRagInvocationRouter ragInvocationRouter,
             IConfiguration config,
             IDocumentHistoryServices documentHistoryServices,
             ITenantCacheServices tenantCacheServices,
@@ -49,7 +47,7 @@ namespace WoopiAiHub.Application.Services
         {
             _documentRepository = documentRepository;
             _questionnaireRepository = questionnaireRepository;
-            _embbedingsApi = embbedingsApi;
+            _ragInvocationRouter = ragInvocationRouter;
             _config = config;
             _documentHistoryServices = documentHistoryServices;
             _tenantCacheServices = tenantCacheServices;
@@ -71,27 +69,31 @@ namespace WoopiAiHub.Application.Services
             {
                 var documentDb = _documentRepository.FindById(documentQuestionnaireDto.IdDocument);
                 var questionnaire = _questionnaireRepository.FindById(documentQuestionnaireDto.IdQuestionnaire);
+                var tenantInfo = await _tenantCacheServices.FindTenantAsync(headersDto.Tenant);
 
                 foreach (var description in questionnaire.Questions.Select(u => u.Description))
                 {
-                    var customQueryRequestDto = await CreateCustomQueryRequestDto(description,
-                            headersDto.Tenant,
-                            headersDto.Language);
+                    var customQueryRequestDto =
+                        CreateCustomQueryRequestDto(description, headersDto.Tenant, headersDto.Language, tenantInfo!);
                     var apikey = _config["IndexerApiKey"]!;
 
-                    var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
+                    var executionResult = await _ragInvocationRouter.ExecuteCustomQueryAsync(
+                        tenantInfo!,
                         documentDb.ReferenceFile.ToString(),
+                        apikey,
+                        headersDto.EmailCreator,
                         customQueryRequestDto,
-                        apikey);
+                        CancellationToken.None);
 
-                    await ProcessRequestCustomQuery(resultRequest,
+                    await ProcessCustomQueryExecutionResult(executionResult,
                         documentQuestionnaireDto.IdDocument,
                         description,
                         headersDto.EmailCreator,
                         isFromQuestionnaire: true);
                 }
 
-                await CreateAuditLogForDocumentCardsAsync(documentQuestionnaireDto.IdDocument, AuditCardActionType.InputQuestionnaire);
+                await CreateAuditLogForDocumentCardsAsync(documentQuestionnaireDto.IdDocument,
+                    AuditCardActionType.InputQuestionnaire);
 
                 return true;
             }
@@ -112,18 +114,22 @@ namespace WoopiAiHub.Application.Services
             try
             {
                 var documentDb = _documentRepository.FindById(documentInputDto.Id);
-                var customQueryRequestDto = await CreateCustomQueryRequestDto(documentInputDto.Input,
-                    headersDto.Tenant,
-                    headersDto.Language);
+                var tenantInfo = await _tenantCacheServices.FindTenantAsync(headersDto.Tenant);
+                var customQueryRequestDto =
+                    CreateCustomQueryRequestDto(documentInputDto.Input, headersDto.Tenant, headersDto.Language,
+                        tenantInfo!);
 
                 var apikey = _config["IndexerApiKey"]!;
 
-                var resultRequest = await _embbedingsApi.CustomQuery(headersDto.Tenant,
+                var executionResult = await _ragInvocationRouter.ExecuteCustomQueryAsync(
+                    tenantInfo!,
                     documentDb.ReferenceFile.ToString(),
+                    apikey,
+                    headersDto.EmailCreator,
                     customQueryRequestDto,
-                    apikey);
+                    CancellationToken.None);
 
-                var textResponse = await ProcessRequestCustomQuery(resultRequest,
+                var textResponse = await ProcessCustomQueryExecutionResult(executionResult,
                     documentInputDto.Id,
                     documentInputDto.Input,
                     headersDto.EmailCreator,
@@ -141,45 +147,31 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Processes the HTTP response from the custom query API: deserializes the result, records usage, creates and saves document history, and returns the response text or throws on failure.
+        /// Persists usage, document history, and returns the model response text from a completed custom query execution.
         /// </summary>
-        private async Task<string> ProcessRequestCustomQuery(HttpResponseMessage resultRequest,
+        private async Task<string> ProcessCustomQueryExecutionResult(CustomQueryExecutionResult result,
             int id,
             string input,
             string emailCreator,
             bool isFromQuestionnaire)
         {
-            if (resultRequest.IsSuccessStatusCode)
+            var userId = _userRepository.FindIdByEmail(emailCreator);
+            var userIdOrNull = (userId == Guid.Empty) ? (Guid?)null : userId;
+            var historyType = isFromQuestionnaire ? DocumentHistoryTypeInputQuestionnaire : DocumentHistoryTypeDocumentInput;
+            var documentHistoryForDb = CreateDocumentHistoryForDb(id,
+                result.ResponseText,
+                input,
+                historyType,
+                userIdOrNull);
+            foreach (var usage in result.Usage)
             {
-                var queryResponse = await resultRequest.Content.ReadAsStringAsync();
-                var queryResponseModel = JsonConvert.DeserializeObject<QueryResponseModelRefitDto>(queryResponse);
-
-                var userId = _userRepository.FindIdByEmail(emailCreator);
-                var userIdOrNull = (userId == Guid.Empty) ? (Guid?)null : userId;
-                var historyType = isFromQuestionnaire ? DocumentHistoryTypeInputQuestionnaire : DocumentHistoryTypeDocumentInput;
-                var documentHistoryForDb = CreateDocumentHistoryForDb(id,
-                    queryResponseModel!.response,
-                    input,
-                    historyType,
-                    userIdOrNull);
-                foreach (var usage in queryResponseModel.Usage)
-                {
-                    await _usageDailyServices.AddByValuesAsync(MetricNames.Token, emailCreator, usage.Total_usage ?? 0,
-                        usage.Model);
-                }
-
-                _documentHistoryServices.Create(documentHistoryForDb);
-
-                return queryResponseModel.response;
+                await _usageDailyServices.AddByValuesAsync(MetricNames.Token, emailCreator, usage.Total_usage ?? 0,
+                    usage.Model);
             }
-            else if (resultRequest.StatusCode.Equals(HttpStatusCode.NotFound))
-            {
-                throw new FileNotFoundException("The file was not found in the llmindexer weaviate");
-            }
-            else
-            {
-                throw new AppException(ErrorCode.RefitApiError, "Error while sending question to Embeddings API", null);
-            }
+
+            _documentHistoryServices.Create(documentHistoryForDb);
+
+            return result.ResponseText;
         }
 
         /// <summary>
@@ -198,16 +190,15 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Builds a custom query request DTO from the input text and tenant/language, using cached tenant settings (model, k-value, template, etc.).
         /// </summary>
-        private async Task<CustomQueryRequestRefitDto> CreateCustomQueryRequestDto(string input,
+        private static CustomQueryRequestRefitDto CreateCustomQueryRequestDto(string input,
             string tenantName,
-            string language)
+            string language,
+            TenantInfoDto tenant)
         {
-            var tenant = await _tenantCacheServices.FindTenantAsync(tenantName);
-
             return new CustomQueryRequestRefitDto
             {
                 Question = input,
-                Model = tenant!.Model,
+                Model = tenant.Model,
                 kValue = tenant.KValue,
                 Temperature = 0,
                 Template = tenant.Template.Replace("{language}", language.ConvertLanguageCodeToName()),

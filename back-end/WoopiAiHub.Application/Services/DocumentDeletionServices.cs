@@ -1,4 +1,3 @@
-using System.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
@@ -7,6 +6,7 @@ using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 
@@ -19,7 +19,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IEmbeddingsApi _embbedingsApi;
+        private readonly IRagInvocationRouter _ragInvocationRouter;
+        private readonly ITenantCacheServices _tenantCacheServices;
         private readonly IConfiguration _config;
         private readonly IFileRepositoryApi _fileRepositoryApi;
         private readonly IAuditCardService _auditCardService;
@@ -32,7 +33,8 @@ namespace WoopiAiHub.Application.Services
             IStepToolExecutionRepository stepToolExecutionRepository,
             IStepToolOutputRepository stepToolOutputRepository,
             IUnitOfWork unitOfWork,
-            IEmbeddingsApi embbedingsApi,
+            IRagInvocationRouter ragInvocationRouter,
+            ITenantCacheServices tenantCacheServices,
             IConfiguration config,
             IFileRepositoryApi fileRepositoryApi,
             IAuditCardService auditCardService,
@@ -44,7 +46,8 @@ namespace WoopiAiHub.Application.Services
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _stepToolOutputRepository = stepToolOutputRepository;
             _unitOfWork = unitOfWork;
-            _embbedingsApi = embbedingsApi;
+            _ragInvocationRouter = ragInvocationRouter;
+            _tenantCacheServices = tenantCacheServices;
             _config = config;
             _fileRepositoryApi = fileRepositoryApi;
             _auditCardService = auditCardService;
@@ -128,16 +131,14 @@ namespace WoopiAiHub.Application.Services
             if (string.IsNullOrEmpty(tenant))
                 throw new ArgumentException("Tenant cannot be null or empty.", nameof(tenant));
 
-            var apikey = _config["IndexerApiKey"]!;
-            var resultRequest = await _embbedingsApi.DeleteHash(tenant,
-                hash,
-                tenant,
-                apikey);
-
-            if (!resultRequest.IsSuccessStatusCode && resultRequest.StatusCode != HttpStatusCode.NotFound)
+            var tenantInfo = await _tenantCacheServices.FindTenantAsync(tenant);
+            if (tenantInfo == null)
             {
-                throw new ArgumentException("Error while sending delete hash in Embeddings API");
+                throw new ArgumentException("Tenant not found.", nameof(tenant));
             }
+
+            var apikey = _config["IndexerApiKey"]!;
+            await _ragInvocationRouter.DeleteEmbeddingsAsync(tenantInfo, hash, apikey, CancellationToken.None);
         }
 
         /// <summary>
