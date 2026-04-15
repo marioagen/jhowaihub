@@ -24,7 +24,6 @@ namespace WoopiAiHub.Application.Messaging
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<PromptConsumer> _logger;
         private readonly MessageQueues _queues;
-        private readonly ResponseOpenAiSettings _responseOpenAiSettings;
         private readonly OpenAiSettings _openAiSettings;
         private readonly McpSettings _mcpSettings;
 
@@ -33,7 +32,6 @@ namespace WoopiAiHub.Application.Messaging
                               IMessageConsumer<OpenAiResponseConsumerResponseDto> consumer,
                               ILogger<PromptConsumer> logger,
                               IOptions<MessageQueues> queues,
-                              IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
                               IOptions<OpenAiSettings> openAiSettings,
                               IOptions<McpSettings> mcpSettings) : base(configuration)
         {
@@ -41,7 +39,6 @@ namespace WoopiAiHub.Application.Messaging
             _queues = queues.Value;
             _consumer = consumer;
             _logger = logger;
-            _responseOpenAiSettings = responseOpenAiSettings.Value;
             _openAiSettings = openAiSettings.Value;
             _mcpSettings = mcpSettings.Value;
         }

@@ -30,7 +30,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         private readonly Mock<IApiTemplateServices> _mockApiTemplateServices;
         private readonly Mock<IAccountServices> _mockAccountServices;
         private readonly ChatCompletionSettings _chatCompletionSettings;
-        private readonly ResponseOpenAiSettings _responseOpenAiSettings;
+        private readonly OpenAiSettings _openAiSettings;
+        private readonly McpSettings _mcpSettings;
         public PromptHandlerTests()
         {
             _mocker = new AutoMocker();
@@ -52,11 +53,9 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 Temperature = 0.7,
                 ApiVersion = "1"
             };
-            _responseOpenAiSettings = new ResponseOpenAiSettings
+
+            _mcpSettings = new McpSettings
             {
-                Temperature = 0,
-                Model = "gpt-4",
-                ApiVersion = "",
                 McpAddress = "",
                 Instructions = "instructions {0} instructions",
                 JWTKey = Guid.NewGuid().ToString(),
@@ -66,8 +65,17 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 JWTExpirationTime = 5
 
             };
+
+            _openAiSettings = new OpenAiSettings
+            {
+                Temperature = 0,
+                Model = "gpt-4",
+                ApiVersion = "",
+
+            };
             _mocker.Use<IOptions<ChatCompletionSettings>>(Options.Create(_chatCompletionSettings));
-            _mocker.Use<IOptions<ResponseOpenAiSettings>>(Options.Create(_responseOpenAiSettings));
+            _mocker.Use<IOptions<McpSettings>>(Options.Create(_mcpSettings));
+            _mocker.Use<IOptions<OpenAiSettings>>(Options.Create(_openAiSettings));
 
             _handler = _mocker.CreateInstance<PromptHandler>();
         }
@@ -331,11 +339,11 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             _mockAccountServices
                 .Setup(x =>
                     x.GenerateTokenWithParameters(
-                        _responseOpenAiSettings.JWTKey,
-                        _responseOpenAiSettings.JWTIssuer,
-                        _responseOpenAiSettings.JWTAudience,
-                        _responseOpenAiSettings.JWTUser,
-                        _responseOpenAiSettings.JWTExpirationTime
+                        _mcpSettings.JWTKey,
+                        _mcpSettings.JWTIssuer,
+                        _mcpSettings.JWTAudience,
+                        _mcpSettings.JWTUser,
+                        _mcpSettings.JWTExpirationTime
                     )
                 )
                 .Returns("token-test");
@@ -355,7 +363,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.Contains("Api 1", message.OpenAiResponse.Instructions);
             Assert.Contains("Api 2", message.OpenAiResponse.Instructions);
 
-            Assert.Equal(_responseOpenAiSettings.MaxToolCalls, message.OpenAiResponse.MaxToolCalls);
+            Assert.Equal(_mcpSettings.MaxToolCalls, message.OpenAiResponse.MaxToolCalls);
 
             Assert.NotNull(message.OpenAiResponse.Tools);
             Assert.Single(message.OpenAiResponse.Tools);

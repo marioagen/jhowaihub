@@ -27,7 +27,6 @@ public class PromptHandler : IToolHandler
     private readonly McpSettings _mcpSettings;
     private readonly IApiTemplateServices _apiTemplateServices;
     private readonly IAccountServices _accountServices;
-    private readonly ResponseOpenAiSettings _responseOpenAiSettings;
     private readonly OpenAiSettings _openAiSettings;
 
     public PromptHandler(IOptions<MessageQueues> messageQueues,
@@ -35,7 +34,6 @@ public class PromptHandler : IToolHandler
                          ITenantCacheServices tenantCacheServices,
                          IApiTemplateServices apiTemplateServices,
                          IAccountServices accountServices,
-                         IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
                          IOptions<OpenAiSettings> openAiSettings,
                          IOptions<McpSettings> mcpSettings)
     {
@@ -44,7 +42,6 @@ public class PromptHandler : IToolHandler
         _tenantCacheServices = tenantCacheServices;
         _apiTemplateServices = apiTemplateServices;
         _accountServices = accountServices;
-        _responseOpenAiSettings = responseOpenAiSettings.Value;
         _openAiSettings = openAiSettings.Value;
         _mcpSettings = mcpSettings.Value;
     }
@@ -208,7 +205,7 @@ public class PromptHandler : IToolHandler
             mappedApiString = mappedApiString.Replace($"PAYLOAD_API_{item.Id}", System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(bodyContent).RootElement));
         }
 
-        var instructions = string.IsNullOrEmpty(mappedApiString) ? "" : _responseOpenAiSettings.Instructions.Replace("{0}", mappedApiString);
+        var instructions = string.IsNullOrEmpty(mappedApiString) ? "" : _mcpSettings.Instructions.Replace("{0}", mappedApiString);
         return instructions;
     }
 

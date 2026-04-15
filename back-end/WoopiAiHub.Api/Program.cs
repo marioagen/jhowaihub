@@ -75,7 +75,6 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IHubNotifier, HubNotifier>();
 builder.Services.AddSingleton<IConnectionMappingService, ConnectionMappingService>();
 builder.Services.Configure<ChatCompletionSettings>(builder.Configuration.GetSection("ChatCompletionSettings"));
-builder.Services.Configure<ResponseOpenAiSettings>(builder.Configuration.GetSection("ResponseOpenAiSettings"));
 builder.Services.Configure<OpenAiSettings>(builder.Configuration.GetSection("OpenAiSettings"));
 builder.Services.Configure<McpSettings>(builder.Configuration.GetSection("McpSettings"));
 
