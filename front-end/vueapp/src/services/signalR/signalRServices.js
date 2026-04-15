@@ -16,6 +16,7 @@ class SignalRService {
         this.connection = null;
         this.hubUrl = `${ENV_CONFIG.VUE_APP_BASE_URL_API}/hubs/notifications`;
         this._intentionalStop = false;
+        this._isStarting = false;
         this._registeredHandlers = new Map();
         this._startRetryTimer = null;
         this._visibilityHandler = this._onVisibilityChange.bind(this);
@@ -23,8 +24,10 @@ class SignalRService {
     }
 
     async startConnection() {
-        if (this._intentionalStop) return;
-        if (this._isConnectedOrConnecting()) return;
+        this._intentionalStop = false;
+        if (this._isStarting || this._isConnectedOrConnecting()) return;
+        this._isStarting = true;
+        this._clearRestartTimer();
 
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(this.hubUrl, {
@@ -43,6 +46,8 @@ class SignalRService {
         } catch (error) {
             logService.showMessage("SignalR start failed. Retrying in 5s: " + error);
             this._scheduleRestart();
+        } finally {
+            this._isStarting = false;
         }
     }
 
@@ -107,17 +112,17 @@ class SignalRService {
     }
 
     _registerLifecycleHandlers() {
-        this.connection.onreconnecting(() => {
-            logService.showMessage("SignalR reconnecting...");
+        this.connection.onreconnecting((error) => {
+            logService.showMessage("SignalR reconnecting... Error: " + (error || "unknown"));
         });
 
-        this.connection.onreconnected(() => {
-            logService.showMessage("SignalR reconnected.");
+        this.connection.onreconnected((connectionId) => {
+            logService.showMessage("SignalR reconnected. New connectionId: " + connectionId);
         });
 
         this.connection.onclose((error) => {
             if (this._intentionalStop) return;
-            logService.showMessage("SignalR connection closed. Restarting in 5s...");
+            logService.showMessage("SignalR connection closed. Error: " + (error || "none") + ". Restarting in 5s...");
             this._scheduleRestart();
         });
     }
@@ -149,7 +154,7 @@ class SignalRService {
     _onVisibilityChange() {
         if (document.visibilityState !== "visible") return;
         if (this._intentionalStop) return;
-        if (!this._isConnectedOrConnecting()) {
+        if (!this._isStarting && !this._isConnectedOrConnecting()) {
             logService.showMessage("SignalR: tab visible, reconnecting...");
             this.connection = null;
             this.startConnection();

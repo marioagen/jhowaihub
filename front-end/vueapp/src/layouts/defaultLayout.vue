@@ -92,7 +92,6 @@
             GlobalEventService.off("uploadComplete", this.handleUploadComplete);
             GlobalEventService.off("uploadStarted", this.handleUploadStarted);
             signalRService.off(this.signalrAnonymizationReady);
-            signalRService.stopConnection();
         },
         computed: {
             updatePage() {
