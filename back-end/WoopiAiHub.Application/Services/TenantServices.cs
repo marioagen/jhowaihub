@@ -106,19 +106,6 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Makes the request to obtain the tenants that the user has enabled in the Marketplace
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        public async Task<IEnumerable<string>> FindAllByUserEmail(string email)
-        {
-            var tenants = await _marketPlaceApi.FindTenantsByUserEmail(_configuration["keyAccess"]!,
-                                                                       email);
-
-            return tenants;
-        }
-
-        /// <summary>
         /// Finds the plan associated with the tenant
         /// </summary>
         /// <param name="tenant"></param>

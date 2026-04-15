@@ -252,7 +252,7 @@
                 }
                 this.loadingUsers = true;
                 try {
-                    const workflow = await WorkflowService.getWorkflowById(workflowId, {});
+                    const workflow = await WorkflowService.getPhase1ById(workflowId);
                     if (workflow?.error || !workflow?.teams?.length) {
                         this.fetchedUsers = [];
                         return;

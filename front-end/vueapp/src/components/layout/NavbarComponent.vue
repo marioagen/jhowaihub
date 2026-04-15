@@ -60,7 +60,6 @@
     import axios from "axios";
     import api from "@/services/api";
     import router from "@/router";
-    import AvatarComponent from "@/components/global/AvatarComponent.vue";
     import LanguageComponent from "@/components/layout/LanguageComponent.vue";
     import NavbarNotificationComponent from "@/components/layout/NavbarNotificationComponent.vue";
     import ThemeSwitchComponent from "@/components/layout/ThemeSwitchComponent.vue";
@@ -75,7 +74,6 @@
             },
         },
         components: {
-            AvatarComponent,
             LanguageComponent,
             NavbarNotificationComponent,
             ThemeSwitchComponent,
@@ -86,38 +84,13 @@
                 profileImage: "",
                 user: this.$store.state.userProfile.name,
                 selectedTenant: null,
-                tenantsFromState: [],
             };
         },
         methods: {
-            handleTenantChange(event) {
-                this.selectedTenant = event.target.value;
-                this.$store.commit("updateUserProfileTenant", {
-                    amount: this.selectedTenant,
-                });
-
-                this.InitializeTenant(this.selectedTenant)
-                    .then(() => {
-                        window.location.href = "/";
-                    })
-                    .catch((error) => {
-                        console.log("Erro ao inicializar o tenant:", error);
-                    });
-            },
             InitializeTenant(tenant) {
                 return api.get("/Tenant/InitializeTenant/" + tenant);
             },
-            getUserTenants(userEmail, savedTenant) {
-                api.get("/Tenant/FindAllByUserEmail/" + userEmail)
-                    .then((result) => {
-                        if (JSON.stringify(result.data) !== JSON.stringify(this.tenantsFromState)) {
-                            this.tenantsFromState = result.data;
-                        }
-                    })
-                    .catch((e) => {
-                        console.log(e);
-                    });
-
+            initializeSelectedTenant(savedTenant) {
                 this.selectedTenant = savedTenant;
                 if (!this.tenantInitialized) {
                     this.InitializeTenant(this.selectedTenant);
@@ -167,9 +140,8 @@
             },
         },
         created() {
-            const userEmail = this.$store.state.userProfile.login;
             const savedTenant = this.$store.state.userProfile.tenant;
-            if (userEmail === "" || savedTenant === "") {
+            if (savedTenant === "" || this.$store.state.userProfile.login === "") {
                 router.push({ name: "Logout" });
             }
 
@@ -177,7 +149,7 @@
                 this.getProfileImage();
             }
 
-            this.getUserTenants(userEmail, savedTenant);
+            this.initializeSelectedTenant(savedTenant);
         },
     };
 </script>
