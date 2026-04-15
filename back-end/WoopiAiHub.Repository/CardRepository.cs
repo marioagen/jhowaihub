@@ -209,8 +209,6 @@ namespace WoopiAiHub.Repository
                 return false;
 
             var totalUpdated = 0;
-
-            // Batch cards that share the same target values into a single UPDATE.
             var groups = cards.GroupBy(c => new { c.StepId, c.StatusId, c.AssignedUserId });
             foreach (var group in groups)
             {
