@@ -24,14 +24,25 @@
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
                                 >
+                                    <LucideIcon
+                                        icon="Workflow"
+                                        :size="14"
+                                        class="me-2"
+                                        stroke="#0d6efd"
+                                    />
                                     <div>
                                         <div class="fw-bold font-size-sm">
                                             {{ selectedOption.teamName }}
                                         </div>
-                                        <div class="text-muted font-size-xs">
+                                        <div class="font-size-xs">
                                             {{ selectedOption.name }}
                                         </div>
                                     </div>
+                                    <LucideIcon
+                                        icon="ChevronDown"
+                                        :size="20"
+                                        class="ms-2 text-muted"
+                                    />
                                     <LucideIcon
                                         icon="ChevronDown"
                                         :size="20"
@@ -47,7 +58,21 @@
                                                     :size="16"
                                                     class="me-1"
                                                 />
+                                                <LucideIcon
+                                                    icon="Search"
+                                                    :size="16"
+                                                    class="me-1"
+                                                />
                                             </span>
+                                            <input
+                                                id="filter-workflow"
+                                                v-model="workflowSearchText"
+                                                type="text"
+                                                name="filter"
+                                                class="form-control"
+                                                @input="searchWorkflow"
+                                                @click.stop=""
+                                            />
                                             <input
                                                 id="filter-workflow"
                                                 v-model="workflowSearchText"
@@ -59,6 +84,14 @@
                                             />
                                         </div>
                                     </li>
+                                    <li
+                                        v-for="item in filteredWorkflows"
+                                        :key="item.id"
+                                    >
+                                        <a
+                                            class="dropdown-item"
+                                            @click="selectOption(item)"
+                                        >
                                     <li
                                         v-for="item in filteredWorkflows"
                                         :key="item.id"
@@ -88,7 +121,7 @@
                             >
                                 <LucideIcon
                                     icon="SquarePen"
-                                    :size="14"
+                                    :size="20"
                                 />
                             </button>
                         </div>
