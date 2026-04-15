@@ -204,8 +204,7 @@ public class PromptHandler : IToolHandler
             mappedApiString = mappedApiString.Replace($"PAYLOAD_API_{item.Id}", System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(bodyContent).RootElement));
         }
 
-        var instructions = string.IsNullOrEmpty(mappedApiString) ? "" : _mcpSettings.Instructions.Replace("{0}", mappedApiString);
-        return instructions;
+        return string.IsNullOrEmpty(mappedApiString) ? "" : _mcpSettings.Instructions.Replace("{0}", mappedApiString);
     }
 
     /// <summary>

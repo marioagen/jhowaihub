@@ -31,8 +31,6 @@ namespace WoopiAiHub.Domain.Models
         [Column("EnableAccessFromMcp", TypeName = "bit")]
         public bool EnableAccessFromMcp { get; private set; } = false;
         public virtual ICollection<PromptApiTemplate> PromptApiTemplates { get; set; } = [];
-
-
         public void UpdateName(string name) => Name = name;
         public void UpdateMethod(string method) => Method = method;
         public void UpdateUrl(string url) => Url = url;

@@ -110,7 +110,7 @@
                                     <div class="d-flex align-items-center mb-1">
                                         <LucideIcon icon="PlugZap" class="icon-blue" />
                                         <label class="form-label mb-0 ms-2">
-                                            Consulta externa de IA
+                                            {{ $t("prompts.labelMcp") }}
                                         </label>
                                     </div>
                                 </div>
@@ -121,7 +121,7 @@
                                             <input v-bind="field" id="templateActive" type="checkbox"
                                                 class="form-check-input" :class="{ 'is-invalid': errorMessage }" />
                                             <label class="form-check-label" for="templateActive">
-                                                Habilitar consulta externa de IA
+                                                {{ $t("prompts.enableMcp") }}
                                             </label>
                                         </div>
                                     </Field>
@@ -163,24 +163,26 @@
                                         <div v-if="isLoading" class="text-center">      
                                             <LoadingComponent />
                                         </div>
-                                        <div v-else-if="filtersAPiTemplateList.length === 0" class="text-center text-muted py-3">
-                                            {{ $t("documents.upload.noWorkflowFound") }}
-                                        </div>
-                                        <div v-if="!isLoading" v-for="api in filtersAPiTemplateList" :key="api.id" class="p-1">
-                                            <div class="form-check d-flex align-items-center">
-                                                <input class="form-check-input me-3" type="checkbox" :id="`user-${api.id}`"
-                                                    :value="api.id" v-model="apiTemplatesSelected" />
-                                                <label class="form-check-label d-flex align-items-center w-100"
-                                                    :for="`user-${api.id}`">                                                                                            
-                                                    <div class="d-flex flex-column">
-                                                        <span class="fw-semibold">
-                                                            {{ api.name }}
-                                                        </span>
-                                                        <small class="gray-color">{{ api.url }}</small>
-                                                    </div>
-                                                </label>
+                                        <template v-else >
+                                            <div v-if="filtersAPiTemplateList.length === 0" class="text-center text-muted py-3">
+                                                {{ $t("documents.upload.noWorkflowFound") }}
                                             </div>
-                                        </div>
+                                            <div v-else v-for="api in filtersAPiTemplateList" :key="api.id" class="p-1">
+                                                <div class="form-check d-flex align-items-center">
+                                                    <input class="form-check-input me-3" type="checkbox" :id="`user-${api.id}`"
+                                                        :value="api.id" v-model="apiTemplatesSelected" />
+                                                    <label class="form-check-label d-flex align-items-center w-100"
+                                                        :for="`user-${api.id}`">                                                                                            
+                                                        <div class="d-flex flex-column">
+                                                            <span class="fw-semibold">
+                                                                {{ api.name }}
+                                                            </span>
+                                                            <small class="gray-color">{{ api.url }}</small>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </template>
                                     </div>
                                     <div v-if="apiTemplatesSelected.length > 0" class="mt-3">
                                         <label class="form-label">
@@ -391,7 +393,8 @@ export default {
         },
         findById(id) {
             this.resetData();
-            PromptService.getPromptById(id).then((response) => {
+            PromptService.getPromptById(id)
+            .then((response) => {
                 this.form = {
                     name: response.name,
                     description: response.description,
@@ -401,6 +404,14 @@ export default {
                 this.setValues(this.form);
                 this.apiTemplatesSelected = response.promptApiTemplates.map(x => x.apiTemplateId);
                 this.idEdit = id;
+            })
+            .catch(() => {
+                this.$notify({  
+                    title: "prompts.title",
+                    message: "prompts.getDataError",
+                    variant: "danger",
+                    icon: "CircleX",
+                });
             });
         },
         loadCloneData(id) {
@@ -503,8 +514,6 @@ export default {
             this.isRefining = true;
             PromptService.refinePrompt(this.values.text)
                 .then((response) => {
-                    if (!response || response.error) throw new Error("Refine failed");
-
                     let refinedText = response;
                     if (typeof response === "object") {
                         refinedText = Object.entries(response)
@@ -555,8 +564,6 @@ export default {
                 contextText: this.testContext,
             })
                 .then((response) => {
-                    if (!response || response.error) throw new Error("Test failed");
-
                     this.testResult =
                         typeof response === "string" ? response : String(response ?? "");
                 })
