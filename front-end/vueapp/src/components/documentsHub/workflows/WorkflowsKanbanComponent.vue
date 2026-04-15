@@ -410,11 +410,28 @@
                 }
                 return this.users.filter((u) => u.name && u.name.toLowerCase().includes(q));
             },
+            firstStepCardIds() {
+                const steps = Array.isArray(this.kanbanCards)
+                    ? this.kanbanCards
+                    : this.kanbanCards?.steps || [];
+                if (steps.length === 0) return [];
+                const minOrder = Math.min(...steps.map((s) => s.order));
+                return steps
+                    .filter((s) => s.order === minOrder)
+                    .flatMap((s) => (s.cards || []).map((c) => c.id));
+            },
         },
         methods: {
             clearBulkSelection() {
                 this.selectedCardIds = [];
                 this.bulkAssignUserSearchText = "";
+            },
+            isFirstStepCardId(cardId) {
+                return this.firstStepCardIds.some((fid) => fid === cardId || fid == cardId);
+            },
+            pruneFirstStepCardIdsFromSelection() {
+                if (this.selectedCardIds.length === 0) return;
+                this.selectedCardIds = this.selectedCardIds.filter((id) => !this.isFirstStepCardId(id));
             },
             assignRangeErrorMessage(error) {
                 const data = error?.response?.data;
@@ -487,6 +504,7 @@
                 this.isKanbanView = false;
             },
             onToggleAccordionCardSelection({ cardId, selected }) {
+                if (this.isFirstStepCardId(cardId)) return;
                 const set = new Set(this.selectedCardIds);
                 if (selected) {
                     set.add(cardId);
@@ -496,11 +514,13 @@
                 this.selectedCardIds = Array.from(set);
             },
             onToggleAccordionStepSelection({ cardIds, selectAll }) {
+                const allowedIds = cardIds.filter((id) => !this.isFirstStepCardId(id));
+                if (allowedIds.length === 0) return;
                 const set = new Set(this.selectedCardIds);
                 if (selectAll) {
-                    cardIds.forEach((id) => set.add(id));
+                    allowedIds.forEach((id) => set.add(id));
                 } else {
-                    cardIds.forEach((id) => set.delete(id));
+                    allowedIds.forEach((id) => set.delete(id));
                 }
                 this.selectedCardIds = Array.from(set);
             },
@@ -558,6 +578,7 @@
                 WorkflowService.getWorkflowStepsById(workflowId, this.filters)
                     .then((response) => {
                         this.kanbanCards = response;
+                        this.pruneFirstStepCardIdsFromSelection();
                     })
                     .finally(() => {
                         this.isLoadingKanban = false;
@@ -674,6 +695,7 @@
                         steps: [...steps],
                     };
                 }
+                this.pruneFirstStepCardIdsFromSelection();
             },
             updateSpecificCards(cardIds, signalRMessage = null) {
                 if (!cardIds || cardIds.length === 0) return;
