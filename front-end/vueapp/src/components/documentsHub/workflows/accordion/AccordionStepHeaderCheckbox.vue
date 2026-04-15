@@ -55,6 +55,11 @@
             syncDom() {
                 const el = this.$refs.inputEl;
                 if (!el) return;
+                if (this.visibleCardIds.length === 0) {
+                    el.checked = false;
+                    el.indeterminate = false;
+                    return;
+                }
                 const all = this.allSelected();
                 const some = this.someSelected();
                 el.checked = all && this.visibleCardIds.length > 0;
