@@ -1,4 +1,5 @@
 import store from "@/store";
+import { tz } from "@date-fns/tz";
 import { format, parseISO, isValid } from "date-fns";
 
 export default {
@@ -53,10 +54,13 @@ export default {
             return "";
         }
 
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const opts = timeZone ? { in: tz(timeZone) } : undefined;
+
         if (store.state.userProfile.language === "en") {
-            return format(dateObj, "yyyy/MM/dd HH:mm");
+            return format(dateObj, "yyyy/MM/dd HH:mm", opts);
         } else {
-            return format(dateObj, "dd/MM/yyyy HH:mm");
+            return format(dateObj, "dd/MM/yyyy HH:mm", opts);
         }
     },
 };
