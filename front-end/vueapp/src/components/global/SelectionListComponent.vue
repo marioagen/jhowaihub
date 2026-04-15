@@ -1,9 +1,17 @@
 <template>
-    <div class="mt-3">
-        <label class="form-label fw-semibold mb-0">{{ $t(labelPanel) }}</label>
+    <div :class="{ 'mt-3': !compact }">
+        <label
+            v-if="showLabel"
+            class="form-label fw-semibold mb-0"
+        >
+            {{ $t(labelPanel) }}
+        </label>
         <div class="card">
             <div class="card-header p-2">
-                <div class="d-flex justify-content-between align-items-center mb-2">
+                <div
+                    v-if="!hideBulkToolbar"
+                    class="d-flex justify-content-between align-items-center mb-2"
+                >
                     <span class="fw-semibold">
                         {{ $t(labelSelectedQuantity) }} ({{ selected.length }})
                     </span>
@@ -37,7 +45,7 @@
                     class="mb-3 px-1"
                 >
                     <label class="form-label small fw-semibold mb-2 d-block">
-                        {{ $t("common.selectionList") }}
+                        {{ $t(selectionChipLabelKey) }}
                     </label>
                     <div class="d-flex flex-wrap gap-2">
                         <div
@@ -121,7 +129,9 @@
                                     </div>
                                     <div>
                                         <div class="fw-semibold">{{ item.name }}</div>
-                                        <div class="text-muted small">{{ item.email }}</div>
+                                        <div class="text-muted small">
+                                            {{ userSecondaryLine(item) }}
+                                        </div>
                                     </div>
                                 </label>
                             </div>
@@ -185,6 +195,26 @@
                 type: String,
                 default: "",
             },
+            maxSelections: {
+                type: Number,
+                default: null,
+            },
+            hideBulkToolbar: {
+                type: Boolean,
+                default: false,
+            },
+            compact: {
+                type: Boolean,
+                default: false,
+            },
+            selectionChipLabelKey: {
+                type: String,
+                default: "common.selectionList",
+            },
+            showLabel: {
+                type: Boolean,
+                default: true,
+            },
         },
         emits: ["update:selectedItems"],
         data() {
@@ -198,13 +228,17 @@
                     return this.selectedItems;
                 },
                 set(val) {
-                    this.$emit("update:selectedItems", val);
+                    let next = val;
+                    if (this.maxSelections === 1 && Array.isArray(val) && val.length > 1) {
+                        next = [val[val.length - 1]];
+                    }
+                    this.$emit("update:selectedItems", next);
                 },
             },
             filteredItems() {
                 if (!this.search) return this.items;
                 return this.items.filter((item) =>
-                    item.name.toLowerCase().includes(this.search.toLowerCase())
+                    (item.name || "").toLowerCase().includes(this.search.toLowerCase())
                 );
             },
             resolvedChipIcon() {
@@ -230,7 +264,16 @@
                 this.selected = this.selectedItems.filter((itemId) => itemId !== id);
             },
             selectAll() {
+                if (this.maxSelections === 1 && this.filteredItems.length > 0) {
+                    this.selected = [this.filteredItems[0].id];
+                    return;
+                }
                 this.selected = this.filteredItems.map((item) => item.id);
+            },
+            userSecondaryLine(item) {
+                if (item.profile?.name) return item.profile.name;
+                if (item.role) return item.role;
+                return item.email ?? "";
             },
             clearSelection() {
                 this.selected = [];

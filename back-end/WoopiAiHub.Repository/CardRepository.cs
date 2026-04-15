@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -12,6 +11,9 @@ namespace WoopiAiHub.Repository
     {
         private readonly ApplicationDbContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CardRepository"/> class with the EF Core database context.
+        /// </summary>
         public CardRepository(ApplicationDbContext context)
         {
             _context = context;
@@ -64,6 +66,30 @@ namespace WoopiAiHub.Repository
                     .ThenInclude(st => st!.Workflow)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        /// <summary>
+        /// Loads multiple cards by id with step and workflow navigation properties, tracked by the current context.
+        /// </summary>
+        /// <param name="cardIds">Card identifiers to load.</param>
+        public async Task<List<Card>> FindRangeByIdsWithStepWorkflowTracked(IReadOnlyList<int> cardIds)
+        {
+            return await _context.Cards
+                .Where(c => cardIds.Contains(c.Id))
+                .Include(s => s.Step)
+                    .ThenInclude(st => st!.Workflow)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Loads cards by id with step and workflow navigation properties tracked; returns an empty list when <paramref name="cardIds"/> is null or empty.
+        /// </summary>
+        /// <inheritdoc />
+        public async Task<List<Card>?> FindByCardIdsAsync(IReadOnlyList<int> cardIds)
+        {
+            if (cardIds == null || cardIds.Count == 0)
+                return new List<Card>();
+            return await FindRangeByIdsWithStepWorkflowTracked(cardIds);
         }
 
         /// <summary>
@@ -164,17 +190,22 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Updates the specified collection of card entities in the database.
+        /// Updates the specified collection of card entities; equivalent to <see cref="UpdateRange"/>.
+        /// </summary>
+        public Task<bool> UpdateList(List<Card> cards) => UpdateRange(cards);
+
+        /// <summary>
+        /// Updates the specified collection of card entities in the database using EF Core <c>UpdateRange</c>.
         /// </summary>
         /// <remarks>Throws an exception if any card in the list is invalid or if a database error occurs.
         /// All changes are committed in a single transaction.</remarks>
         /// <param name="cards">A list of <see cref="Card"/> objects to update. Each card must have a valid identifier corresponding to an
         /// existing record in the database. Cannot be null.</param>
         /// <returns>true if one or more records were updated successfully; otherwise, false.</returns>
-        public bool UpdateList(List<Card> cards)
+        public async Task<bool> UpdateRange(List<Card> cards)
         {
             _context.Cards.UpdateRange(cards);
-            return _context.SaveChanges() > 0;
+            return await _context.SaveChangesAsync() > 0;
         }
 
         /// <summary>
@@ -333,6 +364,9 @@ namespace WoopiAiHub.Repository
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Returns the card with step and workflow, or all cards in the same document batch when the card belongs to a batch.
+        /// </summary>
         /// <inheritdoc />
         public async Task<List<Card>?> FindCardOrBatchWithStepWorkflowAsync(int cardId)
         {
@@ -344,6 +378,9 @@ namespace WoopiAiHub.Repository
             return [card];
         }
 
+        /// <summary>
+        /// Returns the card with document loaded, or all cards in the same document batch when the card belongs to a batch.
+        /// </summary>
         /// <inheritdoc />
         public async Task<List<Card>?> FindCardOrBatchWithDocumentAsync(int cardId)
         {

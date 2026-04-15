@@ -13,6 +13,9 @@ namespace WoopiAiHub.Repository
     {
         private readonly ApplicationDbContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WorkflowRepository"/> class with the EF Core database context.
+        /// </summary>
         public WorkflowRepository(ApplicationDbContext context)
         {
             _context = context;
@@ -816,6 +819,30 @@ namespace WoopiAiHub.Repository
                                                 .AnyAsync(u => u.Id == userId);
 
             return isValidTeamUser;
+        }
+
+        /// <summary>
+        /// Returns whether <paramref name="userId"/> belongs to a team on every workflow linked to each card’s document
+        /// (all distinct card ids must pass validation).
+        /// </summary>
+        /// <inheritdoc cref="IWorkflowRepository.IsValidTeamUser(IReadOnlyList{int}, Guid)" />
+        public async Task<bool> IsValidTeamUser(IReadOnlyList<int> cardIds, Guid userId)
+        {
+            if (cardIds == null || cardIds.Count == 0)
+                return false;
+
+            var distinctIds = cardIds.Distinct().ToList();
+
+            var matchingIds = await _context.Cards
+                .Where(c => distinctIds.Contains(c.Id))
+                .Where(c => c.Document!.Workflows
+                    .SelectMany(w => w.Teams)
+                    .SelectMany(t => t.Users)
+                    .Any(u => u.Id == userId))
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            return matchingIds.Count == distinctIds.Count;
         }
 
         /// <summary>

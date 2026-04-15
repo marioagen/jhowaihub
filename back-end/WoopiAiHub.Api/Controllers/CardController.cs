@@ -1,8 +1,8 @@
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -77,6 +77,20 @@ namespace WoopiAiHub.Api.Controllers
         public async Task<IActionResult> UnassignUser(int cardId)
         {
             var result = await _cardServices.UnassignUser(cardId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Assigns a user to multiple cards (one assignment per distinct card id).
+        /// </summary>
+        /// <param name="request">User id and card ids to assign.</param>
+        /// <returns><see langword="true"/> if the assignment completed successfully.</returns>
+        [HttpPut("AssignRange")]
+        [SwaggerOperation("Assigns a user to multiple cards (AssignRange per distinct card id)")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> AssignRange([FromBody] AssignRangeDto request)
+        {
+            var result = await _cardServices.AssignRangeAsync(request);
             return Ok(result);
         }
 
