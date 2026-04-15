@@ -99,7 +99,7 @@ namespace WoopiAiHub.Domain.Models
 
         public void RecordLogin()
         {
-            LastLoginAt = DateTime.Now;
+            LastLoginAt = DateTime.UtcNow;
         }
     }
 }
