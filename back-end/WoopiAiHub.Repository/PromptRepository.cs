@@ -192,6 +192,12 @@ namespace WoopiAiHub.Repository
             return false;
         }
 
+        /// <summary>
+        /// Will remove the references to ApiTemplate from prompt when a Api template is deleted or is checked as no external search
+        /// </summary>
+        /// <param name="prompt"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public async Task<bool> UpdateAndRemovePromptApisFromPrompt(Prompt prompt, List<int> data)
         {
             var existPrompt = await _context.Prompts.AnyAsync(p => p.Id == prompt.Id);

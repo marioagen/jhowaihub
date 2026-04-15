@@ -2,7 +2,7 @@ using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Domain.DTOs
 {
-    public class PromptApiTemplateDto
+    public record class PromptApiTemplateDto
     {
         public int Id { get; set; }
         public int PromptId { get; set; }

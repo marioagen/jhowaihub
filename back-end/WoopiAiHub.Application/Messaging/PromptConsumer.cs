@@ -25,19 +25,25 @@ namespace WoopiAiHub.Application.Messaging
         private readonly ILogger<PromptConsumer> _logger;
         private readonly MessageQueues _queues;
         private readonly ResponseOpenAiSettings _responseOpenAiSettings;
+        private readonly OpenAiSettings _openAiSettings;
+        private readonly McpSettings _mcpSettings;
 
         public PromptConsumer(IServiceScopeFactory scopeFactory,
                               IConfiguration configuration,
                               IMessageConsumer<OpenAiResponseConsumerResponseDto> consumer,
                               ILogger<PromptConsumer> logger,
                               IOptions<MessageQueues> queues,
-                              IOptions<ResponseOpenAiSettings> responseOpenAiSettings) : base(configuration)
+                              IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
+                              IOptions<OpenAiSettings> openAiSettings,
+                              IOptions<McpSettings> mcpSettings) : base(configuration)
         {
             _scopeFactory = scopeFactory;
             _queues = queues.Value;
             _consumer = consumer;
             _logger = logger;
             _responseOpenAiSettings = responseOpenAiSettings.Value;
+            _openAiSettings = openAiSettings.Value;
+            _mcpSettings = mcpSettings.Value;
         }
 
         /// <summary>
@@ -64,7 +70,7 @@ namespace WoopiAiHub.Application.Messaging
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
 
                     var tokens = message.Response.Usage?.TotalTokens ?? 0;
-                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email, tokens, _responseOpenAiSettings.Model);
+                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email, tokens, _openAiSettings.Model);
 
                     var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(message.Data.ToString());
                     var automationServicesDto = new AutomationServicesDto

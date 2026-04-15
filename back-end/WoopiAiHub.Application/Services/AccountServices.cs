@@ -357,7 +357,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public string GenerateToken(string user, int? tokenExpirationTime = null)
+        private string GenerateToken(string user, int? tokenExpirationTime = null)
         {
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
             var issuer = _config["Jwt:Issuer"] ?? throw new ArgumentException("JWT Issuer is not configured.");
@@ -365,6 +365,16 @@ namespace WoopiAiHub.Application.Services
             return GenerateTokenWithParameters(key, issuer, audience, user, tokenExpirationTime);
         }
 
+        /// <summary>
+        /// Method used by the Account service and MCP service to generate the JWT token to authentication
+        /// </summary>
+        /// <param name="jwtKey"></param>
+        /// <param name="jwtIssuer"></param>
+        /// <param name="jwtAudience"></param>
+        /// <param name="user"></param>
+        /// <param name="tokenExpirationTime"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public string GenerateTokenWithParameters(string jwtKey, string jwtIssuer, string jwtAudience, string user, int? tokenExpirationTime = null)
         {
             var key = jwtKey ?? throw new ArgumentException("JWT key is not configured.");

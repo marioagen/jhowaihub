@@ -7,6 +7,7 @@ using Xunit;
 using Newtonsoft.Json.Linq;
 using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.UnitTests.Fixture
 {
@@ -154,9 +155,7 @@ namespace WoopiAiHub.UnitTests.Fixture
 
         public static OpenAiResponseConsumerResponseDto FindValidOpenAiResponseConsumerResponseDto(bool emptyMessage = false)
         {
-            JObject mockJObject = new JObject();
-            mockJObject.Add("CardId", 1);
-            mockJObject.Add("StepToolId", 30);
+            JObject mockJObject = JObject.FromObject(FindValidMetaDataAutomationDto());
 
             var faker = new Faker<OpenAiResponseConsumerResponseDto>("pt_BR")
                 .CustomInstantiator(f => new OpenAiResponseConsumerResponseDto
@@ -164,8 +163,9 @@ namespace WoopiAiHub.UnitTests.Fixture
                     ReferenceFile = f.Random.Guid().ToString(),
                     Tenant = f.Random.String(),
                     Email = f.Random.String(),
-                    Response = new ResponseOpenAiResponseDto {
-                        
+                    Response = new ResponseOpenAiResponseDto
+                    {
+
                         Usage = new ResponseOpenAiResponseUsageDto
                         {
                             InputTokens = f.Random.Int(1, 1000),
@@ -191,12 +191,33 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
+        public static StepToolExecution FindValidStepToolExecution(MetaDataAutomationDto metadata)
+        {
+            var faker = new Faker<StepToolExecution>("pt_BR")
+                .CustomInstantiator(f => new StepToolExecution(f.Random.Int(0), DateTime.Now, metadata.StepToolId, Domain.Enum.StatusExecution.Pending, metadata.CardId)
+                {
+                    Card = new Card(metadata.CardId, DateTime.Now, metadata.StepToolId, f.Random.Int(0), f.Random.String(100), 1, Guid.NewGuid())
+                });
+            return faker;
+        }
+        public static MetaDataAutomationDto FindValidMetaDataAutomationDto()
+        {
+            var faker = new Faker("pt_BR");
+            return new MetaDataAutomationDto()
+            {
+                CardId = faker.Random.Int(0),
+                StepToolId = faker.Random.Int(0)
+            };
+        }
+
         public static SubscriptionPeriodDto FindValidSubscriptionPeriodDto()
         {
             var faker = new Faker<SubscriptionPeriodDto>("pt_BR")
                 .CustomInstantiator(f => new SubscriptionPeriodDto
                 {
-                    Tenant = f.Random.String(), PeriodStart = f.Date.Past(), PeriodEnd = f.Date.Future()
+                    Tenant = f.Random.String(),
+                    PeriodStart = f.Date.Past(),
+                    PeriodEnd = f.Date.Future()
                 });
             return faker;
         }

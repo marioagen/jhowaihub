@@ -1,4 +1,3 @@
-
 namespace WoopiAiHub.Domain.Models
 {
     public class PromptApiTemplate : BaseEntity

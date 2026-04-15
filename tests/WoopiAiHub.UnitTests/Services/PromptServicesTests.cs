@@ -892,12 +892,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ProcessOpenAiResponseResult_WhenExecutionNotFound_ShouldThrowArgumentException()
         {
             // Arrange
-            var metadata = new MetaDataAutomationDto
-            {
-                StepToolId = 10,
-                CardId = 20
-            };
-
+            var metadata = MessagingFixture.FindValidMetaDataAutomationDto();
             var responseDto = MessagingFixture.FindValidOpenAiResponseConsumerResponseDto();
 
             _mocker.GetMock<IStepToolExecutionRepository>()
@@ -925,10 +920,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var responseDto = MessagingFixture.FindValidOpenAiResponseConsumerResponseDto();
             var metadata = JsonSerializer.Deserialize<MetaDataAutomationDto>(responseDto.Data.ToString());
-
-            var execution = new StepToolExecution(1, DateTime.Now, metadata.StepToolId, Domain.Enum.StatusExecution.Pending, metadata.CardId) {
-                Card = new Card(metadata.CardId, DateTime.Now, metadata.StepToolId, 123, "Message Test", 1, Guid.NewGuid())
-            };
+            var execution = MessagingFixture.FindValidStepToolExecution(metadata);
 
             _mocker.GetMock<IStepToolExecutionRepository>()
                 .Setup(x => x.FindByStepToolIdAndCardIdAsync(metadata.StepToolId, metadata.CardId))
@@ -944,7 +936,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
             _mocker.GetMock<IDocumentHistoryRepository>().Verify(x => x.Create(It.Is<DocumentHistory>(d =>
-                d.IdDocument == 123 &&
+                d.IdDocument == execution.Card.DocumentId &&
                 d.Input == "Prompt"
             )), Times.Once);
 
@@ -961,10 +953,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange            
             var responseDto = MessagingFixture.FindValidOpenAiResponseConsumerResponseDto(true);
             var metadata = JsonSerializer.Deserialize<MetaDataAutomationDto>(responseDto.Data.ToString());
-
-            var execution = new StepToolExecution(1, DateTime.Now, metadata.StepToolId, Domain.Enum.StatusExecution.Pending, metadata.CardId) {
-                Card = new Card(metadata.CardId, DateTime.Now, metadata.StepToolId, 123, "Message Test", 1, Guid.NewGuid())
-            };
+            var execution =MessagingFixture.FindValidStepToolExecution(metadata);
 
             _mocker.GetMock<IStepToolExecutionRepository>()
                 .Setup(x => x.FindByStepToolIdAndCardIdAsync(metadata.StepToolId, metadata.CardId))
@@ -990,10 +979,7 @@ namespace WoopiAiHub.UnitTests.Services
                     
             var responseDto = MessagingFixture.FindValidOpenAiResponseConsumerResponseDto();
             var metadata = JsonSerializer.Deserialize<MetaDataAutomationDto>(responseDto.Data.ToString());
-
-            var execution = new StepToolExecution(1, DateTime.Now, metadata.StepToolId, Domain.Enum.StatusExecution.Pending, metadata.CardId) {
-                Card = new Card(metadata.CardId, DateTime.Now, metadata.StepToolId, 123, "Message Test", 1, Guid.NewGuid())
-            };
+            var execution =MessagingFixture.FindValidStepToolExecution(metadata);
 
             _mocker.GetMock<IStepToolExecutionRepository>()
                 .Setup(x => x.FindByStepToolIdAndCardIdAsync(metadata.StepToolId, metadata.CardId))

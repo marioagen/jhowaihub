@@ -674,7 +674,6 @@ export default {
     border: 1.5px solid var(--color-border-form-control);
     border-radius: 0.375rem;
     transition: border-color 0.3s ease;
-    /* min-height: 150px; */
 }
 
 .team-selector-container.is-invalid {
@@ -758,11 +757,9 @@ export default {
     .btn-custom-light:hover,
     .btn-custom-light:focus {
         background-color: #e2e6ea !important;
-        /* tom levemente mais escuro ao hover/focus */
         color: #212529 !important;
     }
 
-    /* Chips azul escuro com texto branco */
     .selected-team-chip {
         background-color: #155dfc !important;
         color: white !important;
@@ -846,7 +843,6 @@ export default {
         left: 50%;
         -webkit-transform: translate(-50%, -50%);
         transform: translate(-50%, -50%);
-        /*width: 500px;*/
     }
 
     .h5-custom-modal {

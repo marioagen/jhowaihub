@@ -623,17 +623,6 @@
                 </div>
             </form>
         </div>
-        <!-- <ConfirmModal
-            id="updateConfirm"
-            title="Un checking the enable mcp"
-            message="Ao descelecionar a consulta externa todos os agentes lincados ao apitemplate terá suas referencas a este template removida. Deseja continuar?"
-            cancelText="common.cancel"
-            confirmText="common.confirm"
-            confirmVariant="primary"
-            ref="UpdateConfirm"
-            :isLoading="isLoading"
-            @confirm="removeAllFiles"
-        /> -->
     </main>
 </template>
 <script>

@@ -492,23 +492,25 @@ namespace WoopiAiHub.Application.Services
             }
         }
 
+        /// <summary>
+        /// Will process the response from open ai
+        /// </summary>
+        /// <param name="responseDto"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="AppException"></exception>
         public async Task ProcessOpenAiResponseResult(OpenAiResponseConsumerResponseDto responseDto)
         {
             var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(responseDto.Data.ToString());
             var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(dataDto.StepToolId,
                 dataDto.CardId);
+
             if (execution == null)
             {
                 throw new ArgumentException("StepToolExecution not found");
             }
 
-            var message = responseDto
-                    .Response
-                    .Output
-                    .FirstOrDefault(x => x.Type == OpenAiResponsesTypes.Message)?
-                    .Content
-                    .FirstOrDefault(x => x.Type == OpenAiResponseInputContentType.OutputText)?
-                    .Text ?? string.Empty;
+            string message = GetTheOutputFromOpenAiResponseToPromptUsed(responseDto);
 
             _unitOfWork.BeginTransaction();
             try
@@ -531,6 +533,17 @@ namespace WoopiAiHub.Application.Services
             {
                 _unitOfWork.Rollback();
                 throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
+
+            static string GetTheOutputFromOpenAiResponseToPromptUsed(OpenAiResponseConsumerResponseDto responseDto)
+            {
+                return responseDto
+                        .Response
+                        .Output
+                        .FirstOrDefault(x => x.Type == OpenAiResponsesTypes.Message)?
+                        .Content
+                        .FirstOrDefault(x => x.Type == OpenAiResponseInputContentType.OutputText)?
+                        .Text ?? string.Empty;
             }
         }
 

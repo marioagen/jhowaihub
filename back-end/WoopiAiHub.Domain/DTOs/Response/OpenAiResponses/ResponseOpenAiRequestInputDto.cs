@@ -1,4 +1,3 @@
-
 using System.Text.Json.Serialization;
 namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
 {

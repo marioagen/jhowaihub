@@ -41,7 +41,6 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddRefitClient<IGraphApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.GraphApiBaseAddress));
             services.AddRefitClient<IMarketPlaceApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.MarketPlaceBaseAddress));
             services.AddRefitClient<IChatCompletionApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.AiGatewayApiBaseAddress));
-            services.AddRefitClient<IResponseApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.AiGatewayApiBaseAddress));
             services.AddRefitClient<IAnonymizationApi>().ConfigureHttpClient(c => c.BaseAddress = new Uri(externalSettings.AnonymizationApiBaseAddress));
 
             services.Configure<EncryptionSettings>(configuration.GetSection("EncryptionSettings"));

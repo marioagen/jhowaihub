@@ -24,23 +24,29 @@ public class PromptHandler : IToolHandler
     private readonly MessageQueues _messageQueues;
     private readonly IPromptServices _promptServices;
     private readonly ITenantCacheServices _tenantCacheServices;
-    private readonly ResponseOpenAiSettings _responseOpenAiSettings;
+    private readonly McpSettings _mcpSettings;
     private readonly IApiTemplateServices _apiTemplateServices;
     private readonly IAccountServices _accountServices;
+    private readonly ResponseOpenAiSettings _responseOpenAiSettings;
+    private readonly OpenAiSettings _openAiSettings;
 
     public PromptHandler(IOptions<MessageQueues> messageQueues,
                          IPromptServices promptServices,
                          ITenantCacheServices tenantCacheServices,
-                         IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
                          IApiTemplateServices apiTemplateServices,
-                         IAccountServices accountServices)
+                         IAccountServices accountServices,
+                         IOptions<ResponseOpenAiSettings> responseOpenAiSettings,
+                         IOptions<OpenAiSettings> openAiSettings,
+                         IOptions<McpSettings> mcpSettings)
     {
         _messageQueues = messageQueues.Value;
         _promptServices = promptServices;
         _tenantCacheServices = tenantCacheServices;
-        _responseOpenAiSettings = responseOpenAiSettings.Value;
         _apiTemplateServices = apiTemplateServices;
         _accountServices = accountServices;
+        _responseOpenAiSettings = responseOpenAiSettings.Value;
+        _openAiSettings = openAiSettings.Value;
+        _mcpSettings = mcpSettings.Value;
     }
 
     /// <summary>
@@ -83,8 +89,8 @@ public class PromptHandler : IToolHandler
                 Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
                 ReferenceFile = automationServicesDto.ReferenceFile!,
                 Tenant = automationServicesDto.Tenant,
-                Model = _responseOpenAiSettings.Model,
-                ApiVersion = _responseOpenAiSettings.ApiVersion,
+                Model = _openAiSettings.Model,
+                ApiVersion = _openAiSettings.ApiVersion,
                 ApplicationId = tenantInfo!.AiGatewayApplicationId.Value.ToString(),
                 ApplicationKey = tenantInfo!.AiGatewayKey,
                 OpenAiResponse = dto,
@@ -93,12 +99,18 @@ public class PromptHandler : IToolHandler
         };
     }
 
+    /// <summary>
+    /// ill create the dto to send to Open Ai response tool
+    /// </summary>
+    /// <param name="promptDto"></param>
+    /// <param name="fullText"></param>
+    /// <returns></returns>
     private async Task<ResponseOpenAiRequestDto> GenerateTheOpenAiResponseRequestDto(PromptDto? promptDto, string fullText)
     {
 
         var dto = new ResponseOpenAiRequestDto
         {
-            Model = _responseOpenAiSettings.Model,
+            Model = _openAiSettings.Model,
             Input = new List<ResponseOpenAiRequestInputDto> {
                     new ResponseOpenAiRequestInputDto {
                         Type = OpenAiResponsesTypes.Message,
@@ -118,30 +130,38 @@ public class PromptHandler : IToolHandler
         return dto;
     }
 
+    /// <summary>
+    /// method to check if the selected prompt has the MCP flag checked and validate if all the necessary data is
+    /// available to create the instructions and mcp connection to OpenAi response tool 
+    /// </summary>
+    /// <param name="promptDto"></param>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     private async Task VerifyAndAddOrNotMcpSupport(PromptDto promptDto, ResponseOpenAiRequestDto dto)
     {
         if (!promptDto.EnableAccessToMcp)
             return;
 
-        if (string.IsNullOrEmpty(_responseOpenAiSettings.Instructions))
+        if (string.IsNullOrEmpty(_mcpSettings.Instructions))
             throw new ArgumentException("The agent with a external access enabled need has the instructions filled in the appSettings");
 
         string instructions = await GenerateInstructionsWithMappedApisToAgent(promptDto);
 
         var accessToken = _accountServices.GenerateTokenWithParameters(
-            _responseOpenAiSettings.JWTKey,
-            _responseOpenAiSettings.JWTIssuer,
-            _responseOpenAiSettings.JWTAudience,
-            _responseOpenAiSettings.JWTUser,
-            _responseOpenAiSettings.JWTExpirationTime);
+            _mcpSettings.JWTKey,
+            _mcpSettings.JWTIssuer,
+            _mcpSettings.JWTAudience,
+            _mcpSettings.JWTUser,
+            _mcpSettings.JWTExpirationTime);
 
         dto.Instructions = instructions;
-        dto.MaxToolCalls = _responseOpenAiSettings.MaxToolCalls;
+        dto.MaxToolCalls = _mcpSettings.MaxToolCalls;
         dto.Tools = new List<ResponseOpenAiRequestToolsDto> {
             new ResponseOpenAiRequestToolsDto {
                 Type = OpenAiResponseToolsType.Mcp,
                 ServerLabel = "dmcp",
-                ServerUrl= _responseOpenAiSettings.McpAddress,
+                ServerUrl= _mcpSettings.McpAddress,
                 Headers= new Dictionary<string, string> {
                         {"Authorization", $"Bearer {accessToken}"}
                     },
@@ -151,6 +171,11 @@ public class PromptHandler : IToolHandler
         };
     }
 
+    /// <summary>
+    /// Method to map the api templates linked to a prompt to the instruction property
+    /// </summary>
+    /// <param name="promptDto"></param>
+    /// <returns></returns>
     private async Task<string> GenerateInstructionsWithMappedApisToAgent(PromptDto promptDto)
     {
         var apis = await _apiTemplateServices.FindAll(new ApiTemplateFilterDto() { EnableAccessFromMcp = true, PromptId = promptDto.Id });
@@ -167,7 +192,7 @@ public class PromptHandler : IToolHandler
                 _ => 3
             },
             description = api.Description,
-            headers=api.HeaderTemplate,
+            headers = api.HeaderTemplate,
             payload_schema = api.Method switch
             {
                 "GET" => null,

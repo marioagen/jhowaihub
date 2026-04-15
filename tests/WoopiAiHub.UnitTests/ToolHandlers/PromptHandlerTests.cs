@@ -58,7 +58,6 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 Model = "gpt-4",
                 ApiVersion = "",
                 McpAddress = "",
-                SessionIdKey= "SessionIdKey",
                 Instructions = "instructions {0} instructions",
                 JWTKey = Guid.NewGuid().ToString(),
                 JWTIssuer =  faker.Internet.Url(),
