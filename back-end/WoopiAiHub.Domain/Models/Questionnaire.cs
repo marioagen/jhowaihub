@@ -12,7 +12,7 @@ namespace WoopiAiHub.Domain.Models
 {
     public class Questionnaire : BaseEntity
     {
-        [Column("Title", TypeName = "varchar(50)")]
+        [Column("Title", TypeName = "varchar(255)")]
         public string Title { get; set; }
         [Column("TypeDoc_Id", TypeName = "int")]
         public int TypeDocId { get; set; }

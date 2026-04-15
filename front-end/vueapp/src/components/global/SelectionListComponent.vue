@@ -78,7 +78,7 @@
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">
+                        <span class="input-group-text border-end-0">
                             <i class="fas fa-search text-secondary"></i>
                         </span>
                         <input

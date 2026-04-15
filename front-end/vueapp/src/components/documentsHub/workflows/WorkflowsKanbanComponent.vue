@@ -7,52 +7,72 @@
                         <div class="flex flex-col items-start gap-3 flex-1 align-items-center">
                             <div class="d-flex align-items-center gap-2 flex-wrap">
                                 <div class="d-flex align-items-center">
-                                    <LucideIcon icon="Clock"
-                                                :size="14"
-                                                class="me-2" />
+                                    <LucideIcon
+                                        icon="Clock"
+                                        :size="14"
+                                        class="me-2"
+                                    />
                                     <span>
                                         {{ $t("workflow.boardView") }}
                                     </span>
                                 </div>
                             </div>
                             <div class="dropdown">
-                                <button class="btn btn-light border text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle pe-1"
-                                        type="button"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false">
+                                <button
+                                    class="btn btn-light border text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle pe-1"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    <LucideIcon
+                                        icon="Workflow"
+                                        :size="14"
+                                        class="me-2"
+                                        stroke="#0d6efd"
+                                    />
                                     <div>
                                         <div class="fw-bold font-size-sm">
                                             {{ selectedOption.teamName }}
                                         </div>
-                                        <div class="text-muted font-size-xs">
+                                        <div class="font-size-xs">
                                             {{ selectedOption.name }}
                                         </div>
                                     </div>
-                                    <LucideIcon icon="ChevronDown"
-                                                :size="20"
-                                                class="ms-2 text-muted" />
+                                    <LucideIcon
+                                        icon="ChevronDown"
+                                        :size="20"
+                                        class="ms-2 text-muted"
+                                    />
                                 </button>
                                 <ul class="dropdown-menu p-2 workflow-list">
                                     <li class="mb-1">
                                         <div class="input-group input-group-sm">
-                                            <span class="input-group-text p-1">
-                                                <LucideIcon icon="Search"
-                                                            :size="16"
-                                                            class="me-1" />
+                                            <span class="input-group-text p-1 border-end-0">
+                                                <LucideIcon
+                                                    icon="Search"
+                                                    :size="16"
+                                                    class="me-1"
+                                                />
                                             </span>
-                                            <input id="filter-workflow"
-                                                   v-model="workflowSearchText"
-                                                   type="text"
-                                                   name="filter"
-                                                   class="form-control"
-                                                   @input="searchWorkflow"
-                                                   @click.stop="" />
+                                            <input
+                                                id="filter-workflow"
+                                                v-model="workflowSearchText"
+                                                type="text"
+                                                name="filter"
+                                                class="form-control border-start-0"
+                                                @input="searchWorkflow"
+                                                @click.stop=""
+                                            />
                                         </div>
                                     </li>
-                                    <li v-for="item in filteredWorkflows"
-                                        :key="item.id">
-                                        <a class="dropdown-item"
-                                           @click="selectOption(item)">
+                                    <li
+                                        v-for="item in filteredWorkflows"
+                                        :key="item.id"
+                                    >
+                                        <a
+                                            class="dropdown-item"
+                                            @click="selectOption(item)"
+                                        >
                                             <div class="fw-bold">
                                                 {{ item.teams.name }}
                                             </div>
@@ -63,24 +83,19 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="badge bg-secondary badge-custom">
-                                <LucideIcon icon="Workflow"
-                                            :size="14"
-                                            class="me-2"
-                                            stroke="#0d6efd" />
-                                <span>
-                                    {{ selectedOption.name || $t("workflow.selectWorkflow") }}
-                                </span>
-                            </div>
-                            <button v-if="canManageWorkflow"
-                                    type="button"
-                                    class="btn btn-primary borderless p-0 d-inline-flex align-items-center"
-                                    :disabled="!selectedOption.id || isLoadingKanban"
-                                    v-tooltip="$t('workflow.editWorkflowBoard')"
-                                    :aria-label="$t('workflow.editWorkflowBoard')"
-                                    @click="redirectToWorkflowEditPage">
-                                <LucideIcon icon="SquarePen"
-                                            :size="14" />
+                            <button
+                                v-if="canManageWorkflow"
+                                type="button"
+                                class="btn btn-primary borderless p-0 d-inline-flex align-items-center"
+                                :disabled="!selectedOption.id || isLoadingKanban"
+                                v-tooltip="$t('workflow.editWorkflowBoard')"
+                                :aria-label="$t('workflow.editWorkflowBoard')"
+                                @click="redirectToWorkflowEditPage"
+                            >
+                                <LucideIcon
+                                    icon="SquarePen"
+                                    :size="20"
+                                />
                             </button>
                         </div>
                     </div>
@@ -284,8 +299,10 @@
                 </div>
             </div>
         </div>
-        <div v-else
-             class="text-center">
+        <div
+            v-else
+            class="text-center"
+        >
             <span class="text-primary">
                 {{ $t("workflow.notFound") }}
             </span>
@@ -374,11 +391,28 @@
                 }
                 return this.users.filter((u) => u.name && u.name.toLowerCase().includes(q));
             },
+            firstStepCardIds() {
+                const steps = Array.isArray(this.kanbanCards)
+                    ? this.kanbanCards
+                    : this.kanbanCards?.steps || [];
+                if (steps.length === 0) return [];
+                const minOrder = Math.min(...steps.map((s) => s.order));
+                return steps
+                    .filter((s) => s.order === minOrder)
+                    .flatMap((s) => (s.cards || []).map((c) => c.id));
+            },
         },
         methods: {
             clearBulkSelection() {
                 this.selectedCardIds = [];
                 this.bulkAssignUserSearchText = "";
+            },
+            isFirstStepCardId(cardId) {
+                return this.firstStepCardIds.some((fid) => fid === cardId || fid == cardId);
+            },
+            pruneFirstStepCardIdsFromSelection() {
+                if (this.selectedCardIds.length === 0) return;
+                this.selectedCardIds = this.selectedCardIds.filter((id) => !this.isFirstStepCardId(id));
             },
             assignRangeErrorMessage(error) {
                 const data = error?.response?.data;
@@ -451,6 +485,7 @@
                 this.isKanbanView = false;
             },
             onToggleAccordionCardSelection({ cardId, selected }) {
+                if (this.isFirstStepCardId(cardId)) return;
                 const set = new Set(this.selectedCardIds);
                 if (selected) {
                     set.add(cardId);
@@ -460,11 +495,13 @@
                 this.selectedCardIds = Array.from(set);
             },
             onToggleAccordionStepSelection({ cardIds, selectAll }) {
+                const allowedIds = cardIds.filter((id) => !this.isFirstStepCardId(id));
+                if (allowedIds.length === 0) return;
                 const set = new Set(this.selectedCardIds);
                 if (selectAll) {
-                    cardIds.forEach((id) => set.add(id));
+                    allowedIds.forEach((id) => set.add(id));
                 } else {
-                    cardIds.forEach((id) => set.delete(id));
+                    allowedIds.forEach((id) => set.delete(id));
                 }
                 this.selectedCardIds = Array.from(set);
             },
@@ -522,6 +559,7 @@
                 WorkflowService.getWorkflowStepsById(workflowId, this.filters)
                     .then((response) => {
                         this.kanbanCards = response;
+                        this.pruneFirstStepCardIdsFromSelection();
                     })
                     .finally(() => {
                         this.isLoadingKanban = false;
@@ -638,6 +676,7 @@
                         steps: [...steps],
                     };
                 }
+                this.pruneFirstStepCardIdsFromSelection();
             },
             updateSpecificCards(cardIds, signalRMessage = null) {
                 if (!cardIds || cardIds.length === 0) return;
@@ -887,18 +926,18 @@
         box-shadow: none !important;
     }
 
-        .borderless:hover:not(:disabled) {
-            background-color: transparent !important;
-            border: none !important;
-            color: var(--bs-primary) !important;
-            filter: brightness(0.92);
-            cursor: pointer;
-        }
+    .borderless:hover:not(:disabled) {
+        background-color: transparent !important;
+        border: none !important;
+        color: var(--bs-primary) !important;
+        filter: brightness(0.92);
+        cursor: pointer;
+    }
 
-        .borderless:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+    .borderless:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
     .borderless:focus-visible {
         outline: 2px solid var(--bs-primary);

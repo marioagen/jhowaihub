@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -98,29 +98,6 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.Use(_serviceProviderMock.Object);
 
             _tenantServices = _mocker.CreateInstance<TenantServices>();
-        }
-
-        [Fact(DisplayName = "Test FindAllByUserEmail returns tenants for valid email")]
-        [Trait("Find", "Success")]
-        public async Task FindAllByUserEmail_Success()
-        {
-            // Arrange
-            var email = "test@example.com";
-            var expectedTenants = new List<string> { "Tenant1", "Tenant2" };
-
-            var marketPlaceApiMock = _mocker.GetMock<IMarketPlaceApi>();
-            marketPlaceApiMock
-                .Setup(api => api.FindTenantsByUserEmail(It.IsAny<string>(), email))
-                .ReturnsAsync(expectedTenants);
-
-            // Act
-            var result = await _tenantServices.FindAllByUserEmail(email);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(expectedTenants, result);
-
-            marketPlaceApiMock.Verify(api => api.FindTenantsByUserEmail("mockKeyAccess", email), Times.Once);
         }
 
         [Fact(DisplayName = "InitializeTenant throws ArgumentException for null tenant")]

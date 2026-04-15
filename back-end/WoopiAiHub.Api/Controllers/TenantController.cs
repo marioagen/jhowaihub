@@ -27,29 +27,6 @@ namespace WoopiAiHub.Api.Controllers
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        [HttpGet("FindAllByUserEmail/{email}")]
-        [SwaggerOperation("EndPoint that finds a tenants by an email")]
-        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindAllByUserEmail(string email)
-        {
-            try
-            {
-                var result = await _tenantServices.FindAllByUserEmail(email);
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"An exception occurred in the {nameof(TenantController)} in the {nameof(FindAllByUserEmail)} method.");
-                return BadRequest("Error when searching for tenants in the Marketplace");
-            }
-        }
-
-        /// <summary>
-        /// Searches for the tenants that the user has enabled in the Marketplace.
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
         [HttpGet("FindPlanByName/{tenant}")]
         [SwaggerOperation("EndPoint that finds a tenants by an email")]
         [ProducesResponseType(typeof(DashboardTenantInfo), StatusCodes.Status200OK)]
