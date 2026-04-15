@@ -1,4 +1,5 @@
 using WoopiAiHub.Api.Attributes;
+using WoopiAiHub.Api.Converters;
 using WoopiAiHub.Application.DependencyInjection;
 using WoopiAiHub.Domain.DependencyInjection;
 using WoopiAiHub.Repository.DependencyInjection;
@@ -29,7 +30,15 @@ builder.Services.AddValidation();
 // Add services to the container.
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        // Ensure all DateTime values are serialized with UTC 'Z' suffix.
+        // EF Core returns Kind=Unspecified from SQL Server, which System.Text.Json
+        // would serialize without any timezone indicator, causing parseISO on the
+        // frontend to treat the value as local time instead of UTC.
+        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
+        options.JsonSerializerOptions.Converters.Add(new UtcNullableDateTimeConverter());
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
