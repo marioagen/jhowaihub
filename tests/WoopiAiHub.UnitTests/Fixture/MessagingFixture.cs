@@ -200,6 +200,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 });
             return faker;
         }
+
         public static MetaDataAutomationDto FindValidMetaDataAutomationDto()
         {
             var faker = new Faker("pt_BR");
@@ -282,6 +283,120 @@ namespace WoopiAiHub.UnitTests.Fixture
                     StatusCode = f.Random.Int(100, 599),
                     Content = "{}"
                 });
+            return faker;
+        }
+        public static List<ApiTemplateDto> FindValidListApiTemplateDto()
+        {
+            var faker = new Faker<List<ApiTemplateDto>>("pt_BR")
+                .CustomInstantiator(f => {                    
+                    var id1 = f.Random.Int(0, 8);
+                    var id2 = f.Random.Int(0, 8);
+
+                    while (id2 == id1)
+                        id2 = f.Random.Int(0, 8);
+
+                    return new List<ApiTemplateDto> {
+                        new ApiTemplateDto {
+                            Id = id1,
+                            Created = DateTime.Now,
+                            Name = string.Format("Api {0}",id1),
+                            Method = "GET",
+                            Url = string.Format("http://localhost/api-{0}",id1),
+                            Description = "",
+                            EnableAccessFromMcp = true,
+                            BodyTemplate = "{}"
+                        },
+                        new ApiTemplateDto {
+                            Id = id2,
+                            Created = DateTime.Now,
+                            Name = string.Format("Api {0}",id2),
+                            Method = "GET",
+                            Url = string.Format("http://localhost/api-{0}",id2),
+                            Description = "",
+                            EnableAccessFromMcp = true,
+                            BodyTemplate = "{}"
+                        }
+                    };
+                });
+            return faker;
+        }
+
+        public static PromptTemplatesResponse FindValidPromptTemplatesResponseSort()
+        {
+            var faker = new Faker<PromptTemplatesResponse>("pt_BR")
+                .CustomInstantiator(f => new PromptTemplatesResponse()
+                {
+                    Prompts = new List<PromptTemplateDto> {
+                        new PromptTemplateDto
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = "B",
+                            Description = "Desc",
+                            Text = "Text",
+                            Created = new DateTime(2026, 1, 2)
+                        },
+                        new PromptTemplateDto
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = "A",
+                            Description = "Desc",
+                            Text = "Text",
+                            Created = new DateTime(2026, 1, 3)
+                        },
+                        new PromptTemplateDto
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = "C",
+                            Description = "Desc",
+                            Text = "Text",
+                            Created = new DateTime(2026, 1, 1)
+                        }
+                    }
+                });
+            return faker;
+        }
+        public static PromptTemplatesResponse FindValidPromptTemplatesResponse(Guid? id = null)
+        {
+            var faker = new Faker<PromptTemplatesResponse>("pt_BR")
+                .CustomInstantiator(f => new PromptTemplatesResponse()
+                {
+                    Prompts = new List<PromptTemplateDto>
+                    {
+                        new PromptTemplateDto
+                        {
+                            Id = id ?? Guid.NewGuid(),
+                            Name = "Template 1",
+                            Description = "Desc 1",
+                            Text = "Text 1",
+                            Created = DateTime.Now
+                        }
+                    }
+                });
+            return faker;
+        }
+
+        public static List<PromptInternalDto> FindValidPromptInternalDtoList()
+        {
+            var faker = new Faker<List<PromptInternalDto>> ("pt_BR")
+                .CustomInstantiator(f => new List<PromptInternalDto>
+                    {
+                        new PromptInternalDto {
+                            Id = f.Random.Int(1),
+                            Name = string.Format("Prompt {0}", f.Random.Int(1)),
+                            Description = string.Format("Description {0}", f.Random.Int(1))
+                        },
+                        new PromptInternalDto {
+                            Id = f.Random.Int(1),
+                            Name = string.Format("Prompt {0}", f.Random.Int(1)),
+                            Description = string.Format("Description {0}", f.Random.Int(1))
+                        },
+                        new PromptInternalDto {
+                            Id = f.Random.Int(1),
+                            Name = string.Format("Prompt {0}", f.Random.Int(1)),
+                            Description = string.Format("Description {0}", f.Random.Int(1))
+                        }
+                    }
+                );
             return faker;
         }
 

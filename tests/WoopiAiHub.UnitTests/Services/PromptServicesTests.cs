@@ -475,30 +475,8 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindPromptTemplates", "Success")]
         public async Task FindPromptTemplates_Success()
         {
-            //Arrange
-
-            var templatesResponse = new PromptTemplatesResponse
-            {
-                Prompts = new List<PromptTemplateDto>
-                {
-                    new PromptTemplateDto
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Template 1",
-                        Description = "Desc 1",
-                        Text = "Text 1",
-                        Created = DateTime.Now
-                    },
-                    new PromptTemplateDto
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Template 2",
-                        Description = "Desc 2",
-                        Text = "Text 2",
-                        Created = DateTime.Now
-                    }
-                }
-            };
+            //Arrange            
+            var templatesResponse = MessagingFixture.FindValidPromptTemplatesResponseSort();
             var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
             var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
@@ -512,11 +490,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(responseMessage);
 
             //Act
-            var result = await _promptServices.FindPromptTemplates("Template", null);
+            var result = await _promptServices.FindPromptTemplates("Text", null);
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
+            Assert.Equal(3, result.Count);
         }
 
         [Theory(DisplayName = "Find prompt templates ordering")]
@@ -529,37 +507,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindPromptTemplates_Ordering(string? orderBy)
         {
             // Arrange
-            var templatesResponse = new PromptTemplatesResponse
-            {
-                Prompts = new List<PromptTemplateDto>
-                {
-                    new PromptTemplateDto
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "B",
-                        Description = "Desc",
-                        Text = "Text",
-                        Created = new DateTime(2026, 1, 2)
-                    },
-                    new PromptTemplateDto
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "A",
-                        Description = "Desc",
-                        Text = "Text",
-                        Created = new DateTime(2026, 1, 3)
-                    },
-                    new PromptTemplateDto
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "C",
-                        Description = "Desc",
-                        Text = "Text",
-                        Created = new DateTime(2026, 1, 1)
-                    }
-                }
-            };
-
+            var templatesResponse = MessagingFixture.FindValidPromptTemplatesResponseSort();
             var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
             var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
@@ -668,20 +616,7 @@ namespace WoopiAiHub.UnitTests.Services
             var promptId = Guid.NewGuid();
             var templateIds = new List<Guid> { promptId };
             var email = "test@example.com";
-            var templatesResponse = new PromptTemplatesResponse
-            {
-                Prompts = new List<PromptTemplateDto>
-                {
-                    new PromptTemplateDto
-                    {
-                        Id = promptId,
-                        Name = "Template 1",
-                        Description = "Desc 1",
-                        Text = "Text 1",
-                        Created = DateTime.Now
-                    }
-                }
-            };
+            var templatesResponse = MessagingFixture.FindValidPromptTemplatesResponse(promptId);
             var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
             var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
@@ -775,12 +710,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindAllBasic_Success()
         {
             //Arrange
-            var expectedPrompts = new List<PromptInternalDto>
-            {
-                new PromptInternalDto { Id = 1, Name = "Prompt 1", Description = "Description 1" },
-                new PromptInternalDto { Id = 2, Name = "Prompt 2", Description = "Description 2" },
-                new PromptInternalDto { Id = 3, Name = "Prompt 3", Description = "Description 3" }
-            };
+            var expectedPrompts = MessagingFixture.FindValidPromptInternalDtoList();
 
             _mocker.GetMock<IPromptRepository>()
                 .Setup(r => r.FindAllInternal())

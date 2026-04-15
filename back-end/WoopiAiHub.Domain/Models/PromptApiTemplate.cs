@@ -7,5 +7,7 @@ namespace WoopiAiHub.Domain.Models
         public Prompt? Prompt { get; set; }
         public int ApiTemplateId { get; set; }
         public ApiTemplate? ApiTemplate { get; set; }
+
+
     }
 }

@@ -75,7 +75,7 @@ public class PromptHandler : IToolHandler
         var promptId = int.Parse(input!.Value);
         var promptDto = _promptServices.FindById(promptId);
 
-        ResponseOpenAiRequestDto dto = await GenerateTheOpenAiResponseRequestDto(promptDto, fullText);
+        ResponseOpenAiRequestDto dto = await GenerateOpenAiResponseRequestDto(promptDto, fullText);
 
         return new ExecutionMessageDto
         {
@@ -102,9 +102,8 @@ public class PromptHandler : IToolHandler
     /// <param name="promptDto"></param>
     /// <param name="fullText"></param>
     /// <returns></returns>
-    private async Task<ResponseOpenAiRequestDto> GenerateTheOpenAiResponseRequestDto(PromptDto? promptDto, string fullText)
+    private async Task<ResponseOpenAiRequestDto> GenerateOpenAiResponseRequestDto(PromptDto? promptDto, string fullText)
     {
-
         var dto = new ResponseOpenAiRequestDto
         {
             Model = _openAiSettings.Model,
@@ -143,7 +142,7 @@ public class PromptHandler : IToolHandler
         if (string.IsNullOrEmpty(_mcpSettings.Instructions))
             throw new ArgumentException("The agent with a external access enabled need has the instructions filled in the appSettings");
 
-        string instructions = await GenerateInstructionsWithMappedApisToAgent(promptDto);
+        var instructions = await GenerateInstructionsWithMappedApisToAgent(promptDto);
 
         var accessToken = _accountServices.GenerateTokenWithParameters(
             _mcpSettings.JWTKey,

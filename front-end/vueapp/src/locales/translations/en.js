@@ -929,6 +929,7 @@ const english = {
         duplicated: "Duplicate prompt",
         editPrompt: "Edit agent",
         emptyPromptError: "The agent field cannot be empty",
+        getDataError: "Failed to retrieve data from the agent",
         importButton: "Import",
         importError: "Error importing agents",
         importPredefined: "Import predefined",
@@ -1078,6 +1079,8 @@ const english = {
         requestBody: "Request Body",
         tabBody: "Body",
         tabTests: "Tests",
+        description: "Description",
+        enableMcp: "Enable external AI query",
         tests: {
             detectedVariables: "Detected Variables",
             noVariablesLead: "No variable",

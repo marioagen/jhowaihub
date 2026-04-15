@@ -114,7 +114,6 @@
                                         </label>
                                     </div>
                                 </div>
-
                                 <div class="mb-3">
                                     <Field name="enableAccessToMcp" type="checkbox" :value="true"
                                         v-slot="{ field, errorMessage }">
@@ -161,12 +160,8 @@
                                         {{ $t("documents.upload.warningWorkflowNotListed") }}
                                     </div>
                                     <div class="border rounded bg-select p-1 user-list scrollable-list">
-                                        <div v-if="isLoading" class="text-center">
-                                            <div class="spinner-border text-primary" role="status">
-                                                <span class="visually-hidden">
-                                                    {{ $t("common.loading") }}
-                                                </span>
-                                            </div>
+                                        <div v-if="isLoading" class="text-center">      
+                                            <LoadingComponent />
                                         </div>
                                         <div v-else-if="filtersAPiTemplateList.length === 0" class="text-center text-muted py-3">
                                             {{ $t("documents.upload.noWorkflowFound") }}
@@ -309,12 +304,14 @@
 <script>
 import PromptService from "@/services/prompts/PromptsService";
 import TemplateService from "@/services/template/TemplateService";
+import LoadingComponent from "@/components/global/LoadingComponent.vue";
 import { Field, useForm } from "vee-validate";
 
 export default {
     name: "PromptForm",
     components: {
         Field,
+        LoadingComponent
     },
     props: {
         id: {
@@ -408,19 +405,28 @@ export default {
         },
         loadCloneData(id) {
             this.resetData();
-            PromptService.getPromptById(id).then((response) => {
-                this.form = {
-                    name: response.name + " " + this.$t("prompts.cloneSuffix"),
-                    description: response.description,
-                    text: response.text,
-                    enableAccessToMcp: response.enableAccessToMcp
-                };
-                this.apiTemplatesSelected = response.promptApiTemplates.map(x => x.apiTemplateId);
-                this.setValues(this.form);
-            });
+            PromptService.getPromptById(id)
+                .then((response) => {
+                    this.form = {
+                        name: response.name + " " + this.$t("prompts.cloneSuffix"),
+                        description: response.description,
+                        text: response.text,
+                        enableAccessToMcp: response.enableAccessToMcp
+                    };
+                    this.apiTemplatesSelected = response.promptApiTemplates.map(x => x.apiTemplateId);
+                    this.setValues(this.form);
+                })
+                .catch(() => {
+                    this.$notify({
+                        title: "prompts.title",
+                        message: "prompts.getDataError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                });
         },
-        updatePrompt: function () {
-            var paramsData = {
+        updatePrompt () {
+            const paramsData = {
                 id: this.idEdit,
                 name: this.values.name,
                 description: this.values.description,
@@ -430,8 +436,6 @@ export default {
             };
             PromptService.updatePrompt(paramsData)
                 .then((response) => {
-                    if (!response) throw new Error("Update failed");
-
                     this.$notify({
                         title: "prompts.title",
                         message: "prompts.updateSuccess",
@@ -440,7 +444,7 @@ export default {
                     });
                     this.$emit("saved", response);
                 })
-                .catch((e) => {
+                .catch(() => {
                     this.$notify({
                         title: "prompts.title",
                         message: "prompts.updateError",
@@ -459,23 +463,9 @@ export default {
             };
             PromptService.createPrompt(paramsData)
                 .then((response) => {
-                    if (response.error) {
-                        let errorMessage = response.error.response.data.detail;
-                        return this.$notify({
-                            title: "prompts.title",
-                            message: this.$t(errorMessage),
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                    }
-
-                    if (!response) {
-                        throw new Error("Create failed");
-                    }
-
                     this.$notify({
                         title: "prompts.title",
-                        message: "prompts.updateSuccess",
+                        message: "prompts.createSuccess",
                         variant: "success",
                         icon: "CircleCheckBig",
                     });
@@ -501,7 +491,7 @@ export default {
                 },
             });
         },
-         refinePrompt: function () {
+        refinePrompt: function () {
             if (!this.values || !this.values.text || this.values.text.trim() === "") {
                 return this.$notify({
                     title: "prompts.title",
@@ -590,7 +580,7 @@ export default {
                     if (response.error !== undefined) {
                         this.$notify({
                             title: "prompts.title",
-                            message: this.$t(errorMessage),
+                            message: errorMessage,
                             variant: "danger",
                             icon: "CircleX",
                         });
@@ -604,7 +594,7 @@ export default {
         },        
         getName(id) {
             const api = this.apiTemplates.find((t) => t.id === id);
-            return api ? api.name : "Desconhecido";
+            return api ? api.name : "Unknown";
         },
         selectAll(event) {
             event.target.blur();

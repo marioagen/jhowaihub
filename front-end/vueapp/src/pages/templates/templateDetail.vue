@@ -100,7 +100,7 @@
                                                 :class="{ 'is-invalid': errorMessage }"
                                             />
                                             <label class="form-check-label" for="templateActive">
-                                                Habilitar consulta externa de IA
+                                                {{ $t("template.enableMcp") }}
                                             </label>
                                         </div>
                                     </Field>
@@ -110,7 +110,7 @@
                                         for="templateName"
                                         class="form-label"
                                     >
-                                        Descrição
+                                        {{ $t("template.description") }}
                                     </label>
                                     <Field
                                         name="description"

@@ -948,6 +948,7 @@ const portuguese = {
         subtitleEdit: "Atualize as informações do agente selecionado",
         subtitleNew: "Criar um novo agente de IA",
         title: "Agentes",
+        getDataError: "Falha ao recuperar dados do agente",
         updateError: "Falha ao atualizar agente",
         updateSuccess: "Agente atualizado com sucesso",
         viewComplete: "Ver completo",
@@ -1073,6 +1074,8 @@ const portuguese = {
         requestBody: "Corpo da Requisição",
         tabBody: "Corpo",
         tabTests: "Testes",
+        description: "Descrição",
+        enableMcp: "Habilitar consulta externa de IA",
         tests: {
             detectedVariables: "Variáveis Detectadas",
             noVariablesLead: "Nenhuma variável",

@@ -938,6 +938,7 @@ const spanish = {
         deleteSuccess: "Agentes eliminados exitosamente",
         duplicated: "Prompt duplicado",
         editPrompt: "Editar agente",
+        getDataError: "No se pudieron recuperar los datos del agente",
         importButton: "Importar",
         importError: "Error al importar agentes",
         importPredefined: "Importar predefinidos",
@@ -1104,6 +1105,8 @@ const spanish = {
         requestBody: "Cuerpo de la Solicitud",
         tabBody: "Cuerpo",
         tabTests: "Pruebas",
+        description: "Descripción",
+        enableMcp: "Habilitar consulta de IA externa",
         tests: {
             detectedVariables: "Variables detectadas",
             noVariablesLead: "Ninguna variable",

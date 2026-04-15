@@ -92,7 +92,6 @@ namespace WoopiAiHub.Application.Services
                 ).ToList();
             }
 
-
             templates = orderBy?.ToLower() switch
             {
                 "name_asc" => templates.OrderBy(t => t.Name).ToList(),
@@ -456,7 +455,6 @@ namespace WoopiAiHub.Application.Services
                 })
                 .ToList();
 
-
             return (prompt, apiToDelete);
         }
 
@@ -510,12 +508,11 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("StepToolExecution not found");
             }
 
-            string message = GetTheOutputFromOpenAiResponseToPromptUsed(responseDto);
+            string message = FindTheOutputFromOpenAiResponseToPromptUsed(responseDto);
 
             _unitOfWork.BeginTransaction();
             try
             {
-
                 if (!string.IsNullOrEmpty(message))
                 {
                     var documentHistory = new DocumentHistory(execution.Card!.DocumentId,
@@ -534,18 +531,23 @@ namespace WoopiAiHub.Application.Services
                 _unitOfWork.Rollback();
                 throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
-
-            static string GetTheOutputFromOpenAiResponseToPromptUsed(OpenAiResponseConsumerResponseDto responseDto)
-            {
-                return responseDto
-                        .Response
-                        .Output
-                        .FirstOrDefault(x => x.Type == OpenAiResponsesTypes.Message)?
-                        .Content
-                        .FirstOrDefault(x => x.Type == OpenAiResponseInputContentType.OutputText)?
-                        .Text ?? string.Empty;
-            }
         }
+
+        /// <summary>
+        /// get the output from open ai response tools
+        /// </summary>
+        /// <param name="responseDto"></param>
+        /// <returns></returns>
+        private static string FindTheOutputFromOpenAiResponseToPromptUsed(OpenAiResponseConsumerResponseDto responseDto)
+        {
+            return responseDto
+                    .Response
+                    .Output
+                    .FirstOrDefault(x => x.Type == OpenAiResponsesTypes.Message)?
+                    .Content
+                    .FirstOrDefault(x => x.Type == OpenAiResponseInputContentType.OutputText)?
+                    .Text ?? string.Empty;
+            }
 
         /// <summary>
         /// Updates StepToolExecution output

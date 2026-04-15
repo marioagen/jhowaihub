@@ -9,6 +9,5 @@ namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
 
         [JsonPropertyName("text")]
         public string? Text { get; set; } = string.Empty;
-
     }
 }

@@ -16,6 +16,5 @@ namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
         public List<ResponseOpenAiRequestToolsDto> Tools { get; set; } = new ();
         [JsonPropertyName("input")]
         public List<ResponseOpenAiRequestInputDto> Input { get; set; } = new ();
-
     }
 }

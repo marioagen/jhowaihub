@@ -7,7 +7,6 @@ using WoopiAiHub.Application.ToolsHandler;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
-using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -63,7 +62,6 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 JWTAudience = faker.Internet.Url(),
                 JWTUser = faker.Internet.UserName(),
                 JWTExpirationTime = 5
-
             };
 
             _openAiSettings = new OpenAiSettings
@@ -104,30 +102,9 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
                                .Returns(PromptFixture.FindValidPromptDto());
 
-            _mockApiTemplateServices.Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>())
-                )
-                .ReturnsAsync(new List<ApiTemplateDto> {
-                    new ApiTemplateDto {
-                        Id = 1,
-                        Created = DateTime.Now,
-                        Name = "Api 1",
-                        Method = "GET",
-                        Url = "http://localhost",
-                        Description = "",
-                        EnableAccessFromMcp = true,
-                        BodyTemplate = "{}"
-                    },
-                    new ApiTemplateDto {
-                        Id = 2,
-                        Created = DateTime.Now,
-                        Name = "Api 2",
-                        Method = "POST",
-                        Url = "http://localhost",
-                        Description = "",
-                        EnableAccessFromMcp = true,
-                        BodyTemplate = "{}"
-                    }
-                });
+            _mockApiTemplateServices
+                .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
+                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto());
 
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
@@ -190,28 +167,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 .Returns(PromptFixture.FindValidPromptDto());
             _mockApiTemplateServices
                 .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
-                .ReturnsAsync(new List<ApiTemplateDto> {
-                    new ApiTemplateDto {
-                        Id = 1,
-                        Created = DateTime.Now,
-                        Name = "Api 1",
-                        Method = "GET",
-                        Url = "http://localhost",
-                        Description = "",
-                        EnableAccessFromMcp = true,
-                        BodyTemplate = "{}"
-                    },
-                    new ApiTemplateDto {
-                        Id = 2,
-                        Created = DateTime.Now,
-                        Name = "Api 2",
-                        Method = "POST",
-                        Url = "http://localhost",
-                        Description = "",
-                        EnableAccessFromMcp = true,
-                        BodyTemplate = "{}"
-                    }
-                });
+                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto());
 
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
@@ -249,28 +205,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
 
             _mockApiTemplateServices
                 .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
-                .ReturnsAsync(new List<ApiTemplateDto> {
-                    new ApiTemplateDto {
-                        Id = 1,
-                        Created = DateTime.Now,
-                        Name = "Api 1",
-                        Method = "GET",
-                        Url = "http://localhost",
-                        Description = "",
-                        EnableAccessFromMcp = true,
-                        BodyTemplate = "{}"
-                    },
-                    new ApiTemplateDto {
-                        Id = 2,
-                        Created = DateTime.Now,
-                        Name = "Api 2",
-                        Method = "POST",
-                        Url = "http://localhost",
-                        Description = "",
-                        EnableAccessFromMcp = true,
-                        BodyTemplate = "{}"
-                    }
-                });
+                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto());
+
 
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
@@ -311,30 +247,11 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
                                .Returns(promptDto);
 
+            var apis = MessagingFixture.FindValidListApiTemplateDto();
             _mockApiTemplateServices
                 .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
-                .ReturnsAsync(new List<ApiTemplateDto> {
-                    new ApiTemplateDto {
-                        Id = 1,
-                        Created = DateTime.Now,
-                        Name = "Api 1",
-                        Method = "GET",
-                        Url = "http://localhost",
-                        Description = "Api 1",
-                        EnableAccessFromMcp = true,
-                        BodyTemplate = "{}"
-                    },
-                    new ApiTemplateDto {
-                        Id = 2,
-                        Created = DateTime.Now,
-                        Name = "Api 2",
-                        Method = "POST",
-                        Url = "http://localhost",
-                        Description = "Api 2",
-                        EnableAccessFromMcp = true,
-                        BodyTemplate = "{}"
-                    }
-                });
+                .ReturnsAsync(apis);
+
 
             _mockAccountServices
                 .Setup(x =>
@@ -359,9 +276,9 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.NotEmpty(message.OpenAiResponse.Instructions);
 
             Assert.Contains("instructions", message.OpenAiResponse.Instructions);
-            Assert.Contains("http://localhost", message.OpenAiResponse.Instructions);
-            Assert.Contains("Api 1", message.OpenAiResponse.Instructions);
-            Assert.Contains("Api 2", message.OpenAiResponse.Instructions);
+            Assert.Contains(apis[0].Url, message.OpenAiResponse.Instructions);
+            Assert.Contains(apis[0].Description, message.OpenAiResponse.Instructions);
+            Assert.Contains(apis[1].Description, message.OpenAiResponse.Instructions);
 
             Assert.Equal(_mcpSettings.MaxToolCalls, message.OpenAiResponse.MaxToolCalls);
 
