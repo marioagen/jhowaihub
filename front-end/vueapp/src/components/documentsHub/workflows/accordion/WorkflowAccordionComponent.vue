@@ -48,7 +48,6 @@
                                     style="width: 2.5rem"
                                 >
                                     <AccordionStepHeaderCheckbox
-                                        v-if="step.order !== minOrder"
                                         :visible-card-ids="visibleCardIdsForStep(step)"
                                         :selected-card-ids="selectedCardIds"
                                         @toggle-step="onToggleStepSelection"

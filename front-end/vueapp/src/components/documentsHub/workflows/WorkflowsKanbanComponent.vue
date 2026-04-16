@@ -251,6 +251,7 @@
                                         v-if="canBulkReject"
                                         type="button"
                                         class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
+                                        :disabled="hasFirstStepCardInSelection"
                                         @click="rejectRange"
                                     >
                                         <LucideIcon
@@ -401,6 +402,10 @@
                     .filter((s) => s.order === minOrder)
                     .flatMap((s) => (s.cards || []).map((c) => c.id));
             },
+            hasFirstStepCardInSelection() {
+                if (!this.selectedCardIds.length) return false;
+                return this.selectedCardIds.some((id) => this.isFirstStepCardId(id));
+            },
         },
         methods: {
             clearBulkSelection() {
@@ -409,10 +414,6 @@
             },
             isFirstStepCardId(cardId) {
                 return this.firstStepCardIds.some((fid) => fid === cardId || fid == cardId);
-            },
-            pruneFirstStepCardIdsFromSelection() {
-                if (this.selectedCardIds.length === 0) return;
-                this.selectedCardIds = this.selectedCardIds.filter((id) => !this.isFirstStepCardId(id));
             },
             assignRangeErrorMessage(error) {
                 const data = error?.response?.data;
@@ -468,7 +469,11 @@
                 }
             },
             rejectRange() {
-                if (!this.canBulkReject || this.selectedCardIds.length === 0) {
+                if (
+                    !this.canBulkReject ||
+                    this.selectedCardIds.length === 0 ||
+                    this.hasFirstStepCardInSelection
+                ) {
                     return;
                 }
                 this.$refs.documentRejectionModalRef?.open(this.selectedOption?.id);
@@ -485,7 +490,6 @@
                 this.isKanbanView = false;
             },
             onToggleAccordionCardSelection({ cardId, selected }) {
-                if (this.isFirstStepCardId(cardId)) return;
                 const set = new Set(this.selectedCardIds);
                 if (selected) {
                     set.add(cardId);
@@ -495,13 +499,12 @@
                 this.selectedCardIds = Array.from(set);
             },
             onToggleAccordionStepSelection({ cardIds, selectAll }) {
-                const allowedIds = cardIds.filter((id) => !this.isFirstStepCardId(id));
-                if (allowedIds.length === 0) return;
+                if (!cardIds?.length) return;
                 const set = new Set(this.selectedCardIds);
                 if (selectAll) {
-                    allowedIds.forEach((id) => set.add(id));
+                    cardIds.forEach((id) => set.add(id));
                 } else {
-                    allowedIds.forEach((id) => set.delete(id));
+                    cardIds.forEach((id) => set.delete(id));
                 }
                 this.selectedCardIds = Array.from(set);
             },
@@ -559,7 +562,6 @@
                 WorkflowService.getWorkflowStepsById(workflowId, this.filters)
                     .then((response) => {
                         this.kanbanCards = response;
-                        this.pruneFirstStepCardIdsFromSelection();
                     })
                     .finally(() => {
                         this.isLoadingKanban = false;
@@ -676,7 +678,6 @@
                         steps: [...steps],
                     };
                 }
-                this.pruneFirstStepCardIdsFromSelection();
             },
             updateSpecificCards(cardIds, signalRMessage = null) {
                 if (!cardIds || cardIds.length === 0) return;
