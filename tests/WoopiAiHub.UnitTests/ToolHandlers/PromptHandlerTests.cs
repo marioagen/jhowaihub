@@ -27,7 +27,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         private readonly Mock<ITenantCacheServices> _mockTenantCacheServices;
         private readonly Mock<IPromptServices> _mockPromptServices;
         private readonly Mock<IApiTemplateServices> _mockApiTemplateServices;
-        private readonly Mock<IAccountServices> _mockAccountServices;
+        private readonly Mock<IJwtTokenServices> _mockJwtTokenServices;
         private readonly ChatCompletionSettings _chatCompletionSettings;
         private readonly OpenAiSettings _openAiSettings;
         private readonly McpSettings _mcpSettings;
@@ -44,7 +44,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             _mockTenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
             _mockPromptServices = _mocker.GetMock<IPromptServices>();
             _mockApiTemplateServices = _mocker.GetMock<IApiTemplateServices>();
-            _mockAccountServices = _mocker.GetMock<IAccountServices>();
+            _mockJwtTokenServices = _mocker.GetMock<IJwtTokenServices>();
             var faker = new Faker("pt_BR");;
             _chatCompletionSettings = new ChatCompletionSettings
             {
@@ -253,7 +253,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 .ReturnsAsync(apis);
 
 
-            _mockAccountServices
+            _mockJwtTokenServices
                 .Setup(x =>
                     x.GenerateTokenWithParameters(
                         _mcpSettings.JWTKey,

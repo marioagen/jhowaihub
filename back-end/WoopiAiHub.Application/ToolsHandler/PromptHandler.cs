@@ -26,24 +26,24 @@ public class PromptHandler : IToolHandler
     private readonly ITenantCacheServices _tenantCacheServices;
     private readonly McpSettings _mcpSettings;
     private readonly IApiTemplateServices _apiTemplateServices;
-    private readonly IAccountServices _accountServices;
+    private readonly IJwtTokenServices _jwtTokenServices;
     private readonly OpenAiSettings _openAiSettings;
 
     public PromptHandler(IOptions<MessageQueues> messageQueues,
                          IPromptServices promptServices,
                          ITenantCacheServices tenantCacheServices,
                          IApiTemplateServices apiTemplateServices,
-                         IAccountServices accountServices,
                          IOptions<OpenAiSettings> openAiSettings,
-                         IOptions<McpSettings> mcpSettings)
+                         IOptions<McpSettings> mcpSettings,
+                         IJwtTokenServices jwtTokenServices)
     {
         _messageQueues = messageQueues.Value;
         _promptServices = promptServices;
         _tenantCacheServices = tenantCacheServices;
         _apiTemplateServices = apiTemplateServices;
-        _accountServices = accountServices;
         _openAiSettings = openAiSettings.Value;
         _mcpSettings = mcpSettings.Value;
+        _jwtTokenServices = jwtTokenServices;
     }
 
     /// <summary>
@@ -144,7 +144,7 @@ public class PromptHandler : IToolHandler
 
         var instructions = await GenerateInstructionsWithMappedApisToAgent(promptDto);
 
-        var accessToken = _accountServices.GenerateTokenWithParameters(
+        var accessToken = _jwtTokenServices.GenerateTokenWithParameters(
             _mcpSettings.JWTKey,
             _mcpSettings.JWTIssuer,
             _mcpSettings.JWTAudience,

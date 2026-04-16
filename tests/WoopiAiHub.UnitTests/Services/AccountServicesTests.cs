@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.AutoMock;
-using Refit;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -28,6 +26,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly AutoMocker _mocker;
         private readonly AccountFixture _fixture;
         private readonly AccountServices _accountServices;
+        private readonly Mock<IJwtTokenServices> _mockJwtTokenServices;
 
         public AccountServicesTests(AccountFixture accountFixture)
         {
@@ -52,6 +51,7 @@ namespace WoopiAiHub.UnitTests.Services
             configMock.Setup(x => x.GetSection("JWT:RefreshTokenExpirationDays")).Returns(mockJwtRefreshTokenSection.Object);
 
             _mocker.Use(configMock);
+            _mockJwtTokenServices = _mocker.GetMock<IJwtTokenServices>();
 
             _accountServices = _mocker.CreateInstance<AccountServices>();
         }
@@ -258,6 +258,18 @@ namespace WoopiAiHub.UnitTests.Services
         public void AuthenticateApi_Success()
         {
             // Act
+            _mockJwtTokenServices
+                .Setup(x =>
+                    x.GenerateTokenWithParameters(
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        "mockKey",
+                        null
+                    )
+                )
+                .Returns("token-test");
+
             var result = _accountServices.AuthenticateApi("mockKey");
 
             // Assert

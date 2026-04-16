@@ -363,6 +363,15 @@ export default {
             const textInput = this.values?.text;
             return typeof textInput === "string" && textInput.trim().length > 0;
         },
+        initializeData() {
+            if (this.id) {
+                this.findById(this.id);
+            } else if (this.cloneId) {
+                this.loadCloneData(this.cloneId);
+            } else {
+                this.resetData();
+            }
+        },
     },
     setup() {
         const { validate, setValues, values, resetForm } = useForm();
@@ -624,26 +633,8 @@ export default {
         },
     },
     mounted() {
-        if (this.id) {
-            this.findById(this.id);
-        } else if (this.cloneId) {
-            this.loadCloneData(this.cloneId);
-        }
+        this.initializeData;
         this.getTemplatesEnableAccessToMcp();
-    },
-    watch: {
-        id(newId) {
-            if (newId) {
-                this.findById(newId);
-            } else {
-                this.resetData();
-            }
-        },
-        cloneId(newId) {
-            if (newId) {
-                this.loadCloneData(newId);
-            }
-        },
     },
 };
 </script>

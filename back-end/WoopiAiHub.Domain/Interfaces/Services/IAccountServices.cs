@@ -11,6 +11,5 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         string FindClientId();
         Task<string?> RefreshTokenAsync(string refreshToken, string headerTenant);
         Task<bool> RevokeTokenAsync(string refreshToken);
-        string GenerateTokenWithParameters(string jwtKey, string jwtIssuer, string jwtAudience, string user, int? tokenExpirationTime = null);
     }
 }
