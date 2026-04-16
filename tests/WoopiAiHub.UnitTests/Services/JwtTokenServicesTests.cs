@@ -3,7 +3,6 @@ using System.Security.Claims;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using WoopiAiHub.Application.Services;
-using WoopiAiHub.Domain.Interfaces.Services;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Services
@@ -11,7 +10,7 @@ namespace WoopiAiHub.UnitTests.Services
     public class JwtTokenServicesTests
     {
         private readonly Mock<IConfiguration> _mockConfiguration;
-        private readonly IJwtTokenServices _jwtTokenServices;
+        private readonly JwtTokenServices _jwtTokenServices;
         private const string ValidJwtKey = "this-is-a-valid-jwt-key-that-is-long-enough-for-hmacsha256-algorithm";
         private const string ValidIssuer = "http://localhost";
         private const string ValidAudience = "http://localhost";
@@ -106,7 +105,6 @@ namespace WoopiAiHub.UnitTests.Services
             var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
 
             Assert.NotNull(jwtToken);
-            Assert.NotNull(jwtToken.ValidTo);
 
             var expectedExpiration = beforeTokenGeneration.AddMinutes(expectedExpirationMinutes);
             // Allow a 5-second tolerance for execution time
@@ -137,7 +135,6 @@ namespace WoopiAiHub.UnitTests.Services
             var jwtToken = handler.ReadToken(token) as JwtSecurityToken;
 
             Assert.NotNull(jwtToken);
-            Assert.NotNull(jwtToken.ValidTo);
 
             var expectedExpiration = beforeTokenGeneration.AddMinutes(customExpirationMinutes);
             // Allow a 5-second tolerance for execution time

@@ -27,7 +27,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="tokenExpirationTime"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
-        public string GenerateTokenWithParameters(string jwtKey, string jwtIssuer, string jwtAudience, string user, int? tokenExpirationTime = null)
+        public string GenerateTokenWithParameters(string? jwtKey, string jwtIssuer, string jwtAudience, string user, int? tokenExpirationTime = null)
         {
             var key = jwtKey ?? throw new ArgumentException("JWT key is not configured.");
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
