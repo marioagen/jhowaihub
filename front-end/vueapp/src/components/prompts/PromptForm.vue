@@ -395,6 +395,16 @@ export default {
             this.resetData();
             PromptService.getPromptById(id)
             .then((response) => {
+                if(response.error) {
+                    this.$notify({  
+                        title: "prompts.title",
+                        message: "prompts.getDataError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                    return;
+                }
+
                 this.form = {
                     name: response.name,
                     description: response.description,
@@ -405,19 +415,21 @@ export default {
                 this.apiTemplatesSelected = response.promptApiTemplates.map(x => x.apiTemplateId);
                 this.idEdit = id;
             })
-            .catch(() => {
-                this.$notify({  
-                    title: "prompts.title",
-                    message: "prompts.getDataError",
-                    variant: "danger",
-                    icon: "CircleX",
-                });
-            });
         },
         loadCloneData(id) {
             this.resetData();
             PromptService.getPromptById(id)
                 .then((response) => {
+                    if(response.error) {    
+                        this.$notify({
+                            title: "prompts.title",
+                            message: "prompts.getDataError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                        return;
+                    }
+
                     this.form = {
                         name: response.name + " " + this.$t("prompts.cloneSuffix"),
                         description: response.description,
@@ -427,14 +439,6 @@ export default {
                     this.apiTemplatesSelected = response.promptApiTemplates.map(x => x.apiTemplateId);
                     this.setValues(this.form);
                 })
-                .catch(() => {
-                    this.$notify({
-                        title: "prompts.title",
-                        message: "prompts.getDataError",
-                        variant: "danger",
-                        icon: "CircleX",
-                    });
-                });
         },
         updatePrompt () {
             const paramsData = {
@@ -447,6 +451,16 @@ export default {
             };
             PromptService.updatePrompt(paramsData)
                 .then((response) => {
+                    if(response.error) {    
+                        this.$notify({
+                            title: "prompts.title",
+                            message: "prompts.getDataError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                        return;
+                    }
+
                     this.$notify({
                         title: "prompts.title",
                         message: "prompts.updateSuccess",
@@ -454,17 +468,9 @@ export default {
                         icon: "CircleCheckBig",
                     });
                     this.$emit("saved", response);
-                })
-                .catch(() => {
-                    this.$notify({
-                        title: "prompts.title",
-                        message: "prompts.updateError",
-                        variant: "danger",
-                        icon: "CircleX",
-                    });
                 });
         },
-        createPrompt: function () {
+        createPrompt () {
             var paramsData = {
                 name: this.values.name,
                 description: this.values.description,
@@ -474,6 +480,16 @@ export default {
             };
             PromptService.createPrompt(paramsData)
                 .then((response) => {
+                    if(response.error){
+                        this.$notify({
+                            title: "prompts.title",
+                            message: "prompts.createError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                        return;
+                    }
+            
                     this.$notify({
                         title: "prompts.title",
                         message: "prompts.createSuccess",
@@ -481,14 +497,6 @@ export default {
                         icon: "CircleCheckBig",
                     });
                     this.$emit("saved", response);
-                })
-                .catch((e) => {
-                    this.$notify({
-                        title: "prompts.title",
-                        message: "prompts.createError",
-                        variant: "danger",
-                        icon: "CircleX",
-                    });
                 });
         },
         resetData() {
@@ -502,7 +510,7 @@ export default {
                 },
             });
         },
-        refinePrompt: function () {
+        refinePrompt() {
             if (!this.values || !this.values.text || this.values.text.trim() === "") {
                 return this.$notify({
                     title: "prompts.title",
@@ -514,6 +522,16 @@ export default {
             this.isRefining = true;
             PromptService.refinePrompt(this.values.text)
                 .then((response) => {
+                    if(response.error) {
+                        this.$notify({
+                            title: "prompts.title",
+                            message: "prompts.refineError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                        return;
+                    }
+
                     let refinedText = response;
                     if (typeof response === "object") {
                         refinedText = Object.entries(response)
@@ -536,14 +554,6 @@ export default {
                         icon: "CircleCheckBig",
                     });
                 })
-                .catch((error) => {
-                    this.$notify({
-                        title: "prompts.title",
-                        message: "prompts.refineError",
-                        variant: "danger",
-                        icon: "CircleX",
-                    });
-                })
                 .finally(() => {
                     this.isRefining = false;
                 });
@@ -564,16 +574,17 @@ export default {
                 contextText: this.testContext,
             })
                 .then((response) => {
+                    if(response.error) {
+                        this.$notify({
+                            title: "prompts.title",
+                            message: "prompts.playground.testError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    }
+
                     this.testResult =
                         typeof response === "string" ? response : String(response ?? "");
-                })
-                .catch(() => {
-                    this.$notify({
-                        title: "prompts.title",
-                        message: "prompts.playground.testError",
-                        variant: "danger",
-                        icon: "CircleX",
-                    });
                 })
                 .finally(() => {
                     this.isTesting = false;
