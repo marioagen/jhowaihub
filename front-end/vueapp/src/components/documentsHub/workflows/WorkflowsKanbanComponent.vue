@@ -251,7 +251,7 @@
                                         v-if="canBulkReject"
                                         type="button"
                                         class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
-                                        :disabled="hasFirstStepCardInSelection"
+                                        :disabled="isRejectionDisabled"
                                         @click="rejectRange"
                                     >
                                         <LucideIcon
@@ -392,10 +392,13 @@
                 }
                 return this.users.filter((u) => u.name && u.name.toLowerCase().includes(q));
             },
+            workflowSteps() {
+                const raw = this.kanbanCards;
+                if (!raw) return [];
+                return Array.isArray(raw) ? raw : (raw.steps ?? []);
+            },
             firstStepCardIds() {
-                const steps = Array.isArray(this.kanbanCards)
-                    ? this.kanbanCards
-                    : this.kanbanCards?.steps || [];
+                const steps = this.workflowSteps;
                 if (steps.length === 0) return [];
                 const minOrder = Math.min(...steps.map((s) => s.order));
                 return steps
@@ -405,6 +408,22 @@
             hasFirstStepCardInSelection() {
                 if (!this.selectedCardIds.length) return false;
                 return this.selectedCardIds.some((id) => this.isFirstStepCardId(id));
+            },
+            hasMultipleStepsInSelection() {
+                if (this.selectedCardIds.length < 2) return false;
+                const orders = new Set();
+                for (const step of this.workflowSteps) {
+                    for (const card of step.cards || []) {
+                        if (this.selectedCardIds.some((id) => id === card.id || id == card.id)) {
+                            orders.add(step.order);
+                            if (orders.size > 1) return true;
+                        }
+                    }
+                }
+                return false;
+            },
+            isRejectionDisabled() {
+                return this.hasFirstStepCardInSelection || this.hasMultipleStepsInSelection;
             },
         },
         methods: {
@@ -472,7 +491,7 @@
                 if (
                     !this.canBulkReject ||
                     this.selectedCardIds.length === 0 ||
-                    this.hasFirstStepCardInSelection
+                    this.isRejectionDisabled
                 ) {
                     return;
                 }
