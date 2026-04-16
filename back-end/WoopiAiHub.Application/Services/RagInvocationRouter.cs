@@ -23,13 +23,13 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         NullValueHandling = NullValueHandling.Ignore
     };
 
-    private readonly IIntegrationHubApi _integrationHubApi;
+    private readonly IAzureAiSearch _integrationHubApi;
     private readonly IEmbeddingsApi _embeddingsApi;
     private readonly IChatCompletionApi _chatCompletionApi;
     private readonly IConfiguration _configuration;
     private readonly ILogger<RagInvocationRouter> _logger;
 
-    public RagInvocationRouter(IIntegrationHubApi integrationHubApi,
+    public RagInvocationRouter(IAzureAiSearch integrationHubApi,
         IEmbeddingsApi embeddingsApi,
         IChatCompletionApi chatCompletionApi,
         IConfiguration configuration,
@@ -84,7 +84,7 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
     }
 
     /// <summary>
-    /// Executes chat completion via the AI Gateway Refit client or the integration-services HTTP API depending on tenant RAG provider.
+    /// Executes chat completion via the AI Gateway Refit client 
     /// </summary>
     public async Task<ChatCompletionResponseDto> ExecuteChatCompletionAsync(TenantInfoDto tenant,
         string email,
@@ -101,8 +101,7 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
 
         if (RoutesToIntegration(tenant))
         {
-            return await ExecuteIntegrationChatCompletionAsync(tenant, email, chatCompletion, model, apiVersion,
-                cancellationToken).ConfigureAwait(false);
+            throw new InvalidOperationException("Chat completion is not supported for Azure AI Search integration.");
         }
 
         return await _chatCompletionApi
@@ -116,6 +115,20 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         return !string.IsNullOrEmpty(p) &&
                p.Equals(RagProviderNames.AzureAiSearch, StringComparison.OrdinalIgnoreCase);
     }
+
+    /// <summary>
+    /// Executes a custom query against the indexer service for the specified tenant and reference file asynchronously.
+    /// </summary>
+    /// <param name="tenantName">The name of the tenant for which the custom query is executed. Cannot be null or empty.</param>
+    /// <param name="referenceFile">The identifier of the reference file to query within the indexer. Cannot be null or empty.</param>
+    /// <param name="indexerApiKey">The API key used to authenticate the request to the indexer service. Cannot be null or empty.</param>
+    /// <param name="request">The custom query request details to be sent to the indexer API. Cannot be null.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the execution result of the custom
+    /// query, including the response and usage information.</returns>
+    /// <exception cref="FileNotFoundException">Thrown if the specified reference file is not found in the indexer service.</exception>
+    /// <exception cref="AppException">Thrown if an error occurs while sending the query to the Embeddings API.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the response from the Embeddings API does not contain a valid result.</exception>
 
     private async Task<CustomQueryExecutionResult> ExecuteIndexerCustomQueryAsync(string tenantName,
         string referenceFile,
@@ -146,6 +159,19 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         return new CustomQueryExecutionResult(model.response, usage.ToList());
     }
 
+    /// <summary>
+    /// Execute Integrataion Custom Query when tenant RAG provider is set to Azure AI Search, executes the custom query via the integration-services HTTP API.
+    /// </summary>
+    /// <param name="tenant"></param>
+    /// <param name="referenceFile"></param>
+    /// <param name="indexerApiKey"></param>
+    /// <param name="emailCreator"></param>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <exception cref="AppException"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
     private async Task<CustomQueryExecutionResult> ExecuteIntegrationCustomQueryAsync(TenantInfoDto tenant,
         string referenceFile,
         string indexerApiKey,
@@ -218,6 +244,15 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         return new CustomQueryExecutionResult(first.Answer, mappedUsage);
     }
 
+    /// <summary>
+    /// Executes the delete operation for the Azure AI Search integration by calling the Indexer Refit client. It will throw an exception if the response is not successful to indicate that something went wrong with the request, but it will not throw if the status code is NotFound to avoid breaking the flow in case the file was not found in the indexer and therefore there is nothing to delete.
+    /// </summary>
+    /// <param name="tenantName"></param>
+    /// <param name="referenceFile"></param>
+    /// <param name="indexerApiKey"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     private async Task ExecuteIndexerDeleteAsync(string tenantName,
         string referenceFile,
         string indexerApiKey,
@@ -232,6 +267,15 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         }
     }
 
+    /// <summary>
+    /// Executes the delete operation for the Azure AI Search integration by calling the Integration Hub API. It logs a warning instead of throwing if the response is not successful to avoid breaking the flow in case of issues with the Integration API, but it will throw an exception if the status code is different than NotFound to indicate that something went wrong with the request.
+    /// </summary>
+    /// <param name="tenant"></param>
+    /// <param name="referenceFile"></param>
+    /// <param name="indexerApiKey"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     private async Task ExecuteIntegrationDeleteAsync(TenantInfoDto tenant,
         string referenceFile,
         string indexerApiKey,
@@ -254,55 +298,5 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
             _logger.LogWarning("Integration delete failed: {Status} {Body}", response.StatusCode, body);
             throw new ArgumentException("Error while sending delete to Integration API");
         }
-    }
-
-    private async Task<ChatCompletionResponseDto> ExecuteIntegrationChatCompletionAsync(TenantInfoDto tenant,
-        string email,
-        ChatCompletionDto chatCompletion,
-        string model,
-        string apiVersion,
-        CancellationToken cancellationToken)
-    {
-        var bodyDto = new IntegrationHubChatCompletionBodyDto
-        {
-            Temperature = chatCompletion.Temperature,
-            MaxTokens = chatCompletion.MaxTokens,
-            Stream = chatCompletion.Stream,
-            Messages = chatCompletion.Messages
-                .Select(m => new IntegrationHubChatMessageDto { Role = m.Role, Content = m.Content }).ToList()
-        };
-
-        var payload = new IntegrationHubChatCompletionQueryRequest
-        {
-            ReferenceFile = string.Empty,
-            Tenant = tenant.Name,
-            Email = email,
-            Model = model,
-            ApiVersion = apiVersion,
-            ApplicationId = tenant.AiGatewayApplicationId!.Value.ToString(),
-            ApplicationKey = tenant.AiGatewayKey,
-            ResponseQueue = string.Empty,
-            Data = new Newtonsoft.Json.Linq.JObject(),
-            ChatCompletion = bodyDto
-        };
-
-        var keyAccess = _configuration["KeyAccess"] ?? string.Empty;
-        using var response =
-            await _integrationHubApi.ChatCompletionAsync(keyAccess, payload, cancellationToken).ConfigureAwait(false);
-        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogWarning("Integration chat-completion failed: {Status} {Body}", response.StatusCode,
-                responseBody);
-            throw new AppException(ErrorCode.RefitApiError, "Error while calling Integration chat-completion API", null);
-        }
-
-        var result = JsonConvert.DeserializeObject<ChatCompletionResponseDto>(responseBody, JsonSettings);
-        if (result == null)
-        {
-            throw new InvalidOperationException("Integration chat-completion returned an empty body.");
-        }
-
-        return result;
     }
 }

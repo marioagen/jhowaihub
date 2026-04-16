@@ -1,18 +1,17 @@
-using System.Net.Http;
 using Refit;
 using WoopiAiHub.Domain.DTOs.IntegrationHub;
 
 namespace WoopiAiHub.Domain.Interfaces.Refit;
 
-public interface IIntegrationHubApi
+public interface IAzureAiSearch
 {
-    [Post("/api/v1/hub/embeddings/custom-query")]
+    [Post("/api/AzureAiSearch/custom-query")]
     Task<HttpResponseMessage> CustomQueryAsync(
         [Header("KeyAccess")] string KeyAccess,
         [Body] IntegrationHubDocumentEmbeddingsQueryRequest request,
         CancellationToken cancellationToken = default);
 
-    [Post("/api/v1/hub/embeddings/delete")]
+    [Post("/api/AzureAiSearch/delete")]
     Task<HttpResponseMessage> DeleteEmbeddingsAsync(
         [Header("KeyAccess")] string KeyAccess,
         [Body] IntegrationHubDocumentEmbeddingsDeleteRequest request,
