@@ -418,12 +418,7 @@ namespace WoopiAiHub.Application.Services
                 enableAccessToMcp: promptCreateDto.EnableAccessToMcp);
 
             prompt.PromptApiTemplates = promptCreateDto.ApiTemplatesSelected
-                .Select(x =>
-                {
-                    var promptApiTemplate = new PromptApiTemplate(0, DateTime.Now);
-                    promptApiTemplate.ApiTemplateId = x;
-                    return promptApiTemplate;
-                })
+                .Select(x => new PromptApiTemplate(0, x, 0, DateTime.Now))
                 .ToList();
 
             return prompt;
@@ -445,14 +440,10 @@ namespace WoopiAiHub.Application.Services
                 promptDto.IdUser,
                 enableAccessToMcp: promptDto.EnableAccessToMcp);
 
-            var apiToDelete = promptDto.PromptApiTemplates.Where(x => !promptUpdateDto.ApiTemplatesSelected.Contains(x.ApiTemplateId)).Select(x =>x.Id).ToList();
+            var apiToDelete = promptDto.PromptApiTemplates.Where(x => !promptUpdateDto.ApiTemplatesSelected.Contains(x.ApiTemplateId)).Select(x => x.Id).ToList();
             var apiToCreate = promptUpdateDto.ApiTemplatesSelected.Where(x => !promptDto.PromptApiTemplates.Any(p => p.ApiTemplateId == x));
-            prompt.PromptApiTemplates = apiToCreate.Select(x =>
-                {
-                    var promptApiTemplate = new PromptApiTemplate(0, DateTime.Now);
-                    promptApiTemplate.ApiTemplateId = x;
-                    return promptApiTemplate;
-                })
+            prompt.PromptApiTemplates = apiToCreate
+                .Select(x => new PromptApiTemplate(0, x, 0, DateTime.Now))
                 .ToList();
 
             return (prompt, apiToDelete);
@@ -547,7 +538,7 @@ namespace WoopiAiHub.Application.Services
                     .Content
                     .FirstOrDefault(x => x.Type == OpenAiResponseInputContentType.OutputText)?
                     .Text ?? string.Empty;
-            }
+        }
 
         /// <summary>
         /// Updates StepToolExecution output
