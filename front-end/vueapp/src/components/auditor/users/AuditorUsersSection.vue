@@ -60,7 +60,7 @@
 <style scoped>
     .auditor-summary-card,
     .auditor-detail-card {
-        height: 70vh;
+        height: calc(100vh - 230px);
         display: flex;
         flex-direction: column;
         overflow: hidden;
