@@ -4,12 +4,16 @@ using Moq;
 using Moq.AutoMock;
 using Moq.Protected;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
+using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Models;
 using WoopiAiHub.UnitTests.Fixtures;
 using Xunit;
 
@@ -287,13 +291,34 @@ namespace WoopiAiHub.UnitTests.Services
 
         #region ProcessAnonymizationResult Tests
 
-        [Fact(DisplayName = "ProcessAnonymizationResult - Should successfully notify hub with valid result")]
+        [Fact(DisplayName = "ProcessAnonymizationResult - Should successfully save anonymization and notify hub")]
         [Trait("ProcessAnonymizationResult", "Success")]
-        public async Task ProcessAnonymizationResult_WithValidResult_NotifiesHubSuccessfully()
+        public async Task ProcessAnonymizationResult_WithValidResult_SavesAndNotifiesSuccessfully()
         {
             // Arrange
             var result = AnonymizationFixture.FindValidAnonymizationResultDto();
+            var document = new Document(
+                "Test Document",
+                "Test Description",
+                "test-reference",
+                DocumentStatus.Analyzed,
+                "test@example.com",
+                1,
+                new List<Workflow>(),
+                DateTime.Now,
+                false);
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+
+            documentRepositoryMock
+                .Setup(x => x.FindById(result.WoopiAiDocumentId))
+                .Returns(document);
+
+            documentAnonymizationRepositoryMock
+                .Setup(x => x.CreateAsync(It.IsAny<DocumentAnonymization>()))
+                .ReturnsAsync(true);
 
             hubNotifierMock
                 .Setup(x => x.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl))
@@ -303,21 +328,90 @@ namespace WoopiAiHub.UnitTests.Services
             await _sut.ProcessAnonymizationResult(result);
 
             // Assert
+            documentRepositoryMock.Verify(
+                x => x.FindById(result.WoopiAiDocumentId),
+                Times.Once);
+
+            documentAnonymizationRepositoryMock.Verify(
+                x => x.CreateAsync(It.Is<DocumentAnonymization>(
+                    d => d.DocumentId == document.Id && d.DocumentUrl == result.DocumentUrl)),
+                Times.Once);
+
             hubNotifierMock.Verify(
                 x => x.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl),
                 Times.Once);
         }
 
-        [Fact(DisplayName = "ProcessAnonymizationResult - Should throw NullReferenceException when result is null")]
-        [Trait("ProcessAnonymizationResult", "NullHandling")]
-        public async Task ProcessAnonymizationResult_WithNullResult_ThrowsNullReferenceException()
+        [Fact(DisplayName = "ProcessAnonymizationResult - Should throw AppException when document is not found")]
+        [Trait("ProcessAnonymizationResult", "DocumentNotFound")]
+        public async Task ProcessAnonymizationResult_WhenDocumentNotFound_ThrowsAppException()
         {
             // Arrange
-            AnonymizationResultDto? result = null;
+            var result = AnonymizationFixture.FindValidAnonymizationResultDto();
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+
+            documentRepositoryMock
+                .Setup(x => x.FindById(result.WoopiAiDocumentId))
+                .Returns((Document?)null);
 
             // Act & Assert
-            await Assert.ThrowsAsync<NullReferenceException>(
-                () => _sut.ProcessAnonymizationResult(result!));
+            var exception = await Assert.ThrowsAsync<AppException>(
+                () => _sut.ProcessAnonymizationResult(result));
+
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal("Document not found", exception.Message);
+
+            documentAnonymizationRepositoryMock.Verify(
+                x => x.CreateAsync(It.IsAny<DocumentAnonymization>()),
+                Times.Never);
+
+            hubNotifierMock.Verify(
+                x => x.AnonymizationReadyAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()),
+                Times.Never);
+        }
+
+        [Fact(DisplayName = "ProcessAnonymizationResult - Should propagate exception from document anonymization repository")]
+        [Trait("ProcessAnonymizationResult", "ExceptionHandling")]
+        public async Task ProcessAnonymizationResult_WhenRepositoryThrows_PropagatesException()
+        {
+            // Arrange
+            var result = AnonymizationFixture.FindValidAnonymizationResultDto();
+            var document = new Document(
+                "Test Document",
+                "Test Description",
+                "test-reference",
+                DocumentStatus.Analyzed,
+                "test@example.com",
+                1,
+                new List<Workflow>(),
+                DateTime.Now,
+                false);
+
+            var expectedException = new InvalidOperationException("Database error");
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+
+            documentRepositoryMock
+                .Setup(x => x.FindById(result.WoopiAiDocumentId))
+                .Returns(document);
+
+            documentAnonymizationRepositoryMock
+                .Setup(x => x.CreateAsync(It.IsAny<DocumentAnonymization>()))
+                .ThrowsAsync(expectedException);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => _sut.ProcessAnonymizationResult(result));
+
+            Assert.Equal("Database error", exception.Message);
+
+            hubNotifierMock.Verify(
+                x => x.AnonymizationReadyAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()),
+                Times.Never);
         }
 
         [Fact(DisplayName = "ProcessAnonymizationResult - Should propagate exception from hub notifier")]
@@ -326,9 +420,31 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var result = AnonymizationFixture.FindValidAnonymizationResultDto();
+            var document = new Document(
+                "Test Document",
+                "Test Description",
+                "test-reference",
+                DocumentStatus.Analyzed,
+                "test@example.com",
+                1,
+                new List<Workflow>(),
+                DateTime.Now,
+                false);
+
             var expectedException = new InvalidOperationException("Hub notification failed");
 
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+
+            documentRepositoryMock
+                .Setup(x => x.FindById(result.WoopiAiDocumentId))
+                .Returns(document);
+
+            documentAnonymizationRepositoryMock
+                .Setup(x => x.CreateAsync(It.IsAny<DocumentAnonymization>()))
+                .ReturnsAsync(true);
+
             hubNotifierMock
                 .Setup(x => x.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl))
                 .ThrowsAsync(expectedException);
@@ -336,6 +452,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _sut.ProcessAnonymizationResult(result));
+
             Assert.Equal("Hub notification failed", exception.Message);
         }
 
