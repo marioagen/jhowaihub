@@ -152,9 +152,15 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var id = 1;
             var tenant = "Tenant";
+            var document = DocumentFixture.FindValidDocument();
+
             var configMockError = new Mock<IConfiguration>();
             configMockError.Setup(x => x["RefitExternalSettings:FunctionApiKey"]).Returns(string.Empty);
             _mocker.Use(configMockError.Object);
+
+            var documentRepository = _mocker.GetMock<IDocumentRepository>();
+            documentRepository.Setup(a => a.FindById(id)).Returns(document);
+
             var documentServices = _mocker.CreateInstance<DocumentServices>();
 
             // Assert

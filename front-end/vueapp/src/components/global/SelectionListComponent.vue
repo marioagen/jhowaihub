@@ -1,17 +1,30 @@
 <template>
-    <div class="mt-3">
-        <label class="form-label fw-semibold mb-0">{{ $t(labelPanel) }}</label>
+    <div :class="{ 'mt-3': !compact }">
+        <label
+            v-if="showLabel"
+            class="form-label fw-semibold mb-0"
+        >
+            {{ $t(labelPanel) }}
+        </label>
         <div class="card">
             <div class="card-header p-2">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="fw-semibold">{{ $t(labelSelectedQuantity) }} ({{ selected.length }})</span>
+                <div
+                    v-if="!hideBulkToolbar"
+                    class="d-flex justify-content-between align-items-center mb-2"
+                >
+                    <span class="fw-semibold">
+                        {{ $t(labelSelectedQuantity) }} ({{ selected.length }})
+                    </span>
                     <div class="float-end">
                         <button
                             type="button"
                             class="btn btn-outline-secondary btn-sm me-2 fw-semibold"
                             @click="selectAll"
                         >
-                            <LucideIcon icon="CheckCheck" :size="15" />
+                            <LucideIcon
+                                icon="CheckCheck"
+                                :size="15"
+                            />
                             {{ $t("common.selectAll") }}
                         </button>
                         <button
@@ -19,7 +32,10 @@
                             class="btn btn-outline-secondary btn-sm fw-semibold"
                             @click="clearSelection"
                         >
-                            <LucideIcon icon="CircleX" :size="15" />
+                            <LucideIcon
+                                icon="CircleX"
+                                :size="15"
+                            />
                             {{ $t("common.clearSelection") }}
                         </button>
                     </div>
@@ -29,7 +45,7 @@
                     class="mb-3 px-1"
                 >
                     <label class="form-label small fw-semibold mb-2 d-block">
-                        {{ $t("common.selectionList") }}
+                        {{ $t(selectionChipLabelKey) }}
                     </label>
                     <div class="d-flex flex-wrap gap-2">
                         <div
@@ -62,7 +78,9 @@
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-search text-secondary"></i></span>
+                        <span class="input-group-text border-end-0">
+                            <i class="fas fa-search text-secondary"></i>
+                        </span>
                         <input
                             type="text"
                             class="form-control form-control-sm"
@@ -71,13 +89,26 @@
                         />
                     </div>
                 </div>
-                <div class="selection-list" :style="{ maxHeight: listHeight, minHeight: listHeight }">
-                    <div v-if="loading" class="text-center">
-                        <div class="spinner-border text-primary" role="status">
+                <div
+                    class="selection-list"
+                    :style="{ maxHeight: listHeight, minHeight: listHeight }"
+                >
+                    <div
+                        v-if="loading"
+                        class="text-center"
+                    >
+                        <div
+                            class="spinner-border text-primary"
+                            role="status"
+                        >
                             <span class="visually-hidden">{{ $t("common.loading") }}</span>
                         </div>
                     </div>
-                    <div v-if="!loading" v-for="item in filteredItems" :key="item.id">
+                    <div
+                        v-if="!loading"
+                        v-for="item in filteredItems"
+                        :key="item.id"
+                    >
                         <div class="form-check d-flex align-items-center">
                             <input
                                 class="form-check-input me-3"
@@ -98,7 +129,9 @@
                                     </div>
                                     <div>
                                         <div class="fw-semibold">{{ item.name }}</div>
-                                        <div class="text-muted small">{{ item.email }}</div>
+                                        <div class="text-muted small">
+                                            {{ userSecondaryLine(item) }}
+                                        </div>
                                     </div>
                                 </label>
                             </div>
@@ -162,6 +195,26 @@
                 type: String,
                 default: "",
             },
+            maxSelections: {
+                type: Number,
+                default: null,
+            },
+            hideBulkToolbar: {
+                type: Boolean,
+                default: false,
+            },
+            compact: {
+                type: Boolean,
+                default: false,
+            },
+            selectionChipLabelKey: {
+                type: String,
+                default: "common.selectionList",
+            },
+            showLabel: {
+                type: Boolean,
+                default: true,
+            },
         },
         emits: ["update:selectedItems"],
         data() {
@@ -175,12 +228,18 @@
                     return this.selectedItems;
                 },
                 set(val) {
-                    this.$emit("update:selectedItems", val);
+                    let next = val;
+                    if (this.maxSelections === 1 && Array.isArray(val) && val.length > 1) {
+                        next = [val[val.length - 1]];
+                    }
+                    this.$emit("update:selectedItems", next);
                 },
             },
             filteredItems() {
                 if (!this.search) return this.items;
-                return this.items.filter((item) => item.name.toLowerCase().includes(this.search.toLowerCase()));
+                return this.items.filter((item) =>
+                    (item.name || "").toLowerCase().includes(this.search.toLowerCase())
+                );
             },
             resolvedChipIcon() {
                 if (this.chipIcon) {
@@ -205,7 +264,16 @@
                 this.selected = this.selectedItems.filter((itemId) => itemId !== id);
             },
             selectAll() {
+                if (this.maxSelections === 1 && this.filteredItems.length > 0) {
+                    this.selected = [this.filteredItems[0].id];
+                    return;
+                }
                 this.selected = this.filteredItems.map((item) => item.id);
+            },
+            userSecondaryLine(item) {
+                if (item.profile?.name) return item.profile.name;
+                if (item.role) return item.role;
+                return item.email ?? "";
             },
             clearSelection() {
                 this.selected = [];
@@ -224,7 +292,6 @@
         },
     };
 </script>
-
 <style scoped>
     .selection-list {
         overflow-y: auto;

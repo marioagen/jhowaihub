@@ -50,7 +50,7 @@
             v-else
             class="row"
         >
-            <div class="d-flex gap-3 overflow-auto flex-nowrap pb-2">
+            <div class="d-flex gap-3 flex-nowrap pb-2">
                 <div
                     v-for="step in activeStepsList"
                     :key="step.id ? `id-${step.id}` : `tmp-${step.tempId}`"
@@ -148,7 +148,7 @@
                                 v-model="step.profileId"
                                 :name="`steps[${step.tempId}].profileId`"
                                 rules="required"
-                                v-slot="{ field, errors }"
+                                v-slot="{ errors }"
                             >
                                 <div class="d-flex flex-column">
                                     <div class="input-group">
@@ -158,24 +158,64 @@
                                                 :size="16"
                                             />
                                         </span>
-
-                                        <select
-                                            class="form-select form-select-sm border-start-0"
-                                            v-bind="field"
-                                            v-model="step.profileId"
-                                        >
-                                            <option value="">
-                                                {{ $t("workflow.selectProfile") }}
-                                            </option>
-
-                                            <option
-                                                v-for="p in profilesList"
-                                                :key="p.id"
-                                                :value="String(p.id)"
+                                        <div class="dropdown flex-grow-1">
+                                            <button
+                                                class="btn btn-light border form-select-sm text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle border-start-0 rounded-start-0 pe-1"
+                                                type="button"
+                                                data-bs-toggle="dropdown"
+                                                data-bs-display="static"
+                                                aria-expanded="false"
                                             >
-                                                {{ p.text }}
-                                            </option>
-                                        </select>
+                                                <span class="text-truncate profile-label">
+                                                    {{ getProfileName(step.profileId) || $t("workflow.selectProfile") }}
+                                                </span>
+                                                <LucideIcon
+                                                    icon="ChevronDown"
+                                                    :size="14"
+                                                    class="ms-1 text-muted flex-shrink-0"
+                                                />
+                                            </button>
+                                            <ul class="dropdown-menu p-2 profile-dropdown-menu">
+                                                <li class="mb-1">
+                                                    <div class="input-group input-group-sm">
+                                                        <span class="input-group-text p-1 border-end-0">
+                                                            <LucideIcon
+                                                                icon="Search"
+                                                                :size="14"
+                                                            />
+                                                        </span>
+                                                        <input
+                                                            v-model="profileSearches[step.tempId]"
+                                                            type="text"
+                                                            class="form-control form-control-sm border-start-0"
+                                                            :placeholder="$t('filters.search')"
+                                                            @click.stop=""
+                                                        />
+                                                    </div>
+                                                </li>
+                                                <li v-if="!profileSearches[step.tempId]">
+                                                    <a
+                                                        class="dropdown-item small"
+                                                        :class="{ active: !step.profileId }"
+                                                        @click="step.profileId = ''"
+                                                    >
+                                                        {{ $t("workflow.selectProfile") }}
+                                                    </a>
+                                                </li>
+                                                <li
+                                                    v-for="p in getFilteredProfiles(step)"
+                                                    :key="p.id"
+                                                >
+                                                    <a
+                                                        class="dropdown-item small"
+                                                        :class="{ active: String(p.id) === String(step.profileId) }"
+                                                        @click="step.profileId = String(p.id)"
+                                                    >
+                                                        {{ p.text }}
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
 
                                     <span
@@ -245,6 +285,7 @@
                 isLoadingStatus: true,
                 tempStepCounter: 1,
                 isCheckingDocuments: false,
+                profileSearches: {},
             };
         },
 
@@ -298,7 +339,7 @@
             },
 
             hasRemovedOriginalSteps() {
-                return this.steps.some(s => s.id > 0 && s.isActive === false);
+                return this.steps.some((s) => s.id > 0 && s.isActive === false);
             },
 
             getData() {
@@ -315,6 +356,20 @@
                             isActive: true,
                         })),
                 };
+            },
+            getFilteredProfiles(step) {
+                const search = (this.profileSearches[step.tempId] || "").toLowerCase();
+                if (!search) return this.profilesList;
+                return this.profilesList.filter((p) =>
+                    p.text.toLowerCase().includes(search)
+                );
+            },
+            getProfileName(profileId) {
+                if (!profileId) return "";
+                const profile = this.profilesList.find(
+                    (p) => String(p.id) === String(profileId)
+                );
+                return profile ? profile.text : "";
             },
             getProfiles() {
                 this.isLoadingProfiles = true;
@@ -404,9 +459,9 @@
         transition: background-color 0.2s;
     }
 
-        .add-step-card:hover {
-            background-color: var(--color-hover-transfer) !important;
-        }
+    .add-step-card:hover {
+        background-color: var(--color-hover-transfer) !important;
+    }
 
     .icon-circle {
         width: 32px;
@@ -422,5 +477,26 @@
 
     .border-dashed {
         border-style: dashed !important;
+    }
+
+    .profile-dropdown-menu {
+        min-width: 100%;
+        max-height: 240px;
+        overflow-y: auto;
+        position: absolute;
+        top: 100%;
+        bottom: auto;
+    }
+
+    .profile-label {
+        font-size: 0.8rem;
+        max-width: calc(100% - 20px);
+    }
+
+    .dropdown-toggle::after {
+        display: none;
+    }
+    .border {
+        border-color: var(--color-border-form-control) !important;
     }
 </style>

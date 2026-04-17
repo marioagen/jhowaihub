@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -86,6 +86,20 @@ namespace WoopiAiHub.Application.Messaging
                                                                        DocumentStatus.Failure);
 
                     _logger.LogError(ex, "Failed to process the answer response.");
+
+                    try
+                    {
+                        var failingCardService = scope.ServiceProvider.GetRequiredService<IFailingCardService>();
+                        var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(message.Data.ToString());
+                        if (dataDto.CardId > 0)
+                        {
+                            await failingCardService.SetFailingCard(dataDto.CardId, message.Email);
+                        }
+                    }
+                    catch (Exception failingEx)
+                    {
+                        _logger.LogError(failingEx, "Error marking card as failing after exception in consumer");
+                    }
                 }
             });
 

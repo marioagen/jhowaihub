@@ -61,7 +61,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public TypeDoc FindByName(string name)
+        public TypeDoc? FindByName(string name)
         {
             return _typeDocRepository.FindByName(name);
         }

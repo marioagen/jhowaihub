@@ -51,7 +51,7 @@ namespace WoopiAiHub.UnitTests.Services
             var createQuestionnaireDto = _fixture.FindInvalidCreateQuestionnaireDto();
 
             // Act / Assert
-            Assert.Throws<NullReferenceException>(() => _questionnaireServices.CreateUniqueQuestionnaire(createQuestionnaireDto, "email" ));
+            Assert.Throws<ArgumentException>(() => _questionnaireServices.CreateUniqueQuestionnaire(createQuestionnaireDto, "email" ));
         }
 
         [Fact(DisplayName = "Create questionnaire Duplicate")]

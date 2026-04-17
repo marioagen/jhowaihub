@@ -13,11 +13,11 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         bool CreateUniqueQuestion(Question question);
         ICollection<QuestionDto> FindAll();
-        QuestionDto FindByDescriptionAndEmail(string desc,
+        QuestionDto? FindByDescriptionAndEmail(string desc,
                                               string email);
         bool DeleteByIds(List<int> ids);
         bool Update(QuestionUpdateDto updateQuestionDto);
-        QuestionDto FindById(int id);
+        QuestionDto? FindById(int id);
         List<Question> FindByIds(List<int> ids);
         IQueryable<QuestionDto> FindAllPaged(QuestionPagedDataDto questionPagedDataDto);
     }

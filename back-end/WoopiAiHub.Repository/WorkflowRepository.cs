@@ -13,6 +13,9 @@ namespace WoopiAiHub.Repository
     {
         private readonly ApplicationDbContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WorkflowRepository"/> class with the EF Core database context.
+        /// </summary>
         public WorkflowRepository(ApplicationDbContext context)
         {
             _context = context;
@@ -92,6 +95,7 @@ namespace WoopiAiHub.Repository
         public async Task<List<WorkflowDto>> FindByUsersTeams(List<int> teamIds)
         {
             return await _context.Workflows
+                .AsNoTracking()
                 .Include(w => w.Teams)
                 .Where(s => s.Teams.Any(t => teamIds.Contains(t.Id)) && s.Enable.Equals(true))
                 .Select(w => new WorkflowDto
@@ -121,7 +125,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public StepDto FindStepById(int id)
+        public StepDto? FindStepById(int id)
         {
             var step = _context.Steps
             .AsNoTracking()
@@ -630,6 +634,7 @@ namespace WoopiAiHub.Repository
             return _context.Workflows
                            .AsNoTracking()
                            .Where(w => w.Teams.Any(t => t.Users.Any(u => u.Email == userEmail)) && w.Enable.Equals(true))
+                           .OrderBy(w => w.Name)
                            .Select(t => new WorkflowDto
                            {
                                Id = t.Id,
@@ -658,6 +663,7 @@ namespace WoopiAiHub.Repository
             return _context.Workflows
                            .AsNoTracking()
                            .Where(w => w.Enable.Equals(true))
+                           .OrderBy(w => w.Name)
                            .Select(t => new WorkflowDto
                            {
                                Id = t.Id,
@@ -767,7 +773,7 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public StepToolOutput FindByStepToolOutputById(int id)
+        public StepToolOutput? FindByStepToolOutputById(int id)
         {
             var stepToolOutput = _context.StepToolOutputs.Where(p => p.Id == id)
                                                          .FirstOrDefault();
@@ -779,14 +785,17 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<ToolDto> FindToolByStepToolId(int id)
+        public async Task<ToolDto?> FindToolByStepToolId(int id)
         {
-            return await _context.StepTools.Where(p => p.Id == id)
-                                            .Select(s => new ToolDto
-                                            {
-                                                Id = s.Tool.Id,
-                                                Name = s.Tool.Name,
-                                            }).FirstOrDefaultAsync();
+            return await _context.StepTools
+                .AsNoTracking()
+                .Where(p => p.Id == id)
+                .Select(s => new ToolDto
+                {
+                    Id = s.Tool!.Id,
+                    Name = s.Tool.Name,
+                })
+                .FirstOrDefaultAsync();
         }
 
         /// <summary>
@@ -810,6 +819,30 @@ namespace WoopiAiHub.Repository
                                                 .AnyAsync(u => u.Id == userId);
 
             return isValidTeamUser;
+        }
+
+        /// <summary>
+        /// Returns whether <paramref name="userId"/> belongs to a team on every workflow linked to each card’s document
+        /// (all distinct card ids must pass validation).
+        /// </summary>
+        /// <inheritdoc cref="IWorkflowRepository.IsValidTeamUser(IReadOnlyList{int}, Guid)" />
+        public async Task<bool> IsValidTeamUser(IReadOnlyList<int> cardIds, Guid userId)
+        {
+            if (cardIds == null || cardIds.Count == 0)
+                return false;
+
+            var distinctIds = cardIds.Distinct().ToList();
+
+            var matchingIds = await _context.Cards
+                .Where(c => distinctIds.Contains(c.Id))
+                .Where(c => c.Document!.Workflows
+                    .SelectMany(w => w.Teams)
+                    .SelectMany(t => t.Users)
+                    .Any(u => u.Id == userId))
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            return matchingIds.Count == distinctIds.Count;
         }
 
         /// <summary>

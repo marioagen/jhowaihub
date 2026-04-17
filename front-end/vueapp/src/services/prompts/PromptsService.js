@@ -109,6 +109,14 @@ export default {
                     error: error,
                 }
             });
-    }
+    },
+    testPrompt({ promptText, contextText }) {
+        return api.post("/PlayGroundPrompts/test", {
+            promptText: promptText ?? "",
+            contextText: contextText ?? "",
+        })
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
+    },
 }
 

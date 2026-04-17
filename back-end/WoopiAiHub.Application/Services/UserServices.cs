@@ -149,8 +149,9 @@ namespace WoopiAiHub.Application.Services
             {
                 var query = _userRepository.FindAllPaged(pagedDataDto);
                 var ordered = OrderUsersList(query, pagedDataDto);
+                var materializedList = ordered.ToList();
                 var paginated = PaginationHelper.Paginate(
-                    ordered,
+                    materializedList.AsQueryable(),
                     pagedDataDto.Page,
                     pagedDataDto.PageSize);
 

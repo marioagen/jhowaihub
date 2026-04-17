@@ -60,10 +60,10 @@ namespace WoopiAiHub.Repository
         /// tool is found.</returns>
         public StepToolParameter? FindByStepToolId(int stepToolId)
         {
-            var input = _context.StepToolParameters.Where(u => u.StepToolId.Equals(stepToolId) && u.StepTool!.Tool!.IsEditableInput)
-                                                   .FirstOrDefault();
-
-            return input;
+            return _context.StepToolParameters
+                .AsNoTracking()
+                .Where(u => u.StepToolId.Equals(stepToolId) && u.StepTool!.Tool!.IsEditableInput)
+                .FirstOrDefault();
         }
     }
 }

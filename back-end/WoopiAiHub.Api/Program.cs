@@ -1,4 +1,5 @@
 using WoopiAiHub.Api.Attributes;
+using WoopiAiHub.Api.Converters;
 using WoopiAiHub.Application.DependencyInjection;
 using WoopiAiHub.Domain.DependencyInjection;
 using WoopiAiHub.Repository.DependencyInjection;
@@ -29,7 +30,11 @@ builder.Services.AddValidation();
 // Add services to the container.
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeConverter());
+        options.JsonSerializerOptions.Converters.Add(new UtcNullableDateTimeConverter());
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -76,7 +81,12 @@ builder.Services.AddScoped<IHubNotifier, HubNotifier>();
 builder.Services.AddSingleton<IConnectionMappingService, ConnectionMappingService>();
 builder.Services.Configure<ChatCompletionSettings>(
 builder.Configuration.GetSection("ChatCompletionSettings"));
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {

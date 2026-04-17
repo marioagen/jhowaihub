@@ -21,7 +21,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<ModelEmbedding?> FindByNameAsync(string name)
         {
-            return await _context.ModelEmbeddings.FirstOrDefaultAsync(x => x.Name == name);
+            return await _context.ModelEmbeddings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Name == name);
         }
 
         /// <summary>

@@ -136,6 +136,7 @@ namespace WoopiAiHub.Repository
         public async Task<UserDto?> FindUserByEmail(string email)
         {
             return await _context.Users
+                .AsNoTracking()
                 .Include(u => u.Teams)
                 .Where(u => u.Email == email)
                 .Select(u => new UserDto
@@ -199,11 +200,11 @@ namespace WoopiAiHub.Repository
             if (string.IsNullOrEmpty(pagedDataDto.Search))
                 return query;
 
-            return query.Where(i =>
+            return query.AsEnumerable().Where(i =>
                 i.Name.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase) ||
                 i.Email.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase) ||
                 i.Id.ToString().Contains(pagedDataDto.Search) ||
-                i.Teams.Any(t => t.Name.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase)));
+                i.Teams.Any(t => t.Name.Contains(pagedDataDto.Search, StringComparison.OrdinalIgnoreCase))).AsQueryable();
         }
 
         /// <summary>
@@ -283,6 +284,7 @@ namespace WoopiAiHub.Repository
         public async Task<ICollection<UserDto>> FindByTeamIdsAsync(int[] teamIds)
         {
             return await _context.Users
+                .AsNoTracking()
                 .Where(u => u.Teams.Any(t => teamIds.Contains(t.Id)))
                 .Select(u => new UserDto
                 {

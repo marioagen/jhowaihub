@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 
 namespace WoopiAiHub.Application.Services.Hubs
@@ -53,9 +53,13 @@ namespace WoopiAiHub.Application.Services.Hubs
         /// <returns></returns>
         public IReadOnlyCollection<string> GetConnections(string email)
         {
-            return _connections.TryGetValue(email, out var connections)
-                ? connections.ToList()
-                : Array.Empty<string>();
+            if (!_connections.TryGetValue(email, out var connections))
+                return Array.Empty<string>();
+
+            lock (connections)
+            {
+                return connections.ToList();
+            }
         }
     }
 }

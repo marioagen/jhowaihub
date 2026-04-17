@@ -690,7 +690,7 @@ namespace WoopiAiHub.Repository.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("varchar(50)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("Title");
 
                     b.Property<int>("TypeDocId")

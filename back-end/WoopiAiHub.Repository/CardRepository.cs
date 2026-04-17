@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
@@ -12,6 +11,9 @@ namespace WoopiAiHub.Repository
     {
         private readonly ApplicationDbContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CardRepository"/> class with the EF Core database context.
+        /// </summary>
         public CardRepository(ApplicationDbContext context)
         {
             _context = context;
@@ -34,8 +36,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Card?> FindById(int id)
         {
-            return await _context.Cards.Where(c => c.Id == id)
-                .FirstOrDefaultAsync();
+            return await _context.Cards
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         /// <summary>
@@ -46,9 +49,9 @@ namespace WoopiAiHub.Repository
         public async Task<Card?> FindByIdWithStatus(int id)
         {
             return await _context.Cards
+                .AsNoTracking()
                 .Include(s => s.Status)
-                .Where(c => c.Id == id)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         /// <summary>
@@ -63,6 +66,30 @@ namespace WoopiAiHub.Repository
                     .ThenInclude(st => st!.Workflow)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        /// <summary>
+        /// Loads multiple cards by id with step and workflow navigation properties, tracked by the current context.
+        /// </summary>
+        /// <param name="cardIds">Card identifiers to load.</param>
+        public async Task<List<Card>> FindRangeByIdsWithStepWorkflowTracked(IReadOnlyList<int> cardIds)
+        {
+            return await _context.Cards
+                .Where(c => cardIds.Contains(c.Id))
+                .Include(s => s.Step)
+                    .ThenInclude(st => st!.Workflow)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Loads cards by id with step and workflow navigation properties tracked; returns an empty list when <paramref name="cardIds"/> is null or empty.
+        /// </summary>
+        /// <inheritdoc />
+        public async Task<List<Card>?> FindByCardIdsAsync(IReadOnlyList<int> cardIds)
+        {
+            if (cardIds == null || cardIds.Count == 0)
+                return new List<Card>();
+            return await FindRangeByIdsWithStepWorkflowTracked(cardIds);
         }
 
         /// <summary>
@@ -86,7 +113,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<CardAnalysisDto?> FindByIdWithDocumentAndWorkflow(int id)
         {
-            return await _context.Cards.Where(c => c.Id == id)
+            return await _context.Cards
+                .AsNoTracking()
+                .Where(c => c.Id == id)
                 .Select(c => new CardAnalysisDto
                 {
                     Id = c.Id,
@@ -141,7 +170,9 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<Card?> FindByIdWithStepAndProfile(int id)
         {
-            return await _context.Cards.Where(c => c.Id == id)
+            return await _context.Cards
+                .AsNoTracking()
+                .Where(c => c.Id == id)
                 .Include(s => s.Step)
                     .ThenInclude(p => p!.Profile)
                 .FirstOrDefaultAsync();
@@ -159,17 +190,42 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Updates the specified collection of card entities in the database.
+        /// Updates the specified collection of card entities; equivalent to <see cref="UpdateRange"/>.
         /// </summary>
-        /// <remarks>Throws an exception if any card in the list is invalid or if a database error occurs.
-        /// All changes are committed in a single transaction.</remarks>
-        /// <param name="cards">A list of <see cref="Card"/> objects to update. Each card must have a valid identifier corresponding to an
-        /// existing record in the database. Cannot be null.</param>
-        /// <returns>true if one or more records were updated successfully; otherwise, false.</returns>
-        public bool UpdateList(List<Card> cards)
+        public Task<bool> UpdateList(List<Card> cards) => UpdateRange(cards);
+
+        /// <summary>
+        /// Updates StepId, StatusId and AssignedUserId for the given cards directly in the database,
+        /// bypassing the EF ChangeTracker entirely.
+        /// </summary>
+        /// <remarks>
+        /// Using ExecuteUpdateAsync avoids the InvalidOperationException thrown when a navigation property
+        /// for a required relationship (e.g. Card.Step) is null on a tracked entity.
+        /// Cards with the same scalar values are batched into a single UPDATE statement.
+        /// </remarks>
+        public async Task<bool> UpdateRange(List<Card> cards)
         {
-            _context.Cards.UpdateRange(cards);
-            return _context.SaveChanges() > 0;
+            if (cards == null || cards.Count == 0)
+                return false;
+
+            var totalUpdated = 0;
+            var groups = cards.GroupBy(c => new { c.StepId, c.StatusId, c.AssignedUserId });
+            foreach (var group in groups)
+            {
+                var ids = group.Select(c => c.Id).ToList();
+                var stepId = group.Key.StepId;
+                var statusId = group.Key.StatusId;
+                var assignedUserId = group.Key.AssignedUserId;
+
+                totalUpdated += await _context.Cards
+                    .Where(c => ids.Contains(c.Id))
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(c => c.StepId, stepId)
+                        .SetProperty(c => c.StatusId, statusId)
+                        .SetProperty(c => c.AssignedUserId, assignedUserId));
+            }
+
+            return totalUpdated > 0;
         }
 
         /// <summary>
@@ -328,6 +384,9 @@ namespace WoopiAiHub.Repository
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Returns the card with step and workflow, or all cards in the same document batch when the card belongs to a batch.
+        /// </summary>
         /// <inheritdoc />
         public async Task<List<Card>?> FindCardOrBatchWithStepWorkflowAsync(int cardId)
         {
@@ -339,6 +398,9 @@ namespace WoopiAiHub.Repository
             return [card];
         }
 
+        /// <summary>
+        /// Returns the card with document loaded, or all cards in the same document batch when the card belongs to a batch.
+        /// </summary>
         /// <inheritdoc />
         public async Task<List<Card>?> FindCardOrBatchWithDocumentAsync(int cardId)
         {

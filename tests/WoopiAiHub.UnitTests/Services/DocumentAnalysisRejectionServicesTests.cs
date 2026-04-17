@@ -1,9 +1,12 @@
+using Bogus;
 using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Audit;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -27,6 +30,8 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<IStatusRepository> _statusRepositoryMock;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<IPermissionServices> _permissionServicesMock;
+        private readonly Mock<ICardServices> _cardServicesMock;
+        private readonly Mock<IAuditCardService> _auditCardServiceMock;
         private readonly DocumentAnalysisRejectionServices _rejectionServices;
 
         public DocumentAnalysisRejectionServicesTests()
@@ -39,6 +44,15 @@ namespace WoopiAiHub.UnitTests.Services
             _statusRepositoryMock = _mocker.GetMock<IStatusRepository>();
             _unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
             _permissionServicesMock = _mocker.GetMock<IPermissionServices>();
+            _cardServicesMock = _mocker.GetMock<ICardServices>();
+            _auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
+
+            _cardServicesMock.Setup(s => s.AssignRangeAsync(It.IsAny<AssignRangeDto>())).ReturnsAsync(true);
+            _auditCardServiceMock.Setup(s => s.CreateBatchAndSaveAsync(
+                It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                It.IsAny<AuditCardActionType>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
             _rejectionServices = _mocker.CreateInstance<DocumentAnalysisRejectionServices>();
         }
@@ -176,7 +190,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(user.Id);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
@@ -224,7 +238,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(user.Id);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ThrowsAsync(new Exception("Database error"));
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
@@ -413,7 +427,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
@@ -454,7 +468,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
@@ -504,7 +518,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Returns(true);
+                .ReturnsAsync(true);
             _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
@@ -566,7 +580,7 @@ namespace WoopiAiHub.UnitTests.Services
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
                 .Returns(userId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
-                .Throws(new Exception("Database error during batch update"));
+                .ThrowsAsync(new Exception("Database error during batch update"));
             _unitOfWorkMock.Setup(u => u.BeginTransaction()).Verifiable();
             _unitOfWorkMock.Setup(u => u.Rollback()).Verifiable();
 
@@ -580,6 +594,466 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(u => u.Rollback(), Times.Once);
             _unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync should throw when user does not have permission")]
+        [Trait("CreateRejectionRangeAsync", "Fail")]
+        public async Task CreateRejectionRangeAsync_UserWithoutPermission_ThrowsAppException()
+        {
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto();
+            var email = "test@example.com";
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(false);
+
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _rejectionServices.CreateRejectionRangeAsync(dto, email));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal("User does not have permission to reject documents", exception.Message);
+            _cardServicesMock.Verify(s => s.AssignRangeAsync(It.IsAny<AssignRangeDto>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync should throw when CardIds is empty")]
+        [Trait("CreateRejectionRangeAsync", "Fail")]
+        public async Task CreateRejectionRangeAsync_EmptyCardIds_ThrowsAppException()
+        {
+            var faker = new Faker();
+            var dto = new CreateDocumentAnalysisRejectionRangeDto(
+                faker.Lorem.Paragraph(),
+                1,
+                new List<int>(),
+                null);
+            var email = "test@example.com";
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _rejectionServices.CreateRejectionRangeAsync(dto, email));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, exception.LabelError);
+            Assert.Contains("CardIds cannot be empty", exception.Message);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync should throw when CardIds is null")]
+        [Trait("CreateRejectionRangeAsync", "Fail")]
+        public async Task CreateRejectionRangeAsync_NullCardIds_ThrowsAppException()
+        {
+            var faker = new Faker();
+            var dto = new CreateDocumentAnalysisRejectionRangeDto(
+                faker.Lorem.Paragraph(),
+                1,
+                null!,
+                null);
+            var email = "test@example.com";
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _rejectionServices.CreateRejectionRangeAsync(dto, email));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync should throw when a card id is not found")]
+        [Trait("CreateRejectionRangeAsync", "Fail")]
+        public async Task CreateRejectionRangeAsync_CardNotFound_ThrowsAppException()
+        {
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto();
+            var email = "test@example.com";
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card>());
+
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _rejectionServices.CreateRejectionRangeAsync(dto, email));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, exception.LabelError);
+            Assert.Contains("Card not found", exception.Message);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync should throw when a requested card id does not exist (count mismatch)")]
+        [Trait("CreateRejectionRangeAsync", "Fail")]
+        public async Task CreateRejectionRangeAsync_CardCountMismatch_ThrowsAppException()
+        {
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto();
+            var email = "test@example.com";
+            var card1 = CardFixture.FindValidCard();
+            card1.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1 });
+
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _rejectionServices.CreateRejectionRangeAsync(dto, email));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, exception.LabelError);
+            Assert.Contains("Card not found", exception.Message);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync should throw when step is not found")]
+        [Trait("CreateRejectionRangeAsync", "Fail")]
+        public async Task CreateRejectionRangeAsync_StepNotFound_ThrowsAppException()
+        {
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto();
+            var email = "test@example.com";
+            var card = CardFixture.FindValidCard();
+            card.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            var card2 = new Card(2, DateTime.Now, 1, 2, "C2", 1, null)
+            {
+                Step = card.Step
+            };
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card, card2 });
+            _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
+                .ReturnsAsync((Step?)null);
+
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _rejectionServices.CreateRejectionRangeAsync(dto, email));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(StepLabel.NotFound, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync should throw when status is not found")]
+        [Trait("CreateRejectionRangeAsync", "Fail")]
+        public async Task CreateRejectionRangeAsync_StatusNotFound_ThrowsAppException()
+        {
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto();
+            var email = "test@example.com";
+            var card1 = CardFixture.FindValidCard();
+            card1.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+            var card2 = new Card(2, DateTime.Now, 1, 2, "C2", 1, null)
+            {
+                Step = card1.Step
+            };
+            var step = CardFixture.FindValidStep();
+
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+            _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
+                .ReturnsAsync(step);
+            _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
+                .ReturnsAsync((Status?)null);
+
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _rejectionServices.CreateRejectionRangeAsync(dto, email));
+            Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
+            Assert.Equal(StatusLabel.NotFound, exception.LabelError);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync should dedupe duplicate card ids")]
+        [Trait("CreateRejectionRangeAsync", "Success")]
+        public async Task CreateRejectionRangeAsync_DuplicateCardIds_ProcessesDistinctCardsOnly()
+        {
+            var justification = "reason";
+            var stepId = 1;
+            var email = "test@example.com";
+            var dto = new CreateDocumentAnalysisRejectionRangeDto(justification, stepId, new List<int> { 1, 1, 2 }, null);
+
+            var card1 = CardFixture.FindValidCard();
+            card1.Step = new Step(stepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+            var card2 = new Card(2, DateTime.Now, 1, 2, "C2", 1, null)
+            {
+                Step = card1.Step
+            };
+            var step = CardFixture.FindValidStep();
+            var status = CardFixture.FindValidStatus();
+            var userId = Guid.NewGuid();
+
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2 && ids.Contains(1) && ids.Contains(2))))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+            _stepRepositoryMock.Setup(repo => repo.FindById(stepId))
+                .ReturnsAsync(step);
+            _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
+                .ReturnsAsync(status);
+            _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
+                .Returns(userId);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
+                .ReturnsAsync(true);
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
+                .ReturnsAsync(true);
+            _unitOfWorkMock.Setup(u => u.BeginTransaction());
+            _unitOfWorkMock.Setup(u => u.Commit());
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(userId);
+
+            var result = await _rejectionServices.CreateRejectionRangeAsync(dto, email);
+
+            Assert.True(result);
+            _cardRepositoryMock.Verify(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2 && ids.Contains(1) && ids.Contains(2))), Times.Once);
+            _rejectionRepositoryMock.Verify(repo => repo.CreateRangeAsync(It.Is<List<DocumentAnalysisRejection>>(l => l.Count == 2)), Times.Once);
+            _cardServicesMock.Verify(s => s.AssignRangeAsync(It.IsAny<AssignRangeDto>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync with UserId should call AssignRangeAsync once with all card ids")]
+        [Trait("CreateRejectionRangeAsync", "Success")]
+        public async Task CreateRejectionRangeAsync_WithUserId_CallsAssignRangeAsyncOnce()
+        {
+            var assignUserId = Guid.NewGuid();
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto(assignUserId);
+            var email = "test@example.com";
+
+            var card1 = CardFixture.FindValidCard();
+            card1.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+            var card2 = new Card(2, DateTime.Now, 1, 2, "C2", 1, null)
+            {
+                Step = card1.Step
+            };
+            var step = CardFixture.FindValidStep();
+            var status = CardFixture.FindValidStatus();
+
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+            _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
+                .ReturnsAsync(step);
+            _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
+                .ReturnsAsync(status);
+            _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
+                .Returns(Guid.NewGuid());
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
+                .ReturnsAsync(true);
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
+                .ReturnsAsync(true);
+            _unitOfWorkMock.Setup(u => u.BeginTransaction());
+            _unitOfWorkMock.Setup(u => u.Commit());
+
+            _cardRepositoryMock.Setup(repo => repo.FindRangeByIdsWithStepWorkflowTracked(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(assignUserId);
+
+            var result = await _rejectionServices.CreateRejectionRangeAsync(dto, email);
+
+            Assert.True(result);
+            _cardServicesMock.Verify(s => s.AssignRangeAsync(It.Is<AssignRangeDto>(r =>
+                r.UserId == assignUserId && r.CardIds.Count == 2 && r.CardIds.Contains(1) && r.CardIds.Contains(2))), Times.Once);
+            _cardRepositoryMock.Verify(repo => repo.FindRangeByIdsWithStepWorkflowTracked(It.IsAny<IReadOnlyList<int>>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync without UserId should not call AssignRangeAsync")]
+        [Trait("CreateRejectionRangeAsync", "Success")]
+        public async Task CreateRejectionRangeAsync_WithoutUserId_DoesNotCallAssignRangeAsync()
+        {
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto(userId: null);
+            var email = "test@example.com";
+            var card1 = CardFixture.FindValidCard();
+            card1.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+            var card2 = new Card(2, DateTime.Now, 1, 2, "C2", 1, null)
+            {
+                Step = card1.Step
+            };
+            var step = CardFixture.FindValidStep();
+            var status = CardFixture.FindValidStatus();
+            var userId = Guid.NewGuid();
+
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+            _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
+                .ReturnsAsync(step);
+            _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
+                .ReturnsAsync(status);
+            _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
+                .Returns(userId);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
+                .ReturnsAsync(true);
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
+                .ReturnsAsync(true);
+            _unitOfWorkMock.Setup(u => u.BeginTransaction());
+            _unitOfWorkMock.Setup(u => u.Commit());
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(userId);
+
+            var result = await _rejectionServices.CreateRejectionRangeAsync(dto, email);
+
+            Assert.True(result);
+            _cardServicesMock.Verify(s => s.AssignRangeAsync(It.IsAny<AssignRangeDto>()), Times.Never);
+            _cardRepositoryMock.Verify(repo => repo.FindRangeByIdsWithStepWorkflowTracked(It.IsAny<IReadOnlyList<int>>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync should succeed and use email user id when UserId is null")]
+        [Trait("CreateRejectionRangeAsync", "Success")]
+        public async Task CreateRejectionRangeAsync_ValidData_UserIdFromEmail_StoresCorrectUserOnRejections()
+        {
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto(userId: null);
+            var email = "test@example.com";
+            var card1 = CardFixture.FindValidCard();
+            card1.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+            var card2 = new Card(2, DateTime.Now, 1, 2, "C2", 1, null)
+            {
+                Step = card1.Step
+            };
+            var step = CardFixture.FindValidStep();
+            var status = CardFixture.FindValidStatus();
+            var expectedUserId = Guid.NewGuid();
+
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+            _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
+                .ReturnsAsync(step);
+            _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
+                .ReturnsAsync(status);
+            _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
+                .Returns(expectedUserId);
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
+                .ReturnsAsync(true);
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
+                .ReturnsAsync(true);
+            _unitOfWorkMock.Setup(u => u.BeginTransaction());
+            _unitOfWorkMock.Setup(u => u.Commit());
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(expectedUserId);
+
+            List<DocumentAnalysisRejection>? captured = null;
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
+                .Callback<List<DocumentAnalysisRejection>>(list => captured = list)
+                .ReturnsAsync(true);
+
+            var result = await _rejectionServices.CreateRejectionRangeAsync(dto, email);
+
+            Assert.True(result);
+            Assert.NotNull(captured);
+            Assert.All(captured, r => Assert.Equal(expectedUserId, r.UserId));
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync with UserId should store dto UserId on rejections")]
+        [Trait("CreateRejectionRangeAsync", "Success")]
+        public async Task CreateRejectionRangeAsync_WithUserId_UsesDtoUserIdOnRejections()
+        {
+            var dtoUserId = Guid.NewGuid();
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto(dtoUserId);
+            var email = "test@example.com";
+            var card1 = CardFixture.FindValidCard();
+            card1.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+            var card2 = new Card(2, DateTime.Now, 1, 2, "C2", 1, null)
+            {
+                Step = card1.Step
+            };
+            var step = CardFixture.FindValidStep();
+            var status = CardFixture.FindValidStatus();
+
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+            _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
+                .ReturnsAsync(step);
+            _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
+                .ReturnsAsync(status);
+            _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
+                .Returns(Guid.NewGuid());
+            _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
+                .ReturnsAsync(true);
+            _unitOfWorkMock.Setup(u => u.BeginTransaction());
+            _unitOfWorkMock.Setup(u => u.Commit());
+
+            _cardRepositoryMock.Setup(repo => repo.FindRangeByIdsWithStepWorkflowTracked(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+
+            List<DocumentAnalysisRejection>? captured = null;
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
+                .Callback<List<DocumentAnalysisRejection>>(list => captured = list)
+                .ReturnsAsync(true);
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(dtoUserId);
+
+            var result = await _rejectionServices.CreateRejectionRangeAsync(dto, email);
+
+            Assert.True(result);
+            Assert.NotNull(captured);
+            Assert.All(captured, r => Assert.Equal(dtoUserId, r.UserId));
+        }
+
+        [Fact(DisplayName = "CreateRejectionRangeAsync should rollback transaction on exception")]
+        [Trait("CreateRejectionRangeAsync", "Fail")]
+        public async Task CreateRejectionRangeAsync_TransactionFails_RollsBack()
+        {
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto();
+            var email = "test@example.com";
+            var card1 = CardFixture.FindValidCard();
+            card1.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
+            {
+                Workflow = WorkflowFixture.FindValidWorkflow()
+            };
+            var card2 = new Card(2, DateTime.Now, 1, 2, "C2", 1, null)
+            {
+                Step = card1.Step
+            };
+            var step = CardFixture.FindValidStep();
+            var status = CardFixture.FindValidStatus();
+            var userId = Guid.NewGuid();
+
+            _permissionServicesMock.Setup(repo => repo.UserHasPermissionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            _cardRepositoryMock.Setup(repo => repo.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+            _stepRepositoryMock.Setup(repo => repo.FindById(dto.StepId))
+                .ReturnsAsync(step);
+            _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
+                .ReturnsAsync(status);
+            _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
+                .Returns(userId);
+            _rejectionRepositoryMock.Setup(repo => repo.CreateRangeAsync(It.IsAny<List<DocumentAnalysisRejection>>()))
+                .ThrowsAsync(new Exception("Database error"));
+            _unitOfWorkMock.Setup(u => u.BeginTransaction());
+            _unitOfWorkMock.Setup(u => u.Rollback());
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns(userId);
+
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                _rejectionServices.CreateRejectionRangeAsync(dto, email));
+
+            Assert.Equal(ErrorCode.DefaultError, exception.ErrorCode);
+            _unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(u => u.Rollback(), Times.Once);
         }
     }
 }

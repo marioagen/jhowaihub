@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -37,6 +38,7 @@ namespace WoopiAiHub.Application.Messaging
             await _consumer.ConsumerAsync(_queues.ApiRequestQueueResponse, async message =>
             {
                 using var scope = _scopeFactory.CreateScope();
+                AutomationServicesDto? automationServicesDto = null;
                 try
                 {
                     var connectionString = await GetConnectionStringAsync(scope, message.Tenant!);
@@ -45,7 +47,7 @@ namespace WoopiAiHub.Application.Messaging
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
                     var apiServices = scope.ServiceProvider.GetRequiredService<IApiOutputServices>();
-                    var automationServicesDto = await apiServices.ProcessMessage(message);
+                    automationServicesDto = await apiServices.ProcessMessage(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
@@ -56,10 +58,25 @@ namespace WoopiAiHub.Application.Messaging
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex,
+                    _logger.LogError(
+                        ex,
                         "Failed to process message from {QueueName}. Execution id: {ExecutionId}",
                         _queues.ApiRequestQueueResponse,
-                        message.ExecutionId);
+                        message.ExecutionId
+                    );
+
+                    if (automationServicesDto?.CardId > 0)
+                    {
+                        try
+                        {
+                            var failingCardService = scope.ServiceProvider.GetRequiredService<IFailingCardService>();
+                            await failingCardService.SetFailingCard(automationServicesDto.CardId, message.Email);
+                        }
+                        catch (Exception failingEx)
+                        {
+                            _logger.LogError(failingEx, "Error marking card {CardId} as failing after exception in consumer", automationServicesDto.CardId);
+                        }
+                    }
                 }
             });
         }

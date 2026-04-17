@@ -1,4 +1,4 @@
-﻿using Azure.Storage.Blobs.Models;
+using Azure.Storage.Blobs.Models;
 using Bogus;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
@@ -207,6 +207,35 @@ namespace WoopiAiHub.UnitTests.Fixture
                     },
                     Data = mockJObject
                 });
+            return faker;
+        }
+
+        public static ApiOutputDto FindValidApiOutputDto()
+        {
+            var faker = new Faker<ApiOutputDto>("pt_BR")
+                .CustomInstantiator(f => new ApiOutputDto
+                {
+                    TemplateName = f.Random.String(),
+                    Tenant = f.Random.String(),
+                    Email = f.Internet.Email(),
+                    ExecutionId = f.Random.Int(1, 10),
+                    StatusCode = f.Random.Int(100, 599),
+                    Content = "{}"
+                });
+            return faker;
+        }
+
+        public static AutomationServicesDto FindValidAutomationServicesDto()
+        {
+            var faker = new Faker<AutomationServicesDto>("pt_BR")
+                .CustomInstantiator(f => new AutomationServicesDto(
+                    f.Random.Int(1, 100),
+                    f.Random.Int(1, 100),
+                    f.Random.String(),
+                    f.Internet.Email(),
+                    f.Random.String(),
+                    f.Random.Int(1, 10)
+                ));
             return faker;
         }
     }

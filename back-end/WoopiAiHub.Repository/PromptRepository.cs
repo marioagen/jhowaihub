@@ -148,6 +148,7 @@ namespace WoopiAiHub.Repository
         public PromptDto? FindById(int id)
         {
             return _context.Prompts
+                .AsNoTracking()
                 .Select(p => new PromptDto
                 {
                     Id = p.Id,

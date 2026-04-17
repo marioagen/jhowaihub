@@ -18,5 +18,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
 
         Task<ICollection<StepToolExecution>> FindByStepToolByCardIdAsync(int cardId);
         Task<bool> HasExecutionsByStepToolIdsAsync(IEnumerable<int> stepToolIds);
+        Task<ICollection<StepToolExecution>> FindByStepToolIdsAndCardIdsAsync(IEnumerable<int> stepToolIds, IEnumerable<int> cardIds);
     }
 }
