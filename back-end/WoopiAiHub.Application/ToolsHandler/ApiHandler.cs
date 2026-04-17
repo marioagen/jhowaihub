@@ -1,5 +1,6 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.Extensions.Options;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -138,6 +139,29 @@ namespace WoopiAiHub.Application.ToolsHandler
         {
             if (string.IsNullOrEmpty(inputValue)) return inputValue;
 
+            try
+            {
+                var root = JsonNode.Parse(inputValue);
+                if (root is JsonValue jv && jv.TryGetValue<string>(out var rootString))
+                {
+                    var replaced = SubstituteInStructuredString(rootString, outputs);
+                    return JsonSerializer.Serialize(replaced, _jsonOptions);
+                }
+
+                SubstitutePlaceholdersInJsonNodes(root, outputs);
+                return root.ToJsonString(_jsonOptions);
+            }
+            catch (JsonException)
+            {
+                return ConvertOutputsToJsonLegacy(outputs, inputValue);
+            }
+        }
+
+        /// <summary>
+        /// Legacy path for bodies that are not valid JSON until placeholders are replaced (e.g. <c>{"text": {{prompt}}}</c>).
+        /// </summary>
+        private string ConvertOutputsToJsonLegacy(ICollection<StepToolOutput> outputs, string inputValue)
+        {
             var result = inputValue;
             var groups = outputs
                 .Where(o => o.StepTool?.Tool?.ToolType != null)
@@ -157,6 +181,96 @@ namespace WoopiAiHub.Application.ToolsHandler
             }
 
             return result;
+        }
+
+        private void SubstitutePlaceholdersInJsonNodes(JsonNode? node, ICollection<StepToolOutput> outputs)
+        {
+            switch (node)
+            {
+                case JsonObject obj:
+                    foreach (var kvp in obj.ToList())
+                    {
+                        var key = kvp.Key;
+                        var child = kvp.Value;
+                        if (child is JsonValue jv && jv.TryGetValue<string>(out var str))
+                        {
+                            var newStr = SubstituteInStructuredString(str, outputs);
+                            if (newStr != str)
+                                obj[key] = JsonValue.Create(newStr);
+                        }
+                        else
+                            SubstitutePlaceholdersInJsonNodes(child, outputs);
+                    }
+                    break;
+                case JsonArray arr:
+                    for (var i = 0; i < arr.Count; i++)
+                    {
+                        var child = arr[i];
+                        if (child is JsonValue jv && jv.TryGetValue<string>(out var str))
+                        {
+                            var newStr = SubstituteInStructuredString(str, outputs);
+                            if (newStr != str)
+                                arr[i] = JsonValue.Create(newStr);
+                        }
+                        else
+                            SubstitutePlaceholdersInJsonNodes(child, outputs);
+                    }
+                    break;
+            }
+        }
+
+        private string SubstituteInStructuredString(string input, ICollection<StepToolOutput> outputs)
+        {
+            var result = input;
+            var groups = outputs
+                .Where(o => o.StepTool?.Tool?.ToolType != null)
+                .GroupBy(o => o.StepTool!.Tool!.ToolType!.Name, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var group in groups)
+            {
+                if (!TryGetToolConfig(group.Key, out var placeholder, out _)) continue;
+                if (!result.Contains(placeholder, StringComparison.OrdinalIgnoreCase)) continue;
+
+                var fragment = BuildStructuredFragmentReplacement(group);
+                result = result.Replace(placeholder, fragment, StringComparison.OrdinalIgnoreCase);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Builds replacement text for placeholders inside an existing JSON string value. Single Prompt/OCR values are raw text
+        /// so the final serializer can escape; other cases mirror legacy JSON-token composition.
+        /// </summary>
+        private string BuildStructuredFragmentReplacement(IGrouping<string, StepToolOutput> group)
+        {
+            var toolType = group.Key;
+            if (!TryGetToolConfig(toolType, out _, out var isJsonNode))
+                return string.Empty;
+
+            var outputsList = group.ToList();
+            if (outputsList.Count == 0)
+                return isJsonNode ? "null" : string.Empty;
+
+            if (outputsList.Count == 1 && IsPlainTextToolTypeForStructuredSingle(toolType))
+                return GetRawSingleOutputText(toolType, outputsList[0].Value);
+
+            var processedValues = outputsList
+                .Select(o => ProcessOutputValue(toolType, o.Value, isJsonNode))
+                .ToList();
+
+            return BuildReplacementString(processedValues, isJsonNode);
+        }
+
+        private static bool IsPlainTextToolTypeForStructuredSingle(string toolType) =>
+            string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase);
+
+        private string GetRawSingleOutputText(string toolType, string? rawValue)
+        {
+            if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
+                return ExtractOcrText(rawValue ?? string.Empty);
+            return rawValue ?? string.Empty;
         }
 
         /// <summary>
@@ -231,15 +345,36 @@ namespace WoopiAiHub.Application.ToolsHandler
         private static bool TryGetToolConfig(string toolType, out string placeholder, out bool isJsonNode)
         {
             isJsonNode = false;
-            switch (toolType)
+            if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
             {
-                case HandlersTypes.Ocr: placeholder = "{{ocr}}"; return true;
-                case HandlersTypes.Prompt: placeholder = "{{prompt}}"; return true;
-                case HandlersTypes.N8N: placeholder = "{{n8n}}"; isJsonNode = true; return true;
-                case HandlersTypes.API: placeholder = "{{api}}"; isJsonNode = true; return true;
-                case HandlersTypes.Quiz: placeholder = "{{quiz}}"; isJsonNode = true; return true;
-                default: placeholder = string.Empty; return false;
+                placeholder = "{{ocr}}";
+                return true;
             }
+            if (string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase))
+            {
+                placeholder = "{{prompt}}";
+                return true;
+            }
+            if (string.Equals(toolType, HandlersTypes.N8N, StringComparison.OrdinalIgnoreCase))
+            {
+                placeholder = "{{n8n}}";
+                isJsonNode = true;
+                return true;
+            }
+            if (string.Equals(toolType, HandlersTypes.API, StringComparison.OrdinalIgnoreCase))
+            {
+                placeholder = "{{api}}";
+                isJsonNode = true;
+                return true;
+            }
+            if (string.Equals(toolType, HandlersTypes.Quiz, StringComparison.OrdinalIgnoreCase))
+            {
+                placeholder = "{{quiz}}";
+                isJsonNode = true;
+                return true;
+            }
+            placeholder = string.Empty;
+            return false;
         }
 
         /// <summary>
