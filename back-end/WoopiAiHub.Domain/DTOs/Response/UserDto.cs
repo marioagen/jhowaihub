@@ -1,6 +1,8 @@
-﻿namespace WoopiAiHub.Domain.DTOs.Response
+﻿using WoopiAiHub.Domain.Core;
+
+namespace WoopiAiHub.Domain.DTOs.Response
 {
-    public class UserDto
+    public class UserDto: IDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
