@@ -16,10 +16,4 @@ public interface IAzureAiSearch
         [Header("KeyAccess")] string KeyAccess,
         [Body] IntegrationHubDocumentEmbeddingsDeleteRequest request,
         CancellationToken cancellationToken = default);
-
-    [Post("/api/v1/hub/chat-completion")]
-    Task<HttpResponseMessage> ChatCompletionAsync(
-        [Header("KeyAccess")] string KeyAccess,
-        [Body] IntegrationHubChatCompletionQueryRequest request,
-        CancellationToken cancellationToken = default);
 }
