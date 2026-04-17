@@ -79,7 +79,7 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
             return;
         }
 
-        await ExecuteIndexerDeleteAsync(tenant.Name, referenceFile, indexerApiKey, cancellationToken)
+        await ExecuteIndexerDeleteAsync(tenant.Name, referenceFile, indexerApiKey)
             .ConfigureAwait(false);
     }
 
@@ -109,6 +109,11 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
                 chatCompletion).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Tenant routes to integration if RagProvider is set to Azure AI Search, which means that instead of calling the Indexer Refit client, the service will call the integration-services HTTP API for custom query and delete operations. This is needed because when using Azure AI Search as RAG provider, the embeddings are stored in a separate system than when using other RAG providers, so the flow for querying and deleting embeddings needs to be different.
+    /// </summary>
+    /// <param name="tenant"></param>
+    /// <returns></returns>
     private static bool RoutesToIntegration(TenantInfoDto tenant)
     {
         var p = tenant.RagProvider?.Trim();
@@ -255,8 +260,7 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
     /// <exception cref="ArgumentException"></exception>
     private async Task ExecuteIndexerDeleteAsync(string tenantName,
         string referenceFile,
-        string indexerApiKey,
-        CancellationToken cancellationToken)
+        string indexerApiKey)
     {
         var resultRequest =
             await _embeddingsApi.DeleteHash(tenantName, referenceFile, tenantName, indexerApiKey)

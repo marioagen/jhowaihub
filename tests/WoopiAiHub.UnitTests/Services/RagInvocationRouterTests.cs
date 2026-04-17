@@ -6,13 +6,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
-using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.IntegrationHub;
 using WoopiAiHub.Domain.DTOs.Refit;
-using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
-using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
@@ -40,8 +37,6 @@ namespace WoopiAiHub.UnitTests.Services
 
             _ragInvocationRouter = _mocker.CreateInstance<RagInvocationRouter>();
         }
-
-        #region ExecuteCustomQueryAsync
 
         [Fact(DisplayName = "ExecuteCustomQueryAsync - Should execute via Indexer when tenant routes to indexer")]
         [Trait("ExecuteCustomQueryAsync", "Indexer")]
@@ -133,7 +128,7 @@ namespace WoopiAiHub.UnitTests.Services
             var indexerApiKey = "api-key-123";
             var emailCreator = "user@example.com";
             var request = RagInvocationRouterFixture.FindValidCustomQueryRequest();
-            var responseModel = new QueryResponseModelRefitDto { response = null };
+            var responseModel = new QueryResponseModelRefitDto { response = null! };
 
             var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
             var responseContent = JsonConvert.SerializeObject(responseModel);
@@ -273,12 +268,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(
-                () => _ragInvocationRouter.ExecuteCustomQueryAsync(null, referenceFile, indexerApiKey, emailCreator, request));
+                () => _ragInvocationRouter.ExecuteCustomQueryAsync(null!, referenceFile, indexerApiKey, emailCreator, request));
         }
-
-        #endregion
-
-        #region DeleteEmbeddingsAsync
 
         [Fact(DisplayName = "DeleteEmbeddingsAsync - Should delete via Indexer when tenant routes to indexer")]
         [Trait("DeleteEmbeddingsAsync", "Indexer")]
@@ -421,12 +412,8 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(
-                () => _ragInvocationRouter.DeleteEmbeddingsAsync(null, referenceFile, indexerApiKey));
+                () => _ragInvocationRouter.DeleteEmbeddingsAsync(null!, referenceFile, indexerApiKey));
         }
-
-        #endregion
-
-        #region ExecuteChatCompletionAsync
 
         [Fact(DisplayName = "ExecuteChatCompletionAsync - Should execute chat completion successfully")]
         [Trait("ExecuteChatCompletionAsync", "Success")]
@@ -443,7 +430,7 @@ namespace WoopiAiHub.UnitTests.Services
             var chatCompletionApi = _mocker.GetMock<IChatCompletionApi>();
             chatCompletionApi
                 .Setup(a => a.GetChatCompletion(
-                    tenant.AiGatewayApplicationId.Value.ToString(),
+                    tenant.AiGatewayApplicationId!.Value.ToString(),
                     model,
                     apiVersion,
                     tenant.AiGatewayKey,
@@ -529,9 +516,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentNullException>(
-                () => _ragInvocationRouter.ExecuteChatCompletionAsync(null, email, chatCompletion, model, apiVersion));
+                () => _ragInvocationRouter.ExecuteChatCompletionAsync(null!, email, chatCompletion, model, apiVersion));
         }
-
-        #endregion
     }
 }
