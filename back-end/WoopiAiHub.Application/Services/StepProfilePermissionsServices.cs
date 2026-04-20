@@ -1,4 +1,3 @@
-using AutoMapper;
 using Google.Api;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Application.Utils;
