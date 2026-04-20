@@ -142,6 +142,9 @@ namespace WoopiAiHub.Application.ToolsHandler
             try
             {
                 var root = JsonNode.Parse(inputValue);
+                if (root is null)
+                    return ConvertOutputsToJsonLegacy(outputs, inputValue);
+
                 if (root is JsonValue jv && jv.TryGetValue<string>(out var rootString))
                 {
                     var replaced = SubstituteInStructuredString(rootString, outputs);
@@ -191,32 +194,33 @@ namespace WoopiAiHub.Application.ToolsHandler
                     foreach (var kvp in obj.ToList())
                     {
                         var key = kvp.Key;
-                        var child = kvp.Value;
-                        if (child is JsonValue jv && jv.TryGetValue<string>(out var str))
-                        {
-                            var newStr = SubstituteInStructuredString(str, outputs);
-                            if (newStr != str)
-                                obj[key] = JsonValue.Create(newStr);
-                        }
-                        else
-                            SubstitutePlaceholdersInJsonNodes(child, outputs);
+                        SubstitutePlaceholderInJsonChild(kvp.Value, replacement => obj[key] = replacement, outputs);
                     }
                     break;
                 case JsonArray arr:
                     for (var i = 0; i < arr.Count; i++)
                     {
-                        var child = arr[i];
-                        if (child is JsonValue jv && jv.TryGetValue<string>(out var str))
-                        {
-                            var newStr = SubstituteInStructuredString(str, outputs);
-                            if (newStr != str)
-                                arr[i] = JsonValue.Create(newStr);
-                        }
-                        else
-                            SubstitutePlaceholdersInJsonNodes(child, outputs);
+                        var index = i;
+                        SubstitutePlaceholderInJsonChild(arr[index], replacement => arr[index] = replacement, outputs);
                     }
                     break;
             }
+        }
+
+        private void SubstitutePlaceholderInJsonChild(
+            JsonNode? child,
+            Action<JsonValue> assignReplacement,
+            ICollection<StepToolOutput> outputs)
+        {
+            if (child is JsonValue jv && jv.TryGetValue<string>(out var str))
+            {
+                var newStr = SubstituteInStructuredString(str, outputs);
+                if (newStr != str)
+                    assignReplacement(JsonValue.Create(newStr));
+                return;
+            }
+
+            SubstitutePlaceholdersInJsonNodes(child, outputs);
         }
 
         private string SubstituteInStructuredString(string input, ICollection<StepToolOutput> outputs)
@@ -266,7 +270,7 @@ namespace WoopiAiHub.Application.ToolsHandler
             string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase)
             || string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase);
 
-        private string GetRawSingleOutputText(string toolType, string? rawValue)
+        private static string GetRawSingleOutputText(string toolType, string? rawValue)
         {
             if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
                 return ExtractOcrText(rawValue ?? string.Empty);
