@@ -28,6 +28,7 @@ namespace WoopiAiHub.Application.ToolsHandler
         private readonly IStepToolRepository _stepToolRepository = stepToolRepository;
         private readonly IApiTemplateRepository _apiTemplateRepository = apiTemplateRepository;
         private readonly IEncryptionService _encryptationService = encryptationService;
+        private const int MaxUrlLength = 2048;
 
         /// <summary>
         /// Builds an execution payload message for the specified automation service and step tool parameters.
@@ -186,6 +187,9 @@ namespace WoopiAiHub.Application.ToolsHandler
             return result;
         }
 
+        /// <summary>
+        /// Walks a JSON object or array and recursively substitutes tool-output placeholders in string leaf values.
+        /// </summary>
         private void SubstitutePlaceholdersInJsonNodes(JsonNode? node, ICollection<StepToolOutput> outputs)
         {
             switch (node)
@@ -207,6 +211,9 @@ namespace WoopiAiHub.Application.ToolsHandler
             }
         }
 
+        /// <summary>
+        /// Replaces placeholders inside a JSON string value, or recurses into nested objects and arrays.
+        /// </summary>
         private void SubstitutePlaceholderInJsonChild(
             JsonNode? child,
             Action<JsonValue> assignReplacement,
@@ -223,6 +230,9 @@ namespace WoopiAiHub.Application.ToolsHandler
             SubstitutePlaceholdersInJsonNodes(child, outputs);
         }
 
+        /// <summary>
+        /// Replaces tool-type placeholders in a plain string using the same grouping rules as structured JSON substitution.
+        /// </summary>
         private string SubstituteInStructuredString(string input, ICollection<StepToolOutput> outputs)
         {
             var result = input;
@@ -266,10 +276,16 @@ namespace WoopiAiHub.Application.ToolsHandler
             return BuildReplacementString(processedValues, isJsonNode);
         }
 
+        /// <summary>
+        /// Returns whether a single value for the given tool type should be inserted as raw plain text in structured JSON substitution.
+        /// </summary>
         private static bool IsPlainTextToolTypeForStructuredSingle(string toolType) =>
             string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase)
             || string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Returns the raw text for a single OCR or Prompt output when embedding into structured JSON without extra JSON wrapping.
+        /// </summary>
         private static string GetRawSingleOutputText(string toolType, string? rawValue)
         {
             if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
@@ -285,8 +301,6 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// <param name="outputs">A collection of tool output objects whose values are used to replace placeholders in the URL.</param>
         /// <param name="url">The URL string containing placeholders to be replaced (e.g., "{{prompt}}", "{{ocr}}").</param>
         /// <returns>The URL with recognized placeholders replaced by URL-encoded output values. If no placeholders are matched, the original URL is returned.</returns>
-        private const int MaxUrlLength = 2048;
-
         private string ConvertOutputsToUrl(ICollection<StepToolOutput> outputs, string url)
         {
             if (string.IsNullOrEmpty(url)) return url;
