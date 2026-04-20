@@ -526,18 +526,18 @@
     .tool-search-input {
         height: 30px;
         padding: 0 10px 0 28px;
-        border: 1px solid #d1d5db;
+        border: 1px solid var(--color-border-form-control);
         border-radius: 6px;
         font-size: 0.8rem;
         color: var(--color-body-content);
-        background: var(--color-card-content);
+        background: var(--color-bg-form-control);
         outline: none;
         width: 180px;
         transition: border-color 0.15s;
     }
 
     .tool-search-input:focus {
-        border-color: #2f80ed;
+        border-color: var(--color-bg-btn-primary);
     }
 
     .tools-palette-row {
