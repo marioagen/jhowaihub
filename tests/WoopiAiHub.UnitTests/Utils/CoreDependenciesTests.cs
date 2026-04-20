@@ -1,4 +1,3 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -18,14 +17,12 @@ namespace WoopiAiHub.UnitTests.Utils
             var configurationMock = new Mock<IConfiguration>();
             var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             var currentUserServiceMock = new Mock<ICurrentUserService>();
-            var mapperMock = new Mock<IMapper>();
 
             // Act
             var coreDependencies = new CoreDependencies(
                 configurationMock.Object,
                 httpContextAccessorMock.Object,
-                currentUserServiceMock.Object,
-                mapperMock.Object);
+                currentUserServiceMock.Object);
 
             // Assert
             Assert.Same(currentUserServiceMock.Object, coreDependencies.CurrentUserService);
@@ -39,20 +36,17 @@ namespace WoopiAiHub.UnitTests.Utils
             var configurationMock = new Mock<IConfiguration>();
             var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             var currentUserServiceMock = new Mock<ICurrentUserService>();
-            var mapperMock = new Mock<IMapper>();
 
             // Act
             var coreDependencies = new CoreDependencies(
                 configurationMock.Object,
                 httpContextAccessorMock.Object,
-                currentUserServiceMock.Object,
-                mapperMock.Object);
+                currentUserServiceMock.Object);
 
             // Assert
             Assert.Same(configurationMock.Object, coreDependencies.Configuration);
             Assert.Same(httpContextAccessorMock.Object, coreDependencies.HttpContextAccessor);
             Assert.Same(currentUserServiceMock.Object, coreDependencies.CurrentUserService);
-            Assert.Same(mapperMock.Object, coreDependencies.Mapper);
         }
     }
 }

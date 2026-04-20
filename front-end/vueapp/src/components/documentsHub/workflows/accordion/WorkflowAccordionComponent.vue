@@ -252,6 +252,9 @@
     .workflow-accordion-inner {
         width: 100%;
         min-width: 0;
+        max-height: calc(100vh - 247px);
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .workflow-accordion-table-wrap {

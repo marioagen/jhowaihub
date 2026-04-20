@@ -1,4 +1,3 @@
-using AutoMapper;
 using Bogus;
 using Bogus.DataSets;
 using Microsoft.AspNetCore.Http.HttpResults;
