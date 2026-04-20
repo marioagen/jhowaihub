@@ -288,7 +288,8 @@ namespace WoopiAiHub.UnitTests.Fixture
         public static List<ApiTemplateDto> FindValidListApiTemplateDto()
         {
             var faker = new Faker<List<ApiTemplateDto>>("pt_BR")
-                .CustomInstantiator(f => {                    
+                .CustomInstantiator(f =>
+                {
                     var id1 = f.Random.Int(0, 8);
                     var id2 = f.Random.Int(0, 8);
 
@@ -377,7 +378,7 @@ namespace WoopiAiHub.UnitTests.Fixture
 
         public static List<PromptInternalDto> FindValidPromptInternalDtoList()
         {
-            var faker = new Faker<List<PromptInternalDto>> ("pt_BR")
+            var faker = new Faker<List<PromptInternalDto>>("pt_BR")
                 .CustomInstantiator(f => new List<PromptInternalDto>
                     {
                         new PromptInternalDto {
@@ -412,6 +413,43 @@ namespace WoopiAiHub.UnitTests.Fixture
                     f.Random.Int(1, 10)
                 ));
             return faker;
+        }
+
+        public static PromptCreateDto FindValidPromptCreateDto()
+        {
+            var faker = new Faker<PromptCreateDto>("pt_BR")
+                .CustomInstantiator(f => new PromptCreateDto
+                {
+                    Name = f.Name.JobArea(),
+                    Description = f.Name.JobTitle(),
+                    Text = f.Name.JobDescriptor()
+                });
+            return faker;
+        }
+        public static (PromptUpdateDto, PromptDto) FindValidPromptUpdateDtoAndPromptDto()
+        {
+            var fakerPromptUpdateDto = new Faker<PromptUpdateDto>("pt_BR")
+                .CustomInstantiator(f => new PromptUpdateDto
+                {
+                    Id = f.Random.Int(),
+                    Name = f.Name.JobArea(),
+                    Description = f.Name.JobTitle(),
+                    Text = f.Name.JobDescriptor()
+                });
+
+                var obj = fakerPromptUpdateDto.Generate();
+
+            var fakerPromptDto = new Faker<PromptDto>("pt_BR")
+                .CustomInstantiator(f => new PromptDto
+                {
+                    Id = obj.Id,
+                    Name = f.Name.JobArea(),
+                    Description = f.Name.JobTitle(),
+                    Text = f.Name.JobDescriptor(),
+                    IdUser = Guid.NewGuid(),
+                    Created = DateTime.Now
+                });
+            return (obj, fakerPromptDto.Generate());
         }
     }
 

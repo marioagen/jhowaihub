@@ -61,7 +61,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void CreateUniquePrompt_Success()
         {
             //Arrange
-            var dto = new PromptCreateDto { Name = "Teste", Description = "Desc", Text = "Texto" };
+            var dto = MessagingFixture.FindValidPromptCreateDto();
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
             var userServices = _mocker.GetMock<IUserServices>();
@@ -84,7 +84,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void CreateUniquePrompt_ShouldThrowAppException_Duplicated()
         {
             //Arrange
-            var dto = new PromptCreateDto { Name = "Teste", Description = "Desc", Text = "Texto" };
+            var dto = MessagingFixture.FindValidPromptCreateDto();
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
             var userServices = _mocker.GetMock<IUserServices>();
@@ -104,7 +104,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void CreateUniquePrompt_ShouldReturnFalse_Empty()
         {
             //Arrange
-            var dto = new PromptCreateDto { Name = "Teste", Description = "Desc", Text = "Texto" };
+            var dto = MessagingFixture.FindValidPromptCreateDto();
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
             var _userServices = _mocker.GetMock<IUserServices>();
@@ -124,24 +124,15 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Update_Success()
         {
             //Arrange
-            var dto = new PromptUpdateDto { Id = 1, Name = "Novo", Description = "Desc", Text = "Texto" };
+            var (dto, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDto();
             var email = "user@teste.com";
-            var promptDto = new PromptDto
-            {
-                Id = 1,
-                Name = "Antigo",
-                Description = "Desc",
-                Text = "Texto",
-                IdUser = Guid.NewGuid(),
-                Created = DateTime.Now
-            };
             var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
             var _unitOfWork = _mocker.GetMock<IUnitOfWork>();
 
 
-            _validatePrompt.Setup(v => v.ValidateOwnership(1, email));
-            _promptRepository.Setup(r => r.FindById(1)).Returns(promptDto);
+            _validatePrompt.Setup(v => v.ValidateOwnership(promptDto.Id, email));
+            _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns(promptDto);
             _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>()));
             _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<int>>())).ReturnsAsync(true);
             _unitOfWork.Setup(u => u.BeginTransaction());
@@ -159,24 +150,15 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Update_Fail_Save_Chages_Repository()
         {
             //Arrange
-            var dto = new PromptUpdateDto { Id = 1, Name = "Novo", Description = "Desc", Text = "Texto" };
+            var (dto, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDto();
             var email = "user@teste.com";
-            var promptDto = new PromptDto
-            {
-                Id = 1,
-                Name = "Antigo",
-                Description = "Desc",
-                Text = "Texto",
-                IdUser = Guid.NewGuid(),
-                Created = DateTime.Now
-            };
             var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
             var _unitOfWork = _mocker.GetMock<IUnitOfWork>();
 
 
-            _validatePrompt.Setup(v => v.ValidateOwnership(1, email));
-            _promptRepository.Setup(r => r.FindById(1)).Returns(promptDto);
+            _validatePrompt.Setup(v => v.ValidateOwnership(promptDto.Id, email));
+            _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns(promptDto);
             _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>()));
             _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<int>>())).ReturnsAsync(false);
             _unitOfWork.Setup(u => u.BeginTransaction());
@@ -191,13 +173,13 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task Update_ShouldThrowArgumentException_PromptNotFound()
         {
             //Arrange
-            var dto = new PromptUpdateDto { Id = 1, Name = "Novo", Description = "Desc", Text = "Texto" };
+            var (dto, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDto();
             var email = "user@teste.com";
             var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
 
-            _validatePrompt.Setup(v => v.ValidateOwnership(1, email));
-            _promptRepository.Setup(r => r.FindById(1)).Returns((PromptDto)null);
+            _validatePrompt.Setup(v => v.ValidateOwnership(promptDto.Id, email));
+            _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns((PromptDto)null);
 
             //Act/Assert
             await Assert.ThrowsAsync<ArgumentException>(() => _promptServices.Update(dto, email));
@@ -237,15 +219,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void FindById_Success()
         {
             //Arrange
-            var promptDto = new PromptDto
-            {
-                Id = 1,
-                Name = "Teste",
-                Description = "Desc",
-                Text = "Texto",
-                IdUser = Guid.NewGuid(),
-                Created = DateTime.Now
-            };
+            var (_, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDto();
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
             _promptRepository.Setup(r => r.FindById(1)).Returns(promptDto);
 
@@ -275,18 +249,9 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
-            var queryable = new List<PromptDto>
-            {
-                new PromptDto
-                {
-                    Id = 1,
-                    Name = "Teste",
-                    Description = "Desc",
-                    Text = "Texto",
-                    IdUser = idUser,
-                    Created = DateTime.Now
-                }
-            }.AsQueryable();
+            
+            var (_, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDto();
+            var queryable = new List<PromptDto> { promptDto }.AsQueryable();
             var _userServices = _mocker.GetMock<IUserServices>();
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
 

@@ -9,7 +9,6 @@ namespace WoopiAiHub.Application.Services
 {
     public class JwtTokenServices : IJwtTokenServices
     {   
-        
         private readonly IConfiguration _config;
 
         public JwtTokenServices(IConfiguration config)

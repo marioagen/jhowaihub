@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
 {
-    public class ResponseOpenAiResponseOutputMessageContentDto
+    public record class ResponseOpenAiResponseOutputMessageContentDto
     {
         [JsonPropertyName("type")]
         public string Type { get; set; } = string.Empty;

@@ -97,7 +97,7 @@ public class PromptHandler : IToolHandler
     }
 
     /// <summary>
-    /// ill create the dto to send to Open Ai response tool
+    /// Will create the dto to send to Open Ai response tool
     /// </summary>
     /// <param name="promptDto"></param>
     /// <param name="fullText"></param>
