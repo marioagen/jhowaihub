@@ -511,5 +511,81 @@ namespace WoopiAiHub.UnitTests.Services
         }
 
         #endregion
+
+        #region FindAnonymizedDocumentsByDocument Tests
+
+        [Fact(DisplayName = "FindAnonymizedDocumentsByDocument - Should return collection of anonymized documents when documents exist")]
+        [Trait("FindAnonymizedDocumentsByDocument", "Success")]
+        public async Task FindAnonymizedDocumentsByDocument_WithValidDocumentId_ReturnsAnonymizedDocumentsCollection()
+        {
+            // Arrange
+            var documentId = 1;
+            var anonymizedDocuments = AnonymizationFixture.FindValidDocumentAnonymizationDtoCollection(documentId, 2);
+
+            var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
+            documentAnonymizationRepositoryMock
+                .Setup(x => x.FindAnonymizedDocumentsByDocument(documentId))
+                .ReturnsAsync(anonymizedDocuments);
+
+            // Act
+            var result = await _sut.FindAnonymizedDocumentsByDocument(documentId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
+            Assert.All(result, doc => Assert.Equal(documentId, doc.DocumentId));
+            documentAnonymizationRepositoryMock.Verify(
+                x => x.FindAnonymizedDocumentsByDocument(documentId),
+                Times.Once);
+        }
+
+        [Fact(DisplayName = "FindAnonymizedDocumentsByDocument - Should return empty collection when no anonymized documents exist")]
+        [Trait("FindAnonymizedDocumentsByDocument", "Success")]
+        public async Task FindAnonymizedDocumentsByDocument_WithNoExistingDocuments_ReturnsEmptyCollection()
+        {
+            // Arrange
+            var documentId = 999;
+            var emptyCollection = new List<DocumentAnonymizationDto>();
+
+            var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
+            documentAnonymizationRepositoryMock
+                .Setup(x => x.FindAnonymizedDocumentsByDocument(documentId))
+                .ReturnsAsync(emptyCollection);
+
+            // Act
+            var result = await _sut.FindAnonymizedDocumentsByDocument(documentId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+            documentAnonymizationRepositoryMock.Verify(
+                x => x.FindAnonymizedDocumentsByDocument(documentId),
+                Times.Once);
+        }
+
+        [Fact(DisplayName = "FindAnonymizedDocumentsByDocument - Should propagate exception from repository")]
+        [Trait("FindAnonymizedDocumentsByDocument", "ExceptionHandling")]
+        public async Task FindAnonymizedDocumentsByDocument_WhenRepositoryThrows_PropagatesException()
+        {
+            // Arrange
+            var documentId = 1;
+            var expectedException = new InvalidOperationException("Database error");
+
+            var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
+            documentAnonymizationRepositoryMock
+                .Setup(x => x.FindAnonymizedDocumentsByDocument(documentId))
+                .ThrowsAsync(expectedException);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => _sut.FindAnonymizedDocumentsByDocument(documentId));
+
+            Assert.Equal("Database error", exception.Message);
+            documentAnonymizationRepositoryMock.Verify(
+                x => x.FindAnonymizedDocumentsByDocument(documentId),
+                Times.Once);
+        }
+
+        #endregion
     }
 }

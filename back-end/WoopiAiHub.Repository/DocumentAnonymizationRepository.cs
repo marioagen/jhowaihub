@@ -22,15 +22,15 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Asynchronously retrieves all anonymized documents associated with the specified creator email address.
+        /// Retrieves all anonymized document records associated with the specified document identifier.
         /// </summary>
-        /// <param name="email">The email address of the document creator to search for. Cannot be null.</param>
-        /// <returns>A collection of anonymized document data transfer objects associated with the specified email address. The
-        /// collection is empty if no matching documents are found.</returns>
-        public async Task<ICollection<DocumentAnonymizationDto>> FindAnonymizedDocumentsByEmail(string email)
+        /// <param name="documentId">The unique identifier of the document for which to retrieve anonymized versions.</param>
+        /// <returns>A collection of <see cref="DocumentAnonymizationDto"/> objects representing the anonymized versions of the
+        /// specified document. The collection is empty if no anonymized documents are found.</returns>
+        public async Task<ICollection<DocumentAnonymizationDto>> FindAnonymizedDocumentsByDocument(int documentId)
         {
             return await _context.DocumentAnonymizations
-                .Where(da => da.Document != null && da.Document.EmailCreator == email)
+                .Where(da => da.DocumentId == documentId)
                 .Select(da => new DocumentAnonymizationDto
                 {
                     Id = da.Id,
@@ -38,7 +38,9 @@ namespace WoopiAiHub.Repository
                     DocumentUrl = da.DocumentUrl,
                     DocumentName = da.Document != null ? da.Document.Name : string.Empty,
                     Created = da.Created
-                }).ToListAsync();
+                })
+                .OrderByDescending(da => da.Created)
+                .ToListAsync();
         }
     }
 }

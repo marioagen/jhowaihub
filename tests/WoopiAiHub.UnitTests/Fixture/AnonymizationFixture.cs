@@ -104,5 +104,43 @@ namespace WoopiAiHub.UnitTests.Fixtures
                 }
             };
         }
+
+        /// <summary>
+        /// Creates a valid DocumentAnonymizationDto with random test data.
+        /// </summary>
+        /// <returns>A DocumentAnonymizationDto instance with valid test data.</returns>
+        public static DocumentAnonymizationDto FindValidDocumentAnonymizationDto()
+        {
+            return new Faker<DocumentAnonymizationDto>("pt_BR")
+                .CustomInstantiator(f => new DocumentAnonymizationDto
+                {
+                    Id = f.Random.Int(1, 10000),
+                    Created = f.Date.Past(),
+                    DocumentId = f.Random.Int(1, 10000),
+                    DocumentUrl = f.Internet.Url(),
+                    DocumentName = f.System.FileName()
+                })
+                .Generate();
+        }
+
+        /// <summary>
+        /// Creates a collection of valid DocumentAnonymizationDto with random test data.
+        /// </summary>
+        /// <param name="documentId">The document ID to associate with all generated anonymized documents.</param>
+        /// <param name="count">The number of DocumentAnonymizationDto instances to generate. Defaults to 2.</param>
+        /// <returns>A list of DocumentAnonymizationDto instances with the specified document ID.</returns>
+        public static ICollection<DocumentAnonymizationDto> FindValidDocumentAnonymizationDtoCollection(int documentId, int count = 2)
+        {
+            return new Faker<DocumentAnonymizationDto>("pt_BR")
+                .CustomInstantiator(f => new DocumentAnonymizationDto
+                {
+                    Id = f.Random.Int(1, 10000),
+                    Created = f.Date.Past(),
+                    DocumentId = documentId,
+                    DocumentUrl = f.Internet.Url(),
+                    DocumentName = f.System.FileName()
+                })
+                .Generate(count);
+        }
     }
 }

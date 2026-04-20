@@ -45,5 +45,21 @@ namespace WoopiAiHub.Api.Controllers
         {
             await _anonymizationServices.ProcessAnonymizationResult(result);
         }
+
+        /// <summary>
+        /// Finds all anonymized documents associated with the specified document identifier.
+        /// </summary>
+        /// <param name="documentId">The unique identifier of the document for which to retrieve associated anonymized documents.</param>
+        /// <returns>An IActionResult containing a collection of anonymized documents related to the specified document. Returns
+        /// a 200 OK response with the result.</returns>
+        [HttpGet("document/{documentId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [SwaggerOperation("Finds all anonymized documents associated with the specified document identifier.")]
+        [ProducesResponseType(typeof(ICollection<DocumentAnonymizationDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindAnonymizedDocumentsByDocument([FromRoute] int documentId)
+        {
+            var result = await _anonymizationServices.FindAnonymizedDocumentsByDocument(documentId);
+            return Ok(result);
+        }
     }
 }

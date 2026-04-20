@@ -78,13 +78,28 @@
                                     {{ documentName }}
                                 </span>
                             </div>
-                            <button
-                                class="btn btn-outline-primary btn-sm"
-                                @click="openAnonymizationModal"
-                            >
-                                <LucideIcon icon="ShieldCheck" />
-                                {{ $t("analyze.anonymizeDocument") }}
-                            </button>
+                            <div class="d-flex align-items-center gap-2">
+                                <button
+                                    v-if="documentAnonymizations.length > 0"
+                                    class="btn btn-outline-success btn-sm"
+                                    @click="openDocumentAnonymizationsModal"
+                                >
+                                    <LucideIcon icon="ShieldCheck" />
+                                    {{ $t("analyze.anonymizations") }}
+                                    <small>({{ documentAnonymizations.length }})</small>
+                                    <LucideIcon
+                                        icon="ChevronRight"
+                                        :size="15"
+                                    />
+                                </button>
+                                <button
+                                    class="btn btn-outline-primary btn-sm"
+                                    @click="openAnonymizationModal"
+                                >
+                                    <LucideIcon icon="ShieldCheck" />
+                                    {{ $t("analyze.anonymizeDocument") }}
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="col-6 d-flex justify-content-end align-items-center">
@@ -240,12 +255,14 @@
         :workflowId="workflowId"
         @success="handleAnonymizationSuccess"
     />
+    <DocumentAnonymizationsModal ref="modalDocumentAnonymizations" />
 </template>
 <script>
     import { hasPermission } from "@/utils/permissions";
     import DocumentRejectionModal from "@/components/analyze/modals/DocumentRejectionModal.vue";
     import DocumentViewRejectionModal from "@/components/analyze/modals/DocumentViewRejectionModal.vue";
     import AnonymizationModal from "@/components/analyze/modals/AnonymizationModal.vue";
+    import DocumentAnonymizationsModal from "@/components/analyze/modals/DocumentAnonymizationsModal.vue";
     import ResizeColumnsComponent from "@/components/global/ResizeColumnsComponent.vue";
     import PermissionGroups from "@/constants/PermissionGroups";
     import PermissionNames from "@/constants/PermissionNames";
@@ -256,6 +273,7 @@
     import CardsServices from "@/services/cards/CardsServices";
     import LogService from "@/services/log/logService";
     import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices";
+    import AnonymizationServices from "@/services/anonymization/AnonymizationServices";
 
     export default {
         name: "AnalyzerIndex",
@@ -287,6 +305,7 @@
                 workflowId: null,
                 currentStepOrder: 0,
                 cardStatus: "",
+                documentAnonymizations: [],
             };
         },
         components: {
@@ -298,6 +317,7 @@
             DocumentRejectionModal,
             DocumentViewRejectionModal,
             AnonymizationModal,
+            DocumentAnonymizationsModal,
         },
         computed: {
             canReject() {
@@ -411,10 +431,25 @@
             openAnonymizationModal() {
                 this.$refs.modalAnonymization.open();
             },
+            openDocumentAnonymizationsModal() {
+                this.$refs.modalDocumentAnonymizations.open(this.documentAnonymizations);
+            },
+            getDocumentsAnonymizationByDocument() {
+                AnonymizationServices.getDocumentAnonymizations(this.documentId)
+                    .then((response) => {
+                        if (response && !response.error) {
+                            this.documentAnonymizations = response.data;
+                        }
+                    })
+                    .catch((e) => {
+                        LogService.showMessage("Error loading document anonymization: " + e);
+                    });
+            },
         },
         async created() {
             await this.getDataDocument();
             await this.getCardHeaderInfo();
+            await this.getDocumentsAnonymizationByDocument();
         },
     };
 </script>

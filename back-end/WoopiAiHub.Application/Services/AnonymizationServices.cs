@@ -141,5 +141,16 @@ namespace WoopiAiHub.Application.Services
 
             await _hubNotifier.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl);
         }
+
+        /// <summary>
+        /// Retrieves a collection of anonymized document records associated with the specified document identifier.
+        /// </summary>
+        /// <param name="documentId">The unique identifier of the document for which to retrieve anonymized versions.</param>
+        /// <returns>A collection of <see cref="DocumentAnonymizationDto"/> objects representing the anonymized documents linked
+        /// to the specified document. The collection is empty if no anonymized documents are found.</returns>
+        public async Task<ICollection<DocumentAnonymizationDto>> FindAnonymizedDocumentsByDocument(int documentId)
+        {
+            return await _documentAnonymizationRepository.FindAnonymizedDocumentsByDocument(documentId);
+        }
     }
 }

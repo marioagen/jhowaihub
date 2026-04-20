@@ -55,6 +55,27 @@
                     class="ms-1"
                 />
             </template>
+            <template #cell-anonymizations="{ data }">
+                <button
+                    v-if="data.row.anonymizationAmount > 0"
+                    class="btn btn-outline-success btn-sm"
+                    @click="openAnonymizationsModal(data.row.id)"
+                    :disabled="!data.row.id"
+                >
+                    <LucideIcon
+                        icon="ShieldCheck"
+                        :size="16"
+                    />
+                    {{ $t("analyze.anonymizations") }}
+                    <small>({{ data.row.anonymizationAmount }})</small>
+                </button>
+                <span
+                    v-else
+                    class="text-muted"
+                >
+                    -
+                </span>
+            </template>
             <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
                     <a
@@ -91,17 +112,20 @@
         :documentId="selectedDocumentId"
         ref="ListWorkFlowModal"
     />
+    <DocumentAnonymizationsModal ref="DocumentAnonymizationsModal" />
 </template>
 <script>
     import dates from "@/helpers/date";
     import TableComponent from "@/components/global/TableComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import DocumentsServices from "@/services/documents/DocumentsServices";
+    import AnonymizationServices from "@/services/anonymization/AnonymizationServices";
     import BadgeComponent from "@/components/global/BadgeComponent";
     import BadgeOutlinedComponent from "@/components/global/BadgeOutlinedComponent";
     import EmbeddingDocument from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
     import DocumentWorkflowListModal from "@/components/documentsHub/documents/modals/DocumentWorkflowListModal.vue";
+    import DocumentAnonymizationsModal from "@/components/analyze/modals/DocumentAnonymizationsModal.vue";
 
     export default {
         name: "DocumentsTable",
@@ -113,6 +137,7 @@
             TableComponent,
             ConfirmModal,
             DocumentWorkflowListModal,
+            DocumentAnonymizationsModal,
         },
         data: () => ({
             table: {
@@ -130,6 +155,10 @@
                     {
                         key: "workflows",
                         label: "documents.workflows",
+                    },
+                    {
+                        key: "anonymizations",
+                        label: "analyze.anonymizations",
                     },
                     {
                         key: "actions",
@@ -189,6 +218,8 @@
                                 icon: "CircleX",
                             });
                         }
+
+                        console.log(response.content);
                         this.table.data = response.content;
                         this.table.pagination = response.pagination;
                     })
@@ -271,6 +302,32 @@
             changePage(page) {
                 this.table.pagination.currentPage = page;
                 this.getDocuments();
+            },
+            openAnonymizationsModal(documentId) {
+                AnonymizationServices.getDocumentAnonymizations(documentId)
+                    .then((response) => {
+                        if (response && !response.error) {
+                            this.$refs.DocumentAnonymizationsModal.open(response.data);
+                        } else {
+                            this.$notify({
+                                title: this.$t("analyze.title"),
+                                message:
+                                    this.$t("analyze.anonymizations") +
+                                    ": " +
+                                    (response?.error || "Error loading anonymizations"),
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        this.$notify({
+                            title: this.$t("analyze.title"),
+                            message: "Error loading anonymizations: " + error,
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    });
             },
         },
         created() {
