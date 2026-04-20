@@ -642,7 +642,9 @@ const portuguese = {
             selectPrompt: "Selecione um agente",
         },
         hideTools: "Ocultar Ferramentas",
+        noToolsFound: "Nenhuma ferramenta encontrada",
         save: "Salvar",
+        searchTool: "Buscar ferramenta...",
         showTools: "Adicionar Ferramentas",
         sidebar: {
             addDependency: "Adicionar Dependência",

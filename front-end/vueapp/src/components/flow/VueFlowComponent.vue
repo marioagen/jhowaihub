@@ -1,49 +1,77 @@
 <template>
-    <div class="row mb-2">
-        <div class="col">
+    <div class="tools-toolbar mb-2">
+        <div class="toolbar-row">
             <button
-                class="btn btn-primary btn-sm me-2"
-                data-bs-toggle="collapse"
-                data-bs-target="#toolsCollapse"
-                aria-expanded="false"
-                aria-controls="toolsCollapse"
+                v-if="!isActiveCollapse"
+                class="btn btn-primary btn-sm btn-add-tools flex-shrink-0"
                 @click="showCollapse"
             >
                 <LucideIcon
                     icon="Plus"
-                    :size="15"
+                    :size="14"
+                    class="me-1"
                 />
-                {{ isActiveCollapse ? $t("flow.hideTools") : $t("flow.showTools") }}
+                {{ $t("flow.showTools") }}
             </button>
-        </div>
-    </div>
-    <div
-        class="collapse"
-        id="toolsCollapse"
-    >
-        <div class="mt-3 mb-3">
-            <div class="card mb-3">
-                <div class="card-body palette">
-                    <div>
-                        <button
-                            v-for="tool in toolsList"
-                            :key="tool.id"
-                            class="btn btn-outline-primary btn-sm me-2 mt-2 palette-item"
-                            draggable="true"
-                            @dragstart="
-                                onDragStart($event, {
-                                    id: tool.id,
-                                    name: tool.name,
-                                    isEditableInput: tool.isEditableInput,
-                                    toolType: tool.toolType,
-                                })
-                            "
-                        >
-                            {{ tool.name }}
-                        </button>
-                    </div>
+
+            <template v-else>
+                <button
+                    class="btn btn-primary btn-sm flex-shrink-0"
+                    @click="showCollapse"
+                >
+                    <LucideIcon
+                        icon="X"
+                        :size="14"
+                        class="me-1"
+                    />
+                    {{ $t("flow.hideTools") }}
+                </button>
+
+                <div class="tool-search-wrapper flex-shrink-0">
+                    <LucideIcon
+                        icon="Search"
+                        :size="14"
+                        class="search-icon"
+                    />
+                    <input
+                        v-model="toolSearch"
+                        type="text"
+                        class="tool-search-input"
+                        :placeholder="$t('flow.searchTool')"
+                    />
                 </div>
-            </div>
+
+                <div class="tools-palette-row">
+                    <button
+                        v-for="tool in filteredTools"
+                        :key="tool.id"
+                        class="btn btn-sm palette-chip"
+                        :class="getToolClass(tool.toolType)"
+                        draggable="true"
+                        @dragstart="
+                            onDragStart($event, {
+                                id: tool.id,
+                                name: tool.name,
+                                isEditableInput: tool.isEditableInput,
+                                toolType: tool.toolType,
+                            })
+                        "
+                    >
+                        <LucideIcon
+                            :icon="getToolIcon(tool.toolType)"
+                            :size="13"
+                            class="me-1"
+                        />
+                        {{ tool.name }}
+                    </button>
+                    <span
+                        v-if="filteredTools.length === 0"
+                        class="text-muted small fst-italic ps-2"
+                    >
+                        {{ $t("flow.noToolsFound") }}
+                    </span>
+                </div>
+            </template>
         </div>
     </div>
     <div class="card vue-flow-container p-0">
@@ -126,7 +154,17 @@
                 edges: [],
                 vueFlowInstance: null,
                 isActiveCollapse: false,
+                toolSearch: "",
             };
+        },
+        computed: {
+            filteredTools() {
+                const q = (this.toolSearch || "").trim().toLowerCase();
+                if (!q) return this.toolsList;
+                return this.toolsList.filter((t) =>
+                    t.name.toLowerCase().includes(q)
+                );
+            },
         },
         components: {
             VueFlow,
@@ -398,6 +436,27 @@
             },
             showCollapse() {
                 this.isActiveCollapse = !this.isActiveCollapse;
+                if (!this.isActiveCollapse) this.toolSearch = "";
+            },
+            getToolClass(toolType) {
+                const classMap = {
+                    N8N: "chip-n8n",
+                    Prompt: "chip-prompt",
+                    API: "chip-api",
+                    Quiz: "chip-quiz",
+                    Embeddings: "chip-embeddings",
+                };
+                return classMap[toolType] || "chip-default";
+            },
+            getToolIcon(toolType) {
+                const icons = {
+                    N8N: "GitBranch",
+                    Prompt: "MessageSquare",
+                    API: "Globe",
+                    Quiz: "ClipboardList",
+                    Embeddings: "Database",
+                };
+                return icons[toolType] || "Activity";
             },
             async enrichNodesWithSubtitles(nodes) {
                 const promptNodes = nodes.filter(
@@ -436,6 +495,121 @@
     }
 </style>
 <style scoped>
+    .tools-toolbar {
+        width: 100%;
+    }
+
+    .toolbar-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .btn-add-tools {
+        white-space: nowrap;
+    }
+
+    .tool-search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 8px;
+        color: #9ca3af;
+        pointer-events: none;
+    }
+
+    .tool-search-input {
+        height: 30px;
+        padding: 0 10px 0 28px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        color: var(--color-body-content);
+        background: var(--color-card-content);
+        outline: none;
+        width: 180px;
+        transition: border-color 0.15s;
+    }
+
+    .tool-search-input:focus {
+        border-color: #2f80ed;
+    }
+
+    .tools-palette-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .palette-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        cursor: grab;
+        user-select: none;
+        transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+        white-space: nowrap;
+        border-width: 1.5px;
+        border-style: solid;
+    }
+
+    .palette-chip:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .palette-chip:active {
+        cursor: grabbing;
+        transform: translateY(0);
+    }
+
+    /* Per-type chip colors via CSS variables (light = pastel, dark = neon outline) */
+    .chip-n8n {
+        background-color: var(--chip-n8n-bg);
+        color: var(--chip-n8n-text);
+        border-color: var(--chip-n8n-border);
+    }
+
+    .chip-prompt {
+        background-color: var(--chip-prompt-bg);
+        color: var(--chip-prompt-text);
+        border-color: var(--chip-prompt-border);
+    }
+
+    .chip-api {
+        background-color: var(--chip-api-bg);
+        color: var(--chip-api-text);
+        border-color: var(--chip-api-border);
+    }
+
+    .chip-quiz {
+        background-color: var(--chip-quiz-bg);
+        color: var(--chip-quiz-text);
+        border-color: var(--chip-quiz-border);
+    }
+
+    .chip-embeddings {
+        background-color: var(--chip-embeddings-bg);
+        color: var(--chip-embeddings-text);
+        border-color: var(--chip-embeddings-border);
+    }
+
+    .chip-default {
+        background-color: var(--chip-default-bg);
+        color: var(--chip-default-text);
+        border-color: var(--chip-default-border);
+    }
+
     .btn-outline-quiz {
         color: #7c4dff;
         border: 1px solid #7c4dff;
