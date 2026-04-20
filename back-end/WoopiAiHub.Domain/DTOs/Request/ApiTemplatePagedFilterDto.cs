@@ -1,6 +1,6 @@
 ﻿namespace WoopiAiHub.Domain.DTOs.Request
 {
-    public record class ApiTemplatePagedFilterDto : Idto
+    public record class ApiTemplatePagedFilterDto 
     {
         public int Page { get; set; }
         public int PageSize { get; set; }
