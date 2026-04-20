@@ -317,16 +317,18 @@ private string ConvertOutputsToJson(
 
 **Lógica**:
 
-1. **Itera sobre outputs anteriores** do workflow
-2. **Identifica o tipo de ferramenta**:
+1. **Itera sobre outputs anteriores** do workflow (dependências do StepTool)
+2. **Se o body for JSON válido**: faz parse (`JsonNode`), percorre strings e substitui placeholders com texto bruto onde aplicável (Prompt/OCR em valor único), depois serializa de novo com escape correto
+3. **Se o parse falhar** (template com placeholder como valor bruto, ex.: `{{prompt}}` sem aspas): usa substituição textual legada com tokens JSON
+4. **Identifica o tipo de ferramenta**:
     - `OCR` → Placeholder `{{ocr}}`
     - `Embeddings` → Placeholder `{{embeddings}}`
     - `Prompt` → Placeholder `{{prompt}}`
-3. **Extrai o valor**:
+5. **Extrai o valor**:
     - Para OCR e Embeddings: Extrai textos do JSON `DocumentEmbeddings`
     - Para Prompt: Usa o valor direto
-4. **Substitui no template**: Replace case-insensitive
-5. **Serializa JSON**: Garante formato válido se necessário
+6. **Substitui no template**: Replace case-insensitive
+7. **Serializa JSON**: No caminho legado, garante formato de token quando necessário
 
 **Exemplo**:
 
@@ -347,6 +349,12 @@ Após substituição:
     "analysis": "Análise gerada pelo modelo de linguagem"
 }
 ```
+
+#### JSON válido e texto embutido
+
+Quando o `body` é **JSON válido** antes da substituição, o `ApiHandler` analisa o documento e substitui placeholders **dentro** de valores string (por exemplo `"texto fixo {{prompt}} fim"`). Os caracteres do resultado (aspas, barras, quebras de linha) são escapados corretamente ao serializar de novo.
+
+Quando o template usa o placeholder como **valor JSON bruto** (por exemplo `"text": {{prompt}}` sem aspas em torno de `{{prompt}}`), o corpo **não** é JSON válido até depois da substituição; nesse caso continua a ser usado o caminho legado por substituição textual de tokens JSON (comportamento já existente).
 
 ### 3. Estrutura da Mensagem de Requisição
 
