@@ -573,7 +573,6 @@
         transform: translateY(0);
     }
 
-    /* Per-type chip colors via CSS variables (light = pastel, dark = neon outline) */
     .chip-n8n {
         background-color: var(--chip-n8n-bg);
         color: var(--chip-n8n-text);
