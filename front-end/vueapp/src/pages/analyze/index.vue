@@ -435,15 +435,13 @@
                 this.$refs.modalDocumentAnonymizations.open(this.documentAnonymizations);
             },
             getDocumentsAnonymizationByDocument() {
-                AnonymizationServices.getDocumentAnonymizations(this.documentId)
-                    .then((response) => {
+                AnonymizationServices.getDocumentAnonymizations(this.documentId).then(
+                    (response) => {
                         if (response && !response.error) {
                             this.documentAnonymizations = response.data;
                         }
-                    })
-                    .catch((e) => {
-                        LogService.showMessage("Error loading document anonymization: " + e);
-                    });
+                    }
+                );
             },
         },
         async created() {

@@ -219,7 +219,6 @@
                             });
                         }
 
-                        console.log(response.content);
                         this.table.data = response.content;
                         this.table.pagination = response.pagination;
                     })
@@ -304,30 +303,21 @@
                 this.getDocuments();
             },
             openAnonymizationsModal(documentId) {
-                AnonymizationServices.getDocumentAnonymizations(documentId)
-                    .then((response) => {
-                        if (response && !response.error) {
-                            this.$refs.DocumentAnonymizationsModal.open(response.data);
-                        } else {
-                            this.$notify({
-                                title: this.$t("analyze.title"),
-                                message:
-                                    this.$t("analyze.anonymizations") +
-                                    ": " +
-                                    (response?.error || "Error loading anonymizations"),
-                                variant: "danger",
-                                icon: "CircleX",
-                            });
-                        }
-                    })
-                    .catch((error) => {
+                AnonymizationServices.getDocumentAnonymizations(documentId).then((response) => {
+                    if (response && !response.error) {
+                        this.$refs.DocumentAnonymizationsModal.open(response.data);
+                    } else {
                         this.$notify({
                             title: this.$t("analyze.title"),
-                            message: "Error loading anonymizations: " + error,
+                            message:
+                                this.$t("analyze.anonymizations") +
+                                ": " +
+                                (response?.error || "Error loading anonymizations"),
                             variant: "danger",
                             icon: "CircleX",
                         });
-                    });
+                    }
+                });
             },
         },
         created() {
