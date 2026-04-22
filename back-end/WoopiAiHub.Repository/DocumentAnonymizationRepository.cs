@@ -40,6 +40,7 @@ namespace WoopiAiHub.Repository
                     Created = da.Created
                 })
                 .OrderByDescending(da => da.Created)
+                .AsNoTracking()
                 .ToListAsync();
         }
     }
