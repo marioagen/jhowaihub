@@ -1,6 +1,6 @@
 namespace WoopiAiHub.Domain.DTOs.IntegrationHub;
 
-public sealed class IntegrationHubQuestionAnswerDto
+public record class IntegrationHubQuestionAnswerDto
 {
     public int Id { get; set; }
 

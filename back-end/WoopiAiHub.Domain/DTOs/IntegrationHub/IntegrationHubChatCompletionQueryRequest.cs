@@ -2,7 +2,7 @@ using Newtonsoft.Json.Linq;
 
 namespace WoopiAiHub.Domain.DTOs.IntegrationHub;
 
-public sealed class IntegrationHubChatCompletionQueryRequest
+public record class IntegrationHubChatCompletionQueryRequest
 {
     public string ReferenceFile { get; set; } = string.Empty;
 

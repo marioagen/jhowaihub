@@ -1,6 +1,6 @@
 namespace WoopiAiHub.Domain.DTOs.Messaging
 {
-    public class DocumentEmbeddingsDataDto
+    public record class DocumentEmbeddingsDataDto
     {
         public string? RagProvider { get; set; }
         public string ApplicationId { get; set; } = string.Empty;

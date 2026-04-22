@@ -26,7 +26,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                     EmbeddingModelName = "text-embedding-ada-002",
                     ChunkSize = 1000,
                     SearchMode = "any",
-                    RagProvider = string.Empty, // Indexer route
+                    RagProvider = string.Empty,
                     OcrModel = "ocr_model",
                     Plan = "premium",
                     WtcsIncluded = 100,
@@ -82,9 +82,9 @@ namespace WoopiAiHub.UnitTests.Fixture
                     OcrModel = "ocr_model",
                     Plan = "premium",
                     WtcsIncluded = 100,
-                    AiGatewayKey = string.Empty, // Missing key
+                    AiGatewayKey = string.Empty,
                     BillingId = Guid.NewGuid().ToString(),
-                    AiGatewayApplicationId = null // Missing ApplicationId
+                    AiGatewayApplicationId = null
                 }).Generate();
         }
 

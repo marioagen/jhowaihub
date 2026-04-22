@@ -55,12 +55,10 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         ArgumentNullException.ThrowIfNull(tenant);
         if (RoutesToIntegration(tenant))
         {
-            return await ExecuteIntegrationCustomQueryAsync(tenant, referenceFile, indexerApiKey, emailCreator, request,
-                cancellationToken).ConfigureAwait(false);
+            return await ExecuteIntegrationCustomQueryAsync(tenant, referenceFile, indexerApiKey, emailCreator, request, cancellationToken);
         }
 
-        return await ExecuteIndexerCustomQueryAsync(tenant.Name, referenceFile, indexerApiKey, request,
-            cancellationToken).ConfigureAwait(false);
+        return await ExecuteIndexerCustomQueryAsync(tenant.Name, referenceFile, indexerApiKey, request, cancellationToken);
     }
 
     /// <summary>
@@ -74,13 +72,11 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         ArgumentNullException.ThrowIfNull(tenant);
         if (RoutesToIntegration(tenant))
         {
-            await ExecuteIntegrationDeleteAsync(tenant, referenceFile, indexerApiKey, cancellationToken)
-                .ConfigureAwait(false);
+            await ExecuteIntegrationDeleteAsync(tenant, referenceFile, indexerApiKey, cancellationToken);
             return;
         }
 
-        await ExecuteIndexerDeleteAsync(tenant.Name, referenceFile, indexerApiKey)
-            .ConfigureAwait(false);
+        await ExecuteIndexerDeleteAsync(tenant.Name, referenceFile, indexerApiKey);
     }
 
     /// <summary>
@@ -105,8 +101,7 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         }
 
         return await _chatCompletionApi
-            .GetChatCompletion(tenant.AiGatewayApplicationId.Value.ToString(), model, apiVersion, tenant.AiGatewayKey,
-                chatCompletion).ConfigureAwait(false);
+            .GetChatCompletion(tenant.AiGatewayApplicationId.Value.ToString(), model, apiVersion, tenant.AiGatewayKey, chatCompletion);
     }
 
     /// <summary>
@@ -141,9 +136,8 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         CustomQueryRequestRefitDto request,
         CancellationToken cancellationToken)
     {
-        var httpResponse = await _embeddingsApi.CustomQuery(tenantName, referenceFile, request, indexerApiKey)
-            .ConfigureAwait(false);
-        var body = await httpResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+        var httpResponse = await _embeddingsApi.CustomQuery(tenantName, referenceFile, request, indexerApiKey);
+        var body = await httpResponse.Content.ReadAsStringAsync(cancellationToken);
         if (!httpResponse.IsSuccessStatusCode)
         {
             if (httpResponse.StatusCode == HttpStatusCode.NotFound)
@@ -185,39 +179,11 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         CancellationToken cancellationToken)
     {
         var apiVersion = _configuration["ChatCompletionSettings:ApiVersion"] ?? string.Empty;
-        var payload = new IntegrationHubDocumentEmbeddingsQueryRequest
-        {
-            RagProvider = tenant.RagProvider,
-            ApplicationId = tenant.AiGatewayApplicationId?.ToString() ?? string.Empty,
-            ApplicationKey = tenant.AiGatewayKey,
-            ApiVersion = apiVersion,
-            EmbeddingModelName = tenant.EmbeddingModelName,
-            ReferenceFile = referenceFile,
-            KeyMongoAccess = indexerApiKey,
-            Questions =
-            [
-                new IntegrationHubQuestionDto
-                {
-                    Id = 0,
-                    Question = request.Question
-                }
-            ],
-            kValue = request.kValue,
-            Model = request.Model,
-            Template = request.Template,
-            Temperature = request.Temperature,
-            Refine_template = request.Refine_template,
-            Max_tokens = request.Max_tokens,
-            SearchMode = request.SearchMode,
-            Tenant = tenant.Name,
-            Email = emailCreator,
-            Data = new Newtonsoft.Json.Linq.JObject()
-        };
+        var payload = CreateRequestQuery(tenant, referenceFile, indexerApiKey, emailCreator, request, apiVersion);
 
         var keyAccess = _configuration["KeyAccess"] ?? string.Empty;
-        using var response =
-            await _integrationHubApi.CustomQueryAsync(keyAccess, payload, cancellationToken).ConfigureAwait(false);
-        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+        using var response = await _integrationHubApi.CustomQueryAsync(keyAccess, payload, cancellationToken);
+        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
             _logger.LogWarning("Integration custom-query failed: {Status} {Body}", response.StatusCode, responseBody);
@@ -250,6 +216,55 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
     }
 
     /// <summary>
+    /// Creates a new IntegrationHubDocumentEmbeddingsQueryRequest using the specified tenant information, reference
+    /// file, API key, creator email, query request details, and API version.
+    /// </summary>
+    /// <param name="tenant">The tenant information used to populate provider, application, and model details. Cannot be null.</param>
+    /// <param name="referenceFile">The name or path of the reference file to associate with the query. Cannot be null or empty.</param>
+    /// <param name="indexerApiKey">The API key used for accessing the indexer. Cannot be null or empty.</param>
+    /// <param name="emailCreator">The email address of the user creating the request. Cannot be null or empty.</param>
+    /// <param name="request">The query request details, including the question, model parameters, and search options. Cannot be null.</param>
+    /// <param name="apiVersion">The API version to use for the request. Cannot be null or empty.</param>
+    /// <returns>An IntegrationHubDocumentEmbeddingsQueryRequest populated with the provided parameters and ready for submission.</returns>
+    private static IntegrationHubDocumentEmbeddingsQueryRequest CreateRequestQuery(
+        TenantInfoDto tenant,
+        string referenceFile,
+        string indexerApiKey,
+        string emailCreator,
+        CustomQueryRequestRefitDto request,
+        string apiVersion)
+    {
+        return new IntegrationHubDocumentEmbeddingsQueryRequest
+        {
+            RagProvider = tenant.RagProvider,
+            ApplicationId = tenant.AiGatewayApplicationId?.ToString() ?? string.Empty,
+            ApplicationKey = tenant.AiGatewayKey,
+            ApiVersion = apiVersion,
+            EmbeddingModelName = tenant.EmbeddingModelName,
+            ReferenceFile = referenceFile,
+            KeyMongoAccess = indexerApiKey,
+            Questions =
+            [
+                new IntegrationHubQuestionDto
+                {
+                    Id = 0,
+                    Question = request.Question
+                }
+            ],
+            kValue = request.kValue,
+            Model = request.Model,
+            Template = request.Template,
+            Temperature = request.Temperature,
+            Refine_template = request.Refine_template,
+            Max_tokens = request.Max_tokens,
+            SearchMode = request.SearchMode,
+            Tenant = tenant.Name,
+            Email = emailCreator,
+            Data = new Newtonsoft.Json.Linq.JObject()
+        };
+    }
+
+    /// <summary>
     /// Executes the delete operation for the Azure AI Search integration by calling the Indexer Refit client. It will throw an exception if the response is not successful to indicate that something went wrong with the request, but it will not throw if the status code is NotFound to avoid breaking the flow in case the file was not found in the indexer and therefore there is nothing to delete.
     /// </summary>
     /// <param name="tenantName"></param>
@@ -263,8 +278,7 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         string indexerApiKey)
     {
         var resultRequest =
-            await _embeddingsApi.DeleteHash(tenantName, referenceFile, tenantName, indexerApiKey)
-                .ConfigureAwait(false);
+            await _embeddingsApi.DeleteHash(tenantName, referenceFile, tenantName, indexerApiKey);
         if (!resultRequest.IsSuccessStatusCode && resultRequest.StatusCode != HttpStatusCode.NotFound)
         {
             throw new ArgumentException("Error while sending delete hash in Embeddings API");
@@ -295,10 +309,10 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
 
         var keyAccess = _configuration["KeyAccess"] ?? string.Empty;
         using var response =
-            await _integrationHubApi.DeleteEmbeddingsAsync(keyAccess, payload, cancellationToken).ConfigureAwait(false);
+            await _integrationHubApi.DeleteEmbeddingsAsync(keyAccess, payload, cancellationToken);
         if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NotFound)
         {
-            var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogWarning("Integration delete failed: {Status} {Body}", response.StatusCode, body);
             throw new ArgumentException("Error while sending delete to Integration API");
         }

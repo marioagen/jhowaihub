@@ -1,6 +1,6 @@
 namespace WoopiAiHub.Domain.DTOs.IntegrationHub;
 
-public sealed class IntegrationHubDocumentEmbeddingsDeleteRequest
+public record class IntegrationHubDocumentEmbeddingsDeleteRequest
 {
     public string? RagProvider { get; set; }
 

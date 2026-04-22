@@ -1,6 +1,6 @@
 namespace WoopiAiHub.Domain.DTOs.IntegrationHub;
 
-public sealed class IntegrationHubQueryUsageDto
+public record class IntegrationHubQueryUsageDto
 {
     public string Model { get; set; } = string.Empty;
 

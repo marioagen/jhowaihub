@@ -2,7 +2,7 @@ using Newtonsoft.Json.Linq;
 
 namespace WoopiAiHub.Domain.DTOs.IntegrationHub;
 
-public sealed class IntegrationHubDocumentEmbeddingsQueryResponse
+public record class IntegrationHubDocumentEmbeddingsQueryResponse
 {
     public string ReferenceFile { get; set; } = string.Empty;
 

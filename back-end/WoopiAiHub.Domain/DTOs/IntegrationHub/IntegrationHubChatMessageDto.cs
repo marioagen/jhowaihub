@@ -1,6 +1,6 @@
 namespace WoopiAiHub.Domain.DTOs.IntegrationHub;
 
-public sealed class IntegrationHubChatMessageDto
+public record class IntegrationHubChatMessageDto
 {
     public string Role { get; set; } = "system";
 

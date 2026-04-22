@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace WoopiAiHub.Domain.DTOs.Messaging
 {
-    public class DocumentEmbeddingsResultDto
+    public record class DocumentEmbeddingsResultDto
     {
         public string ReferenceFile { get; set; } = string.Empty;
         public string KeyMongoAccess { get; set; } = string.Empty;

@@ -2,7 +2,7 @@ using Newtonsoft.Json.Linq;
 
 namespace WoopiAiHub.Domain.DTOs.IntegrationHub;
 
-public sealed class IntegrationHubDocumentEmbeddingsQueryRequest
+public record class IntegrationHubDocumentEmbeddingsQueryRequest
 {
     public string? RagProvider { get; set; }
 

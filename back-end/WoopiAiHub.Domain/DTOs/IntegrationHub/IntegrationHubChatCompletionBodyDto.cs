@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace WoopiAiHub.Domain.DTOs.IntegrationHub;
 
-public sealed class IntegrationHubChatCompletionBodyDto
+public record class IntegrationHubChatCompletionBodyDto
 {
     public List<IntegrationHubChatMessageDto> Messages { get; set; } = [];
 
