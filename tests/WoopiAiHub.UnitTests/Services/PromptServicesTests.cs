@@ -550,8 +550,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindPromptTemplates", "Success")]
         public async Task FindPromptTemplates_ShouldReturnEmptyList_WhenTheTemplatesNotHasAnyPrompt()
         {
-            //Arrange
-            
+            //Arrange            
             var templatesResponse = new PromptTemplatesResponse();
             var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
             var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)

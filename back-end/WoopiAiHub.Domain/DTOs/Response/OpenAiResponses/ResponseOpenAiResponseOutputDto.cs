@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
 {
-    public class ResponseOpenAiResponseOutputDto
+    public record class ResponseOpenAiResponseOutputDto
     {
         public string Id { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
