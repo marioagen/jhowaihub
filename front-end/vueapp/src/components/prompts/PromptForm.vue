@@ -487,7 +487,9 @@
                         if (!response || response.error) throw new Error("Test failed");
 
                         this.testResult =
-                            typeof response === "string" ? response : String(response ?? "");
+                            typeof response === "string"
+                                ? response
+                                : JSON.stringify(response, null, 2);
                     })
                     .catch(() => {
                         this.$notify({
