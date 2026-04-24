@@ -110,11 +110,7 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
     /// <param name="tenant"></param>
     /// <returns></returns>
     private static bool RoutesToIntegration(TenantInfoDto tenant)
-    {
-        var p = tenant.RagProvider?.Trim();
-        return !string.IsNullOrEmpty(p) &&
-               p.Equals(RagProviderNames.AzureAiSearch, StringComparison.OrdinalIgnoreCase);
-    }
+        => tenant.RagProvider == RagProvider.AzureAiSearch;
 
     /// <summary>
     /// Executes a custom query against the indexer service for the specified tenant and reference file asynchronously.

@@ -1,10 +1,11 @@
 using Newtonsoft.Json.Linq;
+using WoopiAiHub.Domain.Enum;
 
 namespace WoopiAiHub.Domain.DTOs.IntegrationHub;
 
 public record class IntegrationHubDocumentEmbeddingsQueryRequest
 {
-    public string? RagProvider { get; set; }
+    public RagProvider? RagProvider { get; set; }
 
     public string ApplicationId { get; set; } = string.Empty;
 

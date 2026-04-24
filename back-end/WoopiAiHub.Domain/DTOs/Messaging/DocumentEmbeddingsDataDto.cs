@@ -1,8 +1,10 @@
+using WoopiAiHub.Domain.Enum;
+
 namespace WoopiAiHub.Domain.DTOs.Messaging
 {
     public record class DocumentEmbeddingsDataDto
     {
-        public string? RagProvider { get; set; }
+        public RagProvider? RagProvider { get; set; }
         public string ApplicationId { get; set; } = string.Empty;
         public string ApplicationKey { get; set; } = string.Empty;
         public string ApiVersion { get; set; } = string.Empty;

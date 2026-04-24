@@ -1,8 +1,10 @@
+using WoopiAiHub.Domain.Enum;
+
 namespace WoopiAiHub.Domain.DTOs.IntegrationHub;
 
 public record class IntegrationHubDocumentEmbeddingsDeleteRequest
 {
-    public string? RagProvider { get; set; }
+    public RagProvider? RagProvider { get; set; }
 
     public string ReferenceFile { get; set; } = string.Empty;
 

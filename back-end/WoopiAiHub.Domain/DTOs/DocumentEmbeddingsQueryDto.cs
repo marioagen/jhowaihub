@@ -1,11 +1,12 @@
 using Newtonsoft.Json.Linq;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiIntegrationServices.Domain.Dtos.Request;
 
 namespace WoopiAiHub.Domain.DTOs
 {
     public record class DocumentEmbeddingsQueryDto
     {
-        public string? RagProvider { get; set; }
+        public RagProvider? RagProvider { get; set; }
         public string ApplicationId { get; set; } = string.Empty;
         public string ApplicationKey { get; set; } = string.Empty;
         public string ApiVersion { get; set; } = string.Empty;

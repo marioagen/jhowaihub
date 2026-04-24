@@ -3,7 +3,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.IntegrationHub;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Utils;
+using WoopiAiHub.Domain.Enum;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Fixture
@@ -26,7 +26,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                     EmbeddingModelName = "text-embedding-ada-002",
                     ChunkSize = 1000,
                     SearchMode = "any",
-                    RagProvider = string.Empty,
+                    RagProvider = RagProvider.Indexer,
                     OcrModel = "ocr_model",
                     Plan = "premium",
                     WtcsIncluded = 100,
@@ -52,7 +52,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                     EmbeddingModelName = "text-embedding-ada-002",
                     ChunkSize = 1000,
                     SearchMode = "any",
-                    RagProvider = RagProviderNames.AzureAiSearch,
+                    RagProvider = RagProvider.AzureAiSearch,
                     OcrModel = "ocr_model",
                     Plan = "premium",
                     WtcsIncluded = 100,
@@ -78,7 +78,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                     EmbeddingModelName = "text-embedding-ada-002",
                     ChunkSize = 1000,
                     SearchMode = "any",
-                    RagProvider = string.Empty,
+                    RagProvider = RagProvider.Indexer,
                     OcrModel = "ocr_model",
                     Plan = "premium",
                     WtcsIncluded = 100,

@@ -4,6 +4,7 @@ using Moq.AutoMock;
 using System.Threading;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -11,7 +12,6 @@ using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
@@ -35,7 +35,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _mocker.GetMock<ITenantCacheServices>()
                 .Setup(x => x.FindTenantAsync(It.IsAny<string>()))
-                .ReturnsAsync(new TenantInfoDto { Name = "test", RagProvider = RagProviderNames.Indexer });
+                .ReturnsAsync(new TenantInfoDto { Name = "test", RagProvider = RagProvider.Indexer });
 
             _documentDeletionServices = _mocker.CreateInstance<WoopiAiHub.Application.Services.DocumentDeletionServices>();
         }

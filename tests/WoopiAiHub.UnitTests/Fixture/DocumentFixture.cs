@@ -12,7 +12,6 @@ using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Models;
-using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.AnalyzeResultAzure;
 using Xunit;
 
@@ -50,7 +49,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                   Model = f.Random.String(),
                   Name = f.Random.String(),
                   OcrModel = f.Random.String(),
-                  RagProvider = RagProviderNames.Indexer,
+                  RagProvider = RagProvider.Indexer,
                   RefineTemplate = f.Random.String(),
                   SearchMode = f.Random.String(),
                   Template = f.Random.String(),

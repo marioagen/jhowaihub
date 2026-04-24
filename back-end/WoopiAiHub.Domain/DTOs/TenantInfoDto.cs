@@ -1,3 +1,5 @@
+using WoopiAiHub.Domain.Enum;
+
 namespace WoopiAiHub.Domain.DTOs
 {
     public class TenantInfoDto
@@ -13,7 +15,7 @@ namespace WoopiAiHub.Domain.DTOs
         public string EmbeddingModelName { get; set; } = string.Empty;
         public int ChunkSize { get; set; }
         public string SearchMode { get; set; } = string.Empty;
-        public string RagProvider { get; set; } = string.Empty;
+        public RagProvider RagProvider { get; set; } = RagProvider.Indexer;
         public string OcrModel { get; set; } = string.Empty;
         public DateTime? DateStart { get; set; }
         public DateTime? DateEnd { get; set; }
