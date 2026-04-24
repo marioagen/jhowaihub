@@ -69,7 +69,7 @@ jobs:
 
             - name: Build Front Image
               working-directory: ./front-end/vueapp
-              run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFrontend}}:${{ steps.tag_version.outputs.new_tag }} --platform linux -f Dockerfile .
+              run: az acr build -r acrapplications --image ${{steps.vars.outputs.imageRepository}}/${{steps.vars.outputs.imageNameFrontend}}:${{ steps.tag_version.outputs.new_tag }} --platform linux --build-arg VITE_APP_VERSION=${{ github.sha }} -f Dockerfile .
 
             - name: Build File-Repository Image
               working-directory: ./external-api
