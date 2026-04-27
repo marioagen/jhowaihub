@@ -22,50 +22,60 @@
                             {{ plan }}
                         </span>
                         <br />
-                        <span class="plan-subtitle">
-                            WTCs:{{ wtcIncluded }}
-                        </span>
+                        <span class="plan-subtitle">WTCs:{{ wtcIncluded }}</span>
                     </div>
                 </div>
             </div>
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="row position-relative">
+                <div class="row position-relative w-50">
                     <div
-                        class="col"
+                        class="col-4"
                         v-outsideClick="handleOutsideClick"
                     >
-                        <button
-                            class="btn btn-outlined btn-sm d-flex align-items-center justify-content-between"
-                            style="width: 200px"
-                            @click="toggleDateFilter"
-                        >
-                            {{ presetDate() }}
-                            <LucideIcon
+                        <div class="position-relative">
+                            <button
+                                class="form-select form-select-sm w-100 text-start date-filter-btn"
+                                style="max-width: 200px"
+                                @click="toggleDateFilter"
+                            >
+                                {{ presetDate() }}
+                            </button>
+                            <div
                                 v-if="showDateFilter"
-                                icon="ChevronUp"
-                                :size="17"
-                                class="text-muted"
-                            />
-                            <LucideIcon
-                                v-else
-                                icon="ChevronDown"
-                                :size="17"
-                                class="text-muted"
-                            />
-                        </button>
-                        <div
-                            v-if="showDateFilter"
-                            class="position-absolute"
-                            style="z-index: 1050; width: 500px"
-                        >
-                            <DashboardDateFilter
-                                @close="showDateFilter = false"
-                                @filterData="filterData"
-                                :isLoading="isLoading"
-                            />
+                                class="position-absolute"
+                                style="z-index: 1050; width: 500px"
+                            >
+                                <DashboardDateFilter
+                                    @close="showDateFilter = false"
+                                    @filterData="filterData"
+                                    :isLoading="isLoading"
+                                />
+                            </div>
                         </div>
                     </div>
-                    <div class="col">
+                    <div class="col-4">
+                        <select
+                            v-model="selectedWorkflow"
+                            class="form-select form-select-sm workflow-filter-select"
+                            @change="onWorkflowSelected"
+                            style="max-width: 250px"
+                            multiple
+                            size="1"
+                        >
+                            <option :value="null">
+                                {{ $t("dashboard.filters.allWorkflows") }}
+                            </option>
+                            <option :value="-1">{{ $t("dashboard.filters.unclassified") }}</option>
+                            <option
+                                v-for="workflow in workflows"
+                                :key="workflow.id"
+                                :value="workflow.id"
+                            >
+                                {{ workflow.name }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-4">
                         <button
                             class="btn btn-primary btn-sm"
                             @click="proccessTenantMetrics()"
@@ -160,6 +170,7 @@
     import WorkflowsExecutionGraph from "@/components/dashboard/graphs/WorkflowsExecutionGraph.vue";
     import DashboardDateFilter from "@/components/dashboard/DashboardDateFilter.vue";
     import DashboardServices from "@/services/dashboard/DashboardServices";
+    import WorkflowService from "@/services/workflow/WorkflowService";
     import store from "@/store";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     export default {
@@ -182,11 +193,15 @@
                     preset: "currentMonth",
                     start: first.toISOString().slice(0, 10),
                     end: today.toISOString().slice(0, 10),
+                    workflowIds: [],
                 },
                 totalWTC: 0,
                 usageUnits: [],
                 plan: "",
                 wtcIncluded: 0,
+                workflows: [],
+                selectedWorkflow: [null],
+                previousWorkflow: [null],
             };
         },
         methods: {
@@ -200,7 +215,10 @@
             },
             filterData(filters) {
                 this.isLoading = true;
-                this.filters = filters;
+                this.filters = {
+                    ...filters,
+                    workflowIds: this.selectedWorkflow,
+                };
                 this.totalWTC = 0;
                 this.datesChange++;
 
@@ -211,10 +229,62 @@
             presetDate() {
                 return this.$t(`dashboard.filters.${this.filters.preset}`);
             },
+            onWorkflowSelected() {
+                this.$nextTick(() => {
+                    const added = this.selectedWorkflow.filter(
+                        (item) => !this.previousWorkflow.includes(item)
+                    );
+                    const removed = this.previousWorkflow.filter(
+                        (item) => !this.selectedWorkflow.includes(item)
+                    );
+
+                    if (added.includes(null) && this.selectedWorkflow.length > 1) {
+                        this.selectedWorkflow = [null];
+                        this.previousWorkflow = [null];
+                        this.filterData(this.filters);
+                        return;
+                    }
+
+                    if (
+                        added.length > 0 &&
+                        this.previousWorkflow.includes(null) &&
+                        !added.includes(null)
+                    ) {
+                        this.selectedWorkflow = this.selectedWorkflow.filter(
+                            (item) => item !== null
+                        );
+                        this.previousWorkflow = [...this.selectedWorkflow];
+                        this.filterData(this.filters);
+                        return;
+                    }
+
+                    if (this.selectedWorkflow.length === 0) {
+                        this.selectedWorkflow = [null];
+                        this.previousWorkflow = [null];
+                        this.filterData(this.filters);
+                        return;
+                    }
+
+                    this.previousWorkflow = [...this.selectedWorkflow];
+                    this.filterData(this.filters);
+                });
+            },
             getDashboardData() {
-                this.filterData(this.filters);
-                DashboardServices.GetUsageUnits(this.filters).then((response) => {
+                const filtersWithWorkflow = {
+                    ...this.filters,
+                    workflowIds: this.selectedWorkflow,
+                };
+                this.previousWorkflow = [...this.selectedWorkflow];
+                this.filterData(filtersWithWorkflow);
+                DashboardServices.GetUsageUnits(filtersWithWorkflow).then((response) => {
                     this.usageUnits = response;
+                });
+            },
+            getWorkflows() {
+                WorkflowService.getWorkflowCompleteList().then((response) => {
+                    if (response && !response.error) {
+                        this.workflows = response;
+                    }
                 });
             },
             getPlan() {
@@ -238,6 +308,7 @@
             },
         },
         mounted() {
+            this.getWorkflows();
             this.getDashboardData();
             this.getPlan();
         },
@@ -274,6 +345,38 @@
     .animate-spin {
         animation: spin 1s linear infinite;
         color: white;
+    }
+
+    .date-filter-btn {
+        background-color: var(--color-bg-form-control) !important;
+        border-color: var(--color-border-form-control) !important;
+        color: var(--color-body-content) !important;
+    }
+
+    .date-filter-btn:focus,
+    .date-filter-btn:active {
+        background-color: var(--color-bg-form-control) !important;
+        border-color: var(--color-bg-form-outline) !important;
+        color: var(--color-body-content) !important;
+        box-shadow: 0 0 0 0.25rem var(--bs-blue-rgb) !important;
+    }
+
+    .workflow-filter-select {
+        background-color: var(--color-bg-form-control) !important;
+        border-color: var(--color-border-form-control) !important;
+        color: var(--color-body-content) !important;
+    }
+
+    .workflow-filter-select:focus {
+        background-color: var(--color-bg-form-control) !important;
+        border-color: var(--color-bg-form-outline) !important;
+        color: var(--color-body-content) !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    }
+
+    .workflow-filter-select option {
+        background-color: var(--color-bg-dropdown-menu) !important;
+        color: var(--color-dropdown-menu) !important;
     }
 
     @keyframes spin {
