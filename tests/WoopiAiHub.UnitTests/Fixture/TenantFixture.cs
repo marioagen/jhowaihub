@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Repository.Context;
 using Xunit;
 
@@ -31,6 +32,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                   Model = f.Random.String(),
                   Name = f.Random.String(),
                   OcrModel = f.Random.String(),
+                  RagProvider = f.PickRandom<RagProvider>(),
                   RefineTemplate = f.Random.String(),
                   SearchMode = f.Random.String(),
                   Template = f.Random.String(),

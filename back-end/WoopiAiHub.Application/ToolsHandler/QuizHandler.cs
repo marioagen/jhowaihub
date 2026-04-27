@@ -1,22 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request.Automation;
-using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
-using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiIntegrationServices.Domain.Dtos.Request;
 
@@ -48,6 +40,7 @@ namespace WoopiAiHub.Application.ToolsHandler
             var quizId = int.Parse(input!.Value);
             var quizDto = _quizServices.FindById(quizId);
             var apikey = _config["IndexerApiKey"]!;
+            var apiVersion = _config["ChatCompletionSettings:ApiVersion"]!;
 
             return new ExecutionMessageDto
             {
@@ -62,6 +55,11 @@ namespace WoopiAiHub.Application.ToolsHandler
                                 Id = q.Id,
                                 Question = q.Description,
                             }).ToList(),
+                    ApplicationKey = tenantInfo!.AiGatewayKey,
+                    ApplicationId = tenantInfo.AiGatewayApplicationId!.Value.ToString(),
+                    RagProvider = tenantInfo.RagProvider,
+                    EmbeddingModelName = tenantInfo.EmbeddingModelName,
+                    ApiVersion = apiVersion,
                     ReferenceFile = automationServicesDto.ReferenceFile!,
                     Model = tenantInfo!.Model,
                     kValue = tenantInfo.KValue,

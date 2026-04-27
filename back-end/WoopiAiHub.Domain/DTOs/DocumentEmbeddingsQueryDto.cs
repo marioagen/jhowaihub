@@ -1,14 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiIntegrationServices.Domain.Dtos.Request;
 
 namespace WoopiAiHub.Domain.DTOs
 {
     public record class DocumentEmbeddingsQueryDto
     {
+        public RagProvider? RagProvider { get; set; }
+        public string ApplicationId { get; set; } = string.Empty;
+        public string ApplicationKey { get; set; } = string.Empty;
+        public string ApiVersion { get; set; } = string.Empty;
+        public string? EmbeddingModelName { get; set; }
         public string ReferenceFile { get; set; } = string.Empty;
         public string KeyMongoAccess { get; set; } = string.Empty;
         public IEnumerable<QuestionAIGatewayDto> Questions { get; set; } = Enumerable.Empty<QuestionAIGatewayDto>();

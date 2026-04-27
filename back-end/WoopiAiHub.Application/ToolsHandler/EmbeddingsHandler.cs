@@ -4,9 +4,7 @@ using Newtonsoft.Json;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request.Automation;
-using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
-using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
@@ -52,11 +50,17 @@ public class EmbeddingsHandler : IToolHandler
         }
 
         var apikey = _config["IndexerApiKey"]!;
+        var apiVersion = _config["ChatCompletionSettings:ApiVersion"]!;
         var documents = JsonConvert.DeserializeObject<DocumentEmbeddingsDataDto>(output);
+        documents!.ApplicationKey = tenantInfo.AiGatewayKey ?? string.Empty;
+        documents.ApplicationId = tenantInfo.AiGatewayApplicationId?.ToString() ?? string.Empty;
+        documents.RagProvider = tenantInfo.RagProvider;
+        documents.ApiVersion = apiVersion;
 
         foreach (var item in documents!.DocumentEmbeddings)
         {
             item.KeyMongoAccess = apikey;
+            item.EmbeddingModelName = tenantInfo.EmbeddingModelName;
         }
 
         return new ExecutionMessageDto

@@ -9,5 +9,6 @@ namespace WoopiAiHub.Domain.Utils
         public string MarketPlaceBaseAddress { get; set; } = string.Empty;
         public string AiGatewayApiBaseAddress { get; set; } = string.Empty;
         public string AnonymizationApiBaseAddress { get; set; } = string.Empty;
+        public string IntegrationApiBaseAddress { get; set; } = string.Empty;   
     }
 }
