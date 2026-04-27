@@ -263,11 +263,19 @@
 
     .workflow-accordion :deep(.accordion-item) {
         margin-bottom: 0.375rem;
+        background-color: var(--color-card-content) !important;
+        border-color: var(--color-border-form-control) !important;
     }
 
     .workflow-accordion :deep(.accordion-item:last-of-type) {
         margin-bottom: 0;
     }
+
+    .workflow-accordion :deep(.accordion-body) {
+        background-color: var(--color-card-content) !important;
+        color: var(--color-body-content) !important;
+    }
+
     .workflow-accordion :deep(.accordion-header) {
         font-size: inherit;
         font-weight: inherit;
@@ -288,10 +296,13 @@
         min-height: 0;
     }
 
-    .workflow-accordion :deep(.accordion-header .accordion-button::after) {
+    /* Chevron adapts to theme */
+    .workflow-accordion :deep(.accordion-header .accordion-button::after),
+    .workflow-accordion :deep(.accordion-header .accordion-button:not(.collapsed)::after) {
         width: 0.875rem;
         height: 0.875rem;
         background-size: 0.875rem;
+        filter: var(--filter-btn-close);
     }
 
     .workflow-accordion :deep(.workflow-accordion-step-title) {
@@ -306,40 +317,63 @@
         vertical-align: middle;
     }
 
+    /* ── Step-type colors ─────────────────────────────── */
     .workflow-accordion :deep(.accordion-item.first-steps .accordion-button) {
         background-color: var(--color-bg-kanban-primary) !important;
-        color: #212529 !important;
+        color: var(--color-body-content) !important;
         box-shadow: none !important;
     }
 
     .workflow-accordion :deep(.accordion-item.first-steps .workflow-accordion-step-title > .badge) {
         background-color: var(--color-bg-kanban-primary-accent) !important;
-        color: unset;
+        color: var(--color-body-content) !important;
     }
 
     .workflow-accordion :deep(.accordion-item.last-step .accordion-button) {
         background-color: var(--color-bg-kanban-success) !important;
-        color: #212529 !important;
+        color: var(--color-body-content) !important;
         box-shadow: none !important;
     }
 
     .workflow-accordion :deep(.accordion-item.last-step .workflow-accordion-step-title > .badge) {
         background-color: var(--color-bg-kanban-success-accent) !important;
-        color: unset;
+        color: var(--color-body-content) !important;
     }
 
     .workflow-accordion :deep(.accordion-item.middle-step .accordion-button) {
-        background-color: rgba(0, 0, 0, 0.03) !important;
-        color: #212529 !important;
+        background-color: var(--color-card-content) !important;
+        color: var(--color-body-content) !important;
         box-shadow: none !important;
     }
 
     .workflow-accordion :deep(.accordion-item.middle-step .workflow-accordion-step-title > .badge) {
         background-color: var(--color-hover-transfer) !important;
-        color: unset;
+        color: var(--color-body-content) !important;
     }
 
     .workflow-accordion :deep(.accordion-item .badge) {
         color: unset;
+    }
+
+    /* ── Table inside accordion ───────────────────────── */
+    .workflow-accordion :deep(table) {
+        color: var(--color-body-content) !important;
+        border-color: var(--color-border-form-control) !important;
+    }
+
+    .workflow-accordion :deep(table thead tr th) {
+        color: var(--color-text-muted) !important;
+        background-color: var(--color-card-content) !important;
+        border-color: var(--color-border-form-control) !important;
+    }
+
+    .workflow-accordion :deep(table tbody tr) {
+        background-color: var(--color-card-content) !important;
+        color: var(--color-body-content) !important;
+        border-color: var(--color-border-form-control) !important;
+    }
+
+    .workflow-accordion :deep(table tbody tr td) {
+        border-color: var(--color-border-form-control) !important;
     }
 </style>
