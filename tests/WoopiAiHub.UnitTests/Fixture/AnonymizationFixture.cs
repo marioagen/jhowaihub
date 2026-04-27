@@ -4,6 +4,7 @@ using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.UnitTests.Fixtures
 {
@@ -141,6 +142,25 @@ namespace WoopiAiHub.UnitTests.Fixtures
                     DocumentName = f.System.FileName()
                 })
                 .Generate(count);
+        }
+
+        /// <summary>
+        /// Creates a valid Document with random test data.
+        /// </summary>
+        /// <returns>A Document instance with valid test data.</returns>
+        public static Document FindValidDocument()
+        {
+            var faker = new Faker("pt_BR");
+            return new Document(
+                faker.System.FileName(),
+                faker.Lorem.Sentence(3),
+                faker.Random.String(20),
+                DocumentStatus.Analyzed,
+                faker.Person.Email,
+                faker.Random.Int(1, 1000),
+                new List<Workflow>(),
+                faker.Date.Past(),
+                false);
         }
     }
 }

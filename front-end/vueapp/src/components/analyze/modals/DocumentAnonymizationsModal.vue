@@ -135,7 +135,6 @@
         },
         methods: {
             open(anonymizations) {
-                console.log(anonymizations);
                 this.anonymizations = anonymizations || [];
                 this.$refs.ModalDocumentAnonymizations.open();
             },

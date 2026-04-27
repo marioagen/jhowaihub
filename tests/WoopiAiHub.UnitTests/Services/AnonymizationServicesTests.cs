@@ -297,16 +297,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var result = AnonymizationFixture.FindValidAnonymizationResultDto();
-            var document = new Document(
-                "Test Document",
-                "Test Description",
-                "test-reference",
-                DocumentStatus.Analyzed,
-                "test@example.com",
-                1,
-                new List<Workflow>(),
-                DateTime.Now,
-                false);
+            var document = AnonymizationFixture.FindValidDocument();
 
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
@@ -379,16 +370,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var result = AnonymizationFixture.FindValidAnonymizationResultDto();
-            var document = new Document(
-                "Test Document",
-                "Test Description",
-                "test-reference",
-                DocumentStatus.Analyzed,
-                "test@example.com",
-                1,
-                new List<Workflow>(),
-                DateTime.Now,
-                false);
+            var document = AnonymizationFixture.FindValidDocument();
 
             var expectedException = new InvalidOperationException("Database error");
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
@@ -420,16 +402,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var result = AnonymizationFixture.FindValidAnonymizationResultDto();
-            var document = new Document(
-                "Test Document",
-                "Test Description",
-                "test-reference",
-                DocumentStatus.Analyzed,
-                "test@example.com",
-                1,
-                new List<Workflow>(),
-                DateTime.Now,
-                false);
+            var document = AnonymizationFixture.FindValidDocument();
 
             var expectedException = new InvalidOperationException("Hub notification failed");
 
