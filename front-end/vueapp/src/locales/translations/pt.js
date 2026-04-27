@@ -91,6 +91,16 @@ const portuguese = {
             tagFreeQuestion: "Pergunta Livre",
         },
         anonymizeDocument: "Anonimizar documento",
+        anonymizations: "Anonimizações",
+        anonymizationHistoryModal: {
+            title: "Histórico de Anonimizações",
+            versionSingular: "versão gerada",
+            versionPlural: "versões geradas",
+            noAnonymizations: "Nenhuma anonimização disponível.",
+            mostRecent: "MAIS RECENTE",
+            unnamed: "Anonimização sem nome",
+            clickToView: "Clique em um item para abrir em nova aba",
+        },
     },
     anonymization: {
         title: "Anonimizar Documento",

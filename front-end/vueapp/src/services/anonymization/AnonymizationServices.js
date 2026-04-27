@@ -13,4 +13,16 @@ export default {
                 };
             });
     },
+    getDocumentAnonymizations(documentId) {
+        return api
+            .get(`/Anonymization/document/${documentId}`)
+            .then((result) => {
+                return result;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
 };

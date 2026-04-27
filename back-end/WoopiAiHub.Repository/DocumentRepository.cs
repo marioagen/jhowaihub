@@ -94,6 +94,7 @@ namespace WoopiAiHub.Repository
                 Status = d.Status,
                 Created = d.Created,
                 HasBatch = d.HasBatch,
+                AnonymizationAmount = d.DocumentAnonymizations.Count,
                 WorkflowProgress = d.Workflows
                     .Where(w => w.Enable
                         && w.Steps.Count > 0

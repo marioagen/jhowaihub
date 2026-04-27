@@ -7,5 +7,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     {
         Task ProcessAnonymization(ProcessAnonymizationRequestDto requestDto, HeadersDto headersDto);
         Task ProcessAnonymizationResult(AnonymizationResultDto result);
+        Task<ICollection<DocumentAnonymizationDto>> FindAnonymizedDocumentsByDocument(int documentId);
     }
 }

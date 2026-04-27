@@ -105,6 +105,16 @@ const english = {
             tagFreeQuestion: "Free Question",
         },
         anonymizeDocument: "Anonymize document",
+        anonymizations: "Anonymizations",
+        anonymizationHistoryModal: {
+            title: "Anonymizations History",
+            versionSingular: "version generated",
+            versionPlural: "versions generated",
+            noAnonymizations: "No anonymizations available.",
+            mostRecent: "MOST RECENT",
+            unnamed: "Unnamed anonymization",
+            clickToView: "Click an item to view in new tab",
+        },
     },
     anonymization: {
         title: "Anonymize Document",

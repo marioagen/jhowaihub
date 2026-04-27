@@ -1,12 +1,16 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Enum.Audit;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
+using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -17,6 +21,8 @@ namespace WoopiAiHub.Application.Services
         IHttpClientFactory httpClientFactory,
         IHubNotifier hubNotifier,
         IAuditCardService auditCardService,
+        IDocumentRepository documentRepository,
+        IDocumentAnonymizationRepository documentAnonymizationRepository,
         ILogger<AnonymizationServices> logger
     ) : IAnonymizationServices
     {
@@ -26,6 +32,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
         private readonly IHubNotifier _hubNotifier = hubNotifier;
         private readonly IAuditCardService _auditCardService = auditCardService;
+        private readonly IDocumentRepository _documentRepository = documentRepository;
+        private readonly IDocumentAnonymizationRepository _documentAnonymizationRepository = documentAnonymizationRepository;
         private readonly ILogger<AnonymizationServices> _logger = logger;
 
         /// <summary>
@@ -112,13 +120,37 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Notifies connected clients that an anonymization result is ready for processing.
+        /// Processes the result of a document anonymization operation by updating the repository and notifying
+        /// subscribers when the anonymization is ready.
         /// </summary>
-        /// <param name="result">An object containing the details of the completed anonymization operation. Cannot be null.</param>
-        /// <returns>A task that represents the asynchronous notification operation.</returns>
+        /// <param name="result">An object containing the details of the completed anonymization operation, including the document
+        /// identifier, user email, and the URL of the anonymized document. Cannot be null.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <exception cref="AppException">Thrown if the document specified by the anonymization result cannot be found.</exception>
         public async Task ProcessAnonymizationResult(AnonymizationResultDto result)
         {
+            var document = _documentRepository.FindById(result.WoopiAiDocumentId) ?? throw new AppException(ErrorCode.NotFound, "Document not found", null);
+
+            var documentAnonymization = new DocumentAnonymization(
+                0,
+                DateTime.Now,
+                document.Id,
+                result.DocumentUrl
+            );
+            await _documentAnonymizationRepository.CreateAsync(documentAnonymization);
+
             await _hubNotifier.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl);
+        }
+
+        /// <summary>
+        /// Retrieves a collection of anonymized document records associated with the specified document identifier.
+        /// </summary>
+        /// <param name="documentId">The unique identifier of the document for which to retrieve anonymized versions.</param>
+        /// <returns>A collection of <see cref="DocumentAnonymizationDto"/> objects representing the anonymized documents linked
+        /// to the specified document. The collection is empty if no anonymized documents are found.</returns>
+        public async Task<ICollection<DocumentAnonymizationDto>> FindAnonymizedDocumentsByDocument(int documentId)
+        {
+            return await _documentAnonymizationRepository.FindAnonymizedDocumentsByDocument(documentId);
         }
     }
 }
