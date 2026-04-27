@@ -309,7 +309,7 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
         if (!response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NotFound)
         {
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogWarning("Integration delete failed: {Status} {Body}", response.StatusCode, body);
+            _logger.LogError("Integration delete failed: {Status} {Body}", response.StatusCode, body);
             throw new ArgumentException("Error while sending delete to Integration API");
         }
     }
