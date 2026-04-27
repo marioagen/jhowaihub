@@ -660,6 +660,8 @@ const spanish = {
             selectPrompt: "Seleccione un agente",
         },
         hideTools: "Ocultar Herramientas",
+        noToolsFound: "No se encontraron herramientas",
+        searchTool: "Buscar herramienta...",
         showTools: "Agregar Herramientas",
         sidebar: {
             addDependency: "Agregar Dependencia",

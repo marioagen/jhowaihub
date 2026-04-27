@@ -653,6 +653,8 @@ const english = {
             selectPrompt: "Select an agent",
         },
         hideTools: "Hide Tools",
+        noToolsFound: "No tools found",
+        searchTool: "Search tool...",
         showTools: "Add Tools",
         sidebar: {
             addDependency: "Add Dependency",
