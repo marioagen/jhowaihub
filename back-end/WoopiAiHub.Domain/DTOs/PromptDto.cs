@@ -11,6 +11,8 @@ namespace WoopiAiHub.Domain.DTOs
         public DateTime Created { get; set; }
         public bool IsEdited { get; set; }
         public bool IsImported { get; set; }
+        public bool EnableAccessToMcp { get; set; } = false;        
+        public List<PromptApiTemplateDto> PromptApiTemplates { get; set; } = [];
         public string OwnerName { get; set; } = string.Empty;
         public string OwnerEmail { get; set; } = string.Empty;
     }

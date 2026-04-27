@@ -7,8 +7,8 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Domain.Enum;
-using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
@@ -71,7 +71,6 @@ namespace WoopiAiHub.Application.Services
             _executionServices = executionServices;
         }
 
-
         /// <summary>
         /// Find prompt templates from external source
         /// </summary>
@@ -91,7 +90,6 @@ namespace WoopiAiHub.Application.Services
                     t.Text.ToLower().Contains(lowerQuery)
                 ).ToList();
             }
-
 
             templates = orderBy?.ToLower() switch
             {
@@ -128,13 +126,7 @@ namespace WoopiAiHub.Application.Services
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
 
-            var templates = items?.Prompts;
-            if (templates == null)
-            {
-                return new List<PromptTemplateDto>();
-            }
-
-            return templates;
+            return items?.Prompts ?? new List<PromptTemplateDto>();
         }
 
         /// <summary>
@@ -179,11 +171,6 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         public bool ImportPrompts(List<ImportedPromptDto> importedPrompts, string email)
         {
-            if (importedPrompts == null || importedPrompts.Count == 0)
-            {
-                return false;
-            }
-
             var idUser = _userServices.FindIdByEmail(email);
             if (idUser == Guid.Empty)
             {
@@ -238,7 +225,7 @@ namespace WoopiAiHub.Application.Services
         /// <param name="promptUpdateDto"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public bool Update(PromptUpdateDto promptUpdateDto, string emailCreator)
+        public async Task<bool> Update(PromptUpdateDto promptUpdateDto, string emailCreator)
         {
             _validatePrompt.ValidateOwnership(promptUpdateDto.Id,
                 emailCreator);
@@ -249,11 +236,11 @@ namespace WoopiAiHub.Application.Services
                 throw new ArgumentException("Prompt not found");
             }
 
-            var prompt = GeneratePromptToUpdate(promptDto, promptUpdateDto);
+            (var prompt, var promptApiTemplateIds) = GeneratePromptToUpdate(promptDto, promptUpdateDto);
 
             _validatePrompt.ValidatePromptFields(prompt);
 
-            var promptUpdateResult = _promptRepository.Update(prompt);
+            var promptUpdateResult = await _promptRepository.UpdateAndRemovePromptApisFromPrompt(prompt, promptApiTemplateIds);
 
             if (!promptUpdateResult)
             {
@@ -370,7 +357,10 @@ namespace WoopiAiHub.Application.Services
 
             return new PagedResultDto<PromptDto>()
             {
-                Items = query, CurrentPage = currentPage, TotalPages = pageCount, Count = count
+                Items = query,
+                CurrentPage = currentPage,
+                TotalPages = pageCount,
+                Count = count
             };
         }
 
@@ -423,7 +413,12 @@ namespace WoopiAiHub.Application.Services
                 promptCreateDto.Name,
                 promptCreateDto.Description,
                 promptCreateDto.Text,
-                idUser);
+                idUser,
+                enableAccessToMcp: promptCreateDto.EnableAccessToMcp);
+
+            prompt.PromptApiTemplates = promptCreateDto.ApiTemplatesSelected
+                .Select(x => new PromptApiTemplate(0, x, 0, DateTime.Now))
+                .ToList();
 
             return prompt;
         }
@@ -433,7 +428,7 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="promptDto"></param>
         /// <param name="promptUpdateDto"></param>
-        private static Prompt GeneratePromptToUpdate(PromptDto promptDto, PromptUpdateDto promptUpdateDto)
+        private static (Prompt, List<int> promptApiTemplateIds) GeneratePromptToUpdate(PromptDto promptDto, PromptUpdateDto promptUpdateDto)
         {
             var prompt = new Prompt(
                 promptDto.Id,
@@ -442,9 +437,15 @@ namespace WoopiAiHub.Application.Services
                 promptUpdateDto.Description,
                 promptUpdateDto.Text,
                 promptDto.IdUser,
-                true);
+                enableAccessToMcp: promptDto.EnableAccessToMcp);
 
-            return prompt;
+            var apiToDelete = promptDto.PromptApiTemplates.Where(x => !promptUpdateDto.ApiTemplatesSelected.Contains(x.ApiTemplateId)).Select(x => x.Id).ToList();
+            var apiToCreate = promptUpdateDto.ApiTemplatesSelected.Where(x => !promptDto.PromptApiTemplates.Any(p => p.ApiTemplateId == x));
+            prompt.PromptApiTemplates = apiToCreate
+                .Select(x => new PromptApiTemplate(0, x, 0, DateTime.Now))
+                .ToList();
+
+            return (prompt, apiToDelete);
         }
 
         /// <summary>
@@ -477,6 +478,65 @@ namespace WoopiAiHub.Application.Services
                 _unitOfWork.Rollback();
                 throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
+        }
+
+        /// <summary>
+        /// Will process the response from open ai
+        /// </summary>
+        /// <param name="responseDto"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="AppException"></exception>
+        public async Task ProcessOpenAiResponseResult(OpenAiResponseConsumerResponseDto responseDto)
+        {
+            var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(responseDto.Data.ToString());
+            var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(dataDto.StepToolId,
+                dataDto.CardId);
+
+            if (execution == null)
+            {
+                throw new ArgumentException("StepToolExecution not found");
+            }
+
+            string message = FindTheOutputFromOpenAiResponseToPromptUsed(responseDto);
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                if (!string.IsNullOrEmpty(message))
+                {
+                    var documentHistory = new DocumentHistory(execution.Card!.DocumentId,
+                    "Prompt",
+                    message,
+                    0,
+                    DateTime.Now);
+                    _documentHistoryRepository.Create(documentHistory);
+                    await _executionServices.HandleExecutionProgress(execution!, responseDto.Email);
+                    await SaveStepToolOutputAsync(execution!, message);
+                }
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.Rollback();
+                throw new AppException(ErrorCode.DefaultError, ex.Message, null);
+            }
+        }
+
+        /// <summary>
+        /// get the output from open ai response tools
+        /// </summary>
+        /// <param name="responseDto"></param>
+        /// <returns></returns>
+        private static string FindTheOutputFromOpenAiResponseToPromptUsed(OpenAiResponseConsumerResponseDto responseDto)
+        {
+            return responseDto
+                    .Response
+                    .Output
+                    .FirstOrDefault(x => x.Type == OpenAiResponsesTypes.Message)?
+                    .Content
+                    .FirstOrDefault(x => x.Type == OpenAiResponseInputContentType.OutputText)?
+                    .Text ?? string.Empty;
         }
 
         /// <summary>

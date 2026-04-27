@@ -84,6 +84,58 @@
                                         </span>
                                     </Field>
                                 </div>
+                                <div class="mb-3">
+                                    <Field
+                                        name="enableAccessFromMcp"
+                                        type="checkbox"
+                                        :value="true"
+                                        v-slot="{ field, errorMessage }"
+                                    >
+                                        <div class="form-check">
+                                            <input
+                                                v-bind="field"
+                                                id="templateActive"
+                                                type="checkbox"
+                                                class="form-check-input"
+                                                :class="{ 'is-invalid': errorMessage }"
+                                            />
+                                            <label class="form-check-label" for="templateActive">
+                                                {{ $t("template.enableMcp") }}
+                                            </label>
+                                        </div>
+                                    </Field>
+                                    
+                                    <div v-if="values.enableAccessFromMcp">
+                                    <label
+                                        for="templateName"
+                                        class="form-label"
+                                    >
+                                        {{ $t("template.description") }}
+                                    </label>
+                                    <Field
+                                        name="description"
+                                        rules="required"
+                                        :rules="values.enableAccessFromMcp ? 'required' : ''"
+                                        v-slot="{ field, errorMessage }"
+                                    >
+                                        <textarea
+                                            v-bind="field"
+                                            class="form-control"
+                                            id="description"
+                                            rows="3"
+                                            :class="{ 'is-invalid': errorMessage }"
+                                            :placeholder="'Descrição da api'"
+                                        ></textarea>
+                                        <span
+                                            v-if="errorMessage"
+                                            class="validation-message text-danger"
+                                        >
+                                            {{ errorMessage }}
+                                        </span>
+                                    </Field>
+                                    </div>
+                                    
+                                </div>
                                 <div class="row mb-3">
                                     <div class="col-md-3">
                                         <label
@@ -278,9 +330,17 @@
                                                 :key="index"
                                                 class="row mb-2 align-items-center"
                                             >
-                                                <div class="col-10">
+                                                <div class="col-5">
                                                     <input
                                                         v-model="header.key"
+                                                        type="text"
+                                                        class="form-control form-control-sm"
+                                                        :placeholder="$t('template.keyPlaceholder')"
+                                                    />
+                                                </div>
+                                                <div class="col-5">
+                                                    <input
+                                                        v-model="header.value"
                                                         type="text"
                                                         class="form-control form-control-sm"
                                                         :placeholder="$t('template.keyPlaceholder')"
@@ -600,6 +660,8 @@
                     queryParams: [],
                     headers: [],
                     body: "",
+                    enableAccessFromMcp: false,
+                    description: "",
                 },
                 isSaving: false,
                 isLoading: false,
@@ -678,7 +740,7 @@
                     .filter((h) => h.key.trim() !== "")
                     .map((h) => ({
                         key: h.key,
-                        value: `{{${h.key}}}`,
+                        value: !!h.value ? h.value : `{{${h.key}}}`,
                     }));
                 if (headers.length > 0) {
                     collectFrom(JSON.stringify(headers));
@@ -779,6 +841,10 @@
                 } else {
                     this.hideAutocomplete();
                 }
+            },
+            validateJSON(value) {
+                const result = textHelper.validateJSON(value);
+                this.jsonError = result.isValid ? "" : "";
             },
             isMainJsonOpeningBrace(value, position) {
                 const beforeCursor = value.substring(0, position).trim();
@@ -918,6 +984,9 @@
                     name: this.values.name,
                     method: this.values.method,
                     url: this.values.url,
+                    bodyTemplate: this.values.body == "" ? null : this.values.body,
+                    enableAccessFromMcp:  this.values.enableAccessFromMcp,
+                    description:  this.values.enableAccessFromMcp ? this.values.description : null,
                     queryTemplate: queryParams.length === 0 ? null : JSON.stringify(queryParams),
                     headerTemplate: headers.length === 0 ? null : JSON.stringify(headers),
                     bodyTemplate:
@@ -982,7 +1051,7 @@
                 this.form.queryParams.splice(index, 1);
             },
             addHeader() {
-                this.form.headers.push({ key: "" });
+                this.form.headers.push({ key: "", value: ""});
             },
             removeHeader(index) {
                 this.form.headers.splice(index, 1);
@@ -1019,6 +1088,8 @@
                         this.form.method = data.method || "GET";
                         this.form.url = data.url || "";
                         this.form.body = data.bodyTemplate || "";
+                        this.form.enableAccessFromMcp =  data.enableAccessFromMcp || false;
+                        this.form.description =  data.description || "";
 
                         try {
                             const parsedQueryParams = data.queryTemplate
@@ -1048,7 +1119,9 @@
                             name: this.form.name,
                             method: this.form.method,
                             url: this.form.url,
-                            body: this.form.body,
+                            body: this.form.body,                    
+                            enableAccessFromMcp: this.form.enableAccessFromMcp,
+                            description: this.form.description,
                         });
                     })
                     .catch(() => {
@@ -1083,7 +1156,7 @@
                         .filter((h) => h.key.trim() !== "")
                         .map((h) => ({
                             key: h.key,
-                            value: `{{${h.key}}}`,
+                            value: !!h.value ? h.value : `{{${h.key}}}`,
                         }));
 
                     const templateData = {
@@ -1094,6 +1167,8 @@
                         queryTemplate:
                             queryParams.length === 0 ? null : JSON.stringify(queryParams),
                         headerTemplate: headers.length === 0 ? null : JSON.stringify(headers),
+                        enableAccessFromMcp:  this.values.enableAccessFromMcp,
+                        description:  this.values.enableAccessFromMcp ? this.values.description : null,
                     };
 
                     if (this.isEditMode) {

@@ -1,16 +1,8 @@
 using Bogus;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Response;
-using WoopiAiHub.Domain.Models;
 using Xunit;
-
 namespace WoopiAiHub.UnitTests.Fixture
 {
     public class PromptFixture
@@ -47,12 +39,13 @@ namespace WoopiAiHub.UnitTests.Fixture
             return prompt;
         }
 
-        public static PromptDto FindValidPromptDto()
+        public static PromptDto FindValidPromptDto(bool enableAccessToMcp = true)
         {
             var _faker = new Faker("pt_BR");
+            var promptId = _faker.Random.Int(1, 1000);
             return new PromptDto
             {
-                Id = _faker.Random.Int(1, 1000),
+                Id = promptId,
                 Name = _faker.Name.FullName(),
                 Description = _faker.Name.FullName(),
                 Text = _faker.Name.FullName(),
@@ -61,6 +54,16 @@ namespace WoopiAiHub.UnitTests.Fixture
                 Created = _faker.Date.Past(),
                 OwnerName = _faker.Name.FullName(),
                 OwnerEmail = _faker.Internet.Email(),
+                EnableAccessToMcp = enableAccessToMcp,
+                PromptApiTemplates = enableAccessToMcp ?
+                    new List<PromptApiTemplateDto> {
+                        new PromptApiTemplateDto{
+                            Id = 1,
+                            PromptId = promptId,
+                            ApiTemplateId = 1
+                        }
+                    } :
+                    new List<PromptApiTemplateDto>()
             };
         }
     }

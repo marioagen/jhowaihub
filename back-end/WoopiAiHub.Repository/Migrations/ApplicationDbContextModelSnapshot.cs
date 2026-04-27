@@ -109,6 +109,14 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnName("Created")
                         .HasDefaultValueSql("(GETDATE())");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("Description");
+
+                    b.Property<bool>("EnableAccessFromMcp")
+                        .HasColumnType("bit")
+                        .HasColumnName("EnableAccessFromMcp");
+
                     b.Property<string>("HeaderTemplate")
                         .HasColumnType("varchar(max)")
                         .HasColumnName("HeaderTemplate");
@@ -620,6 +628,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("Description");
 
+                    b.Property<bool>("EnableAccessToMcp")
+                        .HasColumnType("bit")
+                        .HasColumnName("EnableAccessToMcp");
+
                     b.Property<Guid>("IdUser")
                         .HasColumnType("uniqueIdentifier")
                         .HasColumnName("IdUser");
@@ -652,6 +664,34 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasIndex("IdUser");
 
                     b.ToTable("Prompts", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.PromptApiTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ApiTemplateId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int>("PromptId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApiTemplateId");
+
+                    b.HasIndex("PromptId");
+
+                    b.ToTable("PromptApiTemplates");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Question", b =>
@@ -1764,6 +1804,25 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.PromptApiTemplate", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.ApiTemplate", "ApiTemplate")
+                        .WithMany("PromptApiTemplates")
+                        .HasForeignKey("ApiTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.Prompt", "Prompt")
+                        .WithMany("PromptApiTemplates")
+                        .HasForeignKey("PromptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApiTemplate");
+
+                    b.Navigation("Prompt");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.QuestionQuestionnaire", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Question", "Question")
@@ -2089,6 +2148,11 @@ namespace WoopiAiHub.Repository.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ApiTemplate", b =>
+                {
+                    b.Navigation("PromptApiTemplates");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Card", b =>
                 {
                     b.Navigation("Executions");
@@ -2133,6 +2197,11 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("StepProfilePermissions");
 
                     b.Navigation("Steps");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Prompt", b =>
+                {
+                    b.Navigation("PromptApiTemplates");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Question", b =>

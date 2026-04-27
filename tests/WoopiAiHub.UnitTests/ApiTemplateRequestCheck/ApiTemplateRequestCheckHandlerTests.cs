@@ -187,7 +187,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestCheck
         [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_LoadsFromTemplateId_WhenDraftIsNull()
         {
-            var model = new ApiTemplate("Db", "GET", "https://api.example.com/from-db", null, null, null);
+            var model = new ApiTemplate("Db", "GET", "https://api.example.com/from-db", null, null, null, null, false);
             _templateRepository
                 .Setup(r => r.FindByIdReturnModel(7))
                 .ReturnsAsync(model);
@@ -212,7 +212,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestCheck
         [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_FromTemplateId_EchoesRequestMetadata_IncludingNullExecutionId()
         {
-            var model = new ApiTemplate("DbName", "GET", "https://api.example.com/from-db", null, null, null);
+            var model = new ApiTemplate("DbName", "GET", "https://api.example.com/from-db", null, null, null, null, false);
             _templateRepository
                 .Setup(r => r.FindByIdReturnModel(5))
                 .ReturnsAsync(model);
@@ -243,7 +243,7 @@ namespace WoopiAiHub.UnitTests.ApiTemplateRequestCheck
         [Trait("ExecuteAsync", "Success")]
         public async Task ExecuteAsync_FromTemplateId_EchoesExecutionId_WhenSet()
         {
-            var model = new ApiTemplate("DbName", "GET", "https://api.example.com/from-db", null, null, null);
+            var model = new ApiTemplate("DbName", "GET", "https://api.example.com/from-db", null, null, null, null, false);
             _templateRepository
                 .Setup(r => r.FindByIdReturnModel(5))
                 .ReturnsAsync(model);

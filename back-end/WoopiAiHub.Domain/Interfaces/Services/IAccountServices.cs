@@ -1,6 +1,5 @@
 ﻿using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Request.Account;
-using WoopiAiHub.Domain.DTOs.Response.Account;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
 {

@@ -94,7 +94,9 @@ namespace WoopiAiHub.UnitTests.Services
                 "https://api.example.com/test",
                 null,
                 null,
-                "{\"key\":\"value\"}"
+                "{\"key\":\"value\"}",
+                null,
+                false
             );
 
             _mocker.GetMock<IApiTemplateRepository>()
@@ -417,7 +419,9 @@ namespace WoopiAiHub.UnitTests.Services
                 "https://api.example.com/old",
                 null,
                 null,
-                null
+                null,
+                null,
+                false
             );
 
             var updateDto = new ApiTemplateUpdateDto
@@ -493,7 +497,9 @@ namespace WoopiAiHub.UnitTests.Services
                 "https://api.example.com/old",
                 null,
                 null,
-                null
+                null,
+                null,
+                false
             );
 
             var updateDto = new ApiTemplateUpdateDto
@@ -526,7 +532,9 @@ namespace WoopiAiHub.UnitTests.Services
                 "https://api.example.com/test",
                 null,
                 null,
-                null
+                null,
+                null,
+                false
             );
 
             var updateDto = new ApiTemplateUpdateDto
@@ -559,7 +567,9 @@ namespace WoopiAiHub.UnitTests.Services
                 "https://api.example.com/test",
                 "old=query",
                 "old: header",
-                "{\"old\":\"body\"}"
+                "{\"old\":\"body\"}",
+                "Test APi",
+                false
             );
 
             var updateDto = new ApiTemplateUpdateDto

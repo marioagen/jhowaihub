@@ -8,5 +8,7 @@ namespace WoopiAiHub.Domain.DTOs.Request
         public string? QueryTemplate { get; set; }
         public string? HeaderTemplate { get; set; }
         public string? BodyTemplate { get; set; }
+        public string? Description { get; set; }
+        public bool EnableAccessFromMcp { get; set; } = false;
     }
 }

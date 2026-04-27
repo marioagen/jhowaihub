@@ -53,6 +53,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IProfileServices, ProfileServices>();
             services.AddScoped<IPasswordHasher, Argon2PasswordHasher>();
             services.AddScoped<IRefreshTokenServices, RefreshTokenServices>();
+            services.AddScoped<IJwtTokenServices, JwtTokenServices>();
             services.AddScoped<IStatusServices, StatusServices>();
             services.AddScoped<IWorkflowServices, WorkflowServices>();
             services.AddScoped<IValidateStep, ValidateStep>();

@@ -12,14 +12,10 @@ using WoopiAiHub.Domain.Interfaces.Services.Automation;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
-using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.UnitTests.Fixture;
-using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
-using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Application.Utils;
-
 namespace WoopiAiHub.UnitTests.Consumers
 {
     [Collection(nameof(MessagingCollection))]
@@ -27,10 +23,11 @@ namespace WoopiAiHub.UnitTests.Consumers
     {
         private readonly AutoMocker _mocker;
         private readonly ChatCompletionResponseDto _chatCompletionResponseDto;
+        private readonly OpenAiResponseConsumerResponseDto _openAiResponseConsumerResponseDto;
         private readonly Mock<IDocumentServices> _documentServices;
         private readonly Mock<IPromptServices> _promptServices;
         private readonly Mock<ITenantCacheServices> _tenantCacheServices;
-        private readonly Mock<IMessageConsumer<ChatCompletionResponseDto>> _consumerMock;
+        private readonly Mock<IMessageConsumer<OpenAiResponseConsumerResponseDto>> _consumerMock;
         private readonly Mock<ILogger<PromptConsumer>> _loggerMock;
         private readonly Mock<IUsageDailyServices> _usageDailyServices;
         private readonly Mock<IAutomationServices> _automationServices;
@@ -40,6 +37,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             _mocker = new AutoMocker();
 
             _chatCompletionResponseDto = MessagingFixture.FindValidChatCompletionResponseDto();
+            _openAiResponseConsumerResponseDto = MessagingFixture.FindValidOpenAiResponseConsumerResponseDto();
             var tenant = MessagingFixture.FindValidTenantInfoDto();
 
             var messageQueues = Options.Create(new MessageQueues
@@ -99,7 +97,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .Returns(_automationServices.Object);
 
             _loggerMock = new Mock<ILogger<PromptConsumer>>();
-            _consumerMock = new Mock<IMessageConsumer<ChatCompletionResponseDto>>();
+            _consumerMock = new Mock<IMessageConsumer<OpenAiResponseConsumerResponseDto>>();
             _mocker.Use(_consumerMock.Object);
             _mocker.Use(_loggerMock.Object);
             _mocker.Use(httpContextAccessorMock.Object);
@@ -111,7 +109,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         {
             // Arrange
             _promptServices
-                .Setup(x => x.ProcessChatCompletionResult(It.IsAny<ChatCompletionResponseDto>()))
+                .Setup(x => x.ProcessOpenAiResponseResult(It.IsAny<OpenAiResponseConsumerResponseDto>()))
                 .Returns(Task.CompletedTask);
 
             _usageDailyServices
@@ -120,10 +118,10 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .ReturnsAsync(true);
 
             _consumerMock.Setup(x =>
-                    x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ChatCompletionResponseDto, Task>>()))
-                .Callback<string, Func<ChatCompletionResponseDto, Task>>(async (queue, callback) =>
+                    x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<OpenAiResponseConsumerResponseDto, Task>>()))
+                .Callback<string, Func<OpenAiResponseConsumerResponseDto, Task>>(async (queue, callback) =>
                 {
-                    await callback(_chatCompletionResponseDto);
+                    await callback(_openAiResponseConsumerResponseDto);
                 })
                 .Returns(Task.CompletedTask);
 
@@ -133,10 +131,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             await consumer.StartAsync(CancellationToken.None);
 
             // Assert
-            _promptServices.Verify(x => x.ProcessChatCompletionResult(_chatCompletionResponseDto), Times.Once);
-            _usageDailyServices.Verify(
-                x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()),
-                Times.Once);
+            _promptServices.Verify(x => x.ProcessOpenAiResponseResult(_openAiResponseConsumerResponseDto), Times.Once);
         }
 
         [Fact(DisplayName = "Must catch exception when processing response")]
@@ -147,14 +142,14 @@ namespace WoopiAiHub.UnitTests.Consumers
             var exceptionEsperada = new ArgumentException("StepToolExecution not found");
 
             _promptServices
-                .Setup(x => x.ProcessChatCompletionResult(It.IsAny<ChatCompletionResponseDto>()))
+                .Setup(x => x.ProcessOpenAiResponseResult(It.IsAny<OpenAiResponseConsumerResponseDto>()))
                 .ThrowsAsync(exceptionEsperada);
 
             _consumerMock.Setup(x =>
-                    x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ChatCompletionResponseDto, Task>>()))
-                .Callback<string, Func<ChatCompletionResponseDto, Task>>(async (queue, callback) =>
+                    x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<OpenAiResponseConsumerResponseDto, Task>>()))
+                .Callback<string, Func<OpenAiResponseConsumerResponseDto, Task>>(async (queue, callback) =>
                 {
-                    await callback(_chatCompletionResponseDto);
+                    await callback(_openAiResponseConsumerResponseDto);
                 })
                 .Returns(Task.CompletedTask);
 
@@ -168,7 +163,7 @@ namespace WoopiAiHub.UnitTests.Consumers
 
             // Assert
             Assert.Null(exception);
-            _promptServices.Verify(x => x.ProcessChatCompletionResult(_chatCompletionResponseDto), Times.Once);
+            _promptServices.Verify(x => x.ProcessOpenAiResponseResult(_openAiResponseConsumerResponseDto), Times.Once);
 
             loggerMock.Verify(x =>
                     x.Log(

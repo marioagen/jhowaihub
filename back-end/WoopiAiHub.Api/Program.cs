@@ -78,8 +78,10 @@ builder.Services.AddApplication();
 
 builder.Services.AddScoped<IHubNotifier, HubNotifier>();
 builder.Services.AddSingleton<IConnectionMappingService, ConnectionMappingService>();
-builder.Services.Configure<ChatCompletionSettings>(
-builder.Configuration.GetSection("ChatCompletionSettings"));
+builder.Services.Configure<ChatCompletionSettings>(builder.Configuration.GetSection("ChatCompletionSettings"));
+builder.Services.Configure<OpenAiSettings>(builder.Configuration.GetSection("OpenAiSettings"));
+builder.Services.Configure<McpSettings>(builder.Configuration.GetSection("McpSettings"));
+
 builder.Services.AddSignalR(options =>
 {
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);

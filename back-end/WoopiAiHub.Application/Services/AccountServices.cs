@@ -34,6 +34,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IRefreshTokenServices _refreshTokenServices;
+        private readonly IJwtTokenServices _jwtTokenServices;
         private const string _messageHttpContextNotAvailable = "HttpContext is not available.";
 
         public AccountServices(IGraphApi graphApi,
@@ -45,7 +46,8 @@ namespace WoopiAiHub.Application.Services
                                ITenantContextService tenantContextService,
                                IHttpContextAccessor httpContextAccessor,
                                IPasswordHasher passwordHasher,
-                               IRefreshTokenServices refreshTokenServices)
+                               IRefreshTokenServices refreshTokenServices,
+                               IJwtTokenServices jwtTokenServices)
         {
             _graphApi = graphApi;
             _marketPlaceApi = marketPlaceApi;
@@ -57,6 +59,7 @@ namespace WoopiAiHub.Application.Services
             _httpContextAccessor = httpContextAccessor;
             _passwordHasher = passwordHasher;
             _refreshTokenServices = refreshTokenServices;
+            _jwtTokenServices = jwtTokenServices;
         }
 
         /// <summary>
@@ -357,28 +360,14 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        private string GenerateToken(string user)
+        private string GenerateToken(string user, int? tokenExpirationTime = null)
         {
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var expirationMinutes = _config.GetValue("JWT:AccessTokenExpirationMinutes", 60);
-
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            var token = new JwtSecurityToken(_config["Jwt:Issuer"],
-                _config["Jwt:Audience"],
-                claims,
-                expires: DateTime.Now.AddMinutes(expirationMinutes),
-                signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var issuer = _config["Jwt:Issuer"] ?? throw new ArgumentException("JWT Issuer is not configured.");
+            var audience = _config["Jwt:Audience"] ?? throw new ArgumentException("JWT Audience is not configured.");
+            return _jwtTokenServices.GenerateTokenWithParameters(key, issuer, audience, user, tokenExpirationTime);
         }
-
+        
         /// <summary>
         /// Asynchronously generates a new access token and refresh token for the specified user.
         /// </summary>

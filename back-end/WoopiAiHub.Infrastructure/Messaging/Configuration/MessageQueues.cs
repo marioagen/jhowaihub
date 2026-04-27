@@ -5,6 +5,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Configuration
         public string OcrQueue { get; set; } = string.Empty;
         public string EmbeddingQueue { get; set; } = string.Empty;
         public string ChatCompletionQueue { get; set; } = string.Empty;
+        public string OpenAiResponseQueue { get; set; } = string.Empty;
         public string AnswerQueue { get; set; } = string.Empty;
         public string OcrQueueAiHubResponse { get; set; } = string.Empty;
         public string EmbeddingQueueAiHubResponse { get; set; } = string.Empty;
@@ -12,6 +13,7 @@ namespace WoopiAiHub.Infrastructure.Messaging.Configuration
         public string AutomationQueueConsumer { get; set; } = string.Empty;
         public string AutomationQueueResponse { get; set; } = string.Empty;
         public string ChatCompletionQueueAiHubResponse { get; set; } = string.Empty;
+        public string OpenAiResponseQueueAiHubResponse { get; set; } = string.Empty;
         public string OcrAnonymizationQueueConsumer { get; set; } = string.Empty;
         public string DeleteQueueConsumer { get; set; } = string.Empty;
         public string DeleteQueuePublisher { get; set; } = string.Empty;
@@ -42,6 +44,8 @@ namespace WoopiAiHub.Infrastructure.Messaging.Configuration
                 MarketplaceEndSubscriptionPeriodQueue,
                 ApiRequestQueue,
                 ApiRequestQueueResponse,
+                OpenAiResponseQueue,
+                OpenAiResponseQueueAiHubResponse,
                 ExternalFileUploadQueue
             ];
         }

@@ -1,3 +1,4 @@
+using Bogus;
 using Microsoft.Extensions.Options;
 using Moq;
 using Moq.AutoMock;
@@ -5,10 +6,11 @@ using Newtonsoft.Json;
 using WoopiAiHub.Application.ToolsHandler;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
-using WoopiAiHub.Domain.DTOs.Messaging;
-using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Infrastructure.Messaging.Configuration;
 using WoopiAiHub.UnitTests.Fixture;
@@ -24,25 +26,54 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         private readonly MessageQueues _messageQueues;
         private readonly Mock<ITenantCacheServices> _mockTenantCacheServices;
         private readonly Mock<IPromptServices> _mockPromptServices;
+        private readonly Mock<IApiTemplateServices> _mockApiTemplateServices;
+        private readonly Mock<IJwtTokenServices> _mockJwtTokenServices;
         private readonly ChatCompletionSettings _chatCompletionSettings;
+        private readonly OpenAiSettings _openAiSettings;
+        private readonly McpSettings _mcpSettings;
         public PromptHandlerTests()
         {
             _mocker = new AutoMocker();
-            _messageQueues = new MessageQueues { ChatCompletionQueueAiHubResponse = "test-queue",
-                                                 ChatCompletionQueue = "test-queue2"
+            _messageQueues = new MessageQueues
+            {
+                OpenAiResponseQueueAiHubResponse = "test-queue",
+                OpenAiResponseQueue = "test-queue2",
             };
             var options = Options.Create(_messageQueues);
             _mocker.Use<IOptions<MessageQueues>>(options);
             _mockTenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
             _mockPromptServices = _mocker.GetMock<IPromptServices>();
+            _mockApiTemplateServices = _mocker.GetMock<IApiTemplateServices>();
+            _mockJwtTokenServices = _mocker.GetMock<IJwtTokenServices>();
+            var faker = new Faker("pt_BR");;
             _chatCompletionSettings = new ChatCompletionSettings
             {
                 Model = "gpt-4",
                 Temperature = 0.7,
                 ApiVersion = "1"
             };
-            _mocker.Use<IOptions<ChatCompletionSettings>>(Options.Create(_chatCompletionSettings));
 
+            _mcpSettings = new McpSettings
+            {
+                McpAddress = "",
+                Instructions = "instructions {0} instructions",
+                JWTKey = Guid.NewGuid().ToString(),
+                JWTIssuer =  faker.Internet.Url(),
+                JWTAudience = faker.Internet.Url(),
+                JWTUser = faker.Internet.UserName(),
+                JWTExpirationTime = 5
+            };
+
+            _openAiSettings = new OpenAiSettings
+            {
+                Temperature = 0,
+                Model = "gpt-4",
+                ApiVersion = "",
+
+            };
+            _mocker.Use<IOptions<ChatCompletionSettings>>(Options.Create(_chatCompletionSettings));
+            _mocker.Use<IOptions<McpSettings>>(Options.Create(_mcpSettings));
+            _mocker.Use<IOptions<OpenAiSettings>>(Options.Create(_openAiSettings));
 
             _handler = _mocker.CreateInstance<PromptHandler>();
         }
@@ -54,12 +85,13 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
 
-            var tenantInfo = new TenantInfoDto {
+            var tenantInfo = new TenantInfoDto
+            {
                 AiGatewayApplicationId = Guid.NewGuid(),
                 AiGatewayKey = "key"
             };
 
-            var stepToolParameter = new StepToolParameter(1,DateTime.Now,2,true,Guid.NewGuid(),"6");
+            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
             var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
             var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
 
@@ -70,12 +102,16 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
                                .Returns(PromptFixture.FindValidPromptDto());
 
+            _mockApiTemplateServices
+                .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
+                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto());
+
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
 
             // Assert
-            Assert.Equal(_messageQueues.ChatCompletionQueue, result.Queue);
-            var message = result.Message as ChatCompletionQueryDto;
+            Assert.Equal(_messageQueues.OpenAiResponseQueue, result.Queue);
+            var message = result.Message as OpenAiResponseQueryDto;
             Assert.NotNull(message);
             Assert.Equal(automationServicesDto.Tenant, message.Tenant);
             Assert.Equal(automationServicesDto.Email, message.Email);
@@ -129,15 +165,133 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 .ReturnsAsync(tenantInfo);
             _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
                 .Returns(PromptFixture.FindValidPromptDto());
+            _mockApiTemplateServices
+                .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
+                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto());
 
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
 
             // Assert
-            Assert.Equal(_messageQueues.ChatCompletionQueue, result.Queue);
-            var message = result.Message as ChatCompletionQueryDto;
+            Assert.Equal(_messageQueues.OpenAiResponseQueue, result.Queue);
+            var message = result.Message as OpenAiResponseQueryDto;
             Assert.NotNull(message);
-            Assert.Contains(previousPromptOutput, message!.ChatCompletion!.Messages![0].Content);
+            Assert.Contains(previousPromptOutput, message!.OpenAiResponse!.Input![0].Content[0].Text);
+        }
+
+        [Fact(DisplayName = "Verify And Add Or Not Mcp Support When EnableAccessToMcp Is False Should Do Nothing")]
+        [Trait("BuildPayload", "Success")]
+        public async Task VerifyAndAddOrNotMcpSupport_WhenEnableAccessToMcpIsFalse_ShouldDoNothing()
+        {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+
+            var tenantInfo = new TenantInfoDto
+            {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = "key"
+            };
+
+            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
+            var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
+
+            _mockTenantCacheServices
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
+                .ReturnsAsync(tenantInfo);
+
+            _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
+                               .Returns(PromptFixture.FindValidPromptDto(false));
+
+            _mockApiTemplateServices
+                .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
+                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto());
+
+
+            // Act
+            var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
+
+            // Assert
+            Assert.IsType<OpenAiResponseQueryDto>(result.Message);
+            var message = (OpenAiResponseQueryDto)result.Message;
+
+            Assert.NotNull(message.OpenAiResponse);
+            Assert.Empty(message.OpenAiResponse.Instructions);
+            Assert.Empty(((OpenAiResponseQueryDto)result.Message).OpenAiResponse.Instructions);
+            Assert.Equal(0, message.OpenAiResponse.MaxToolCalls);
+            Assert.Empty(message.OpenAiResponse.Tools);
+        }
+
+        [Fact(DisplayName = "Verify And Add Or Not Mcp Support When EnableAccessToMcp Is True Should Do add instructions")]
+        [Trait("BuildPayload", "Success")]
+        public async Task VerifyAndAddOrNotMcpSupport_WhenEnabledAndApisExist_ShouldConfigureDto()
+        {
+            // Arrange
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+
+            var tenantInfo = new TenantInfoDto
+            {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = "key"
+            };
+
+            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
+            var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
+
+            _mockTenantCacheServices
+                .Setup(service => service.FindTenantAsync(It.IsAny<string>()))
+                .ReturnsAsync(tenantInfo);
+
+            var promptDto = PromptFixture.FindValidPromptDto();
+            _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
+                               .Returns(promptDto);
+
+            var apis = MessagingFixture.FindValidListApiTemplateDto();
+            _mockApiTemplateServices
+                .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
+                .ReturnsAsync(apis);
+
+
+            _mockJwtTokenServices
+                .Setup(x =>
+                    x.GenerateTokenWithParameters(
+                        _mcpSettings.JWTKey,
+                        _mcpSettings.JWTIssuer,
+                        _mcpSettings.JWTAudience,
+                        _mcpSettings.JWTUser,
+                        _mcpSettings.JWTExpirationTime
+                    )
+                )
+                .Returns("token-test");
+
+            // Act
+            var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
+
+            // Assert
+            Assert.IsType<OpenAiResponseQueryDto>(result.Message);
+            var message = (OpenAiResponseQueryDto)result.Message;
+            
+            Assert.NotNull(message.OpenAiResponse);
+            Assert.NotEmpty(message.OpenAiResponse.Instructions);
+
+            Assert.Contains("instructions", message.OpenAiResponse.Instructions);
+            Assert.Contains(apis[0].Url, message.OpenAiResponse.Instructions);
+            Assert.Contains(apis[0].Description ?? "", message.OpenAiResponse.Instructions);
+            Assert.Contains(apis[1].Description ?? "", message.OpenAiResponse.Instructions);
+
+            Assert.Equal(_mcpSettings.MaxToolCalls, message.OpenAiResponse.MaxToolCalls);
+
+            Assert.NotNull(message.OpenAiResponse.Tools);
+            Assert.Single(message.OpenAiResponse.Tools);
+
+            var tool = message.OpenAiResponse.Tools[0];
+            Assert.Equal(OpenAiResponseToolsType.Mcp, tool.Type);
+            Assert.Single(tool.AllowedTools);
+            Assert.Equal("generalista", tool.AllowedTools[0]);
+
+            Assert.NotNull(tool.Headers);
+            Assert.Equal("Bearer token-test", tool.Headers["Authorization"]);
         }
     }
 }

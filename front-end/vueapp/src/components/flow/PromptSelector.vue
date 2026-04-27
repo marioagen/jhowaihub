@@ -62,7 +62,7 @@
                                     :key="prompt.id"
                                     :value="prompt.id"
                                 >
-                                    {{ prompt.name }}
+                                    {{ prompt.name }}<span v-if="prompt.enableAccessToMcp"> - [{{ $t("flow.formFlow.remoteAccess") }}]</span>
                                 </option>
                             </select>
                         </div>
@@ -291,6 +291,18 @@
         border-radius: 8px;
         background: white;
         padding: 20px 24px;
+    }
+
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .color-acesso-externo {
+        color: blue !important;
     }
 
     .border-dashed {

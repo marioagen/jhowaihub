@@ -102,7 +102,9 @@ namespace WoopiAiHub.Application.Services
                 templateCreateDto.Url,
                 templateCreateDto.QueryTemplate,
                 templateCreateDto.HeaderTemplate,
-                templateCreateDto.BodyTemplate
+                templateCreateDto.BodyTemplate,
+                templateCreateDto.Description,
+                templateCreateDto.EnableAccessFromMcp
             );
 
             return await _templateRepository.CreateAsync(template);
@@ -124,10 +126,17 @@ namespace WoopiAiHub.Application.Services
             existingTemplate.UpdateQueryTemplate(templateUpdateDto.QueryTemplate);
             existingTemplate.UpdateHeaderTemplate(templateUpdateDto.HeaderTemplate);
             existingTemplate.UpdateBodyTemplate(templateUpdateDto.BodyTemplate);
+            existingTemplate.UpdateDescription(templateUpdateDto.Description);
+            existingTemplate.UpdateEnableAccessFromMcp(templateUpdateDto.EnableAccessFromMcp);
 
             existingTemplate.Validate();
 
-            return await _templateRepository.UpdateAsync(existingTemplate);
+            var templateUpdated =  await _templateRepository.UpdateAsync(existingTemplate);
+            if(!existingTemplate.EnableAccessFromMcp && templateUpdated) {
+                await _templateRepository.RemovePromptLinked(existingTemplate.Id);
+            }
+
+            return templateUpdated;
         }
     }
 }

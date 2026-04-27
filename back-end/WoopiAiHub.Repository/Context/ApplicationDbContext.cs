@@ -68,6 +68,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<AuditCard> AuditCards { get; set; }
         public DbSet<DocumentAnalysisRejection> DocumentAnalysisRejections { get; set; }
         public DbSet<DocumentBatch> DocumentBatchs { get; set; }
+        public DbSet<PromptApiTemplate> PromptApiTemplates { get; set; }
         public DbSet<DocumentAnonymization> DocumentAnonymizations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

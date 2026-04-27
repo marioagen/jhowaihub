@@ -13,9 +13,11 @@ using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
-using WoopiAiHub.Infrastructure.Messaging.Configuration;
-using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
+using WoopiAiHub.UnitTests.Fixture;
+using WoopiAiHub.Domain.DTOs.Messaging;
+using WoopiAiHub.Domain.Interfaces.Services.Automation;
+using System.Text.Json;
 
 namespace WoopiAiHub.UnitTests.Services
 {
@@ -23,6 +25,7 @@ namespace WoopiAiHub.UnitTests.Services
     {
         private readonly AutoMocker _mocker;
         private readonly PromptServices _promptServices;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
         public PromptServicesTests()
         {
@@ -30,16 +33,24 @@ namespace WoopiAiHub.UnitTests.Services
             var mockPromptSettings = new Mock<IOptions<PromptSettings>>();
             mockPromptSettings.Setup(x => x.Value).Returns(new PromptSettings
             {
-                TemplateFileName = "name.json", Folder = "folder"
+                TemplateFileName = "name.json",
+                Folder = "folder"
             });
             var mockChatSettings = new Mock<IOptions<ChatCompletionSettings>>();
             mockChatSettings.Setup(x => x.Value).Returns(new ChatCompletionSettings
             {
-                Model = "model", ApiVersion = "v1", MaxTokens = 100, Temperature = 0.5f
+                Model = "model",
+                ApiVersion = "v1",
+                MaxTokens = 100,
+                Temperature = 0.5f
             });
 
             _mocker.Use(mockPromptSettings);
             _mocker.Use(mockChatSettings);
+
+            var mocker = new AutoMocker();
+
+            _unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
 
             _promptServices = _mocker.CreateInstance<PromptServices>();
         }
@@ -49,7 +60,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void CreateUniquePrompt_Success()
         {
             //Arrange
-            var dto = new PromptCreateDto { Name = "Teste", Description = "Desc", Text = "Texto" };
+            var dto = MessagingFixture.FindValidPromptCreateDto();
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
             var userServices = _mocker.GetMock<IUserServices>();
@@ -72,7 +83,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void CreateUniquePrompt_ShouldThrowAppException_Duplicated()
         {
             //Arrange
-            var dto = new PromptCreateDto { Name = "Teste", Description = "Desc", Text = "Texto" };
+            var dto = MessagingFixture.FindValidPromptCreateDto();
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
             var userServices = _mocker.GetMock<IUserServices>();
@@ -92,7 +103,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void CreateUniquePrompt_ShouldReturnFalse_Empty()
         {
             //Arrange
-            var dto = new PromptCreateDto { Name = "Teste", Description = "Desc", Text = "Texto" };
+            var dto = MessagingFixture.FindValidPromptCreateDto();
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
             var _userServices = _mocker.GetMock<IUserServices>();
@@ -109,54 +120,68 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "Create prompt success")]
         [Trait("Update", "Success")]
-        public void Update_Success()
+        public async Task Update_Success()
         {
             //Arrange
-            var dto = new PromptUpdateDto { Id = 1, Name = "Novo", Description = "Desc", Text = "Texto" };
+            var (dto, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDto();
             var email = "user@teste.com";
-            var promptDto = new PromptDto
-            {
-                Id = 1,
-                Name = "Antigo",
-                Description = "Desc",
-                Text = "Texto",
-                IdUser = Guid.NewGuid(),
-                Created = DateTime.Now
-            };
             var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
             var _unitOfWork = _mocker.GetMock<IUnitOfWork>();
 
 
-            _validatePrompt.Setup(v => v.ValidateOwnership(1, email));
-            _promptRepository.Setup(r => r.FindById(1)).Returns(promptDto);
+            _validatePrompt.Setup(v => v.ValidateOwnership(promptDto.Id, email));
+            _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns(promptDto);
             _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>()));
-            _promptRepository.Setup(r => r.Update(It.IsAny<Prompt>())).Returns(true);
+            _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<int>>())).ReturnsAsync(true);
             _unitOfWork.Setup(u => u.BeginTransaction());
             _unitOfWork.Setup(u => u.Commit());
 
             //Act
-            var result = _promptServices.Update(dto, email);
+            var result = await _promptServices.Update(dto, email);
 
             //Assert
             Assert.True(result);
         }
 
-        [Fact(DisplayName = "Update prompt should throw argumentException when is not found")]
+        [Fact(DisplayName = "Not update prompt with error")]
         [Trait("Update", "Fail")]
-        public void Update_ShouldThrowArgumentException_PromptNotFound()
+        public async Task Update_Fail_Save_Chages_Repository()
         {
             //Arrange
-            var dto = new PromptUpdateDto { Id = 1, Name = "Novo", Description = "Desc", Text = "Texto" };
+            var (dto, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDto();
+            var email = "user@teste.com";
+            var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
+            var _promptRepository = _mocker.GetMock<IPromptRepository>();
+            var _unitOfWork = _mocker.GetMock<IUnitOfWork>();
+
+
+            _validatePrompt.Setup(v => v.ValidateOwnership(promptDto.Id, email));
+            _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns(promptDto);
+            _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>()));
+            _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<int>>())).ReturnsAsync(false);
+            _unitOfWork.Setup(u => u.BeginTransaction());
+            _unitOfWork.Setup(u => u.Commit());
+
+            //Act/Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _promptServices.Update(dto, email));
+        }
+
+        [Fact(DisplayName = "Update prompt should throw argumentException when is not found")]
+        [Trait("Update", "Fail")]
+        public async Task Update_ShouldThrowArgumentException_PromptNotFound()
+        {
+            //Arrange
+            var (dto, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDto();
             var email = "user@teste.com";
             var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
 
-            _validatePrompt.Setup(v => v.ValidateOwnership(1, email));
-            _promptRepository.Setup(r => r.FindById(1)).Returns((PromptDto)null);
+            _validatePrompt.Setup(v => v.ValidateOwnership(promptDto.Id, email));
+            _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns((PromptDto?)null);
 
             //Act/Assert
-            Assert.Throws<ArgumentException>(() => _promptServices.Update(dto, email));
+            await Assert.ThrowsAsync<ArgumentException>(() => _promptServices.Update(dto, email));
         }
 
         [Fact(DisplayName = "Delete prompts by ids success")]
@@ -193,15 +218,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void FindById_Success()
         {
             //Arrange
-            var promptDto = new PromptDto
-            {
-                Id = 1,
-                Name = "Teste",
-                Description = "Desc",
-                Text = "Texto",
-                IdUser = Guid.NewGuid(),
-                Created = DateTime.Now
-            };
+            var (_, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDto();
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
             _promptRepository.Setup(r => r.FindById(1)).Returns(promptDto);
 
@@ -231,18 +248,9 @@ namespace WoopiAiHub.UnitTests.Services
             //Arrange
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
-            var queryable = new List<PromptDto>
-            {
-                new PromptDto
-                {
-                    Id = 1,
-                    Name = "Teste",
-                    Description = "Desc",
-                    Text = "Texto",
-                    IdUser = idUser,
-                    Created = DateTime.Now
-                }
-            }.AsQueryable();
+            
+            var (_, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDto();
+            var queryable = new List<PromptDto> { promptDto }.AsQueryable();
             var _userServices = _mocker.GetMock<IUserServices>();
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
 
@@ -431,30 +439,8 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindPromptTemplates", "Success")]
         public async Task FindPromptTemplates_Success()
         {
-            //Arrange
-
-            var templatesResponse = new PromptTemplatesResponse
-            {
-                Prompts = new List<PromptTemplateDto>
-                {
-                    new PromptTemplateDto
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Template 1",
-                        Description = "Desc 1",
-                        Text = "Text 1",
-                        Created = DateTime.Now
-                    },
-                    new PromptTemplateDto
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Template 2",
-                        Description = "Desc 2",
-                        Text = "Text 2",
-                        Created = DateTime.Now
-                    }
-                }
-            };
+            //Arrange            
+            var templatesResponse = MessagingFixture.FindValidPromptTemplatesResponseSort();
             var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
             var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
@@ -468,11 +454,78 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(responseMessage);
 
             //Act
-            var result = await _promptServices.FindPromptTemplates("Template", null);
+            var result = await _promptServices.FindPromptTemplates("Text", null);
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
+            Assert.Equal(3, result.Count);
+        }
+
+        [Theory(DisplayName = "Find prompt templates ordering")]
+        [Trait("FindPromptTemplates", "Ordering")]
+        [InlineData("name_asc")]
+        [InlineData("name_desc")]
+        [InlineData("created_asc")]
+        [InlineData(null)]
+        [InlineData("invalid")]
+        public async Task FindPromptTemplates_Ordering(string? orderBy)
+        {
+            // Arrange
+            var templatesResponse = MessagingFixture.FindValidPromptTemplatesResponseSort();
+            var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
+            var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            {
+                Content = new StringContent(jsonContent)
+            };
+
+            _mocker.GetMock<IConfiguration>()
+                .Setup(c => c["RefitExternalSettings:FunctionApiKey"])
+                .Returns("key");
+
+            _mocker.GetMock<IFunctionFileRetriever>()
+                .Setup(f => f.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(responseMessage);
+
+            // Act
+            var result = await _promptServices.FindPromptTemplates(null, orderBy);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(3, result.Count);
+
+            switch (orderBy?.ToLower())
+            {
+                case "name_asc":
+                    Assert.Equal(["A", "B", "C"], result.Select(x => x.Name));
+                    break;
+
+                case "name_desc":
+                    Assert.Equal(["C", "B", "A"], result.Select(x => x.Name));
+                    break;
+
+                case "created_asc":
+                    Assert.Equal(
+                        [
+                            new DateTime(2026, 1, 1),
+                            new DateTime(2026, 1, 2),
+                            new DateTime(2026, 1, 3)
+                        ],
+                        result.Select(x => x.Created)
+                    );
+                    break;
+
+                default:
+                    Assert.Equal(
+                        new[]
+                        {
+                            new DateTime(2026, 1, 3),
+                            new DateTime(2026, 1, 2),
+                            new DateTime(2026, 1, 1)
+                        },
+                        result.Select(x => x.Created)
+                    );
+                    break;
+            }
         }
 
         [Fact(DisplayName = "Find prompt templates should throw app exception when request fails")]
@@ -492,6 +545,32 @@ namespace WoopiAiHub.UnitTests.Services
             await Assert.ThrowsAsync<AppException>(async () => await _promptServices.FindPromptTemplates(null, null));
         }
 
+        [Fact(DisplayName = "Find prompt templates should return a empty list if any template has any prompt")]
+        [Trait("FindPromptTemplates", "Success")]
+        public async Task FindPromptTemplates_ShouldReturnEmptyList_WhenTheTemplatesNotHasAnyPrompt()
+        {
+            //Arrange            
+            var templatesResponse = new PromptTemplatesResponse();
+            var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
+            var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            {
+                Content = new StringContent(jsonContent)
+            };
+
+            _mocker.GetMock<IConfiguration>().Setup(c => c["RefitExternalSettings:FunctionApiKey"]).Returns("key");
+
+            _mocker.GetMock<IFunctionFileRetriever>()
+                .Setup(f => f.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(responseMessage);
+
+            //Act
+            var result = await _promptServices.FindPromptTemplates("Template", null);
+
+            //Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
+
         [Fact(DisplayName = "Import prompts by ids success")]
         [Trait("ImportPromptsByIds", "Success")]
         public async Task ImportPromptsByIds_Success()
@@ -500,20 +579,7 @@ namespace WoopiAiHub.UnitTests.Services
             var promptId = Guid.NewGuid();
             var templateIds = new List<Guid> { promptId };
             var email = "test@example.com";
-            var templatesResponse = new PromptTemplatesResponse
-            {
-                Prompts = new List<PromptTemplateDto>
-                {
-                    new PromptTemplateDto
-                    {
-                        Id = promptId,
-                        Name = "Template 1",
-                        Description = "Desc 1",
-                        Text = "Text 1",
-                        Created = DateTime.Now
-                    }
-                }
-            };
+            var templatesResponse = MessagingFixture.FindValidPromptTemplatesResponse(promptId);
             var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
             var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
@@ -533,6 +599,35 @@ namespace WoopiAiHub.UnitTests.Services
 
             //Assert
             Assert.True(result);
+        }
+        
+        [Fact(DisplayName = "Import prompts by ids should return false when the user not has a valid guid ")]
+        [Trait("ImportPromptsByIds", "Fail")]
+        public async Task ImportPromptsByIds_FailsIfTheListNotUserWithAValidGuid()
+        {
+            //Arrange
+            var promptId = Guid.NewGuid();
+            var templateIds = new List<Guid> { promptId };
+            var email = "test@example.com";
+            var templatesResponse = new PromptTemplatesResponse();
+            var jsonContent = System.Text.Json.JsonSerializer.Serialize(templatesResponse);
+            var responseMessage = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
+            {
+                Content = new StringContent(jsonContent)
+            };
+
+            _mocker.GetMock<IConfiguration>().Setup(c => c["RefitExternalSettings:FunctionApiKey"]).Returns("key");
+            _mocker.GetMock<IOptions<PromptSettings>>().Setup(o => o.Value).Returns(new PromptSettings());
+            _mocker.GetMock<IFunctionFileRetriever>()
+                .Setup(f => f.Get(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(responseMessage);
+            _mocker.GetMock<IUserServices>().Setup(u => u.FindIdByEmail(email)).Returns(Guid.NewGuid());
+            _mocker.GetMock<IPromptRepository>().Setup(r => r.CreateByRange(It.IsAny<List<Prompt>>())).Returns(true);
+
+            //Act
+            //Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(async () =>
+                await _promptServices.ImportPromptsByIds(templateIds, email));
         }
 
         [Fact(DisplayName = "Import prompts by ids should return false when list is empty")]
@@ -578,12 +673,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindAllBasic_Success()
         {
             //Arrange
-            var expectedPrompts = new List<PromptInternalDto>
-            {
-                new PromptInternalDto { Id = 1, Name = "Prompt 1", Description = "Description 1" },
-                new PromptInternalDto { Id = 2, Name = "Prompt 2", Description = "Description 2" },
-                new PromptInternalDto { Id = 3, Name = "Prompt 3", Description = "Description 3" }
-            };
+            var expectedPrompts = MessagingFixture.FindValidPromptInternalDtoList();
 
             _mocker.GetMock<IPromptRepository>()
                 .Setup(r => r.FindAllInternal())
@@ -693,5 +783,122 @@ namespace WoopiAiHub.UnitTests.Services
 
             Assert.Equal("Refinement prompt template not found", exception.Message);
         }
+
+        [Fact(DisplayName = "ProcessOpenAiResponseResult When the execution not found the data a exception will be fired")]
+        [Trait("ProcessOpenAiResponseResult", "Fail")]
+        public async Task ProcessOpenAiResponseResult_WhenExecutionNotFound_ShouldThrowArgumentException()
+        {
+            // Arrange
+            var metadata = MessagingFixture.FindValidMetaDataAutomationDto();
+            var responseDto = MessagingFixture.FindValidOpenAiResponseConsumerResponseDto();
+
+            _mocker.GetMock<IStepToolExecutionRepository>()
+                .Setup(x => x.FindByStepToolIdAndCardIdAsync(metadata.StepToolId, metadata.CardId))
+                .ReturnsAsync((StepToolExecution?)null);
+
+            // Act
+            var act = async () => await _promptServices.ProcessOpenAiResponseResult(responseDto);
+
+            // Assert
+            var ex = await Assert.ThrowsAsync<ArgumentException>(act);
+            Assert.Equal("StepToolExecution not found", ex.Message);
+
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Never);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+            _mocker.GetMock<IDocumentHistoryRepository>().Verify(x => x.Create(It.IsAny<DocumentHistory>()), Times.Never);
+            _mocker.GetMock<IExecutionServices>().Verify(x => x.HandleExecutionProgress(It.IsAny<StepToolExecution>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "Process OpenAiResponseResult when message is present should create history handle progress and commit")]
+        [Trait("ProcessOpenAiResponseResult", "Fail")]
+        public async Task ProcessOpenAiResponseResult_WhenMessageIsPresent_ShouldCreateHistory_HandleProgress_AndCommit()
+        {
+            // Arrange
+            var responseDto = MessagingFixture.FindValidOpenAiResponseConsumerResponseDto();
+            var metadata = JsonSerializer.Deserialize<MetaDataAutomationDto>(responseDto.Data.ToString());
+            var execution = MessagingFixture.FindValidStepToolExecution(metadata);
+
+            _mocker.GetMock<IStepToolExecutionRepository>()
+                .Setup(x => x.FindByStepToolIdAndCardIdAsync(metadata.StepToolId, metadata.CardId))
+                .ReturnsAsync(execution);
+
+            _mocker.GetMock<IExecutionServices>()
+                .Setup(x => x.HandleExecutionProgress(execution, responseDto.Email))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _promptServices.ProcessOpenAiResponseResult(responseDto);
+
+            // Assert
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _mocker.GetMock<IDocumentHistoryRepository>().Verify(x => x.Create(It.Is<DocumentHistory>(d =>
+                execution.Card!= null  &&
+                d.IdDocument == execution.Card.DocumentId &&
+                d.Input == "Prompt"
+            )), Times.Once);
+
+            _mocker.GetMock<IExecutionServices>().Verify(x => x.HandleExecutionProgress(execution, responseDto.Email), Times.Once);
+
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+        }
+
+        [Fact(DisplayName = "Process OpenAiResponseResult when message is empty should not create history nor handle progress but commit")]
+        [Trait("ProcessOpenAiResponseResult", "Fail")]
+        public async Task ProcessOpenAiResponseResult_WhenMessageIsEmpty_ShouldNotCreateHistory_NorHandleProgress_ButCommit()
+        {
+            // Arrange            
+            var responseDto = MessagingFixture.FindValidOpenAiResponseConsumerResponseDto(true);
+            var metadata = JsonSerializer.Deserialize<MetaDataAutomationDto>(responseDto.Data.ToString());
+            var execution =MessagingFixture.FindValidStepToolExecution(metadata);
+
+            _mocker.GetMock<IStepToolExecutionRepository>()
+                .Setup(x => x.FindByStepToolIdAndCardIdAsync(metadata.StepToolId, metadata.CardId))
+                .ReturnsAsync(execution);
+
+            // Act
+            await _promptServices.ProcessOpenAiResponseResult(responseDto);
+
+            // Assert
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _mocker.GetMock<IDocumentHistoryRepository>().Verify(x => x.Create(It.IsAny<DocumentHistory>()), Times.Never);
+            _mocker.GetMock<IExecutionServices>().Verify(x => x.HandleExecutionProgress(It.IsAny<StepToolExecution>(), It.IsAny<string>()), Times.Never);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+        }
+
+        
+        [Fact(DisplayName = "Process OpenAiResponseResult when a exception occurs inside try should rollback and throw AppException")]
+        [Trait("ProcessOpenAiResponseResult", "Fail")]
+        public async Task ProcessOpenAiResponseResult_WhenExceptionOccursInsideTry_ShouldRollback_AndThrowAppException()
+        {
+            // Arrange
+                    
+            var responseDto = MessagingFixture.FindValidOpenAiResponseConsumerResponseDto();
+            var metadata = JsonSerializer.Deserialize<MetaDataAutomationDto>(responseDto.Data.ToString());
+            var execution =MessagingFixture.FindValidStepToolExecution(metadata);
+
+            _mocker.GetMock<IStepToolExecutionRepository>()
+                .Setup(x => x.FindByStepToolIdAndCardIdAsync(metadata.StepToolId, metadata.CardId))
+                .ReturnsAsync(execution);
+
+            _mocker.GetMock<IDocumentHistoryRepository>()
+                .Setup(x => x.Create(It.IsAny<DocumentHistory>()))
+                .Throws(new Exception("erro ao salvar histórico"));
+
+            // Act
+            var act = async () => await _promptServices.ProcessOpenAiResponseResult(responseDto);
+
+            // Assert
+            var ex = await Assert.ThrowsAsync<AppException>(act);
+            Assert.Equal("erro ao salvar histórico", ex.Message);
+
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
+             _mocker.GetMock<IExecutionServices>().Verify(x => x.HandleExecutionProgress(It.IsAny<StepToolExecution>(), It.IsAny<string>()), Times.Never);
+        }
+
     }
 }

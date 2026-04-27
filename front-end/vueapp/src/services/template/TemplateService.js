@@ -21,10 +21,12 @@ export default {
                 };
             });
     },
-    getAllTemplates() {
+    getAllTemplates(enableAccessFromMcp = null) {
         return api
             .get("/ApiTemplate", {
-                params: { orderBy: "created desc" },
+                params: {
+                    enableAccessFromMcp: enableAccessFromMcp,
+                    orderBy: "created desc" },
             })
             .then(({ data }) => {
                 return data;

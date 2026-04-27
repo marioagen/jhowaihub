@@ -51,7 +51,9 @@ namespace WoopiAiHub.Repository
                     Url = item.Url,
                     QueryTemplate = item.QueryTemplate,
                     HeaderTemplate = item.HeaderTemplate,
-                    BodyTemplate = item.BodyTemplate
+                    BodyTemplate = item.BodyTemplate,
+                    Description = item.Description,
+                    EnableAccessFromMcp = item.EnableAccessFromMcp
                 })
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
@@ -88,7 +90,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public async Task<ICollection<ApiTemplateDto>> FindAll(ApiTemplateFilterDto filter)
         {
-            var query = ApplyFilters(filter.Input, filter.Method, filter.OrderBy);
+            var query = ApplyFilters(filter.Input, filter.Method, filter.EnableAccessFromMcp, filter.PromptId, filter.OrderBy);
             var templates = await query.ToListAsync();
             return [.. templates.Select(item => new ApiTemplateDto
             {
@@ -99,7 +101,8 @@ namespace WoopiAiHub.Repository
                 Url = item.Url,
                 QueryTemplate = item.QueryTemplate,
                 HeaderTemplate = item.HeaderTemplate,
-                BodyTemplate = item.BodyTemplate
+                BodyTemplate = item.BodyTemplate,
+                Description=item.Description
             })];
         }
 
@@ -110,7 +113,7 @@ namespace WoopiAiHub.Repository
         /// <returns></returns>
         public IQueryable<ApiTemplateDto> FindAllPaged(ApiTemplatePagedFilterDto filter)
         {
-            var query = ApplyFilters(filter.Input, filter.Method, filter.OrderBy);
+            var query = ApplyFilters(filter.Input, filter.Method, filter.EnableAccessFromMcp, filter.PromptId, filter.OrderBy);
 
             return query.Select(w => new ApiTemplateDto
             {
@@ -121,8 +124,26 @@ namespace WoopiAiHub.Repository
                 Url = w.Url,
                 QueryTemplate = w.QueryTemplate,
                 HeaderTemplate = w.HeaderTemplate,
-                BodyTemplate = w.BodyTemplate
+                BodyTemplate = w.BodyTemplate,
+                Description = w.Description,
+                EnableAccessFromMcp = w.EnableAccessFromMcp
             });
+        }
+
+        /// <summary>
+        /// Remove the apitemplates from the prompts where the entities are linked
+        /// </summary>
+        /// <param name="templateId"></param>
+        /// <returns></returns>
+        public async Task<bool> RemovePromptLinked(int templateId)
+        {
+            var promptLinked = await _context.PromptApiTemplates.Where(p => p.ApiTemplateId == templateId).ToListAsync();
+
+            if (!promptLinked.Any())
+                return true;
+
+            _context.RemoveRange(promptLinked);
+            return await _context.SaveChangesAsync() > 0;
         }
 
         /// <summary>
@@ -136,7 +157,7 @@ namespace WoopiAiHub.Repository
         /// <param name="orderBy">The ordering criteria to apply to the results. Supported values are "created asc", "created desc", "name
         /// asc", and "name desc" (case-insensitive). If null, empty, or unrecognized, no ordering is applied.</param>
         /// <returns></returns>
-        private IQueryable<ApiTemplate> ApplyFilters(string? input, string? method, string? orderBy)
+        private IQueryable<ApiTemplate> ApplyFilters(string? input, string? method, bool? enableAccessFromMcp, int? promptId, string? orderBy)
         {
             input = input?.ToLower();
             method = method?.ToLower();
@@ -150,10 +171,19 @@ namespace WoopiAiHub.Repository
                 query = query.Where(i =>
                     EF.Functions.Like(i.Name, $"%{input}%"));
             }
-
             if (!string.IsNullOrEmpty(method))
             {
                 query = query.Where(i => i.Method.ToLower().Equals(method));
+            }
+
+            if (enableAccessFromMcp.HasValue)
+            {
+                query = query.Where(i => i.EnableAccessFromMcp == enableAccessFromMcp.Value);
+            }
+
+            if (promptId.HasValue)
+            {
+                query = query.Where(i => i.PromptApiTemplates.Any(pt => pt.PromptId == promptId.Value));
             }
 
             if (!string.IsNullOrWhiteSpace(orderBy))

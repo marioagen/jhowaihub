@@ -88,6 +88,7 @@ namespace WoopiAiHub.Repository
                     IdUser = p.IdUser,
                     IsEdited = p.IsEdited,
                     IsImported = p.IsImported,
+                    EnableAccessToMcp = p.EnableAccessToMcp,
                     OwnerName = p.User != null ? p.User.Name : string.Empty,
                     OwnerEmail = p.User != null ? p.User.Email : string.Empty
                 }).AsNoTracking();
@@ -148,6 +149,7 @@ namespace WoopiAiHub.Repository
         public PromptDto? FindById(int id)
         {
             return _context.Prompts
+                .Include(x => x.PromptApiTemplates)
                 .AsNoTracking()
                 .Select(p => new PromptDto
                 {
@@ -159,8 +161,15 @@ namespace WoopiAiHub.Repository
                     IdUser = p.IdUser,
                     IsEdited = p.IsEdited,
                     IsImported = p.IsImported,
+                    EnableAccessToMcp = p.EnableAccessToMcp,
                     OwnerName = p.User != null ? p.User.Name : string.Empty,
-                    OwnerEmail = p.User != null ? p.User.Email : string.Empty
+                    OwnerEmail = p.User != null ? p.User.Email : string.Empty,
+                    PromptApiTemplates = p.PromptApiTemplates.Select(promptApi => new PromptApiTemplateDto
+                    {
+                        ApiTemplateId = promptApi.ApiTemplateId,
+                        PromptId = promptApi.PromptId,
+                        Id = promptApi.Id
+                    }).ToList()
                 }).FirstOrDefault(p => p.Id == id);
         }
 
@@ -181,6 +190,33 @@ namespace WoopiAiHub.Repository
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Will remove the references to ApiTemplate from prompt when a Api template is deleted or is checked as no external search
+        /// </summary>
+        /// <param name="prompt"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdateAndRemovePromptApisFromPrompt(Prompt prompt, List<int> data)
+        {
+            var existPrompt = await _context.Prompts.AnyAsync(p => p.Id == prompt.Id);
+            if (!existPrompt)
+            {
+                return false;
+            }
+
+            var existPromptApiTemplates = await _context.PromptApiTemplates.Where(p => data.Contains(p.Id)).ToListAsync();
+            if (data.Count > 0 && existPromptApiTemplates.Count == 0)
+            {
+                return false;
+            }
+
+            _context.Prompts.Update(prompt);
+            _context.PromptApiTemplates.RemoveRange(existPromptApiTemplates);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }
