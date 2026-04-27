@@ -363,14 +363,13 @@ export default {
             const textInput = this.values?.text;
             return typeof textInput === "string" && textInput.trim().length > 0;
         },
-        initializeData() {
-            if (this.id) {
-                this.findById(this.id);
-            } else if (this.cloneId) {
-                this.loadCloneData(this.cloneId);
-            } else {
-                this.resetData();
-            }
+    },
+    watch: {
+        "$route.query.id"() {
+            this.initializeData();
+        },
+        "$route.query.clone"() {
+            this.initializeData();
         },
     },
     setup() {
@@ -383,6 +382,38 @@ export default {
         };
     },
     methods: {
+        getQueryParamAsInt(paramName) {
+            const raw = this.$route.query[paramName];
+            if (raw === undefined || raw === null || raw === "") {
+                return null;
+            }
+            const s = Array.isArray(raw) ? raw[0] : raw;
+            const n = parseInt(String(s), 10);
+            return Number.isFinite(n) ? n : null;
+        },
+        resolveEditId() {
+            if (this.id != null && this.id !== 0) {
+                return this.id;
+            }
+            return this.getQueryParamAsInt("id");
+        },
+        resolveCloneId() {
+            if (this.cloneId != null && this.cloneId !== 0) {
+                return this.cloneId;
+            }
+            return this.getQueryParamAsInt("clone");
+        },
+        initializeData() {
+            const editId = this.resolveEditId();
+            const cloneId = this.resolveCloneId();
+            if (editId) {
+                this.findById(editId);
+            } else if (cloneId) {
+                this.loadCloneData(cloneId);
+            } else {
+                this.resetData();
+            }
+        },
         cancel() {
             this.$emit("cancelled");
         },
@@ -633,7 +664,7 @@ export default {
         },
     },
     mounted() {
-        this.initializeData;
+        this.initializeData();
         this.getTemplatesEnableAccessToMcp();
     },
 };
