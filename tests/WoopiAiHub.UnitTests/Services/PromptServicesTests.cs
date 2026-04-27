@@ -178,7 +178,7 @@ namespace WoopiAiHub.UnitTests.Services
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
 
             _validatePrompt.Setup(v => v.ValidateOwnership(promptDto.Id, email));
-            _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns((PromptDto)null);
+            _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns((PromptDto?)null);
 
             //Act/Assert
             await Assert.ThrowsAsync<ArgumentException>(() => _promptServices.Update(dto, email));
