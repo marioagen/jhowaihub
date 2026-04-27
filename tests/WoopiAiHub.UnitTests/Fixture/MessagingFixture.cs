@@ -3,6 +3,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using Xunit;
 using Newtonsoft.Json.Linq;
 using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
@@ -59,6 +60,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                     Model = f.Random.String(),
                     Name = f.Random.String(),
                     OcrModel = f.Random.String(),
+                    RagProvider = f.PickRandom<RagProvider>(),
                     RefineTemplate = f.Random.String(),
                     SearchMode = f.Random.String(),
                     Template = f.Random.String(),

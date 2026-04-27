@@ -49,12 +49,13 @@ namespace WoopiAiHub.UnitTests.Fixture
                   Model = f.Random.String(),
                   Name = f.Random.String(),
                   OcrModel = f.Random.String(),
+                  RagProvider = RagProvider.Indexer,
                   RefineTemplate = f.Random.String(),
                   SearchMode = f.Random.String(),
                   Template = f.Random.String(),
               });
 
-            return faker;
+            return faker.Generate();
         }
 
         public static AnalyzeResult FindValidAnalyseResult()

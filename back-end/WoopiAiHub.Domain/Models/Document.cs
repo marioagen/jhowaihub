@@ -29,6 +29,7 @@ namespace WoopiAiHub.Domain.Models
         public virtual DocumentNormalized? DocumentNormalized { get; set; }
         public virtual ICollection<Card> Cards { get; set; }
         public virtual ICollection<Workflow> Workflows { get; set; }
+        public virtual ICollection<DocumentAnonymization> DocumentAnonymizations { get; set; }
 
         public Document(string name,
                        string description,

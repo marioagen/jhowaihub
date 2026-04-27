@@ -2,7 +2,6 @@
     <tr class="accordion-card-row w-100">
         <td class="text-center align-middle py-2">
             <input
-                v-if="!isFirstStep"
                 type="checkbox"
                 class="form-check-input m-0"
                 :checked="isCardSelected"

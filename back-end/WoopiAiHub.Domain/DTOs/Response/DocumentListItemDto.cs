@@ -12,5 +12,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public DateTime Created { get; set; }
         public IEnumerable<DocumentWorkflowProgressDto> WorkflowProgress { get; set; } = new List<DocumentWorkflowProgressDto>();
         public bool HasBatch { get; set; }
+        public int AnonymizationAmount { get; set; } = 0;
     }
 }

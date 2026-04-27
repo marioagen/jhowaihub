@@ -9,7 +9,7 @@ on:
 jobs:
     format-check:
         name: Check Code Formatting
-        runs-on: ubuntu-latest
+        runs-on: ["azure"]
 
         steps:
             - name: Checkout code

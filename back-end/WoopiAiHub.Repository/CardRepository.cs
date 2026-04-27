@@ -171,7 +171,6 @@ namespace WoopiAiHub.Repository
         public async Task<Card?> FindByIdWithStepAndProfile(int id)
         {
             return await _context.Cards
-                .AsNoTracking()
                 .Where(c => c.Id == id)
                 .Include(s => s.Step)
                     .ThenInclude(p => p!.Profile)

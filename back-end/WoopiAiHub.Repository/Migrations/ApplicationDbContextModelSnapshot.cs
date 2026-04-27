@@ -394,6 +394,35 @@ namespace WoopiAiHub.Repository.Migrations
                     b.ToTable("DocumentAnalysisRejections", (string)null);
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentAnonymization", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int>("DocumentId")
+                        .HasColumnType("int")
+                        .HasColumnName("DocumentId");
+
+                    b.Property<string>("DocumentUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DocumentUrl");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentId");
+
+                    b.ToTable("DocumentAnonymizations", (string)null);
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentBatch", b =>
                 {
                     b.Property<int>("Id")
@@ -1683,6 +1712,17 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentAnonymization", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.Document", "Document")
+                        .WithMany("DocumentAnonymizations")
+                        .HasForeignKey("DocumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Document");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.DocumentHistory", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Document", "Document")
@@ -2057,6 +2097,8 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Document", b =>
                 {
                     b.Navigation("Cards");
+
+                    b.Navigation("DocumentAnonymizations");
 
                     b.Navigation("DocumentHistories");
 

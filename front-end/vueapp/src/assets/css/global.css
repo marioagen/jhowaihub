@@ -173,6 +173,24 @@ body {
     --color-bg-kanban-success-accent: #a1cfb1;
     --color-read-only: #ffffff;
     --color-bg-main: #f8f9fb;
+    --chip-n8n-bg: #fff3e0;
+    --chip-n8n-text: #bf5a00;
+    --chip-n8n-border: #ffcc80;
+    --chip-prompt-bg: #e8f5e9;
+    --chip-prompt-text: #256329;
+    --chip-prompt-border: #a5d6a7;
+    --chip-api-bg: #e3f2fd;
+    --chip-api-text: #1054a0;
+    --chip-api-border: #90caf9;
+    --chip-quiz-bg: #f3e5f5;
+    --chip-quiz-text: #5a1782;
+    --chip-quiz-border: #ce93d8;
+    --chip-embeddings-bg: #e0f2f1;
+    --chip-embeddings-text: #004d40;
+    --chip-embeddings-border: #80cbc4;
+    --chip-default-bg: #f5f5f5;
+    --chip-default-text: #424242;
+    --chip-default-border: #bdbdbd;
 }
 
 .css-theme-dark {
@@ -285,6 +303,24 @@ body {
     --color-text-warning-badge: rgb(252, 211, 77);
     --color-read-only: #232945;
     --color-bg-main: #1f2132;
+    --chip-n8n-bg: rgba(255, 140, 0, 0.1);
+    --chip-n8n-text: #ffaa33;
+    --chip-n8n-border: #ff8c00;
+    --chip-prompt-bg: rgba(76, 175, 80, 0.1);
+    --chip-prompt-text: #66bb6a;
+    --chip-prompt-border: #4caf50;
+    --chip-api-bg: rgba(79, 195, 247, 0.1);
+    --chip-api-text: #4fc3f7;
+    --chip-api-border: #29b6f6;
+    --chip-quiz-bg: rgba(206, 147, 216, 0.1);
+    --chip-quiz-text: #ce93d8;
+    --chip-quiz-border: #ab47bc;
+    --chip-embeddings-bg: rgba(38, 198, 218, 0.1);
+    --chip-embeddings-text: #26c6da;
+    --chip-embeddings-border: #00acc1;
+    --chip-default-bg: rgba(144, 164, 174, 0.1);
+    --chip-default-text: #90a4ae;
+    --chip-default-border: #607d8b;
 }
 .css-theme-dark input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);

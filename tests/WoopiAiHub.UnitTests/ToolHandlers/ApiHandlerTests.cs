@@ -784,6 +784,149 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.Equal(ErrorCode.InvalidValue, exception.ErrorCode);
         }
 
+        [Fact(DisplayName = "BuildPayload should replace Prompt placeholder embedded inside a JSON string value")]
+        [Trait("BuildPayload", "Success")]
+        public async Task BuildPayload_ShouldReplacePromptPlaceholder_EmbeddedInJsonString()
+        {
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolDto = CreateValidStepToolDto();
+            var apiTemplate = CreateValidApiTemplateDto();
+            var execution = AutomationFixture.FindValidStepToolExecution();
+
+            var promptText = "resposta do modelo";
+            var output = CreateStepToolOutput(HandlersTypes.Prompt, promptText);
+            var outputs = new List<StepToolOutput> { output };
+
+            var apiRequest = new ApiRequestDto
+            {
+                TemplateId = apiTemplate.Id!.Value,
+                Url = apiTemplate.Url,
+                Method = apiTemplate.Method,
+                Body = "{\"text\":\"Esse é um teste para rodar o {{prompt}}\"}"
+            };
+
+            var encryptedData = JsonSerializer.Serialize(apiRequest);
+
+            _mockStepToolRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(stepToolDto);
+
+            _mockEncryptionService
+                .Setup(service => service.Decrypt(It.IsAny<string>()))
+                .Returns(encryptedData);
+
+            _mockApiTemplateRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(apiTemplate);
+
+            var result = await _handler.BuildPayload(automationServicesDto, null, outputs, execution);
+
+            var message = result.Message as ApiRequestDto;
+            Assert.NotNull(message);
+            Assert.NotNull(message.Body);
+
+            using var doc = JsonDocument.Parse(message.Body);
+            var text = doc.RootElement.GetProperty("text").GetString();
+            Assert.Equal("Esse é um teste para rodar o resposta do modelo", text);
+        }
+
+        [Fact(DisplayName = "BuildPayload should escape Prompt output when embedded inside a JSON string value")]
+        [Trait("BuildPayload", "Success")]
+        public async Task BuildPayload_ShouldEscapePromptSpecialChars_WhenEmbeddedInJsonString()
+        {
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolDto = CreateValidStepToolDto();
+            var apiTemplate = CreateValidApiTemplateDto();
+            var execution = AutomationFixture.FindValidStepToolExecution();
+
+            var promptText = "say \"hello\" and \\backslash";
+            var output = CreateStepToolOutput(HandlersTypes.Prompt, promptText);
+            var outputs = new List<StepToolOutput> { output };
+
+            var apiRequest = new ApiRequestDto
+            {
+                TemplateId = apiTemplate.Id!.Value,
+                Url = apiTemplate.Url,
+                Method = apiTemplate.Method,
+                Body = "{\"message\":\"prefix {{prompt}} suffix\"}"
+            };
+
+            var encryptedData = JsonSerializer.Serialize(apiRequest);
+
+            _mockStepToolRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(stepToolDto);
+
+            _mockEncryptionService
+                .Setup(service => service.Decrypt(It.IsAny<string>()))
+                .Returns(encryptedData);
+
+            _mockApiTemplateRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(apiTemplate);
+
+            var result = await _handler.BuildPayload(automationServicesDto, null, outputs, execution);
+
+            var message = result.Message as ApiRequestDto;
+            Assert.NotNull(message);
+            Assert.NotNull(message.Body);
+
+            using var doc = JsonDocument.Parse(message.Body);
+            var combined = doc.RootElement.GetProperty("message").GetString();
+            Assert.Equal("prefix say \"hello\" and \\backslash suffix", combined);
+        }
+
+        [Fact(DisplayName = "BuildPayload should resolve TryGetToolConfig when tool type name casing differs")]
+        [Trait("BuildPayload", "Success")]
+        public async Task BuildPayload_ShouldReplacePrompt_WhenToolTypeNameIsLowercase()
+        {
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var stepToolDto = CreateValidStepToolDto();
+            var apiTemplate = CreateValidApiTemplateDto();
+            var execution = AutomationFixture.FindValidStepToolExecution();
+
+            var promptText = "lower-case tool type";
+            var output = AutomationFixture.FindValidStepToolOutput(promptText);
+            output.StepTool = new StepTool(1, DateTime.UtcNow, 1, 1, 1, 1, 1)
+            {
+                Tool = new Tool(1, DateTime.UtcNow, "Tool", true, 1, 1, 1, false, null, null)
+                {
+                    ToolType = new ToolType(1, DateTime.UtcNow, "prompt", string.Empty, true)
+                }
+            };
+            var outputs = new List<StepToolOutput> { output };
+
+            var apiRequest = new ApiRequestDto
+            {
+                TemplateId = apiTemplate.Id!.Value,
+                Url = apiTemplate.Url,
+                Method = apiTemplate.Method,
+                Body = "{\"text\":\"{{prompt}}\"}"
+            };
+
+            var encryptedData = JsonSerializer.Serialize(apiRequest);
+
+            _mockStepToolRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(stepToolDto);
+
+            _mockEncryptionService
+                .Setup(service => service.Decrypt(It.IsAny<string>()))
+                .Returns(encryptedData);
+
+            _mockApiTemplateRepository
+                .Setup(repo => repo.FindById(It.IsAny<int>()))
+                .ReturnsAsync(apiTemplate);
+
+            var result = await _handler.BuildPayload(automationServicesDto, null, outputs, execution);
+
+            var message = result.Message as ApiRequestDto;
+            Assert.NotNull(message);
+            Assert.NotNull(message.Body);
+            using var doc = JsonDocument.Parse(message.Body);
+            Assert.Equal(promptText, doc.RootElement.GetProperty("text").GetString());
+        }
+
         private static StepToolDto CreateValidStepToolDto()
         {
             var stepToolDto = AutomationFixture.FindValidStepToolDto();

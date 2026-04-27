@@ -76,7 +76,6 @@ else {
 builder.Services.AddInfrastructure(config);
 builder.Services.AddApplication();
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IHubNotifier, HubNotifier>();
 builder.Services.AddSingleton<IConnectionMappingService, ConnectionMappingService>();
 builder.Services.Configure<ChatCompletionSettings>(builder.Configuration.GetSection("ChatCompletionSettings"));

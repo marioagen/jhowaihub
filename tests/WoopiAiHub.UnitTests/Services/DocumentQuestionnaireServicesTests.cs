@@ -1,11 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.AutoMock;
-using System.Net;
-using System.Text;
 using WoopiAiHub.Application.Services;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
-using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -48,13 +46,15 @@ namespace WoopiAiHub.UnitTests.Services
             documentRepository.Setup(a => a.FindById(1)).Returns(document);
             var questionnaireRepository = _mocker.GetMock<IQuestionnaireRepository>();
             questionnaireRepository.Setup(a => a.FindById(1)).Returns(questionnaire);
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
-            var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent("{\"response\":\"value\",\"Usage\":[]}", Encoding.UTF8, "application/json")
-            };
-            embeddingsApi.Setup(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()))
-                         .ReturnsAsync(httpResponseMessage);
+            var ragRouter = _mocker.GetMock<IRagInvocationRouter>();
+            ragRouter.Setup(a => a.ExecuteCustomQueryAsync(
+                    It.IsAny<TenantInfoDto>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CustomQueryRequestRefitDto>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new CustomQueryExecutionResult("value", Array.Empty<QueryUsageDto>()));
             var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
             tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
                                .ReturnsAsync(tenant);
@@ -66,7 +66,13 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             documentRepository.Verify(a => a.FindById(1), Times.Once);
             questionnaireRepository.Verify(a => a.FindById(1), Times.Once);
-            embeddingsApi.Verify(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()), Times.Once);
+            ragRouter.Verify(a => a.ExecuteCustomQueryAsync(
+                It.IsAny<TenantInfoDto>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<CustomQueryRequestRefitDto>(),
+                It.IsAny<CancellationToken>()), Times.Once);
             tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
         }
 
@@ -81,17 +87,19 @@ namespace WoopiAiHub.UnitTests.Services
             var documentInput = DocumentFixture.FindValidDocumentInputDto();
             var documentRepository = _mocker.GetMock<IDocumentRepository>();
             documentRepository.Setup(a => a.FindById(1)).Returns(document);
-            var embeddingsApi = _mocker.GetMock<IEmbeddingsApi>();
+            var ragRouter = _mocker.GetMock<IRagInvocationRouter>();
             var documentHistoryServices = _mocker.GetMock<IDocumentHistoryServices>();
             var tenantCacheServices = _mocker.GetMock<ITenantCacheServices>();
             documentHistoryServices.Setup(a => a.Create(It.IsAny<DocumentHistory>())).Returns(true);
 
-            var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent("{\"response\":\"value\",\"Usage\":[]}", Encoding.UTF8, "application/json")
-            };
-            embeddingsApi.Setup(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()))
-                         .ReturnsAsync(httpResponseMessage);
+            ragRouter.Setup(a => a.ExecuteCustomQueryAsync(
+                    It.IsAny<TenantInfoDto>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CustomQueryRequestRefitDto>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new CustomQueryExecutionResult("value", Array.Empty<QueryUsageDto>()));
             tenantCacheServices.Setup(x => x.FindTenantAsync(It.IsAny<string>()))
                                .ReturnsAsync(tenant);
 
@@ -101,7 +109,13 @@ namespace WoopiAiHub.UnitTests.Services
             //Assert
             Assert.NotNull(result);
             documentRepository.Verify(a => a.FindById(1), Times.Once);
-            embeddingsApi.Verify(a => a.CustomQuery(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CustomQueryRequestRefitDto>(), It.IsAny<string>()), Times.Once);
+            ragRouter.Verify(a => a.ExecuteCustomQueryAsync(
+                It.IsAny<TenantInfoDto>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<CustomQueryRequestRefitDto>(),
+                It.IsAny<CancellationToken>()), Times.Once);
             documentHistoryServices.Verify(a => a.Create(It.IsAny<DocumentHistory>()), Times.Once);
             tenantCacheServices.Verify(a => a.FindTenantAsync(It.IsAny<string>()), Times.Once());
         }
