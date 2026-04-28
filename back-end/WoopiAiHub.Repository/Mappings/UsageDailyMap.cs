@@ -51,8 +51,21 @@ namespace WoopiAiHub.Repository.Mappings
                    .WithMany(me => me.UsageDailies)
                    .HasForeignKey(ud => ud.UserId);
 
-            builder.HasIndex(ud => new { ud.Processed, ud.UsageTypeId })
-                   .HasDatabaseName("IX_UsageDaily_Processed_UsageTypeId");
+            builder.HasOne(ud => ud.Workflow)
+                   .WithMany(me => me.UsageDailies)
+                   .HasForeignKey(ud => ud.WorkflowId);
+
+            builder.HasIndex(ud => new { ud.Processed, ud.Created })
+                   .HasDatabaseName("IX_UsageDaily_Processed_Created");
+
+            builder.HasIndex(ud => ud.Created)
+                   .HasDatabaseName("IX_UsageDaily_Created");
+
+            builder.HasIndex(ud => new { ud.WorkflowId, ud.Processed })
+                   .HasDatabaseName("IX_UsageDaily_WorkflowId_Processed");
+
+            builder.HasIndex(ud => new { ud.UserId, ud.Processed })
+                   .HasDatabaseName("IX_UsageDaily_UserId_Processed");
         }
     }
 }
