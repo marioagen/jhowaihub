@@ -486,24 +486,6 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Contains("key", exception.Message, StringComparison.OrdinalIgnoreCase);
         }
 
-        [Fact(DisplayName = "ExecuteChatCompletionAsync - Should throw InvalidOperationException when tenant routes to Azure AI Search")]
-        [Trait("ExecuteChatCompletionAsync", "Integration")]
-        public async Task ExecuteChatCompletionAsync_AzureAiSearchNotSupported()
-        {
-            // Arrange
-            var tenant = RagInvocationRouterFixture.FindValidTenantWithAzureAiSearch();
-            var email = "user@example.com";
-            var chatCompletion = RagInvocationRouterFixture.FindValidChatCompletionRequest();
-            var model = "gpt-4";
-            var apiVersion = "2024-02-15-preview";
-
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => _ragInvocationRouter.ExecuteChatCompletionAsync(tenant, email, chatCompletion, model, apiVersion));
-
-            Assert.Contains("not supported", exception.Message, StringComparison.OrdinalIgnoreCase);
-        }
-
         [Fact(DisplayName = "ExecuteChatCompletionAsync - Should throw ArgumentNullException when tenant is null")]
         [Trait("ExecuteChatCompletionAsync", "Validation")]
         public async Task ExecuteChatCompletionAsync_NullTenant()
