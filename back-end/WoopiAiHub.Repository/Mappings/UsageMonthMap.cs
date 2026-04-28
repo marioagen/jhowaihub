@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WoopiAiHub.Domain.Models;
 
@@ -45,6 +45,10 @@ namespace WoopiAiHub.Repository.Mappings
             builder.HasOne(um => um.User)
                    .WithMany(u => u.UsageMonths)
                    .HasForeignKey(um => um.UserId);
+
+            builder.HasOne(um => um.Workflow)
+                   .WithMany(u => u.UsageMonths)
+                   .HasForeignKey(um => um.WorkflowId);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -19,24 +19,31 @@ namespace WoopiAiHub.Domain.Models
         [Column("ModelEmbeddingId", TypeName = "int")]
         public int? ModelEmbeddingId { get; private set; }
 
+        [Column("WorkflowId", TypeName = "int")]
+        public int? WorkflowId { get; private set; }
+
         public virtual UsageType? UsageType { get; set; }
         public virtual ModelEmbedding? ModelEmbedding { get; set; }
         public virtual User? User { get; set; }
+        public virtual Workflow? Workflow { get; set; }
 
-        public UsageDaily(int id,
-                          DateTime created,
-                          Guid userId,
-                          int usageTypeId,
-                          int usageCount,
-                          bool processed,
-                          int? modelEmbeddingId)
-            : base(id, created)
+        public UsageDaily(
+            int id,
+            DateTime created,
+            Guid userId,
+            int usageTypeId,
+            int usageCount,
+            bool processed,
+            int? modelEmbeddingId,
+            int? workflowId = null
+        ) : base(id, created)
         {
             UserId = userId;
             UsageTypeId = usageTypeId;
             UsageCount = usageCount;
             Processed = processed;
             ModelEmbeddingId = modelEmbeddingId;
+            WorkflowId = workflowId;
         }
     }
 }
