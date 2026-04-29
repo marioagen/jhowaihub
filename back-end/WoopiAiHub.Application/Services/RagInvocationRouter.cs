@@ -95,11 +95,6 @@ public sealed class RagInvocationRouter : IRagInvocationRouter
             throw new ArgumentException("AiGateway ApplicationId or key not found for tenant.");
         }
 
-        if (RoutesToIntegration(tenant))
-        {
-            throw new InvalidOperationException("Chat completion is not supported for Azure AI Search integration.");
-        }
-
         return await _chatCompletionApi
             .GetChatCompletion(tenant.AiGatewayApplicationId.Value.ToString(), model, apiVersion, tenant.AiGatewayKey, chatCompletion);
     }

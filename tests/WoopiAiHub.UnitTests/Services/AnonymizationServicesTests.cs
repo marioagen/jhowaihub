@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -14,6 +15,7 @@ using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Infrastructure.Multitenancy;
 using WoopiAiHub.UnitTests.Fixtures;
 using Xunit;
 
@@ -298,10 +300,18 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var result = AnonymizationFixture.FindValidAnonymizationResultDto();
             var document = AnonymizationFixture.FindValidDocument();
+            var connectionString = "Server=.;Database=TestDb;";
+            var httpContextAccessor = new Mock<IHttpContextAccessor>();
+            httpContextAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
 
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+            var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
+
+            tenantContextServiceMock
+                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
+                .ReturnsAsync((connectionString, httpContextAccessor.Object));
 
             documentRepositoryMock
                 .Setup(x => x.FindById(result.WoopiAiDocumentId))
@@ -319,6 +329,10 @@ namespace WoopiAiHub.UnitTests.Services
             await _sut.ProcessAnonymizationResult(result);
 
             // Assert
+            tenantContextServiceMock.Verify(
+                x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant),
+                Times.Once);
+
             documentRepositoryMock.Verify(
                 x => x.FindById(result.WoopiAiDocumentId),
                 Times.Once);
@@ -331,6 +345,10 @@ namespace WoopiAiHub.UnitTests.Services
             hubNotifierMock.Verify(
                 x => x.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl),
                 Times.Once);
+
+            Assert.NotNull(httpContextAccessor.Object.HttpContext);
+            Assert.NotNull(httpContextAccessor.Object.HttpContext.Items["TenantConnection"]);
+            Assert.Equal(connectionString, httpContextAccessor.Object.HttpContext.Items["TenantConnection"]);
         }
 
         [Fact(DisplayName = "ProcessAnonymizationResult - Should throw AppException when document is not found")]
@@ -339,10 +357,18 @@ namespace WoopiAiHub.UnitTests.Services
         {
             // Arrange
             var result = AnonymizationFixture.FindValidAnonymizationResultDto();
+            var connectionString = "Server=.;Database=TestDb;";
+            var httpContextAccessor = new Mock<IHttpContextAccessor>();
+            httpContextAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
 
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+            var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
+
+            tenantContextServiceMock
+                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
+                .ReturnsAsync((connectionString, httpContextAccessor.Object));
 
             documentRepositoryMock
                 .Setup(x => x.FindById(result.WoopiAiDocumentId))
@@ -354,6 +380,10 @@ namespace WoopiAiHub.UnitTests.Services
 
             Assert.Equal(ErrorCode.NotFound, exception.ErrorCode);
             Assert.Equal("Document not found", exception.Message);
+
+            tenantContextServiceMock.Verify(
+                x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant),
+                Times.Once);
 
             documentAnonymizationRepositoryMock.Verify(
                 x => x.CreateAsync(It.IsAny<DocumentAnonymization>()),
@@ -371,11 +401,19 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var result = AnonymizationFixture.FindValidAnonymizationResultDto();
             var document = AnonymizationFixture.FindValidDocument();
+            var connectionString = "Server=.;Database=TestDb;";
+            var httpContextAccessor = new Mock<IHttpContextAccessor>();
+            httpContextAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
 
             var expectedException = new InvalidOperationException("Database error");
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+            var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
+
+            tenantContextServiceMock
+                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
+                .ReturnsAsync((connectionString, httpContextAccessor.Object));
 
             documentRepositoryMock
                 .Setup(x => x.FindById(result.WoopiAiDocumentId))
@@ -403,12 +441,20 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var result = AnonymizationFixture.FindValidAnonymizationResultDto();
             var document = AnonymizationFixture.FindValidDocument();
+            var connectionString = "Server=.;Database=TestDb;";
+            var httpContextAccessor = new Mock<IHttpContextAccessor>();
+            httpContextAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
 
             var expectedException = new InvalidOperationException("Hub notification failed");
 
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+            var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
+
+            tenantContextServiceMock
+                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
+                .ReturnsAsync((connectionString, httpContextAccessor.Object));
 
             documentRepositoryMock
                 .Setup(x => x.FindById(result.WoopiAiDocumentId))
@@ -427,6 +473,48 @@ namespace WoopiAiHub.UnitTests.Services
                 () => _sut.ProcessAnonymizationResult(result));
 
             Assert.Equal("Hub notification failed", exception.Message);
+        }
+
+        [Fact(DisplayName = "ProcessAnonymizationResult - Should set TenantConnection in HttpContext")]
+        [Trait("ProcessAnonymizationResult", "TenantContext")]
+        public async Task ProcessAnonymizationResult_ShouldSetTenantConnectionInHttpContext()
+        {
+            // Arrange
+            var tenantId = "tenant-123";
+            var result = AnonymizationFixture.FindAnonymizationResultDtoWithTenant(tenantId);
+            var document = AnonymizationFixture.FindValidDocument();
+            var connectionString = "Server=.;Database=TenantDb;";
+            var httpContextAccessor = new Mock<IHttpContextAccessor>();
+            var httpContext = new DefaultHttpContext();
+            httpContextAccessor.Setup(x => x.HttpContext).Returns(httpContext);
+
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+            var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
+
+            tenantContextServiceMock
+                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(tenantId))
+                .ReturnsAsync((connectionString, httpContextAccessor.Object));
+
+            documentRepositoryMock
+                .Setup(x => x.FindById(result.WoopiAiDocumentId))
+                .Returns(document);
+
+            documentAnonymizationRepositoryMock
+                .Setup(x => x.CreateAsync(It.IsAny<DocumentAnonymization>()))
+                .ReturnsAsync(true);
+
+            hubNotifierMock
+                .Setup(x => x.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _sut.ProcessAnonymizationResult(result);
+
+            // Assert
+            Assert.NotNull(httpContext.Items["TenantConnection"]);
+            Assert.Equal(connectionString, httpContext.Items["TenantConnection"]);
         }
 
         #endregion
