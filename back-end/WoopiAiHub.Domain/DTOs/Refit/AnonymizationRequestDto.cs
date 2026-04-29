@@ -9,5 +9,6 @@ namespace WoopiAiHub.Domain.DTOs.Refit
         public string? WoopiAiPromptId { get; init; }
         public int? WoopiAiDocumentId { get; init; }
         public string? WoopiAiEmail { get; init; }
+        public string? WoopiAiTenant { get; init; }
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
@@ -11,6 +12,7 @@ using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Infrastructure.Multitenancy;
 
 namespace WoopiAiHub.Application.Services
 {
@@ -23,6 +25,7 @@ namespace WoopiAiHub.Application.Services
         IAuditCardService auditCardService,
         IDocumentRepository documentRepository,
         IDocumentAnonymizationRepository documentAnonymizationRepository,
+        ITenantContextService tenantContextService,
         ILogger<AnonymizationServices> logger
     ) : IAnonymizationServices
     {
@@ -34,6 +37,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IAuditCardService _auditCardService = auditCardService;
         private readonly IDocumentRepository _documentRepository = documentRepository;
         private readonly IDocumentAnonymizationRepository _documentAnonymizationRepository = documentAnonymizationRepository;
+        private readonly ITenantContextService _tenantContextService = tenantContextService;
         private readonly ILogger<AnonymizationServices> _logger = logger;
 
         /// <summary>
@@ -79,7 +83,8 @@ namespace WoopiAiHub.Application.Services
                 AnonymizationType = (int?)requestDto.AnonymizationType,
                 WoopiAiPromptId = requestDto.PromptId?.ToString(),
                 WoopiAiDocumentId = requestDto.DocumentId,
-                WoopiAiEmail = headersDto.EmailCreator
+                WoopiAiEmail = headersDto.EmailCreator,
+                WoopiAiTenant = headersDto.Tenant
             };
 
             var authHeader = $"Basic {token}";
@@ -129,6 +134,10 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException">Thrown if the document specified by the anonymization result cannot be found.</exception>
         public async Task ProcessAnonymizationResult(AnonymizationResultDto result)
         {
+            (var connectionString, var httpAccessor) = await _tenantContextService.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant);
+            httpAccessor.HttpContext ??= new DefaultHttpContext();
+            httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
+
             var document = _documentRepository.FindById(result.WoopiAiDocumentId) ?? throw new AppException(ErrorCode.NotFound, "Document not found", null);
 
             var documentAnonymization = new DocumentAnonymization(

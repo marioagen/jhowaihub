@@ -69,7 +69,8 @@ namespace WoopiAiHub.UnitTests.Fixtures
                 {
                     WoopiAiEmail = f.Person.Email,
                     WoopiAiDocumentId = f.Random.Int(1, 10000),
-                    DocumentUrl = f.Internet.Url()
+                    DocumentUrl = f.Internet.Url(),
+                    WoopiAiTenant = f.Random.String(10)
                 })
                 .Generate();
         }
@@ -161,6 +162,24 @@ namespace WoopiAiHub.UnitTests.Fixtures
                 new List<Workflow>(),
                 faker.Date.Past(),
                 false);
+        }
+
+        /// <summary>
+        /// Creates an AnonymizationResultDto with a specific tenant value for testing.
+        /// </summary>
+        /// <param name="tenant">The tenant identifier to associate with the anonymization result.</param>
+        /// <returns>An AnonymizationResultDto instance with the specified tenant.</returns>
+        public static AnonymizationResultDto FindAnonymizationResultDtoWithTenant(string tenant)
+        {
+            return new Faker<AnonymizationResultDto>("pt_BR")
+                .CustomInstantiator(f => new AnonymizationResultDto
+                {
+                    WoopiAiEmail = f.Person.Email,
+                    WoopiAiDocumentId = f.Random.Int(1, 10000),
+                    DocumentUrl = f.Internet.Url(),
+                    WoopiAiTenant = tenant
+                })
+                .Generate();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WoopiAiHub.Infrastructure.Multitenancy
 {
@@ -6,5 +7,6 @@ namespace WoopiAiHub.Infrastructure.Multitenancy
     {
         Task<bool> TrySetTenantConnectionAsync(HttpContext context, string tenantIdentifier);
         Task InitializeTenantAsync(string tenantIdentifier);
+        Task<(string, IHttpContextAccessor)> GetConnectionStringAndHttpAcessorAsync(string tenantName);
     }
 }

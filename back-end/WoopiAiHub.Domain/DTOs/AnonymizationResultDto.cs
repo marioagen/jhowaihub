@@ -5,5 +5,6 @@ namespace WoopiAiHub.Domain.DTOs
         public string DocumentUrl { get; set; } = string.Empty;
         public int WoopiAiDocumentId { get; set; }
         public string WoopiAiEmail { get; set; } = string.Empty;
+        public string WoopiAiTenant { get; set; } = string.Empty;
     }
 }
