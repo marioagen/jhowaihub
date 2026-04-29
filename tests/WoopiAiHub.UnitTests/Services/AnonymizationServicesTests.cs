@@ -310,7 +310,7 @@ namespace WoopiAiHub.UnitTests.Services
             var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
 
             tenantContextServiceMock
-                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
+                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
                 .ReturnsAsync((connectionString, httpContextAccessor.Object));
 
             documentRepositoryMock
@@ -330,7 +330,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             tenantContextServiceMock.Verify(
-                x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant),
+                x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant),
                 Times.Once);
 
             documentRepositoryMock.Verify(
@@ -367,7 +367,7 @@ namespace WoopiAiHub.UnitTests.Services
             var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
 
             tenantContextServiceMock
-                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
+                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
                 .ReturnsAsync((connectionString, httpContextAccessor.Object));
 
             documentRepositoryMock
@@ -382,7 +382,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("Document not found", exception.Message);
 
             tenantContextServiceMock.Verify(
-                x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant),
+                x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant),
                 Times.Once);
 
             documentAnonymizationRepositoryMock.Verify(
@@ -412,7 +412,7 @@ namespace WoopiAiHub.UnitTests.Services
             var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
 
             tenantContextServiceMock
-                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
+                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
                 .ReturnsAsync((connectionString, httpContextAccessor.Object));
 
             documentRepositoryMock
@@ -453,7 +453,7 @@ namespace WoopiAiHub.UnitTests.Services
             var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
 
             tenantContextServiceMock
-                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
+                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
                 .ReturnsAsync((connectionString, httpContextAccessor.Object));
 
             documentRepositoryMock
@@ -494,7 +494,7 @@ namespace WoopiAiHub.UnitTests.Services
             var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
 
             tenantContextServiceMock
-                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(tenantId))
+                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(tenantId))
                 .ReturnsAsync((connectionString, httpContextAccessor.Object));
 
             documentRepositoryMock

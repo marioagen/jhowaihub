@@ -101,7 +101,7 @@ namespace WoopiAiHub.Infrastructure.Multitenancy
         /// <param name="tenantName">The name of the tenant for which to retrieve the connection string. Cannot be null or empty.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the connection string for the
         /// specified tenant.</returns>
-        public async Task<(string, IHttpContextAccessor)> GetConnectionStringAndHttpAcessorAsync(string tenantName)
+        public async Task<(string, IHttpContextAccessor)> FindConnectionStringAndHttpAcessorAsync(string tenantName)
         {
             using var scope = _scopeFactory.CreateScope();
 

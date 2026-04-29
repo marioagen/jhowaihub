@@ -134,7 +134,7 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException">Thrown if the document specified by the anonymization result cannot be found.</exception>
         public async Task ProcessAnonymizationResult(AnonymizationResultDto result)
         {
-            (var connectionString, var httpAccessor) = await _tenantContextService.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant);
+            (var connectionString, var httpAccessor) = await _tenantContextService.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant);
             httpAccessor.HttpContext ??= new DefaultHttpContext();
             httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 

@@ -243,7 +243,7 @@ namespace WoopiAiHub.UnitTests.Infrastructure.Multitenancy
                 .ReturnsAsync(tenant);
 
             // Act
-            var (connectionString, returnedAccessor) = await _sut.GetConnectionStringAndHttpAcessorAsync(tenantName);
+            var (connectionString, returnedAccessor) = await _sut.FindConnectionStringAndHttpAcessorAsync(tenantName);
 
             // Assert
             Assert.Equal(expectedConnectionString, connectionString);
@@ -299,7 +299,7 @@ namespace WoopiAiHub.UnitTests.Infrastructure.Multitenancy
                 .ReturnsAsync(tenant);
 
             // Act
-            var (connectionString, returnedAccessor) = await sut.GetConnectionStringAndHttpAcessorAsync(tenantName);
+            var (connectionString, returnedAccessor) = await sut.FindConnectionStringAndHttpAcessorAsync(tenantName);
 
             // Assert
             Assert.Equal(string.Empty, connectionString);
@@ -341,7 +341,7 @@ namespace WoopiAiHub.UnitTests.Infrastructure.Multitenancy
                 .ReturnsAsync(tenant);
 
             // Act
-            var (connectionString, _) = await _sut.GetConnectionStringAndHttpAcessorAsync(tenantName);
+            var (connectionString, _) = await _sut.FindConnectionStringAndHttpAcessorAsync(tenantName);
 
             // Assert
             Assert.Contains(databaseName, connectionString);
@@ -381,7 +381,7 @@ namespace WoopiAiHub.UnitTests.Infrastructure.Multitenancy
                 .ReturnsAsync(tenant);
 
             // Act
-            await _sut.GetConnectionStringAndHttpAcessorAsync(tenantName);
+            await _sut.FindConnectionStringAndHttpAcessorAsync(tenantName);
 
             // Assert
             scopeMock.Verify(x => x.Dispose(), Times.Once);
