@@ -487,7 +487,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="AppException"></exception>
-        public async Task ProcessOpenAiResponseResult(OpenAiResponseConsumerResponseDto responseDto)
+        public async Task<StepToolExecution> ProcessOpenAiResponseResult(OpenAiResponseConsumerResponseDto responseDto)
         {
             var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(responseDto.Data.ToString());
             var execution = await _stepToolExecutionRepository.FindByStepToolIdAndCardIdAsync(dataDto.StepToolId,
@@ -521,6 +521,8 @@ namespace WoopiAiHub.Application.Services
                 _unitOfWork.Rollback();
                 throw new AppException(ErrorCode.DefaultError, ex.Message, null);
             }
+
+            return execution;
         }
 
         /// <summary>

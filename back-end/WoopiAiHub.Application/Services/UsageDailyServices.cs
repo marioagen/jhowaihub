@@ -37,7 +37,8 @@ namespace WoopiAiHub.Application.Services
                 usageDailyDto.UsageTypeId,
                 usageDailyDto.UsageCount,
                 usageDailyDto.Processed,
-                usageDailyDto.ModelEmbeddingId
+                usageDailyDto.ModelEmbeddingId,
+                usageDailyDto.WorkflowId
             );
 
             return await _usageDailyRepository.AddAsync(usageDaily);
@@ -57,7 +58,8 @@ namespace WoopiAiHub.Application.Services
                 usageDailyDto.UsageTypeId,
                 usageDailyDto.UsageCount,
                 usageDailyDto.Processed,
-                usageDailyDto.ModelEmbeddingId
+                usageDailyDto.ModelEmbeddingId,
+                usageDailyDto.WorkflowId
             )).ToList();
 
             return await _usageDailyRepository.AddRangeAsync(usageDailies);
@@ -70,8 +72,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="email"></param>
         /// <param name="count"></param>
         /// <param name="modelEmbedding"></param>
+        /// <param name="workflowId"></param>
         /// <returns></returns>
-        public async Task<bool> AddByValuesAsync(string usageTypeName, string email, int count, string modelEmbedding = "")
+        public async Task<bool> AddByValuesAsync(string usageTypeName, string email, int count, string modelEmbedding = "", int? workflowId = null)
         {
             var usageType = await _usageTypeServices.FindByNameAsync(usageTypeName);
             if (usageType == null)
@@ -95,7 +98,9 @@ namespace WoopiAiHub.Application.Services
                 usageType.Id,
                 count,
                 userId,
-                modelEmbeddingId
+                modelEmbeddingId,
+                false,
+                workflowId
             );
 
             return await AddAsync(usageDailyDto);
@@ -107,8 +112,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="usageTypeName"></param>
         /// <param name="email"></param>
         /// <param name="usages"></param>
+        /// <param name="workflowId"></param>
         /// <returns></returns>
-        public async Task<bool> AddByRangeValuesAsync(string usageTypeName, string email, List<QueryUsageDto> usages)
+        public async Task<bool> AddByRangeValuesAsync(string usageTypeName, string email, List<QueryUsageDto> usages, int? workflowId = null)
         {
             var usageType = await _usageTypeServices.FindByNameAsync(usageTypeName);
             if (usageType is null)
@@ -148,7 +154,9 @@ namespace WoopiAiHub.Application.Services
                     usageType.Id,
                     m.TotalUsage,
                     userId,
-                    m.ModelId
+                    m.ModelId,
+                    false,
+                    workflowId
                 ))
                 .ToList();
 

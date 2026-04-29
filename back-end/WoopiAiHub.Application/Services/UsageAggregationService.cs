@@ -116,7 +116,8 @@ namespace WoopiAiHub.Application.Services
                     ud.UsageTypeId,
                     ud.ModelEmbeddingId,
                     ud.UserId,
-                    Day = ud.Created.Date
+                    Day = ud.Created.Date,
+                    ud.WorkflowId
                 })
                 .ToList();
 
@@ -129,7 +130,8 @@ namespace WoopiAiHub.Application.Services
                     usageTypeId: group.Key.UsageTypeId,
                     total: totalUsage,
                     modelEmbeddingId: group.Key.ModelEmbeddingId,
-                    userId: group.Key.UserId
+                    userId: group.Key.UserId,
+                    workflowId: group.Key.WorkflowId
                 );
 
                 await usageMonthRepository.UpsertAsync(dailyRecord);
