@@ -1,7 +1,3 @@
-# Infraestrutura local: RabbitMQ, Redis, SQL Server.
-# Uso: docker compose up -d
-# Opcional: defina MSSQL_SA_PASSWORD em .env (ver docker-compose.env.example) para não usar o default local.
-
 name: woopi-ai
 
 services:
@@ -14,7 +10,6 @@ services:
         volumes:
             - rabbitmq-data:/var/lib/rabbitmq
         environment:
-            # Alinhado a appsettings Messaging.Brokers.RabbitMQ (guest/guest em localhost).
             RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
             RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
 
@@ -36,7 +31,6 @@ services:
             - mssql-data:/var/opt/mssql
         environment:
             ACCEPT_EULA: "Y"
-            # Default só para desenvolvimento local; sobrescreva com MSSQL_SA_PASSWORD no .env se quiser outra senha.
             MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-Strong!WortePass99}
 
 volumes:
