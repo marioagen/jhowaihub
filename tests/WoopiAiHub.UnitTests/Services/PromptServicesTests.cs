@@ -686,7 +686,7 @@ namespace WoopiAiHub.UnitTests.Services
             promptRepository.Setup(r => r.CreateUniquePromptAndReturn(It.IsAny<Prompt>())).Returns(returnedPrompt);
 
             //Act
-            var result = await _promptServices.CreateUniquePromptFromIntegration(dto, email);
+            var result = _promptServices.CreateUniquePromptFromIntegration(dto, email);
 
             //Assert
             Assert.NotNull(result);
@@ -710,7 +710,7 @@ namespace WoopiAiHub.UnitTests.Services
             validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(false);
 
             //Act/Assert
-            await Assert.ThrowsAsync<ArgumentException>(() =>
+            Assert.Throws<ArgumentException>(() =>
                 _promptServices.CreateUniquePromptFromIntegration(dto, email));
         }
 
@@ -731,7 +731,7 @@ namespace WoopiAiHub.UnitTests.Services
             promptRepository.Setup(r => r.CreateUniquePromptAndReturn(It.IsAny<Prompt>())).Returns((Prompt?)null);
 
             //Act/Assert
-            await Assert.ThrowsAsync<AppException>(() =>
+            Assert.Throws<AppException>(() =>
                 _promptServices.CreateUniquePromptFromIntegration(dto, email));
         }
 

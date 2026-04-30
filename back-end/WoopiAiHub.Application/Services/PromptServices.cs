@@ -227,7 +227,7 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="AppException"></exception>
-        public async Task<PromptIntegrationDto> CreateUniquePromptFromIntegration(
+        public PromptIntegrationDto CreateUniquePromptFromIntegration(
             PromptIntegrationCreateDto promptIntegrationCreateDto,
             string email)
         {

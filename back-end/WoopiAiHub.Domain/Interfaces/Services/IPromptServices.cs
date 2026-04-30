@@ -8,7 +8,7 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     public interface IPromptServices
     {
         bool CreateUniquePrompt(PromptCreateDto promptCreateDto, string email);
-        Task<PromptIntegrationDto> CreateUniquePromptFromIntegration(
+        PromptIntegrationDto CreateUniquePromptFromIntegration(
             PromptIntegrationCreateDto promptIntegrationCreateDto,
             string email);
         Task<bool> Update(PromptUpdateDto promptUpdateDto, string emailCreator);

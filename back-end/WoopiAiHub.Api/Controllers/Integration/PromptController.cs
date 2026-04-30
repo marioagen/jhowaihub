@@ -51,12 +51,12 @@ namespace WoopiAiHub.Api.Controllers.Internal
         [HttpPost]
         [SwaggerOperation("Endpoint that receives the request to create a Prompt in the database")]
         [ProducesResponseType(typeof(PromptIntegrationDto), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Create(
+        public IActionResult Create(
             [FromBody] PromptIntegrationCreateDto promptIntegrationCreateDto,
             [FromHeader] HeadersDto headersDto)
         {
 
-            var result = await _promptServices.CreateUniquePromptFromIntegration(
+            var result = _promptServices.CreateUniquePromptFromIntegration(
                             promptIntegrationCreateDto,
                             headersDto.EmailCreator);
             return Ok(result);
