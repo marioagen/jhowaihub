@@ -229,7 +229,6 @@ public class PromptHandler : IToolHandler
         return dict;
     }
 
-
     /// <summary>
     /// Extracts and concatenates text from dependency outputs. OCR output is parsed from DocumentEmbeddings; Prompt output is used as plain text.
     /// When StepTool/ToolType is not available (e.g. tests), tries OCR format first, then falls back to plain text.
