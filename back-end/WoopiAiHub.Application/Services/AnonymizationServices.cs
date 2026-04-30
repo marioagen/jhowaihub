@@ -141,7 +141,7 @@ namespace WoopiAiHub.Application.Services
             httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
             var documentRepository = scope.ServiceProvider.GetRequiredService<IDocumentRepository>();
-            var documentAnonymizationRepository = scope.ServiceProvider.GetRequiredService<IDocumentAnonymizationRepository>();
+            var documentAnonymizationRepositoryService = scope.ServiceProvider.GetRequiredService<IDocumentAnonymizationRepository>();
             var hubNotifier = scope.ServiceProvider.GetRequiredService<IHubNotifier>();
 
             var document = documentRepository.FindById(result.WoopiAiDocumentId) ?? throw new AppException(ErrorCode.NotFound, "Document not found", null);
@@ -152,7 +152,7 @@ namespace WoopiAiHub.Application.Services
                 document.Id,
                 result.DocumentUrl
             );
-            await documentAnonymizationRepository.CreateAsync(documentAnonymization);
+            await documentAnonymizationRepositoryService.CreateAsync(documentAnonymization);
 
             await hubNotifier.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl);
         }
