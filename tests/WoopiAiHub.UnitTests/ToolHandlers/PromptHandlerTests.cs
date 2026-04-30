@@ -331,9 +331,9 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 .Returns("token-test");
 
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
-            var message = (OpenAiResponseQueryDto)result.Message;
+            var message = result.Message as OpenAiResponseQueryDto;
 
-            var apisJson = ExtractMappedApisJsonFromInstructions(message.OpenAiResponse!.Instructions!);
+            var apisJson = ExtractMappedApisJsonFromInstructions(message?.OpenAiResponse!.Instructions!);
             using var doc = JsonDocument.Parse(apisJson);
             var first = doc.RootElement.EnumerateArray().First();
             var headers = first.GetProperty("headers");
@@ -366,9 +366,9 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 .Returns("token-test");
 
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
-            var message = (OpenAiResponseQueryDto)result.Message;
+            var message = result.Message as OpenAiResponseQueryDto;
 
-            var apisJson = ExtractMappedApisJsonFromInstructions(message.OpenAiResponse!.Instructions!);
+            var apisJson = ExtractMappedApisJsonFromInstructions(message?.OpenAiResponse!.Instructions!);
             using var doc = JsonDocument.Parse(apisJson);
             foreach (var el in doc.RootElement.EnumerateArray())
             {
@@ -403,9 +403,9 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 .Returns("token-test");
 
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
-            var message = (OpenAiResponseQueryDto)result.Message;
+            var message = result.Message as OpenAiResponseQueryDto;
 
-            var apisJson = ExtractMappedApisJsonFromInstructions(message.OpenAiResponse!.Instructions!);
+            var apisJson = ExtractMappedApisJsonFromInstructions(message?.OpenAiResponse!.Instructions!);
             using var doc = JsonDocument.Parse(apisJson);
             var headers = doc.RootElement[0].GetProperty("headers");
             Assert.Single(headers.EnumerateObject());
