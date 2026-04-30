@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
@@ -21,11 +22,10 @@ namespace WoopiAiHub.Application.Services
         IAnonymizationApi anonymizationApi,
         IConfiguration configuration,
         IHttpClientFactory httpClientFactory,
-        IHubNotifier hubNotifier,
         IAuditCardService auditCardService,
-        IDocumentRepository documentRepository,
         IDocumentAnonymizationRepository documentAnonymizationRepository,
         ITenantContextService tenantContextService,
+        IServiceScopeFactory scopeFactory,
         ILogger<AnonymizationServices> logger
     ) : IAnonymizationServices
     {
@@ -33,11 +33,10 @@ namespace WoopiAiHub.Application.Services
         private readonly IAnonymizationApi _anonymizationApi = anonymizationApi;
         private readonly IConfiguration _configuration = configuration;
         private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
-        private readonly IHubNotifier _hubNotifier = hubNotifier;
         private readonly IAuditCardService _auditCardService = auditCardService;
-        private readonly IDocumentRepository _documentRepository = documentRepository;
         private readonly IDocumentAnonymizationRepository _documentAnonymizationRepository = documentAnonymizationRepository;
         private readonly ITenantContextService _tenantContextService = tenantContextService;
+        private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
         private readonly ILogger<AnonymizationServices> _logger = logger;
 
         /// <summary>
@@ -134,11 +133,18 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="AppException">Thrown if the document specified by the anonymization result cannot be found.</exception>
         public async Task ProcessAnonymizationResult(AnonymizationResultDto result)
         {
-            (var connectionString, var httpAccessor) = await _tenantContextService.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant);
+            using var scope = _scopeFactory.CreateScope();
+
+            var connectionString = await _tenantContextService.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant, scope);
+            var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
             httpAccessor.HttpContext ??= new DefaultHttpContext();
             httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
-            var document = _documentRepository.FindById(result.WoopiAiDocumentId) ?? throw new AppException(ErrorCode.NotFound, "Document not found", null);
+            var documentRepository = scope.ServiceProvider.GetRequiredService<IDocumentRepository>();
+            var documentAnonymizationRepository = scope.ServiceProvider.GetRequiredService<IDocumentAnonymizationRepository>();
+            var hubNotifier = scope.ServiceProvider.GetRequiredService<IHubNotifier>();
+
+            var document = documentRepository.FindById(result.WoopiAiDocumentId) ?? throw new AppException(ErrorCode.NotFound, "Document not found", null);
 
             var documentAnonymization = new DocumentAnonymization(
                 0,
@@ -146,9 +152,9 @@ namespace WoopiAiHub.Application.Services
                 document.Id,
                 result.DocumentUrl
             );
-            await _documentAnonymizationRepository.CreateAsync(documentAnonymization);
+            await documentAnonymizationRepository.CreateAsync(documentAnonymization);
 
-            await _hubNotifier.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl);
+            await hubNotifier.AnonymizationReadyAsync(result.WoopiAiEmail, result.WoopiAiDocumentId, result.DocumentUrl);
         }
 
         /// <summary>
