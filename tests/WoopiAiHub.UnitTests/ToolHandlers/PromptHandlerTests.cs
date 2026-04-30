@@ -374,7 +374,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             {
                 var headers = el.GetProperty("headers");
                 Assert.Equal(JsonValueKind.Object, headers.ValueKind);
-                Assert.Equal(0, headers.EnumerateObject().Count());
+                Assert.Empty(headers.EnumerateObject());
             }
         }
 
