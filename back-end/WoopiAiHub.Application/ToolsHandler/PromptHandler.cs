@@ -207,6 +207,11 @@ public class PromptHandler : IToolHandler
         return string.IsNullOrEmpty(mappedApiString) ? "" : _mcpSettings.Instructions.Replace("{0}", mappedApiString);
     }
 
+    /// <summary>
+    /// Method used to convert the headers from api template to a dictionary
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns></returns>
     private static Dictionary<string, string> ExtractHeadersValues(string? item)
     {
         if (string.IsNullOrEmpty(item))
@@ -222,6 +227,11 @@ public class PromptHandler : IToolHandler
         {
             var key = el.GetProperty("key").GetString();
             var value = el.GetProperty("value").GetString();
+
+            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+            {
+                continue;
+            }
 
             dict[key] = value;
         }
