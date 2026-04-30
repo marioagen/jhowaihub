@@ -238,7 +238,7 @@ namespace WoopiAiHub.UnitTests.Services
             _promptRepository.Setup(r => r.FindById(1)).Returns((PromptDto)null);
 
             //Act/Assert
-            Assert.Throws<ArgumentException>(() => _promptServices.FindById(1));
+            Assert.Throws<AppException>(() => _promptServices.FindById(1));
         }
 
         [Fact(DisplayName = "Find all prompts success")]
@@ -668,6 +668,73 @@ namespace WoopiAiHub.UnitTests.Services
                 await _promptServices.ImportPromptsByIds(templateIds, "email"));
         }
 
+        [Fact(DisplayName = "Create unique prompt from integration success")]
+        [Trait("CreateUniquePromptFromIntegration", "Success")]
+        public async Task CreateUniquePromptFromIntegration_Success()
+        {
+            //Arrange
+            var dto = MessagingFixture.FindValidPromptIntegrationCreateDto();
+            var email = "user@teste.com";
+            var idUser = Guid.NewGuid();
+            var returnedPrompt = new Prompt(1, DateTime.Now, dto.Name, dto.Description, dto.Text, idUser, isEdited: false, isImported: true);
+            var userServices = _mocker.GetMock<IUserServices>();
+            var validatePrompt = _mocker.GetMock<IValidatePrompt>();
+            var promptRepository = _mocker.GetMock<IPromptRepository>();
+
+            userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
+            validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(true);
+            promptRepository.Setup(r => r.CreateUniquePromptAndReturn(It.IsAny<Prompt>())).Returns(returnedPrompt);
+
+            //Act
+            var result = await _promptServices.CreateUniquePromptFromIntegration(dto, email);
+
+            //Assert
+            Assert.NotNull(result);
+            Assert.Equal(dto.Name, result.Name);
+            Assert.Equal(dto.Description, result.Description);
+            Assert.Equal(dto.Text, result.Text);
+        }
+
+        [Fact(DisplayName = "Create unique prompt from integration should throw argument exception when fields are invalid")]
+        [Trait("CreateUniquePromptFromIntegration", "Fail")]
+        public async Task CreateUniquePromptFromIntegration_ShouldThrowArgumentException_InvalidFields()
+        {
+            //Arrange
+            var dto = MessagingFixture.FindValidPromptIntegrationCreateDto();
+            var email = "user@teste.com";
+            var idUser = Guid.NewGuid();
+            var userServices = _mocker.GetMock<IUserServices>();
+            var validatePrompt = _mocker.GetMock<IValidatePrompt>();
+
+            userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
+            validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(false);
+
+            //Act/Assert
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _promptServices.CreateUniquePromptFromIntegration(dto, email));
+        }
+
+        [Fact(DisplayName = "Create unique prompt from integration should throw app exception when is duplicated")]
+        [Trait("CreateUniquePromptFromIntegration", "Fail")]
+        public async Task CreateUniquePromptFromIntegration_ShouldThrowAppException_Duplicated()
+        {
+            //Arrange
+            var dto = MessagingFixture.FindValidPromptIntegrationCreateDto();
+            var email = "user@teste.com";
+            var idUser = Guid.NewGuid();
+            var userServices = _mocker.GetMock<IUserServices>();
+            var validatePrompt = _mocker.GetMock<IValidatePrompt>();
+            var promptRepository = _mocker.GetMock<IPromptRepository>();
+
+            userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
+            validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(true);
+            promptRepository.Setup(r => r.CreateUniquePromptAndReturn(It.IsAny<Prompt>())).Returns((Prompt?)null);
+
+            //Act/Assert
+            await Assert.ThrowsAsync<AppException>(() =>
+                _promptServices.CreateUniquePromptFromIntegration(dto, email));
+        }
+
         [Fact(DisplayName = "Find all basic prompts success")]
         [Trait("FindAllBasic", "Success")]
         public async Task FindAllBasic_Success()
@@ -694,7 +761,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task FindAllBasic_ShouldReturnEmptyCollection()
         {
             //Arrange
-            var emptyPrompts = new List<PromptInternalDto>();
+            var emptyPrompts = new List<PromptIntegrationDto>();
 
             _mocker.GetMock<IPromptRepository>()
                 .Setup(r => r.FindAllInternal())

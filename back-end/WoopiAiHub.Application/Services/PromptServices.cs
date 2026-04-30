@@ -220,6 +220,48 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Create a new prompt from integration, this method is used for create a prompt from external source like prompt templates, for this reason the validation is only for the fields and not for the ownership, because the prompt is created with the user that is making the request and not with the user that is in the template, also this method return the prompt created with the id to be used in the front end after the integration
+        /// </summary>
+        /// <param name="promptIntegrationCreateDto"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="AppException"></exception>
+        public async Task<PromptIntegrationDto> CreateUniquePromptFromIntegration(
+            PromptIntegrationCreateDto promptIntegrationCreateDto,
+            string email)
+        {
+            var idUser = _userServices.FindIdByEmail(email);
+            var prompt = new Prompt(
+                0,
+                DateTime.Now,
+                promptIntegrationCreateDto.Name,
+                promptIntegrationCreateDto.Description,
+                promptIntegrationCreateDto.Text,
+                idUser,
+                isEdited: false,
+                isImported: true
+            );
+            var result = _validatePrompt.ValidatePromptFields(prompt);
+            if (!result)
+            {
+                throw new ArgumentException("Invalid prompt fields");
+            }
+            var createPromptResult = _promptRepository.CreateUniquePromptAndReturn(prompt);
+            if (createPromptResult == null)
+            {
+                throw new AppException(ErrorCode.Duplicated, "prompts.duplicated", null);
+            }
+            return new PromptIntegrationDto
+            {
+                Id = prompt.Id,
+                Name = prompt.Name,
+                Description = prompt.Description,
+                Text = prompt.Text
+            };
+        }
+
+        /// <summary>
         /// Update a prompt
         /// </summary>
         /// <param name="promptUpdateDto"></param>
@@ -372,7 +414,8 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public PromptDto FindById(int id)
         {
-            return _promptRepository.FindById(id) ?? throw new ArgumentException("Prompt not found");
+            return _promptRepository.FindById(id) ??
+                throw new AppException(ErrorCode.NotFound, "Prompt not found", null);
         }
 
         /// <summary>
@@ -395,7 +438,7 @@ namespace WoopiAiHub.Application.Services
         /// Asynchronously retrieves all prompts in the basic format.
         /// </summary>
         /// <returns></returns>
-        public async Task<ICollection<PromptInternalDto>> FindAllInternal()
+        public async Task<ICollection<PromptIntegrationDto>> FindAllInternal()
         {
             return await _promptRepository.FindAllInternal();
         }
