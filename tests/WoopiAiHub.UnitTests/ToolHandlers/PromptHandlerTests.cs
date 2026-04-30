@@ -288,7 +288,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var tool = message.OpenAiResponse.Tools[0];
             Assert.Equal(OpenAiResponseToolsType.Mcp, tool.Type);
             Assert.Single(tool.AllowedTools);
-            Assert.Equal("generalista", tool.AllowedTools[0]);
+            Assert.Equal("generalist", tool.AllowedTools[0]);
 
             Assert.NotNull(tool.Headers);
             Assert.Equal("Bearer token-test", tool.Headers["Authorization"]);
