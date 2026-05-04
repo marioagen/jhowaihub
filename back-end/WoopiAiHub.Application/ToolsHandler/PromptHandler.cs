@@ -162,7 +162,7 @@ public class PromptHandler : IToolHandler
                         {"Authorization", $"Bearer {accessToken}"}
                     },
                 RequireApproval="never",
-                AllowedTools=["generalista"]
+                AllowedTools=["generalist"]
             }
         };
     }
@@ -188,7 +188,7 @@ public class PromptHandler : IToolHandler
                 _ => 3
             },
             description = api.Description,
-            headers = api.HeaderTemplate,
+            headers = ExtractHeadersValues(api.HeaderTemplate),
             payload_schema = api.Method switch
             {
                 "GET" => null,
@@ -205,6 +205,38 @@ public class PromptHandler : IToolHandler
         }
 
         return string.IsNullOrEmpty(mappedApiString) ? "" : _mcpSettings.Instructions.Replace("{0}", mappedApiString);
+    }
+
+    /// <summary>
+    /// Method used to convert the headers from api template to a dictionary
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns></returns>
+    private static Dictionary<string, string> ExtractHeadersValues(string? item)
+    {
+        if (string.IsNullOrEmpty(item))
+        {
+            return new Dictionary<string, string>();
+        }
+
+        var doc = JsonDocument.Parse(item);
+
+        var dict = new Dictionary<string, string>();
+
+        foreach (var el in doc.RootElement.EnumerateArray())
+        {
+            var key = el.GetProperty("key").GetString();
+            var value = el.GetProperty("value").GetString();
+
+            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+            {
+                continue;
+            }
+
+            dict[key] = value;
+        }
+
+        return dict;
     }
 
     /// <summary>

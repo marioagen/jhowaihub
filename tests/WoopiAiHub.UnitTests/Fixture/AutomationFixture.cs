@@ -1,10 +1,6 @@
 using Bogus;
-using Bogus.DataSets;
-using Microsoft.AspNetCore.Http.HttpResults;
-using StackExchange.Redis;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Connector;
-using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Request.Automation;
 using WoopiAiHub.Domain.DTOs.Response;

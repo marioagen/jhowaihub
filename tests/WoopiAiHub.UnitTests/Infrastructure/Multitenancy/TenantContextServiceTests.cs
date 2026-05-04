@@ -221,37 +221,22 @@ namespace WoopiAiHub.UnitTests.Infrastructure.Multitenancy
             var scopeMock = new Mock<IServiceScope>();
             var scopeServiceProviderMock = new Mock<IServiceProvider>();
             var tenantCacheServiceMock = new Mock<ITenantCacheServices>();
-            var httpAccessor = new Mock<IHttpContextAccessor>();
 
             scopeServiceProviderMock
                 .Setup(x => x.GetService(typeof(ITenantCacheServices)))
                 .Returns(tenantCacheServiceMock.Object);
 
-            scopeServiceProviderMock
-                .Setup(x => x.GetService(typeof(IHttpContextAccessor)))
-                .Returns(httpAccessor.Object);
-
             scopeMock.Setup(x => x.ServiceProvider).Returns(scopeServiceProviderMock.Object);
-
-            var scopeFactoryMock = _mocker.GetMock<IServiceScopeFactory>();
-            scopeFactoryMock
-                .Setup(x => x.CreateScope())
-                .Returns(scopeMock.Object);
 
             tenantCacheServiceMock
                 .Setup(x => x.FindTenantAsync(tenantName))
                 .ReturnsAsync(tenant);
 
             // Act
-            var (connectionString, returnedAccessor) = await _sut.GetConnectionStringAndHttpAcessorAsync(tenantName);
+            var connectionString = await _sut.FindConnectionStringAndHttpAcessorAsync(tenantName, scopeMock.Object);
 
             // Assert
             Assert.Equal(expectedConnectionString, connectionString);
-            Assert.Equal(httpAccessor.Object, returnedAccessor);
-
-            scopeFactoryMock.Verify(
-                x => x.CreateScope(),
-                Times.Once);
 
             tenantCacheServiceMock.Verify(
                 x => x.FindTenantAsync(tenantName),
@@ -277,33 +262,22 @@ namespace WoopiAiHub.UnitTests.Infrastructure.Multitenancy
             var scopeMock = new Mock<IServiceScope>();
             var scopeServiceProviderMock = new Mock<IServiceProvider>();
             var tenantCacheServiceMock = new Mock<ITenantCacheServices>();
-            var httpAccessor = new Mock<IHttpContextAccessor>();
 
             scopeServiceProviderMock
                 .Setup(x => x.GetService(typeof(ITenantCacheServices)))
                 .Returns(tenantCacheServiceMock.Object);
 
-            scopeServiceProviderMock
-                .Setup(x => x.GetService(typeof(IHttpContextAccessor)))
-                .Returns(httpAccessor.Object);
-
             scopeMock.Setup(x => x.ServiceProvider).Returns(scopeServiceProviderMock.Object);
-
-            var scopeFactoryMock = mocker.GetMock<IServiceScopeFactory>();
-            scopeFactoryMock
-                .Setup(x => x.CreateScope())
-                .Returns(scopeMock.Object);
 
             tenantCacheServiceMock
                 .Setup(x => x.FindTenantAsync(tenantName))
                 .ReturnsAsync(tenant);
 
             // Act
-            var (connectionString, returnedAccessor) = await sut.GetConnectionStringAndHttpAcessorAsync(tenantName);
+            var connectionString = await sut.FindConnectionStringAndHttpAcessorAsync(tenantName, scopeMock.Object);
 
             // Assert
             Assert.Equal(string.Empty, connectionString);
-            Assert.Equal(httpAccessor.Object, returnedAccessor);
         }
 
         [Fact(DisplayName = "GetConnectionStringAndHttpAcessorAsync - Should properly format connection string with tenant database name")]
@@ -319,29 +293,19 @@ namespace WoopiAiHub.UnitTests.Infrastructure.Multitenancy
             var scopeMock = new Mock<IServiceScope>();
             var scopeServiceProviderMock = new Mock<IServiceProvider>();
             var tenantCacheServiceMock = new Mock<ITenantCacheServices>();
-            var httpAccessor = new Mock<IHttpContextAccessor>();
 
             scopeServiceProviderMock
                 .Setup(x => x.GetService(typeof(ITenantCacheServices)))
                 .Returns(tenantCacheServiceMock.Object);
 
-            scopeServiceProviderMock
-                .Setup(x => x.GetService(typeof(IHttpContextAccessor)))
-                .Returns(httpAccessor.Object);
-
             scopeMock.Setup(x => x.ServiceProvider).Returns(scopeServiceProviderMock.Object);
-
-            var scopeFactoryMock = _mocker.GetMock<IServiceScopeFactory>();
-            scopeFactoryMock
-                .Setup(x => x.CreateScope())
-                .Returns(scopeMock.Object);
 
             tenantCacheServiceMock
                 .Setup(x => x.FindTenantAsync(tenantName))
                 .ReturnsAsync(tenant);
 
             // Act
-            var (connectionString, _) = await _sut.GetConnectionStringAndHttpAcessorAsync(tenantName);
+            var connectionString = await _sut.FindConnectionStringAndHttpAcessorAsync(tenantName, scopeMock.Object);
 
             // Assert
             Assert.Contains(databaseName, connectionString);
@@ -359,32 +323,22 @@ namespace WoopiAiHub.UnitTests.Infrastructure.Multitenancy
             var scopeMock = new Mock<IServiceScope>();
             var scopeServiceProviderMock = new Mock<IServiceProvider>();
             var tenantCacheServiceMock = new Mock<ITenantCacheServices>();
-            var httpAccessor = new Mock<IHttpContextAccessor>();
 
             scopeServiceProviderMock
                 .Setup(x => x.GetService(typeof(ITenantCacheServices)))
                 .Returns(tenantCacheServiceMock.Object);
 
-            scopeServiceProviderMock
-                .Setup(x => x.GetService(typeof(IHttpContextAccessor)))
-                .Returns(httpAccessor.Object);
-
             scopeMock.Setup(x => x.ServiceProvider).Returns(scopeServiceProviderMock.Object);
-
-            var scopeFactoryMock = _mocker.GetMock<IServiceScopeFactory>();
-            scopeFactoryMock
-                .Setup(x => x.CreateScope())
-                .Returns(scopeMock.Object);
 
             tenantCacheServiceMock
                 .Setup(x => x.FindTenantAsync(tenantName))
                 .ReturnsAsync(tenant);
 
             // Act
-            await _sut.GetConnectionStringAndHttpAcessorAsync(tenantName);
+            await _sut.FindConnectionStringAndHttpAcessorAsync(tenantName, scopeMock.Object);
 
             // Assert
-            scopeMock.Verify(x => x.Dispose(), Times.Once);
+            // The scope is provided by the caller, so dispose verification is not applicable
         }
 
         #endregion
