@@ -322,8 +322,8 @@ namespace WoopiAiHub.UnitTests.Services
             scopeFactoryMock.Setup(x => x.CreateScope()).Returns(scopeMock.Object);
 
             tenantContextServiceMock
-                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
-                .ReturnsAsync((connectionString, httpContextAccessor.Object));
+                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant, It.IsAny<IServiceScope>()))
+                .ReturnsAsync(connectionString);
 
             documentRepositoryMock
                 .Setup(x => x.FindById(result.WoopiAiDocumentId))
@@ -406,7 +406,6 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("Document not found", exception.Message);
 
             tenantContextServiceMock.Verify(
-                x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant),
                 x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant, It.IsAny<IServiceScope>()),
                 Times.Once);
 
