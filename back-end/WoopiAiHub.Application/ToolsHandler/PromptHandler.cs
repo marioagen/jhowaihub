@@ -342,6 +342,7 @@ public class PromptHandler : IToolHandler
             JsonValueKind.Array => string.Join(", ", el.EnumerateArray().Select(FormatJsonValueForApiDisplay)),
             JsonValueKind.Object => el.GetRawText(),
             JsonValueKind.Undefined => string.Empty,
+            _ => el.GetRawText(),
         };
 
     /// <summary>
