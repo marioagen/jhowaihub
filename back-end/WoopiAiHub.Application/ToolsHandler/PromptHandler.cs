@@ -331,7 +331,6 @@ public class PromptHandler : IToolHandler
     /// </summary>
     /// <param name="el">A JSON value (string, number, array, object, or literal).</param>
     /// <returns>Text to place after a property name in the flattened API output.</returns>
-#pragma warning disable CS8524 // All JsonValueKind values returned by JsonDocument are named; runtime may add more.
     private static string FormatJsonValueForApiDisplay(JsonElement el) =>
         el.ValueKind switch
         {
@@ -344,7 +343,6 @@ public class PromptHandler : IToolHandler
             JsonValueKind.Object => el.GetRawText(),
             JsonValueKind.Undefined => string.Empty,
         };
-#pragma warning restore CS8524
 
     /// <summary>
     /// Wraps a string in double quotes and escapes <c>\</c> and <c>"</c> so the result is safe to embed in the flattened key/value line.
