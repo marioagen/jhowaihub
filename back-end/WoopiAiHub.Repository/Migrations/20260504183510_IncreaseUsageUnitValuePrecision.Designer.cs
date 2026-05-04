@@ -12,7 +12,7 @@ using WoopiAiHub.Repository.Context;
 namespace WoopiAiHub.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260428191500_IncreaseUsageUnitValuePrecision")]
+    [Migration("20260504183510_IncreaseUsageUnitValuePrecision")]
     partial class IncreaseUsageUnitValuePrecision
     {
         /// <inheritdoc />
@@ -111,6 +111,14 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("Created")
                         .HasDefaultValueSql("(GETDATE())");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("varchar(max)")
+                        .HasColumnName("Description");
+
+                    b.Property<bool>("EnableAccessFromMcp")
+                        .HasColumnType("bit")
+                        .HasColumnName("EnableAccessFromMcp");
 
                     b.Property<string>("HeaderTemplate")
                         .HasColumnType("varchar(max)")
@@ -623,6 +631,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("Description");
 
+                    b.Property<bool>("EnableAccessToMcp")
+                        .HasColumnType("bit")
+                        .HasColumnName("EnableAccessToMcp");
+
                     b.Property<Guid>("IdUser")
                         .HasColumnType("uniqueIdentifier")
                         .HasColumnName("IdUser");
@@ -655,6 +667,34 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasIndex("IdUser");
 
                     b.ToTable("Prompts", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.PromptApiTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ApiTemplateId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime")
+                        .HasColumnName("Created");
+
+                    b.Property<int>("PromptId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApiTemplateId");
+
+                    b.HasIndex("PromptId");
+
+                    b.ToTable("PromptApiTemplates");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Question", b =>
@@ -1272,16 +1312,27 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("UserId");
 
+                    b.Property<int?>("WorkflowId")
+                        .HasColumnType("int")
+                        .HasColumnName("WorkflowId");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("Created")
+                        .HasDatabaseName("IX_UsageDaily_Created");
 
                     b.HasIndex("ModelEmbeddingId");
 
                     b.HasIndex("UsageTypeId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("Processed", "Created")
+                        .HasDatabaseName("IX_UsageDaily_Processed_Created");
 
-                    b.HasIndex("Processed", "UsageTypeId")
-                        .HasDatabaseName("IX_UsageDaily_Processed_UsageTypeId");
+                    b.HasIndex("UserId", "Processed")
+                        .HasDatabaseName("IX_UsageDaily_UserId_Processed");
+
+                    b.HasIndex("WorkflowId", "Processed")
+                        .HasDatabaseName("IX_UsageDaily_WorkflowId_Processed");
 
                     b.ToTable("UsageDailies");
                 });
@@ -1359,6 +1410,10 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("UserId");
 
+                    b.Property<int?>("WorkflowId")
+                        .HasColumnType("int")
+                        .HasColumnName("WorkflowId");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ModelEmbeddingId");
@@ -1366,6 +1421,8 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasIndex("UsageTypeId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("WorkflowId");
 
                     b.ToTable("UsageMonths");
                 });
@@ -1767,6 +1824,25 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.PromptApiTemplate", b =>
+                {
+                    b.HasOne("WoopiAiHub.Domain.Models.ApiTemplate", "ApiTemplate")
+                        .WithMany("PromptApiTemplates")
+                        .HasForeignKey("ApiTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WoopiAiHub.Domain.Models.Prompt", "Prompt")
+                        .WithMany("PromptApiTemplates")
+                        .HasForeignKey("PromptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApiTemplate");
+
+                    b.Navigation("Prompt");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.QuestionQuestionnaire", b =>
                 {
                     b.HasOne("WoopiAiHub.Domain.Models.Question", "Question")
@@ -1990,11 +2066,17 @@ namespace WoopiAiHub.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WoopiAiHub.Domain.Models.Workflow", "Workflow")
+                        .WithMany("UsageDailies")
+                        .HasForeignKey("WorkflowId");
+
                     b.Navigation("ModelEmbedding");
 
                     b.Navigation("UsageType");
 
                     b.Navigation("User");
+
+                    b.Navigation("Workflow");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageLog", b =>
@@ -2040,11 +2122,17 @@ namespace WoopiAiHub.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WoopiAiHub.Domain.Models.Workflow", "Workflow")
+                        .WithMany("UsageMonths")
+                        .HasForeignKey("WorkflowId");
+
                     b.Navigation("ModelEmbedding");
 
                     b.Navigation("UsageType");
 
                     b.Navigation("User");
+
+                    b.Navigation("Workflow");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.UsageUnit", b =>
@@ -2092,6 +2180,11 @@ namespace WoopiAiHub.Repository.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.ApiTemplate", b =>
+                {
+                    b.Navigation("PromptApiTemplates");
+                });
+
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Card", b =>
                 {
                     b.Navigation("Executions");
@@ -2136,6 +2229,11 @@ namespace WoopiAiHub.Repository.Migrations
                     b.Navigation("StepProfilePermissions");
 
                     b.Navigation("Steps");
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.Prompt", b =>
+                {
+                    b.Navigation("PromptApiTemplates");
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Question", b =>
@@ -2226,6 +2324,10 @@ namespace WoopiAiHub.Repository.Migrations
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Workflow", b =>
                 {
                     b.Navigation("Steps");
+
+                    b.Navigation("UsageDailies");
+
+                    b.Navigation("UsageMonths");
                 });
 #pragma warning restore 612, 618
         }
