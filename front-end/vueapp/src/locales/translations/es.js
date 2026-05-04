@@ -404,6 +404,8 @@ const spanish = {
         downloadSuccessfully: "Descargar con éxito",
         exportBtn: "Exportar CSV",
         filters: {
+            allWorkflows: "Todas las ejecuciones",
+            unclassified: "No clasificado",
             currentMonth: "Este Mes",
             lastMonth: "Mes Pasado",
             previousNinety: "Últimos 90 Días",

@@ -401,6 +401,8 @@ const english = {
         downloadSuccessfully: "Download successfully",
         exportBtn: "Export CSV",
         filters: {
+            allWorkflows: "All Workflows",
+            unclassified: "Unclassified",
             currentMonth: "This Month",
             lastMonth: "Last Month",
             previousNinety: "Last 90 Days",

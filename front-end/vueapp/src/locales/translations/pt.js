@@ -397,6 +397,8 @@ const portuguese = {
         downloadSuccessfully: "Download com sucesso",
         exportBtn: "Exportar CSV",
         filters: {
+            allWorkflows: "Todas as esteiras",
+            unclassified: "Não classificado",
             currentMonth: "Este mês",
             lastMonth: "Mês passado",
             previousNinety: "Últimos 90 dias",

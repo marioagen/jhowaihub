@@ -60,6 +60,11 @@
                 type: String,
                 required: true,
             },
+            workflowIds: {
+                type: Array,
+                required: false,
+                default: () => [],
+            },
             usageUnits: {
                 type: Array,
                 required: true,
@@ -127,6 +132,9 @@
             end() {
                 this.getWorkflowsAutomaticData();
             },
+            workflowIds() {
+                this.getWorkflowsAutomaticData();
+            },
             calculatedTotal(newValue) {
                 this.$emit("totalCalculated", newValue);
             },
@@ -138,6 +146,11 @@
                     end: this.end,
                     usageType: ColTypeUsage.Automation,
                 };
+
+                if (this.workflowIds.length > 0 && !this.workflowIds.includes(null)) {
+                    params.workflowIds = this.workflowIds;
+                }
+
                 this.isLoaded = false;
                 DashboardServices.GetByUsageType(params)
                     .then((response) => {

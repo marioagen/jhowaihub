@@ -63,6 +63,11 @@
                 type: String,
                 required: true,
             },
+            workflowIds: {
+                type: Array,
+                required: false,
+                default: () => [],
+            },
             usageUnits: {
                 type: Array,
                 required: true,
@@ -117,6 +122,17 @@
         created() {
             this.getPagesData();
         },
+        watch: {
+            start() {
+                this.getPagesData();
+            },
+            end() {
+                this.getPagesData();
+            },
+            workflowIds() {
+                this.getPagesData();
+            },
+        },
         methods: {
             getPagesData() {
                 this.isLoaded = false;
@@ -125,6 +141,11 @@
                     end: this.end,
                     usageType: ColTypeUsage.Page,
                 };
+
+                if (this.workflowIds.length > 0 && !this.workflowIds.includes(null)) {
+                    params.workflowIds = this.workflowIds;
+                }
+
                 DashboardServices.GetByUsageType(params)
                     .then((response) => {
                         if (response && !response.error) {

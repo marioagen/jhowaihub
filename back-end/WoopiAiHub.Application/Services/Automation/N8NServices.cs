@@ -34,15 +34,15 @@ namespace WoopiAiHub.Application.Services.Automation
         {
             var execution = await _stepToolExecutionRepository.FindByIdAsync(automationOutputDto.ExecutionId);
 
-            var automationServicesDto = new AutomationServicesDto
-                (
-                    execution!.StepToolId,
-                    execution.CardId,
-                    automationOutputDto.Tenant!,
-                    automationOutputDto.Email!,
-                    execution.Card!.Document!.ReferenceFile,
-                    0
-                );
+            var automationServicesDto = new AutomationServicesDto(
+                execution!.StepToolId,
+                execution.CardId,
+                automationOutputDto.Tenant!,
+                automationOutputDto.Email!,
+                execution.Card!.Document!.ReferenceFile,
+                execution.StepTool?.StepId,
+                execution.StepTool?.Step?.WorkflowId
+            );
 
             var content = automationOutputDto.Content?.ToString() ?? "";
             var stepToolOutput = new StepToolOutput(

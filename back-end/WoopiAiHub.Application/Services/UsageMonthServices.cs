@@ -25,7 +25,7 @@ namespace WoopiAiHub.Application.Services
             var startDate = DateHelper.ParseDate(usageMonthFilterDto.Start);
             var endDate = DateHelper.ParseDate(usageMonthFilterDto.End);
 
-            return await _usageMonthRepository.FindDataByUsageType(usageMonthFilterDto.UsageType, startDate, endDate);
+            return await _usageMonthRepository.FindDataByUsageType(usageMonthFilterDto.UsageType, startDate, endDate, usageMonthFilterDto.WorkflowIds);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace WoopiAiHub.Application.Services
         {
             var startDate = DateHelper.ParseDate(modelEmbeddingFilterDto.Start);
             var endDate = DateHelper.ParseDate(modelEmbeddingFilterDto.End);
-            return await _usageMonthRepository.FindDataByModelEmbedding(modelEmbeddingFilterDto.Id, startDate, endDate);
+            return await _usageMonthRepository.FindDataByModelEmbedding(modelEmbeddingFilterDto.Id, startDate, endDate, modelEmbeddingFilterDto.WorkflowIds);
         }
 
         /// <summary>

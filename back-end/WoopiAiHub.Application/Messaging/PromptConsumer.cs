@@ -58,13 +58,13 @@ namespace WoopiAiHub.Application.Messaging
                     httpAccessor.HttpContext.Items["TenantConnection"] = connectionString;
 
                     var promptServices = scope.ServiceProvider.GetRequiredService<IPromptServices>();
-                    await promptServices.ProcessOpenAiResponseResult(message);
+                    var result = await promptServices.ProcessOpenAiResponseResult(message);
 
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
 
                     var tokens = message.Response.Usage?.TotalTokens ?? 0;
-                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email, tokens, _openAiSettings.Model);
+                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email, tokens, _openAiSettings.Model, result.StepTool?.Step?.WorkflowId);
 
                     var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(message.Data.ToString());
                     var automationServicesDto = new AutomationServicesDto
@@ -74,7 +74,8 @@ namespace WoopiAiHub.Application.Messaging
                         message.Tenant,
                         message.Email,
                         message.ReferenceFile,
-                        0
+                        result.StepTool?.StepId,
+                        result.StepTool?.Step?.WorkflowId
                     );
                     await automationServices.ContinueExecution(automationServicesDto);
                 }
