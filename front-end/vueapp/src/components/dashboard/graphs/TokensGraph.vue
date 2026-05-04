@@ -94,6 +94,11 @@
                 type: String,
                 required: true,
             },
+            workflowIds: {
+                type: Array,
+                required: false,
+                default: () => [],
+            },
             usageUnits: {
                 type: Array,
                 required: true,
@@ -138,6 +143,17 @@
         created() {
             this.getIAList();
         },
+        watch: {
+            workflowIds() {
+                this.getTokensData();
+            },
+            start() {
+                this.getTokensData();
+            },
+            end() {
+                this.getTokensData();
+            },
+        },
         computed: {
             currentIA() {
                 return this.IAList[this.currentIAIndex] ?? undefined;
@@ -180,6 +196,11 @@
                     end: this.end,
                     id: this.currentIA.id,
                 };
+
+                if (this.workflowIds.length > 0 && !this.workflowIds.includes(null)) {
+                    params.workflowIds = this.workflowIds;
+                }
+
                 DashboardServices.GetTokensByModel(params)
                     .then((response) => {
                         if (response && !response.error) {

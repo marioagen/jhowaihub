@@ -112,11 +112,15 @@ namespace WoopiAiHub.Repository
         /// <summary>
         /// Finds usage data by usage type.
         /// </summary>
-        /// <param name="usageTypeId"></param>
+        /// <param name="usageType"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="workflowIds"></param>
         /// <returns></returns>
         public async Task<ICollection<DashboardUsageDto>> FindDataByUsageType(string usageType,
             DateTime? start,
-            DateTime? end)
+            DateTime? end,
+            List<int>? workflowIds)
         {
             var query = _context.UsageMonths
                 .Where(x => x.UsageType!.Name.Equals(usageType));
@@ -126,6 +130,18 @@ namespace WoopiAiHub.Repository
 
             if (end.HasValue)
                 query = query.Where(x => x.Created.Date <= end.Value.Date);
+
+            if (workflowIds is not null && workflowIds.Count > 0)
+            {
+                if (workflowIds.Any(x => x == -1))
+                {
+                    query = query.Where(x => x.WorkflowId == null || (x.WorkflowId != null && workflowIds.Contains(x.WorkflowId.Value)));
+                }
+                else
+                {
+                    query = query.Where(x => x.WorkflowId != null && workflowIds.Contains(x.WorkflowId.Value));
+                }
+            }
 
             var result = await query.GroupBy(x => x.Created.Date)
                 .Select(g => new DashboardUsageDto(g.Key.Date.ToString("dd/MM"), g.Sum(x => x.Total)))
@@ -138,10 +154,14 @@ namespace WoopiAiHub.Repository
         /// Finds usage data by model embedding ID.
         /// </summary>
         /// <param name="modelEmbeddingId"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="workflowIds"></param>
         /// <returns></returns>
         public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(int modelEmbeddingId,
             DateTime? start,
-            DateTime? end)
+            DateTime? end,
+            List<int>? workflowIds)
         {
             var query = _context.UsageMonths
                 .Where(x => x.ModelEmbeddingId == modelEmbeddingId);
@@ -151,6 +171,18 @@ namespace WoopiAiHub.Repository
 
             if (end.HasValue)
                 query = query.Where(x => x.Created.Date <= end.Value.Date);
+
+            if (workflowIds is not null && workflowIds.Count > 0)
+            {
+                if (workflowIds.Any(x => x == -1))
+                {
+                    query = query.Where(x => x.WorkflowId == null || (x.WorkflowId != null && workflowIds.Contains(x.WorkflowId.Value)));
+                }
+                else
+                {
+                    query = query.Where(x => x.WorkflowId != null && workflowIds.Contains(x.WorkflowId.Value));
+                }
+            }
 
             var result = await query
                 .GroupBy(x => x.Created.Date)

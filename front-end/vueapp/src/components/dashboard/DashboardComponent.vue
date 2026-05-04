@@ -123,6 +123,7 @@
                     <TokensGraph
                         :start="filters.start"
                         :end="filters.end"
+                        :workflowIds="filters.workflowIds"
                         :key="datesChange"
                         :usageUnits="usageUnits"
                         :isLoading="isLoading"
@@ -134,6 +135,7 @@
                     <PagesProcessedGraph
                         :start="filters.start"
                         :end="filters.end"
+                        :workflowIds="filters.workflowIds"
                         :key="datesChange"
                         :usageUnits="usageUnits"
                         :isLoading="isLoading"
@@ -145,6 +147,7 @@
                     <WorkflowsAutomaticGraph
                         :start="filters.start"
                         :end="filters.end"
+                        :workflowIds="filters.workflowIds"
                         :key="datesChange"
                         :usage-units="usageUnits"
                         @total-calculated="setTotalWTC"
@@ -154,6 +157,7 @@
                     <WorkflowsExecutionGraph
                         :start="filters.start"
                         :end="filters.end"
+                        :workflowIds="filters.workflowIds"
                         :key="datesChange"
                         :usage-units="usageUnits"
                         @total-calculated="setTotalWTC"
@@ -276,7 +280,7 @@
                 };
                 this.previousWorkflow = [...this.selectedWorkflow];
                 this.filterData(filtersWithWorkflow);
-                DashboardServices.GetUsageUnits(filtersWithWorkflow).then((response) => {
+                DashboardServices.GetUsageUnits(this.filters).then((response) => {
                     this.usageUnits = response;
                 });
             },

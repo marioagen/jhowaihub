@@ -34,7 +34,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         {
             _mocker = new AutoMocker();
 
-            _apiOutputDto = CreateValidApiOutputDto();
+            _apiOutputDto = MessagingFixture.FindValidApiOutputDto();
             var tenant = MessagingFixture.FindValidTenantInfoDto();
 
             var messageQueues = Options.Create(new MessageQueues
@@ -97,8 +97,8 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task ApiOutputConsumer_ConsumeAsync_ShouldConsumeMessage()
         {
             // Arrange
-            var automationServicesDto = CreateValidAutomationServicesDto();
-            
+            var automationServicesDto = AutomationFixture.FindValidautomationServicesDto();
+
             _apiOutputServices
                 .Setup(x => x.ProcessMessage(It.IsAny<ApiOutputDto>()))
                 .ReturnsAsync(automationServicesDto);
@@ -108,7 +108,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .Returns(Task.CompletedTask);
 
             _usageDailyServices
-                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
                 .ReturnsAsync(true);
 
             _consumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ApiOutputDto, Task>>()))
@@ -126,7 +126,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             // Assert
             _apiOutputServices.Verify(x => x.ProcessMessage(_apiOutputDto), Times.Once);
             _automationServices.Verify(x => x.ContinueExecution(automationServicesDto), Times.Once);
-            _usageDailyServices.Verify(x => x.AddByValuesAsync(It.IsAny<string>(), _apiOutputDto.Email!, 1, It.IsAny<string>()), Times.Once);
+            _usageDailyServices.Verify(x => x.AddByValuesAsync(It.IsAny<string>(), _apiOutputDto.Email!, 1, It.IsAny<string>(), null), Times.Once);
         }
 
         [Fact(DisplayName = "Must catch exception when processing response")]
@@ -174,7 +174,7 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task ApiOutputConsumer_ConsumeAsync_ShouldSetTenantConnection()
         {
             // Arrange
-            var automationServicesDto = CreateValidAutomationServicesDto();
+            var automationServicesDto = AutomationFixture.FindValidautomationServicesDto();
             string? capturedConnectionString = null;
 
             var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
@@ -205,7 +205,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .Returns(Task.CompletedTask);
 
             _usageDailyServices
-                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
                 .ReturnsAsync(true);
 
             _consumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ApiOutputDto, Task>>()))
@@ -268,32 +268,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             // Assert
             _apiOutputServices.Verify(x => x.ProcessMessage(_apiOutputDto), Times.Once);
             _automationServices.Verify(x => x.ContinueExecution(It.IsAny<AutomationServicesDto>()), Times.Never);
-            _usageDailyServices.Verify(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()), Times.Never);
-        }
-
-        private static ApiOutputDto CreateValidApiOutputDto()
-        {
-            return new ApiOutputDto
-            {
-                TemplateName = "Test Template",
-                Tenant = "test-tenant",
-                Email = "test@example.com",
-                ExecutionId = 1,
-                StatusCode = 200,
-                Content = "{\"result\": \"success\"}"
-            };
-        }
-
-        private static AutomationServicesDto CreateValidAutomationServicesDto()
-        {
-            return new AutomationServicesDto(
-                StepToolId: 1,
-                CardId: 1,
-                Tenant: "test-tenant",
-                Email: "test@example.com",
-                ReferenceFile: null,
-                StepId: null
-            );
+            _usageDailyServices.Verify(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null), Times.Never);
         }
     }
 }

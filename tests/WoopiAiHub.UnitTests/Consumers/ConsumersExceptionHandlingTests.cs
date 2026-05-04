@@ -124,7 +124,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .ThrowsAsync(new InvalidOperationException("Automation service error"));
 
             _usageDailyServices
-                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
                 .ReturnsAsync(true);
 
             _failingCardService
@@ -176,7 +176,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .ThrowsAsync(new Exception("Automation error"));
 
             _usageDailyServices
-                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
                 .ReturnsAsync(true);
 
             _failingCardService
@@ -224,7 +224,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .ThrowsAsync(new Exception("Automation error"));
 
             _usageDailyServices
-                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
                 .ReturnsAsync(true);
 
             _apiOutputConsumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ApiOutputDto, Task>>()))
@@ -302,7 +302,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .ThrowsAsync(new TimeoutException("N8N service timeout"));
 
             _usageDailyServices
-                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
                 .ReturnsAsync(true);
 
             _failingCardService
@@ -354,7 +354,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .ThrowsAsync(new Exception("N8N error"));
 
             _usageDailyServices
-                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
                 .ReturnsAsync(true);
 
             _failingCardService
@@ -402,7 +402,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .ThrowsAsync(new Exception("N8N error"));
 
             _usageDailyServices
-                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
                 .ReturnsAsync(true);
 
             _n8nConsumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<AutomationOutputDto, Task>>()))

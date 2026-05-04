@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Moq.AutoMock;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +16,7 @@ using WoopiAiHub.UnitTests.Fixture;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
 using WoopiAiHub.Application.Utils;
+
 namespace WoopiAiHub.UnitTests.Consumers
 {
     [Collection(nameof(MessagingCollection))]
@@ -108,13 +109,15 @@ namespace WoopiAiHub.UnitTests.Consumers
         public async Task PromptConsumer_ConsumeAsync_ShouldConsumeMessage()
         {
             // Arrange
+            var stepToolExecution = AutomationFixture.FindValidStepToolExecution();
+
             _promptServices
                 .Setup(x => x.ProcessOpenAiResponseResult(It.IsAny<OpenAiResponseConsumerResponseDto>()))
-                .Returns(Task.CompletedTask);
+                .ReturnsAsync(stepToolExecution);
 
             _usageDailyServices
                 .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(),
-                    It.IsAny<string>()))
+                    It.IsAny<string>(), null))
                 .ReturnsAsync(true);
 
             _consumerMock.Setup(x =>

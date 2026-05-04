@@ -230,7 +230,8 @@ namespace WoopiAiHub.UnitTests.Services
             usageDailyServicesMock.Verify(u => u.AddByRangeValuesAsync(
                 MetricNames.Token,
                 documentEmbeddingsQueryResponseDto.Email,
-                It.IsAny<List<QueryUsageDto>>()
+                It.IsAny<List<QueryUsageDto>>(),
+                null
             ), Times.Once);
         }
     }
