@@ -53,8 +53,8 @@
                                 <div>
                                     <div class="fw-medium">
                                         {{ stepTool.tool.name }}
-                                        <template v-if="stepTool.tool.resourceName">
-                                            : {{ stepTool.tool.resourceName }}
+                                        <template v-if="resolveToolResourceLabel(stepTool)">
+                                            : {{ resolveToolResourceLabel(stepTool) }}
                                         </template>
                                         <small class="text-muted">
                                             ({{ stepTool.tool.toolType }})
@@ -104,6 +104,7 @@
 </template>
 <script>
     import LucideIcon from "@/components/global/LucideIcon.vue";
+    import ToolType from "@/constants/ToolType";
 
     export default {
         name: "DependencySelector",
@@ -182,13 +183,24 @@
                 const step = this.previousStepTools.find((s) => s.order === order);
                 return step ? step.name : "";
             },
+            resolveToolResourceLabel(stepTool) {
+                if (!stepTool?.tool) return "";
+                if (
+                    stepTool.tool.toolType === ToolType.Prompt &&
+                    stepTool.parameters?.length > 0 &&
+                    stepTool.parameters[0].promptName
+                ) {
+                    return stepTool.parameters[0].promptName;
+                }
+                return stepTool.tool.resourceName || "";
+            },
             findToolLabelById(stepOrder, stepToolOrder) {
                 const step = this.previousStepTools.find((s) => s.order === stepOrder);
                 const stepTool = step
                     ? step.stepTools.find((st) => st.order === stepToolOrder)
                     : null;
                 if (!stepTool) return "";
-                const resource = stepTool.tool.resourceName;
+                const resource = this.resolveToolResourceLabel(stepTool);
                 return resource
                     ? `${stepTool.tool.name}: ${resource} (${stepTool.tool.toolType})`
                     : `${stepTool.tool.name}/${stepTool.tool.toolType}`;

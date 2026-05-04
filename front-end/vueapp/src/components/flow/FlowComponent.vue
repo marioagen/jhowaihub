@@ -895,10 +895,44 @@
                 }
 
                 const maxOrder = Math.max(...relevantSteps.map((step) => step.order));
-                const nodesToolIds = this.nodes.map((n) => n.data?.toolId).filter(Boolean);
-                const currentStepFromWorkflow = relevantSteps.find((s) => s.order === maxOrder);
-                const currentStepBackendToolCount = (currentStepFromWorkflow?.stepTools || [])
-                    .length;
+
+                const priorSteps = relevantSteps.filter((s) => s.order < maxOrder);
+                const needsPromptNames = priorSteps.some((s) =>
+                    (s.stepTools || []).some((st) => st.tool?.toolType === ToolType.Prompt)
+                );
+
+                let promptIdToName = new Map();
+                if (needsPromptNames) {
+                    try {
+                        const prompts = await PromptService.getPrompts();
+                        promptIdToName = new Map(prompts.map((p) => [String(p.id), p.name]));
+                    } catch (error) {
+                        LogService.showMessage(
+                            "Error loading prompts for dependency labels: " + error
+                        );
+                    }
+                }
+
+                const mapPriorStepTools = (stepTools) =>
+                    (stepTools || []).map((st) => {
+                        const promptName = st.parameters?.[0]?.promptName;
+                        let resourceName = st.tool?.resourceName || promptName || "";
+                        if (
+                            !resourceName &&
+                            st.tool?.toolType === ToolType.Prompt &&
+                            st.parameters?.[0]?.value != null &&
+                            st.parameters[0].value !== ""
+                        ) {
+                            resourceName = promptIdToName.get(String(st.parameters[0].value)) || "";
+                        }
+                        return {
+                            ...st,
+                            tool: {
+                                ...(st.tool || {}),
+                                resourceName,
+                            },
+                        };
+                    });
 
                 this.previousStepTools = relevantSteps.map((step) => {
                     if (step.order < maxOrder) {
@@ -906,7 +940,7 @@
                             id: step.id,
                             name: step?.name || step.name || "Unnamed Tool",
                             order: step.order,
-                            stepTools: step.stepTools || [],
+                            stepTools: mapPriorStepTools(step.stepTools),
                         };
                     }
 
