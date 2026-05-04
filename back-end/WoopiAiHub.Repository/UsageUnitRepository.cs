@@ -19,28 +19,38 @@ namespace WoopiAiHub.Repository
         /// Find all usage units.
         /// </summary>
         /// <remarks>
-        /// The query is materialized before projection so that <see cref="decimal.ToString(IFormatProvider?)"/>
-        /// runs in C# (not SQL). This preserves the exact scale stored in the column
-        /// (e.g. "0.000000790" with the trailing zero), which would otherwise be lost
+        /// The SQL projection selects only the columns needed (no entity tracking, no extra joins
+        /// fetching whole related rows), and the materialized rows are then mapped to the DTO in
+        /// memory. The two-step shape is required because <see cref="decimal.ToString(IFormatProvider?)"/>
+        /// is not translatable to SQL by EF Core, and we need it to preserve the exact scale stored
+        /// in the column (e.g. "0.000000790" with the trailing zero) — which would otherwise be lost
         /// when serialized as a JSON number on the way to the frontend.
         /// </remarks>
         public async Task<IEnumerable<UsageUnitDto>> FindAllAsync()
         {
             var rows = await _context.UsageUnits
                                      .AsNoTracking()
-                                     .Include(uu => uu.UsageType)
-                                     .Include(uu => uu.ModelEmbedding)
+                                     .Select(uu => new
+                                     {
+                                         uu.Id,
+                                         uu.Name,
+                                         uu.UsageTypeId,
+                                         UsageTypeName = uu.UsageType != null ? uu.UsageType.Name : null,
+                                         uu.ModelEmbeddingId,
+                                         ModelEmbeddingName = uu.ModelEmbedding != null ? uu.ModelEmbedding.Name : null,
+                                         uu.Value
+                                     })
                                      .ToListAsync();
 
-            return rows.Select(uu => new UsageUnitDto
+            return rows.Select(r => new UsageUnitDto
             {
-                Id = uu.Id,
-                Name = uu.Name,
-                UsageTypeId = uu.UsageTypeId,
-                UsageTypeName = uu.UsageType?.Name ?? string.Empty,
-                ModelEmbeddingId = uu.ModelEmbeddingId,
-                ModelEmbeddingName = uu.ModelEmbedding?.Name ?? string.Empty,
-                Value = uu.Value.ToString(CultureInfo.InvariantCulture)
+                Id = r.Id,
+                Name = r.Name,
+                UsageTypeId = r.UsageTypeId,
+                UsageTypeName = r.UsageTypeName ?? string.Empty,
+                ModelEmbeddingId = r.ModelEmbeddingId,
+                ModelEmbeddingName = r.ModelEmbeddingName ?? string.Empty,
+                Value = r.Value.ToString(CultureInfo.InvariantCulture)
             });
         }
     }
