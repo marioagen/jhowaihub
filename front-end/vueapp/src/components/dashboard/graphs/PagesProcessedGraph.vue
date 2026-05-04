@@ -28,7 +28,7 @@
                         {{ $t("dashboard.graphs.periodTotal") }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
-                        {{ totalPages * usageUnitPages }}
+                        {{ formatDecimalValue(calculatedTotal) }}
                     </h4>
                 </div>
             </div>
@@ -49,6 +49,7 @@
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import DashboardServices from "@/services/dashboard/DashboardServices";
     import { ColTypeUsage } from "@/constants/ColTypeUsage";
+    import { formatDecimalValue } from "@/helpers/number";
     export default {
         components: {
             BarGraphComponent,
@@ -111,12 +112,17 @@
             },
             usageUnitPages() {
                 if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
-                    return 0;
+                    return "0";
                 }
                 return (
                     this.usageUnits.find((item) => item.usageTypeName === ColTypeUsage.Page)
-                        ?.value ?? 0
+                        ?.value ?? "0"
                 );
+            },
+            calculatedTotal() {
+                const unit = parseFloat(this.usageUnitPages) || 0;
+                const total = Number(this.totalPages) || 0;
+                return unit * total;
             },
         },
         created() {
@@ -134,6 +140,7 @@
             },
         },
         methods: {
+            formatDecimalValue,
             getPagesData() {
                 this.isLoaded = false;
                 let params = {
@@ -169,7 +176,7 @@
                     });
             },
             setTotalPages() {
-                this.$emit("setTotalPages", this.usageUnitPages * this.totalPages);
+                this.$emit("setTotalPages", this.calculatedTotal);
             },
             updateGraph(start, end) {
                 this.start = start;

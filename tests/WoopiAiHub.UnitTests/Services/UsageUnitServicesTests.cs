@@ -25,7 +25,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var usageUnits = new List<UsageUnitDto>
             {
-                new UsageUnitDto{ Id = 1,Name = "Unit 1", ModelEmbeddingId = null, ModelEmbeddingName = string.Empty, UsageTypeId = 1, UsageTypeName = "Teste", Value = (decimal)0.006 },
+                new UsageUnitDto{ Id = 1,Name = "Unit 1", ModelEmbeddingId = null, ModelEmbeddingName = string.Empty, UsageTypeId = 1, UsageTypeName = "Teste", Value = "0.006" },
             };
 
             _usageUnitRepositoryMock.Setup(repo => repo.FindAllAsync())

@@ -60,7 +60,7 @@
                         {{ $t("dashboard.graphs.periodTotal") }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
-                        {{ totalTokens * usageUnitTokens }}
+                        {{ formatDecimalValue(calculatedTotal) }}
                     </h4>
                 </div>
             </div>
@@ -80,6 +80,7 @@
     import BarGraphComponent from "@/components/global/graphs/BarGraphComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import DashboardServices from "@/services/dashboard/DashboardServices";
+    import { formatDecimalValue } from "@/helpers/number";
     export default {
         components: {
             BarGraphComponent,
@@ -163,17 +164,23 @@
             },
             usageUnitTokens() {
                 if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
-                    return 0;
+                    return "0";
                 }
                 return (
                     this.usageUnits.find(
                         (item) =>
                             item.modelEmbeddingId === (this.IAList[this.currentIAIndex]?.id ?? 0)
-                    )?.value ?? 0
+                    )?.value ?? "0"
                 );
+            },
+            calculatedTotal() {
+                const unit = parseFloat(this.usageUnitTokens) || 0;
+                const total = Number(this.totalTokens) || 0;
+                return unit * total;
             },
         },
         methods: {
+            formatDecimalValue,
             getIAList() {
                 DashboardServices.GetUsedModels().then((response) => {
                     if (response && !response.error) {
