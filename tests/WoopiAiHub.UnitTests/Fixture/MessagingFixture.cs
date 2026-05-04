@@ -287,7 +287,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 });
             return faker;
         }
-        public static List<ApiTemplateDto> FindValidListApiTemplateDto()
+        public static List<ApiTemplateDto> FindValidListApiTemplateDto(string headers)
         {
             var faker = new Faker<List<ApiTemplateDto>>("pt_BR")
                 .CustomInstantiator(f =>
@@ -307,7 +307,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                             Url = string.Format("http://localhost/api-{0}",id1),
                             Description = "",
                             EnableAccessFromMcp = true,
-                            BodyTemplate = "{}"
+                            BodyTemplate = "{}",
+                            HeaderTemplate = headers
                         },
                         new ApiTemplateDto {
                             Id = id2,
@@ -317,7 +318,8 @@ namespace WoopiAiHub.UnitTests.Fixture
                             Url = string.Format("http://localhost/api-{0}",id2),
                             Description = "",
                             EnableAccessFromMcp = true,
-                            BodyTemplate = "{}"
+                            BodyTemplate = "{}",
+                            HeaderTemplate = headers
                         }
                     };
                 });

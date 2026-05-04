@@ -162,7 +162,7 @@ public class PromptHandler : IToolHandler
                         {"Authorization", $"Bearer {accessToken}"}
                     },
                 RequireApproval="never",
-                AllowedTools=["generalista"]
+                AllowedTools=["generalist"]
             }
         };
     }
@@ -188,7 +188,7 @@ public class PromptHandler : IToolHandler
                 _ => 3
             },
             description = api.Description,
-            headers = api.HeaderTemplate,
+            headers = ExtractHeadersValues(api.HeaderTemplate),
             payload_schema = api.Method switch
             {
                 "GET" => null,
@@ -208,8 +208,40 @@ public class PromptHandler : IToolHandler
     }
 
     /// <summary>
-    /// Extracts and concatenates text from dependency outputs. OCR output is parsed from DocumentEmbeddings; API JSON object responses are flattened to
-    /// <c>Key: value</c> lines; other tool types use plain text.
+    /// Method used to convert the headers from api template to a dictionary
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns></returns>
+    private static Dictionary<string, string> ExtractHeadersValues(string? item)
+    {
+        if (string.IsNullOrEmpty(item))
+        {
+            return new Dictionary<string, string>();
+        }
+
+        var doc = JsonDocument.Parse(item);
+
+        var dict = new Dictionary<string, string>();
+
+        foreach (var el in doc.RootElement.EnumerateArray())
+        {
+            var key = el.GetProperty("key").GetString();
+            var value = el.GetProperty("value").GetString();
+
+            if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+            {
+                continue;
+            }
+
+            dict[key] = value;
+        }
+
+        return dict;
+    }
+
+    /// <summary>
+    /// Extracts and concatenates text from dependency outputs. OCR output is parsed from DocumentEmbeddings; Prompt output is used as plain text.
+    /// When StepTool/ToolType is not available (e.g. tests), tries OCR format first, then falls back to plain text.
     /// </summary>
     private static string ExtractFullTextFromOutputs(ICollection<StepToolOutput> outputs)
     {

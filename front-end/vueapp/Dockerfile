@@ -10,6 +10,9 @@ RUN npm install
 # Copy rest of the files
 COPY . .
 
+ARG VITE_APP_VERSION=unknown
+ENV VITE_APP_VERSION=$VITE_APP_VERSION
+
 # Build the project
 RUN npm run build
 

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Bogus;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -78,6 +79,17 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             _handler = _mocker.CreateInstance<PromptHandler>();
         }
 
+        private static string ExtractMappedApisJsonFromInstructions(string fullInstructions)
+        {
+            const string prefix = "instructions ";
+            const string suffix = " instructions";
+            var start = fullInstructions.IndexOf(prefix, StringComparison.Ordinal);
+            var end = fullInstructions.IndexOf(suffix, start + prefix.Length, StringComparison.Ordinal);
+            if (start < 0 || end < 0)
+                throw new InvalidOperationException("Unexpected instructions format: " + fullInstructions);
+            return fullInstructions.Substring(start + prefix.Length, end - start - prefix.Length);
+        }
+
         [Fact(DisplayName = "BuildPayload should return ExecutionMessageDto with correct queue and message")]
         [Trait("BuildPayload", "Success")]
         public async Task BuildPayload_ShouldReturnExecutionMessageDto_WithCorrectQueueAndMessage()
@@ -104,7 +116,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
 
             _mockApiTemplateServices
                 .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
-                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto());
+                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto(string.Empty));
 
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
@@ -167,7 +179,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 .Returns(PromptFixture.FindValidPromptDto());
             _mockApiTemplateServices
                 .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
-                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto());
+                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto(string.Empty));
 
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
@@ -205,7 +217,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
 
             _mockApiTemplateServices
                 .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
-                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto());
+                .ReturnsAsync(MessagingFixture.FindValidListApiTemplateDto(string.Empty));
 
 
             // Act
@@ -247,7 +259,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             _mockPromptServices.Setup(service => service.FindById(It.IsAny<int>()))
                                .Returns(promptDto);
 
-            var apis = MessagingFixture.FindValidListApiTemplateDto();
+            var apis = MessagingFixture.FindValidListApiTemplateDto(string.Empty);
             _mockApiTemplateServices
                 .Setup(s =>s.FindAll(It.IsAny<ApiTemplateFilterDto>()))
                 .ReturnsAsync(apis);
@@ -288,10 +300,116 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var tool = message.OpenAiResponse.Tools[0];
             Assert.Equal(OpenAiResponseToolsType.Mcp, tool.Type);
             Assert.Single(tool.AllowedTools);
-            Assert.Equal("generalista", tool.AllowedTools[0]);
+            Assert.Equal("generalist", tool.AllowedTools[0]);
 
             Assert.NotNull(tool.Headers);
             Assert.Equal("Bearer token-test", tool.Headers["Authorization"]);
+        }
+
+        [Fact(DisplayName = "BuildPayload MCP instructions embed headers object when HeaderTemplate has key/value pairs")]
+        [Trait("ExtractHeadersValues", "Integration")]
+        public async Task BuildPayload_WhenMcpEnabled_HeaderTemplateWithPairs_EmbedsHeadersInInstructionsJson()
+        {
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
+            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var output = AutomationFixture.FindValidStepToolOutput(
+                JsonConvert.SerializeObject(MessagingFixture.FindValidDocumentEmbeddingsDataDto()));
+
+            var apis = MessagingFixture.FindValidListApiTemplateDto("""[{"key":"Authorization","value":"Bearer custom-from-template"},{"key":"X-Trace","value":"t1"}]""");
+
+            _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
+            _mockPromptServices.Setup(s => s.FindById(It.IsAny<int>())).Returns(PromptFixture.FindValidPromptDto());
+            _mockApiTemplateServices.Setup(s => s.FindAll(It.IsAny<ApiTemplateFilterDto>())).ReturnsAsync(apis);
+            _mockJwtTokenServices
+                .Setup(x => x.GenerateTokenWithParameters(
+                    _mcpSettings.JWTKey,
+                    _mcpSettings.JWTIssuer,
+                    _mcpSettings.JWTAudience,
+                    _mcpSettings.JWTUser,
+                    _mcpSettings.JWTExpirationTime))
+                .Returns("token-test");
+
+            var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
+            var message = result.Message as OpenAiResponseQueryDto;
+
+            var apisJson = ExtractMappedApisJsonFromInstructions(message?.OpenAiResponse!.Instructions!);
+            using var doc = JsonDocument.Parse(apisJson);
+            var first = doc.RootElement.EnumerateArray().First();
+            var headers = first.GetProperty("headers");
+            Assert.Equal("Bearer custom-from-template", headers.GetProperty("Authorization").GetString());
+            Assert.Equal("t1", headers.GetProperty("X-Trace").GetString());
+        }
+
+        [Fact(DisplayName = "BuildPayload MCP instructions use empty headers when HeaderTemplate is null or empty")]
+        [Trait("ExtractHeadersValues", "Integration")]
+        public async Task BuildPayload_WhenMcpEnabled_HeaderTemplateNullOrEmpty_InstructionsHaveEmptyHeadersObject()
+        {
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
+            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var output = AutomationFixture.FindValidStepToolOutput(
+                JsonConvert.SerializeObject(MessagingFixture.FindValidDocumentEmbeddingsDataDto()));
+            
+            var apis = MessagingFixture.FindValidListApiTemplateDto(string.Empty);
+
+            _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
+            _mockPromptServices.Setup(s => s.FindById(It.IsAny<int>())).Returns(PromptFixture.FindValidPromptDto());
+            _mockApiTemplateServices.Setup(s => s.FindAll(It.IsAny<ApiTemplateFilterDto>())).ReturnsAsync(apis);
+            _mockJwtTokenServices
+                .Setup(x => x.GenerateTokenWithParameters(
+                    _mcpSettings.JWTKey,
+                    _mcpSettings.JWTIssuer,
+                    _mcpSettings.JWTAudience,
+                    _mcpSettings.JWTUser,
+                    _mcpSettings.JWTExpirationTime))
+                .Returns("token-test");
+
+            var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
+            var message = result.Message as OpenAiResponseQueryDto;
+
+            var apisJson = ExtractMappedApisJsonFromInstructions(message?.OpenAiResponse!.Instructions!);
+            using var doc = JsonDocument.Parse(apisJson);
+            foreach (var el in doc.RootElement.EnumerateArray())
+            {
+                var headers = el.GetProperty("headers");
+                Assert.Equal(JsonValueKind.Object, headers.ValueKind);
+                Assert.Empty(headers.EnumerateObject());
+            }
+        }
+
+        [Fact(DisplayName = "BuildPayload MCP instructions skip header entries with blank key or value")]
+        [Trait("ExtractHeadersValues", "Integration")]
+        public async Task BuildPayload_WhenMcpEnabled_HeaderTemplateWithBlankPairs_SkipsInvalidEntries()
+        {
+            var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
+            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
+            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var output = AutomationFixture.FindValidStepToolOutput(
+                JsonConvert.SerializeObject(MessagingFixture.FindValidDocumentEmbeddingsDataDto()));
+
+            var apis = MessagingFixture.FindValidListApiTemplateDto("""[{"key":"","value":"v1"},{"key":"K","value":""},{"key":"Good","value":"ok"}]""");
+
+            _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
+            _mockPromptServices.Setup(s => s.FindById(It.IsAny<int>())).Returns(PromptFixture.FindValidPromptDto());
+            _mockApiTemplateServices.Setup(s => s.FindAll(It.IsAny<ApiTemplateFilterDto>())).ReturnsAsync(apis);
+            _mockJwtTokenServices
+                .Setup(x => x.GenerateTokenWithParameters(
+                    _mcpSettings.JWTKey,
+                    _mcpSettings.JWTIssuer,
+                    _mcpSettings.JWTAudience,
+                    _mcpSettings.JWTUser,
+                    _mcpSettings.JWTExpirationTime))
+                .Returns("token-test");
+
+            var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
+            var message = result.Message as OpenAiResponseQueryDto;
+
+            var apisJson = ExtractMappedApisJsonFromInstructions(message?.OpenAiResponse!.Instructions!);
+            using var doc = JsonDocument.Parse(apisJson);
+            var headers = doc.RootElement[0].GetProperty("headers");
+            Assert.Single(headers.EnumerateObject());
+            Assert.Equal("ok", headers.GetProperty("Good").GetString());
         }
     }
 }
