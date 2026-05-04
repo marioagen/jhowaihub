@@ -28,7 +28,7 @@
                         {{ $t("dashboard.graphs.periodTotal") }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
-                        {{ totalWorkflows * usageUnitWorkflow }}
+                        {{ formatDecimalValue(calculatedTotal) }}
                     </h4>
                 </div>
             </div>
@@ -46,6 +46,7 @@
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import DashboardServices from "@/services/dashboard/DashboardServices";
     import { ColTypeUsage } from "@/constants/ColTypeUsage";
+    import { formatDecimalValue } from "@/helpers/number";
     export default {
         components: {
             BarGraphComponent,
@@ -109,15 +110,17 @@
             },
             usageUnitWorkflow() {
                 if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
-                    return 0;
+                    return "0";
                 }
                 return (
                     this.usageUnits.find((item) => item.usageTypeName === ColTypeUsage.Execution)
-                        ?.value ?? 0
+                        ?.value ?? "0"
                 );
             },
             calculatedTotal() {
-                return this.usageUnitWorkflow * this.totalWorkflows;
+                const unit = parseFloat(this.usageUnitWorkflow) || 0;
+                const total = Number(this.totalWorkflows) || 0;
+                return unit * total;
             },
         },
         watch: {
@@ -132,6 +135,7 @@
             },
         },
         methods: {
+            formatDecimalValue,
             getWorkflowsData() {
                 let params = {
                     start: this.start,

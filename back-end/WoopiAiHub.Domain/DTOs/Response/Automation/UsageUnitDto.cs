@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Domain.DTOs.Response.Automation
+namespace WoopiAiHub.Domain.DTOs.Response.Automation
 {
     public record class UsageUnitDto
     {
@@ -8,6 +8,11 @@
         public string UsageTypeName { get; init; } = string.Empty;
         public int? ModelEmbeddingId { get; init; }
         public string ModelEmbeddingName { get; init; } = string.Empty;
-        public decimal Value { get; init; }
+
+        /// <summary>
+        /// Serialized as string to preserve trailing zeros (e.g. "0.000000790").
+        /// JSON numbers in JavaScript lose trailing zeros after parsing.
+        /// </summary>
+        public string Value { get; init; } = "0";
     }
 }

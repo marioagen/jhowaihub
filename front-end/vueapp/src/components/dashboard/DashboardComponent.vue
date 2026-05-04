@@ -224,7 +224,9 @@
                 });
             },
             setTotalWTC(total) {
-                this.totalWTC += total;
+                const value = Number(total);
+                if (!Number.isFinite(value)) return;
+                this.totalWTC += value;
             },
             proccessTenantMetrics() {
                 this.isLoading = true;
