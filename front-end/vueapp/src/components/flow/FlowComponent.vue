@@ -923,6 +923,7 @@
                                 id: n.data.toolId,
                                 name: n.label,
                                 toolType: n.data.toolType || "",
+                                resourceName: n.data.subtitle || "",
                             },
                         }));
                     return {

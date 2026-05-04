@@ -53,6 +53,9 @@
                                 <div>
                                     <div class="fw-medium">
                                         {{ stepTool.tool.name }}
+                                        <template v-if="stepTool.tool.resourceName">
+                                            : {{ stepTool.tool.resourceName }}
+                                        </template>
                                         <small class="text-muted">
                                             ({{ stepTool.tool.toolType }})
                                         </small>
@@ -184,7 +187,11 @@
                 const stepTool = step
                     ? step.stepTools.find((st) => st.order === stepToolOrder)
                     : null;
-                return stepTool ? `${stepTool.tool.name}/${stepTool.tool.toolType}` : "";
+                if (!stepTool) return "";
+                const resource = stepTool.tool.resourceName;
+                return resource
+                    ? `${stepTool.tool.name}: ${resource} (${stepTool.tool.toolType})`
+                    : `${stepTool.tool.name}/${stepTool.tool.toolType}`;
             },
         },
     };
