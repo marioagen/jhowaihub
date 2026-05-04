@@ -317,6 +317,7 @@
     import AutomationServices from "@/services/automation/AutomationServices";
     import PromptService from "@/services/prompts/PromptsService";
     import QuizzesService from "@/services/quizzes/QuizzesService";
+    import TemplateService from "@/services/template/TemplateService";
     import WorkflowService from "@/services/workflow/WorkflowService";
     import LogService from "@/services/log/logService";
     import ToolType from "@/constants/ToolType";
@@ -867,106 +868,196 @@
                     this.quizlist = response;
                 });
             },
-            async loadPreviousStepTools(node) {
-                let workflowSteps = [];
-                let dataSource = "none";
-                if (this.workflowId) {
-                    try {
-                        const workflow = await WorkflowService.getWorkflowById(this.workflowId);
-                        if (!workflow.error) {
-                            workflowSteps = workflow.steps || [];
-                            dataSource = "api";
-                        }
-                    } catch (error) {
-                        LogService.showMessage("Error loading workflow steps: " + error);
-                    }
-                }
-
-                if (workflowSteps.length === 0) {
-                    workflowSteps = this.$store.state.tempWorkflow.list || [];
-                    dataSource = dataSource === "none" ? "store" : dataSource;
-                }
-
-                const relevantSteps = workflowSteps.filter((step) => step.order <= this.stepOrder);
-
-                if (!relevantSteps || relevantSteps.length === 0) {
-                    this.previousStepTools = [];
-                    return;
-                }
-
-                const maxOrder = Math.max(...relevantSteps.map((step) => step.order));
-
-                const priorSteps = relevantSteps.filter((s) => s.order < maxOrder);
-                const needsPromptNames = priorSteps.some((s) =>
-                    (s.stepTools || []).some((st) => st.tool?.toolType === ToolType.Prompt)
+            priorStepsContainToolType(priorSteps, toolType) {
+                return priorSteps.some((s) =>
+                    (s.stepTools || []).some((st) => st.tool?.toolType === toolType)
                 );
-
-                let promptIdToName = new Map();
-                if (needsPromptNames) {
-                    try {
-                        const prompts = await PromptService.getPrompts();
-                        promptIdToName = new Map(prompts.map((p) => [String(p.id), p.name]));
-                    } catch (error) {
-                        LogService.showMessage(
-                            "Error loading prompts for dependency labels: " + error
-                        );
-                    }
+            },
+            async loadPromptIdToNameMapForDependencyLabels() {
+                try {
+                    const prompts = await PromptService.getPrompts();
+                    return new Map(prompts.map((p) => [String(p.id), p.name]));
+                } catch (error) {
+                    LogService.showMessage("Error loading prompts for dependency labels: " + error);
+                    return new Map();
                 }
-
-                const mapPriorStepTools = (stepTools) =>
-                    (stepTools || []).map((st) => {
-                        const promptName = st.parameters?.[0]?.promptName;
-                        let resourceName = st.tool?.resourceName || promptName || "";
-                        if (
-                            !resourceName &&
-                            st.tool?.toolType === ToolType.Prompt &&
-                            st.parameters?.[0]?.value != null &&
-                            st.parameters[0].value !== ""
-                        ) {
-                            resourceName = promptIdToName.get(String(st.parameters[0].value)) || "";
-                        }
-                        return {
-                            ...st,
-                            tool: {
-                                ...(st.tool || {}),
-                                resourceName,
-                            },
-                        };
-                    });
-
-                this.previousStepTools = relevantSteps.map((step) => {
+            },
+            async loadQuizIdToNameMapForDependencyLabels() {
+                try {
+                    const quizzes = await QuizzesService.getQuizzesList();
+                    if (quizzes?.error || !Array.isArray(quizzes)) return new Map();
+                    return new Map(quizzes.map((q) => [String(q.id), q.title || q.name || ""]));
+                } catch (error) {
+                    LogService.showMessage("Error loading quizzes for dependency labels: " + error);
+                    return new Map();
+                }
+            },
+            async loadApiTemplateIdToNameMapForDependencyLabels() {
+                try {
+                    const templates = await TemplateService.getAllTemplates();
+                    if (templates?.error || !Array.isArray(templates)) return new Map();
+                    return new Map(templates.map((t) => [String(t.id), t.name || ""]));
+                } catch (error) {
+                    LogService.showMessage(
+                        "Error loading API templates for dependency labels: " + error
+                    );
+                    return new Map();
+                }
+            },
+            async fetchPriorStepDependencyLabelMaps(priorSteps) {
+                const maps = {
+                    promptIdToName: new Map(),
+                    quizIdToName: new Map(),
+                    templateIdToName: new Map(),
+                };
+                if (this.priorStepsContainToolType(priorSteps, ToolType.Prompt)) {
+                    maps.promptIdToName = await this.loadPromptIdToNameMapForDependencyLabels();
+                }
+                if (this.priorStepsContainToolType(priorSteps, ToolType.Quiz)) {
+                    maps.quizIdToName = await this.loadQuizIdToNameMapForDependencyLabels();
+                }
+                if (this.priorStepsContainToolType(priorSteps, ToolType.API)) {
+                    maps.templateIdToName =
+                        await this.loadApiTemplateIdToNameMapForDependencyLabels();
+                }
+                return maps;
+            },
+            getBaseResourceNameForPriorStepTool(st) {
+                const promptName = st.parameters?.[0]?.promptName;
+                return st.tool?.resourceName || promptName || "";
+            },
+            resolvePromptResourceNameForPriorStepTool(st, resourceName, promptIdToName) {
+                if (resourceName) return resourceName;
+                if (st.tool?.toolType !== ToolType.Prompt) return resourceName;
+                const val = st.parameters?.[0]?.value;
+                if (val == null || val === "") return resourceName;
+                return promptIdToName.get(String(val)) || "";
+            },
+            resolveQuizResourceNameForPriorStepTool(st, resourceName, quizIdToName) {
+                if (resourceName) return resourceName;
+                if (st.tool?.toolType !== ToolType.Quiz) return resourceName;
+                const val = st.parameters?.[0]?.value;
+                if (val == null || val === "") return resourceName;
+                return quizIdToName.get(String(val)) || "";
+            },
+            resolveApiResourceNameForPriorStepTool(st, resourceName, templateIdToName) {
+                if (resourceName) return resourceName;
+                if (st.tool?.toolType !== ToolType.API) return resourceName;
+                const raw = st.parameters?.[0]?.value;
+                if (raw == null || raw === "") return resourceName;
+                try {
+                    const cfg = typeof raw === "string" ? JSON.parse(raw) : raw;
+                    const tid = cfg?.templateId;
+                    if (tid == null || tid === "") return resourceName;
+                    return templateIdToName.get(String(tid)) || "";
+                } catch {
+                    return resourceName;
+                }
+            },
+            enrichPriorStepToolWithDependencyLabels(st, labelMaps) {
+                let resourceName = this.getBaseResourceNameForPriorStepTool(st);
+                resourceName = this.resolvePromptResourceNameForPriorStepTool(
+                    st,
+                    resourceName,
+                    labelMaps.promptIdToName
+                );
+                resourceName = this.resolveQuizResourceNameForPriorStepTool(
+                    st,
+                    resourceName,
+                    labelMaps.quizIdToName
+                );
+                resourceName = this.resolveApiResourceNameForPriorStepTool(
+                    st,
+                    resourceName,
+                    labelMaps.templateIdToName
+                );
+                return {
+                    ...st,
+                    tool: {
+                        ...(st.tool || {}),
+                        resourceName,
+                    },
+                };
+            },
+            mapPriorStepToolsWithDependencyLabels(stepTools, labelMaps) {
+                return (stepTools || []).map((st) =>
+                    this.enrichPriorStepToolWithDependencyLabels(st, labelMaps)
+                );
+            },
+            buildStepToolsFromFlowNodesBeforeOrder(node) {
+                return this.nodes
+                    .filter(
+                        (n) =>
+                            n.id !== "start" &&
+                            n.data?.order != null &&
+                            n.data.order < node.data.order
+                    )
+                    .map((n) => ({
+                        order: n.data.order,
+                        tool: {
+                            id: n.data.toolId,
+                            name: n.label,
+                            toolType: n.data.toolType || "",
+                            resourceName: n.data.subtitle || "",
+                        },
+                    }));
+            },
+            buildPreviousStepToolsPayload(relevantSteps, maxOrder, node, labelMaps) {
+                const mapPrior = (stepTools) =>
+                    this.mapPriorStepToolsWithDependencyLabels(stepTools, labelMaps);
+                return relevantSteps.map((step) => {
                     if (step.order < maxOrder) {
                         return {
                             id: step.id,
                             name: step?.name || step.name || "Unnamed Tool",
                             order: step.order,
-                            stepTools: mapPriorStepTools(step.stepTools),
+                            stepTools: mapPrior(step.stepTools),
                         };
                     }
-
-                    const stepToolsFromNodes = this.nodes
-                        .filter(
-                            (n) =>
-                                n.id !== "start" &&
-                                n.data?.order != null &&
-                                n.data.order < node.data.order
-                        )
-                        .map((n) => ({
-                            order: n.data.order,
-                            tool: {
-                                id: n.data.toolId,
-                                name: n.label,
-                                toolType: n.data.toolType || "",
-                                resourceName: n.data.subtitle || "",
-                            },
-                        }));
                     return {
                         id: step.id,
                         name: step?.name || step.name || "Unnamed Tool",
                         order: step.order,
-                        stepTools: stepToolsFromNodes,
+                        stepTools: this.buildStepToolsFromFlowNodesBeforeOrder(node),
                     };
                 });
+            },
+            async loadWorkflowStepsForPreviousTools() {
+                let workflowSteps = [];
+                if (this.workflowId) {
+                    try {
+                        const workflow = await WorkflowService.getWorkflowById(this.workflowId);
+                        if (!workflow.error) {
+                            workflowSteps = workflow.steps || [];
+                        }
+                    } catch (error) {
+                        LogService.showMessage("Error loading workflow steps: " + error);
+                    }
+                }
+                if (workflowSteps.length === 0) {
+                    workflowSteps = this.$store.state.tempWorkflow.list || [];
+                }
+                return workflowSteps;
+            },
+            async loadPreviousStepTools(node) {
+                const workflowSteps = await this.loadWorkflowStepsForPreviousTools();
+                const relevantSteps = workflowSteps.filter((step) => step.order <= this.stepOrder);
+
+                if (!relevantSteps?.length) {
+                    this.previousStepTools = [];
+                    return;
+                }
+
+                const maxOrder = Math.max(...relevantSteps.map((step) => step.order));
+                const priorSteps = relevantSteps.filter((s) => s.order < maxOrder);
+                const labelMaps = await this.fetchPriorStepDependencyLabelMaps(priorSteps);
+
+                this.previousStepTools = this.buildPreviousStepToolsPayload(
+                    relevantSteps,
+                    maxOrder,
+                    node,
+                    labelMaps
+                );
             },
             filterDependenciesToValidOnly(dependencies) {
                 if (!dependencies?.length || !this.previousStepTools?.length)

@@ -52,13 +52,7 @@
                             <div class="d-flex align-items-center">
                                 <div>
                                     <div class="fw-medium">
-                                        {{ stepTool.tool.name }}
-                                        <template v-if="resolveToolResourceLabel(stepTool)">
-                                            : {{ resolveToolResourceLabel(stepTool) }}
-                                        </template>
-                                        <small class="text-muted">
-                                            ({{ stepTool.tool.toolType }})
-                                        </small>
+                                        {{ formatDependencyToolLabel(stepTool) }}
                                     </div>
                                 </div>
                             </div>
@@ -185,14 +179,52 @@
             },
             resolveToolResourceLabel(stepTool) {
                 if (!stepTool?.tool) return "";
+                const fromTool = stepTool.tool.resourceName || "";
+                if (fromTool) return fromTool;
+                const ptt = (stepTool.tool.toolType || "").toString().toLowerCase();
                 if (
-                    stepTool.tool.toolType === ToolType.Prompt &&
+                    ptt === ToolType.Prompt.toLowerCase() &&
                     stepTool.parameters?.length > 0 &&
                     stepTool.parameters[0].promptName
                 ) {
                     return stepTool.parameters[0].promptName;
                 }
-                return stepTool.tool.resourceName || "";
+                return "";
+            },
+            normalizeToolTypeForI18n(toolType) {
+                const raw = (toolType || "").toString();
+                if (!raw) return "";
+                if (/^api$/i.test(raw)) return "Api";
+                if (/^n8n$/i.test(raw)) return "N8N";
+                return raw;
+            },
+            localizeToolTypeDisplay(toolType) {
+                const key = this.normalizeToolTypeForI18n(toolType);
+                if (!key) return "";
+                const path = `tools.typeDisplay.${key}`;
+                if (this.$te(path)) return this.$t(path);
+                return toolType || "";
+            },
+            formatDependencyToolLabel(stepTool) {
+                if (!stepTool?.tool) return "";
+                const tt = (stepTool.tool.toolType || "").toString();
+                const ttLower = tt.toLowerCase();
+                const name = (this.resolveToolResourceLabel(stepTool) || "").trim();
+                if (name && ttLower === ToolType.Prompt.toLowerCase()) {
+                    return this.$t("flow.dependencies.optionAgent", { name });
+                }
+                if (name && ttLower === ToolType.API.toLowerCase()) {
+                    return this.$t("flow.dependencies.optionApi", { name });
+                }
+                if (name && ttLower === ToolType.Quiz.toLowerCase()) {
+                    return this.$t("flow.dependencies.optionQuiz", { name });
+                }
+                const toolName = stepTool.tool.name || "";
+                const typeLabel = this.localizeToolTypeDisplay(tt);
+                if (toolName && typeLabel) {
+                    return `${toolName} (${typeLabel})`;
+                }
+                return toolName || typeLabel || tt;
             },
             findToolLabelById(stepOrder, stepToolOrder) {
                 const step = this.previousStepTools.find((s) => s.order === stepOrder);
@@ -200,10 +232,7 @@
                     ? step.stepTools.find((st) => st.order === stepToolOrder)
                     : null;
                 if (!stepTool) return "";
-                const resource = this.resolveToolResourceLabel(stepTool);
-                return resource
-                    ? `${stepTool.tool.name}: ${resource} (${stepTool.tool.toolType})`
-                    : `${stepTool.tool.name}/${stepTool.tool.toolType}`;
+                return this.formatDependencyToolLabel(stepTool);
             },
         },
     };
