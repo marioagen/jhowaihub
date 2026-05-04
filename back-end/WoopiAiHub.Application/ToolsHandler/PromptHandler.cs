@@ -204,7 +204,7 @@ public class PromptHandler : IToolHandler
             mappedApiString = mappedApiString.Replace($"PAYLOAD_API_{item.Id}", System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(bodyContent).RootElement));
         }
 
-        return string.IsNullOrEmpty(mappedApiString) ? "" : _mcpSettings.Instructions.Replace("{0}", mappedApiString);
+        return _mcpSettings.Instructions.Replace("{0}", mappedApiString);
     }
 
     /// <summary>
@@ -296,11 +296,7 @@ public class PromptHandler : IToolHandler
             using var doc = JsonDocument.Parse(trimmed);
             var root = doc.RootElement;
             if (root.ValueKind == JsonValueKind.Object)
-            {
-                var line = FormatJsonObjectAsLabelValueString(root);
-                if (line != null)
-                    return line;
-            }
+                return FormatJsonObjectAsLabelValueString(root);
         }
         catch
         {
@@ -315,7 +311,7 @@ public class PromptHandler : IToolHandler
     /// </summary>
     /// <param name="root">A JSON object element.</param>
     /// <returns>Joined <c>Label: value</c> segments, or the literal <c>{}</c> when the object has no properties.</returns>
-    private static string? FormatJsonObjectAsLabelValueString(JsonElement root)
+    private static string FormatJsonObjectAsLabelValueString(JsonElement root)
     {
         var segments = new List<string>();
         foreach (var prop in root.EnumerateObject())
@@ -335,6 +331,7 @@ public class PromptHandler : IToolHandler
     /// </summary>
     /// <param name="el">A JSON value (string, number, array, object, or literal).</param>
     /// <returns>Text to place after a property name in the flattened API output.</returns>
+#pragma warning disable CS8524 // All JsonValueKind values returned by JsonDocument are named; runtime may add more.
     private static string FormatJsonValueForApiDisplay(JsonElement el) =>
         el.ValueKind switch
         {
@@ -345,8 +342,9 @@ public class PromptHandler : IToolHandler
             JsonValueKind.Null => "null",
             JsonValueKind.Array => string.Join(", ", el.EnumerateArray().Select(FormatJsonValueForApiDisplay)),
             JsonValueKind.Object => el.GetRawText(),
-            _ => el.GetRawText()
+            JsonValueKind.Undefined => string.Empty,
         };
+#pragma warning restore CS8524
 
     /// <summary>
     /// Wraps a string in double quotes and escapes <c>\</c> and <c>"</c> so the result is safe to embed in the flattened key/value line.
