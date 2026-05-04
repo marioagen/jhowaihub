@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.AutoMock;
@@ -308,9 +308,21 @@ namespace WoopiAiHub.UnitTests.Services
             var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
             var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
+            var scopeFactoryMock = _mocker.GetMock<IServiceScopeFactory>();
+
+            var scopeMock = new Mock<IServiceScope>();
+            var serviceProviderMock = new Mock<IServiceProvider>();
+
+            serviceProviderMock.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(httpContextAccessor.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IDocumentRepository))).Returns(documentRepositoryMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IDocumentAnonymizationRepository))).Returns(documentAnonymizationRepositoryMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IHubNotifier))).Returns(hubNotifierMock.Object);
+
+            scopeMock.Setup(x => x.ServiceProvider).Returns(serviceProviderMock.Object);
+            scopeFactoryMock.Setup(x => x.CreateScope()).Returns(scopeMock.Object);
 
             tenantContextServiceMock
-                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
+                .Setup(x => x.GetConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
                 .ReturnsAsync((connectionString, httpContextAccessor.Object));
 
             documentRepositoryMock
@@ -330,7 +342,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             tenantContextServiceMock.Verify(
-                x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant),
+                x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant, It.IsAny<IServiceScope>()),
                 Times.Once);
 
             documentRepositoryMock.Verify(
@@ -365,10 +377,22 @@ namespace WoopiAiHub.UnitTests.Services
             var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
             var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
+            var scopeFactoryMock = _mocker.GetMock<IServiceScopeFactory>();
+
+            var scopeMock = new Mock<IServiceScope>();
+            var serviceProviderMock = new Mock<IServiceProvider>();
+
+            serviceProviderMock.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(httpContextAccessor.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IDocumentRepository))).Returns(documentRepositoryMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IDocumentAnonymizationRepository))).Returns(documentAnonymizationRepositoryMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IHubNotifier))).Returns(hubNotifierMock.Object);
+
+            scopeMock.Setup(x => x.ServiceProvider).Returns(serviceProviderMock.Object);
+            scopeFactoryMock.Setup(x => x.CreateScope()).Returns(scopeMock.Object);
 
             tenantContextServiceMock
-                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
-                .ReturnsAsync((connectionString, httpContextAccessor.Object));
+                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant, It.IsAny<IServiceScope>()))
+                .ReturnsAsync(connectionString);
 
             documentRepositoryMock
                 .Setup(x => x.FindById(result.WoopiAiDocumentId))
@@ -383,6 +407,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             tenantContextServiceMock.Verify(
                 x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant),
+                x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant, It.IsAny<IServiceScope>()),
                 Times.Once);
 
             documentAnonymizationRepositoryMock.Verify(
@@ -410,10 +435,22 @@ namespace WoopiAiHub.UnitTests.Services
             var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
             var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
+            var scopeFactoryMock = _mocker.GetMock<IServiceScopeFactory>();
+
+            var scopeMock = new Mock<IServiceScope>();
+            var serviceProviderMock = new Mock<IServiceProvider>();
+
+            serviceProviderMock.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(httpContextAccessor.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IDocumentRepository))).Returns(documentRepositoryMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IDocumentAnonymizationRepository))).Returns(documentAnonymizationRepositoryMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IHubNotifier))).Returns(hubNotifierMock.Object);
+
+            scopeMock.Setup(x => x.ServiceProvider).Returns(serviceProviderMock.Object);
+            scopeFactoryMock.Setup(x => x.CreateScope()).Returns(scopeMock.Object);
 
             tenantContextServiceMock
-                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
-                .ReturnsAsync((connectionString, httpContextAccessor.Object));
+                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant, It.IsAny<IServiceScope>()))
+                .ReturnsAsync(connectionString);
 
             documentRepositoryMock
                 .Setup(x => x.FindById(result.WoopiAiDocumentId))
@@ -451,10 +488,22 @@ namespace WoopiAiHub.UnitTests.Services
             var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
             var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
+            var scopeFactoryMock = _mocker.GetMock<IServiceScopeFactory>();
+
+            var scopeMock = new Mock<IServiceScope>();
+            var serviceProviderMock = new Mock<IServiceProvider>();
+
+            serviceProviderMock.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(httpContextAccessor.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IDocumentRepository))).Returns(documentRepositoryMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IDocumentAnonymizationRepository))).Returns(documentAnonymizationRepositoryMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IHubNotifier))).Returns(hubNotifierMock.Object);
+
+            scopeMock.Setup(x => x.ServiceProvider).Returns(serviceProviderMock.Object);
+            scopeFactoryMock.Setup(x => x.CreateScope()).Returns(scopeMock.Object);
 
             tenantContextServiceMock
-                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant))
-                .ReturnsAsync((connectionString, httpContextAccessor.Object));
+                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(result.WoopiAiTenant, It.IsAny<IServiceScope>()))
+                .ReturnsAsync(connectionString);
 
             documentRepositoryMock
                 .Setup(x => x.FindById(result.WoopiAiDocumentId))
@@ -492,10 +541,22 @@ namespace WoopiAiHub.UnitTests.Services
             var documentAnonymizationRepositoryMock = _mocker.GetMock<IDocumentAnonymizationRepository>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
             var tenantContextServiceMock = _mocker.GetMock<ITenantContextService>();
+            var scopeFactoryMock = _mocker.GetMock<IServiceScopeFactory>();
+
+            var scopeMock = new Mock<IServiceScope>();
+            var serviceProviderMock = new Mock<IServiceProvider>();
+
+            serviceProviderMock.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(httpContextAccessor.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IDocumentRepository))).Returns(documentRepositoryMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IDocumentAnonymizationRepository))).Returns(documentAnonymizationRepositoryMock.Object);
+            serviceProviderMock.Setup(x => x.GetService(typeof(IHubNotifier))).Returns(hubNotifierMock.Object);
+
+            scopeMock.Setup(x => x.ServiceProvider).Returns(serviceProviderMock.Object);
+            scopeFactoryMock.Setup(x => x.CreateScope()).Returns(scopeMock.Object);
 
             tenantContextServiceMock
-                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(tenantId))
-                .ReturnsAsync((connectionString, httpContextAccessor.Object));
+                .Setup(x => x.FindConnectionStringAndHttpAcessorAsync(tenantId, It.IsAny<IServiceScope>()))
+                .ReturnsAsync(connectionString);
 
             documentRepositoryMock
                 .Setup(x => x.FindById(result.WoopiAiDocumentId))

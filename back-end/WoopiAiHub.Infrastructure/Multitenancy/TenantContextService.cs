@@ -12,16 +12,13 @@ namespace WoopiAiHub.Infrastructure.Multitenancy
     {
         private readonly IConfiguration _configuration;
         private readonly ITenantCacheServices _tenantCacheService;
-        private readonly IServiceScopeFactory _scopeFactory;
 
         public TenantContextService(
             IConfiguration configuration,
-            ITenantCacheServices tenantCacheService,
-            IServiceScopeFactory scopeFactory)
+            ITenantCacheServices tenantCacheService)
         {
             _configuration = configuration;
             _tenantCacheService = tenantCacheService;
-            _scopeFactory = scopeFactory;
         }
 
         /// <summary>
@@ -101,18 +98,12 @@ namespace WoopiAiHub.Infrastructure.Multitenancy
         /// <param name="tenantName">The name of the tenant for which to retrieve the connection string. Cannot be null or empty.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the connection string for the
         /// specified tenant.</returns>
-        public async Task<(string, IHttpContextAccessor)> FindConnectionStringAndHttpAcessorAsync(string tenantName)
+        public async Task<string> FindConnectionStringAndHttpAcessorAsync(string tenantName, IServiceScope scope)
         {
-            using var scope = _scopeFactory.CreateScope();
-
             var tenantCacheService = scope.ServiceProvider.GetRequiredService<ITenantCacheServices>();
             var tenant = await tenantCacheService.FindTenantAsync(tenantName);
             var template = _configuration.GetConnectionString("TemplateConnection") ?? string.Empty;
-            var connectionString = template?.Replace("___NEWDB___", tenant!.DatabaseName) ?? string.Empty;
-
-            var httpAccessor = scope.ServiceProvider.GetRequiredService<IHttpContextAccessor>();
-
-            return (connectionString, httpAccessor);
+            return template?.Replace("___NEWDB___", tenant!.DatabaseName) ?? string.Empty;
         }
     }
 }

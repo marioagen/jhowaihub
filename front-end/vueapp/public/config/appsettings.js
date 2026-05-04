@@ -1,5 +1,6 @@
 const ENV_CONFIG = (() => {
     return {
+        VITE_APP_VERSION: "local",
         VUE_APP_NAME: "WOOPI AI",
         VUE_APP_BASE_URL_API: "https://localhost:7045",
         VUE_APP_WAITING_TIME_MSG_UPLD: "5000",
