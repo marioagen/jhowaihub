@@ -671,7 +671,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "Create unique prompt from integration success")]
         [Trait("CreateUniquePromptFromIntegration", "Success")]
-        public async Task CreateUniquePromptFromIntegration_Success()
+        public void CreateUniquePromptFromIntegration_Success()
         {
             //Arrange
             var dto = MessagingFixture.FindValidPromptIntegrationCreateDto();
@@ -698,7 +698,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "Create unique prompt from integration should throw argument exception when fields are invalid")]
         [Trait("CreateUniquePromptFromIntegration", "Fail")]
-        public async Task CreateUniquePromptFromIntegration_ShouldThrowArgumentException_InvalidFields()
+        public void CreateUniquePromptFromIntegration_ShouldThrowArgumentException_InvalidFields()
         {
             //Arrange
             var dto = MessagingFixture.FindValidPromptIntegrationCreateDto();
@@ -717,7 +717,7 @@ namespace WoopiAiHub.UnitTests.Services
 
         [Fact(DisplayName = "Create unique prompt from integration should throw app exception when is duplicated")]
         [Trait("CreateUniquePromptFromIntegration", "Fail")]
-        public async Task CreateUniquePromptFromIntegration_ShouldThrowAppException_Duplicated()
+        public void CreateUniquePromptFromIntegration_ShouldThrowAppException_Duplicated()
         {
             //Arrange
             var dto = MessagingFixture.FindValidPromptIntegrationCreateDto();

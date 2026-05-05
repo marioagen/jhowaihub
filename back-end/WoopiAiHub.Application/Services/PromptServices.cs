@@ -242,6 +242,11 @@ namespace WoopiAiHub.Application.Services
 
             var createPromptResult = _promptRepository.CreateAndReturn(prompt);
 
+            if (createPromptResult == null)
+            {
+                throw new InvalidOperationException("Create prompt Failed");
+            }
+
             return new PromptIntegrationDto
             {
                 Id = prompt.Id,
