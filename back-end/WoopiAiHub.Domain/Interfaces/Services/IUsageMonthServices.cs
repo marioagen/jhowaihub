@@ -8,6 +8,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<ICollection<DashboardUsageDto>> FindDataByUsageType(UsageTypeFilterDto usageMonthFilterDto);
         Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(ModelEmbeddingFilterDto modelEmbeddingFilterDto);
         Task<ICollection<ModelEmbeddingDto>> FindUsedModelEmbeddings();
-        Task<decimal> FindTotalUsageCostAsync(DateFilterDto dateFilterDto);
+        Task<decimal> FindTotalUsageCostAsync(TotalUsageCostFilterDto filterDto);
     }
 }

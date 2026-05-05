@@ -64,14 +64,14 @@ namespace WoopiAiHub.Api.Controllers
         /// <summary>
         /// Endpoint that receives the request to find total usage cost
         /// </summary>
-        /// <param name="dateFilterDto"></param>
+        /// <param name="filterDto"></param>
         /// <returns></returns>
         [HttpGet("FindTotalUsageCost")]
         [SwaggerOperation("Endpoint that receives the request to find total usage cost")]
         [ProducesResponseType(typeof(decimal), StatusCodes.Status200OK)]
-        public async Task<ActionResult<decimal>> FindTotalUsageCost([FromQuery] DateFilterDto dateFilterDto)
+        public async Task<ActionResult<decimal>> FindTotalUsageCost([FromQuery] TotalUsageCostFilterDto filterDto)
         {
-            var result = await _usageMonthServices.FindTotalUsageCostAsync(dateFilterDto);
+            var result = await _usageMonthServices.FindTotalUsageCostAsync(filterDto);
             return Ok(result);
         }
     }

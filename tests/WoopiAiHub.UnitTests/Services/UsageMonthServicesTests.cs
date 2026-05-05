@@ -116,7 +116,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var start = "2023-10-01";
             var end = "2023-10-31";
-            var dateFilterDto = new DateFilterDto { Start = start, End = end };
+            var dateFilterDto = new TotalUsageCostFilterDto { Start = start, End = end };
             var expectedTotal = 123.45m;
 
             DateTime? expectedStart = DateTime.Parse(start);

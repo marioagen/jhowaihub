@@ -52,13 +52,13 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Finds total usage cost.
         /// </summary>
-        /// <param name="dateFilterDto"></param>
+        /// <param name="filterDto"></param>
         /// <returns></returns>
-        public async Task<decimal> FindTotalUsageCostAsync(DateFilterDto dateFilterDto)
+        public async Task<decimal> FindTotalUsageCostAsync(TotalUsageCostFilterDto filterDto)
         {
-            var startDate = DateHelper.ParseDate(dateFilterDto.Start);
-            var endDate = DateHelper.ParseDate(dateFilterDto.End);
-            return await _usageMonthRepository.FindTotalUsageCostAsync(startDate, endDate);
+            var startDate = DateHelper.ParseDate(filterDto.Start);
+            var endDate = DateHelper.ParseDate(filterDto.End);
+            return await _usageMonthRepository.FindTotalUsageCostAsync(startDate, endDate, filterDto.WorkflowIds);
         }
     }
 }
