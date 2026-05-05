@@ -230,11 +230,17 @@
                     });
             },
             getTotalCost() {
+                this.isLoaded = false;
+
                 let paramsTotalCost = {
                     start: this.start,
                     end: this.end,
                 };
-                this.isLoaded = false;
+
+                if (this.workflowIds.length > 0 && !this.workflowIds.includes(null)) {
+                    paramsTotalCost.workflowIds = this.workflowIds;
+                }
+
                 DashboardServices.GetTotalUsageCost(paramsTotalCost)
                     .then((response) => {
                         if (response && !response.error) {
