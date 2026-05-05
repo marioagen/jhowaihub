@@ -52,10 +52,7 @@
                             <div class="d-flex align-items-center">
                                 <div>
                                     <div class="fw-medium">
-                                        {{ stepTool.tool.name }}
-                                        <small class="text-muted">
-                                            ({{ stepTool.tool.toolType }})
-                                        </small>
+                                        {{ formatDependencyToolLabel(stepTool) }}
                                     </div>
                                 </div>
                             </div>
@@ -101,6 +98,7 @@
 </template>
 <script>
     import LucideIcon from "@/components/global/LucideIcon.vue";
+    import ToolType from "@/constants/ToolType";
 
     export default {
         name: "DependencySelector",
@@ -179,12 +177,62 @@
                 const step = this.previousStepTools.find((s) => s.order === order);
                 return step ? step.name : "";
             },
+            resolveToolResourceLabel(stepTool) {
+                if (!stepTool?.tool) return "";
+                const fromTool = stepTool.tool.resourceName || "";
+                if (fromTool) return fromTool;
+                const ptt = (stepTool.tool.toolType || "").toString().toLowerCase();
+                if (
+                    ptt === ToolType.Prompt.toLowerCase() &&
+                    stepTool.parameters?.length > 0 &&
+                    stepTool.parameters[0].promptName
+                ) {
+                    return stepTool.parameters[0].promptName;
+                }
+                return "";
+            },
+            normalizeToolTypeForI18n(toolType) {
+                const raw = (toolType || "").toString();
+                if (!raw) return "";
+                if (/^api$/i.test(raw)) return "Api";
+                if (/^n8n$/i.test(raw)) return "N8N";
+                return raw;
+            },
+            localizeToolTypeDisplay(toolType) {
+                const key = this.normalizeToolTypeForI18n(toolType);
+                if (!key) return "";
+                const path = `tools.typeDisplay.${key}`;
+                if (this.$te(path)) return this.$t(path);
+                return toolType || "";
+            },
+            formatDependencyToolLabel(stepTool) {
+                if (!stepTool?.tool) return "";
+                const tt = (stepTool.tool.toolType || "").toString();
+                const ttLower = tt.toLowerCase();
+                const name = (this.resolveToolResourceLabel(stepTool) || "").trim();
+                if (name && ttLower === ToolType.Prompt.toLowerCase()) {
+                    return this.$t("flow.dependencies.optionAgent", { name });
+                }
+                if (name && ttLower === ToolType.API.toLowerCase()) {
+                    return this.$t("flow.dependencies.optionApi", { name });
+                }
+                if (name && ttLower === ToolType.Quiz.toLowerCase()) {
+                    return this.$t("flow.dependencies.optionQuiz", { name });
+                }
+                const toolName = stepTool.tool.name || "";
+                const typeLabel = this.localizeToolTypeDisplay(tt);
+                if (toolName && typeLabel) {
+                    return `${toolName} (${typeLabel})`;
+                }
+                return toolName || typeLabel || tt;
+            },
             findToolLabelById(stepOrder, stepToolOrder) {
                 const step = this.previousStepTools.find((s) => s.order === stepOrder);
                 const stepTool = step
                     ? step.stepTools.find((st) => st.order === stepToolOrder)
                     : null;
-                return stepTool ? `${stepTool.tool.name}/${stepTool.tool.toolType}` : "";
+                if (!stepTool) return "";
+                return this.formatDependencyToolLabel(stepTool);
             },
         },
     };

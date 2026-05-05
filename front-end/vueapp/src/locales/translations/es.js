@@ -687,6 +687,11 @@ const spanish = {
             inputs: "Entradas",
             noDependencies: "No hay herramientas disponibles",
         },
+        dependencies: {
+            optionAgent: "Agente: {name}",
+            optionApi: "API: {name}",
+            optionQuiz: "Cuestionario: {name}",
+        },
         sidebarTitle: "Configurar I/O:",
         start: "Inicio",
         subtitle: "",

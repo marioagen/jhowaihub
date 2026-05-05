@@ -1,0 +1,39 @@
+name: woopi-ai
+
+services:
+    rabbitmq:
+        image: rabbitmq:3-management
+        hostname: rabbitmq
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        volumes:
+            - rabbitmq-data:/var/lib/rabbitmq
+        environment:
+            RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
+            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
+
+    redis:
+        image: redis:7-alpine
+        hostname: redis
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis-data:/data
+        command: ["redis-server", "--appendonly", "yes"]
+
+    mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        hostname: mssql
+        ports:
+            - "1433:1433"
+        volumes:
+            - mssql-data:/var/opt/mssql
+        environment:
+            ACCEPT_EULA: "Y"
+            MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-Strong!WortePass99}
+
+volumes:
+    rabbitmq-data:
+    redis-data:
+    mssql-data:
