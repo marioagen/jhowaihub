@@ -345,6 +345,9 @@ export default {
             apiTemplates: [],
             apiTemplatesSelected: [],
             isLoading: false,
+            testContext: "",
+            testResult: "",
+            isTesting: false,
         };
     },
     computed: {
@@ -621,10 +624,13 @@ export default {
                             variant: "danger",
                             icon: "CircleX",
                         });
+                        return;
                     }
 
                     this.testResult =
-                        typeof response === "string" ? response : String(response ?? "");
+                        typeof response === "string"
+                            ? response
+                            : JSON.stringify(response, null, 2);
                 })
                 .finally(() => {
                     this.isTesting = false;
