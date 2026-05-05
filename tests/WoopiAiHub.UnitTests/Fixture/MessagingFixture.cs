@@ -326,6 +326,49 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
+        public static List<ApiTemplateDto> FindListApiTemplateDtoForMcpPostPutDeleteBodyMapping()
+        {
+            return new List<ApiTemplateDto>
+            {
+                new()
+                {
+                    Id = 101,
+                    Created = DateTime.UtcNow,
+                    Name = "PostApi",
+                    Method = "POST",
+                    Url = "https://example.com/post",
+                    Description = "post-desc",
+                    EnableAccessFromMcp = true,
+                    HeaderTemplate = "",
+                    BodyTemplate = """{"x":"post-body"}""",
+                },
+                new()
+                {
+                    Id = 102,
+                    Created = DateTime.UtcNow,
+                    Name = "PutApi",
+                    Method = "PUT",
+                    Url = "https://example.com/put",
+                    Description = "put-desc",
+                    EnableAccessFromMcp = true,
+                    HeaderTemplate = "",
+                    BodyTemplate = "",
+                },
+                new()
+                {
+                    Id = 103,
+                    Created = DateTime.UtcNow,
+                    Name = "DeleteApi",
+                    Method = "DELETE",
+                    Url = "https://example.com/del",
+                    Description = "del-desc",
+                    EnableAccessFromMcp = true,
+                    HeaderTemplate = "",
+                    BodyTemplate = null,
+                },
+            };
+        }
+
         public static PromptTemplatesResponse FindValidPromptTemplatesResponseSort()
         {
             var faker = new Faker<PromptTemplatesResponse>("pt_BR")

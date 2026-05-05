@@ -20,6 +20,19 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Name.FullName()
             );
         }
+
+        public static StepToolOutput CreateStepToolOutput(string toolType, string value)
+        {
+            var output = AutomationFixture.FindValidStepToolOutput(value);
+            output.StepTool = new StepTool(1, DateTime.UtcNow, 1, 1, 1, 1, 1)
+            {
+                Tool = new Tool(1, DateTime.UtcNow, "Tool", true, 1, 1, 1, false, null, null)
+                {
+                    ToolType = new ToolType(1, DateTime.UtcNow, toolType, string.Empty, true)
+                }
+            };
+            return output;
+        }
     }
 
     [CollectionDefinition(nameof(ToolHandlerCollection))]
