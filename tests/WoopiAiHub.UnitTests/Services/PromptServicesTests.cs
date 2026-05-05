@@ -68,8 +68,8 @@ namespace WoopiAiHub.UnitTests.Services
             var promptRepository = _mocker.GetMock<IPromptRepository>();
 
             userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
-            validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(true);
-            promptRepository.Setup(r => r.CreateUniquePrompt(It.IsAny<Prompt>())).Returns(true);
+            validatePrompt.Setup(v => v.ValidateRequiredPromptFields(It.IsAny<Prompt>())).Returns(true);
+            promptRepository.Setup(r => r.Create(It.IsAny<Prompt>())).Returns(true);
 
             //Act
             var result = _promptServices.CreateUniquePrompt(dto, email);
@@ -83,6 +83,7 @@ namespace WoopiAiHub.UnitTests.Services
         public void CreateUniquePrompt_ShouldThrowAppException_Duplicated()
         {
             //Arrange
+            var prompt = PromptFixture.FindValidPrompt();
             var dto = MessagingFixture.FindValidPromptCreateDto();
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
@@ -91,8 +92,8 @@ namespace WoopiAiHub.UnitTests.Services
             var promptRepository = _mocker.GetMock<IPromptRepository>();
 
             userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
-            validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(true);
-            promptRepository.Setup(r => r.CreateUniquePrompt(It.IsAny<Prompt>())).Returns(false);
+            validatePrompt.Setup(v => v.ValidateRequiredPromptFields(It.IsAny<Prompt>())).Returns(true);
+            promptRepository.Setup(r => r.FindByNameAndUser(It.IsAny<string>(), It.IsAny<Guid>())).Returns(prompt);
 
             //Act/Assert
             Assert.Throws<AppException>(() => _promptServices.CreateUniquePrompt(dto, email));
@@ -109,7 +110,7 @@ namespace WoopiAiHub.UnitTests.Services
             var _userServices = _mocker.GetMock<IUserServices>();
             var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
             _userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
-            _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(false);
+            _validatePrompt.Setup(v => v.ValidateRequiredPromptFields(It.IsAny<Prompt>())).Returns(false);
 
             //Act
             var result = _promptServices.CreateUniquePrompt(dto, email);
@@ -132,7 +133,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _validatePrompt.Setup(v => v.ValidateOwnership(promptDto.Id, email));
             _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns(promptDto);
-            _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>()));
+            _validatePrompt.Setup(v => v.ValidateRequiredPromptFields(It.IsAny<Prompt>()));
             _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<int>>())).ReturnsAsync(true);
             _unitOfWork.Setup(u => u.BeginTransaction());
             _unitOfWork.Setup(u => u.Commit());
@@ -158,7 +159,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             _validatePrompt.Setup(v => v.ValidateOwnership(promptDto.Id, email));
             _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns(promptDto);
-            _validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>()));
+            _validatePrompt.Setup(v => v.ValidateRequiredPromptFields(It.IsAny<Prompt>()));
             _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<int>>())).ReturnsAsync(false);
             _unitOfWork.Setup(u => u.BeginTransaction());
             _unitOfWork.Setup(u => u.Commit());
@@ -682,8 +683,8 @@ namespace WoopiAiHub.UnitTests.Services
             var promptRepository = _mocker.GetMock<IPromptRepository>();
 
             userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
-            validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(true);
-            promptRepository.Setup(r => r.CreateUniquePromptAndReturn(It.IsAny<Prompt>())).Returns(returnedPrompt);
+            validatePrompt.Setup(v => v.ValidateRequiredPromptFields(It.IsAny<Prompt>())).Returns(true);
+            promptRepository.Setup(r => r.CreateAndReturn(It.IsAny<Prompt>())).Returns(returnedPrompt);
 
             //Act
             var result = _promptServices.CreateUniquePromptFromIntegration(dto, email);
@@ -707,10 +708,10 @@ namespace WoopiAiHub.UnitTests.Services
             var validatePrompt = _mocker.GetMock<IValidatePrompt>();
 
             userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
-            validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(false);
+            validatePrompt.Setup(v => v.ValidateRequiredPromptFields(It.IsAny<Prompt>())).Returns(false);
 
             //Act/Assert
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<AppException>(() =>
                 _promptServices.CreateUniquePromptFromIntegration(dto, email));
         }
 
@@ -720,6 +721,7 @@ namespace WoopiAiHub.UnitTests.Services
         {
             //Arrange
             var dto = MessagingFixture.FindValidPromptIntegrationCreateDto();
+            var prompt = PromptFixture.FindValidPrompt();
             var email = "user@teste.com";
             var idUser = Guid.NewGuid();
             var userServices = _mocker.GetMock<IUserServices>();
@@ -727,8 +729,8 @@ namespace WoopiAiHub.UnitTests.Services
             var promptRepository = _mocker.GetMock<IPromptRepository>();
 
             userServices.Setup(u => u.FindIdByEmail(email)).Returns(idUser);
-            validatePrompt.Setup(v => v.ValidatePromptFields(It.IsAny<Prompt>())).Returns(true);
-            promptRepository.Setup(r => r.CreateUniquePromptAndReturn(It.IsAny<Prompt>())).Returns((Prompt?)null);
+            validatePrompt.Setup(v => v.ValidateRequiredPromptFields(It.IsAny<Prompt>())).Returns(true);
+            promptRepository.Setup(r => r.FindByNameAndUser(It.IsAny<string>(), It.IsAny<Guid>())).Returns(prompt);
 
             //Act/Assert
             Assert.Throws<AppException>(() =>

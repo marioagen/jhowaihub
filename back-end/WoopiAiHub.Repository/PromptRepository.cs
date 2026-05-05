@@ -20,9 +20,10 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="prompt"></param>
         /// <returns></returns>
-        public bool CreateUniquePrompt(Prompt prompt)
+        public bool Create(Prompt prompt)
         {
-            return CreateUniquePromptAndReturn(prompt) != null;
+            _context.Prompts.Add(prompt);
+            return _context.SaveChanges() > 0;
         }
 
         /// <summary>
@@ -30,18 +31,23 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="prompt"></param>
         /// <returns></returns>
-        public Prompt? CreateUniquePromptAndReturn(Prompt prompt)
+        public Prompt? CreateAndReturn(Prompt prompt)
         {
-            var existPrompt = _context.Prompts.Any(p => p.Name == prompt.Name && p.IdUser == prompt.IdUser);
-            if (!existPrompt)
-            {
-                _context.Prompts.Add(prompt);
-                _context.SaveChanges();
+            _context.Prompts.Add(prompt);
+            _context.SaveChanges();
 
-                return prompt;
-            }
+            return prompt;
+        }
 
-            return null;
+        /// <summary>
+        /// Find a prompt by name and user id, if not found it will return null
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="idUser"></param>
+        /// <returns></returns>
+        public Prompt? FindByNameAndUser(string name, Guid idUser)
+        {
+            return _context.Prompts.FirstOrDefault(p => p.Name == name && p.IdUser == idUser);
         }
 
         /// <summary>

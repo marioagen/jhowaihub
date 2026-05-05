@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Moq.AutoMock;
 using System;
 using WoopiAiHub.Application.Services;
@@ -80,7 +80,7 @@ namespace WoopiAiHub.UnitTests.Services.Utils
             var prompt = PromptFixture.FindInvalidPrompt();
 
             // Act 
-            var empty = _validatePrompt.ValidatePromptFields(prompt);
+            var empty = _validatePrompt.ValidateRequiredPromptFields(prompt);
 
             //Assert
             Assert.False(empty);
@@ -94,7 +94,7 @@ namespace WoopiAiHub.UnitTests.Services.Utils
             var prompt = PromptFixture.FindValidPrompt();
 
             // Act 
-            var result = _validatePrompt.ValidatePromptFields(prompt);
+            var result = _validatePrompt.ValidateRequiredPromptFields(prompt);
 
             //Assert
             Assert.True(result);

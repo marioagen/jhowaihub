@@ -440,6 +440,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                 });
             return faker;
         }
+
         public static (PromptUpdateDto, PromptDto) FindValidPromptUpdateDtoAndPromptDto()
         {
             var fakerPromptUpdateDto = new Faker<PromptUpdateDto>("pt_BR")

@@ -5,8 +5,8 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
 {
     public interface IPromptRepository
     {
-        bool CreateUniquePrompt(Prompt prompt);
-        Prompt? CreateUniquePromptAndReturn(Prompt prompt);
+        bool Create(Prompt prompt);
+        Prompt? CreateAndReturn(Prompt prompt);
         bool CreateByRange(List<Prompt> prompts);
         bool Delete(List<int> ids);
         bool Update(Prompt prompt);
@@ -15,5 +15,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         IQueryable<PromptDto> FindByIdUser(Guid idUser);
         Task<ICollection<PromptIntegrationDto>> FindAllInternal();
         Task<bool> UpdateAndRemovePromptApisFromPrompt(Prompt prompt, List<int> data);
+        Prompt? FindByNameAndUser(string name, Guid idUser);
     }
 }

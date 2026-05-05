@@ -203,20 +203,20 @@ namespace WoopiAiHub.Application.Services
             var idUser = _userServices.FindIdByEmail(email);
             var prompt = GeneratePromptToCreate(promptCreateDto, idUser);
 
-            var result = _validatePrompt.ValidatePromptFields(prompt);
+            var result = _validatePrompt.ValidateRequiredPromptFields(prompt);
 
             if (!result)
             {
                 return false;
             }
 
-            var createPromptResult = _promptRepository.CreateUniquePrompt(prompt);
-            if (!createPromptResult)
+            var promptWithSameName = _promptRepository.FindByNameAndUser(prompt.Name, idUser);
+            if (promptWithSameName != null)
             {
                 throw new AppException(ErrorCode.Duplicated, "prompts.duplicated", null);
             }
 
-            return createPromptResult;
+            return _promptRepository.Create(prompt);
         }
 
         /// <summary>
@@ -232,6 +232,34 @@ namespace WoopiAiHub.Application.Services
             string email)
         {
             var idUser = _userServices.FindIdByEmail(email);
+            var prompt = CreateAndValidatePromptFields(promptIntegrationCreateDto, idUser);
+
+            var promptWithSameName = _promptRepository.FindByNameAndUser(prompt.Name, idUser);
+            if (promptWithSameName != null)
+            {
+                throw new AppException(ErrorCode.Duplicated, "The Prompt name is already in use.", null);
+            }
+
+            var createPromptResult = _promptRepository.CreateAndReturn(prompt);
+
+            return new PromptIntegrationDto
+            {
+                Id = prompt.Id,
+                Name = prompt.Name,
+                Description = prompt.Description,
+                Text = prompt.Text
+            };
+        }
+
+        /// <summary>
+        /// Create a new prompt and validate the required fields, this method is used for create a prompt from external source like prompt templates, for this reason the validation is only for the fields and not for the ownership, because the prompt is created with the user that is making the request and not with the user that is in the template
+        /// </summary>
+        /// <param name="promptIntegrationCreateDto"></param>
+        /// <param name="idUser"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        private Prompt CreateAndValidatePromptFields(PromptIntegrationCreateDto promptIntegrationCreateDto, Guid idUser)
+        {
             var prompt = new Prompt(
                 0,
                 DateTime.Now,
@@ -242,23 +270,14 @@ namespace WoopiAiHub.Application.Services
                 isEdited: false,
                 isImported: true
             );
-            var result = _validatePrompt.ValidatePromptFields(prompt);
+
+            var result = _validatePrompt.ValidateRequiredPromptFields(prompt);
             if (!result)
             {
-                throw new ArgumentException("Invalid prompt fields");
+                throw new AppException(ErrorCode.RequiredField, "Fill in all the fields", null);
             }
-            var createPromptResult = _promptRepository.CreateUniquePromptAndReturn(prompt);
-            if (createPromptResult == null)
-            {
-                throw new AppException(ErrorCode.Duplicated, "prompts.duplicated", null);
-            }
-            return new PromptIntegrationDto
-            {
-                Id = prompt.Id,
-                Name = prompt.Name,
-                Description = prompt.Description,
-                Text = prompt.Text
-            };
+
+            return prompt;
         }
 
         /// <summary>
@@ -280,7 +299,7 @@ namespace WoopiAiHub.Application.Services
 
             (var prompt, var promptApiTemplateIds) = GeneratePromptToUpdate(promptDto, promptUpdateDto);
 
-            _validatePrompt.ValidatePromptFields(prompt);
+            _validatePrompt.ValidateRequiredPromptFields(prompt);
 
             var promptUpdateResult = await _promptRepository.UpdateAndRemovePromptApisFromPrompt(prompt, promptApiTemplateIds);
 
