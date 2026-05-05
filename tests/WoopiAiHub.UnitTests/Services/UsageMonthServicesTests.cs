@@ -116,7 +116,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var start = "2023-10-01";
             var end = "2023-10-31";
-            var dateFilterDto = new TotalUsageCostFilterDto { Start = start, End = end };
+            var dateFilterDto = new TotalUsageCostFilterDto { Start = start, End = end, WorkflowIds = null };
             var expectedTotal = 123.45m;
 
             DateTime? expectedStart = DateTime.Parse(start);
@@ -125,7 +125,8 @@ namespace WoopiAiHub.UnitTests.Services
             _usageMonthRepositoryMock
                 .Setup(x => x.FindTotalUsageCostAsync(
                     It.Is<DateTime?>(d => d == expectedStart),
-                    It.Is<DateTime?>(d => d == expectedEnd)))
+                    It.Is<DateTime?>(d => d == expectedEnd),
+                    It.IsAny<List<int>>()))
                 .ReturnsAsync(expectedTotal);
 
             // Act
@@ -135,7 +136,8 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(expectedTotal, result);
             _usageMonthRepositoryMock.Verify(x => x.FindTotalUsageCostAsync(
                 It.Is<DateTime?>(d => d == expectedStart),
-                It.Is<DateTime?>(d => d == expectedEnd)), Times.Once);
+                It.Is<DateTime?>(d => d == expectedEnd),
+                It.IsAny<List<int>>()), Times.Once);
         }
     }
 }
