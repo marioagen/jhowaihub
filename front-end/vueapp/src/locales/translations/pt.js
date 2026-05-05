@@ -397,6 +397,8 @@ const portuguese = {
         downloadSuccessfully: "Download com sucesso",
         exportBtn: "Exportar CSV",
         filters: {
+            allWorkflows: "Todas as esteiras",
+            unclassified: "Não classificado",
             currentMonth: "Este mês",
             lastMonth: "Mês passado",
             previousNinety: "Últimos 90 dias",
@@ -667,6 +669,11 @@ const portuguese = {
             filter: "Selecione um webhook",
             inputs: "Entradas",
             noDependencies: "Nenhuma ferramenta disponível",
+        },
+        dependencies: {
+            optionAgent: "Agente: {name}",
+            optionApi: "API: {name}",
+            optionQuiz: "Questionário: {name}",
         },
         sidebarTitle: "Configurar I/O:",
         start: "Início",

@@ -57,7 +57,8 @@ namespace WoopiAiHub.Application.Services.Automation
                 outputDto.Tenant,
                 outputDto.Email,
                 execution.Card!.Document!.ReferenceFile,
-                0
+                execution.StepTool?.StepId,
+                execution.StepTool?.Step?.WorkflowId
             );
         }
     }

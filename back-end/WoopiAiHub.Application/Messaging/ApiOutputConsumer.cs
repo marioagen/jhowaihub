@@ -52,7 +52,7 @@ namespace WoopiAiHub.Application.Messaging
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
 
-                    await usageDailyServices.AddByValuesAsync(MetricNames.Automation, message.Email!, 1);
+                    await usageDailyServices.AddByValuesAsync(MetricNames.Automation, message.Email!, 1, string.Empty, automationServicesDto.WorkflowId);
 
                     await automationServices.ContinueExecution(automationServicesDto);
                 }

@@ -2,6 +2,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
+using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Domain.Interfaces.Services
 {
@@ -20,6 +21,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> ImportPromptsByIds(List<Guid> templateIds, string email);
         Task<ICollection<PromptInternalDto>> FindAllInternal();
         Task<string> AiPromptRefinement(string prompt, string tenantId, string email);
-        Task ProcessOpenAiResponseResult(OpenAiResponseConsumerResponseDto responseDto);
+        Task<StepToolExecution> ProcessOpenAiResponseResult(OpenAiResponseConsumerResponseDto responseDto);
     }
 }

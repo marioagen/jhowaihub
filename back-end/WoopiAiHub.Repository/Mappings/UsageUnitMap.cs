@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WoopiAiHub.Domain.Models;
 
@@ -30,7 +30,7 @@ namespace WoopiAiHub.Repository.Mappings
 
             builder.Property(u => u.Value)
                    .HasColumnName("Value")
-                   .HasColumnType("decimal(18,7)")
+                   .HasColumnType("decimal(18,9)")
                    .IsRequired();
 
             builder.HasOne(u => u.UsageType)

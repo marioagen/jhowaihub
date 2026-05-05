@@ -28,7 +28,7 @@
                         {{ $t("dashboard.graphs.periodTotal") }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
-                        {{ totalWorkflowsAutomatic * usageUnitWorkflowAutomatic }}
+                        {{ formatDecimalValue(calculatedTotal) }}
                     </h4>
                 </div>
             </div>
@@ -46,6 +46,7 @@
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import DashboardServices from "@/services/dashboard/DashboardServices";
     import { ColTypeUsage } from "@/constants/ColTypeUsage";
+    import { formatDecimalValue } from "@/helpers/number";
     export default {
         components: {
             BarGraphComponent,
@@ -59,6 +60,11 @@
             end: {
                 type: String,
                 required: true,
+            },
+            workflowIds: {
+                type: Array,
+                required: false,
+                default: () => [],
             },
             usageUnits: {
                 type: Array,
@@ -109,15 +115,17 @@
             },
             usageUnitWorkflowAutomatic() {
                 if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
-                    return 0;
+                    return "0";
                 }
                 return (
                     this.usageUnits.find((item) => item.usageTypeName === ColTypeUsage.Automation)
-                        ?.value ?? 0
+                        ?.value ?? "0"
                 );
             },
             calculatedTotal() {
-                return this.usageUnitWorkflowAutomatic * this.totalWorkflowsAutomatic;
+                const unit = parseFloat(this.usageUnitWorkflowAutomatic) || 0;
+                const total = Number(this.totalWorkflowsAutomatic) || 0;
+                return unit * total;
             },
         },
         watch: {
@@ -127,17 +135,26 @@
             end() {
                 this.getWorkflowsAutomaticData();
             },
+            workflowIds() {
+                this.getWorkflowsAutomaticData();
+            },
             calculatedTotal(newValue) {
                 this.$emit("totalCalculated", newValue);
             },
         },
         methods: {
+            formatDecimalValue,
             getWorkflowsAutomaticData() {
                 let params = {
                     start: this.start,
                     end: this.end,
                     usageType: ColTypeUsage.Automation,
                 };
+
+                if (this.workflowIds.length > 0 && !this.workflowIds.includes(null)) {
+                    params.workflowIds = this.workflowIds;
+                }
+
                 this.isLoaded = false;
                 DashboardServices.GetByUsageType(params)
                     .then((response) => {

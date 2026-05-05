@@ -61,7 +61,7 @@ namespace WoopiAiHub.Application.Messaging
                     if (pages == 0)
                         pages = 1;
 
-                    await usageDailyServices.AddByValuesAsync(MetricNames.Page, message.Email, pages);
+                    await usageDailyServices.AddByValuesAsync(MetricNames.Page, message.Email, pages, string.Empty, result.WorkflowId);
 
                     var automationServicesDto = new AutomationServicesDto
                     (
@@ -70,7 +70,8 @@ namespace WoopiAiHub.Application.Messaging
                         message.Tenant,
                         message.Email,
                         message.ReferenceFile,
-                        0
+                        0,
+                        result.WorkflowId
                     );
                     await automationServices.ContinueExecution(automationServicesDto);
                 }

@@ -31,7 +31,8 @@ namespace WoopiAiHub.UnitTests.Services
             {
                 UsageType = usageType,
                 Start = null,
-                End = null
+                End = null,
+                WorkflowIds = null
             };
             var expectedData = new List<DashboardUsageDto>
             {
@@ -39,7 +40,7 @@ namespace WoopiAiHub.UnitTests.Services
                 new DashboardUsageDto("2023-10-02", 20)
             };
 
-            _usageMonthRepositoryMock.Setup(x => x.FindDataByUsageType(It.IsAny<string>(), It.IsAny<DateTime?>(),It.IsAny<DateTime?>()))
+            _usageMonthRepositoryMock.Setup(x => x.FindDataByUsageType(It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<List<int>>()))
                 .ReturnsAsync(expectedData);
 
             // Act
@@ -49,7 +50,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotNull(result);
             Assert.Equal(expectedData.Count, result.Count);
             Assert.Equal(expectedData, result);
-            _usageMonthRepositoryMock.Verify(x => x.FindDataByUsageType(It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>()), Times.Once);
+            _usageMonthRepositoryMock.Verify(x => x.FindDataByUsageType(It.IsAny<string>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<List<int>>()), Times.Once);
         }
 
         [Fact(DisplayName = "Test FindDataByModelEmbedding and returns a list of DashboardUsageDto")]
@@ -62,7 +63,8 @@ namespace WoopiAiHub.UnitTests.Services
             {
                 Id = modelEmbeddingId,
                 Start = null,
-                End = null
+                End = null,
+                WorkflowIds = null
             };
             var expectedData = new List<DashboardUsageDto>
             {
@@ -70,7 +72,7 @@ namespace WoopiAiHub.UnitTests.Services
                 new DashboardUsageDto("2023-10-02", 15)
             };
 
-            _usageMonthRepositoryMock.Setup(x => x.FindDataByModelEmbedding(It.IsAny<int>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>()))
+            _usageMonthRepositoryMock.Setup(x => x.FindDataByModelEmbedding(It.IsAny<int>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<List<int>>()))
                 .ReturnsAsync(expectedData);
 
             // Act
@@ -80,7 +82,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotNull(result);
             Assert.Equal(expectedData.Count, result.Count);
             Assert.Equal(expectedData, result);
-            _usageMonthRepositoryMock.Verify(x => x.FindDataByModelEmbedding(It.IsAny<int>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>()), Times.Once);
+            _usageMonthRepositoryMock.Verify(x => x.FindDataByModelEmbedding(It.IsAny<int>(), It.IsAny<DateTime?>(), It.IsAny<DateTime?>(), It.IsAny<List<int>>()), Times.Once);
         }
 
         [Fact(DisplayName = "Test FindUsedModelEmbeddings and returns a list of used ModelEmbeddingDto")]

@@ -28,7 +28,7 @@
                         {{ $t("dashboard.graphs.periodTotal") }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
-                        {{ totalPages * usageUnitPages }}
+                        {{ formatDecimalValue(calculatedTotal) }}
                     </h4>
                 </div>
             </div>
@@ -49,6 +49,7 @@
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import DashboardServices from "@/services/dashboard/DashboardServices";
     import { ColTypeUsage } from "@/constants/ColTypeUsage";
+    import { formatDecimalValue } from "@/helpers/number";
     export default {
         components: {
             BarGraphComponent,
@@ -62,6 +63,11 @@
             end: {
                 type: String,
                 required: true,
+            },
+            workflowIds: {
+                type: Array,
+                required: false,
+                default: () => [],
             },
             usageUnits: {
                 type: Array,
@@ -106,18 +112,35 @@
             },
             usageUnitPages() {
                 if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
-                    return 0;
+                    return "0";
                 }
                 return (
                     this.usageUnits.find((item) => item.usageTypeName === ColTypeUsage.Page)
-                        ?.value ?? 0
+                        ?.value ?? "0"
                 );
+            },
+            calculatedTotal() {
+                const unit = parseFloat(this.usageUnitPages) || 0;
+                const total = Number(this.totalPages) || 0;
+                return unit * total;
             },
         },
         created() {
             this.getPagesData();
         },
+        watch: {
+            start() {
+                this.getPagesData();
+            },
+            end() {
+                this.getPagesData();
+            },
+            workflowIds() {
+                this.getPagesData();
+            },
+        },
         methods: {
+            formatDecimalValue,
             getPagesData() {
                 this.isLoaded = false;
                 let params = {
@@ -125,6 +148,11 @@
                     end: this.end,
                     usageType: ColTypeUsage.Page,
                 };
+
+                if (this.workflowIds.length > 0 && !this.workflowIds.includes(null)) {
+                    params.workflowIds = this.workflowIds;
+                }
+
                 DashboardServices.GetByUsageType(params)
                     .then((response) => {
                         if (response && !response.error) {
@@ -148,7 +176,7 @@
                     });
             },
             setTotalPages() {
-                this.$emit("setTotalPages", this.usageUnitPages * this.totalPages);
+                this.$emit("setTotalPages", this.calculatedTotal);
             },
             updateGraph(start, end) {
                 this.start = start;

@@ -5,6 +5,7 @@ namespace WoopiAiHub.Domain.DTOs
         int UsageCount,
         Guid UserId,
         int? ModelEmbeddingId,
-        bool Processed = false
+        bool Processed = false,
+        int? WorkflowId = null
     );
 }

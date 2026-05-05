@@ -869,6 +869,10 @@
     };
 </script>
 <style scoped>
+    .border-top {
+        border-color: var(--color-border-form-control) !important;
+    }
+
     .flex {
         display: flex;
     }
