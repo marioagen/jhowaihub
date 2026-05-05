@@ -27,25 +27,40 @@
                         v-if="field.outputType != 'API'"
                         class="field-header"
                     >
-                        <label class="field-label">
-                            {{ field.label }}
-                        </label>
-                        <span
-                            v-if="field.isEdited"
-                            class="edited-badge"
-                        >
-                            <i class="fas fa-pen"></i>
-                            {{ $t("common.edited") }}
-                        </span>
-                        <span
-                            v-if="field.outputType !== 'Quiz'"
-                            @click="open(fields[index].value, field.label, index)"
-                        >
-                            <LucideIcon
-                                icon="Eye"
-                                :size="16"
-                            />
-                        </span>
+                        <div class="field-header-main">
+                            <label class="field-label">
+                                {{ field.label }}
+                            </label>
+                            <div class="field-meta">
+                                <span class="field-type-chip">{{ outputTypeLabel(field) }}</span>
+                                <span
+                                    v-if="toolNameChip(field)"
+                                    class="field-tool-chip"
+                                    :title="toolNameChip(field)"
+                                >
+                                    {{ toolNameChip(field) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="field-header-actions">
+                            <span
+                                v-if="field.isEdited"
+                                class="edited-badge"
+                            >
+                                <i class="fas fa-pen"></i>
+                                {{ $t("common.edited") }}
+                            </span>
+                            <span
+                                v-if="field.outputType !== 'Quiz'"
+                                class="field-header-eye"
+                                @click="open(fields[index].value, field.label, index)"
+                            >
+                                <LucideIcon
+                                    icon="Eye"
+                                    :size="16"
+                                />
+                            </span>
+                        </div>
                     </div>
                     <div
                         class="field-value-container"
@@ -126,13 +141,33 @@
                     <div v-if="field.outputType == 'API'">
                         <div
                             v-if="field.label == 'TemplateName'"
-                            :class="index == 0 ? 'field-header' : 'field-header border-top pt-4'"
+                            :class="index == 0 ? 'field-header field-header-api-title' : 'field-header field-header-api-title border-top pt-4'"
                         >
+                            <div class="field-meta field-meta-api mb-2">
+                                <span class="field-type-chip">{{ outputTypeLabel(field) }}</span>
+                                <span
+                                    v-if="toolNameChip(field)"
+                                    class="field-tool-chip"
+                                    :title="toolNameChip(field)"
+                                >
+                                    {{ toolNameChip(field) }}
+                                </span>
+                            </div>
                             <h6 class="fw-bold mb-0">
                                 {{ field.value }}
                             </h6>
                         </div>
                         <div v-else>
+                            <div class="field-meta field-meta-api mb-2">
+                                <span class="field-type-chip">{{ outputTypeLabel(field) }}</span>
+                                <span
+                                    v-if="toolNameChip(field)"
+                                    class="field-tool-chip"
+                                    :title="toolNameChip(field)"
+                                >
+                                    {{ toolNameChip(field) }}
+                                </span>
+                            </div>
                             <label class="field-label">
                                 {{ field.label }}
                             </label>
@@ -209,6 +244,16 @@
             };
         },
         methods: {
+            outputTypeLabel(field) {
+                if (!field || !field.outputType) return "";
+                const key = `tools.typeDisplay.${field.outputType}`;
+                const translated = this.$t(key);
+                return translated && translated !== key ? translated : field.outputType;
+            },
+            toolNameChip(field) {
+                const n = field?.toolName && String(field.toolName).trim();
+                return n || "";
+            },
             startEditing(index) {
                 this.originalValues[index] = this.fields[index].value;
                 this.isEditing[index] = true;
@@ -350,8 +395,70 @@
 
     .field-header {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .field-header-main {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .field-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .field-header-eye {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    .field-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin-top: 0.35rem;
+        align-items: center;
+    }
+
+    .field-meta-api {
+        margin-top: 0;
+    }
+
+    .field-header-api-title {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .field-type-chip {
+        background: rgba(0, 115, 230, 0.12);
+        color: #0073e6;
+        border: 1px solid rgba(0, 115, 230, 0.25);
+        border-radius: 12px;
+        padding: 0.12rem 0.55rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        line-height: 1.2;
+        max-width: 100%;
+    }
+
+    .field-tool-chip {
+        background: var(--color-card-content, #eef3fb);
+        color: var(--color-body-content, #333);
+        border: 1px solid var(--color-border-form-control, #cfe1f7);
+        border-radius: 12px;
+        padding: 0.12rem 0.55rem;
+        font-size: 0.72rem;
+        line-height: 1.2;
+        max-width: min(100%, 240px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .field-label {
@@ -482,12 +589,17 @@
 
         .field-header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
+            gap: 0.75rem;
         }
 
         .field-label {
             font-size: 0.85rem;
+        }
+
+        .field-tool-chip {
+            max-width: min(100%, 180px);
         }
 
         .edited-badge {

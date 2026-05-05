@@ -377,7 +377,10 @@ namespace WoopiAiHub.Application.Services
             if (string.IsNullOrWhiteSpace(output.Value))
                 return fields;
 
-            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType))
+            var toolName = output.StepTool?.Tool?.Name ?? string.Empty;
+
+            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType,
+                    toolName))
             {
                 fields.AddRange(jsonFields);
             }
@@ -390,6 +393,7 @@ namespace WoopiAiHub.Application.Services
                     IsEdited = false,
                     OutputId = output.Id,
                     OutputType = output.StepTool?.Tool?.ToolType ?? "None",
+                    ToolName = toolName,
                 });
             }
 
@@ -406,7 +410,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private static bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields,
             int id,
-            string? outputType)
+            string? outputType,
+            string toolName)
         {
             fields = new List<ExtractedFieldDto>();
 
@@ -433,6 +438,7 @@ namespace WoopiAiHub.Application.Services
                             IsEdited = false,
                             OutputId = id,
                             OutputType = outputType ?? string.Empty,
+                            ToolName = toolName,
                         });
                     }
 
