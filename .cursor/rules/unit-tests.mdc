@@ -1,0 +1,62 @@
+---
+description: Padrão de testes de unidade baseado em CardServicesTests (xUnit + Moq.AutoMock + Fixture + AAA)
+alwaysApply: true
+---
+
+# Testes de unidade
+
+A referência canônica é `tests/WoopiAiHub.UnitTests/Services/CardServicesTests.cs` + `tests/WoopiAiHub.UnitTests/Fixture/CardFixture.cs`. Todo teste novo deve seguir esse padrão.
+
+## Quando criar testes
+
+- **Todo método novo (público) em `Services` exige teste de unidade** cobrindo o caminho feliz e os principais caminhos de erro.
+- Alteração de método existente exige atualizar/adicionar cenários para o novo comportamento.
+
+## Estrutura obrigatória
+
+1. **xUnit** (`[Fact]` com `DisplayName` descritivo + `[Trait("Method", "Success|Fail")]`).
+2. **Moq + Moq.AutoMock**: instanciar via `new AutoMocker()` e `_mocker.CreateInstance<TServices>()`. Mocks individuais via `_mocker.GetMock<TInterface>()`.
+3. **Fixture estática** em `tests/WoopiAiHub.UnitTests/Fixture/<Entity>Fixture.cs` para construir DTOs/entidades de teste (`FindValidXxx()`). Nunca instancie modelos do Domain diretamente no teste — adicione/reaproveite no Fixture.
+4. **`[Collection(nameof(XxxCollection))]`** na classe de teste para agrupar pelo `CollectionDefinition` do Fixture correspondente.
+5. **AAA explícito** com comentários `// Arrange`, `// Act`, `// Assert`.
+6. **Nome do método de teste**: `Metodo_Cenario_ResultadoEsperado` (ex: `UpdateStepAndStatus_CardNotFound_ThrowsAppException`).
+
+## Esqueleto de referência
+
+```csharp
+[Collection(nameof(MyCollection))]
+public class MyServicesTests
+{
+    private readonly AutoMocker _mocker;
+    private readonly Mock<IMyRepository> _myRepositoryMock;
+    private readonly MyServices _myServices;
+
+    public MyServicesTests()
+    {
+        _mocker = new AutoMocker();
+        _myRepositoryMock = _mocker.GetMock<IMyRepository>();
+        _myServices = _mocker.CreateInstance<MyServices>();
+    }
+
+    [Fact(DisplayName = "Tests DoSomething and returns true when input is valid")]
+    [Trait("DoSomething", "Success")]
+    public async Task DoSomething_ValidInput_ReturnsTrue()
+    {
+        // Arrange
+        var dto = MyFixture.FindValidDto();
+        _myRepositoryMock.Setup(r => r.FindById(dto.Id)).ReturnsAsync(MyFixture.FindValidEntity());
+
+        // Act
+        var result = await _myServices.DoSomething(dto);
+
+        // Assert
+        Assert.True(result);
+        _myRepositoryMock.Verify(r => r.FindById(dto.Id), Times.Once);
+    }
+}
+```
+
+## Cobertura mínima
+
+- Caminho feliz + cada `throw` do método (use `Assert.ThrowsAsync<AppException>` validando `ErrorCode` e `LabelError`).
+- Verificar interações relevantes com `.Verify(..., Times.Once)`.
