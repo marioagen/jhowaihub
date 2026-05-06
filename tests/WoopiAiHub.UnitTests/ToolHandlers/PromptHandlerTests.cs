@@ -154,7 +154,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServiceDto = AutomationFixture.FindValidAutomationServicesDto();
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var stepToolParameter = ToolHandlerFixture.FindValidStepToolParameter();
             var tenantInfo = new TenantInfoDto { };
             var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
             var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
