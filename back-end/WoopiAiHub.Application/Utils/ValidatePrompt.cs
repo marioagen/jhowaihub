@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.Interfaces.Repository;
+using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
 
@@ -37,8 +37,7 @@ namespace WoopiAiHub.Application.Utils
         /// Validate the prompt: required fields cannot be null or empty, and the variables must be valid
         /// </summary>
         /// <param name="prompt"></param>
-        /// <exception cref="AppException"></exception>e
-        public bool ValidatePromptFields(Prompt prompt)
+        public bool ValidateRequiredPromptFields(Prompt prompt)
         {
             if (string.IsNullOrWhiteSpace(prompt.Name) ||
                 string.IsNullOrWhiteSpace(prompt.Description) ||

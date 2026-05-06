@@ -1,4 +1,4 @@
-﻿using Bogus;
+using Bogus;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
@@ -380,22 +380,22 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
-        public static List<PromptInternalDto> FindValidPromptInternalDtoList()
+        public static List<PromptIntegrationDto> FindValidPromptInternalDtoList()
         {
-            var faker = new Faker<List<PromptInternalDto>>("pt_BR")
-                .CustomInstantiator(f => new List<PromptInternalDto>
+            var faker = new Faker<List<PromptIntegrationDto>>("pt_BR")
+                .CustomInstantiator(f => new List<PromptIntegrationDto>
                     {
-                        new PromptInternalDto {
+                        new PromptIntegrationDto {
                             Id = f.Random.Int(1),
                             Name = string.Format("Prompt {0}", f.Random.Int(1)),
                             Description = string.Format("Description {0}", f.Random.Int(1))
                         },
-                        new PromptInternalDto {
+                        new PromptIntegrationDto {
                             Id = f.Random.Int(1),
                             Name = string.Format("Prompt {0}", f.Random.Int(1)),
                             Description = string.Format("Description {0}", f.Random.Int(1))
                         },
-                        new PromptInternalDto {
+                        new PromptIntegrationDto {
                             Id = f.Random.Int(1),
                             Name = string.Format("Prompt {0}", f.Random.Int(1)),
                             Description = string.Format("Description {0}", f.Random.Int(1))
@@ -430,6 +430,19 @@ namespace WoopiAiHub.UnitTests.Fixture
                 });
             return faker;
         }
+
+        public static PromptIntegrationCreateDto FindValidPromptIntegrationCreateDto()
+        {
+            var faker = new Faker<PromptIntegrationCreateDto>("pt_BR")
+                .CustomInstantiator(f => new PromptIntegrationCreateDto
+                {
+                    Name = f.Name.JobArea(),
+                    Description = f.Name.JobTitle(),
+                    Text = f.Name.JobDescriptor()
+                });
+            return faker;
+        }
+
         public static (PromptUpdateDto, PromptDto) FindValidPromptUpdateDtoAndPromptDto()
         {
             var fakerPromptUpdateDto = new Faker<PromptUpdateDto>("pt_BR")

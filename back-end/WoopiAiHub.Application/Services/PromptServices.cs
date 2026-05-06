@@ -203,20 +203,86 @@ namespace WoopiAiHub.Application.Services
             var idUser = _userServices.FindIdByEmail(email);
             var prompt = GeneratePromptToCreate(promptCreateDto, idUser);
 
-            var result = _validatePrompt.ValidatePromptFields(prompt);
+            var result = _validatePrompt.ValidateRequiredPromptFields(prompt);
 
             if (!result)
             {
                 return false;
             }
 
-            var createPromptResult = _promptRepository.CreateUniquePrompt(prompt);
-            if (!createPromptResult)
+            var promptWithSameName = _promptRepository.FindByNameAndUser(prompt.Name, idUser);
+            if (promptWithSameName != null)
             {
                 throw new AppException(ErrorCode.Duplicated, "prompts.duplicated", null);
             }
 
-            return createPromptResult;
+            return _promptRepository.Create(prompt);
+        }
+
+        /// <summary>
+        /// Create a new prompt from integration, this method is used for create a prompt from external source like prompt templates, for this reason the validation is only for the fields and not for the ownership, because the prompt is created with the user that is making the request and not with the user that is in the template, also this method return the prompt created with the id to be used in the front end after the integration
+        /// </summary>
+        /// <param name="promptIntegrationCreateDto"></param>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="AppException"></exception>
+        public PromptIntegrationDto CreateUniquePromptFromIntegration(
+            PromptIntegrationCreateDto promptIntegrationCreateDto,
+            string email)
+        {
+            var idUser = _userServices.FindIdByEmail(email);
+            var prompt = CreateAndValidatePromptFields(promptIntegrationCreateDto, idUser);
+
+            var promptWithSameName = _promptRepository.FindByNameAndUser(prompt.Name, idUser);
+            if (promptWithSameName != null)
+            {
+                throw new AppException(ErrorCode.Duplicated, "The Prompt name is already in use.", null);
+            }
+
+            var createPromptResult = _promptRepository.CreateAndReturn(prompt);
+
+            if (createPromptResult == null)
+            {
+                throw new InvalidOperationException("Create prompt Failed");
+            }
+
+            return new PromptIntegrationDto
+            {
+                Id = prompt.Id,
+                Name = prompt.Name,
+                Description = prompt.Description,
+                Text = prompt.Text
+            };
+        }
+
+        /// <summary>
+        /// Create a new prompt and validate the required fields, this method is used for create a prompt from external source like prompt templates, for this reason the validation is only for the fields and not for the ownership, because the prompt is created with the user that is making the request and not with the user that is in the template
+        /// </summary>
+        /// <param name="promptIntegrationCreateDto"></param>
+        /// <param name="idUser"></param>
+        /// <returns></returns>
+        /// <exception cref="AppException"></exception>
+        private Prompt CreateAndValidatePromptFields(PromptIntegrationCreateDto promptIntegrationCreateDto, Guid idUser)
+        {
+            var prompt = new Prompt(
+                0,
+                DateTime.Now,
+                promptIntegrationCreateDto.Name,
+                promptIntegrationCreateDto.Description,
+                promptIntegrationCreateDto.Text,
+                idUser,
+                isEdited: false,
+                isImported: true
+            );
+
+            var result = _validatePrompt.ValidateRequiredPromptFields(prompt);
+            if (!result)
+            {
+                throw new AppException(ErrorCode.RequiredField, "Fill in all the fields", null);
+            }
+
+            return prompt;
         }
 
         /// <summary>
@@ -238,7 +304,7 @@ namespace WoopiAiHub.Application.Services
 
             (var prompt, var promptApiTemplateIds) = GeneratePromptToUpdate(promptDto, promptUpdateDto);
 
-            _validatePrompt.ValidatePromptFields(prompt);
+            _validatePrompt.ValidateRequiredPromptFields(prompt);
 
             var promptUpdateResult = await _promptRepository.UpdateAndRemovePromptApisFromPrompt(prompt, promptApiTemplateIds);
 
@@ -372,7 +438,8 @@ namespace WoopiAiHub.Application.Services
         /// <exception cref="ArgumentException"></exception>
         public PromptDto FindById(int id)
         {
-            return _promptRepository.FindById(id) ?? throw new ArgumentException("Prompt not found");
+            return _promptRepository.FindById(id) ??
+                throw new AppException(ErrorCode.NotFound, "Prompt not found", null);
         }
 
         /// <summary>
@@ -395,7 +462,7 @@ namespace WoopiAiHub.Application.Services
         /// Asynchronously retrieves all prompts in the basic format.
         /// </summary>
         /// <returns></returns>
-        public async Task<ICollection<PromptInternalDto>> FindAllInternal()
+        public async Task<ICollection<PromptIntegrationDto>> FindAllInternal()
         {
             return await _promptRepository.FindAllInternal();
         }
