@@ -113,13 +113,9 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
 
-            var tenantInfo = new TenantInfoDto
-            {
-                AiGatewayApplicationId = Guid.NewGuid(),
-                AiGatewayKey = "key"
-            };
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
 
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
             var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
 
@@ -154,8 +150,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServiceDto = AutomationFixture.FindValidAutomationServicesDto();
-            var stepToolParameter = ToolHandlerFixture.FindValidStepToolParameter();
-            var tenantInfo = new TenantInfoDto { };
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoMissingAiGateway();
             var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
             var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
 
@@ -177,12 +173,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServiceDto = AutomationFixture.FindValidAutomationServicesDto();
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
-            var tenantInfo = new TenantInfoDto
-            {
-                AiGatewayApplicationId = Guid.NewGuid(),
-                AiGatewayKey = ""
-            };
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithEmptyAiGatewayKey();
             var output = AutomationFixture.FindValidStepToolOutput(
                 JsonConvert.SerializeObject(MessagingFixture.FindValidDocumentEmbeddingsDataDto()));
 
@@ -204,12 +196,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto
-            {
-                AiGatewayApplicationId = Guid.NewGuid(),
-                AiGatewayKey = "key"
-            };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var previousPromptOutput = "Resumo do documento: este é o texto gerado pelo prompt anterior.";
             var output = AutomationFixture.FindValidStepToolOutput(previousPromptOutput);
             output.StepTool = new StepTool(1, DateTime.UtcNow, 1, 1, 1, 1, 1)
@@ -246,13 +234,9 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
 
-            var tenantInfo = new TenantInfoDto
-            {
-                AiGatewayApplicationId = Guid.NewGuid(),
-                AiGatewayKey = "key"
-            };
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
 
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
             var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
 
@@ -289,13 +273,9 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
 
-            var tenantInfo = new TenantInfoDto
-            {
-                AiGatewayApplicationId = Guid.NewGuid(),
-                AiGatewayKey = "key"
-            };
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
 
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var documentEmbeddingsDataDto = MessagingFixture.FindValidDocumentEmbeddingsDataDto();
             var output = AutomationFixture.FindValidStepToolOutput(JsonConvert.SerializeObject(documentEmbeddingsDataDto));
 
@@ -360,8 +340,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var output = AutomationFixture.FindValidStepToolOutput(
                 JsonConvert.SerializeObject(MessagingFixture.FindValidDocumentEmbeddingsDataDto()));
 
@@ -398,8 +378,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var output = AutomationFixture.FindValidStepToolOutput(
                 JsonConvert.SerializeObject(MessagingFixture.FindValidDocumentEmbeddingsDataDto()));
             
@@ -438,8 +418,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var output = AutomationFixture.FindValidStepToolOutput(
                 JsonConvert.SerializeObject(MessagingFixture.FindValidDocumentEmbeddingsDataDto()));
 
@@ -475,8 +455,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
 
             _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
 
@@ -494,8 +474,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
 
             _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
 
@@ -513,8 +493,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
             var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Prompt, "   \n  ");
 
             _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
@@ -533,8 +513,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
             var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Ocr, "{}");
 
             _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
@@ -553,8 +533,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var quizText = "  quiz-result-value  ";
             var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Quiz, quizText);
 
@@ -577,8 +557,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var apiJson =
                 """{"":"skip-empty-name","a":1,"msg":"line","esc":"a\"b","slash":"x\\y","n":42,"ok":false,"z":null,"flags":[true,false],"arr":[1,2],"obj":{"k":1}}""";
             var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.API, apiJson);
@@ -612,8 +592,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.API, "{}");
 
             _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
@@ -636,8 +616,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.API, "{not-json");
 
             _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
@@ -656,8 +636,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.API, "[1,2]");
 
             _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
@@ -679,8 +659,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.API, "\"hello\"");
 
             _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
@@ -702,8 +682,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.N8N, "  n8n-plain  ");
 
             _mockTenantCacheServices.Setup(s => s.FindTenantAsync(It.IsAny<string>())).ReturnsAsync(tenantInfo);
@@ -725,8 +705,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var blank = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Prompt, "  \t  ");
             var first = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Prompt, "first-block");
             var second = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Prompt, "second-block");
@@ -767,8 +747,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var mockApi = mocker.GetMock<IApiTemplateServices>();
 
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var output = AutomationFixture.FindValidStepToolOutput(
                 JsonConvert.SerializeObject(MessagingFixture.FindValidDocumentEmbeddingsDataDto()));
 
@@ -791,8 +771,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
         {
             // Arrange
             var automationServicesDto = AutomationFixture.FindValidAutomationServicesDto();
-            var tenantInfo = new TenantInfoDto { AiGatewayApplicationId = Guid.NewGuid(), AiGatewayKey = "key" };
-            var stepToolParameter = new StepToolParameter(1, DateTime.Now, 2, true, Guid.NewGuid(), "6");
+            var tenantInfo = MessagingFixture.FindTenantInfoDtoWithAiGateway();
+            var stepToolParameter = ToolHandlerFixture.FindValidPromptStepToolParameter();
             var output = AutomationFixture.FindValidStepToolOutput(
                 JsonConvert.SerializeObject(MessagingFixture.FindValidDocumentEmbeddingsDataDto()));
 

@@ -69,6 +69,29 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
+        public static TenantInfoDto FindTenantInfoDtoWithAiGateway()
+        {
+            return new TenantInfoDto
+            {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = "key"
+            };
+        }
+
+        public static TenantInfoDto FindTenantInfoDtoMissingAiGateway()
+        {
+            return new TenantInfoDto();
+        }
+
+        public static TenantInfoDto FindTenantInfoDtoWithEmptyAiGatewayKey()
+        {
+            return new TenantInfoDto
+            {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = ""
+            };
+        }
+
         public static IEnumerable<DocumentEmbeddingsAddDto> FindValidDocumentEmbeddingsAddDto()
         {
             var documentEmbeddingsAddDto = new Faker<DocumentEmbeddingsAddDto>("pt_BR")
