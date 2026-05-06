@@ -69,6 +69,29 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
+        public static TenantInfoDto FindTenantInfoDtoWithAiGateway()
+        {
+            return new TenantInfoDto
+            {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = "key"
+            };
+        }
+
+        public static TenantInfoDto FindTenantInfoDtoMissingAiGateway()
+        {
+            return new TenantInfoDto();
+        }
+
+        public static TenantInfoDto FindTenantInfoDtoWithEmptyAiGatewayKey()
+        {
+            return new TenantInfoDto
+            {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = ""
+            };
+        }
+
         public static IEnumerable<DocumentEmbeddingsAddDto> FindValidDocumentEmbeddingsAddDto()
         {
             var documentEmbeddingsAddDto = new Faker<DocumentEmbeddingsAddDto>("pt_BR")
@@ -324,6 +347,49 @@ namespace WoopiAiHub.UnitTests.Fixture
                     };
                 });
             return faker;
+        }
+
+        public static List<ApiTemplateDto> FindListApiTemplateDtoForMcpPostPutDeleteBodyMapping()
+        {
+            return new List<ApiTemplateDto>
+            {
+                new()
+                {
+                    Id = 101,
+                    Created = DateTime.UtcNow,
+                    Name = "PostApi",
+                    Method = "POST",
+                    Url = "https://example.com/post",
+                    Description = "post-desc",
+                    EnableAccessFromMcp = true,
+                    HeaderTemplate = "",
+                    BodyTemplate = """{"x":"post-body"}""",
+                },
+                new()
+                {
+                    Id = 102,
+                    Created = DateTime.UtcNow,
+                    Name = "PutApi",
+                    Method = "PUT",
+                    Url = "https://example.com/put",
+                    Description = "put-desc",
+                    EnableAccessFromMcp = true,
+                    HeaderTemplate = "",
+                    BodyTemplate = "",
+                },
+                new()
+                {
+                    Id = 103,
+                    Created = DateTime.UtcNow,
+                    Name = "DeleteApi",
+                    Method = "DELETE",
+                    Url = "https://example.com/del",
+                    Description = "del-desc",
+                    EnableAccessFromMcp = true,
+                    HeaderTemplate = "",
+                    BodyTemplate = null,
+                },
+            };
         }
 
         public static PromptTemplatesResponse FindValidPromptTemplatesResponseSort()

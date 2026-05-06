@@ -204,7 +204,7 @@ public class PromptHandler : IToolHandler
             mappedApiString = mappedApiString.Replace($"PAYLOAD_API_{item.Id}", System.Text.Json.JsonSerializer.Serialize(JsonDocument.Parse(bodyContent).RootElement));
         }
 
-        return string.IsNullOrEmpty(mappedApiString) ? "" : _mcpSettings.Instructions.Replace("{0}", mappedApiString);
+        return _mcpSettings.Instructions.Replace("{0}", mappedApiString);
     }
 
     /// <summary>
@@ -256,18 +256,102 @@ public class PromptHandler : IToolHandler
                 continue;
 
             var toolType = output.StepTool?.Tool?.ToolType?.Name;
-            if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
+            switch (toolType)
             {
-                TryAddOcrText(value, parts);
-            }
-            else if (string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase))
-            {
-                parts.Add(value.Trim());
+                case string t when string.Equals(t, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase):
+                    TryAddOcrText(value, parts);
+                    break;
+                case string t when string.Equals(t, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase):
+                    parts.Add(value.Trim());
+                    break;
+                case string t when string.Equals(t, HandlersTypes.Quiz, StringComparison.OrdinalIgnoreCase):
+                    parts.Add(value.Trim());
+                    break;
+                case string t when string.Equals(t, HandlersTypes.API, StringComparison.OrdinalIgnoreCase):
+                    parts.Add(FormatApiResponseForPromptContext(value));
+                    break;
+                default:
+                    parts.Add(value.Trim());
+                    break;
             }
         }
 
         return string.Join("\n\n", parts);
     }
+
+    /// <summary>
+    /// Normalizes a dependency API response for prompt context. When the value parses as a JSON object, flattens it to a single readable line
+    /// (<c>Key: value, ...</c>); otherwise returns the trimmed string unchanged.
+    /// </summary>
+    /// <param name="value">Raw content from the API step (JSON object or plain text).</param>
+    /// <returns>A single-line string for the prompt, or <see cref="string.Empty"/> when <paramref name="value"/> is null or whitespace only.</returns>
+    private static string FormatApiResponseForPromptContext(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var trimmed = value.Trim();
+        try
+        {
+            using var doc = JsonDocument.Parse(trimmed);
+            var root = doc.RootElement;
+            if (root.ValueKind == JsonValueKind.Object)
+                return FormatJsonObjectAsLabelValueString(root);
+        }
+        catch
+        {
+            throw new ArgumentException("The API response is not a valid JSON object");
+        }
+
+        return trimmed;
+    }
+
+    /// <summary>
+    /// Builds a comma-separated line from a JSON object: each property is rendered as <c>Capitalized name: formatted value</c> (property order follows the JSON object).
+    /// </summary>
+    /// <param name="root">A JSON object element.</param>
+    /// <returns>Joined <c>Label: value</c> segments, or the literal <c>{}</c> when the object has no properties.</returns>
+    private static string FormatJsonObjectAsLabelValueString(JsonElement root)
+    {
+        var segments = new List<string>();
+        foreach (var prop in root.EnumerateObject())
+        {
+            if (string.IsNullOrEmpty(prop.Name))
+                continue;
+            var label = char.ToUpperInvariant(prop.Name[0]) + (prop.Name.Length > 1 ? prop.Name[1..] : string.Empty);
+            segments.Add($"{label}: {FormatJsonValueForApiDisplay(prop.Value)}");
+        }
+        if (segments.Count == 0)
+            return "{}";
+        return string.Join(", ", segments);
+    }
+
+    /// <summary>
+    /// Renders a JSON value for the prompt line: strings are quoted, primitives use JSON literals, arrays are joined recursively, and nested objects use the raw JSON fragment.
+    /// </summary>
+    /// <param name="el">A JSON value (string, number, array, object, or literal).</param>
+    /// <returns>Text to place after a property name in the flattened API output.</returns>
+    private static string FormatJsonValueForApiDisplay(JsonElement el) =>
+        el.ValueKind switch
+        {
+            JsonValueKind.String => QuotedStringForDisplay(el.GetString() ?? string.Empty),
+            JsonValueKind.Number => el.GetRawText(),
+            JsonValueKind.True => "true",
+            JsonValueKind.False => "false",
+            JsonValueKind.Null => "null",
+            JsonValueKind.Array => string.Join(", ", el.EnumerateArray().Select(FormatJsonValueForApiDisplay)),
+            JsonValueKind.Object => el.GetRawText(),
+            JsonValueKind.Undefined => string.Empty,
+            _ => el.GetRawText(),
+        };
+
+    /// <summary>
+    /// Wraps a string in double quotes and escapes <c>\</c> and <c>"</c> so the result is safe to embed in the flattened key/value line.
+    /// </summary>
+    /// <param name="s">The string to quote.</param>
+    /// <returns><paramref name="s"/> as a double-quoted literal segment.</returns>
+    private static string QuotedStringForDisplay(string s) =>
+        "\"" + s.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal) + "\"";
 
     /// <summary>
     /// Tries to parse OCR output in DocumentEmbeddings format and extract text. If parsing fails, returns false to allow fallback to plain text.
