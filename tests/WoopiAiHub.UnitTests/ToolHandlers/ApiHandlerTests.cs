@@ -261,7 +261,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             };
 
             var outputValue = JsonSerializer.Serialize(ocrOutput);
-            var output = CreateStepToolOutput(HandlersTypes.Ocr, outputValue);
+            var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Ocr, outputValue);
             var outputs = new List<StepToolOutput> { output };
 
             var apiRequest = new ApiRequestDto
@@ -308,7 +308,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var execution = AutomationFixture.FindValidStepToolExecution();
 
             var promptText = "This is the prompt response";
-            var output = CreateStepToolOutput(HandlersTypes.Prompt, promptText);
+            var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Prompt, promptText);
             var outputs = new List<StepToolOutput> { output };
 
             var apiRequest = new ApiRequestDto
@@ -364,8 +364,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var promptText = "Prompt response";
 
             var ocrOutputValue = JsonSerializer.Serialize(ocrOutput);
-            var output1 = CreateStepToolOutput(HandlersTypes.Ocr, ocrOutputValue);
-            var output2 = CreateStepToolOutput(HandlersTypes.Prompt, promptText);
+            var output1 = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Ocr, ocrOutputValue);
+            var output2 = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Prompt, promptText);
             var outputs = new List<StepToolOutput> { output1, output2 };
 
             var apiRequest = new ApiRequestDto
@@ -413,7 +413,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var execution = AutomationFixture.FindValidStepToolExecution();
 
             var n8nJson = "{\"status\":\"ok\"}";
-            var output = CreateStepToolOutput(HandlersTypes.N8N, n8nJson);
+            var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.N8N, n8nJson);
             var outputs = new List<StepToolOutput> { output };
 
             var apiRequest = new ApiRequestDto
@@ -461,8 +461,8 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
 
             var n8nJson1 = "{\"id\":1}";
             var n8nJson2 = "{\"id\":2}";
-            var output1 = CreateStepToolOutput(HandlersTypes.N8N, n8nJson1);
-            var output2 = CreateStepToolOutput(HandlersTypes.N8N, n8nJson2);
+            var output1 = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.N8N, n8nJson1);
+            var output2 = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.N8N, n8nJson2);
             var outputs = new List<StepToolOutput> { output1, output2 };
 
             var apiRequest = new ApiRequestDto
@@ -512,7 +512,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var execution = AutomationFixture.FindValidStepToolExecution();
 
             var apiJson = "{\"result\":123}";
-            var output = CreateStepToolOutput(HandlersTypes.API, apiJson);
+            var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.API, apiJson);
             var outputs = new List<StepToolOutput> { output };
 
             var apiRequest = new ApiRequestDto
@@ -558,7 +558,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var execution = AutomationFixture.FindValidStepToolExecution();
 
             var quizJson = "{\"score\":10}";
-            var output = CreateStepToolOutput(HandlersTypes.Quiz, quizJson);
+            var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Quiz, quizJson);
             var outputs = new List<StepToolOutput> { output };
 
             var apiRequest = new ApiRequestDto
@@ -604,7 +604,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var execution = AutomationFixture.FindValidStepToolExecution();
 
             var promptText = "hello world";
-            var output = CreateStepToolOutput(HandlersTypes.Prompt, promptText);
+            var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Prompt, promptText);
             var outputs = new List<StepToolOutput> { output };
 
             var apiRequest = new ApiRequestDto
@@ -658,7 +658,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             };
 
             var outputValue = JsonSerializer.Serialize(ocrOutput);
-            var output = CreateStepToolOutput(HandlersTypes.Ocr, outputValue);
+            var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Ocr, outputValue);
             var outputs = new List<StepToolOutput> { output };
 
             var apiRequest = new ApiRequestDto
@@ -704,7 +704,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var execution = AutomationFixture.FindValidStepToolExecution();
 
             var promptText = "test response";
-            var output = CreateStepToolOutput(HandlersTypes.Prompt, promptText);
+            var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Prompt, promptText);
             var outputs = new List<StepToolOutput> { output };
 
             var apiRequest = new ApiRequestDto
@@ -752,7 +752,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var execution = AutomationFixture.FindValidStepToolExecution();
 
             var hugePromptText = new string('a', 3000);
-            var output = CreateStepToolOutput(HandlersTypes.Prompt, hugePromptText);
+            var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Prompt, hugePromptText);
             var outputs = new List<StepToolOutput> { output };
 
             var apiRequest = new ApiRequestDto
@@ -794,7 +794,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var execution = AutomationFixture.FindValidStepToolExecution();
 
             var promptText = "resposta do modelo";
-            var output = CreateStepToolOutput(HandlersTypes.Prompt, promptText);
+            var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Prompt, promptText);
             var outputs = new List<StepToolOutput> { output };
 
             var apiRequest = new ApiRequestDto
@@ -840,7 +840,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var execution = AutomationFixture.FindValidStepToolExecution();
 
             var promptText = "say \"hello\" and \\backslash";
-            var output = CreateStepToolOutput(HandlersTypes.Prompt, promptText);
+            var output = ToolHandlerFixture.CreateStepToolOutput(HandlersTypes.Prompt, promptText);
             var outputs = new List<StepToolOutput> { output };
 
             var apiRequest = new ApiRequestDto
@@ -964,19 +964,6 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
                 BodyTemplate = null,
                 Created = DateTime.UtcNow
             };
-        }
-
-        private static StepToolOutput CreateStepToolOutput(string toolType, string value)
-        {
-            var output = AutomationFixture.FindValidStepToolOutput(value);
-            output.StepTool = new StepTool(1, DateTime.UtcNow, 1, 1, 1, 1, 1)
-            {
-                Tool = new Tool(1, DateTime.UtcNow, "Tool", true, 1, 1, 1, false, null, null)
-                {
-                    ToolType = new ToolType(1, DateTime.UtcNow, toolType, string.Empty, true)
-                }
-            };
-            return output;
         }
     }
 }

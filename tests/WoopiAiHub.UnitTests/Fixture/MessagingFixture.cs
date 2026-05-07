@@ -1,4 +1,4 @@
-﻿using Bogus;
+using Bogus;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response.Automation;
@@ -67,6 +67,29 @@ namespace WoopiAiHub.UnitTests.Fixture
                 });
 
             return faker;
+        }
+
+        public static TenantInfoDto FindTenantInfoDtoWithAiGateway()
+        {
+            return new TenantInfoDto
+            {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = "key"
+            };
+        }
+
+        public static TenantInfoDto FindTenantInfoDtoMissingAiGateway()
+        {
+            return new TenantInfoDto();
+        }
+
+        public static TenantInfoDto FindTenantInfoDtoWithEmptyAiGatewayKey()
+        {
+            return new TenantInfoDto
+            {
+                AiGatewayApplicationId = Guid.NewGuid(),
+                AiGatewayKey = ""
+            };
         }
 
         public static IEnumerable<DocumentEmbeddingsAddDto> FindValidDocumentEmbeddingsAddDto()
@@ -326,6 +349,49 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
+        public static List<ApiTemplateDto> FindListApiTemplateDtoForMcpPostPutDeleteBodyMapping()
+        {
+            return new List<ApiTemplateDto>
+            {
+                new()
+                {
+                    Id = 101,
+                    Created = DateTime.UtcNow,
+                    Name = "PostApi",
+                    Method = "POST",
+                    Url = "https://example.com/post",
+                    Description = "post-desc",
+                    EnableAccessFromMcp = true,
+                    HeaderTemplate = "",
+                    BodyTemplate = """{"x":"post-body"}""",
+                },
+                new()
+                {
+                    Id = 102,
+                    Created = DateTime.UtcNow,
+                    Name = "PutApi",
+                    Method = "PUT",
+                    Url = "https://example.com/put",
+                    Description = "put-desc",
+                    EnableAccessFromMcp = true,
+                    HeaderTemplate = "",
+                    BodyTemplate = "",
+                },
+                new()
+                {
+                    Id = 103,
+                    Created = DateTime.UtcNow,
+                    Name = "DeleteApi",
+                    Method = "DELETE",
+                    Url = "https://example.com/del",
+                    Description = "del-desc",
+                    EnableAccessFromMcp = true,
+                    HeaderTemplate = "",
+                    BodyTemplate = null,
+                },
+            };
+        }
+
         public static PromptTemplatesResponse FindValidPromptTemplatesResponseSort()
         {
             var faker = new Faker<PromptTemplatesResponse>("pt_BR")
@@ -380,22 +446,22 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
-        public static List<PromptInternalDto> FindValidPromptInternalDtoList()
+        public static List<PromptIntegrationDto> FindValidPromptInternalDtoList()
         {
-            var faker = new Faker<List<PromptInternalDto>>("pt_BR")
-                .CustomInstantiator(f => new List<PromptInternalDto>
+            var faker = new Faker<List<PromptIntegrationDto>>("pt_BR")
+                .CustomInstantiator(f => new List<PromptIntegrationDto>
                     {
-                        new PromptInternalDto {
+                        new PromptIntegrationDto {
                             Id = f.Random.Int(1),
                             Name = string.Format("Prompt {0}", f.Random.Int(1)),
                             Description = string.Format("Description {0}", f.Random.Int(1))
                         },
-                        new PromptInternalDto {
+                        new PromptIntegrationDto {
                             Id = f.Random.Int(1),
                             Name = string.Format("Prompt {0}", f.Random.Int(1)),
                             Description = string.Format("Description {0}", f.Random.Int(1))
                         },
-                        new PromptInternalDto {
+                        new PromptIntegrationDto {
                             Id = f.Random.Int(1),
                             Name = string.Format("Prompt {0}", f.Random.Int(1)),
                             Description = string.Format("Description {0}", f.Random.Int(1))
@@ -430,6 +496,19 @@ namespace WoopiAiHub.UnitTests.Fixture
                 });
             return faker;
         }
+
+        public static PromptIntegrationCreateDto FindValidPromptIntegrationCreateDto()
+        {
+            var faker = new Faker<PromptIntegrationCreateDto>("pt_BR")
+                .CustomInstantiator(f => new PromptIntegrationCreateDto
+                {
+                    Name = f.Name.JobArea(),
+                    Description = f.Name.JobTitle(),
+                    Text = f.Name.JobDescriptor()
+                });
+            return faker;
+        }
+
         public static (PromptUpdateDto, PromptDto) FindValidPromptUpdateDtoAndPromptDto()
         {
             var fakerPromptUpdateDto = new Faker<PromptUpdateDto>("pt_BR")

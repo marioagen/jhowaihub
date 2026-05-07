@@ -148,10 +148,12 @@ namespace WoopiAiHub.Repository
         /// <param name="end"></param>
         /// <param name="workflowIds"></param>
         /// <returns></returns>
-        public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(int modelEmbeddingId,
+        public async Task<ICollection<DashboardUsageDto>> FindDataByModelEmbedding(
+            int modelEmbeddingId,
             DateTime? start,
             DateTime? end,
-            List<int>? workflowIds)
+            List<int>? workflowIds
+        )
         {
             var query = _context.UsageMonths
                 .Where(x => x.ModelEmbeddingId == modelEmbeddingId);
@@ -195,8 +197,10 @@ namespace WoopiAiHub.Repository
         /// and calculates the sum of their total usage.</remarks>
         /// <param name="periodStart">The start date and time of the period to calculate usage for. This value is inclusive.</param>
         /// <param name="periodEnd">The end date and time of the period to calculate usage for. This value is exclusive.</param>
+        /// <param name="workflowIds">A list of workflow identifiers to filter by. If null or empty, no workflow filter is applied. If the list
+        /// contains -1, records with a null workflow identifier are also included.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the total usage as an integer.</returns>
-        public async Task<decimal> FindTotalUsageCostAsync(DateTime? periodStart, DateTime? periodEnd)
+        public async Task<decimal> FindTotalUsageCostAsync(DateTime? periodStart, DateTime? periodEnd, List<int>? workflowIds)
         {
             var query = _context.UsageMonths
                 .Where(um => um.ModelEmbeddingId != null);
@@ -206,6 +210,8 @@ namespace WoopiAiHub.Repository
 
             if (periodEnd.HasValue)
                 query = query.Where(x => x.Created.Date <= periodEnd.Value.Date);
+
+            query = ApplyWorkflowFilter(query, workflowIds);
 
             return await query
                 .Join(

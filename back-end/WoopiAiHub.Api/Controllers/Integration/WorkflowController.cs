@@ -7,7 +7,7 @@ using WoopiAiHub.Domain.Interfaces.Services;
 namespace WoopiAiHub.Api.Controllers.Internal
 {
     [KeyExternalAccessAuthorization]
-    [Route("api/internal/[controller]")]
+    [Route("api/integration/[controller]")]
     [ApiController]
     public class WorkflowController(IWorkflowServices workflowServices) : ControllerBase
     {
