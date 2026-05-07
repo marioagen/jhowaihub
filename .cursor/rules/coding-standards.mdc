@@ -12,6 +12,23 @@ alwaysApply: true
 - **Single Responsibility**: um método faz uma coisa. Se o nome usa "And" ou "Or" no meio, provavelmente são dois métodos.
 - `async/await` end-to-end. Propague `CancellationToken` quando o método já o recebe ou quando chama algo que aceita.
 
+## Nomenclatura de métodos de leitura (GET)
+
+- **Nunca use o prefixo `Get` em métodos de leitura.** Use sempre `Find`.
+- Isso se aplica a `Services`, `Repository`, `Interfaces` e qualquer outra camada.
+
+```csharp
+// BAD
+GetUserById(Guid id)
+GetAllActiveUsers()
+GetEmailByUserId(Guid id)
+
+// GOOD
+FindUserById(Guid id)
+FindAllActiveUsers()
+FindEmailByIdAsync(Guid id)
+```
+
 ## Comentários
 
 - **Não adicione comentários explicando o que o código faz**. O nome deve explicar.

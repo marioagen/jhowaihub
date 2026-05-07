@@ -11,6 +11,21 @@ Instruções para qualquer assistente de IA (Cursor, Codex, Copilot, Claude Code
 - **Single Responsibility**: um método faz uma coisa. Se o nome usa "And"/"Or" no meio, geralmente são dois métodos.
 - `async/await` end-to-end. Propague `CancellationToken` quando o método já o recebe ou quando chama algo que aceita.
 
+### Nomenclatura de métodos de leitura (GET)
+
+- **Nunca use o prefixo `Get` em métodos de leitura.** Use sempre `Find`.
+- Isso se aplica a `Services`, `Repository`, `Interfaces` e qualquer outra camada.
+
+```csharp
+// BAD
+GetUserById(Guid id)
+GetAllActiveUsers()
+
+// GOOD
+FindUserById(Guid id)
+FindAllActiveUsers()
+```
+
 ### Comentários
 
 - **Não adicione comentários explicando o que o código faz**. O nome deve explicar.
