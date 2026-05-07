@@ -118,7 +118,9 @@ public class PromptHandler : IToolHandler
                             }
                         }
                     }
-                 }
+                 },
+            MaxToolCalls = _openAiSettings.MaxToolCalls,
+            Temperature = _openAiSettings.Temperature
         };
 
         await VerifyAndAddOrNotMcpSupport(promptDto, dto);
