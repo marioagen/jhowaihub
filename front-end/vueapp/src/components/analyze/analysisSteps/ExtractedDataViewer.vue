@@ -36,7 +36,7 @@
                                 <span
                                     v-if="toolNameChip(field)"
                                     class="field-tool-chip"
-                                    :title="toolNameChip(field)"
+                                    :title="toolNameTooltip(field)"
                                 >
                                     {{ toolNameChip(field) }}
                                 </span>
@@ -141,14 +141,18 @@
                     <div v-if="field.outputType == 'API'">
                         <div
                             v-if="field.label == 'TemplateName'"
-                            :class="index == 0 ? 'field-header field-header-api-title' : 'field-header field-header-api-title border-top pt-4'"
+                            :class="
+                                index == 0
+                                    ? 'field-header field-header-api-title'
+                                    : 'field-header field-header-api-title border-top pt-4'
+                            "
                         >
                             <div class="field-meta field-meta-api mb-2">
                                 <span class="field-type-chip">{{ outputTypeLabel(field) }}</span>
                                 <span
                                     v-if="toolNameChip(field)"
                                     class="field-tool-chip"
-                                    :title="toolNameChip(field)"
+                                    :title="toolNameTooltip(field)"
                                 >
                                     {{ toolNameChip(field) }}
                                 </span>
@@ -163,7 +167,7 @@
                                 <span
                                     v-if="toolNameChip(field)"
                                     class="field-tool-chip"
-                                    :title="toolNameChip(field)"
+                                    :title="toolNameTooltip(field)"
                                 >
                                     {{ toolNameChip(field) }}
                                 </span>
@@ -253,6 +257,11 @@
             toolNameChip(field) {
                 const n = field?.toolName && String(field.toolName).trim();
                 return n || "";
+            },
+            toolNameTooltip(field) {
+                const toolName = this.toolNameChip(field);
+                if (toolName.length <= 50) return "";
+                return toolName;
             },
             startEditing(index) {
                 this.originalValues[index] = this.fields[index].value;

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -149,6 +150,14 @@ namespace WoopiAiHub.Repository
                             Id = o.StepTool.Id,
                             StepId = o.StepTool.StepId,
                             ToolId = o.StepTool.ToolId,
+                            Parameters = o.StepTool.Parameters.Select(p => new StepToolParameterDto
+                            {
+                                Id = p.Id,
+                                Value = p.Value,
+                                RequiredFile = p.RequiredFile,
+                                WebhookId = p.WebhookId,
+                                Type = string.Empty
+                            }).ToList(),
                             Tool = o.StepTool.Tool != null ? new ToolDto
                             {
                                 Id = o.StepTool.Tool.Id,
