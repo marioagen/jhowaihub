@@ -24,21 +24,22 @@
                     class="field-item"
                 >
                     <div
-                        v-if="field.outputType != 'API'"
+                        v-if="field.outputType?.toLowerCase() !== 'api'"
                         class="field-header"
                     >
                         <div class="field-header-main">
-                            <label class="field-label">
+                            <label
+                                v-if="field.outputType !== 'Prompt' && field.outputType !== 'Quiz'"
+                                class="field-label"
+                            >
                                 {{ field.label }}
                             </label>
                             <div class="field-meta">
-                                <span class="field-type-chip">{{ outputTypeLabel(field) }}</span>
                                 <span
-                                    v-if="toolNameChip(field)"
-                                    class="field-tool-chip"
-                                    :title="toolNameTooltip(field)"
+                                    :class="['tool-chip', toolTypeClass(field)]"
+                                    :title="mergedChipLabel(field)"
                                 >
-                                    {{ toolNameChip(field) }}
+                                    {{ mergedChipLabel(field) }}
                                 </span>
                             </div>
                         </div>
@@ -138,7 +139,7 @@
                             </button>
                         </div>
                     </div>
-                    <div v-if="field.outputType == 'API'">
+                    <div v-if="field.outputType?.toLowerCase() === 'api'">
                         <div
                             v-if="field.label == 'TemplateName'"
                             :class="
@@ -148,35 +149,20 @@
                             "
                         >
                             <div class="field-meta field-meta-api mb-2">
-                                <span class="field-type-chip">{{ outputTypeLabel(field) }}</span>
                                 <span
-                                    v-if="toolNameChip(field)"
-                                    class="field-tool-chip"
-                                    :title="toolNameTooltip(field)"
+                                    :class="['tool-chip', toolTypeClass(field)]"
+                                    :title="mergedApiChipLabel(field)"
                                 >
-                                    {{ toolNameChip(field) }}
+                                    {{ mergedApiChipLabel(field) }}
                                 </span>
                             </div>
-                            <h6 class="fw-bold mb-0">
-                                {{ field.value }}
-                            </h6>
                         </div>
                         <div v-else>
-                            <div class="field-meta field-meta-api mb-2">
-                                <span class="field-type-chip">{{ outputTypeLabel(field) }}</span>
-                                <span
-                                    v-if="toolNameChip(field)"
-                                    class="field-tool-chip"
-                                    :title="toolNameTooltip(field)"
-                                >
-                                    {{ toolNameChip(field) }}
-                                </span>
-                            </div>
                             <label class="field-label">
                                 {{ field.label }}
                             </label>
                             <input
-                                v-if="field.label == 'StatusCode'"
+                                v-if="field.label === 'StatusCode'"
                                 type="text"
                                 class="field-value form-control mt-2"
                                 readonly
@@ -258,10 +244,29 @@
                 const n = field?.toolName && String(field.toolName).trim();
                 return n || "";
             },
-            toolNameTooltip(field) {
-                const toolName = this.toolNameChip(field);
-                if (toolName.length <= 50) return "";
-                return toolName;
+            toolTypeClass(field) {
+                const map = {
+                    prompt: "chip-prompt",
+                    quiz: "chip-quiz",
+                    api: "chip-api",
+                    n8n: "chip-n8n",
+                    embeddings: "chip-embeddings",
+                };
+                return map[field.outputType?.toLowerCase()] || "chip-default";
+            },
+            mergedChipLabel(field) {
+                const type = this.outputTypeLabel(field);
+                const tool = this.toolNameChip(field);
+                if (type && tool) return `${type} - ${tool}`;
+                return type || tool || "";
+            },
+            mergedApiChipLabel(field) {
+                const type = this.outputTypeLabel(field);
+                const templateName = (field.value || "").trim();
+                if (templateName && templateName.toLowerCase() !== type.toLowerCase()) {
+                    return `${type} - ${templateName}`;
+                }
+                return type;
             },
             startEditing(index) {
                 this.originalValues[index] = this.fields[index].value;
@@ -444,30 +449,56 @@
         align-items: stretch;
     }
 
-    .field-type-chip {
-        background: rgba(0, 115, 230, 0.12);
-        color: #0073e6;
-        border: 1px solid rgba(0, 115, 230, 0.25);
+    .tool-chip {
+        display: inline-flex;
+        align-items: center;
         border-radius: 12px;
-        padding: 0.12rem 0.55rem;
+        padding: 0.12rem 0.65rem;
         font-size: 0.72rem;
         font-weight: 600;
-        line-height: 1.2;
-        max-width: 100%;
-    }
-
-    .field-tool-chip {
-        background: var(--color-card-content, #eef3fb);
-        color: var(--color-body-content, #333);
-        border: 1px solid var(--color-border-form-control, #cfe1f7);
-        border-radius: 12px;
-        padding: 0.12rem 0.55rem;
-        font-size: 0.72rem;
-        line-height: 1.2;
-        max-width: min(100%, 240px);
+        line-height: 1.4;
+        border-width: 1px;
+        border-style: solid;
+        max-width: min(100%, 320px);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    .chip-prompt {
+        background-color: var(--chip-prompt-bg);
+        color: var(--chip-prompt-text);
+        border-color: var(--chip-prompt-border);
+    }
+
+    .chip-quiz {
+        background-color: var(--chip-quiz-bg);
+        color: var(--chip-quiz-text);
+        border-color: var(--chip-quiz-border);
+    }
+
+    .chip-api {
+        background-color: var(--chip-api-bg);
+        color: var(--chip-api-text);
+        border-color: var(--chip-api-border);
+    }
+
+    .chip-n8n {
+        background-color: var(--chip-n8n-bg);
+        color: var(--chip-n8n-text);
+        border-color: var(--chip-n8n-border);
+    }
+
+    .chip-embeddings {
+        background-color: var(--chip-embeddings-bg);
+        color: var(--chip-embeddings-text);
+        border-color: var(--chip-embeddings-border);
+    }
+
+    .chip-default {
+        background-color: var(--chip-default-bg);
+        color: var(--chip-default-text);
+        border-color: var(--chip-default-border);
     }
 
     .field-label {
@@ -605,10 +636,6 @@
 
         .field-label {
             font-size: 0.85rem;
-        }
-
-        .field-tool-chip {
-            max-width: min(100%, 180px);
         }
 
         .edited-badge {
