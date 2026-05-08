@@ -165,8 +165,8 @@
 <script>
     import { Field, useForm } from "vee-validate";
     import { getJWTPermissions } from "@/utils/permissions";
-    import AuthService from "@/services/authenticate/AuthService";
     import { scheduleTokenRefresh } from "@/services/api";
+    import AuthService from "@/services/authenticate/AuthService";
     import TenantModal from "@/components/authentication/TenantModal.vue";
     import logoDark from "@/assets/img/woopiai-logo-dark.png";
     import logoLight from "@/assets/img/woopiai-logo-light.png";
