@@ -42,6 +42,8 @@
                         <DependencySelector
                             :previousStepTools="previousStepTools"
                             v-model:selectedDependencies="selectedDependencies"
+                            :allowedDependencyToolTypes="promptAllowedDependencyToolTypes"
+                            dependenciesHintKey="flow.formFlow.promptDependenciesHint"
                         />
                     </div>
                     <div class="mb-4">
@@ -62,7 +64,10 @@
                                     :key="prompt.id"
                                     :value="prompt.id"
                                 >
-                                    {{ prompt.name }}<span v-if="prompt.enableAccessToMcp"> - [{{ $t("flow.formFlow.remoteAccess") }}]</span>
+                                    {{ prompt.name }}
+                                    <span v-if="prompt.enableAccessToMcp">
+                                        - [{{ $t("flow.formFlow.remoteAccess") }}]
+                                    </span>
                                 </option>
                             </select>
                         </div>
@@ -107,6 +112,7 @@
 </template>
 <script>
     import DependencySelector from "@/components/flow/DependencySelector.vue";
+    import ToolType from "@/constants/ToolType";
     import PromptForm from "@/components/prompts/PromptForm.vue";
     import PromptService from "@/services/prompts/PromptsService";
     import LogService from "@/services/log/logService";
@@ -122,6 +128,7 @@
         },
         data() {
             return {
+                promptAllowedDependencyToolTypes: [ToolType.API, ToolType.Quiz],
                 nodeData: null,
                 previousStepTools: [],
                 selectedDependencies: [],

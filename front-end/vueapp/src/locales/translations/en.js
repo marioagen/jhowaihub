@@ -662,6 +662,8 @@ const english = {
                 "Failed to update flow. Flow already contains output data for tools.",
             prompts: "Agents",
             promptRequired: "Select at least one agent",
+            promptDependenciesHint:
+                "For this tool you can only link API tools and questionnaires (Quiz) from previous steps.",
             selectPrompt: "Select an agent",
             remoteAccess: "Remote Access",
         },
@@ -1205,6 +1207,8 @@ const english = {
         ocrDependencyRequired: "Agent tool requires a dependency on a Digitizer Agent tool",
         ocrOrPromptDependencyRequired:
             "Agent tool requires a dependency on a Digitizer Agent (OCR) or another Agent (Prompt)",
+        promptApiOrQuizDependencyRequired:
+            "Agent tool dependencies must be API tools or questionnaires (Quiz) only, with usable output.",
         removeError: "Error removing tool",
         removeSuccess: "Tool removed successfully",
         removeTitle: "You are about to delete a tool from the system",

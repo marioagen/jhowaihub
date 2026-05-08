@@ -48,11 +48,11 @@ public class PromptHandler : IToolHandler
 
     /// <summary>
     /// Builds an execution payload for processing prompt tasks with multiple outputs from dependent StepTools.
-    /// Dependencies can be OCR (document embeddings) or another Prompt (previous prompt response); the combined text is sent to the AI Gateway.
+    /// Dependency outputs are merged into user context; configured flows restrict Prompt dependencies to API and Quiz tools.
     /// </summary>
     /// <param name="automationServicesDto"></param>
     /// <param name="input"></param>
-    /// <param name="outputs">Collection of outputs from dependent StepTools (OCR and/or Prompt)</param>
+    /// <param name="outputs">Collection of outputs from dependent StepTools.</param>
     /// <param name="execution"></param>
     /// <returns></returns>
     public async Task<ExecutionMessageDto> BuildPayload(AutomationServicesDto automationServicesDto,
@@ -69,7 +69,7 @@ public class PromptHandler : IToolHandler
         var fullText = ExtractFullTextFromOutputs(outputs);
         if (string.IsNullOrWhiteSpace(fullText))
         {
-            throw new AppException(ErrorCode.RequiredField, "The prompt tool requires an OCR or Prompt dependency with output", ToolLabel.OcrOrPromptDependencyRequired);
+            throw new AppException(ErrorCode.RequiredField, "The prompt tool requires an API or Quiz dependency with output", ToolLabel.PromptApiOrQuizDependencyRequired);
         }
 
         var promptId = int.Parse(input!.Value);

@@ -5,7 +5,7 @@
             <span class="text-danger">*</span>
         </h6>
         <p class="text-muted small mb-2">
-            {{ $t("flow.sidebar.dependenciesHint") }}
+            {{ dependenciesHintText }}
         </p>
 
         <!-- Dropdown to Add Dependencies -->
@@ -111,6 +111,14 @@
                 type: Array,
                 default: () => [],
             },
+            allowedDependencyToolTypes: {
+                type: Array,
+                default: null,
+            },
+            dependenciesHintKey: {
+                type: String,
+                default: null,
+            },
         },
         components: {
             LucideIcon,
@@ -133,23 +141,43 @@
             },
         },
         computed: {
+            dependenciesHintText() {
+                const key = this.dependenciesHintKey || "flow.sidebar.dependenciesHint";
+                return this.$t(key);
+            },
             availableStepTools() {
                 return this.previousStepTools
                     .map((step) => ({
                         ...step,
-                        stepTools: step.stepTools.filter(
-                            (stepTool) =>
-                                !this.internalDependencies.some(
+                        stepTools: step.stepTools.filter((stepTool) => {
+                            if (
+                                this.internalDependencies.some(
                                     (selected) =>
                                         selected.stepOrder === step.order &&
                                         selected.stepToolOrder === stepTool.order
                                 )
-                        ),
+                            ) {
+                                return false;
+                            }
+                            return this.isStepToolTypeAllowedForDependency(stepTool);
+                        }),
                     }))
                     .filter((step) => step.stepTools.length > 0);
             },
         },
         methods: {
+            isStepToolTypeAllowedForDependency(stepTool) {
+                const allowed = this.allowedDependencyToolTypes;
+                if (!Array.isArray(allowed) || allowed.length === 0) {
+                    return true;
+                }
+                const tt = (stepTool?.tool?.toolType || "").toString();
+                if (!tt) {
+                    return false;
+                }
+                const lower = tt.toLowerCase();
+                return allowed.some((a) => String(a).toLowerCase() === lower);
+            },
             updateModel() {
                 this.$emit("update:selectedDependencies", this.internalDependencies);
             },
