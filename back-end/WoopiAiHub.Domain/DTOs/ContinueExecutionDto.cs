@@ -1,4 +1,4 @@
-﻿namespace WoopiAiHub.Domain.DTOs
+namespace WoopiAiHub.Domain.DTOs
 {
-    public record class AutomationServicesDto(int StepToolId, int CardId, string Tenant, string Email, string? ReferenceFile, int? StepId);
+    public record class AutomationServicesDto(int StepToolId, int CardId, string Tenant, string Email, string? ReferenceFile, int? StepId, int? WorkflowId = null);
 }

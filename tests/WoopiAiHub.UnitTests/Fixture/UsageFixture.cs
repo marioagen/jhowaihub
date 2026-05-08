@@ -28,7 +28,9 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Int(1, 10),
                 _faker.Random.Int(1, 100),
                 Guid.NewGuid(),
-                _faker.Random.Int(0, 5)
+                _faker.Random.Int(0, 5),
+                false,
+                null
             );
         }
 

@@ -87,6 +87,8 @@ namespace WoopiAiHub.Application.Services
             await SaveStepToolOutputAsync(execution, embeddingsJson);
             await UpdateDocumentStatusAsync(dto.ReferenceFile);
 
+            dto.Data = dto.Data with { WorkflowId = execution.StepTool?.Step?.WorkflowId };
+
             return dto.Data;
         }
 
@@ -131,7 +133,8 @@ namespace WoopiAiHub.Application.Services
                 await _usageDailyServices.AddByRangeValuesAsync(
                     MetricNames.Token,
                     documentQuestionnaireDto.Email,
-                    usages
+                    usages,
+                    execution?.StepTool?.Step?.WorkflowId
                 );
 
                 _unitOfWork.Commit();
@@ -168,6 +171,8 @@ namespace WoopiAiHub.Application.Services
             await _executionServices.HandleExecutionProgress(execution!, documentEmbeddingsResultDto.Email);
             await SaveStepToolOutputAsync(execution!, documentEmbeddingsResultDto.ReferenceFile);
             _documentRepository.ChangeStatus(documentId, DocumentStatus.Embeddings);
+
+            documentEmbeddingsResultDto.Data = documentEmbeddingsResultDto.Data with { WorkflowId = execution?.StepTool?.Step?.WorkflowId };
 
             return documentEmbeddingsResultDto.Data;
         }

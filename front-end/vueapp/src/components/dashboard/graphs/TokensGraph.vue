@@ -60,7 +60,7 @@
                         {{ $t("dashboard.graphs.periodTotal") }}
                     </span>
                     <h4 class="mb-0 fw-bold text-primary">
-                        {{ totalTokens * usageUnitTokens }}
+                        {{ formatDecimalValue(calculatedTotal) }}
                     </h4>
                 </div>
             </div>
@@ -80,6 +80,7 @@
     import BarGraphComponent from "@/components/global/graphs/BarGraphComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import DashboardServices from "@/services/dashboard/DashboardServices";
+    import { formatDecimalValue } from "@/helpers/number";
     export default {
         components: {
             BarGraphComponent,
@@ -93,6 +94,11 @@
             end: {
                 type: String,
                 required: true,
+            },
+            workflowIds: {
+                type: Array,
+                required: false,
+                default: () => [],
             },
             usageUnits: {
                 type: Array,
@@ -138,6 +144,17 @@
         created() {
             this.getIAList();
         },
+        watch: {
+            workflowIds() {
+                this.getTokensData();
+            },
+            start() {
+                this.getTokensData();
+            },
+            end() {
+                this.getTokensData();
+            },
+        },
         computed: {
             currentIA() {
                 return this.IAList[this.currentIAIndex] ?? undefined;
@@ -147,17 +164,23 @@
             },
             usageUnitTokens() {
                 if (!Array.isArray(this.usageUnits) || this.usageUnits.length === 0) {
-                    return 0;
+                    return "0";
                 }
                 return (
                     this.usageUnits.find(
                         (item) =>
                             item.modelEmbeddingId === (this.IAList[this.currentIAIndex]?.id ?? 0)
-                    )?.value ?? 0
+                    )?.value ?? "0"
                 );
+            },
+            calculatedTotal() {
+                const unit = parseFloat(this.usageUnitTokens) || 0;
+                const total = Number(this.totalTokens) || 0;
+                return unit * total;
             },
         },
         methods: {
+            formatDecimalValue,
             getIAList() {
                 DashboardServices.GetUsedModels().then((response) => {
                     if (response && !response.error) {
@@ -180,6 +203,11 @@
                     end: this.end,
                     id: this.currentIA.id,
                 };
+
+                if (this.workflowIds.length > 0 && !this.workflowIds.includes(null)) {
+                    params.workflowIds = this.workflowIds;
+                }
+
                 DashboardServices.GetTokensByModel(params)
                     .then((response) => {
                         if (response && !response.error) {
@@ -202,11 +230,17 @@
                     });
             },
             getTotalCost() {
+                this.isLoaded = false;
+
                 let paramsTotalCost = {
                     start: this.start,
                     end: this.end,
                 };
-                this.isLoaded = false;
+
+                if (this.workflowIds.length > 0 && !this.workflowIds.includes(null)) {
+                    paramsTotalCost.workflowIds = this.workflowIds;
+                }
+
                 DashboardServices.GetTotalUsageCost(paramsTotalCost)
                     .then((response) => {
                         if (response && !response.error) {

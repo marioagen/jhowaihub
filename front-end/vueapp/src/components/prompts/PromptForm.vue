@@ -1,11 +1,22 @@
 <template>
     <div class="container-fluid scroll-area">
         <form @submit.prevent="save">
-            <div class="row align-items-center mt-3" v-if="!embedded">
+            <div
+                class="row align-items-center mt-3"
+                v-if="!embedded"
+            >
                 <div class="col-md-8 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <button class="btn btn-sm btn-back p-0 me-3" @click="cancel" type="button">
-                            <LucideIcon icon="ArrowLeft" :size="17" class="me-1" />
+                        <button
+                            class="btn btn-sm btn-back p-0 me-3"
+                            @click="cancel"
+                            type="button"
+                        >
+                            <LucideIcon
+                                icon="ArrowLeft"
+                                :size="17"
+                                class="me-1"
+                            />
                             <span class="fw-bold">
                                 {{ $t("common.back") }}
                             </span>
@@ -32,15 +43,24 @@
                 <div class="col-lg-7 col-xl-8">
                     <div class="card mt-3">
                         <div class="card-body">
-                            <h6 class="card-title mb-3" v-if="!embedded">
+                            <h6
+                                class="card-title mb-3"
+                                v-if="!embedded"
+                            >
                                 {{ $t("prompts.information") }}
                             </h6>
-                            <h6 v-else class="mb-3">
+                            <h6
+                                v-else
+                                class="mb-3"
+                            >
                                 {{ $t("prompts.newPrompt") }}
                             </h6>
 
                             <div class="mb-3">
-                                <label for="inputNamePrompt" class="form-label">
+                                <label
+                                    for="inputNamePrompt"
+                                    class="form-label"
+                                >
                                     {{ $t("prompts.namePrompt") }}
                                 </label>
                                 <Field
@@ -58,48 +78,105 @@
                                         name="name"
                                         :class="{
                                             'is-invalid': errorMessage,
-                                        }" />
-                                    <span class="validation-message text-danger" v-if="errorMessage">
+                                        }"
+                                    />
+                                    <span
+                                        class="validation-message text-danger"
+                                        v-if="errorMessage"
+                                    >
                                         {{ errorMessage }}
                                     </span>
                                 </Field>
                             </div>
                             <div class="mb-3">
-                                <label for="FormControlTextarea1" class="form-label">
+                                <label
+                                    for="FormControlTextarea1"
+                                    class="form-label"
+                                >
                                     {{ $t("common.description") }}
                                 </label>
-                                <Field name="description" :rules="'required|max:500'" v-slot="{ field, errorMessage }">
-                                    <textarea v-bind="field" type="text" class="form-control" id="inputDescription"
-                                        aria-describedby="descriptionCounter" rows="3" name="description"
-                                        maxlength="500" :class="{
+                                <Field
+                                    name="description"
+                                    :rules="'required|max:500'"
+                                    v-slot="{ field, errorMessage }"
+                                >
+                                    <textarea
+                                        v-bind="field"
+                                        type="text"
+                                        class="form-control"
+                                        id="inputDescription"
+                                        aria-describedby="descriptionCounter"
+                                        rows="3"
+                                        name="description"
+                                        maxlength="500"
+                                        :class="{
                                             'is-invalid': errorMessage,
-                                        }" @input="field.onInput($event)" />
-                                    <div id="descriptionCounter" class="form-text text-end">
+                                        }"
+                                        @input="field.onInput($event)"
+                                    />
+                                    <div
+                                        id="descriptionCounter"
+                                        class="form-text text-end"
+                                    >
                                         {{ (values.description || "").length }}/500
                                     </div>
-                                    <span class="validation-message text-danger" v-if="errorMessage">
+                                    <span
+                                        class="validation-message text-danger"
+                                        v-if="errorMessage"
+                                    >
                                         {{ errorMessage }}
                                     </span>
                                 </Field>
                             </div>
 
                             <div class="mb-3">
-                                <label for="FormControlTextarea2" class="form-label">
+                                <label
+                                    for="FormControlTextarea2"
+                                    class="form-label"
+                                >
                                     {{ $t("prompts.promptContent") }}
                                 </label>
-                                <Field name="text" rules="required" v-slot="{ field, errorMessage }">
-                                    <textarea v-bind="field" type="text" class="form-control" id="FormControlTextarea2"
-                                        rows="3" name="text" :class="{
+                                <Field
+                                    name="text"
+                                    rules="required"
+                                    v-slot="{ field, errorMessage }"
+                                >
+                                    <textarea
+                                        v-bind="field"
+                                        type="text"
+                                        class="form-control"
+                                        id="FormControlTextarea2"
+                                        rows="3"
+                                        name="text"
+                                        :class="{
                                             'is-invalid': errorMessage,
-                                        }" />
-                                    <span class="validation-message text-danger" v-if="errorMessage">
+                                        }"
+                                    />
+                                    <span
+                                        class="validation-message text-danger"
+                                        v-if="errorMessage"
+                                    >
                                         {{ errorMessage }}
                                     </span>
                                 </Field>
-                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" @click="refinePrompt"
-                                    :disabled="isRefining">
-                                    <LucideIcon icon="Wand2" :size="17" class="me-2" v-if="!isRefining" />
-                                    <LucideIcon icon="LoaderCircle" :size="17" class="me-2 animate-spin" v-else />
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-primary mt-2"
+                                    @click="refinePrompt"
+                                    :disabled="isRefining"
+                                >
+                                    <LucideIcon
+                                        icon="Wand2"
+                                        :size="17"
+                                        class="me-2"
+                                        v-if="!isRefining"
+                                    />
+                                    <LucideIcon
+                                        icon="LoaderCircle"
+                                        :size="17"
+                                        class="me-2 animate-spin"
+                                        v-else
+                                    />
                                     <span class="fw-bold">
                                         {{ $t("prompts.refinePrompt") }}
                                     </span>
@@ -108,26 +185,43 @@
                             <div class="mb-3 team-selector-container rounded p-3">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <div class="d-flex align-items-center mb-1">
-                                        <LucideIcon icon="PlugZap" class="icon-blue" />
+                                        <LucideIcon
+                                            icon="PlugZap"
+                                            class="icon-blue"
+                                        />
                                         <label class="form-label mb-0 ms-2">
                                             {{ $t("prompts.labelMcp") }}
                                         </label>
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <Field name="enableAccessToMcp" type="checkbox" :value="true"
-                                        v-slot="{ field, errorMessage }">
+                                    <Field
+                                        name="enableAccessToMcp"
+                                        type="checkbox"
+                                        :value="true"
+                                        v-slot="{ field, errorMessage }"
+                                    >
                                         <div class="form-check">
-                                            <input v-bind="field" id="templateActive" type="checkbox"
-                                                class="form-check-input" :class="{ 'is-invalid': errorMessage }" />
-                                            <label class="form-check-label" for="templateActive">
+                                            <input
+                                                v-bind="field"
+                                                id="templateActive"
+                                                type="checkbox"
+                                                class="form-check-input"
+                                                :class="{ 'is-invalid': errorMessage }"
+                                            />
+                                            <label
+                                                class="form-check-label"
+                                                for="templateActive"
+                                            >
                                                 {{ $t("prompts.enableMcp") }}
                                             </label>
                                         </div>
                                     </Field>
                                 </div>
                                 <div v-if="values.enableAccessToMcp">
-                                    <div class="text-danger small mb-3 d-flex align-items-center gap-1">
+                                    <div
+                                        class="text-danger small mb-3 d-flex align-items-center gap-1"
+                                    >
                                         <span class="text-danger">*</span>
                                         <span>
                                             {{ $t("validation.required") }}
@@ -136,62 +230,110 @@
                                     <div class="mb-3 rounded">
                                         <div class="input-group">
                                             <span class="input-group-text border-end-0">
-                                                <LucideIcon icon="Search" size="16" />
+                                                <LucideIcon
+                                                    icon="Search"
+                                                    size="16"
+                                                />
                                             </span>
-                                            <input type="text" class="form-control form-control-sm" :placeholder="$t(
-                                                'documents.workflowListModal.searchPlaceholder'
-                                            )
-                                                " v-model="searchTerm" />
+                                            <input
+                                                type="text"
+                                                class="form-control form-control-sm"
+                                                :placeholder="$t('prompts.apiSearchPlaceholder')"
+                                                v-model="searchTerm"
+                                            />
                                         </div>
                                     </div>
                                     <div class="mb-1 d-flex gap-2 p-2 rounded">
-                                        <button type="button" class="btn btn-custom-light btn-sm"
-                                            @click="selectAll($event)">
-                                            <LucideIcon icon="Check" class="me-1" />
+                                        <button
+                                            type="button"
+                                            class="btn btn-custom-light btn-sm"
+                                            @click="selectAll($event)"
+                                        >
+                                            <LucideIcon
+                                                icon="Check"
+                                                class="me-1"
+                                            />
                                             {{ $t("common.selectAll") }}
                                         </button>
-                                        <button type="button" class="btn btn-custom-light btn-sm"
-                                            @click="clearSelection($event)">
-                                            <LucideIcon icon="X" class="me-1" />
+                                        <button
+                                            type="button"
+                                            class="btn btn-custom-light btn-sm"
+                                            @click="clearSelection($event)"
+                                        >
+                                            <LucideIcon
+                                                icon="X"
+                                                class="me-1"
+                                            />
                                             {{ $t("common.clearSelection") }}
                                         </button>
                                     </div>
                                     <div class="text-muted small mb-1">
-                                        {{ $t("documents.upload.warningWorkflowNotListed") }}
+                                        {{ $t("prompts.apiSelectionWarning") }}
                                     </div>
-                                    <div class="border rounded bg-select p-1 user-list scrollable-list">
-                                        <div v-if="isLoading" class="text-center">      
+                                    <div
+                                        class="border rounded bg-select p-1 user-list scrollable-list"
+                                    >
+                                        <div
+                                            v-if="isLoading"
+                                            class="text-center"
+                                        >
                                             <LoadingComponent />
                                         </div>
-                                        <template v-else >
-                                            <div v-if="filtersAPiTemplateList.length === 0" class="text-center text-muted py-3">
-                                                {{ $t("documents.upload.noWorkflowFound") }}
+                                        <template v-else>
+                                            <div
+                                                v-if="filtersAPiTemplateList.length === 0"
+                                                class="text-center text-muted py-3"
+                                            >
+                                                {{ $t("prompts.noApiTemplatesFound") }}
                                             </div>
-                                            <div v-else v-for="api in filtersAPiTemplateList" :key="api.id" class="p-1">
+                                            <div
+                                                v-else
+                                                v-for="api in filtersAPiTemplateList"
+                                                :key="api.id"
+                                                class="p-1"
+                                            >
                                                 <div class="form-check d-flex align-items-center">
-                                                    <input class="form-check-input me-3" type="checkbox" :id="`user-${api.id}`"
-                                                        :value="api.id" v-model="apiTemplatesSelected" />
-                                                    <label class="form-check-label d-flex align-items-center w-100"
-                                                        :for="`user-${api.id}`">                                                                                            
+                                                    <input
+                                                        class="form-check-input me-3"
+                                                        type="checkbox"
+                                                        :id="`user-${api.id}`"
+                                                        :value="api.id"
+                                                        v-model="apiTemplatesSelected"
+                                                    />
+                                                    <label
+                                                        class="form-check-label d-flex align-items-center w-100"
+                                                        :for="`user-${api.id}`"
+                                                    >
                                                         <div class="d-flex flex-column">
                                                             <span class="fw-semibold">
                                                                 {{ api.name }}
                                                             </span>
-                                                            <small class="gray-color">{{ api.url }}</small>
+                                                            <small class="gray-color">
+                                                                {{ api.url }}
+                                                            </small>
                                                         </div>
                                                     </label>
                                                 </div>
                                             </div>
                                         </template>
                                     </div>
-                                    <div v-if="apiTemplatesSelected.length > 0" class="mt-3">
+                                    <div
+                                        v-if="apiTemplatesSelected.length > 0"
+                                        class="mt-3"
+                                    >
                                         <label class="form-label">
                                             {{ $t("documents.upload.selectionList") }}
                                         </label>
                                         <div class="d-flex flex-wrap gap-2">
-                                            <div v-for="id in apiTemplatesSelected" :key="id"
-                                                class="badge rounded-pill d-flex align-items-center px-2 py-1 selected-team-chip">
-                                                <LucideIcon icon="Building" class="me-1" />
+                                            <div
+                                                v-for="id in apiTemplatesSelected"
+                                                :key="id"
+                                                class="badge rounded-pill d-flex align-items-center px-2 py-1 selected-team-chip"
+                                            >
+                                                <LucideIcon
+                                                    icon="Building"
+                                                    class="me-1"
+                                                />
                                                 <span class="me-1">
                                                     {{ getName(id) }}
                                                 </span>
@@ -202,11 +344,22 @@
                             </div>
 
                             <div class="d-flex justify-content-end gap-2 mt-3">
-                                <button class="btn btn-secondary" type="button" @click="cancel">
+                                <button
+                                    class="btn btn-secondary"
+                                    type="button"
+                                    @click="cancel"
+                                >
                                     {{ $t("common.cancel") }}
                                 </button>
-                                <button class="btn btn-primary" type="submit">
-                                    <LucideIcon icon="Save" :size="17" class="me-2" />
+                                <button
+                                    class="btn btn-primary"
+                                    type="submit"
+                                >
+                                    <LucideIcon
+                                        icon="Save"
+                                        :size="17"
+                                        class="me-2"
+                                    />
                                     {{ $t("common.save") }}
                                 </button>
                             </div>
@@ -304,163 +457,166 @@
     </div>
 </template>
 <script>
-import PromptService from "@/services/prompts/PromptsService";
-import TemplateService from "@/services/template/TemplateService";
-import LoadingComponent from "@/components/global/LoadingComponent.vue";
-import { Field, useForm } from "vee-validate";
+    import PromptService from "@/services/prompts/PromptsService";
+    import TemplateService from "@/services/template/TemplateService";
+    import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import { Field, useForm } from "vee-validate";
 
-export default {
-    name: "PromptForm",
-    components: {
-        Field,
-        LoadingComponent
-    },
-    props: {
-        id: {
-            type: Number,
-            required: false,
-            default: null,
+    export default {
+        name: "PromptForm",
+        components: {
+            Field,
+            LoadingComponent,
         },
-        cloneId: {
-            type: Number,
-            required: false,
-            default: null,
-        },
-        embedded: {
-            type: Boolean,
-            default: false,
-        },
-    },
-    emits: ["saved", "cancelled"],
-    data() {
-        return {
-            form: {
-                name: "",
-                description: "",
-                text: "",
+        props: {
+            id: {
+                type: Number,
+                required: false,
+                default: null,
             },
-            idEdit: 0,
-            isRefining: false,
-            searchTerm: "",
-            apiTemplates: [],
-            apiTemplatesSelected: [],
-            isLoading: false,
-        };
-    },
-    computed: {
-        isEditMode() {
-            return this.idEdit !== undefined && this.idEdit !== null && this.idEdit !== 0;
+            cloneId: {
+                type: Number,
+                required: false,
+                default: null,
+            },
+            embedded: {
+                type: Boolean,
+                default: false,
+            },
         },
-        filtersAPiTemplateList() {
-            if (!this.searchTerm) {
-                return this.apiTemplates;
-            }
-            return this.apiTemplates.filter((team) =>
-                team.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-            );
+        emits: ["saved", "cancelled"],
+        data() {
+            return {
+                form: {
+                    name: "",
+                    description: "",
+                    text: "",
+                },
+                idEdit: 0,
+                isRefining: false,
+                searchTerm: "",
+                apiTemplates: [],
+                apiTemplatesSelected: [],
+                isLoading: false,
+                testContext: "",
+                testResult: "",
+                isTesting: false,
+            };
         },
-        canTestPrompt() {
-            const textInput = this.values?.text;
-            return typeof textInput === "string" && textInput.trim().length > 0;
+        computed: {
+            isEditMode() {
+                return this.idEdit !== undefined && this.idEdit !== null && this.idEdit !== 0;
+            },
+            filtersAPiTemplateList() {
+                if (!this.searchTerm) {
+                    return this.apiTemplates;
+                }
+                return this.apiTemplates.filter((team) =>
+                    team.name.toLowerCase().includes(this.searchTerm.toLowerCase())
+                );
+            },
+            canTestPrompt() {
+                const textInput = this.values?.text;
+                return typeof textInput === "string" && textInput.trim().length > 0;
+            },
         },
-    },
-    watch: {
-        "$route.query.id"() {
-            this.initializeData();
+        watch: {
+            "$route.query.id"() {
+                this.initializeData();
+            },
+            "$route.query.clone"() {
+                this.initializeData();
+            },
         },
-        "$route.query.clone"() {
-            this.initializeData();
+        setup() {
+            const { validate, setValues, values, resetForm } = useForm();
+            return {
+                validate,
+                setValues,
+                values,
+                resetForm,
+            };
         },
-    },
-    setup() {
-        const { validate, setValues, values, resetForm } = useForm();
-        return {
-            validate,
-            setValues,
-            values,
-            resetForm,
-        };
-    },
-    methods: {
-        getQueryParamAsInt(paramName) {
-            const raw = this.$route.query[paramName];
-            if (raw === undefined || raw === null || raw === "") {
-                return null;
-            }
-            const s = Array.isArray(raw) ? raw[0] : raw;
-            const n = parseInt(String(s), 10);
-            return Number.isFinite(n) ? n : null;
-        },
-        resolveEditId() {
-            if (this.id != null && this.id !== 0) {
-                return this.id;
-            }
-            return this.getQueryParamAsInt("id");
-        },
-        resolveCloneId() {
-            if (this.cloneId != null && this.cloneId !== 0) {
-                return this.cloneId;
-            }
-            return this.getQueryParamAsInt("clone");
-        },
-        initializeData() {
-            const editId = this.resolveEditId();
-            const cloneId = this.resolveCloneId();
-            if (editId) {
-                this.findById(editId);
-            } else if (cloneId) {
-                this.loadCloneData(cloneId);
-            } else {
-                this.resetData();
-            }
-        },
-        cancel() {
-            this.$emit("cancelled");
-        },
-        async save(e) {
-            const result = await this.validate();
-            if (result.valid && (
-                    (this.values.enableAccessToMcp && this.apiTemplatesSelected.length > 0) ||
-                    !this.values.enableAccessToMcp
-                )
-            ) {
-                if (this.isEditMode) {
-                    this.updatePrompt();
+        methods: {
+            getQueryParamAsInt(paramName) {
+                const raw = this.$route.query[paramName];
+                if (raw === undefined || raw === null || raw === "") {
+                    return null;
+                }
+                const s = Array.isArray(raw) ? raw[0] : raw;
+                const n = parseInt(String(s), 10);
+                return Number.isFinite(n) ? n : null;
+            },
+            resolveEditId() {
+                if (this.id != null && this.id !== 0) {
+                    return this.id;
+                }
+                return this.getQueryParamAsInt("id");
+            },
+            resolveCloneId() {
+                if (this.cloneId != null && this.cloneId !== 0) {
+                    return this.cloneId;
+                }
+                return this.getQueryParamAsInt("clone");
+            },
+            initializeData() {
+                const editId = this.resolveEditId();
+                const cloneId = this.resolveCloneId();
+                if (editId) {
+                    this.findById(editId);
+                } else if (cloneId) {
+                    this.loadCloneData(cloneId);
                 } else {
-                    this.createPrompt();
+                    this.resetData();
                 }
-            }
-        },
-        findById(id) {
-            this.resetData();
-            PromptService.getPromptById(id)
-            .then((response) => {
-                if(response.error) {
-                    this.$notify({  
-                        title: "prompts.title",
-                        message: "prompts.getDataError",
-                        variant: "danger",
-                        icon: "CircleX",
-                    });
-                    return;
+            },
+            cancel() {
+                this.$emit("cancelled");
+            },
+            async save(e) {
+                const result = await this.validate();
+                if (
+                    result.valid &&
+                    ((this.values.enableAccessToMcp && this.apiTemplatesSelected.length > 0) ||
+                        !this.values.enableAccessToMcp)
+                ) {
+                    if (this.isEditMode) {
+                        this.updatePrompt();
+                    } else {
+                        this.createPrompt();
+                    }
                 }
+            },
+            findById(id) {
+                this.resetData();
+                PromptService.getPromptById(id).then((response) => {
+                    if (response.error) {
+                        this.$notify({
+                            title: "prompts.title",
+                            message: "prompts.getDataError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                        return;
+                    }
 
-                this.form = {
-                    name: response.name,
-                    description: response.description,
-                    text: response.text,
-                    enableAccessToMcp: response.enableAccessToMcp
-                };
-                this.setValues(this.form);
-                this.apiTemplatesSelected = response.promptApiTemplates.map(x => x.apiTemplateId);
-                this.idEdit = id;
-            })
-        },
-        loadCloneData(id) {
-            this.resetData();
-            PromptService.getPromptById(id)
-                .then((response) => {
-                    if(response.error) {    
+                    this.form = {
+                        name: response.name,
+                        description: response.description,
+                        text: response.text,
+                        enableAccessToMcp: response.enableAccessToMcp,
+                    };
+                    this.setValues(this.form);
+                    this.apiTemplatesSelected = response.promptApiTemplates.map(
+                        (x) => x.apiTemplateId
+                    );
+                    this.idEdit = id;
+                });
+            },
+            loadCloneData(id) {
+                this.resetData();
+                PromptService.getPromptById(id).then((response) => {
+                    if (response.error) {
                         this.$notify({
                             title: "prompts.title",
                             message: "prompts.getDataError",
@@ -474,24 +630,25 @@ export default {
                         name: response.name + " " + this.$t("prompts.cloneSuffix"),
                         description: response.description,
                         text: response.text,
-                        enableAccessToMcp: response.enableAccessToMcp
+                        enableAccessToMcp: response.enableAccessToMcp,
                     };
-                    this.apiTemplatesSelected = response.promptApiTemplates.map(x => x.apiTemplateId);
+                    this.apiTemplatesSelected = response.promptApiTemplates.map(
+                        (x) => x.apiTemplateId
+                    );
                     this.setValues(this.form);
-                })
-        },
-        updatePrompt () {
-            const paramsData = {
-                id: this.idEdit,
-                name: this.values.name,
-                description: this.values.description,
-                text: this.values.text,
-                enableAccessToMcp: this.values.enableAccessToMcp,
-                apiTemplatesSelected: this.apiTemplatesSelected.map(x => x)
-            };
-            PromptService.updatePrompt(paramsData)
-                .then((response) => {
-                    if(response.error) {    
+                });
+            },
+            updatePrompt() {
+                const paramsData = {
+                    id: this.idEdit,
+                    name: this.values.name,
+                    description: this.values.description,
+                    text: this.values.text,
+                    enableAccessToMcp: this.values.enableAccessToMcp,
+                    apiTemplatesSelected: this.apiTemplatesSelected.map((x) => x),
+                };
+                PromptService.updatePrompt(paramsData).then((response) => {
+                    if (response.error) {
                         this.$notify({
                             title: "prompts.title",
                             message: "prompts.getDataError",
@@ -509,18 +666,17 @@ export default {
                     });
                     this.$emit("saved", response);
                 });
-        },
-        createPrompt () {
-            var paramsData = {
-                name: this.values.name,
-                description: this.values.description,
-                text: this.values.text,
-                enableAccessToMcp: this.values.enableAccessToMcp,
-                apiTemplatesSelected: this.apiTemplatesSelected.map(x => x)
-            };
-            PromptService.createPrompt(paramsData)
-                .then((response) => {
-                    if(response.error){
+            },
+            createPrompt() {
+                var paramsData = {
+                    name: this.values.name,
+                    description: this.values.description,
+                    text: this.values.text,
+                    enableAccessToMcp: this.values.enableAccessToMcp,
+                    apiTemplatesSelected: this.apiTemplatesSelected.map((x) => x),
+                };
+                PromptService.createPrompt(paramsData).then((response) => {
+                    if (response.error) {
                         this.$notify({
                             title: "prompts.title",
                             message: "prompts.createError",
@@ -529,7 +685,7 @@ export default {
                         });
                         return;
                     }
-            
+
                     this.$notify({
                         title: "prompts.title",
                         message: "prompts.createSuccess",
@@ -538,182 +694,183 @@ export default {
                     });
                     this.$emit("saved", response);
                 });
-        },
-        resetData() {
-            this.idEdit = 0;
-            this.resetForm({
-                values: {
-                    name: "",
-                    description: "",
-                    text: "",
-                    enableAccessToMcp: false
-                },
-            });
-        },
-        refinePrompt() {
-            if (!this.values || !this.values.text || this.values.text.trim() === "") {
-                return this.$notify({
-                    title: "prompts.title",
-                    message: "prompts.emptyPromptError",
-                    variant: "warning",
-                    icon: "AlertCircle",
+            },
+            resetData() {
+                this.idEdit = 0;
+                this.resetForm({
+                    values: {
+                        name: "",
+                        description: "",
+                        text: "",
+                        enableAccessToMcp: false,
+                    },
                 });
-            }
-            this.isRefining = true;
-            PromptService.refinePrompt(this.values.text)
-                .then((response) => {
-                    if(response.error) {
-                        this.$notify({
-                            title: "prompts.title",
-                            message: "prompts.refineError",
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                        return;
-                    }
-
-                    let refinedText = response;
-                    if (typeof response === "object") {
-                        refinedText = Object.entries(response)
-                            .map(([key, value]) => {
-                                if (Array.isArray(value)) {
-                                    return `${key}\n${value.map((item) => `${item}`).join("\n")}`;
-                                }
-                                return `${key}\n${value}`;
-                            })
-                            .join("\n\n");
-                    }
-                    this.setValues({
-                        ...this.values,
-                        text: refinedText,
-                    });
-                    this.$notify({
+            },
+            refinePrompt() {
+                if (!this.values || !this.values.text || this.values.text.trim() === "") {
+                    return this.$notify({
                         title: "prompts.title",
-                        message: "prompts.refineSuccess",
-                        variant: "success",
-                        icon: "CircleCheckBig",
+                        message: "prompts.emptyPromptError",
+                        variant: "warning",
+                        icon: "AlertCircle",
                     });
-                })
-                .finally(() => {
-                    this.isRefining = false;
-                });
-        },
-        clearTestContext() {
-            this.testContext = "";
-        },
-        clearTestResult() {
-            this.testResult = "";
-        },
-        testPromptInContext() {
-            if (!this.canTestPrompt) {
-                return;
-            }
-            this.isTesting = true;
-            PromptService.testPrompt({
-                promptText: this.values.text,
-                contextText: this.testContext,
-            })
-                .then((response) => {
-                    if(response.error) {
+                }
+                this.isRefining = true;
+                PromptService.refinePrompt(this.values.text)
+                    .then((response) => {
+                        if (response.error) {
+                            this.$notify({
+                                title: "prompts.title",
+                                message: "prompts.refineError",
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
+                            return;
+                        }
+
+                        let refinedText = response;
+                        if (typeof response === "object") {
+                            refinedText = Object.entries(response)
+                                .map(([key, value]) => {
+                                    if (Array.isArray(value)) {
+                                        return `${key}\n${value.map((item) => `${item}`).join("\n")}`;
+                                    }
+                                    return `${key}\n${value}`;
+                                })
+                                .join("\n\n");
+                        }
+                        this.setValues({
+                            ...this.values,
+                            text: refinedText,
+                        });
                         this.$notify({
                             title: "prompts.title",
-                            message: "prompts.playground.testError",
-                            variant: "danger",
-                            icon: "CircleX",
+                            message: "prompts.refineSuccess",
+                            variant: "success",
+                            icon: "CircleCheckBig",
                         });
-                    }
-
-                    this.testResult =
-                        typeof response === "string" ? response : String(response ?? "");
+                    })
+                    .finally(() => {
+                        this.isRefining = false;
+                    });
+            },
+            clearTestContext() {
+                this.testContext = "";
+            },
+            clearTestResult() {
+                this.testResult = "";
+            },
+            testPromptInContext() {
+                if (!this.canTestPrompt) {
+                    return;
+                }
+                this.isTesting = true;
+                PromptService.testPrompt({
+                    promptText: this.values.text,
+                    contextText: this.testContext,
                 })
-                .finally(() => {
-                    this.isTesting = false;
-                });
-        },
-        getTemplatesEnableAccessToMcp() {
-            this.isLoading = true;
+                    .then((response) => {
+                        if (response.error) {
+                            this.$notify({
+                                title: "prompts.title",
+                                message: "prompts.playground.testError",
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
+                            return;
+                        }
 
-            TemplateService.getAllTemplates(true)
-                .then((response) => {
-                    if (response.error !== undefined) {
-                        this.$notify({
-                            title: "prompts.title",
-                            message: errorMessage,
-                            variant: "danger",
-                            icon: "CircleX",
-                        });
-                    }
+                        this.testResult =
+                            typeof response === "string"
+                                ? response
+                                : JSON.stringify(response, null, 2);
+                    })
+                    .finally(() => {
+                        this.isTesting = false;
+                    });
+            },
+            getTemplatesEnableAccessToMcp() {
+                this.isLoading = true;
 
-                    this.apiTemplates = response;
-                })
-                .finally(() => {
-                    this.isLoading = false;
-                });
-        },        
-        getName(id) {
-            const api = this.apiTemplates.find((t) => t.id === id);
-            return api ? api.name : "Unknown";
+                TemplateService.getAllTemplates(true)
+                    .then((response) => {
+                        if (response.error !== undefined) {
+                            this.$notify({
+                                title: "prompts.title",
+                                message: errorMessage,
+                                variant: "danger",
+                                icon: "CircleX",
+                            });
+                        }
+
+                        this.apiTemplates = response;
+                    })
+                    .finally(() => {
+                        this.isLoading = false;
+                    });
+            },
+            getName(id) {
+                const api = this.apiTemplates.find((t) => t.id === id);
+                return api ? api.name : "Unknown";
+            },
+            selectAll(event) {
+                event.target.blur();
+                this.apiTemplatesSelected = this.filtersAPiTemplateList.map((user) => user.id);
+            },
+            clearSelection(event) {
+                event.target.blur();
+                this.apiTemplatesSelected = [];
+            },
         },
-        selectAll(event) {
-            event.target.blur();
-            this.apiTemplatesSelected = this.filtersAPiTemplateList.map((user) => user.id);
+        mounted() {
+            this.initializeData();
+            this.getTemplatesEnableAccessToMcp();
         },
-        clearSelection(event) {
-            event.target.blur();
-            this.apiTemplatesSelected = [];
-        },
-    },
-    mounted() {
-        this.initializeData();
-        this.getTemplatesEnableAccessToMcp();
-    },
-};
+    };
 </script>
 <style scoped>
-.card {
-    border-radius: 10px;
-}
-
-.animate-spin {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
+    .card {
+        border-radius: 10px;
     }
 
-    to {
-        transform: rotate(360deg);
+    .animate-spin {
+        animation: spin 1s linear infinite;
     }
-}
 
-.btn-back {
-    color: var(--color-body-content) !important
-}
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
 
+        to {
+            transform: rotate(360deg);
+        }
+    }
 
-.content-box {
-    width: 100%;
-    float: left;
-    text-align: center;
-}
+    .btn-back {
+        color: var(--color-body-content) !important;
+    }
 
-.team-selector-container {
-    background-color: var(--color-sidebar-li-collapsed-hover) !important;
-    border: 1.5px solid var(--color-border-form-control);
-    border-radius: 0.375rem;
-    transition: border-color 0.3s ease;
-}
+    .content-box {
+        width: 100%;
+        float: left;
+        text-align: center;
+    }
 
-.team-selector-container.is-invalid {
-    border-color: #dc3545 !important;
-}
+    .team-selector-container {
+        background-color: var(--color-sidebar-li-collapsed-hover) !important;
+        border: 1.5px solid var(--color-border-form-control);
+        border-radius: 0.375rem;
+        transition: border-color 0.3s ease;
+    }
 
-.team-selector-container.is-valid {
-    border-color: var(--color-bg-primary-badge) !important;
-}
+    .team-selector-container.is-invalid {
+        border-color: #dc3545 !important;
+    }
 
+    .team-selector-container.is-valid {
+        border-color: var(--color-bg-primary-badge) !important;
+    }
 
     .icon-blue {
         color: #155dfc;

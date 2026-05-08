@@ -404,6 +404,8 @@ const spanish = {
         downloadSuccessfully: "Descargar con éxito",
         exportBtn: "Exportar CSV",
         filters: {
+            allWorkflows: "Todas las ejecuciones",
+            unclassified: "No clasificado",
             currentMonth: "Este Mes",
             lastMonth: "Mes Pasado",
             previousNinety: "Últimos 90 Días",
@@ -684,6 +686,11 @@ const spanish = {
             filter: "Selecciona un webhook",
             inputs: "Entradas",
             noDependencies: "No hay herramientas disponibles",
+        },
+        dependencies: {
+            optionAgent: "Agente: {name}",
+            optionApi: "API: {name}",
+            optionQuiz: "Cuestionario: {name}",
         },
         sidebarTitle: "Configurar I/O:",
         start: "Inicio",
@@ -978,6 +985,10 @@ const spanish = {
         updateError: "Error al actualizar agente",
         updateSuccess: "Agente actualizado exitosamente",
         viewComplete: "Ver completo",
+        apiSelectionWarning:
+            "¿La API que desea no apareció en la pantalla? Verifique si la plantilla está habilitada para consulta externa",
+        noApiTemplatesFound: "No hay plantillas de API disponibles para consulta externa",
+        apiSearchPlaceholder: "Buscar plantillas de API",
         playground: {
             title: "Área de prueba (Playground)",
             contextLabel: "Contexto (texto del PDF)",

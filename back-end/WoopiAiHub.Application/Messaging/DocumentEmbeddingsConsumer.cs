@@ -57,7 +57,7 @@ namespace WoopiAiHub.Application.Messaging
                     var automationServices = scope.ServiceProvider.GetRequiredService<IAutomationServices>();
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
 
-                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email!, message.TotalUsage, message.EmbeddingModelName);
+                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email!, message.TotalUsage, message.EmbeddingModelName, result.WorkflowId);
 
                     var continueExecutionDto = new AutomationServicesDto
                     (
@@ -66,7 +66,8 @@ namespace WoopiAiHub.Application.Messaging
                         message.Tenant!,
                         message.Email!,
                         message.ReferenceFile!,
-                        null
+                        null,
+                        result.WorkflowId
                     );
                     await automationServices.ContinueExecution(continueExecutionDto);
                 }

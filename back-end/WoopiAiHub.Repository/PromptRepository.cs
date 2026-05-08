@@ -20,18 +20,34 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <param name="prompt"></param>
         /// <returns></returns>
-        public bool CreateUniquePrompt(Prompt prompt)
+        public bool Create(Prompt prompt)
         {
-            var existPrompt = _context.Prompts.Any(p => p.Name == prompt.Name && p.IdUser == prompt.IdUser);
-            if (!existPrompt)
-            {
-                _context.Prompts.Add(prompt);
-                _context.SaveChanges();
+            _context.Prompts.Add(prompt);
+            return _context.SaveChanges() > 0;
+        }
 
-                return true;
-            }
+        /// <summary>
+        /// Create a new prompt and return the created prompt, if a prompt with the same name already exists for the user, it will return null
+        /// </summary>
+        /// <param name="prompt"></param>
+        /// <returns></returns>
+        public Prompt? CreateAndReturn(Prompt prompt)
+        {
+            _context.Prompts.Add(prompt);
+            _context.SaveChanges();
 
-            return false;
+            return prompt;
+        }
+
+        /// <summary>
+        /// Find a prompt by name and user id, if not found it will return null
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="idUser"></param>
+        /// <returns></returns>
+        public Prompt? FindByNameAndUser(string name, Guid idUser)
+        {
+            return _context.Prompts.FirstOrDefault(p => p.Name == name && p.IdUser == idUser);
         }
 
         /// <summary>
@@ -100,14 +116,15 @@ namespace WoopiAiHub.Repository
         /// Asynchronously retrieves all prompts in the basic format.
         /// </summary>
         /// <returns></returns>
-        public async Task<ICollection<PromptInternalDto>> FindAllInternal()
+        public async Task<ICollection<PromptIntegrationDto>> FindAllInternal()
         {
             return await _context.Prompts
-                .Select(p => new PromptInternalDto
+                .Select(p => new PromptIntegrationDto
                 {
                     Id = p.Id,
                     Name = p.Name,
-                    Description = p.Description
+                    Description = p.Description,
+                    Text = p.Text
                 })
                 .AsNoTracking()
                 .ToListAsync();

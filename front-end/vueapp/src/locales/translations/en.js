@@ -401,6 +401,8 @@ const english = {
         downloadSuccessfully: "Download successfully",
         exportBtn: "Export CSV",
         filters: {
+            allWorkflows: "All Workflows",
+            unclassified: "Unclassified",
             currentMonth: "This Month",
             lastMonth: "Last Month",
             previousNinety: "Last 90 Days",
@@ -660,7 +662,7 @@ const english = {
                 "Failed to update flow. Flow already contains output data for tools.",
             prompts: "Agents",
             promptRequired: "Select at least one agent",
-            selectPrompt: "Select an agent",            
+            selectPrompt: "Select an agent",
             remoteAccess: "Remote Access",
         },
         hideTools: "Hide Tools",
@@ -676,6 +678,11 @@ const english = {
             filter: "Select webhook",
             inputs: "Inputs",
             noDependencies: "No tools available",
+        },
+        dependencies: {
+            optionAgent: "Agent: {name}",
+            optionApi: "API: {name}",
+            optionQuiz: "Questionnaire: {name}",
         },
         sidebarTitle: "Configure I/O:",
         start: "Start",
@@ -972,6 +979,10 @@ const english = {
         updateError: "Agent update failed",
         updateSuccess: "Agent updated successfully",
         viewComplete: "View complete",
+        apiSelectionWarning:
+            "The API you want to use did not appear on the screen? Check if the template is enabled for external consultation",
+        noApiTemplatesFound: "No API templates available for external consultation",
+        apiSearchPlaceholder: "Search API templates",
         playground: {
             title: "Test area (Playground)",
             contextLabel: "Context (PDF text)",

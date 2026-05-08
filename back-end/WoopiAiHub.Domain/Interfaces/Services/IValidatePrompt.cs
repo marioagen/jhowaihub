@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +11,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
     {
         void ValidateOwnership(int promptId,
                               string emailCreator);
-        bool ValidatePromptFields(Prompt prompt);
+        bool ValidateRequiredPromptFields(Prompt prompt);
     }
 }

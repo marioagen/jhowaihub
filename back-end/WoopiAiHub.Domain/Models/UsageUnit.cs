@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -10,7 +10,7 @@ namespace WoopiAiHub.Domain.Models
         public int? UsageTypeId { get; private set; }
         [Column("ModelEmbeddingId", TypeName = "int")]
         public int? ModelEmbeddingId { get; private set; }
-        [Column("Value", TypeName = "decimal(18,7)")]
+        [Column("Value", TypeName = "decimal(18,9)")]
         public decimal Value { get; private set; }
 
         public virtual UsageType? UsageType { get; set; }
