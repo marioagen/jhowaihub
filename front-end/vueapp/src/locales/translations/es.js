@@ -985,6 +985,10 @@ const spanish = {
         updateError: "Error al actualizar agente",
         updateSuccess: "Agente actualizado exitosamente",
         viewComplete: "Ver completo",
+        apiSelectionWarning:
+            "¿La API que desea no apareció en la pantalla? Verifique si la plantilla está habilitada para consulta externa",
+        noApiTemplatesFound: "No hay plantillas de API disponibles para consulta externa",
+        apiSearchPlaceholder: "Buscar plantillas de API",
         playground: {
             title: "Área de prueba (Playground)",
             contextLabel: "Contexto (texto del PDF)",
