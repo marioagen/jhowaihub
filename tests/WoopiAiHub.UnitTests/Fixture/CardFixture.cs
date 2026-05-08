@@ -1,6 +1,8 @@
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using Xunit;
 using Bogus;
 
@@ -63,9 +65,59 @@ namespace WoopiAiHub.UnitTests.Fixture
             };
         }
 
-        public static Card FindCard(int id, int documentId, string name, int? documentBatchId = null)
+        public static Card FindCard(int id, int documentId, string name, int? documentBatchId = null, Guid? assignedUserId = null)
         {
-            return new Card(id, DateTime.UtcNow, 1, documentId, name, 1, null, documentBatchId);
+            return new Card(id, DateTime.UtcNow, 1, documentId, name, 1, assignedUserId, documentBatchId);
+        }
+
+        public static Card FindCardWithWorkflowStep(int id, int documentId, string name, int? documentBatchId = null, Guid? assignedUserId = null)
+        {
+            var card = FindCard(id, documentId, name, documentBatchId, assignedUserId);
+            card.Step = FindValidStepWithWorkflow();
+            return card;
+        }
+
+        public static List<Card> FindDocumentBatchCardsWithAssignedUsers(int documentBatchId = 100)
+        {
+            return
+            [
+                FindCardWithWorkflowStep(1, 1, "Card Name", documentBatchId, Guid.NewGuid()),
+                FindCardWithWorkflowStep(2, 2, "Card 2", documentBatchId, Guid.NewGuid()),
+                FindCardWithWorkflowStep(3, 3, "Card 3", documentBatchId, Guid.NewGuid())
+            ];
+        }
+
+        public static List<Card> FindDocumentBatchCardsWithoutAssignedUser(int documentBatchId = 100)
+        {
+            return
+            [
+                FindCardWithWorkflowStep(1, 1, "Card Name", documentBatchId),
+                FindCardWithWorkflowStep(2, 2, "Card 2", documentBatchId),
+                FindCardWithWorkflowStep(3, 3, "Card 3", documentBatchId)
+            ];
+        }
+
+        public static Card FindSecondaryCardSharingDocumentAndStep(Card primary, int cardId, string name)
+        {
+            return new Card(cardId, DateTime.UtcNow, 1, 1, name, 1, null)
+            {
+                Document = primary.Document,
+                Step = primary.Step
+            };
+        }
+
+        public static Step FindWorkflowNextStep(int id = 2, string name = "Next", int order = 2, int workflowId = 1, int statusId = 2)
+        {
+            return new Step(id, DateTime.UtcNow, workflowId, name, order, 1, statusId);
+        }
+
+        public static CardHeaderDto FindValidCardHeaderDto(string cardName = "Test Card", string workflowName = "Test Workflow")
+        {
+            return new CardHeaderDto
+            {
+                CardName = cardName,
+                WorkflowName = workflowName
+            };
         }
 
         public static Status FindValidStatus()
@@ -235,6 +287,83 @@ namespace WoopiAiHub.UnitTests.Fixture
         public static CardAnalysisDto FindCardAnalysisDtoWithJsonOutput(int cardId = 1)
         {
             return FindCardAnalysisDtoWithOutput(cardId, 1, 1, "{\"Nome\": \"João Silva\", \"Email\": \"joao@example.com\"}", "Prompt", 2, 1);
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithNullStep(int cardId = 1)
+        {
+            var dto = FindValidCardAnalysisDto(cardId);
+            dto.Step = null;
+            return dto;
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithEmptyJsonObjectOutput(int cardId = 1)
+        {
+            return FindCardAnalysisDtoWithOutput(cardId, 1, 1, "{}", "Prompt", 2, 1);
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithWhitespaceValueOutput(int cardId = 1)
+        {
+            return FindCardAnalysisDtoWithOutput(cardId, 1, 1, "   \t  ", "Prompt", 2, 1);
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithJsonThatThrowsOnParse(int cardId = 1)
+        {
+            return FindCardAnalysisDtoWithOutput(cardId, 1, 1, "{\"a\":}", "Prompt", 2, 1);
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithNullToolOnOutput(int cardId = 1)
+        {
+            var cardAnalysisDto = FindValidCardAnalysisDto(cardId);
+            cardAnalysisDto.Outputs =
+            [
+                new StepToolOutputAnalysesDto
+                {
+                    Id = 1,
+                    StepToolId = 1,
+                    Value = "{\"x\": \"y\"}",
+                    StepTool = new StepToolDto
+                    {
+                        Id = 1,
+                        StepId = 1,
+                        ToolId = 1,
+                        Tool = null
+                    }
+                }
+            ];
+            return cardAnalysisDto;
+        }
+
+        public static StepToolExecution CreateStepToolExecutionWithToolTypeName(
+            int executionId,
+            int cardId,
+            int stepToolId,
+            string toolTypeName,
+            StatusExecution status = StatusExecution.Ready)
+        {
+            var toolType = new ToolType(executionId, DateTime.UtcNow, toolTypeName, string.Empty, true);
+            var tool = new Tool(executionId, DateTime.UtcNow, "Tool", true, executionId, 1, 1, false, null, null);
+            tool.ToolType = toolType;
+            var stepTool = new StepTool(stepToolId, DateTime.UtcNow, 1, executionId, 1, 0, 0);
+            stepTool.Tool = tool;
+            var execution = new StepToolExecution(executionId, DateTime.UtcNow, stepToolId, status, cardId);
+            execution.StepTool = stepTool;
+            return execution;
+        }
+
+        public static Card FindRejectedCardWithDocument(int rejectedStatusId = 9)
+        {
+            var card = new Card(1, DateTime.UtcNow, 1, 1, "Card", rejectedStatusId, null);
+            card.Status = new Status(StatusNames.Rejected, "#FFFFFF", rejectedStatusId, DateTime.UtcNow);
+            card.Document = new Document(
+                "Doc",
+                "Ref",
+                "Link",
+                Domain.Enum.DocumentStatus.ReadyForAnalysis,
+                "email",
+                1,
+                new List<Workflow>(),
+                DateTime.Now);
+            return card;
         }
 
         public static CreateDocumentAnalysisRejectionDto FindValidCreateDocumentAnalysisRejectionDto()
