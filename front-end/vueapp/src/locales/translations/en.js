@@ -979,6 +979,10 @@ const english = {
         updateError: "Agent update failed",
         updateSuccess: "Agent updated successfully",
         viewComplete: "View complete",
+        apiSelectionWarning:
+            "The API you want to use did not appear on the screen? Check if the template is enabled for external consultation",
+        noApiTemplatesFound: "No API templates available for external consultation",
+        apiSearchPlaceholder: "Search API templates",
         playground: {
             title: "Test area (Playground)",
             contextLabel: "Context (PDF text)",
