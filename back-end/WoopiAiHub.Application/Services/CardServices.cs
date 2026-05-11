@@ -23,6 +23,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
         private readonly IWorkflowRepository _workflowRepository;
+        private readonly IPromptServices _promptServices;
+        private readonly IQuestionnaireServices _questionnaireServices;
 
         private const string CardNotFoundMessage = "Card not found";
 
@@ -34,7 +36,9 @@ namespace WoopiAiHub.Application.Services
                             IStepRepository stepRepository,
                             IAutomationServices automationServices,
                             IStepToolExecutionRepository stepToolExecutionRepository,
-                            IWorkflowRepository workflowRepository)
+                            IWorkflowRepository workflowRepository,
+                            IPromptServices promptServices,
+                            IQuestionnaireServices questionnaireServices)
         {
             _cardRepository = cardRepository;
             _auditCardService = auditCardService;
@@ -42,6 +46,8 @@ namespace WoopiAiHub.Application.Services
             _automationServices = automationServices;
             _stepToolExecutionRepository = stepToolExecutionRepository;
             _workflowRepository = workflowRepository;
+            _promptServices = promptServices;
+            _questionnaireServices = questionnaireServices;
         }
 
         /// <summary>
@@ -245,7 +251,9 @@ namespace WoopiAiHub.Application.Services
             var workflow = await _workflowRepository.FindByIdForAnalyze(card.Step.WorkflowId) ??
                            throw new ArgumentException($"Workflow not found for card {cardId}. StepId: {card.StepId}, Step is null: false");
 
-            var steps = BuildStepsFromWorkflow(workflow, card);
+            var promptLabelCache = new Dictionary<int, string>();
+            var questionnaireLabelCache = new Dictionary<int, string>();
+            var steps = BuildStepsFromWorkflow(workflow, card, promptLabelCache, questionnaireLabelCache);
             var lastProcessedStepId = card.StepId.ToString();
 
             return new DocumentAnalyzeStepsDto
@@ -291,7 +299,11 @@ namespace WoopiAiHub.Application.Services
         /// <param name="workflow"></param>
         /// <param name="card"></param>
         /// <returns></returns>
-        private List<DocumentStepDto> BuildStepsFromWorkflow(Workflow workflow, CardAnalysisDto card)
+        private List<DocumentStepDto> BuildStepsFromWorkflow(
+            Workflow workflow,
+            CardAnalysisDto card,
+            Dictionary<int, string> promptLabelCache,
+            Dictionary<int, string> questionnaireLabelCache)
         {
             var steps = new List<DocumentStepDto>();
             var workflowSteps = workflow.Steps.OrderBy(s => s.Order).ToList();
@@ -299,7 +311,7 @@ namespace WoopiAiHub.Application.Services
             foreach (var step in workflowSteps)
             {
                 var stepDto = CreateStepDto(step);
-                PopulateStepOutputs(stepDto, step, card);
+                PopulateStepOutputs(stepDto, step, card, promptLabelCache, questionnaireLabelCache);
                 steps.Add(stepDto);
             }
 
@@ -327,7 +339,12 @@ namespace WoopiAiHub.Application.Services
         /// <param name="stepDto"></param>
         /// <param name="step"></param>
         /// <param name="card"></param>
-        private static void PopulateStepOutputs(DocumentStepDto stepDto, Step step, CardAnalysisDto card)
+        private void PopulateStepOutputs(
+            DocumentStepDto stepDto,
+            Step step,
+            CardAnalysisDto card,
+            Dictionary<int, string> promptLabelCache,
+            Dictionary<int, string> questionnaireLabelCache)
         {
             foreach (var stepTool in step.StepTools.OrderBy(st => st.Order))
             {
@@ -345,7 +362,7 @@ namespace WoopiAiHub.Application.Services
                     if (ShouldSkipOutput(output))
                         continue;
 
-                    var extractedFields = ParseOutput(output);
+                    var extractedFields = ParseOutput(output, promptLabelCache, questionnaireLabelCache);
                     stepDto.Outputs.AddRange(extractedFields);
                 }
             }
@@ -370,14 +387,20 @@ namespace WoopiAiHub.Application.Services
         /// </summary>
         /// <param name="output"></param>
         /// <returns></returns>
-        private static List<ExtractedFieldDto> ParseOutput(StepToolOutputAnalysesDto output)
+        private List<ExtractedFieldDto> ParseOutput(
+            StepToolOutputAnalysesDto output,
+            Dictionary<int, string> promptLabelCache,
+            Dictionary<int, string> questionnaireLabelCache)
         {
             var fields = new List<ExtractedFieldDto>();
 
             if (string.IsNullOrWhiteSpace(output.Value))
                 return fields;
 
-            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType))
+            var toolName = ResolveToolName(output, promptLabelCache, questionnaireLabelCache);
+
+            if (TryParseJsonOutput(output.Value, out var jsonFields, output.Id, output.StepTool?.Tool?.ToolType,
+                    toolName))
             {
                 fields.AddRange(jsonFields);
             }
@@ -390,10 +413,129 @@ namespace WoopiAiHub.Application.Services
                     IsEdited = false,
                     OutputId = output.Id,
                     OutputType = output.StepTool?.Tool?.ToolType ?? "None",
+                    ToolName = toolName,
                 });
             }
 
             return fields;
+        }
+
+        /// <summary>
+        /// Resolves display name for output tool, using Prompt.Text/Name for prompt outputs.
+        /// Falls back to tool name when prompt cannot be resolved.
+        /// </summary>
+        private string ResolveToolName(
+            StepToolOutputAnalysesDto output,
+            Dictionary<int, string> promptLabelCache,
+            Dictionary<int, string> questionnaireLabelCache)
+        {
+            var fallbackToolName = output.StepTool?.Tool?.Name ?? string.Empty;
+            var toolType = output.StepTool?.Tool?.ToolType;
+
+            if (string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase))
+            {
+                return ResolvePromptToolName(output, promptLabelCache, fallbackToolName);
+            }
+
+            if (string.Equals(toolType, HandlersTypes.Quiz, StringComparison.OrdinalIgnoreCase))
+            {
+                return ResolveQuestionnaireToolName(output, questionnaireLabelCache, fallbackToolName);
+            }
+
+            return fallbackToolName;
+        }
+
+        /// <summary>
+        /// Resolves the display name for prompt tool outputs using cached prompt text or name.
+        /// </summary>
+        /// <param name="output">The tool output that contains prompt parameter metadata.</param>
+        /// <param name="promptLabelCache">Cache of prompt id to resolved prompt label.</param>
+        /// <param name="fallbackToolName">Fallback tool name used when no prompt label is found.</param>
+        /// <returns>The prompt text or name when available; otherwise the fallback tool name.</returns>
+        private string ResolvePromptToolName(
+            StepToolOutputAnalysesDto output,
+            Dictionary<int, string> promptLabelCache,
+            string fallbackToolName)
+        {
+            var promptId = ExtractPromptId(output);
+            if (!promptId.HasValue)
+            {
+                return fallbackToolName;
+            }
+
+            if (!promptLabelCache.TryGetValue(promptId.Value, out var cachedPromptLabel))
+            {
+                var prompt = _promptServices.FindById(promptId.Value);
+                cachedPromptLabel = (string.IsNullOrWhiteSpace(prompt?.Text)
+                    ? prompt?.Name
+                    : prompt.Text) ?? string.Empty;
+
+                promptLabelCache[promptId.Value] = cachedPromptLabel;
+            }
+
+            return string.IsNullOrWhiteSpace(cachedPromptLabel) ? fallbackToolName : cachedPromptLabel;
+        }
+
+        /// <summary>
+        /// Resolves the display name for questionnaire tool outputs using cached questionnaire titles.
+        /// </summary>
+        /// <param name="output">The tool output that contains questionnaire parameter metadata.</param>
+        /// <param name="questionnaireLabelCache">Cache of questionnaire id to resolved title.</param>
+        /// <param name="fallbackToolName">Fallback tool name used when no questionnaire title is found.</param>
+        /// <returns>The questionnaire title when available; otherwise the fallback tool name.</returns>
+        private string ResolveQuestionnaireToolName(
+            StepToolOutputAnalysesDto output,
+            Dictionary<int, string> questionnaireLabelCache,
+            string fallbackToolName)
+        {
+            var questionnaireId = ExtractQuestionnaireId(output);
+            if (!questionnaireId.HasValue)
+            {
+                return fallbackToolName;
+            }
+
+            if (!questionnaireLabelCache.TryGetValue(questionnaireId.Value, out var cachedQuestionnaireLabel))
+            {
+                var questionnaire = _questionnaireServices.FindById(questionnaireId.Value);
+                cachedQuestionnaireLabel = questionnaire?.Title ?? string.Empty;
+                questionnaireLabelCache[questionnaireId.Value] = cachedQuestionnaireLabel;
+            }
+
+            return string.IsNullOrWhiteSpace(cachedQuestionnaireLabel) ? fallbackToolName : cachedQuestionnaireLabel;
+        }
+
+        /// <summary>
+        /// Extracts the prompt id from the first StepTool parameter value.
+        /// Returns null when the value is missing or invalid.
+        /// </summary>
+        private static int? ExtractPromptId(StepToolOutputAnalysesDto output)
+        {
+            return ExtractFirstStepToolParameterId(output);
+        }
+
+        /// <summary>
+        /// Extracts the questionnaire id from the first StepTool parameter value.
+        /// Returns null when the value is missing or invalid.
+        /// </summary>
+        private static int? ExtractQuestionnaireId(StepToolOutputAnalysesDto output)
+        {
+            return ExtractFirstStepToolParameterId(output);
+        }
+
+        /// <summary>
+        /// Extracts and parses the first StepTool parameter value as an integer identifier.
+        /// </summary>
+        /// <param name="output">The output containing StepTool parameters.</param>
+        /// <returns>The parsed identifier when available and valid; otherwise <see langword="null"/>.</returns>
+        private static int? ExtractFirstStepToolParameterId(StepToolOutputAnalysesDto output)
+        {
+            var rawId = output.StepTool?.Parameters?.FirstOrDefault()?.Value;
+            if (string.IsNullOrWhiteSpace(rawId))
+            {
+                return null;
+            }
+
+            return int.TryParse(rawId, out var parsedId) ? parsedId : null;
         }
 
         /// <summary>
@@ -406,7 +548,8 @@ namespace WoopiAiHub.Application.Services
         /// <returns></returns>
         private static bool TryParseJsonOutput(string value, out List<ExtractedFieldDto> fields,
             int id,
-            string? outputType)
+            string? outputType,
+            string toolName)
         {
             fields = new List<ExtractedFieldDto>();
 
@@ -433,6 +576,7 @@ namespace WoopiAiHub.Application.Services
                             IsEdited = false,
                             OutputId = id,
                             OutputType = outputType ?? string.Empty,
+                            ToolName = toolName,
                         });
                     }
 

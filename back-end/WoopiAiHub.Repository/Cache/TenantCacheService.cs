@@ -1,4 +1,4 @@
-﻿using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;

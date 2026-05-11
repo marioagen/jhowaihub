@@ -3,6 +3,7 @@ using Microsoft.VisualBasic;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Fixture
@@ -513,6 +514,110 @@ namespace WoopiAiHub.UnitTests.Fixture
                 IsEditableInput = tool.IsEditableInput,
                 ConnectorUrl = tool.ConnectorUrl
             };
+        }
+
+        public static Workflow FindWorkflowForAnalyzeWithSingleTool(
+            string workflowName,
+            IList<Team>? teams,
+            string stepName,
+            string toolName,
+            int toolTypeId,
+            string toolTypeName)
+        {
+            var teamList = teams is null ? new List<Team>() : teams.ToList();
+            var workflow = new Workflow(1, DateTime.Now, teamList, workflowName);
+            var step = new Step(1, DateTime.Now, 1, stepName, 1, 1, 1);
+            var tool = new Tool(1, DateTime.Now, toolName, true, toolTypeId, 1, 1, false, null, null);
+            var toolType = new ToolType(toolTypeId, DateTime.Now, toolTypeName, string.Empty, true);
+            tool.ToolType = toolType;
+            var stepTool = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0);
+            stepTool.Tool = tool;
+            step.StepTools = [stepTool];
+            step.Workflow = workflow;
+            workflow.Steps = [step];
+            return workflow;
+        }
+
+        public static Workflow FindWorkflowForAnalyzeWithPromptTool(
+            string workflowName = "Test Workflow",
+            string stepName = "Step Test",
+            string toolName = "Test Tool")
+        {
+            return FindWorkflowForAnalyzeWithSingleTool(
+                workflowName,
+                new List<Team>(),
+                stepName,
+                toolName,
+                2,
+                HandlersTypes.Prompt);
+        }
+
+        public static Workflow FindWorkflowForAnalyzeWithOcrTool(
+            string workflowName = "Test Workflow",
+            string stepName = "Step Test",
+            string toolName = "OCR Tool")
+        {
+            return FindWorkflowForAnalyzeWithSingleTool(
+                workflowName,
+                new List<Team>(),
+                stepName,
+                toolName,
+                1,
+                HandlersTypes.Ocr);
+        }
+
+        public static Workflow FindWorkflowForAnalyzeWithEmbeddingsTool(
+            string workflowName = "Test Workflow",
+            string stepName = "Step Test",
+            string toolName = "Embeddings Tool")
+        {
+            return FindWorkflowForAnalyzeWithSingleTool(
+                workflowName,
+                new List<Team>(),
+                stepName,
+                toolName,
+                3,
+                HandlersTypes.Embeddings);
+        }
+
+        public static Workflow FindWorkflowForAnalyzeWithTwoPromptSteps(string workflowName = "Test Workflow")
+        {
+            var workflow = new Workflow(1, DateTime.Now, new List<Team>(), workflowName);
+            var tool = new Tool(1, DateTime.Now, "Test Tool", true, 2, 1, 1, false, null, null);
+            tool.ToolType = new ToolType(2, DateTime.Now, HandlersTypes.Prompt, string.Empty, true);
+            var step1 = new Step(1, DateTime.Now, 1, "Step 1", 1, 1, 1);
+            var step2 = new Step(2, DateTime.Now, 2, "Step 2", 1, 1, 1);
+            var stepTool1 = new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0) { Tool = tool };
+            var stepTool2 = new StepTool(2, DateTime.Now, 2, 1, 1, 0, 0) { Tool = tool };
+            step1.StepTools = [stepTool1];
+            step2.StepTools = [stepTool2];
+            step1.Workflow = workflow;
+            step2.Workflow = workflow;
+            workflow.Steps = [step1, step2];
+            return workflow;
+        }
+
+        public static Workflow FindMinimalAnalyzeWorkflow(
+            string workflowName = "W",
+            string stepName = "S",
+            string? toolName = null,
+            int? toolTypeId = null,
+            string? toolTypeName = null)
+        {
+            var workflow = new Workflow(1, DateTime.Now, new List<Team>(), workflowName);
+            var step = new Step(1, DateTime.Now, 1, stepName, 1, 1, 1);
+            step.Workflow = workflow;
+            workflow.Steps = [step];
+            if (toolName is null || toolTypeId is null || toolTypeName is null)
+                step.StepTools = [new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0)];
+            else
+            {
+                var tool = new Tool(1, DateTime.Now, toolName, true, toolTypeId.Value, 1, 1, false, null, null);
+                tool.ToolType = new ToolType(toolTypeId.Value, DateTime.Now, toolTypeName, string.Empty, true);
+                step.StepTools = [new StepTool(1, DateTime.Now, 1, 1, 1, 0, 0) { Tool = tool }];
+            }
+
+            return workflow;
         }
     }
 

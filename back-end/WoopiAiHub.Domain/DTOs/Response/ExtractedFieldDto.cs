@@ -7,5 +7,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public bool IsEdited { get; set; }
         public int OutputId { get; set; }
         public string OutputType { get; set; } = string.Empty;
+        public string ToolName { get; set; } = string.Empty;
     }
 }
