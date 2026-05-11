@@ -343,7 +343,7 @@
                                                         v-model="header.value"
                                                         type="text"
                                                         class="form-control form-control-sm"
-                                                        :placeholder="$t('template.keyPlaceholder')"
+                                                        :placeholder="$t('template.valuePlaceholder')"
                                                     />
                                                 </div>
                                                 <div class="col-2">
@@ -1110,6 +1110,7 @@
                                 : [];
                             this.form.headers = parsedHeaders.map((h) => ({
                                 key: h.key,
+                                value: h.value ?? "",
                             }));
                         } catch (e) {
                             this.form.headers = [];
