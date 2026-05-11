@@ -1,4 +1,5 @@
 using WoopiAiHub.Domain.DTOs.Request;
+using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Models;
@@ -190,6 +191,104 @@ namespace WoopiAiHub.UnitTests.Fixture
                     }
                 }
             ];
+
+            return cardAnalysisDto;
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithPromptOutputsUsingPromptParameter(
+            int cardId = 1,
+            int promptId = 99)
+        {
+            var cardAnalysisDto = FindValidCardAnalysisDto(cardId);
+            cardAnalysisDto.Outputs =
+            [
+                new StepToolOutputAnalysesDto
+                {
+                    Id = 1,
+                    StepToolId = 1,
+                    Value = "v1",
+                    StepTool = new StepToolDto
+                    {
+                        Id = 1,
+                        StepId = 1,
+                        ToolId = 1,
+                        Parameters = [new StepToolParameterDto { Value = promptId.ToString() }],
+                        Tool = new ToolDto
+                        {
+                            Id = 1,
+                            Name = "FallbackTool",
+                            ToolTypeId = 2,
+                            ToolType = HandlersTypes.Prompt
+                        }
+                    }
+                },
+                new StepToolOutputAnalysesDto
+                {
+                    Id = 2,
+                    StepToolId = 1,
+                    Value = "v2",
+                    StepTool = new StepToolDto
+                    {
+                        Id = 1,
+                        StepId = 1,
+                        ToolId = 1,
+                        Parameters = [new StepToolParameterDto { Value = promptId.ToString() }],
+                        Tool = new ToolDto
+                        {
+                            Id = 1,
+                            Name = "FallbackTool",
+                            ToolTypeId = 2,
+                            ToolType = HandlersTypes.Prompt
+                        }
+                    }
+                }
+            ];
+
+            return cardAnalysisDto;
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithQuizOutputUsingQuestionnaireParameter(
+            int cardId = 1,
+            int questionnaireId = 7,
+            string toolName = "QuizTool")
+        {
+            var cardAnalysisDto = FindValidCardAnalysisDto(cardId);
+            cardAnalysisDto.Outputs =
+            [
+                new StepToolOutputAnalysesDto
+                {
+                    Id = 1,
+                    StepToolId = 1,
+                    Value = "answer",
+                    StepTool = new StepToolDto
+                    {
+                        Id = 1,
+                        StepId = 1,
+                        ToolId = 1,
+                        Parameters = [new StepToolParameterDto { Value = questionnaireId.ToString() }],
+                        Tool = new ToolDto
+                        {
+                            Id = 1,
+                            Name = toolName,
+                            ToolTypeId = 5,
+                            ToolType = HandlersTypes.Quiz
+                        }
+                    }
+                }
+            ];
+
+            return cardAnalysisDto;
+        }
+
+        public static CardAnalysisDto FindCardAnalysisDtoWithApiToolOutput(int cardId = 1, string toolName = "Test Tool")
+        {
+            var cardAnalysisDto = FindCardAnalysisDtoWithPlainTextOutput(cardId);
+            var output = cardAnalysisDto.Outputs?.FirstOrDefault();
+            if (output?.StepTool?.Tool != null)
+            {
+                output.StepTool.Tool.ToolType = HandlersTypes.API;
+                output.StepTool.Tool.Name = toolName;
+            }
 
             return cardAnalysisDto;
         }

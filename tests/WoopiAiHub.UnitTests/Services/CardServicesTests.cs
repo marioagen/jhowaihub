@@ -1078,7 +1078,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Arrange
             var documentId = 7;
             _cardRepositoryMock.Setup(r => r.FindByDocumentIdCardListWithStepWorkflowAsync(documentId))
-                .ReturnsAsync((List<Card>?)null);
+                .ReturnsAsync((List<Card>)null!);
 
             // Act
             var result = await _cardServices.FindCardsByDocumentIdWithStepWorkflowAsync(documentId);
@@ -1092,11 +1092,17 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindCardsByDocumentBatchId", "Success")]
         public async Task FindCardsByDocumentBatchId_NullOrEmpty_ReturnsNull()
         {
-            _cardRepositoryMock.Setup(r => r.FindByDocumentBatchId(1)).ReturnsAsync((List<Card>?)null);
-            Assert.Null(await _cardServices.FindCardsByDocumentBatchId(1));
-
+            // Arrange
+            _cardRepositoryMock.Setup(r => r.FindByDocumentBatchId(1)).ReturnsAsync((List<Card>)null!);
             _cardRepositoryMock.Setup(r => r.FindByDocumentBatchId(2)).ReturnsAsync(new List<Card>());
-            Assert.Null(await _cardServices.FindCardsByDocumentBatchId(2));
+
+            // Act
+            var nullResult = await _cardServices.FindCardsByDocumentBatchId(1);
+            var emptyResult = await _cardServices.FindCardsByDocumentBatchId(2);
+
+            // Assert
+            Assert.Null(nullResult);
+            Assert.Null(emptyResult);
         }
 
         [Fact(DisplayName = "FindCardsByDocumentBatchId maps cards to CardBatchDto")]
@@ -1126,13 +1132,17 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Fail")]
         public async Task AssignRangeAsync_UserNotInTeam_ThrowsAppException()
         {
+            // Arrange
             var userId = Guid.NewGuid();
             _mocker.GetMock<IWorkflowRepository>()
                 .Setup(r => r.IsValidTeamUser(It.IsAny<IReadOnlyList<int>>(), userId))
                 .ReturnsAsync(false);
 
+            // Act
             var ex = await Assert.ThrowsAsync<AppException>(() =>
                 _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { 1 })));
+
+            // Assert
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
             Assert.Equal(CardLabel.UserCannotBeAssigned, ex.LabelError);
             _cardRepositoryMock.Verify(r => r.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()), Times.Never);
@@ -1142,8 +1152,14 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Fail")]
         public async Task AssignRangeAsync_NullCardIds_ThrowsArgumentException()
         {
+            // Arrange
+            var assignRangeDto = new AssignRangeDto(Guid.NewGuid(), null!);
+
+            // Act
             var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
-                _cardServices.AssignRangeAsync(new AssignRangeDto(Guid.NewGuid(), null!)));
+                _cardServices.AssignRangeAsync(assignRangeDto));
+
+            // Assert
             Assert.Contains("CardIds", ex.Message, StringComparison.Ordinal);
         }
 
@@ -1151,6 +1167,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Fail")]
         public async Task AssignRangeAsync_PartialCardList_ThrowsAppException()
         {
+            // Arrange
             var userId = Guid.NewGuid();
             _mocker.GetMock<IWorkflowRepository>()
                 .Setup(r => r.IsValidTeamUser(It.IsAny<IReadOnlyList<int>>(), userId))
@@ -1160,8 +1177,11 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Setup(r => r.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
                 .ReturnsAsync(new List<Card> { oneCard });
 
+            // Act
             var ex = await Assert.ThrowsAsync<AppException>(() =>
                 _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { 1, 2 })));
+
+            // Assert
             Assert.Equal(CardLabel.NotFound, ex.LabelError);
         }
 
@@ -1406,53 +1426,11 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindByIdAnalyzeWithSteps", "Success")]
         public async Task FindByIdAnalyzeWithSteps_PromptParameter_CallsFindByIdOnceForSamePromptId()
         {
+            // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var cardDto = CardFixture.FindValidCardAnalysisDto(cardId);
-            cardDto.Outputs =
-            [
-                new StepToolOutputAnalysesDto
-                {
-                    Id = 1,
-                    StepToolId = 1,
-                    Value = "v1",
-                    StepTool = new StepToolDto
-                    {
-                        Id = 1,
-                        StepId = 1,
-                        ToolId = 1,
-                        Parameters = [new StepToolParameterDto { Value = "99" }],
-                        Tool = new ToolDto
-                        {
-                            Id = 1,
-                            Name = "FallbackTool",
-                            ToolTypeId = 2,
-                            ToolType = HandlersTypes.Prompt
-                        }
-                    }
-                },
-                new StepToolOutputAnalysesDto
-                {
-                    Id = 2,
-                    StepToolId = 1,
-                    Value = "v2",
-                    StepTool = new StepToolDto
-                    {
-                        Id = 1,
-                        StepId = 1,
-                        ToolId = 1,
-                        Parameters = [new StepToolParameterDto { Value = "99" }],
-                        Tool = new ToolDto
-                        {
-                            Id = 1,
-                            Name = "FallbackTool",
-                            ToolTypeId = 2,
-                            ToolType = HandlersTypes.Prompt
-                        }
-                    }
-                }
-            ];
-
+            var promptId = 99;
+            var cardDto = CardFixture.FindCardAnalysisDtoWithPromptOutputsUsingPromptParameter(cardId, promptId);
             var workflow = WorkflowFixture.FindMinimalAnalyzeWorkflow("W", "S", "T", 2, HandlersTypes.Prompt);
 
             _cardRepositoryMock.Setup(a => a.FindByIdWithDocumentAndWorkflow(cardId)).ReturnsAsync(cardDto);
@@ -1460,45 +1438,26 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.GetMock<IStepToolExecutionRepository>()
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync([]);
-            _mocker.GetMock<IPromptServices>().Setup(s => s.FindById(99))
-                .Returns(new PromptDto { Id = 99, Text = "Resolved Prompt", Name = "N" });
+            _mocker.GetMock<IPromptServices>().Setup(s => s.FindById(promptId))
+                .Returns(new PromptDto { Id = promptId, Text = "Resolved Prompt", Name = "N" });
 
+            // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
 
+            // Assert
             Assert.All(result.Steps[0].Outputs, o => Assert.Equal("Resolved Prompt", o.ToolName));
-            _mocker.GetMock<IPromptServices>().Verify(s => s.FindById(99), Times.Once);
+            _mocker.GetMock<IPromptServices>().Verify(s => s.FindById(promptId), Times.Once);
         }
 
         [Fact(DisplayName = "FindByIdAnalyzeWithSteps resolves questionnaire title for Quiz tool type")]
         [Trait("FindByIdAnalyzeWithSteps", "Success")]
         public async Task FindByIdAnalyzeWithSteps_QuizParameter_UsesQuestionnaireTitleAsToolName()
         {
+            // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var cardDto = CardFixture.FindValidCardAnalysisDto(cardId);
-            cardDto.Outputs =
-            [
-                new StepToolOutputAnalysesDto
-                {
-                    Id = 1,
-                    StepToolId = 1,
-                    Value = "answer",
-                    StepTool = new StepToolDto
-                    {
-                        Id = 1,
-                        StepId = 1,
-                        ToolId = 1,
-                        Parameters = [new StepToolParameterDto { Value = "7" }],
-                        Tool = new ToolDto
-                        {
-                            Id = 1,
-                            Name = "QuizTool",
-                            ToolTypeId = 5,
-                            ToolType = HandlersTypes.Quiz
-                        }
-                    }
-                }
-            ];
+            var questionnaireId = 7;
+            var cardDto = CardFixture.FindCardAnalysisDtoWithQuizOutputUsingQuestionnaireParameter(cardId, questionnaireId);
 
             var workflow = WorkflowFixture.FindMinimalAnalyzeWorkflow("W", "S", "QuizTool", 5, HandlersTypes.Quiz);
 
@@ -1507,17 +1466,16 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.GetMock<IStepToolExecutionRepository>()
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync([]);
-            _mocker.GetMock<IQuestionnaireServices>().Setup(s => s.FindById(7))
-                .Returns(new QuestionnaireDto
-                {
-                    Id = 7,
-                    Title = "My Questionnaire",
-                    TypeDoc = new TypeDoc("td", "e", 1, DateTime.UtcNow),
-                    Questions = new List<Question>()
-                });
+            var questionnaire = DocumentFixture.FindValidQuestionnaireDto();
+            questionnaire.Id = questionnaireId;
+            questionnaire.Title = "My Questionnaire";
+            _mocker.GetMock<IQuestionnaireServices>().Setup(s => s.FindById(questionnaireId))
+                .Returns(questionnaire);
 
+            // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
 
+            // Assert
             Assert.Single(result.Steps[0].Outputs);
             Assert.Equal("My Questionnaire", result.Steps[0].Outputs[0].ToolName);
         }
@@ -1526,10 +1484,10 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindByIdAnalyzeWithSteps", "Success")]
         public async Task FindByIdAnalyzeWithSteps_ApiTool_UsesToolNameAsToolName()
         {
+            // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var cardDto = CardFixture.FindCardAnalysisDtoWithPlainTextOutput(cardId);
-            cardDto.Outputs!.First().StepTool!.Tool!.ToolType = HandlersTypes.API;
+            var cardDto = CardFixture.FindCardAnalysisDtoWithApiToolOutput(cardId, "Test Tool");
 
             var workflow = WorkflowFixture.FindMinimalAnalyzeWorkflow("W", "S", "API Tool", 4, HandlersTypes.API);
 
@@ -1539,8 +1497,10 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync([]);
 
+            // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
 
+            // Assert
             Assert.Equal("Test Tool", result.Steps[0].Outputs[0].Label);
             Assert.Equal("Test Tool", result.Steps[0].Outputs[0].ToolName);
         }

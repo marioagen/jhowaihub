@@ -466,18 +466,9 @@ namespace WoopiAiHub.Application.Services
             if (!promptLabelCache.TryGetValue(promptId.Value, out var cachedPromptLabel))
             {
                 var prompt = _promptServices.FindById(promptId.Value);
-                if (!string.IsNullOrWhiteSpace(prompt?.Text))
-                {
-                    cachedPromptLabel = prompt.Text;
-                }
-                else if (!string.IsNullOrWhiteSpace(prompt?.Name))
-                {
-                    cachedPromptLabel = prompt.Name;
-                }
-                else
-                {
-                    cachedPromptLabel = string.Empty;
-                }
+                cachedPromptLabel = (string.IsNullOrWhiteSpace(prompt?.Text)
+                    ? prompt?.Name
+                    : prompt.Text) ?? string.Empty;
 
                 promptLabelCache[promptId.Value] = cachedPromptLabel;
             }
