@@ -7,6 +7,7 @@ namespace WoopiAiHub.Domain.Utils.ErrorLabels
         public const string DependecyRequired = "tools.dependencyRequired";
         public const string OcrDependencyRequired = "tools.ocrDependencyRequired";
         public const string OcrOrPromptDependencyRequired = "tools.ocrOrPromptDependencyRequired";
+        public const string PromptApiOrQuizDependencyRequired = "tools.promptApiOrQuizDependencyRequired";
         public const string EmbeddingDependencyRequired = "tools.embeddingDependencyRequired";
         public const string QuizDependencyRequired = "tools.quizDependencyRequired";
     }

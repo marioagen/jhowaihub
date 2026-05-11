@@ -669,6 +669,8 @@ const spanish = {
                 "No se pudo actualizar el flujo. El flujo ya contiene datos de salida para las herramientas.",
             prompts: "Agentes",
             promptRequired: "Seleccione al menos un agente",
+            promptDependenciesHint:
+                "En esta herramienta solo puede enlazar herramientas API y cuestionarios (Quiz) de pasos anteriores.",
             selectPrompt: "Seleccione un agente",
             remoteAccess: "Acceso remoto",
         },
@@ -1207,6 +1209,8 @@ const spanish = {
             "La herramienta de Agente requiere una dependencia de una herramienta de Agente Digitalizador",
         ocrOrPromptDependencyRequired:
             "La herramienta de Agente requiere una dependencia de Agente Digitalizador (OCR) u otro Agente (Prompt)",
+        promptApiOrQuizDependencyRequired:
+            "Las dependencias de la herramienta Agente deben ser solo herramientas API o cuestionarios (Quiz), con salida utilizable.",
         removeError: "Error al eliminar la herramienta",
         removeSuccess: "Herramienta eliminada con éxito",
         removeTitle: "Estás a punto de eliminar una herramienta del sistema",

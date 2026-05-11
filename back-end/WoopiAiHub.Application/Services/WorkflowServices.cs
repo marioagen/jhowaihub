@@ -1143,7 +1143,7 @@ namespace WoopiAiHub.Application.Services
 
         /// <summary>
         /// Creates dependencies for a step tool based on the DTO.
-        /// Validates that Prompt tools have at least one OCR dependency (direct or recursive).
+        /// Validates Prompt tool dependency rules when applicable.
         /// </summary>
         private async Task CreateDependenciesForStepTool(Workflow workflow, StepTool stepTool, StepToolUpdateDto stepToolDto)
         {
@@ -1198,13 +1198,11 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Validates that a Prompt tool has at least one dependency that is OCR or another Prompt (direct or recursive).
+        /// Ensures a Prompt tool lists at least one dependency and that every linked dependency is an API or Quiz tool.
         /// </summary>
-        /// <param name="tool"></param>
-        /// <param name="createdDependencies"></param>
-        /// <param name="stepToolDto"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
+        /// <param name="tool">Tool metadata for the step tool being saved.</param>
+        /// <param name="createdDependencies">Dependencies resolved from the workflow and DTO.</param>
+        /// <param name="stepToolDto">Incoming step tool payload.</param>
         private async Task ValidatePromptTool(Tool tool, List<StepTool> createdDependencies, StepToolUpdateDto stepToolDto)
         {
             if (tool.ToolType?.Name != HandlersTypes.Prompt)
@@ -1218,21 +1216,15 @@ namespace WoopiAiHub.Application.Services
             }
 
             var toolCache = new Dictionary<int, Tool> { { tool.Id, tool } };
-            var hasValidDependency = await HasOcrOrPromptDependency(createdDependencies, toolCache);
-            if (!hasValidDependency)
-            {
-                throw new AppException(ErrorCode.RequiredField, "Prompt tool must have at least one OCR or Prompt dependency", ToolLabel.OcrOrPromptDependencyRequired);
-            }
+            await EnsurePromptDependenciesAreApiOrQuizOnly(createdDependencies, toolCache);
         }
 
         /// <summary>
-        /// Validates that a Prompt tool has at least one OCR dependency (direct or recursive).
+        /// Ensures a Quiz tool lists at least one dependency and that at least one is an Embeddings tool.
         /// </summary>
-        /// <param name="tool"></param>
-        /// <param name="createdDependencies"></param>
-        /// <param name="stepToolDto"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
+        /// <param name="tool">Tool metadata for the step tool being saved.</param>
+        /// <param name="createdDependencies">Dependencies resolved from the workflow and DTO.</param>
+        /// <param name="stepToolDto">Incoming step tool payload.</param>
         private async Task ValidateQuizTool(Tool tool, List<StepTool> createdDependencies, StepToolUpdateDto stepToolDto)
         {
             if (tool.ToolType?.Name != HandlersTypes.Quiz)
@@ -1254,17 +1246,11 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Determines whether any of the specified dependencies are OCR or Prompt tools (valid for chaining).
+        /// Throws when any Prompt dependency is missing tool metadata or is not an API or Quiz tool.
         /// </summary>
-        /// <remarks>This method checks each dependency to determine if it is associated with a tool of
-        /// type OCR or Prompt. The <paramref name="toolCache"/> is used to avoid redundant lookups and may be populated with
-        /// additional tools as needed.</remarks>
-        /// <param name="dependencies">A list of <see cref="StepTool"/> objects representing the tool dependencies to check.</param>
-        /// <param name="toolCache">A dictionary that maps tool IDs to <see cref="Tool"/> instances, used to cache tool lookups and improve
-        /// performance. May be updated with additional entries during execution.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result is <see langword="true"/> if at least one
-        /// dependency is OCR or Prompt; otherwise, <see langword="false"/>.</returns>
-        private async Task<bool> HasOcrOrPromptDependency(List<StepTool> dependencies, Dictionary<int, Tool> toolCache)
+        /// <param name="dependencies">Resolved dependency step tools.</param>
+        /// <param name="toolCache">Cache of tool id to tool model, updated during resolution.</param>
+        private async Task EnsurePromptDependenciesAreApiOrQuizOnly(List<StepTool> dependencies, Dictionary<int, Tool> toolCache)
         {
             foreach (var dependency in dependencies)
             {
@@ -1277,14 +1263,20 @@ namespace WoopiAiHub.Application.Services
                     }
                 }
 
-                var typeName = dependencyTool?.ToolType?.Name;
-                if (typeName == HandlersTypes.Ocr || typeName == HandlersTypes.Prompt)
+                if (dependencyTool == null)
                 {
-                    return true;
+                    throw new AppException(ErrorCode.NotFound, "Dependency tool not found", ToolLabel.DependencyToolNotFound);
+                }
+
+                var typeName = dependencyTool.ToolType?.Name;
+                if (typeName != HandlersTypes.API && typeName != HandlersTypes.Quiz)
+                {
+                    throw new AppException(
+                        ErrorCode.RequiredField,
+                        "Prompt tool dependencies must be API or Quiz tools only",
+                        ToolLabel.PromptApiOrQuizDependencyRequired);
                 }
             }
-
-            return false;
         }
 
         /// <summary>

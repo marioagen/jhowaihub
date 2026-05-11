@@ -1470,9 +1470,9 @@ namespace WoopiAiHub.UnitTests.Services
                 repo => repo.FindWorkflowsByDocument(requestDto, It.IsAny<CancellationToken>()), Times.Once);
         }
 
-        [Fact(DisplayName = "UpdatePhase3 should throw AppException when Prompt tool dependency is not OCR")]
+        [Fact(DisplayName = "UpdatePhase3 should throw AppException when Prompt tool has no dependencies")]
         [Trait("UpdatePhase3", "Fail")]
-        public async Task UpdatePhase3_PromptToolDependencyNotOCR_ThrowsAppException()
+        public async Task UpdatePhase3_PromptToolNoDependenciesInStep_ThrowsAppException()
         {
             // Arrange
             var stepDto = WorkflowFixture.FindValidStepDto();
@@ -1510,18 +1510,82 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
         }
 
-        [Fact(DisplayName = "UpdatePhase3 should succeed when Prompt tool has OCR dependency")]
+        [Fact(DisplayName = "UpdatePhase3 should succeed when Prompt tool has API dependency")]
         [Trait("UpdatePhase3", "Success")]
-        public async Task UpdatePhase3_PromptToolWithOcrDependency_UpdatesSuccessfully()
+        public async Task UpdatePhase3_PromptToolWithApiDependency_UpdatesSuccessfully()
         {
             // Arrange
             var stepId = 1;
             var stepOrder = 1;
 
             var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
+            stepToolUpdateDto.ToolId = 999;
             var promptStepToolDto = WorkflowFixture.FindValidStepToolUpdateDtoWithDependencies();
+            promptStepToolDto.ToolId = 2;
+            promptStepToolDto.Order = 2;
 
             var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto, promptStepToolDto };
+            var workflowPhase3Dto = new WorkflowPhase3Dto
+            {
+                WorkflowId = 1,
+                Steps = { new StepPhase3Dto { Id = stepId, Order = stepOrder, StepTools = stepToolsList } }
+            };
+
+            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Workflow");
+            var step = new Step(stepId, DateTime.UtcNow, 1, "Step 1", stepOrder, 1, 1);
+            workflow.Steps.Add(step);
+            step.Workflow = workflow;
+
+            var apiStepTool = new StepTool(10, DateTime.UtcNow, stepId, 999, 1, 1, 1);
+            apiStepTool.Step = step;
+            step.StepTools.Add(apiStepTool);
+
+            var promptStepToolEntity = new StepTool(20, DateTime.UtcNow, stepId, 2, 2, 2, 2);
+            promptStepToolEntity.Step = step;
+            step.StepTools.Add(promptStepToolEntity);
+
+            var apiTool = WorkflowFixture.CreateToolModel(999, "API Tool", HandlersTypes.API);
+            var promptTool = WorkflowFixture.CreateToolModel(2, "Prompt Tool", HandlersTypes.Prompt);
+
+            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
+                .ReturnsAsync(workflow);
+
+            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
+            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
+                .Returns(Task.CompletedTask);
+
+            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
+                .Returns(Task.CompletedTask);
+
+            _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync((int id) => id == 999 ? apiTool : id == 2 ? promptTool : apiTool);
+
+            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
+
+            // Act
+            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
+
+            // Assert
+            Assert.True(result);
+            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+        }
+
+        [Fact(DisplayName = "UpdatePhase3 should throw when Prompt tool depends on OCR")]
+        [Trait("UpdatePhase3", "Fail")]
+        public async Task UpdatePhase3_PromptToolWithOcrDependency_ThrowsAppException()
+        {
+            var stepId = 1;
+            var stepOrder = 1;
+
+            var ocrStepToolDto = WorkflowFixture.FindValidStepToolUpdateDto();
+            ocrStepToolDto.ToolId = 999;
+            var promptStepToolDto = WorkflowFixture.FindValidStepToolUpdateDtoWithDependencies();
+            promptStepToolDto.ToolId = 2;
+            promptStepToolDto.Order = 2;
+
+            var stepToolsList = new List<StepToolUpdateDto> { ocrStepToolDto, promptStepToolDto };
             var workflowPhase3Dto = new WorkflowPhase3Dto
             {
                 WorkflowId = 1,
@@ -1541,77 +1605,8 @@ namespace WoopiAiHub.UnitTests.Services
             promptStepToolEntity.Step = step;
             step.StepTools.Add(promptStepToolEntity);
 
-            var ocrTool = WorkflowFixture.CreateToolModel(999, "OCR Tool", "OCR");
-            var promptTool = WorkflowFixture.CreateToolModel(2, "Prompt Tool", "Prompt");
-
-            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
-                .ReturnsAsync(workflow);
-
-            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
-                .Returns(Task.CompletedTask);
-
-            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Returns(Task.CompletedTask);
-
-            _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync((int id) => id == 999 ? ocrTool : id == 2 ? promptTool : ocrTool);
-
-            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
-
-            // Act
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
-
-            // Assert
-            Assert.True(result);
-            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
-            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
-            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
-        }
-
-        [Fact(DisplayName = "UpdatePhase3 should succeed when Prompt tool has another Prompt as dependency")]
-        [Trait("UpdatePhase3", "Success")]
-        public async Task UpdatePhase3_PromptToolWithPromptDependency_UpdatesSuccessfully()
-        {
-            var stepId = 1;
-            var stepOrder = 1;
-
-            var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
-            var promptStepToolDto = WorkflowFixture.FindValidStepToolUpdateDtoWithDependencies();
-            var secondPromptStepToolDto = WorkflowFixture.FindValidStepToolUpdateDtoWithDependencies();
-
-            secondPromptStepToolDto.Dependencies = new List<StepToolOutputDependencyDto>
-            {
-                new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 2 }
-            };
-
-            var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto, promptStepToolDto, secondPromptStepToolDto };
-            var workflowPhase3Dto = new WorkflowPhase3Dto
-            {
-                WorkflowId = 1,
-                Steps = { new StepPhase3Dto { Id = stepId, Order = stepOrder, StepTools = stepToolsList } }
-            };
-
-            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Workflow");
-            var step = new Step(stepId, DateTime.UtcNow, 1, "Step 1", stepOrder, 1, 1);
-            workflow.Steps.Add(step);
-            step.Workflow = workflow;
-
-            var ocrStepTool = new StepTool(10, DateTime.UtcNow, stepId, 997, 1, 1, 1);
-            ocrStepTool.Step = step;
-            step.StepTools.Add(ocrStepTool);
-
-            var firstPromptStepTool = new StepTool(20, DateTime.UtcNow, stepId, 998, 2, 2, 2);
-            firstPromptStepTool.Step = step;
-            step.StepTools.Add(firstPromptStepTool);
-
-            var secondPromptStepTool = new StepTool(30, DateTime.UtcNow, stepId, 999, 3, 3, 3);
-            secondPromptStepTool.Step = step;
-            step.StepTools.Add(secondPromptStepTool);
-
-            var ocrTool = WorkflowFixture.CreateToolModel(997, "OCR Tool", "OCR");
-            var promptToolA = WorkflowFixture.CreateToolModel(998, "Prompt A", "Prompt");
-            var promptToolB = WorkflowFixture.CreateToolModel(999, "Prompt B", "Prompt");
+            var ocrTool = WorkflowFixture.CreateToolModel(999, "OCR Tool", HandlersTypes.Ocr);
+            var promptTool = WorkflowFixture.CreateToolModel(2, "Prompt Tool", HandlersTypes.Prompt);
 
             _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
                 .ReturnsAsync(workflow);
@@ -1622,23 +1617,20 @@ namespace WoopiAiHub.UnitTests.Services
             stepToolDependencyRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
                 .Returns(Task.CompletedTask);
 
-            var stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
-            stepToolOutputRepositoryMock.Setup(x => x.HasOutputsByStepToolIds(It.IsAny<IEnumerable<int>>()))
-                .ReturnsAsync(false);
-
             _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync((int id) => id == 997 ? ocrTool : id == 998 ? promptToolA : id == 999 ? promptToolB : ocrTool);
+                .ReturnsAsync((int id) => id == 999 ? ocrTool : id == 2 ? promptTool : ocrTool);
 
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
-            // Act
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
+            var exception =
+                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
+            Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
+            Assert.Equal("Prompt tool dependencies must be API or Quiz tools only", exception.Message);
+            Assert.Equal(ToolLabel.PromptApiOrQuizDependencyRequired, exception.LabelError);
 
-            // Assert
-            Assert.True(result);
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
-            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
-            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Never);
+            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
         }
 
         [Fact(DisplayName = "UpdatePhase3 should throw AppException when ToolId is invalid")]
@@ -2042,9 +2034,9 @@ namespace WoopiAiHub.UnitTests.Services
             _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
         }
 
-        [Fact(DisplayName = "ValidatePromptTool should throw when hasOcrDependency is false")]
+        [Fact(DisplayName = "ValidatePromptTool should throw when dependency is not API or Quiz")]
         [Trait("UpdatePhase3", "Fail")]
-        public async Task ValidatePromptTool_HasOcrDependencyFalse_ThrowsAppException()
+        public async Task ValidatePromptTool_NonApiQuizDependency_ThrowsAppException()
         {
             // Arrange
             var stepId = 1;
@@ -2107,8 +2099,8 @@ namespace WoopiAiHub.UnitTests.Services
             var exception =
                 await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Prompt tool must have at least one OCR or Prompt dependency", exception.Message);
-            Assert.Equal(ToolLabel.OcrOrPromptDependencyRequired, exception.LabelError);
+            Assert.Equal("Prompt tool dependencies must be API or Quiz tools only", exception.Message);
+            Assert.Equal(ToolLabel.PromptApiOrQuizDependencyRequired, exception.LabelError);
 
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
@@ -2182,138 +2174,6 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
             Assert.Equal("Quiz tool must have at least one Embedding dependency", exception.Message);
             Assert.Equal(ToolLabel.EmbeddingDependencyRequired, exception.LabelError);
-
-            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
-            _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
-            _unitOfWorkMock.Verify(x => x.Commit(), Times.Never);
-        }
-
-        [Fact(DisplayName = "HasOcrDependency should return true when dependency tool is OCR")]
-        [Trait("HasOcrDependency", "Success")]
-        public async Task HasOcrDependency_DependencyToolIsOcr_ReturnsTrue()
-        {
-            var stepDto = WorkflowFixture.FindValidStepDto();
-            var stepToolUpdateDto = WorkflowFixture.FindValidStepToolUpdateDto();
-            stepToolUpdateDto.Dependencies = new List<StepToolOutputDependencyDto>
-            {
-                new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
-            };
-
-            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            var stepToolsList = new List<StepToolUpdateDto> { stepToolUpdateDto };
-            var workflowPhase3Dto = new WorkflowPhase3Dto
-            {
-                WorkflowId = 1,
-                Steps = { new StepPhase3Dto { Id = stepDto.Id, Order = stepDto.Order, StepTools = stepToolsList } }
-            };
-
-            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Workflow");
-            var step = new Step(1, DateTime.UtcNow, 1, "Step 1", 1, 1, 1);
-            workflow.Steps.Add(step);
-            step.Workflow = workflow;
-
-            var ocrStepTool = new StepTool(10, DateTime.UtcNow, 1, 999, 1, 1, 1);
-            ocrStepTool.Step = step;
-            step.StepTools.Add(ocrStepTool);
-
-            var promptStepToolEntity = new StepTool(20, DateTime.UtcNow, 1, 2, 2, 2, 2);
-            promptStepToolEntity.Step = step;
-            step.StepTools.Add(promptStepToolEntity);
-
-            var ocrTool = WorkflowFixture.CreateToolModel(999, "OCR Tool", "OCR");
-            var promptTool = WorkflowFixture.CreateToolModel(2, "Prompt Tool", "Prompt");
-
-            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
-                .ReturnsAsync(workflow);
-
-            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
-                .Returns(Task.CompletedTask);
-
-            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Returns(Task.CompletedTask);
-
-            _toolRepositoryMock.SetupSequence(x => x.FindModelByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync(ocrTool)
-                .ReturnsAsync(promptTool)
-                .ReturnsAsync(ocrTool);
-
-            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
-
-            var result = await _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto());
-
-            Assert.True(result);
-            _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
-            _unitOfWorkMock.Verify(x => x.Commit(), Times.Once);
-        }
-
-        [Fact(DisplayName = "HasOcrDependency should return false when no OCR dependency found")]
-        [Trait("HasOcrDependency", "Fail")]
-        public async Task HasOcrDependency_NoOcrDependency_ReturnsFalse()
-        {
-            // Arrange
-            var stepId = 1;
-            var stepOrder = 1;
-
-            var nonOcrStepToolDto = new StepToolUpdateDto
-            {
-                Id = 0,
-                ToolId = 999,
-                Order = 1,
-                PositionX = 1,
-                PositionY = 1,
-                Parameters = new List<StepToolParameterUpdateDto>()
-            };
-
-            var promptStepToolDto = new StepToolUpdateDto
-            {
-                Id = 0,
-                ToolId = 2,
-                Order = 2,
-                PositionX = 2,
-                PositionY = 2,
-                Parameters = new List<StepToolParameterUpdateDto>(),
-                Dependencies = new List<StepToolOutputDependencyDto>
-                {
-                    new StepToolOutputDependencyDto { StepOrder = 1, StepToolOrder = 1 }
-                }
-            };
-
-            var _stepToolRepositoryMock = _mocker.GetMock<IStepToolDependencyRepository>();
-            var stepToolsList = new List<StepToolUpdateDto> { nonOcrStepToolDto, promptStepToolDto };
-            var workflowPhase3Dto = new WorkflowPhase3Dto
-            {
-                WorkflowId = 1,
-                Steps = { new StepPhase3Dto { Id = stepId, Order = stepOrder, StepTools = stepToolsList } }
-            };
-
-            var workflow = new Workflow(1, DateTime.UtcNow, new List<Team>(), "Workflow");
-            var step = new Step(stepId, DateTime.UtcNow, 1, "Step 1", stepOrder, 1, 1);
-            workflow.Steps.Add(step);
-            step.Workflow = workflow;
-
-            var nonOcrTool = WorkflowFixture.CreateToolModel(999, "Non-OCR Tool", "N8N");
-            var promptTool = WorkflowFixture.CreateToolModel(2, "Prompt Tool", "Prompt");
-
-            _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
-                .ReturnsAsync(workflow);
-
-            _stepToolRepositoryMock.Setup(x => x.DeleteByStepToolIdAsync(It.IsAny<IEnumerable<int>>()))
-                .Returns(Task.CompletedTask);
-
-            _stepToolRepositoryMock.Setup(x => x.CreateAsync(It.IsAny<StepToolDependency>()))
-                .Returns(Task.CompletedTask);
-
-            _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync((int id) => id == 999 ? nonOcrTool : id == 2 ? promptTool : nonOcrTool);
-
-            _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
-
-            // Act & Assert
-            var exception =
-                await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
-            Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Prompt tool must have at least one OCR or Prompt dependency", exception.Message);
-            Assert.Equal(ToolLabel.OcrOrPromptDependencyRequired, exception.LabelError);
 
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
             _unitOfWorkMock.Verify(x => x.Rollback(), Times.Once);
