@@ -280,7 +280,10 @@ namespace WoopiAiHub.UnitTests.Fixture
             return cardAnalysisDto;
         }
 
-        public static CardAnalysisDto FindCardAnalysisDtoWithApiToolOutput(int cardId = 1, string toolName = "Test Tool")
+        public static CardAnalysisDto FindCardAnalysisDtoWithApiToolOutput(
+            int cardId = 1,
+            string toolName = "Test Tool",
+            int apiTemplateId = 7)
         {
             var cardAnalysisDto = FindCardAnalysisDtoWithPlainTextOutput(cardId);
             var output = cardAnalysisDto.Outputs?.FirstOrDefault();
@@ -288,6 +291,13 @@ namespace WoopiAiHub.UnitTests.Fixture
             {
                 output.StepTool.Tool.ToolType = HandlersTypes.API;
                 output.StepTool.Tool.Name = toolName;
+                output.StepTool.Parameters =
+                [
+                    new StepToolParameterDto
+                    {
+                        Value = apiTemplateId.ToString()
+                    }
+                ];
             }
 
             return cardAnalysisDto;
