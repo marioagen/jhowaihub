@@ -912,6 +912,17 @@ const english = {
             workflow: "View Workflow",
             workflowStepAccess: "Access Steps",
             workflowStepView: "View Steps",
+            tools: {
+                prompts: "View Agents",
+                quizzes: "View Quizzes",
+                apis: "View API Templates",
+                connectors: "View Connectors",
+            },
+            management: {
+                users: "View User Management",
+                teams: "View Team Management",
+                profiles: "View Profile Management",
+            },
         },
         groups: {
             actions: "Actions",

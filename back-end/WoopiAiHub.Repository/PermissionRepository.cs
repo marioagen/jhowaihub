@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Models;
@@ -32,7 +32,7 @@ namespace WoopiAiHub.Repository
         public ICollection<PermissionDto> FindAll()
         {
             return _context.Permissions
-                .Where(p => p.Group != WorkflowStepGroup)
+                .Where(p => p.Group != WorkflowStepGroup && p.Active)
                 .Select(q => new PermissionDto
                 {
                     Id = q.Id,

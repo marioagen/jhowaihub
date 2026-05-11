@@ -922,6 +922,17 @@ const spanish = {
             workflow: "Ver Workflow",
             workflowStepAccess: "Acceso Pasos",
             workflowStepView: "Ver Pasos",
+            tools: {
+                prompts: "Ver Agentes",
+                quizzes: "Ver Cuestionarios",
+                apis: "Ver Templates de API",
+                connectors: "Ver Conectores",
+            },
+            management: {
+                users: "Ver Gestión de Usuarios",
+                teams: "Ver Gestión de Times",
+                profiles: "Ver Gestión de Perfis",
+            },
         },
         groups: {
             actions: "Acciones",

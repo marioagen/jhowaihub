@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -13,6 +13,9 @@ namespace WoopiAiHub.Domain.Models
         [Column("Group", TypeName = "varchar(50)")]
         public string Group { get; private set; }
 
+        [Column("Active", TypeName = "bit")]
+        public bool Active { get; private set; }
+
         public virtual ICollection<User> Users { get; set; }
         public virtual ICollection<Profile> Profiles { get; set; }
         public virtual ICollection<StepProfilePermission> StepProfilePermissions { get; set; }
@@ -22,11 +25,13 @@ namespace WoopiAiHub.Domain.Models
                           string name,
                           string group,
                           int id,
-                          DateTime created) : base(id, created)
+                          DateTime created,
+                          bool active = true) : base(id, created)
         {
             this.Description = description;
             this.Name = name;
             this.Group = group;
+            this.Active = active;
         }
 
         private Permission(int id, DateTime created) : base(id, created) { }

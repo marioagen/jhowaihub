@@ -152,8 +152,8 @@ const routes = [
         component: ManagementQuizzesPage,
         meta: {
             layout: "default",
-            module: "Quizzes",
-            action: "View",
+            module: "Tools",
+            action: "View quizzes",
         },
         beforeEnter: authenticate,
     },
@@ -208,7 +208,6 @@ const routes = [
             module: "Management",
             action: "View",
         },
-        beforeEnter: authenticate,
     },
     {
         path: "/management/users/new",
@@ -327,7 +326,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View",
+            action: "View connectors",
         },
         beforeEnter: authenticate,
     },
@@ -359,8 +358,8 @@ const routes = [
         component: PromptPage,
         meta: {
             layout: "default",
-            module: "Prompts",
-            action: "View",
+            module: "Tools",
+            action: "View prompts",
         },
         beforeEnter: authenticate,
     },
@@ -404,8 +403,8 @@ const routes = [
         component: TemplatePage,
         meta: {
             layout: "default",
-            module: "Templates",
-            action: "View",
+            module: "Tools",
+            action: "View APIs",
         },
         beforeEnter: authenticate,
     },

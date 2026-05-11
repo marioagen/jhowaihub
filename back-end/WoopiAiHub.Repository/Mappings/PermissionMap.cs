@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using WoopiAiHub.Domain.Models;
 
@@ -25,6 +25,10 @@ namespace WoopiAiHub.Repository.Mappings
                   .IsRequired();
 
             builder.Property(u => u.Created)
+                   .IsRequired();
+
+            builder.Property(u => u.Active)
+                   .HasDefaultValue(true)
                    .IsRequired();
         }
     }
