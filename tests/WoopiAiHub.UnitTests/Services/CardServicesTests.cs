@@ -1466,14 +1466,15 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.GetMock<IStepToolExecutionRepository>()
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync([]);
+            const string promptName = "Prompt nome país";
             _mocker.GetMock<IPromptServices>().Setup(s => s.FindById(promptId))
-                .Returns(new PromptDto { Id = promptId, Text = "Resolved Prompt", Name = "N" });
+                .Returns(new PromptDto { Id = promptId, Text = "Resolved Prompt", Name = promptName });
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
 
             // Assert
-            Assert.All(result.Steps[0].Outputs, o => Assert.Equal("Resolved Prompt", o.ToolName));
+            Assert.All(result.Steps[0].Outputs, o => Assert.Equal(promptName, o.ToolName));
             _mocker.GetMock<IPromptServices>().Verify(s => s.FindById(promptId), Times.Once);
         }
 
@@ -1508,14 +1509,16 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal("My Questionnaire", result.Steps[0].Outputs[0].ToolName);
         }
 
-        [Fact(DisplayName = "FindByIdAnalyzeWithSteps uses tool name for non-Prompt non-Quiz outputs")]
+        [Fact(DisplayName = "FindByIdAnalyzeWithSteps uses API template name for API outputs")]
         [Trait("FindByIdAnalyzeWithSteps", "Success")]
-        public async Task FindByIdAnalyzeWithSteps_ApiTool_UsesToolNameAsToolName()
+        public async Task FindByIdAnalyzeWithSteps_ApiTool_UsesTemplateNameAsToolName()
         {
             // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
-            var cardDto = CardFixture.FindCardAnalysisDtoWithApiToolOutput(cardId, "Test Tool");
+            var apiTemplateId = 7;
+            var apiTemplateName = "Busca dados";
+            var cardDto = CardFixture.FindCardAnalysisDtoWithApiToolOutput(cardId, "Test Tool", apiTemplateId);
 
             var workflow = WorkflowFixture.FindMinimalAnalyzeWorkflow("W", "S", "API Tool", 4, HandlersTypes.API);
 
@@ -1524,13 +1527,16 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.GetMock<IStepToolExecutionRepository>()
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync([]);
+            _mocker.GetMock<IApiTemplateServices>()
+                .Setup(s => s.FindById(apiTemplateId))
+                .ReturnsAsync(new ApiTemplateDto { Id = apiTemplateId, Name = apiTemplateName });
 
             // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
 
             // Assert
             Assert.Equal("Test Tool", result.Steps[0].Outputs[0].Label);
-            Assert.Equal("Test Tool", result.Steps[0].Outputs[0].ToolName);
+            Assert.Equal(apiTemplateName, result.Steps[0].Outputs[0].ToolName);
         }
 
         [Fact(DisplayName = "ReprocessCard should handle automation service exceptions")]

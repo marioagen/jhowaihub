@@ -161,10 +161,9 @@
                                                 </span>
                                                 <div class="dropdown flex-grow-1 min-w-0">
                                                     <button
-                                                        class="btn btn-light border form-select-sm text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle border-start-0 rounded-start-0 pe-1"
+                                                        class="btn btn-light border form-select-sm text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle border-start-0 rounded-start-0 pe-1 profile-select-trigger"
                                                         type="button"
-                                                        data-bs-toggle="dropdown"
-                                                        data-bs-display="static"
+                                                        @click.stop="toggleProfileMenu(step, $event)"
                                                         aria-expanded="false"
                                                     >
                                                         <span class="text-truncate profile-label">
@@ -179,60 +178,6 @@
                                                             class="ms-1 text-muted flex-shrink-0"
                                                         />
                                                     </button>
-                                                    <ul
-                                                        class="dropdown-menu p-2 profile-dropdown-menu"
-                                                    >
-                                                        <li class="mb-1">
-                                                            <div class="input-group input-group-sm">
-                                                                <span
-                                                                    class="input-group-text p-1 border-end-0"
-                                                                >
-                                                                    <LucideIcon
-                                                                        icon="Search"
-                                                                        :size="14"
-                                                                    />
-                                                                </span>
-                                                                <input
-                                                                    v-model="
-                                                                        profileSearches[step.tempId]
-                                                                    "
-                                                                    type="text"
-                                                                    class="form-control form-control-sm border-start-0"
-                                                                    :placeholder="
-                                                                        $t('filters.search')
-                                                                    "
-                                                                    @click.stop=""
-                                                                />
-                                                            </div>
-                                                        </li>
-                                                        <li v-if="!profileSearches[step.tempId]">
-                                                            <a
-                                                                class="dropdown-item small"
-                                                                :class="{ active: !step.profileId }"
-                                                                @click="step.profileId = ''"
-                                                            >
-                                                                {{ $t("workflow.selectProfile") }}
-                                                            </a>
-                                                        </li>
-                                                        <li
-                                                            v-for="p in getFilteredProfiles(step)"
-                                                            :key="p.id"
-                                                        >
-                                                            <a
-                                                                class="dropdown-item small"
-                                                                :class="{
-                                                                    active:
-                                                                        String(p.id) ===
-                                                                        String(step.profileId),
-                                                                }"
-                                                                @click="
-                                                                    step.profileId = String(p.id)
-                                                                "
-                                                            >
-                                                                {{ p.text }}
-                                                            </a>
-                                                        </li>
-                                                    </ul>
                                                 </div>
                                             </div>
 
@@ -269,6 +214,54 @@
             </div>
         </div>
     </div>
+    <teleport to="body">
+        <div
+            v-if="openProfileMenuStepId"
+            ref="profileDropdownFloating"
+            class="dropdown-menu show p-2 profile-dropdown-menu profile-dropdown-floating"
+            :style="profileDropdownStyle"
+            @click.stop
+        >
+            <li class="mb-1">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text p-1 border-end-0">
+                        <LucideIcon
+                            icon="Search"
+                            :size="14"
+                        />
+                    </span>
+                    <input
+                        v-model="profileSearches[openProfileMenuStepId]"
+                        type="text"
+                        class="form-control form-control-sm border-start-0"
+                        :placeholder="$t('filters.search')"
+                        @click.stop
+                    />
+                </div>
+            </li>
+            <li v-if="!profileSearches[openProfileMenuStepId]">
+                <a
+                    class="dropdown-item small"
+                    :class="{ active: !getOpenStepProfileId() }"
+                    @click="selectProfile(openProfileMenuStepId, '')"
+                >
+                    {{ $t("workflow.selectProfile") }}
+                </a>
+            </li>
+            <li
+                v-for="p in getFilteredProfilesByStepId(openProfileMenuStepId)"
+                :key="p.id"
+            >
+                <a
+                    class="dropdown-item small"
+                    :class="{ active: String(p.id) === String(getOpenStepProfileId()) }"
+                    @click="selectProfile(openProfileMenuStepId, String(p.id))"
+                >
+                    {{ p.text }}
+                </a>
+            </li>
+        </div>
+    </teleport>
 </template>
 <script>
     import { Field } from "vee-validate";
@@ -306,6 +299,9 @@
                 tempStepCounter: 1,
                 isCheckingDocuments: false,
                 profileSearches: {},
+                openProfileMenuStepId: null,
+                profileDropdownStyle: {},
+                profileMenuAnchorRect: null,
             };
         },
 
@@ -382,10 +378,79 @@
                 if (!search) return this.profilesList;
                 return this.profilesList.filter((p) => p.text.toLowerCase().includes(search));
             },
+            getFilteredProfilesByStepId(stepTempId) {
+                const step = this.steps.find((s) => s.tempId === stepTempId);
+                if (!step) return this.profilesList;
+                return this.getFilteredProfiles(step);
+            },
             getProfileName(profileId) {
                 if (!profileId) return "";
                 const profile = this.profilesList.find((p) => String(p.id) === String(profileId));
                 return profile ? profile.text : "";
+            },
+            getOpenStepProfileId() {
+                const step = this.steps.find((s) => s.tempId === this.openProfileMenuStepId);
+                return step?.profileId || "";
+            },
+            toggleProfileMenu(step, event) {
+                if (this.openProfileMenuStepId === step.tempId) {
+                    this.closeProfileMenu();
+                    return;
+                }
+
+                const inputGroupElement = event.currentTarget.closest(".input-group");
+                this.profileMenuAnchorRect = inputGroupElement
+                    ? inputGroupElement.getBoundingClientRect()
+                    : event.currentTarget.getBoundingClientRect();
+                this.openProfileMenuStepId = step.tempId;
+                this.$nextTick(() => {
+                    this.repositionProfileMenu();
+                });
+            },
+            selectProfile(stepTempId, profileId) {
+                const step = this.steps.find((s) => s.tempId === stepTempId);
+                if (!step) return;
+                step.profileId = profileId;
+                this.closeProfileMenu();
+            },
+            closeProfileMenu() {
+                this.openProfileMenuStepId = null;
+                this.profileMenuAnchorRect = null;
+            },
+            repositionProfileMenu() {
+                if (!this.openProfileMenuStepId || !this.profileMenuAnchorRect) return;
+
+                const triggerRect = this.profileMenuAnchorRect;
+                const menuElement = this.$refs.profileDropdownFloating;
+                const menuHeight = menuElement?.offsetHeight || 280;
+
+                const gap = 4;
+                const viewportPadding = 8;
+                const availableBelow = window.innerHeight - triggerRect.bottom - viewportPadding;
+                const availableAbove = triggerRect.top - viewportPadding;
+                const shouldOpenUp = availableBelow < Math.min(220, menuHeight) && availableAbove > availableBelow;
+
+                const top = shouldOpenUp
+                    ? Math.max(viewportPadding, triggerRect.top - menuHeight - gap)
+                    : triggerRect.bottom + gap;
+
+                this.profileDropdownStyle = {
+                    position: "fixed",
+                    top: `${top}px`,
+                    left: `${triggerRect.left}px`,
+                    width: `${triggerRect.width}px`,
+                    zIndex: 2000,
+                };
+            },
+            handleGlobalClick(event) {
+                const target = event.target;
+                if (target.closest(".profile-dropdown-floating")) return;
+                if (target.closest(".profile-select-trigger")) return;
+                this.closeProfileMenu();
+            },
+            handleWindowChange() {
+                if (!this.openProfileMenuStepId) return;
+                this.closeProfileMenu();
             },
             getProfiles() {
                 this.isLoadingProfiles = true;
@@ -417,6 +482,16 @@
             this.getProfiles();
             this.getStatus();
         },
+        mounted() {
+            document.addEventListener("click", this.handleGlobalClick);
+            window.addEventListener("resize", this.handleWindowChange);
+            window.addEventListener("scroll", this.handleWindowChange, true);
+        },
+        beforeUnmount() {
+            document.removeEventListener("click", this.handleGlobalClick);
+            window.removeEventListener("resize", this.handleWindowChange);
+            window.removeEventListener("scroll", this.handleWindowChange, true);
+        },
     };
 </script>
 <style scoped>
@@ -444,6 +519,13 @@
         min-width: 280px;
         flex-shrink: 0;
         box-sizing: border-box;
+        overflow: visible;
+    }
+
+    .step-card .card-body,
+    .step-card .input-group,
+    .step-card .dropdown {
+        overflow: visible;
     }
 
     .card-header {
@@ -514,9 +596,11 @@
         min-width: 100%;
         max-height: 240px;
         overflow-y: auto;
-        position: absolute;
-        top: 100%;
-        bottom: auto;
+        z-index: 1080;
+    }
+
+    .profile-dropdown-floating {
+        min-width: 280px;
     }
 
     .profile-label {
