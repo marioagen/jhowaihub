@@ -1,6 +1,6 @@
 <template>
     <main>
-        <div class="container-fluid mx-2">
+        <div class="container-fluid scroll-area mx-2">
             <form @submit.prevent="save">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center mb-1">
