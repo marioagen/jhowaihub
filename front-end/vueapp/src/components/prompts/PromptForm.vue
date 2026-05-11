@@ -195,28 +195,21 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <Field
-                                        name="enableAccessToMcp"
-                                        type="checkbox"
-                                        :value="true"
-                                        v-slot="{ field, errorMessage }"
-                                    >
-                                        <div class="form-check">
-                                            <input
-                                                v-bind="field"
-                                                id="templateActive"
-                                                type="checkbox"
-                                                class="form-check-input"
-                                                :class="{ 'is-invalid': errorMessage }"
-                                            />
-                                            <label
-                                                class="form-check-label"
-                                                for="templateActive"
-                                            >
-                                                {{ $t("prompts.enableMcp") }}
-                                            </label>
-                                        </div>
-                                    </Field>
+                                    <div class="form-check">
+                                        <input
+                                            id="templateActive"
+                                            type="checkbox"
+                                            class="form-check-input"
+                                            :checked="values.enableAccessToMcp"
+                                            @change="setFieldValue('enableAccessToMcp', $event.target.checked)"
+                                        />
+                                        <label
+                                            class="form-check-label"
+                                            for="templateActive"
+                                        >
+                                            {{ $t("prompts.enableMcp") }}
+                                        </label>
+                                    </div>
                                 </div>
                                 <div v-if="values.enableAccessToMcp">
                                     <div
@@ -491,6 +484,8 @@
                     name: "",
                     description: "",
                     text: "",
+                    enableAccessToMcp: false,
+
                 },
                 idEdit: 0,
                 isRefining: false,
@@ -529,10 +524,11 @@
             },
         },
         setup() {
-            const { validate, setValues, values, resetForm } = useForm();
+            const { validate, setValues, setFieldValue, values, resetForm } = useForm();
             return {
                 validate,
                 setValues,
+                setFieldValue,
                 values,
                 resetForm,
             };
@@ -606,6 +602,7 @@
                         text: response.text,
                         enableAccessToMcp: response.enableAccessToMcp,
                     };
+                    console.log(this.form);
                     this.setValues(this.form);
                     this.apiTemplatesSelected = response.promptApiTemplates.map(
                         (x) => x.apiTemplateId
@@ -647,6 +644,7 @@
                     enableAccessToMcp: this.values.enableAccessToMcp,
                     apiTemplatesSelected: this.apiTemplatesSelected.map((x) => x),
                 };
+                console.log(this.paramsData);
                 PromptService.updatePrompt(paramsData).then((response) => {
                     if (response.error) {
                         this.$notify({
