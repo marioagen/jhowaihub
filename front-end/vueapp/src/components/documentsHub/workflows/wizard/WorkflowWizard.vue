@@ -2,7 +2,6 @@
     <main>
         <FullscreenLoadingComponent v-if="isLoading" />
         <div class="container-fluid scroll-area mx-4 mt-4">
-            <!-- Header -->
             <div class="row align-items-center mb-4">
                 <div class="col-auto">
                     <button
@@ -22,8 +21,6 @@
                     </p>
                 </div>
             </div>
-
-            <!-- Phase Navigation -->
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="phase-nav d-flex justify-content-center">
@@ -59,12 +56,9 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Phase Content -->
             <div class="row">
-                <div class="col-12">
-                    <div class="main-div shadow-sm">
-                        <!-- Phase 1: Name and Teams -->
+                <div class="col-12 min-w-0">
+                    <div class="main-div shadow-sm min-w-0">
                         <Phase1NameAndTeams
                             v-if="currentPhase === 1"
                             ref="phase1"
@@ -94,8 +88,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Navigation Buttons -->
             <div class="row mt-4 mb-2">
                 <div class="col-12 d-flex justify-content-between">
                     <button
@@ -112,7 +104,6 @@
                         {{ $t("workflow.previous") }}
                     </button>
                     <div v-else></div>
-
                     <button
                         v-if="currentPhase < 3"
                         class="btn btn-primary"

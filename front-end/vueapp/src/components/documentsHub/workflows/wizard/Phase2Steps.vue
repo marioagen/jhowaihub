@@ -50,201 +50,221 @@
             v-else
             class="row"
         >
-            <div class="d-flex gap-3 flex-nowrap pb-2">
-                <div
-                    v-for="step in activeStepsList"
-                    :key="step.id ? `id-${step.id}` : `tmp-${step.tempId}`"
-                    class="step-card card shadow-sm rounded-3"
-                >
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <div class="step-number">
-                                {{ step.order }}
-                            </div>
-                            <!-- NAME -->
-                            <Field
-                                v-model="step.name"
-                                :name="`steps[${step.tempId}].name`"
-                                rules="required"
-                                v-slot="{ field, errors }"
-                            >
-                                <div class="d-flex flex-column">
-                                    <input
-                                        type="text"
-                                        class="input-title"
-                                        v-bind="field"
-                                        v-model="step.name"
-                                        :placeholder="$t('workflow.stepNamePlaceholder')"
-                                    />
-                                    <span
-                                        v-if="errors[0]"
-                                        class="validation-message text-danger mt-1"
-                                    >
-                                        {{ errors[0] }}
-                                    </span>
-                                </div>
-                            </Field>
-                        </div>
-
-                        <button
-                            type="button"
-                            class="btn btn-link btn-sm"
-                            @click="removeStep(step)"
-                            :disabled="isCheckingDocuments"
+            <div class="col-12 min-w-0">
+                <div class="steps-horizontal-scroll">
+                    <div class="d-flex flex-nowrap gap-3 pb-2">
+                        <div
+                            v-for="step in activeStepsList"
+                            :key="step.id ? `id-${step.id}` : `tmp-${step.tempId}`"
+                            class="step-card card shadow-sm rounded-3"
                         >
-                            <LucideIcon icon="X" />
-                        </button>
-                    </div>
-
-                    <div class="card-body">
-                        <!-- STATUS -->
-                        <div class="mb-3">
-                            <label class="form-label text-muted small">
-                                {{ $t("common.status") }}
-                            </label>
-
-                            <Field
-                                v-model="step.statusId"
-                                :name="`steps[${step.tempId}}].statusId`"
-                                rules="required"
-                                v-slot="{ field, errors }"
+                            <div
+                                class="card-header d-flex justify-content-between align-items-center gap-2"
                             >
-                                <div class="d-flex flex-column">
-                                    <select
-                                        class="form-select form-select-sm"
-                                        v-bind="field"
-                                        v-model="step.statusId"
-                                    >
-                                        <option value="">
-                                            {{ $t("workflow.selectStatus") }}
-                                        </option>
-
-                                        <option
-                                            v-for="s in statusList"
-                                            :key="s.id"
-                                            :value="String(s.id)"
-                                        >
-                                            {{ s.label ? $t(s.label) : s.name }}
-                                        </option>
-                                    </select>
-
-                                    <span
-                                        v-if="errors[0]"
-                                        class="text-danger small mt-1"
-                                    >
-                                        {{ errors[0] }}
-                                    </span>
-                                </div>
-                            </Field>
-                        </div>
-
-                        <!-- PROFILE -->
-                        <div class="mb-2">
-                            <label class="form-label text-muted small">
-                                {{ $t("workflow.profiles") }}
-                            </label>
-
-                            <Field
-                                v-model="step.profileId"
-                                :name="`steps[${step.tempId}].profileId`"
-                                rules="required"
-                                v-slot="{ errors }"
-                            >
-                                <div class="d-flex flex-column">
-                                    <div class="input-group">
-                                        <span class="input-group-text border-end-0">
-                                            <LucideIcon
-                                                icon="Users"
-                                                :size="16"
-                                            />
-                                        </span>
-                                        <div class="dropdown flex-grow-1">
-                                            <button
-                                                class="btn btn-light border form-select-sm text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle border-start-0 rounded-start-0 pe-1"
-                                                type="button"
-                                                data-bs-toggle="dropdown"
-                                                data-bs-display="static"
-                                                aria-expanded="false"
-                                            >
-                                                <span class="text-truncate profile-label">
-                                                    {{ getProfileName(step.profileId) || $t("workflow.selectProfile") }}
-                                                </span>
-                                                <LucideIcon
-                                                    icon="ChevronDown"
-                                                    :size="14"
-                                                    class="ms-1 text-muted flex-shrink-0"
-                                                />
-                                            </button>
-                                            <ul class="dropdown-menu p-2 profile-dropdown-menu">
-                                                <li class="mb-1">
-                                                    <div class="input-group input-group-sm">
-                                                        <span class="input-group-text p-1 border-end-0">
-                                                            <LucideIcon
-                                                                icon="Search"
-                                                                :size="14"
-                                                            />
-                                                        </span>
-                                                        <input
-                                                            v-model="profileSearches[step.tempId]"
-                                                            type="text"
-                                                            class="form-control form-control-sm border-start-0"
-                                                            :placeholder="$t('filters.search')"
-                                                            @click.stop=""
-                                                        />
-                                                    </div>
-                                                </li>
-                                                <li v-if="!profileSearches[step.tempId]">
-                                                    <a
-                                                        class="dropdown-item small"
-                                                        :class="{ active: !step.profileId }"
-                                                        @click="step.profileId = ''"
-                                                    >
-                                                        {{ $t("workflow.selectProfile") }}
-                                                    </a>
-                                                </li>
-                                                <li
-                                                    v-for="p in getFilteredProfiles(step)"
-                                                    :key="p.id"
-                                                >
-                                                    <a
-                                                        class="dropdown-item small"
-                                                        :class="{ active: String(p.id) === String(step.profileId) }"
-                                                        @click="step.profileId = String(p.id)"
-                                                    >
-                                                        {{ p.text }}
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
+                                <div class="d-flex align-items-center min-w-0 flex-grow-1">
+                                    <div class="step-number flex-shrink-0">
+                                        {{ step.order }}
                                     </div>
-
-                                    <span
-                                        v-if="errors[0]"
-                                        class="text-danger small mt-1"
+                                    <Field
+                                        v-model="step.name"
+                                        :name="`steps[${step.tempId}].name`"
+                                        rules="required"
+                                        v-slot="{ field, errors }"
                                     >
-                                        {{ errors[0] }}
-                                    </span>
+                                        <div class="d-flex flex-column min-w-0 flex-grow-1">
+                                            <input
+                                                type="text"
+                                                class="input-title"
+                                                v-bind="field"
+                                                v-model="step.name"
+                                                :placeholder="$t('workflow.stepNamePlaceholder')"
+                                            />
+                                            <span
+                                                v-if="errors[0]"
+                                                class="validation-message text-danger mt-1"
+                                            >
+                                                {{ errors[0] }}
+                                            </span>
+                                        </div>
+                                    </Field>
                                 </div>
-                            </Field>
+
+                                <button
+                                    type="button"
+                                    class="btn btn-link btn-sm flex-shrink-0"
+                                    @click="removeStep(step)"
+                                    :disabled="isCheckingDocuments"
+                                >
+                                    <LucideIcon icon="X" />
+                                </button>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">
+                                        {{ $t("common.status") }}
+                                    </label>
+
+                                    <Field
+                                        v-model="step.statusId"
+                                        :name="`steps[${step.tempId}].statusId`"
+                                        rules="required"
+                                        v-slot="{ field, errors }"
+                                    >
+                                        <div class="d-flex flex-column">
+                                            <select
+                                                class="form-select form-select-sm"
+                                                v-bind="field"
+                                                v-model="step.statusId"
+                                            >
+                                                <option value="">
+                                                    {{ $t("workflow.selectStatus") }}
+                                                </option>
+
+                                                <option
+                                                    v-for="s in statusList"
+                                                    :key="s.id"
+                                                    :value="String(s.id)"
+                                                >
+                                                    {{ s.label ? $t(s.label) : s.name }}
+                                                </option>
+                                            </select>
+
+                                            <span
+                                                v-if="errors[0]"
+                                                class="text-danger small mt-1"
+                                            >
+                                                {{ errors[0] }}
+                                            </span>
+                                        </div>
+                                    </Field>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label text-muted small">
+                                        {{ $t("workflow.profiles") }}
+                                    </label>
+
+                                    <Field
+                                        v-model="step.profileId"
+                                        :name="`steps[${step.tempId}].profileId`"
+                                        rules="required"
+                                        v-slot="{ errors }"
+                                    >
+                                        <div class="d-flex flex-column">
+                                            <div class="input-group">
+                                                <span class="input-group-text border-end-0">
+                                                    <LucideIcon
+                                                        icon="Users"
+                                                        :size="16"
+                                                    />
+                                                </span>
+                                                <div class="dropdown flex-grow-1 min-w-0">
+                                                    <button
+                                                        class="btn btn-light border form-select-sm text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle border-start-0 rounded-start-0 pe-1"
+                                                        type="button"
+                                                        data-bs-toggle="dropdown"
+                                                        data-bs-display="static"
+                                                        aria-expanded="false"
+                                                    >
+                                                        <span class="text-truncate profile-label">
+                                                            {{
+                                                                getProfileName(step.profileId) ||
+                                                                $t("workflow.selectProfile")
+                                                            }}
+                                                        </span>
+                                                        <LucideIcon
+                                                            icon="ChevronDown"
+                                                            :size="14"
+                                                            class="ms-1 text-muted flex-shrink-0"
+                                                        />
+                                                    </button>
+                                                    <ul
+                                                        class="dropdown-menu p-2 profile-dropdown-menu"
+                                                    >
+                                                        <li class="mb-1">
+                                                            <div class="input-group input-group-sm">
+                                                                <span
+                                                                    class="input-group-text p-1 border-end-0"
+                                                                >
+                                                                    <LucideIcon
+                                                                        icon="Search"
+                                                                        :size="14"
+                                                                    />
+                                                                </span>
+                                                                <input
+                                                                    v-model="
+                                                                        profileSearches[step.tempId]
+                                                                    "
+                                                                    type="text"
+                                                                    class="form-control form-control-sm border-start-0"
+                                                                    :placeholder="
+                                                                        $t('filters.search')
+                                                                    "
+                                                                    @click.stop=""
+                                                                />
+                                                            </div>
+                                                        </li>
+                                                        <li v-if="!profileSearches[step.tempId]">
+                                                            <a
+                                                                class="dropdown-item small"
+                                                                :class="{ active: !step.profileId }"
+                                                                @click="step.profileId = ''"
+                                                            >
+                                                                {{ $t("workflow.selectProfile") }}
+                                                            </a>
+                                                        </li>
+                                                        <li
+                                                            v-for="p in getFilteredProfiles(step)"
+                                                            :key="p.id"
+                                                        >
+                                                            <a
+                                                                class="dropdown-item small"
+                                                                :class="{
+                                                                    active:
+                                                                        String(p.id) ===
+                                                                        String(step.profileId),
+                                                                }"
+                                                                @click="
+                                                                    step.profileId = String(p.id)
+                                                                "
+                                                            >
+                                                                {{ p.text }}
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                            <span
+                                                v-if="errors[0]"
+                                                class="text-danger small mt-1"
+                                            >
+                                                {{ errors[0] }}
+                                            </span>
+                                        </div>
+                                    </Field>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="add-step-card text-center p-4 rounded-3 border-dashed"
+                            @click="addStep"
+                        >
+                            <div class="icon-circle mb-2">
+                                <LucideIcon
+                                    icon="Plus"
+                                    :size="16"
+                                />
+                            </div>
+                            <h6 class="fw-semibold mb-1">
+                                {{ $t("workflow.addStep") }}
+                            </h6>
+                            <p class="text-muted small mb-0">
+                                {{ $t("workflow.addStepDescription") }}
+                            </p>
                         </div>
                     </div>
-                </div>
-                <div
-                    class="add-step-card text-center p-4 rounded-3 border-dashed flex-shrink-0"
-                    @click="addStep"
-                >
-                    <div class="icon-circle mb-2">
-                        <LucideIcon
-                            icon="Plus"
-                            :size="16"
-                        />
-                    </div>
-                    <h6 class="fw-semibold mb-1">
-                        {{ $t("workflow.addStep") }}
-                    </h6>
-                    <p class="text-muted small mb-0">
-                        {{ $t("workflow.addStepDescription") }}
-                    </p>
                 </div>
             </div>
         </div>
@@ -360,15 +380,11 @@
             getFilteredProfiles(step) {
                 const search = (this.profileSearches[step.tempId] || "").toLowerCase();
                 if (!search) return this.profilesList;
-                return this.profilesList.filter((p) =>
-                    p.text.toLowerCase().includes(search)
-                );
+                return this.profilesList.filter((p) => p.text.toLowerCase().includes(search));
             },
             getProfileName(profileId) {
                 if (!profileId) return "";
-                const profile = this.profilesList.find(
-                    (p) => String(p.id) === String(profileId)
-                );
+                const profile = this.profilesList.find((p) => String(p.id) === String(profileId));
                 return profile ? profile.text : "";
             },
             getProfiles() {
@@ -406,6 +422,7 @@
 <style scoped>
     .phase-container {
         padding: 20px 24px;
+        min-width: 0;
     }
 
     .section-title {
@@ -414,9 +431,19 @@
         margin-bottom: 16px;
     }
 
+    .steps-horizontal-scroll {
+        width: 100%;
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: visible;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .step-card {
         min-width: 280px;
         flex-shrink: 0;
+        box-sizing: border-box;
     }
 
     .card-header {
@@ -443,6 +470,9 @@
         font-weight: 600;
         padding: 4px;
         color: var(--color-body-content) !important;
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
     }
 
     .input-title:focus {
@@ -453,6 +483,7 @@
     .add-step-card {
         min-width: 240px;
         flex-shrink: 0;
+        box-sizing: border-box;
         border: 2px dashed var(--color-border-subscription-card) !important;
         cursor: pointer;
         min-height: 240px;
