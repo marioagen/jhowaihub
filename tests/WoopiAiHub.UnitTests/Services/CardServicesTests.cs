@@ -1282,6 +1282,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindByIdAnalyzeWithSteps", "Fail")]
         public async Task FindByIdAnalyzeWithSteps_StepNull_ThrowsArgumentException()
         {
+            // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
             var dto = CardFixture.FindCardAnalysisDtoWithNullStep(cardId);
@@ -1290,8 +1291,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync([]);
 
+            // Act
             var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
                 _cardServices.FindByIdAnalyzeWithSteps(cardId, headers));
+
+            // Assert
             Assert.Contains($"Step not found for card {cardId}", ex.Message, StringComparison.Ordinal);
         }
 
@@ -1299,6 +1303,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindByIdAnalyzeWithSteps", "Success")]
         public async Task FindByIdAnalyzeWithSteps_BothOcrAndEmbeddingsReady_CanAnswerTrue()
         {
+            // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
             var cardDto = CardFixture.FindValidCardAnalysisDto(cardId);
@@ -1316,7 +1321,10 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync(execs);
 
+            // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
+
+            // Assert
             Assert.True(result.CanAnswer);
         }
 
@@ -1324,6 +1332,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindByIdAnalyzeWithSteps", "Success")]
         public async Task FindByIdAnalyzeWithSteps_OnlyOcrReady_CanAnswerFalse()
         {
+            // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
             var cardDto = CardFixture.FindValidCardAnalysisDto(cardId);
@@ -1340,7 +1349,10 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync(execs);
 
+            // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
+
+            // Assert
             Assert.False(result.CanAnswer);
         }
 
@@ -1348,6 +1360,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindByIdAnalyzeWithSteps", "Success")]
         public async Task FindByIdAnalyzeWithSteps_NullToolOnOutput_SkipsOutput()
         {
+            // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
             var cardDto = CardFixture.FindCardAnalysisDtoWithNullToolOnOutput(cardId);
@@ -1359,7 +1372,10 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync([]);
 
+            // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
+
+            // Assert
             Assert.Empty(result.Steps[0].Outputs);
         }
 
@@ -1367,6 +1383,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindByIdAnalyzeWithSteps", "Success")]
         public async Task FindByIdAnalyzeWithSteps_WhitespaceOutputValue_NoExtractedFields()
         {
+            // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
             var cardDto = CardFixture.FindCardAnalysisDtoWithWhitespaceValueOutput(cardId);
@@ -1378,7 +1395,10 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync([]);
 
+            // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
+
+            // Assert
             Assert.Empty(result.Steps[0].Outputs);
         }
 
@@ -1386,6 +1406,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindByIdAnalyzeWithSteps", "Success")]
         public async Task FindByIdAnalyzeWithSteps_EmptyJsonObject_FallsBackToSingleField()
         {
+            // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
             var cardDto = CardFixture.FindCardAnalysisDtoWithEmptyJsonObjectOutput(cardId);
@@ -1397,7 +1418,10 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync([]);
 
+            // Act
             var result = await _cardServices.FindByIdAnalyzeWithSteps(cardId, headers);
+
+            // Assert
             Assert.Single(result.Steps[0].Outputs);
             Assert.Equal("{}", result.Steps[0].Outputs[0].Value);
         }
@@ -1406,6 +1430,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FindByIdAnalyzeWithSteps", "Fail")]
         public async Task FindByIdAnalyzeWithSteps_MalformedJsonObject_ThrowsAppException()
         {
+            // Arrange
             var cardId = 1;
             var headers = DocumentFixture.FindValidHeadersDto();
             var cardDto = CardFixture.FindCardAnalysisDtoWithJsonThatThrowsOnParse(cardId);
@@ -1417,8 +1442,11 @@ namespace WoopiAiHub.UnitTests.Services
                 .Setup(r => r.FindByStepToolByCardIdAsync(cardId))
                 .ReturnsAsync([]);
 
+            // Act
             var ex = await Assert.ThrowsAsync<AppException>(() =>
                 _cardServices.FindByIdAnalyzeWithSteps(cardId, headers));
+
+            // Assert
             Assert.Equal(ErrorCode.DefaultError, ex.ErrorCode);
         }
 
