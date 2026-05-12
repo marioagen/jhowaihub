@@ -14,7 +14,8 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         IQueryable<PromptDto> FindAllWithOwnerStatus(Guid idUser);
         IQueryable<PromptDto> FindByIdUser(Guid idUser);
         Task<ICollection<PromptIntegrationDto>> FindAllInternal();
-        Task<bool> UpdateAndRemovePromptApisFromPrompt(Prompt prompt, List<int> data);
+        Task<List<PromptApiTemplate>> FindPromptApiTemplatesByIds(List<int> ids);
+        Task UpdateAndRemovePromptApisFromPrompt(Prompt prompt, List<PromptApiTemplate> templatesToRemove);
         Prompt? FindByNameAndUser(string name, Guid idUser);
     }
 }
