@@ -602,7 +602,6 @@
                         text: response.text,
                         enableAccessToMcp: response.enableAccessToMcp,
                     };
-                    console.log(this.form);
                     this.setValues(this.form);
                     this.apiTemplatesSelected = response.promptApiTemplates.map(
                         (x) => x.apiTemplateId
@@ -644,7 +643,6 @@
                     enableAccessToMcp: this.values.enableAccessToMcp,
                     apiTemplatesSelected: this.apiTemplatesSelected.map((x) => x),
                 };
-                console.log(this.paramsData);
                 PromptService.updatePrompt(paramsData).then((response) => {
                     if (response.error) {
                         this.$notify({
