@@ -4,6 +4,7 @@ const ToolType = Object.freeze({
     API: "API",
     Quiz: "Quiz",
     Embeddings: "Embeddings",
+    Ocr: "OCR"
 });
 
 export default ToolType;

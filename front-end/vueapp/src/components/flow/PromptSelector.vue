@@ -128,7 +128,7 @@
         },
         data() {
             return {
-                promptAllowedDependencyToolTypes: [ToolType.API, ToolType.Quiz],
+                promptAllowedDependencyToolTypes: [ToolType.API, ToolType.Quiz, ToolType.Prompt, ToolType.Ocr],
                 nodeData: null,
                 previousStepTools: [],
                 selectedDependencies: [],
