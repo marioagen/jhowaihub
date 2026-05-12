@@ -13,7 +13,6 @@ namespace WoopiAiHub.Repository.Migrations
             migrationBuilder.Sql(@"
                 UPDATE Permissions SET [Active] = 0
                 WHERE [Description] IN (
-                    'permissions.descriptions.questions',
                     'permissions.descriptions.quizzes',
                     'permissions.descriptions.management',
                     'permissions.descriptions.users',
@@ -34,11 +33,84 @@ namespace WoopiAiHub.Repository.Migrations
                 ('View profiles', GETDATE(), 'permissions.descriptions.management.profiles', 'Management', 1)
                 ;
             ");
+
+            migrationBuilder.Sql(@"
+                INSERT INTO ProfilePermissions (ProfileId, PermissionId)
+                SELECT 
+                    Profiles.ProfileId, 
+                    NewPerms.Id
+                FROM (
+                    SELECT DISTINCT PP.ProfileId
+                    FROM ProfilePermissions PP 
+                    INNER JOIN Permissions PER ON PER.Id = PP.PermissionId
+                    WHERE PER.[Description] = 'permissions.descriptions.management'
+                ) AS Profiles
+                CROSS JOIN (
+                    SELECT P.Id
+                    FROM Permissions P 
+                    WHERE P.[Description] IN (
+                        'permissions.descriptions.management.users',
+                        'permissions.descriptions.management.teams',
+                        'permissions.descriptions.management.profiles'
+                    )
+                ) AS NewPerms
+                WHERE NOT EXISTS (
+                    SELECT 1 
+                    FROM ProfilePermissions Existing 
+                    WHERE Existing.ProfileId = Profiles.ProfileId 
+                    AND Existing.PermissionId = NewPerms.Id
+                );
+            ");
+
+            migrationBuilder.Sql(@"
+                INSERT INTO ProfilePermissions (ProfileId, PermissionId)
+                SELECT 
+                    Profiles.ProfileId, 
+                    NewPerms.Id
+                FROM (
+                    SELECT DISTINCT PP.ProfileId
+                    FROM ProfilePermissions PP 
+                    INNER JOIN Permissions PER ON PER.Id = PP.PermissionId
+                    WHERE PER.[Description] = 'permissions.descriptions.tools'
+                ) AS Profiles
+                CROSS JOIN (
+                    SELECT P.Id
+                    FROM Permissions P 
+                    WHERE P.[Description] IN (
+                        'permissions.descriptions.tools.prompts',
+                        'permissions.descriptions.tools.quizzes',
+                        'permissions.descriptions.tools.apis',
+                        'permissions.descriptions.tools.connectors'
+                    )
+                ) AS NewPerms
+                WHERE NOT EXISTS (
+                    SELECT 1 
+                    FROM ProfilePermissions Existing 
+                    WHERE Existing.ProfileId = Profiles.ProfileId 
+                    AND Existing.PermissionId = NewPerms.Id
+                );
+            ");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(@"
+                DELETE FROM ProfilePermissions
+                WHERE PermissionId IN (
+                    SELECT Id FROM Permissions
+                    WHERE [Description] IN (
+                        'permissions.descriptions.tools.prompts',
+                        'permissions.descriptions.tools.quizzes',
+                        'permissions.descriptions.tools.apis',
+                        'permissions.descriptions.tools.connectors',
+                        'permissions.descriptions.management.users',
+                        'permissions.descriptions.management.teams',
+                        'permissions.descriptions.management.profiles'
+                    )
+                );
+            ");
+
             migrationBuilder.Sql(@"
                 DELETE FROM Permissions
                 WHERE [Description] IN (
@@ -55,7 +127,6 @@ namespace WoopiAiHub.Repository.Migrations
             migrationBuilder.Sql(@"
                 UPDATE Permissions SET [Active] = 1
                 WHERE [Description] IN (
-                    'permissions.descriptions.questions',
                     'permissions.descriptions.quizzes',
                     'permissions.descriptions.management',
                     'permissions.descriptions.users',

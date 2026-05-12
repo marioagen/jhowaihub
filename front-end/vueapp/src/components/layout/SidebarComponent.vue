@@ -200,8 +200,6 @@
                 if (!list?.length) {
                     return [];
                 }
-
-                console.log(list);
                 return list.filter((item) => {
                     if (item.requiredPermissions?.length) {
                         return item.requiredPermissions.some((perm) =>
