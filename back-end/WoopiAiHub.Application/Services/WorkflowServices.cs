@@ -1269,11 +1269,14 @@ namespace WoopiAiHub.Application.Services
                 }
 
                 var typeName = dependencyTool.ToolType?.Name;
-                if (typeName != HandlersTypes.API && typeName != HandlersTypes.Quiz)
+                if (typeName != HandlersTypes.API
+                    && typeName != HandlersTypes.Quiz
+                    && typeName != HandlersTypes.Ocr
+                    && typeName!= HandlersTypes.Prompt)
                 {
                     throw new AppException(
                         ErrorCode.RequiredField,
-                        "Prompt tool dependencies must be API or Quiz tools only",
+                        "Prompt tool dependencies must be API, Quiz, OCR or Prompt tools only",
                         ToolLabel.PromptApiOrQuizDependencyRequired);
                 }
             }

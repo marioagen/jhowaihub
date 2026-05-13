@@ -652,7 +652,7 @@ const portuguese = {
             prompts: "Agentes",
             promptRequired: "Selecione ao menos um agente",
             promptDependenciesHint:
-                "Nesta ferramenta você só pode vincular ferramentas de API e questionários (Quiz) de etapas anteriores.",
+                "Nesta ferramenta você só pode vincular ferramentas de OCR, Agentes, API e questionários (Quiz) de etapas anteriores.",
             selectPrompt: "Selecione um agente",
             remoteAccess: "Acesso remoto",
         },
