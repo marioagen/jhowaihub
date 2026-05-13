@@ -153,7 +153,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View quizzes",
+            action: "Quizzes",
         },
         beforeEnter: authenticate,
     },
@@ -164,7 +164,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View quizzes",
+            action: "Quizzes",
         },
         beforeEnter: authenticate,
     },
@@ -175,7 +175,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View quizzes",
+            action: "Quizzes",
         },
         beforeEnter: authenticate,
     },
@@ -214,7 +214,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View users",
+            action: "Users",
         },
         beforeEnter: authenticate,
     },
@@ -225,7 +225,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View users",
+            action: "Users",
         },
         beforeEnter: authenticate,
     },
@@ -236,7 +236,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View teams",
+            action: "Teams",
         },
         beforeEnter: authenticate,
     },
@@ -247,7 +247,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View teams",
+            action: "Teams",
         },
         beforeEnter: authenticate,
     },
@@ -258,7 +258,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View profiles",
+            action: "Profiles",
         },
         beforeEnter: authenticate,
     },
@@ -269,7 +269,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View profiles",
+            action: "Profiles",
         },
         beforeEnter: authenticate,
     },
@@ -324,7 +324,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View connectors",
+            action: "Connectors",
         },
         beforeEnter: authenticate,
     },
@@ -357,7 +357,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View prompts",
+            action: "Prompts",
         },
         beforeEnter: authenticate,
     },
@@ -368,7 +368,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View prompts",
+            action: "Prompts",
         },
         beforeEnter: authenticate,
     },
@@ -379,7 +379,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View prompts",
+            action: "Prompts",
         },
         beforeEnter: authenticate,
         props: true,
@@ -402,7 +402,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View APIs",
+            action: "APIs",
         },
         beforeEnter: authenticate,
     },
@@ -413,7 +413,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View APIs",
+            action: "APIs",
         },
         beforeEnter: authenticate,
     },
@@ -424,7 +424,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View APIs",
+            action: "APIs",
         },
         beforeEnter: authenticate,
     },

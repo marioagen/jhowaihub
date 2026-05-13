@@ -24,13 +24,13 @@ namespace WoopiAiHub.Repository.Migrations
 
             migrationBuilder.Sql(@"
                 INSERT INTO Permissions ([Name], Created, [Description], [Group], [Active]) VALUES
-                ('View prompts', GETDATE(), 'permissions.descriptions.tools.prompts', 'Tools', 1),
-                ('View quizzes', GETDATE(), 'permissions.descriptions.tools.quizzes', 'Tools', 1),
-                ('View APIs', GETDATE(), 'permissions.descriptions.tools.apis', 'Tools', 1),
-                ('View connectors', GETDATE(), 'permissions.descriptions.tools.connectors', 'Tools', 1),
-                ('View users', GETDATE(), 'permissions.descriptions.management.users', 'Management', 1),
-                ('View teams', GETDATE(), 'permissions.descriptions.management.teams', 'Management', 1),
-                ('View profiles', GETDATE(), 'permissions.descriptions.management.profiles', 'Management', 1)
+                ('Prompts', GETDATE(), 'permissions.descriptions.tools.prompts', 'Tools', 1),
+                ('Quizzes', GETDATE(), 'permissions.descriptions.tools.quizzes', 'Tools', 1),
+                ('APIs', GETDATE(), 'permissions.descriptions.tools.apis', 'Tools', 1),
+                ('Connectors', GETDATE(), 'permissions.descriptions.tools.connectors', 'Tools', 1),
+                ('Users', GETDATE(), 'permissions.descriptions.management.users', 'Management', 1),
+                ('Teams', GETDATE(), 'permissions.descriptions.management.teams', 'Management', 1),
+                ('Profiles', GETDATE(), 'permissions.descriptions.management.profiles', 'Management', 1)
                 ;
             ");
 

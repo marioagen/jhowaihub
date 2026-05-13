@@ -77,9 +77,9 @@
                         },
                         labelKey: "pages.management",
                         requiredPermissions: [
-                            { permission: "Management", action: "View users" },
-                            { permission: "Management", action: "View teams" },
-                            { permission: "Management", action: "View profiles" },
+                            { permission: "Management", action: "Users" },
+                            { permission: "Management", action: "Teams" },
+                            { permission: "Management", action: "Profiles" },
                         ],
                     },
                     {
@@ -112,7 +112,7 @@
                         group: [
                             {
                                 permission: "Tools",
-                                action: "View prompts",
+                                action: "Prompts",
                                 activeKey: "Prompts",
                                 to: "/prompts",
                                 icon: {
@@ -123,7 +123,7 @@
                             },
                             {
                                 permission: "Tools",
-                                action: "View connectors",
+                                action: "Connectors",
                                 activeKey: "Connectors",
                                 to: "/tools",
                                 icon: {
@@ -134,7 +134,7 @@
                             },
                             {
                                 permission: "Tools",
-                                action: "View APIs",
+                                action: "APIs",
                                 activeKey: "Templates",
                                 to: "/templates",
                                 icon: {
@@ -145,7 +145,7 @@
                             },
                             {
                                 permission: "Tools",
-                                action: "View quizzes",
+                                action: "Quizzes",
                                 activeKey: "ManagementQuizzes",
                                 to: "/management-quizzes",
                                 icon: {
