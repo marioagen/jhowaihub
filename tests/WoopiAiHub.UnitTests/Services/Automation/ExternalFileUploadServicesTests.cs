@@ -5,6 +5,7 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
@@ -40,10 +41,12 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             var automationServicesMock = _mocker.GetMock<IAutomationServices>();
             var unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
             workflowServicesMock.Setup(s => s.FindModelById(It.IsAny<int>())).ReturnsAsync(workflow);
             documentRepositoryMock.Setup(r => r.Create(It.IsAny<Document>()));
             automationServicesMock.Setup(s => s.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(true);
             automationServicesMock.Setup(s => s.StartExecutionByWorkflowsAsync(It.IsAny<AutomationServicesDto>(), It.IsAny<List<Workflow>>())).Returns(Task.CompletedTask);
+            hubNotifierMock.Setup(h => h.WorkflowKanbanRefreshAsync(It.IsAny<string>(), It.IsAny<int>())).Returns(Task.CompletedTask);
 
             // Act
             await _service.ProcessExternalFileUpload(externalFileUploadDto);
@@ -56,6 +59,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             automationServicesMock.Verify(s => s.StartExecutionByWorkflowsAsync(It.IsAny<AutomationServicesDto>(), It.Is<List<Workflow>>(w => w.First() == workflow)), Times.Once);
             unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
             unitOfWorkMock.Verify(u => u.Rollback(), Times.Never);
+            hubNotifierMock.Verify(h => h.WorkflowKanbanRefreshAsync(externalFileUploadDto.Email, externalFileUploadDto.WorkflowId), Times.Once);
         }
 
         [Fact(DisplayName = "ProcessExternalFileUpload should successfully create document but not start execution when no executions available")]
@@ -71,10 +75,12 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             var automationServicesMock = _mocker.GetMock<IAutomationServices>();
             var unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
 
             workflowServicesMock.Setup(s => s.FindModelById(externalFileUploadDto.WorkflowId)).ReturnsAsync(workflow);
             documentRepositoryMock.Setup(r => r.Create(It.IsAny<Document>()));
             automationServicesMock.Setup(s => s.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(false);
+            hubNotifierMock.Setup(h => h.WorkflowKanbanRefreshAsync(It.IsAny<string>(), It.IsAny<int>())).Returns(Task.CompletedTask);
 
             // Act
             await _service.ProcessExternalFileUpload(externalFileUploadDto);
@@ -87,6 +93,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             automationServicesMock.Verify(s => s.StartExecutionByWorkflowsAsync(It.IsAny<AutomationServicesDto>(), It.IsAny<List<Workflow>>()), Times.Never);
             unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
             unitOfWorkMock.Verify(u => u.Rollback(), Times.Never);
+            hubNotifierMock.Verify(h => h.WorkflowKanbanRefreshAsync(externalFileUploadDto.Email, externalFileUploadDto.WorkflowId), Times.Once);
         }
 
         [Fact(DisplayName = "ProcessExternalFileUpload should do nothing when workflow is not found")]
@@ -99,6 +106,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
             var automationServicesMock = _mocker.GetMock<IAutomationServices>();
             var unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
 
             workflowServicesMock.Setup(s => s.FindModelById(externalFileUploadDto.WorkflowId)).ReturnsAsync((Workflow?)null);
 
@@ -113,6 +121,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             automationServicesMock.Verify(s => s.StartExecutionByWorkflowsAsync(It.IsAny<AutomationServicesDto>(), It.IsAny<List<Workflow>>()), Times.Never);
             unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
             unitOfWorkMock.Verify(u => u.Rollback(), Times.Never);
+            hubNotifierMock.Verify(h => h.WorkflowKanbanRefreshAsync(It.IsAny<string>(), It.IsAny<int>()), Times.Never);
         }
 
         [Fact(DisplayName = "ProcessExternalFileUpload should rollback and throw AppException on generic exception")]
@@ -124,6 +133,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var expectedExceptionMessage = "Database connection error";
             var workflowServicesMock = _mocker.GetMock<IWorkflowServices>();
             var unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
 
             workflowServicesMock.Setup(s => s.FindModelById(externalFileUploadDto.WorkflowId)).ThrowsAsync(new Exception(expectedExceptionMessage));
 
@@ -135,6 +145,38 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
             unitOfWorkMock.Verify(u => u.Commit(), Times.Never);
             unitOfWorkMock.Verify(u => u.Rollback(), Times.Once);
+            hubNotifierMock.Verify(h => h.WorkflowKanbanRefreshAsync(It.IsAny<string>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact(DisplayName = "ProcessExternalFileUpload should send WorkflowKanbanRefresh with the email and workflow id from the upload dto")]
+        [Trait("ProcessExternalFileUpload", "Success")]
+        public async Task ProcessExternalFileUpload_Success_ShouldSendKanbanRefreshNotificationWithDtoData()
+        {
+            // Arrange
+            var externalFileUploadDto = MessagingFixture.FindValidExternalFileUploadDto();
+            var workflow = WorkflowFixture.FindValidWorkflow();
+            var firstStep = WorkflowFixture.FindValidStep(workflow.Id);
+            workflow.Steps.Add(firstStep);
+            var workflowServicesMock = _mocker.GetMock<IWorkflowServices>();
+            var documentRepositoryMock = _mocker.GetMock<IDocumentRepository>();
+            var automationServicesMock = _mocker.GetMock<IAutomationServices>();
+            var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
+
+            workflowServicesMock.Setup(s => s.FindModelById(externalFileUploadDto.WorkflowId)).ReturnsAsync(workflow);
+            documentRepositoryMock.Setup(r => r.Create(It.IsAny<Document>()));
+            automationServicesMock.Setup(s => s.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(false);
+            hubNotifierMock.Setup(h => h.WorkflowKanbanRefreshAsync(It.IsAny<string>(), It.IsAny<int>())).Returns(Task.CompletedTask);
+
+            // Act
+            await _service.ProcessExternalFileUpload(externalFileUploadDto);
+
+            // Assert
+            hubNotifierMock.Verify(
+                h => h.WorkflowKanbanRefreshAsync(
+                    It.Is<string>(email => email == externalFileUploadDto.Email),
+                    It.Is<int>(id => id == externalFileUploadDto.WorkflowId)),
+                Times.Once);
+            hubNotifierMock.VerifyNoOtherCalls();
         }
     }
 }

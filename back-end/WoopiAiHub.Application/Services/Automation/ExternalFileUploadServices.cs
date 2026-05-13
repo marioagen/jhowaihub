@@ -2,6 +2,7 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
@@ -16,16 +17,19 @@ namespace WoopiAiHub.Application.Services.Automation
         private readonly IWorkflowServices _workflowServices;
         private readonly IDocumentRepository _documentRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubNotifier _hubNotifier;
 
         public ExternalFileUploadServices(IAutomationServices automationServices,
                                           IWorkflowServices workflowServices,
                                           IDocumentRepository documentRepository,
-                                          IUnitOfWork unitOfWork)
+                                          IUnitOfWork unitOfWork,
+                                          IHubNotifier hubNotifier)
         {
             _automationServices = automationServices;
             _workflowServices = workflowServices;
             _documentRepository = documentRepository;
             _unitOfWork = unitOfWork;
+            _hubNotifier = hubNotifier;
         }
 
         /// <summary>
@@ -37,9 +41,10 @@ namespace WoopiAiHub.Application.Services.Automation
         public async Task ProcessExternalFileUpload(ExternalFileUploadDto externalFileUploadDto)
         {
             _unitOfWork.BeginTransaction();
+            Workflow? workflow;
             try
             {
-                var workflow = await _workflowServices.FindModelById(externalFileUploadDto.WorkflowId);
+                workflow = await _workflowServices.FindModelById(externalFileUploadDto.WorkflowId);
                 if ( workflow != null)
                 {
                     var document = CreateDocument(externalFileUploadDto, workflow);
@@ -52,6 +57,7 @@ namespace WoopiAiHub.Application.Services.Automation
                     {
                         var automationServicesDto = CreateAutomation(externalFileUploadDto);
                         await _automationServices.StartExecutionByWorkflowsAsync(automationServicesDto, [workflow]);
+                        await _hubNotifier.WorkflowKanbanRefreshAsync(externalFileUploadDto.Email, externalFileUploadDto.WorkflowId);
                     }
                 }
                 _unitOfWork.Commit();
