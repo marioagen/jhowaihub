@@ -27,7 +27,6 @@ export const getJWTPermissions = (token) => {
         const raw = payload.permissions ?? payload.permission;
         const permissions =
             !raw || raw === "" ? [] : typeof raw === "string" ? JSON.parse(raw) : raw;
-
         const isAdmin = payload.isAdmin === "true";
         return {
             permissions: permissions,
