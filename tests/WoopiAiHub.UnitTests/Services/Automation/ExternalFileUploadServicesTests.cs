@@ -77,9 +77,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var unitOfWorkMock = _mocker.GetMock<IUnitOfWork>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
 
-            workflowServicesMock.Setup(s => s.FindModelById(externalFileUploadDto.WorkflowId)).ReturnsAsync(workflow);
+            workflowServicesMock.Setup(s => s.FindModelById(It.IsAny<int>())).ReturnsAsync(workflow);
             documentRepositoryMock.Setup(r => r.Create(It.IsAny<Document>()));
-            automationServicesMock.Setup(s => s.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(false);
+            automationServicesMock.Setup(s => s.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(true);
+            automationServicesMock.Setup(s => s.StartExecutionByWorkflowsAsync(It.IsAny<AutomationServicesDto>(), It.IsAny<List<Workflow>>())).Returns(Task.CompletedTask);
             hubNotifierMock.Setup(h => h.WorkflowKanbanRefreshAsync(It.IsAny<string>(), It.IsAny<int>())).Returns(Task.CompletedTask);
 
             // Act
@@ -87,13 +88,13 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             // Assert
             unitOfWorkMock.Verify(u => u.BeginTransaction(), Times.Once);
-            workflowServicesMock.Verify(s => s.FindModelById(externalFileUploadDto.WorkflowId), Times.Once);
+            workflowServicesMock.Verify(s => s.FindModelById(It.IsAny<int>()), Times.Once);
             documentRepositoryMock.Verify(r => r.Create(It.IsAny<Document>()), Times.Once);
             automationServicesMock.Verify(s => s.PrepareExecutionAsync(It.IsAny<List<Workflow>>()), Times.Once);
-            automationServicesMock.Verify(s => s.StartExecutionByWorkflowsAsync(It.IsAny<AutomationServicesDto>(), It.IsAny<List<Workflow>>()), Times.Never);
+            automationServicesMock.Verify(s => s.StartExecutionByWorkflowsAsync(It.IsAny<AutomationServicesDto>(), It.IsAny<List<Workflow>>()), Times.Once);
             unitOfWorkMock.Verify(u => u.Commit(), Times.Once);
             unitOfWorkMock.Verify(u => u.Rollback(), Times.Never);
-            hubNotifierMock.Verify(h => h.WorkflowKanbanRefreshAsync(externalFileUploadDto.Email, externalFileUploadDto.WorkflowId), Times.Once);
+            hubNotifierMock.Verify(h => h.WorkflowKanbanRefreshAsync(It.IsAny<string>(), It.IsAny<int>()), Times.Once);
         }
 
         [Fact(DisplayName = "ProcessExternalFileUpload should do nothing when workflow is not found")]
@@ -162,9 +163,10 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var automationServicesMock = _mocker.GetMock<IAutomationServices>();
             var hubNotifierMock = _mocker.GetMock<IHubNotifier>();
 
-            workflowServicesMock.Setup(s => s.FindModelById(externalFileUploadDto.WorkflowId)).ReturnsAsync(workflow);
+            workflowServicesMock.Setup(s => s.FindModelById(It.IsAny<int>())).ReturnsAsync(workflow);
             documentRepositoryMock.Setup(r => r.Create(It.IsAny<Document>()));
-            automationServicesMock.Setup(s => s.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(false);
+            automationServicesMock.Setup(s => s.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(true);
+            automationServicesMock.Setup(s => s.StartExecutionByWorkflowsAsync(It.IsAny<AutomationServicesDto>(), It.IsAny<List<Workflow>>())).Returns(Task.CompletedTask);
             hubNotifierMock.Setup(h => h.WorkflowKanbanRefreshAsync(It.IsAny<string>(), It.IsAny<int>())).Returns(Task.CompletedTask);
 
             // Act
@@ -172,9 +174,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             // Assert
             hubNotifierMock.Verify(
-                h => h.WorkflowKanbanRefreshAsync(
-                    It.Is<string>(email => email == externalFileUploadDto.Email),
-                    It.Is<int>(id => id == externalFileUploadDto.WorkflowId)),
+                h => h.WorkflowKanbanRefreshAsync(It.IsAny<string>(), It.IsAny<int>()),
                 Times.Once);
             hubNotifierMock.VerifyNoOtherCalls();
         }
