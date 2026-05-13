@@ -1605,7 +1605,7 @@ namespace WoopiAiHub.UnitTests.Services
             promptStepToolEntity.Step = step;
             step.StepTools.Add(promptStepToolEntity);
 
-            var ocrTool = WorkflowFixture.CreateToolModel(999, "OCR Tool", HandlersTypes.Ocr);
+            var embeddings = WorkflowFixture.CreateToolModel(999, "Embedding Tool", HandlersTypes.Embeddings);
             var promptTool = WorkflowFixture.CreateToolModel(2, "Prompt Tool", HandlersTypes.Prompt);
 
             _workflowRepositoryMock.Setup(x => x.FindByIdForFlow(1))
@@ -1618,14 +1618,14 @@ namespace WoopiAiHub.UnitTests.Services
                 .Returns(Task.CompletedTask);
 
             _toolRepositoryMock.Setup(x => x.FindModelByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync((int id) => id == 999 ? ocrTool : id == 2 ? promptTool : ocrTool);
+                .ReturnsAsync((int id) => id == 999 ? embeddings : id == 2 ? promptTool : embeddings);
 
             _unitOfWorkMock.Setup(x => x.SaveChangesAsync()).ReturnsAsync(1);
 
             var exception =
                 await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Prompt tool dependencies must be API or Quiz tools only", exception.Message);
+            Assert.Equal("Prompt tool dependencies must be API, Quiz, OCR or Prompt tools only", exception.Message);
             Assert.Equal(ToolLabel.PromptApiOrQuizDependencyRequired, exception.LabelError);
 
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);
@@ -2099,7 +2099,7 @@ namespace WoopiAiHub.UnitTests.Services
             var exception =
                 await Assert.ThrowsAsync<AppException>(() => _workflowServices.UpdatePhase3(workflowPhase3Dto, new HeadersDto()));
             Assert.Equal(ErrorCode.RequiredField, exception.ErrorCode);
-            Assert.Equal("Prompt tool dependencies must be API or Quiz tools only", exception.Message);
+            Assert.Equal("Prompt tool dependencies must be API, Quiz, OCR or Prompt tools only", exception.Message);
             Assert.Equal(ToolLabel.PromptApiOrQuizDependencyRequired, exception.LabelError);
 
             _unitOfWorkMock.Verify(x => x.BeginTransaction(), Times.Once);

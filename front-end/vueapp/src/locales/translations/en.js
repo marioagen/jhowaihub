@@ -663,7 +663,7 @@ const english = {
             prompts: "Agents",
             promptRequired: "Select at least one agent",
             promptDependenciesHint:
-                "For this tool you can only link API tools and questionnaires (Quiz) from previous steps.",
+                "For this tool you can only link OCR, Agents, API tools and questionnaires (Quiz) from previous steps.",
             selectPrompt: "Select an agent",
             remoteAccess: "Remote Access",
         },
