@@ -1553,17 +1553,22 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Asynchronously counts the number of cards associated with the steps of the specified workflow.
+        /// Asynchronously counts every card associated with the steps of the specified workflow,
+        /// including soft-deleted (disabled) ones. Used by the wizard UI to decide whether the
+        /// blocker modal must appear before destructive edits like step removal — historical
+        /// cards still hold FK references to the Step (Restrict), so allowing the deletion would
+        /// fail at the database level. Blocking here also preserves audit traceability since no
+        /// data needs to be hard-deleted.
         /// </summary>
         /// <param name="id">The unique identifier of the workflow for which to count associated cards.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the total number of cards linked
-        /// to the workflow's steps.</returns>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the total number of cards
+        /// (active or disabled) linked to the workflow's steps.</returns>
         /// <exception cref="AppException">Thrown if a workflow with the specified identifier does not exist.</exception>
         public async Task<int> CountCards(int id)
         {
             var workflow = await FindWorkflowModel(id);
             var stepIds = workflow.Steps.Select(s => s.Id).ToList();
-            return await _cardRepository.CountByStepsInUse(stepIds);
+            return await _cardRepository.CountAllByStepIdsAsync(stepIds);
         }
 
         /// <summary>

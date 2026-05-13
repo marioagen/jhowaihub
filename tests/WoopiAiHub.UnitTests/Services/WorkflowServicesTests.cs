@@ -2778,7 +2778,7 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(workflowId))
                 .ReturnsAsync(workflow);
 
-            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+            _cardRepositoryMock.Setup(r => r.CountAllByStepIdsAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(3);
 
             // Act
@@ -2787,7 +2787,7 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             Assert.Equal(3, result);
             _workflowRepositoryMock.Verify(r => r.FindByIdReturnModel(workflowId), Times.Once);
-            _cardRepositoryMock.Verify(r => r.CountByStepsInUse(It.Is<List<int>>(ids =>
+            _cardRepositoryMock.Verify(r => r.CountAllByStepIdsAsync(It.Is<List<int>>(ids =>
                 ids.Count == 2 && ids.Contains(1) && ids.Contains(2))), Times.Once);
         }
 
@@ -2802,7 +2802,7 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(workflowId))
                 .ReturnsAsync(workflow);
 
-            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+            _cardRepositoryMock.Setup(r => r.CountAllByStepIdsAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(0);
 
             // Act
@@ -2810,7 +2810,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.Equal(0, result);
-            _cardRepositoryMock.Verify(r => r.CountByStepsInUse(It.IsAny<List<int>>()), Times.Once);
+            _cardRepositoryMock.Verify(r => r.CountAllByStepIdsAsync(It.IsAny<List<int>>()), Times.Once);
         }
 
         [Fact(DisplayName = "CountCards should return zero when steps have no cards")]
@@ -2830,7 +2830,7 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(workflowId))
                 .ReturnsAsync(workflow);
 
-            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+            _cardRepositoryMock.Setup(r => r.CountAllByStepIdsAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(0);
 
             // Act
@@ -2838,6 +2838,32 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.Equal(0, result);
+        }
+
+        [Fact(DisplayName = "CountCards counts disabled cards too so the wizard blocker also fires for residual data")]
+        [Trait("CountCards", "Success")]
+        public async Task CountCards_StepsWithDisabledCards_IncludesThemInTotal()
+        {
+            // Arrange
+            var workflowId = 1;
+            var workflow = new Workflow(workflowId, DateTime.UtcNow, new List<Team>(), "Test Workflow");
+
+            var step1 = new Step(1, DateTime.Now, workflowId, "Step 1", 1, 1, 1);
+            workflow.AddStep(step1);
+
+            _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(workflowId))
+                .ReturnsAsync(workflow);
+
+            _cardRepositoryMock.Setup(r => r.CountAllByStepIdsAsync(It.IsAny<List<int>>()))
+                .ReturnsAsync(5);
+
+            // Act
+            var result = await _workflowServices.CountCards(workflowId);
+
+            // Assert
+            Assert.Equal(5, result);
+            _cardRepositoryMock.Verify(r => r.CountAllByStepIdsAsync(It.IsAny<List<int>>()), Times.Once);
+            _cardRepositoryMock.Verify(r => r.CountByStepsInUse(It.IsAny<ICollection<int>>()), Times.Never);
         }
 
         [Fact(DisplayName = "CountCards should throw AppException when workflow not found")]
@@ -2876,14 +2902,14 @@ namespace WoopiAiHub.UnitTests.Services
             _workflowRepositoryMock.Setup(r => r.FindByIdReturnModel(workflowId))
                 .ReturnsAsync(workflow);
 
-            _cardRepositoryMock.Setup(r => r.CountByStepsInUse(It.IsAny<List<int>>()))
+            _cardRepositoryMock.Setup(r => r.CountAllByStepIdsAsync(It.IsAny<List<int>>()))
                 .ReturnsAsync(0);
 
             // Act
             await _workflowServices.CountCards(workflowId);
 
             // Assert
-            _cardRepositoryMock.Verify(r => r.CountByStepsInUse(It.Is<List<int>>(ids =>
+            _cardRepositoryMock.Verify(r => r.CountAllByStepIdsAsync(It.Is<List<int>>(ids =>
                 ids.Count == 3 && ids.Contains(5) && ids.Contains(10) && ids.Contains(15))), Times.Once);
         }
 

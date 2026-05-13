@@ -19,6 +19,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> DisableByIds(List<int> cardIds);
         Task<bool> DeleteByDocumentIds(List<int> documentIds);
         Task<int> CountByStepsInUse(ICollection<int> ids);
+        Task<int> CountAllByStepIdsAsync(ICollection<int> ids);
         Task<ICollection<int>> FindActiveCardIdsInFirstStepAsync(IEnumerable<int> cardIds);
         Task<Card?> FindByDocumentIdCardAsync(int documentId);
         Task<List<Card>> FindByDocumentIdCardListAsync(int documentId);

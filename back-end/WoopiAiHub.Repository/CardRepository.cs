@@ -31,6 +31,20 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Counts every card linked to the provided step ids regardless of the Enable flag.
+        /// Used by the wizard's blocker logic so that historical (soft-deleted) cards still
+        /// prevent destructive edits like step removal — preserving audit traceability.
+        /// </summary>
+        /// <param name="ids">Collection of step ids to check.</param>
+        /// <returns>Number of cards (active or disabled) that reference any of the given steps.</returns>
+        public async Task<int> CountAllByStepIdsAsync(ICollection<int> ids)
+        {
+            return await _context.Cards
+                .IgnoreQueryFilters()
+                .CountAsync(a => ids.Contains(a.StepId));
+        }
+
+        /// <summary>
         /// Returns a card by its ID.
         /// </summary>
         /// <param name="id"></param>

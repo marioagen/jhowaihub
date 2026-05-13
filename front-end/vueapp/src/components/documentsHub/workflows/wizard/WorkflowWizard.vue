@@ -471,7 +471,7 @@
                         variant: "success",
                         icon: "CircleCheckBig",
                     });
-                } catch (error) {
+                } catch {
                     this.$notify({
                         title: "workflow.index",
                         message: "workflow.phase2Error",
@@ -559,8 +559,10 @@
             async handleRemoveToolFlow(step) {
                 this.isLoading = true;
                 try {
-                    const hasConstraints = await WorkflowService.hasStepToolConstraints(step.id);
-                    if (hasConstraints) {
+                    const documentsCount = this.workflowIdInternal
+                        ? await WorkflowService.countDocuments(this.workflowIdInternal)
+                        : 0;
+                    if (documentsCount > 0) {
                         this.pendingStepToRemove = step;
                         this.$refs.RemoveToolValidationDialog.open();
                     } else {

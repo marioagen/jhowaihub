@@ -733,15 +733,13 @@
             async save() {
                 this.isLoading = true;
                 try {
-                    if (!this.stepId) {
+                    if (!this.workflowId) {
                         await this.executeSave();
                         return;
                     }
 
-                    const hasConstraints = await WorkflowService.hasStepToolConstraints(
-                        this.stepId
-                    );
-                    if (hasConstraints) {
+                    const documentsCount = await WorkflowService.countDocuments(this.workflowId);
+                    if (documentsCount > 0) {
                         this.$refs.RemoveToolValidationDialog.open();
                     } else {
                         await this.executeSave();

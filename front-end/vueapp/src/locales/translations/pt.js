@@ -340,6 +340,7 @@ const portuguese = {
         error: "Erro",
         expand: "Expandir",
         failed: "falhou!",
+        gotIt: "Entendi",
         home: "Home",
         id: "ID",
         lines: "Linhas por página",
@@ -1412,9 +1413,11 @@ const portuguese = {
         stepNamePlaceholder: "Nome da etapa",
         steps: "Etapas da Esteira de Processamento",
         stepsTitle: "Etapas da Esteira de Processamento",
-        stepHasDocumentsTitle: "Etapa com documentos em andamento",
+        stepHasDocumentsTitle: "Etapa com documentos vinculados",
         stepHasDocumentsMessage:
-            "Existem documentos em processamento nesta esteira. Para remover uma etapa é necessário que não haja documentos em andamento.",
+            "Esta esteira já possui documentos atrelados às suas etapas — sejam eles atuais ou que já passaram por aqui.",
+        stepHasDocumentsHistoryNote:
+            "Mesmo documentos excluídos pelo usuário continuam vinculados ao histórico da esteira para garantir a auditoria. Por isso, etapas não podem ser removidas enquanto houver qualquer documento associado.",
         stepSubtitle: "Configure as regras e responsáveis",
         stepTitle: "Etapa da Esteira de Processamento",
         subtitle: "Visualize o fluxo de documentos através das etapas de processamento",

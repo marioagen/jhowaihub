@@ -357,6 +357,7 @@ const spanish = {
         error: "Error",
         expand: "Expandir",
         failed: "fallido!",
+        gotIt: "Entendido",
         home: "Home",
         id: "ID",
         lines: "Líneas por página",
@@ -1421,9 +1422,11 @@ const spanish = {
         stepNamePlaceholder: "Nombre del paso",
         steps: "Etapas del Workflow",
         stepsTitle: "Pasos del flujo de trabajo",
-        stepHasDocumentsTitle: "Etapa con documentos en progreso",
+        stepHasDocumentsTitle: "Etapa con documentos vinculados",
         stepHasDocumentsMessage:
-            "Hay documentos en procesamiento en este flujo de trabajo. Para eliminar una etapa, es necesario que no haya documentos en progreso.",
+            "Este flujo ya tiene documentos asociados a sus etapas, ya sea en progreso o en el historial del flujo.",
+        stepHasDocumentsHistoryNote:
+            "Incluso los documentos eliminados por el usuario permanecen vinculados al historial del flujo para garantizar la trazabilidad de auditoría. Por eso, las etapas no pueden eliminarse mientras exista cualquier documento asociado.",
         stepSubtitle: "Configura las reglas y responsables",
         stepTitle: "Etapa del Workflow",
         subtitle: "Visualiza el flujo de documentos a través de las etapas de procesamiento",

@@ -5,15 +5,55 @@
             ref="stepDocumentsModal"
             title="workflow.stepHasDocumentsTitle"
         >
-            <p>{{ $t("workflow.stepHasDocumentsMessage") }}</p>
-            <template #footer>
-                <div class="modal-footer justify-content-center">
+            <template #header>
+                <div class="modal-header step-docs-modal-header">
+                    <button
+                        class="btn btn-outline-warning step-docs-icon-btn"
+                        type="button"
+                        disabled
+                    >
+                        <LucideIcon
+                            icon="AlertTriangle"
+                            :size="20"
+                        />
+                    </button>
+                    <h5 class="modal-title ms-2 step-docs-modal-title">
+                        {{ $t("workflow.stepHasDocumentsTitle") }}
+                    </h5>
                     <button
                         type="button"
-                        class="btn btn-secondary"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                    />
+                </div>
+            </template>
+
+            <div class="step-docs-modal-body">
+                <p class="step-docs-message">
+                    {{ $t("workflow.stepHasDocumentsMessage") }}
+                </p>
+                <div class="step-docs-history-note">
+                    <div class="step-docs-history-icon">
+                        <LucideIcon
+                            icon="Info"
+                            :size="18"
+                        />
+                    </div>
+                    <p class="step-docs-history-text mb-0">
+                        {{ $t("workflow.stepHasDocumentsHistoryNote") }}
+                    </p>
+                </div>
+            </div>
+
+            <template #footer>
+                <div class="modal-footer justify-content-center step-docs-modal-footer">
+                    <button
+                        type="button"
+                        class="btn btn-primary px-4"
                         data-bs-dismiss="modal"
                     >
-                        {{ $t("common.close") }}
+                        {{ $t("common.gotIt") }}
                     </button>
                 </div>
             </template>
@@ -92,8 +132,8 @@
                                 <button
                                     type="button"
                                     class="btn btn-link btn-sm flex-shrink-0"
-                                    @click="removeStep(step)"
                                     :disabled="isCheckingDocuments"
+                                    @click="removeStep(step)"
                                 >
                                     <LucideIcon icon="X" />
                                 </button>
@@ -297,11 +337,11 @@
                 isLoadingProfiles: true,
                 isLoadingStatus: true,
                 tempStepCounter: 1,
-                isCheckingDocuments: false,
                 profileSearches: {},
                 openProfileMenuStepId: null,
                 profileDropdownStyle: {},
                 profileMenuAnchorRect: null,
+                isCheckingDocuments: false,
             };
         },
 
@@ -613,5 +653,69 @@
     }
     .border {
         border-color: var(--color-border-form-control) !important;
+    }
+
+    .step-docs-modal-header {
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--color-border-form-control, #e9ecef);
+    }
+
+    .step-docs-icon-btn {
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border-radius: 50%;
+        opacity: 1;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    .step-docs-modal-title {
+        font-weight: 600;
+        margin: 0;
+        flex-grow: 1;
+    }
+
+    .step-docs-modal-body {
+        padding: 24px 24px 8px;
+    }
+
+    .step-docs-message {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: var(--color-body-content);
+        margin-bottom: 18px;
+    }
+
+    .step-docs-history-note {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 14px 16px;
+        background-color: rgba(255, 193, 7, 0.08);
+        border-left: 4px solid #ffc107;
+        border-radius: 6px;
+    }
+
+    .step-docs-history-icon {
+        flex-shrink: 0;
+        color: #b07d00;
+        margin-top: 2px;
+    }
+
+    .step-docs-history-text {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: var(--color-body-content);
+        font-weight: 600;
+    }
+
+    .step-docs-modal-footer {
+        padding: 16px 20px 20px;
+        border-top: none;
     }
 </style>

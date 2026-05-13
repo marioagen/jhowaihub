@@ -354,6 +354,7 @@ const english = {
         error: "Error",
         expand: "Expand",
         failed: "failed!",
+        gotIt: "Got it",
         home: "Home",
         id: "ID",
         lines: "Lines per page",
@@ -1414,9 +1415,11 @@ const english = {
         stepNamePlaceholder: "Step Name",
         steps: "Workflow Steps",
         stepsTitle: "Workflow Steps",
-        stepHasDocumentsTitle: "Step has documents in progress",
+        stepHasDocumentsTitle: "Step has linked documents",
         stepHasDocumentsMessage:
-            "There are documents being processed in this workflow. To remove a step, all documents must be fully processed first.",
+            "This workflow already has documents tied to its steps — whether they are still in progress or part of the workflow history.",
+        stepHasDocumentsHistoryNote:
+            "Even documents that users have deleted remain linked to the workflow history to preserve auditability. Because of that, steps can't be removed while any document is associated with them.",
         stepSubtitle: "Set up rules and responsibilities",
         stepTitle: "Workflow Step",
         subtitle: "View the flow of documents through the processing stages",
