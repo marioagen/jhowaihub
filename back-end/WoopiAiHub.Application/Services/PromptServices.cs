@@ -504,7 +504,8 @@ namespace WoopiAiHub.Application.Services
                 promptUpdateDto.Description,
                 promptUpdateDto.Text,
                 promptDto.IdUser,
-                enableAccessToMcp: promptDto.EnableAccessToMcp);
+                isEdited: true,
+                enableAccessToMcp: promptUpdateDto.EnableAccessToMcp);
 
             var apiToDelete = promptDto.PromptApiTemplates.Where(x => !promptUpdateDto.ApiTemplatesSelected.Contains(x.ApiTemplateId)).Select(x => x.Id).ToList();
             var apiToCreate = promptUpdateDto.ApiTemplatesSelected.Where(x => !promptDto.PromptApiTemplates.Any(p => p.ApiTemplateId == x));
