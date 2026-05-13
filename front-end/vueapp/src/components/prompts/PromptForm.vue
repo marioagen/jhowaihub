@@ -182,7 +182,7 @@
                                     </span>
                                 </button>
                             </div>
-                            <div class="mb-3 team-selector-container rounded p-3">
+                            <div v-if="mcpIsActive" class="mb-3 team-selector-container rounded p-3">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <div class="d-flex align-items-center mb-1">
                                         <LucideIcon
@@ -496,6 +496,7 @@
                 testContext: "",
                 testResult: "",
                 isTesting: false,
+                mcpIsActive: ENV_CONFIG.VUE_APP_MCP_IS_ACTIVE || false,
             };
         },
         computed: {

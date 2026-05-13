@@ -84,7 +84,7 @@
                                         </span>
                                     </Field>
                                 </div>
-                                <div class="mb-3">
+                                <div v-if="mcpIsActive" class="mb-3">
                                     <Field
                                         name="enableAccessFromMcp"
                                         type="checkbox"
@@ -677,6 +677,7 @@
                     { name: "body", label: "template.tabBody" },
                     { name: "tests", label: "template.tabTests" },
                 ],
+                mcpIsActive: ENV_CONFIG.VUE_APP_MCP_IS_ACTIVE || false,
             };
         },
         computed: {
