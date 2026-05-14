@@ -108,6 +108,7 @@
                 </div>
                 <div
                     v-if="showUsers"
+                    ref="userPanel"
                     class="main-div shadow-sm mt-2"
                 >
                     <Form
@@ -393,6 +394,11 @@
             },
             showUserSection() {
                 this.showUsers = !this.showUsers;
+                if (this.showUsers) {
+                    this.$nextTick(() => {
+                        this.$refs.userPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    });
+                }
             },
             closeUserSection() {
                 this.userData = {};

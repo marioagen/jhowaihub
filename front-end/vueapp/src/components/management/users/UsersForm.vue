@@ -157,56 +157,86 @@
                     </div>
                 </div>
             </Form>
-        </div>
         <div
             v-if="showTeams"
-            class="main-div shadow-sm mt-2"
+            ref="teamPanel"
+            class="row mt-2"
         >
+        <div class="main-div shadow-sm">
             <Form
                 @submit="createTeam"
                 ref="formRefTeam"
                 v-slot="{ meta }"
             >
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label
-                            for="teamName"
-                            class="form-label fw-semibold mb-0"
-                        >
-                            {{ $t("management.teams.teamName") }}
-                        </label>
-                        <Field
-                            type="text"
-                            class="form-control form-control-sm"
-                            id="teamName"
-                            ref="teamNameInput"
-                            autocomplete="off"
-                            name="teamName"
-                            v-model="teamData.name"
-                            :placeholder="$t('management.teams.typeTeamName')"
-                            :rules="'required|min:3|max:100'"
-                        />
-                        <ErrorMessage
-                            name="teamName"
-                            class="invalid-feedback d-block"
-                        />
-                    </div>
-                </div>
-                <div class="col-auto ms-auto">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0">{{ $t("management.teams.createTitle") }}</h6>
                     <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        @click="closeTeamSection"
+                    >
+                        {{ $t("common.cancel") }}
+                    </button>
+                </div>
+                <div class="mb-3">
+                    <label
+                        for="teamName"
+                        class="form-label fw-semibold mb-0"
+                    >
+                        {{ $t("management.teams.teamName") }}
+                        <span class="text-danger ms-1">*</span>
+                    </label>
+                    <Field
+                        type="text"
+                        class="form-control form-control-sm"
+                        id="teamName"
+                        ref="teamNameInput"
+                        autocomplete="off"
+                        name="teamName"
+                        v-model="teamData.name"
+                        :placeholder="$t('management.teams.typeTeamName')"
+                        :rules="'required|min:3|max:100'"
+                    />
+                    <ErrorMessage
+                        name="teamName"
+                        class="invalid-feedback d-block"
+                    />
+                </div>
+                <SelectionListComponent
+                    :id="'team-profiles'"
+                    :labelPanel="'management.profiles.profiles'"
+                    :labelSelectedQuantity="'management.profiles.selectedProfiles'"
+                    :labelSearch="'management.profiles.searchProfiles'"
+                    :items="profilesList"
+                    :loading="isLoadingProfiles"
+                    chip-icon="ShieldCheck"
+                    v-model:selectedItems="selectedProfiles"
+                />
+                <div class="d-flex justify-content-end gap-2 mt-3">
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        @click="closeTeamSection"
+                    >
+                        {{ $t("common.cancel") }}
+                    </button>
+                    <button
+                        type="submit"
                         class="btn btn-primary btn-sm"
                         :disabled="!meta.valid"
                     >
                         <LucideIcon
-                            icon="Save"
+                            icon="Plus"
                             :size="15"
                         />
-                        {{ $t("common.save") }}
+                        {{ $t("management.teams.createBtn") }}
                     </button>
                 </div>
             </Form>
         </div>
-    </main>
+        </div>
+    </div>
+</main>
 </template>
 <script>
     import api from "@/services/api";
@@ -240,6 +270,7 @@
         data() {
             return {
                 isLoading: true,
+                isLoadingProfiles: false,
                 userData: {
                     id: null,
                     name: "",
@@ -250,6 +281,7 @@
                 },
                 teamData: {},
                 selectedTeams: [],
+                selectedProfiles: [],
                 searchTeams: "",
                 teamsList: [],
                 profilesList: [],
@@ -294,6 +326,7 @@
         },
         mounted() {
             this.getTeams();
+            this.getProfiles();
             this.setupEdit();
         },
         methods: {
@@ -353,6 +386,26 @@
                         this.isLoading = false;
                     });
             },
+            getProfiles() {
+                var paramsReq = {
+                    search: "",
+                    pageSize: 0,
+                    page: 1,
+                    isAscending: this.isAscending,
+                };
+
+                this.isLoadingProfiles = true;
+                api.get("/Profile/Paged", { params: paramsReq })
+                    .then(({ data }) => {
+                        this.profilesList = data.content;
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    })
+                    .finally(() => {
+                        this.isLoadingProfiles = false;
+                    });
+            },
             selectAll() {
                 this.selectedTeams = this.filteredTeams.map((user) => user.id);
             },
@@ -367,10 +420,19 @@
             },
             openTeamSection() {
                 this.showTeams = !this.showTeams;
+                if (this.showTeams) {
+                    this.$nextTick(() => {
+                        this.$refs.teamPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    });
+                }
             },
             closeTeamSection() {
                 this.showTeams = false;
                 this.teamData.name = "";
+                this.selectedProfiles = [];
+                if (this.$refs.formRefTeam) {
+                    this.$refs.formRefTeam.resetForm();
+                }
             },
             saveUser() {
                 let response;
@@ -462,12 +524,13 @@
             createTeam() {
                 const team = {
                     name: this.teamData.name,
+                    profileIds: this.selectedProfiles,
                 };
                 api.post("Team", team)
                     .then(() => {
                         this.$notify({
-                            title: "management.teams.title",
-                            message: "management.teams.saveSuccess",
+                            title: this.$t("management.teams.title"),
+                            message: this.$t("management.teams.saveSuccess"),
                             variant: "success",
                             icon: "CircleCheckBig",
                         });
@@ -476,17 +539,17 @@
                     })
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
-                        let errorMessage = "management.teams.invalid";
+                        let notifyMessage = this.$t("management.teams.invalid");
                         if (errorCode && errorCode === ErrorCode.Duplicated) {
-                            this.$refs.formRef.setFieldError(
+                            this.$refs.formRefTeam.setFieldError(
                                 "teamName",
                                 this.$t("management.teams.duplicated")
                             );
-                            errorMessage = "management.teams.duplicated";
+                            notifyMessage = this.$t("management.teams.duplicated");
                         }
                         this.$notify({
-                            title: "management.teams.title",
-                            message: errorMessage,
+                            title: this.$t("management.teams.title"),
+                            message: notifyMessage,
                             variant: "danger",
                             icon: "CircleX",
                         });
