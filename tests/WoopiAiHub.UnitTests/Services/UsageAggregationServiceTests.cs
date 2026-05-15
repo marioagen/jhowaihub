@@ -136,6 +136,90 @@ namespace WoopiAiHub.UnitTests.Services
             await Assert.ThrowsAsync<InvalidOperationException>(() => service.ProcessUnprocessedUsageAsync());
         }
 
+        private (Mock<IUsageDailyRepository> usageDailyRepo, Mock<IUsageMonthRepository> usageMonthRepo) SetupTenantScope(
+            List<TenantListDto> tenants,
+            List<UsageDaily> unprocessedRecords)
+        {
+            _mocker.GetMock<IMarketPlaceApi>()
+                .Setup(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+                .ReturnsAsync(tenants);
+
+            var mockScope = new Mock<IServiceScope>();
+            var mockServiceProvider = new Mock<IServiceProvider>();
+            var mockHttpAccessor = new Mock<IHttpContextAccessor>();
+            var mockUsageDailyRepo = new Mock<IUsageDailyRepository>();
+            var mockUsageMonthRepo = new Mock<IUsageMonthRepository>();
+
+            var mockScopeConfig = new Mock<IConfiguration>();
+            var mockConnectionSection = new Mock<IConfigurationSection>();
+            mockConnectionSection.Setup(s => s["TemplateConnection"]).Returns("Server=localhost;Database=___NEWDB___;");
+            mockScopeConfig.Setup(c => c.GetSection("ConnectionStrings")).Returns(mockConnectionSection.Object);
+
+            mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
+            mockUsageDailyRepo.Setup(x => x.FindUnprocessedAsync()).ReturnsAsync(unprocessedRecords);
+
+            mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository))).Returns(mockUsageMonthRepo.Object);
+            mockServiceProvider.Setup(x => x.GetService(typeof(IConfiguration))).Returns(mockScopeConfig.Object);
+
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
+                .Options;
+            var realDbContext = new ApplicationDbContext(options);
+            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
+
+            mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
+            _mocker.GetMock<IServiceScopeFactory>().Setup(x => x.CreateScope()).Returns(mockScope.Object);
+
+            return (mockUsageDailyRepo, mockUsageMonthRepo);
+        }
+
+        [Fact(DisplayName = "ProcessUnprocessedUsageAsync should upsert separate UsageMonth rows when WorkflowId differs (null vs value)")]
+        [Trait("Process", "Success")]
+        public async Task ProcessUnprocessedUsageAsync_WithDistinctWorkflowIds_UpsertsSeparateRows()
+        {
+            // Arrange
+            var tenants = new List<TenantListDto>
+            {
+                new TenantListDto { Name = "Tenant1", DatabaseName = "DB1" }
+            };
+
+            var sharedUserId = Guid.NewGuid();
+            var sharedDay = new DateTime(2026, 5, 15);
+            const int sharedUsageTypeId = 1;
+            const int sharedModelEmbeddingId = 7;
+            const int workflowId = 42;
+
+            var unprocessedRecords = new List<UsageDaily>
+            {
+                new UsageDaily(1, sharedDay, sharedUserId, sharedUsageTypeId, 100, false, sharedModelEmbeddingId, workflowId: null),
+                new UsageDaily(2, sharedDay, sharedUserId, sharedUsageTypeId, 50,  false, sharedModelEmbeddingId, workflowId: workflowId)
+            };
+
+            var (mockUsageDailyRepo, mockUsageMonthRepo) = SetupTenantScope(tenants, unprocessedRecords);
+            var capturedUpserts = new List<UsageMonth>();
+            mockUsageMonthRepo
+                .Setup(x => x.UpsertAsync(It.IsAny<UsageMonth>()))
+                .Callback<UsageMonth>(capturedUpserts.Add)
+                .Returns(Task.CompletedTask);
+
+            // Act
+            await _service.ProcessUnprocessedUsageAsync();
+
+            // Assert
+            Assert.Equal(2, capturedUpserts.Count);
+
+            var noWorkflowRow = capturedUpserts.SingleOrDefault(u => u.WorkflowId == null);
+            var workflowRow = capturedUpserts.SingleOrDefault(u => u.WorkflowId == workflowId);
+
+            Assert.NotNull(noWorkflowRow);
+            Assert.NotNull(workflowRow);
+            Assert.Equal(100, noWorkflowRow!.Total);
+            Assert.Equal(50, workflowRow!.Total);
+            mockUsageDailyRepo.Verify(x => x.MarkAsProcessedAsync(It.IsAny<IEnumerable<int>>()), Times.Once);
+        }
+
         [Fact(DisplayName = "ProcessUnprocessedUsageAsync should process and mark records as processed")]
         [Trait("Process", "Success")]
         public async Task ProcessUnprocessedUsageAsync_WithUnprocessedRecords_ProcessesAndMarks()

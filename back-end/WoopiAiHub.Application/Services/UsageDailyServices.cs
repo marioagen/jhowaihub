@@ -1,4 +1,5 @@
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
@@ -38,7 +39,8 @@ namespace WoopiAiHub.Application.Services
                 usageDailyDto.UsageCount,
                 usageDailyDto.Processed,
                 usageDailyDto.ModelEmbeddingId,
-                usageDailyDto.WorkflowId
+                usageDailyDto.WorkflowId,
+                usageDailyDto.Origin
             );
 
             return await _usageDailyRepository.AddAsync(usageDaily);
@@ -59,7 +61,8 @@ namespace WoopiAiHub.Application.Services
                 usageDailyDto.UsageCount,
                 usageDailyDto.Processed,
                 usageDailyDto.ModelEmbeddingId,
-                usageDailyDto.WorkflowId
+                usageDailyDto.WorkflowId,
+                usageDailyDto.Origin
             )).ToList();
 
             return await _usageDailyRepository.AddRangeAsync(usageDailies);
@@ -73,8 +76,9 @@ namespace WoopiAiHub.Application.Services
         /// <param name="count"></param>
         /// <param name="modelEmbedding"></param>
         /// <param name="workflowId"></param>
+        /// <param name="origin">Origin of the usage record. Defaults to <see cref="UsageDailyOrigin.WoopiAi"/>.</param>
         /// <returns></returns>
-        public async Task<bool> AddByValuesAsync(string usageTypeName, string email, int count, string modelEmbedding = "", int? workflowId = null)
+        public async Task<bool> AddByValuesAsync(string usageTypeName, string email, int count, string modelEmbedding = "", int? workflowId = null, UsageDailyOrigin origin = UsageDailyOrigin.WoopiAi)
         {
             var usageType = await _usageTypeServices.FindByNameAsync(usageTypeName);
             if (usageType == null)
@@ -100,7 +104,8 @@ namespace WoopiAiHub.Application.Services
                 userId,
                 modelEmbeddingId,
                 false,
-                workflowId
+                workflowId,
+                origin
             );
 
             return await AddAsync(usageDailyDto);

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Models;
 
 namespace WoopiAiHub.Repository.Mappings
@@ -37,6 +38,13 @@ namespace WoopiAiHub.Repository.Mappings
             builder.Property(ud => ud.Created)
                    .HasColumnName("Created")
                    .HasColumnType("datetime")
+                   .IsRequired();
+
+            builder.Property(ud => ud.Origin)
+                   .HasColumnName("Origin")
+                   .HasColumnType("int")
+                   .HasConversion<int>()
+                   .HasDefaultValue(UsageDailyOrigin.WoopiAi)
                    .IsRequired();
 
             builder.HasOne(ud => ud.UsageType)

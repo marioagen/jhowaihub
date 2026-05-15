@@ -296,6 +296,22 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
+        public static UsageAccountingDto FindValidUsageAccountingDto(UsageDailyOrigin origin = UsageDailyOrigin.Services)
+        {
+            var faker = new Faker<UsageAccountingDto>("pt_BR")
+                .CustomInstantiator(f => new UsageAccountingDto
+                {
+                    Tenant = f.Random.String2(10),
+                    Email = f.Internet.Email(),
+                    UsageTypeName = f.Commerce.ProductName(),
+                    Count = f.Random.Int(1, 1000),
+                    ModelEmbeddingName = f.Random.Word(),
+                    WorkflowId = f.Random.Int(1, 100),
+                    Origin = origin
+                });
+            return faker;
+        }
+
         public static ApiOutputDto FindValidApiOutputDto()
         {
             var faker = new Faker<ApiOutputDto>("pt_BR")
