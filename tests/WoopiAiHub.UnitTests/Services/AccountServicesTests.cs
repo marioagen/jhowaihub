@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.AutoMock;
@@ -13,6 +14,8 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.DTOs.Response.Account;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.Infrastructure.Multitenancy;
 using WoopiAiHub.UnitTests.Fixtures;
@@ -119,10 +122,6 @@ namespace WoopiAiHub.UnitTests.Services
             _passwordHasherMock.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()))
                 .Returns(true);
 
-            var configMock = new Mock<IConfiguration>();
-
-            _mocker.Use(configMock.Object);
-
             // Act
             var result = await _accountServices.LoginSSO(authenticateDto, authenticateHeaderDto);
 
@@ -131,6 +130,9 @@ namespace WoopiAiHub.UnitTests.Services
             iMarketPlaceApi.Verify(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             _passwordHasherMock.Verify(a => a.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()), Times.Never);
             _mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Once);
+
+            var authData = Assert.IsType<AccessDataAuthDto>(result);
+            AssertTenantClaim(authData.Token, authenticateDto.Tenant);
         }
 
         [Fact(DisplayName = "Test authenticate Sucess")]
@@ -197,6 +199,9 @@ namespace WoopiAiHub.UnitTests.Services
             iMarketPlaceApi.Verify(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             _mockPasswordHasher.Verify(a => a.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()), Times.Once);
             _mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Once);
+
+            var authData = Assert.IsType<AccessDataAuthDto>(result);
+            AssertTenantClaim(authData.Token, loginDto.Tenant);
         }
 
         [Fact(DisplayName = "Test Authenticate fail")]
@@ -389,6 +394,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.NotNull(result);
+            AssertTenantClaim(result!, tenant);
             _mockRefreshTokenServices.Verify(x => x.FindUserByRefreshTokenAsync(refreshToken), Times.Once);
             _mockTenantContextService.Verify(x => x.InitializeTenantAsync(It.IsAny<string>()), Times.Once);
             _mockTenantContextService.Verify(x => x.TrySetTenantConnectionAsync(_mockHttpContext.Object, It.IsAny<string>()), Times.Once);
@@ -606,6 +612,17 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotNull(result);
             _mocker.GetMock<IGraphApi>().Verify(g => g.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
             _mocker.GetMock<IMarketPlaceApi>().Verify(m => m.CheckAccessByHub(It.IsAny<string>(), authenticateDto.Login), Times.Once);
+        }
+
+        private static void AssertTenantClaim(string accessToken, string expectedTenant)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadToken(accessToken) as JwtSecurityToken;
+
+            Assert.NotNull(jwtToken);
+            var tenantClaim = jwtToken!.Claims.FirstOrDefault(c => c.Type == JwtClaimNames.Tenant);
+            Assert.NotNull(tenantClaim);
+            Assert.Equal(expectedTenant, tenantClaim!.Value);
         }
     }
 }

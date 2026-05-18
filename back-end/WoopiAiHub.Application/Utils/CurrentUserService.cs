@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using WoopiAiHub.Domain.Interfaces.Utils;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Application.Utils
 {
@@ -53,6 +54,9 @@ namespace WoopiAiHub.Application.Utils
                 return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase);
             }
         }
+
+        /// <inheritdoc />
+        public string? Tenant => FindClaim(JwtClaimNames.Tenant);
 
         /// <inheritdoc />
         public string? FindClaim(string claimType) => User?.FindFirst(claimType)?.Value;

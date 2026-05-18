@@ -11,6 +11,11 @@ namespace WoopiAiHub.Domain.Interfaces.Utils
         string? UserId { get; }
         string? Email { get; }
         bool IsAdmin { get; }
+
+        /// <summary>
+        /// Tenant bound to the current access token, when present in the JWT.
+        /// </summary>
+        string? Tenant { get; }
         string? FindClaim(string claimType);
     }
 }

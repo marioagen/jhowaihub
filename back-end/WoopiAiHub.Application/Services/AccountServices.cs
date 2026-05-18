@@ -139,7 +139,7 @@ namespace WoopiAiHub.Application.Services
             }
 
             var permissions = await _permissionRepository.FindUserPermissionsAsync(user.Email);
-            var tokenJWT = await GenerateTokensAsync(user.Id, user.Email, permissions);
+            var tokenJWT = await GenerateTokensAsync(user.Id, user.Email, permissions, tenant);
             this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
 
             user.RecordLogin();
@@ -279,7 +279,7 @@ namespace WoopiAiHub.Application.Services
                 var permissions = await _permissionRepository.FindUserPermissionsAsync(userEmail);
 
                 var user = await _userRepository.FindByEmailAsync(userEmail);
-                var tokens = await GenerateTokensAsync(user.Id, userEmail, permissions);
+                var tokens = await GenerateTokensAsync(user.Id, userEmail, permissions, tenant.Name);
 
                 await _refreshTokenServices.RevokeAsync(refreshToken);
                 await _refreshTokenServices.SaveAsync(userEmail, tokens.RefreshToken);
@@ -371,20 +371,23 @@ namespace WoopiAiHub.Application.Services
         /// <summary>
         /// Asynchronously generates a new access token and refresh token for the specified user.
         /// </summary>
-        /// <remarks>The access token includes claims for the user's email, a unique identifier, and
-        /// issued-at timestamp.  If the user has an "admin" profile, an additional claim for the "Admin" role is
-        /// included.  Permissions are encoded as claims in the format "perm:{resource}" with the associated actions as
+        /// <remarks>The access token includes claims for the user's email, a unique identifier, tenant,
+        /// and issued-at timestamp. If the user has an "admin" profile, an additional claim for the "Admin" role is
+        /// included. Permissions are encoded as claims in the format "perm:{resource}" with the associated actions as
         /// the value. The refresh token is stored using the refresh token service for later validation.</remarks>
+        /// <param name="userId">The unique identifier of the user.</param>
         /// <param name="userEmail">The email address of the user for whom the tokens are being generated. Cannot be null or empty.</param>
         /// <param name="permissions">A dictionary representing the user's permissions, where the key is the resource name and the value is a list
         /// of actions the user is allowed to perform on that resource.</param>
+        /// <param name="tenant">The tenant the access token is bound to; must match X-Tenant on subsequent requests.</param>
         /// <returns>A tuple containing the generated access token and refresh token. The access token is a JWT string with a
         /// short expiration time,  and the refresh token is a string used to obtain a new access token after
         /// expiration.</returns>
         /// <exception cref="ArgumentException">Thrown if the JWT key is not configured in the application settings.</exception>
         private async Task<(string AccessToken, string RefreshToken)> GenerateTokensAsync(Guid userId,
                                                                                           string userEmail,
-                                                                                          Dictionary<string, List<string>> permissions)
+                                                                                          Dictionary<string, List<string>> permissions,
+                                                                                          string tenant)
         {
             var key = _config["JWT:Key"] ?? throw new ArgumentException("JWT key is not configured.");
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
@@ -402,7 +405,8 @@ namespace WoopiAiHub.Application.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
                 new Claim("isAdmin", isAdmin.ToString().ToLower()),
-                new Claim("permissions", permissionsJson)
+                new Claim("permissions", permissionsJson),
+                new Claim(Domain.Utils.JwtClaimNames.Tenant, tenant)
             };
 
             var expirationMinutes = _config.GetValue("JWT:AccessTokenExpirationMinutes", 60);
