@@ -1,6 +1,7 @@
-﻿using Bogus;
+using Bogus;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Repository.Context;
 using Xunit;
@@ -39,6 +40,27 @@ namespace WoopiAiHub.UnitTests.Fixture
               });
 
             return faker;
+        }
+
+        public static TenantListDto FindValidTenantListDto()
+        {
+            var faker = new Faker<TenantListDto>("pt_BR")
+              .CustomInstantiator(f => new TenantListDto
+              {
+                  Name = f.Random.String(),
+                  DatabaseName = f.Random.String(),
+              });
+            return faker;
+        }
+
+        public static List<TenantListDto> FindValidTenantListDtos(int count)
+        {
+            var list = new List<TenantListDto>();
+            for (int i = 0; i < count; i++)
+            {
+                list.Add(FindValidTenantListDto());
+            }
+            return list;
         }
     }
 

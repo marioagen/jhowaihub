@@ -15,6 +15,7 @@ using WoopiAiHub.Domain.Models;
 using WoopiAiHub.Repository.Context;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using WoopiAiHub.UnitTests.Fixture;
 
 namespace WoopiAiHub.UnitTests.Services
 {
@@ -63,11 +64,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ProcessUnprocessedUsageAsync_TenantsExist_ProcessesEachTenant()
         {
             // Arrange
-            var tenants = new List<TenantListDto>
-            {
-                new TenantListDto { Name = "Tenant1", DatabaseName = "DB1" },
-                new TenantListDto { Name = "Tenant2", DatabaseName = "DB2" }
-            };
+            var tenants = TenantFixture.FindValidTenantListDtos(2);
 
             _mocker.GetMock<IMarketPlaceApi>()
                 .Setup(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
@@ -136,13 +133,17 @@ namespace WoopiAiHub.UnitTests.Services
             await Assert.ThrowsAsync<InvalidOperationException>(() => service.ProcessUnprocessedUsageAsync());
         }
 
-        private (Mock<IUsageDailyRepository> usageDailyRepo, Mock<IUsageMonthRepository> usageMonthRepo) SetupTenantScope(
-            List<TenantListDto> tenants,
-            List<UsageDaily> unprocessedRecords)
+        [Fact(DisplayName = "ProcessUnprocessedUsageAsync should upsert separate UsageMonth rows when WorkflowId differs (null vs value)")]
+        [Trait("Process", "Success")]
+        public async Task ProcessUnprocessedUsageAsync_WithDistinctWorkflowIds_UpsertsSeparateRows()
         {
+            // Arrange
+            var tenants = TenantFixture.FindValidTenantListDtos(1);
+            var unprocessedRecords = UsageFixture.FindCustomUsageDailies();
+            var workflowId = unprocessedRecords.First(u => u.WorkflowId != null).WorkflowId;
             _mocker.GetMock<IMarketPlaceApi>()
-                .Setup(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
-                .ReturnsAsync(tenants);
+                   .Setup(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
+                   .ReturnsAsync(tenants);
 
             var mockScope = new Mock<IServiceScope>();
             var mockServiceProvider = new Mock<IServiceProvider>();
@@ -172,32 +173,6 @@ namespace WoopiAiHub.UnitTests.Services
             mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
             _mocker.GetMock<IServiceScopeFactory>().Setup(x => x.CreateScope()).Returns(mockScope.Object);
 
-            return (mockUsageDailyRepo, mockUsageMonthRepo);
-        }
-
-        [Fact(DisplayName = "ProcessUnprocessedUsageAsync should upsert separate UsageMonth rows when WorkflowId differs (null vs value)")]
-        [Trait("Process", "Success")]
-        public async Task ProcessUnprocessedUsageAsync_WithDistinctWorkflowIds_UpsertsSeparateRows()
-        {
-            // Arrange
-            var tenants = new List<TenantListDto>
-            {
-                new TenantListDto { Name = "Tenant1", DatabaseName = "DB1" }
-            };
-
-            var sharedUserId = Guid.NewGuid();
-            var sharedDay = new DateTime(2026, 5, 15);
-            const int sharedUsageTypeId = 1;
-            const int sharedModelEmbeddingId = 7;
-            const int workflowId = 42;
-
-            var unprocessedRecords = new List<UsageDaily>
-            {
-                new UsageDaily(1, sharedDay, sharedUserId, sharedUsageTypeId, 100, false, sharedModelEmbeddingId, workflowId: null),
-                new UsageDaily(2, sharedDay, sharedUserId, sharedUsageTypeId, 50,  false, sharedModelEmbeddingId, workflowId: workflowId)
-            };
-
-            var (mockUsageDailyRepo, mockUsageMonthRepo) = SetupTenantScope(tenants, unprocessedRecords);
             var capturedUpserts = new List<UsageMonth>();
             mockUsageMonthRepo
                 .Setup(x => x.UpsertAsync(It.IsAny<UsageMonth>()))
@@ -225,16 +200,9 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ProcessUnprocessedUsageAsync_WithUnprocessedRecords_ProcessesAndMarks()
         {
             // Arrange
-            var tenants = new List<TenantListDto>
-            {
-                new TenantListDto { Name = "Tenant1", DatabaseName = "DB1" }
-            };
+            var tenants = TenantFixture.FindValidTenantListDtos(1);
 
-            var unprocessedRecords = new List<UsageDaily>
-            {
-                new UsageDaily(1, DateTime.UtcNow, Guid.NewGuid(), 1, 100, false, 1),
-                new UsageDaily(2, DateTime.UtcNow, Guid.NewGuid(), 1, 50, false, 1)
-            };
+            var unprocessedRecords = UsageFixture.FindValidUsageDailies(2);
 
             _mocker.GetMock<IMarketPlaceApi>()
                 .Setup(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))

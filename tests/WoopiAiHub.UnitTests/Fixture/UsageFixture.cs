@@ -51,6 +51,37 @@ namespace WoopiAiHub.UnitTests.Fixture
                 _faker.Random.Word()
             );
         }
+
+        public static List<UsageDaily> FindValidUsageDailies(int count)
+        {
+            var faker = new Faker<UsageDaily>("pt_BR")
+                .CustomInstantiator(f => new UsageDaily(
+                    f.Random.Int(1, 1000),
+                    f.Date.Recent(),
+                    Guid.NewGuid(),
+                    f.Random.Int(1, 10),
+                    f.Random.Int(1, 100),
+                    false,
+                    f.Random.Int(0, 5)
+                ));
+            return faker.Generate(count);
+        }
+
+        public static List<UsageDaily> FindCustomUsageDailies()
+        {
+            var sharedUserId = Guid.NewGuid();
+            var sharedDay = new DateTime(2026, 5, 15);
+            const int sharedUsageTypeId = 1;
+            const int sharedModelEmbeddingId = 7;
+            const int workflowId = 42;
+
+            return new List<UsageDaily>
+            {
+                new UsageDaily(1, sharedDay, sharedUserId, sharedUsageTypeId, 100, false, sharedModelEmbeddingId, workflowId: null),
+                new UsageDaily(2, sharedDay, sharedUserId, sharedUsageTypeId, 50,  false, sharedModelEmbeddingId, workflowId: workflowId)
+            };
+
+        }
     }
 
     [CollectionDefinition(nameof(UsageCollection))]
