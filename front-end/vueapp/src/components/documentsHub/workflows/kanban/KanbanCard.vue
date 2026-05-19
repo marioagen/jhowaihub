@@ -45,7 +45,7 @@
                         class="me-1"
                     />
                     <small>
-                        {{ formatDate(dataCard.created) }}
+                        {{ formatDateWithTime(dataCard.created) }}
                     </small>
                 </div>
                 <hr />
@@ -521,8 +521,8 @@
             setUsers() {
                 this.filteredUsers = this.users;
             },
-            formatDate(date) {
-                return dates.formatDate(date);
+            formatDateWithTime(date) {
+                return dates.formatDateWithTime(date);
             },
             truncateText(text) {
                 if (!text) return "";

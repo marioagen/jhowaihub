@@ -30,7 +30,7 @@
             </span>
         </td>
         <td class="align-middle py-2 small text-nowrap">
-            {{ formatDate(dataCard.created) }}
+            {{ formatDateWithTime(dataCard.created) }}
         </td>
         <td class="align-middle py-2">
             <span
@@ -195,8 +195,8 @@
             },
         },
         methods: {
-            formatDate(date) {
-                return dates.formatDate(date);
+            formatDateWithTime(date) {
+                return dates.formatDateWithTime(date);
             },
             truncateText(text) {
                 if (!text) return "";
