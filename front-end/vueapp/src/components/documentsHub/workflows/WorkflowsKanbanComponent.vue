@@ -347,6 +347,7 @@
                 kanbanCards: [],
                 isLoadingKanban: true,
                 signalrEventExecutionChanged: "CardExecutionChanged",
+                signalrEventWorkflowRefresh: "WorkflowKanbanRefresh",
                 filters: {
                     orderBy: "created desc",
                     input: null,
@@ -857,12 +858,19 @@
                     this.updateSpecificCards([message.cardId], message);
                 }
             });
+            signalRService.on(this.signalrEventWorkflowRefresh, (message) => {
+                if (!message || message.workflowId !== this.selectedOption.id) {
+                    return;
+                }
+                this.reloadKanban();
+            });
         },
         beforeUnmount() {
             if (this.updateCardsDebounceTimer) {
                 clearTimeout(this.updateCardsDebounceTimer);
             }
             signalRService.off(this.signalrEventExecutionChanged);
+            signalRService.off(this.signalrEventWorkflowRefresh);
             GlobalEventService.off("all-uploads-complete", this.getWorkflowByUser);
             GlobalEventService.off("refresh-once", this.getWorkflowByUser);
         },
