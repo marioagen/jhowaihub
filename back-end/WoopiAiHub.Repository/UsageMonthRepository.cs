@@ -20,18 +20,22 @@ namespace WoopiAiHub.Repository
         /// </summary>
         /// <remarks>This method filters records based on the exact day specified in the <paramref
         /// name="month"/> parameter. The time component of <paramref name="month"/> is ignored, and only records
-        /// created within the specified day are considered.</remarks>
+        /// created within the specified day are considered. The <paramref name="workflowId"/> parameter is part
+        /// of the identity of an aggregated row: a null value matches only rows whose WorkflowId is also null.</remarks>
         /// <param name="usageTypeId">The identifier for the usage type to filter by.</param>
         /// <param name="modelEmbeddingId">The identifier for the model embedding to filter by.</param>
         /// <param name="userId">The unique identifier of the user associated with the record.</param>
         /// <param name="month">The date representing the month and day to filter by. Only records created on this specific day are
         /// considered.</param>
+        /// <param name="workflowId">The workflow identifier associated with the record, or <see langword="null"/> for rows
+        /// not tied to any workflow.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains the matching <see
         /// cref="UsageMonth"/> if found; otherwise, <see langword="null"/>.</returns>
         public async Task<UsageMonth?> FindByKeyAsync(int usageTypeId,
             int? modelEmbeddingId,
             Guid userId,
-            DateTime month)
+            DateTime month,
+            int? workflowId)
         {
             var dayStart = month.Date;
             var dayEnd = dayStart.AddDays(1);
@@ -41,6 +45,7 @@ namespace WoopiAiHub.Repository
                     um.UsageTypeId == usageTypeId &&
                     um.ModelEmbeddingId == modelEmbeddingId &&
                     um.UserId == userId &&
+                    um.WorkflowId == workflowId &&
                     um.Created >= dayStart &&
                     um.Created < dayEnd);
         }
@@ -61,7 +66,8 @@ namespace WoopiAiHub.Repository
                 entity.UsageTypeId,
                 entity.ModelEmbeddingId,
                 entity.UserId,
-                entity.Created);
+                entity.Created,
+                entity.WorkflowId);
 
             if (existing != null)
             {

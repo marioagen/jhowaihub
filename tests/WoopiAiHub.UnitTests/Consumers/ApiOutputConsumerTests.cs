@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using WoopiAiHub.Application.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
@@ -108,7 +109,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .Returns(Task.CompletedTask);
 
             _usageDailyServices
-                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
+                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<UsageDailyOrigin>()))
                 .ReturnsAsync(true);
 
             _consumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ApiOutputDto, Task>>()))
@@ -126,7 +127,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             // Assert
             _apiOutputServices.Verify(x => x.ProcessMessage(_apiOutputDto), Times.Once);
             _automationServices.Verify(x => x.ContinueExecution(automationServicesDto), Times.Once);
-            _usageDailyServices.Verify(x => x.AddByValuesAsync(It.IsAny<string>(), _apiOutputDto.Email!, 1, It.IsAny<string>(), null), Times.Once);
+            _usageDailyServices.Verify(x => x.AddByValuesAsync(It.IsAny<string>(), _apiOutputDto.Email!, 1, It.IsAny<string>(), null, It.IsAny<UsageDailyOrigin>()), Times.Once);
         }
 
         [Fact(DisplayName = "Must catch exception when processing response")]
@@ -205,7 +206,7 @@ namespace WoopiAiHub.UnitTests.Consumers
                 .Returns(Task.CompletedTask);
 
             _usageDailyServices
-                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
+                .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<UsageDailyOrigin>()))
                 .ReturnsAsync(true);
 
             _consumerMock.Setup(x => x.ConsumerAsync(It.IsAny<string>(), It.IsAny<Func<ApiOutputDto, Task>>()))
@@ -268,7 +269,7 @@ namespace WoopiAiHub.UnitTests.Consumers
             // Assert
             _apiOutputServices.Verify(x => x.ProcessMessage(_apiOutputDto), Times.Once);
             _automationServices.Verify(x => x.ContinueExecution(It.IsAny<AutomationServicesDto>()), Times.Never);
-            _usageDailyServices.Verify(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null), Times.Never);
+            _usageDailyServices.Verify(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<UsageDailyOrigin>()), Times.Never);
         }
     }
 }

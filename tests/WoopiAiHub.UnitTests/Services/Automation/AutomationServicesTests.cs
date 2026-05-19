@@ -229,7 +229,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
             var usageDailyServicesMock = _mocker.GetMock<IUsageDailyServices>();
 
             usageDailyServicesMock.Setup(s => s.AddByValuesAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<UsageDailyOrigin>()))
                                   .ReturnsAsync(true);
 
             // Act
@@ -237,7 +237,7 @@ namespace WoopiAiHub.UnitTests.Services.Automation
 
             // Assert
             usageDailyServicesMock.Verify(s => s.AddByValuesAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null), Times.Once);
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<UsageDailyOrigin>()), Times.Once);
             stepToolExecutionRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<StepToolExecution>()), Times.Never);
             messagePublisherMock.Verify(m => m.PublishAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             toolFactoryHandlerServicesMock.Verify(s => s.GetHandler(It.IsAny<string>()), Times.Never);
