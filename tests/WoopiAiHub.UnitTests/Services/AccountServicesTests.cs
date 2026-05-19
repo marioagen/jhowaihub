@@ -2,8 +2,11 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.AutoMock;
+using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Application.Validation;
+using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -55,6 +58,14 @@ namespace WoopiAiHub.UnitTests.Services
 
             _mocker.Use(configMock);
             _mockJwtTokenServices = _mocker.GetMock<IJwtTokenServices>();
+
+            _mocker.GetMock<IUserTenantAccessCacheServices>()
+                .Setup(s => s.FindAllowedTenantsByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Array.Empty<TenantAccessDto>());
+
+            _mocker.Use<ITenantBindingValidator>(new TenantBindingValidator(
+                _mocker.GetMock<IUserTenantAccessCacheServices>().Object,
+                Mock.Of<ILogger<TenantBindingValidator>>()));
 
             _accountServices = _mocker.CreateInstance<AccountServices>();
         }
@@ -401,6 +412,36 @@ namespace WoopiAiHub.UnitTests.Services
             _mockPermissionRepository.Verify(x => x.FindUserPermissionsAsync(userEmail), Times.Once);
             _mockRefreshTokenServices.Verify(x => x.RevokeAsync(refreshToken), Times.Once);
             _mockRefreshTokenServices.Verify(x => x.SaveAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
+        }
+
+        [Fact(DisplayName = "RefreshToken throws AppException when tenant is not in marketplace list")]
+        [Trait("RefreshToken", "Fail")]
+        public async Task RefreshTokenAsync_InvalidTenant_ThrowsAppException()
+        {
+            // Arrange
+            var refreshToken = "valid-refresh-token";
+            var userEmail = "user@example.com";
+            var responseCheckAccess = _fixture.FindValidResponseCheckAccessDto();
+
+            var mockRefreshTokenServices = _mocker.GetMock<IRefreshTokenServices>();
+            var marketPlaceApiMock = _mocker.GetMock<IMarketPlaceApi>();
+
+            mockRefreshTokenServices
+                .Setup(x => x.FindUserByRefreshTokenAsync(refreshToken))
+                .ReturnsAsync(userEmail);
+
+            marketPlaceApiMock
+                .Setup(api => api.CheckAccessByHub(It.IsAny<string>(), userEmail))
+                .ReturnsAsync(responseCheckAccess);
+
+            var accountServices = _mocker.CreateInstance<AccountServices>();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                accountServices.RefreshTokenAsync(refreshToken, "TenantNotInList"));
+
+            // Assert
+            Assert.Equal("Tenant not found", exception.Message);
         }
 
         [Fact(DisplayName = "Login ShouldThrowAppException_WhenTenantNotFound")]

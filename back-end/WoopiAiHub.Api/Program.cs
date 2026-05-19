@@ -15,6 +15,7 @@ using WoopiAiHub.Api.Hubs;
 using WoopiAiHub.Application.Services.Hubs;
 using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Domain.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -108,7 +109,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         {
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/notifications"))
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments(HubRoutePaths.NotificationsHub))
             {
                 context.Token = accessToken;
             }
@@ -144,6 +145,6 @@ app.UseExceptionHandler();
 
 app.MapHealthChecks("/healthz");
 
-app.MapHub<NotificationHub>("/hubs/notifications");
+app.MapHub<NotificationHub>(HubRoutePaths.NotificationsHub);
 
 app.Run();

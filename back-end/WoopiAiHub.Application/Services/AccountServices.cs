@@ -14,10 +14,10 @@ using WoopiAiHub.Domain.DTOs.Response.Account;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
+using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Infrastructure.Multitenancy;
 using Newtonsoft.Json;
-using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.DTOs.Response;
 
 namespace WoopiAiHub.Application.Services
@@ -35,6 +35,8 @@ namespace WoopiAiHub.Application.Services
         private readonly IPasswordHasher _passwordHasher;
         private readonly IRefreshTokenServices _refreshTokenServices;
         private readonly IJwtTokenServices _jwtTokenServices;
+        private readonly ITenantBindingValidator _tenantBindingValidator;
+        private readonly IUserTenantAccessCacheServices _userTenantAccessCache;
         private const string _messageHttpContextNotAvailable = "HttpContext is not available.";
 
         public AccountServices(IGraphApi graphApi,
@@ -47,7 +49,9 @@ namespace WoopiAiHub.Application.Services
                                IHttpContextAccessor httpContextAccessor,
                                IPasswordHasher passwordHasher,
                                IRefreshTokenServices refreshTokenServices,
-                               IJwtTokenServices jwtTokenServices)
+                               IJwtTokenServices jwtTokenServices,
+                               ITenantBindingValidator tenantBindingValidator,
+                               IUserTenantAccessCacheServices userTenantAccessCache)
         {
             _graphApi = graphApi;
             _marketPlaceApi = marketPlaceApi;
@@ -60,6 +64,8 @@ namespace WoopiAiHub.Application.Services
             _passwordHasher = passwordHasher;
             _refreshTokenServices = refreshTokenServices;
             _jwtTokenServices = jwtTokenServices;
+            _tenantBindingValidator = tenantBindingValidator;
+            _userTenantAccessCache = userTenantAccessCache;
         }
 
         /// <summary>
@@ -94,7 +100,7 @@ namespace WoopiAiHub.Application.Services
                     loginDto.Tenant = userAccess.Tenants.First().Name;
                 }
 
-                var tenant = FindAndValidateTenant(loginDto.Tenant, userAccess.Tenants);
+                var tenant = _tenantBindingValidator.FindAndValidateTenant(loginDto.Tenant, userAccess.Tenants);
 
                 return await ProceedLogin(loginDto, tenant, true);
             }
@@ -141,6 +147,8 @@ namespace WoopiAiHub.Application.Services
             var permissions = await _permissionRepository.FindUserPermissionsAsync(user.Email);
             var tokenJWT = await GenerateTokensAsync(user.Id, user.Email, permissions, tenant);
             this.SetRefreshTokenCookie(tokenJWT.RefreshToken);
+
+            await _userTenantAccessCache.FindAllowedTenantsByEmailAsync(user.Email);
 
             user.RecordLogin();
             _userRepository.Update(user);
@@ -192,7 +200,7 @@ namespace WoopiAiHub.Application.Services
                         authenticateDto.Tenant = userAccess.Tenants.First().Name;
                     }
 
-                    var tenant = FindAndValidateTenant(authenticateDto.Tenant, userAccess.Tenants);
+                    var tenant = _tenantBindingValidator.FindAndValidateTenant(authenticateDto.Tenant, userAccess.Tenants);
 
                     var loginDto = new LoginDto
                     {
@@ -268,18 +276,19 @@ namespace WoopiAiHub.Application.Services
             var userAccess = await CheckMarketplaceAccess(userEmail);
             if (userAccess != null && userAccess.HasAccess)
             {
-                var tenant = userAccess.Tenants.FirstOrDefault(t => t.Name.Equals(headerTenant));
+                var tenantName = _tenantBindingValidator.FindAndValidateTenant(headerTenant, userAccess.Tenants);
 
                 var httpContext = _httpContextAccessor.HttpContext ??
                                   throw new InvalidOperationException(_messageHttpContextNotAvailable);
 
-                await _tenantContextService.InitializeTenantAsync(tenant!.Name);
-                await _tenantContextService.TrySetTenantConnectionAsync(httpContext,
-                                                                        tenant.Name);
+                await _tenantContextService.InitializeTenantAsync(tenantName);
+                await _tenantContextService.TrySetTenantConnectionAsync(httpContext, tenantName);
                 var permissions = await _permissionRepository.FindUserPermissionsAsync(userEmail);
 
                 var user = await _userRepository.FindByEmailAsync(userEmail);
-                var tokens = await GenerateTokensAsync(user.Id, userEmail, permissions, tenant.Name);
+                var tokens = await GenerateTokensAsync(user.Id, userEmail, permissions, tenantName);
+
+                await _userTenantAccessCache.FindAllowedTenantsByEmailAsync(userEmail);
 
                 await _refreshTokenServices.RevokeAsync(refreshToken);
                 await _refreshTokenServices.SaveAsync(userEmail, tokens.RefreshToken);
@@ -318,37 +327,6 @@ namespace WoopiAiHub.Application.Services
             return false;
         }
 
-        /// <summary>
-        /// Searches for a tenant by name within the provided collection and validates its accessibility.
-        /// </summary>
-        /// <param name="tenant">The name of the tenant to locate. Comparison is case-insensitive.</param>
-        /// <param name="tenants">A collection of <see cref="TenantAccessDto"/> objects representing available tenants.</param>
-        /// <returns>The name of the tenant if found and validated.</returns>
-        /// <exception cref="AppException">Thrown if the tenant is not found in the collection, or if the tenant's database is not ready or cannot be
-        /// accessed.</exception>
-        private static string FindAndValidateTenant(string tenant, ICollection<TenantAccessDto> tenants)
-        {
-            var tenantFound = tenants.FirstOrDefault(t => t.Name.Equals(tenant, StringComparison.OrdinalIgnoreCase));
-            if (tenantFound == null)
-            {
-                throw new AppException(null,
-                       "Tenant not found",
-                        Domain.Utils.ErrorLabels.Login.TenantNotFound);
-            }
-
-            if (!tenantFound.IsDatabaseCreated)
-            {
-                throw new AppException(ErrorCode.BusinessWarningOutput,
-                        "Tenant database is not ready or cannot be accessed.",
-                        Domain.Utils.ErrorLabels.Login.TenantDatabaseNotReady);
-            }
-            return tenantFound.Name;
-        }
-
-        /// <summary>
-        /// Returns an client id from appsettings
-        /// </summary>
-        /// <returns></returns>
         private async Task<ResponseCheckAccessDto> CheckMarketplaceAccess(string login)
         {
             var keyAccess = _config.GetSection("KeyAccess").Get<string>()!;

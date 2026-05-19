@@ -7,6 +7,7 @@ using WoopiAiHub.Application.Services.Audit;
 using WoopiAiHub.Application.Services.Automation;
 using WoopiAiHub.Application.ToolsHandler;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Application.Validation;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -37,6 +38,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IRagInvocationRouter, RagInvocationRouter>();
             services.AddScoped<IDocumentNormalizedServices, DocumentNormalizedServices>();
             services.AddScoped<IAccountServices, AccountServices>();
+            services.AddScoped<ITenantBindingValidator, TenantBindingValidator>();
             services.AddScoped<ITenantServices, TenantServices>();
             services.AddScoped<IOcrGoogle, OcrGoogle>();
             services.AddScoped<IOcrAzure, OcrAzure>();

@@ -1,11 +1,10 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
+using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Middleware;
 using Xunit;
@@ -16,22 +15,20 @@ namespace WoopiAiHub.UnitTests.Middleware
     {
         private const string TemplateConnection = "Server=.;Database=___NEWDB___;";
         private const string TenantName = "tenant-alpha";
-        private const string OtherTenantName = "tenant-beta";
 
-        [Fact(DisplayName = "Sets TenantConnection when authenticated header matches tenant claim")]
+        [Fact(DisplayName = "Sets TenantConnection when validator allows request")]
         [Trait("InvokeAsync", "Success")]
-        public async Task InvokeAsync_AuthenticatedMatchingHeaderAndClaim_SetsTenantConnection()
+        public async Task InvokeAsync_ValidatorAllows_SetsTenantConnection()
         {
             // Arrange
-            var (context, configuration, tenantCache, nextCalled) = CreateContext(
-                isAuthenticated: true,
+            var (context, configuration, tenantCache, validator, nextCalled) = CreateContext(
                 headerTenant: TenantName,
-                claimTenant: TenantName);
+                validatorAllows: true);
 
             var middleware = new MultiTenant(_ => { nextCalled.Value = true; return Task.CompletedTask; });
 
             // Act
-            await middleware.InvokeAsync(context, configuration, tenantCache.Object);
+            await middleware.InvokeAsync(context, configuration, tenantCache.Object, validator.Object);
 
             // Assert
             Assert.True(nextCalled.Value);
@@ -40,20 +37,19 @@ namespace WoopiAiHub.UnitTests.Middleware
             Assert.Contains("TestDB", context.Items["TenantConnection"]!.ToString());
         }
 
-        [Fact(DisplayName = "Returns 403 when authenticated header tenant mismatches claim")]
+        [Fact(DisplayName = "Returns 403 when validator rejects request")]
         [Trait("InvokeAsync", "Fail")]
-        public async Task InvokeAsync_AuthenticatedMismatchedTenant_Returns403()
+        public async Task InvokeAsync_ValidatorRejects_Returns403()
         {
             // Arrange
-            var (context, configuration, tenantCache, nextCalled) = CreateContext(
-                isAuthenticated: true,
-                headerTenant: OtherTenantName,
-                claimTenant: TenantName);
+            var (context, configuration, tenantCache, validator, nextCalled) = CreateContext(
+                headerTenant: TenantName,
+                validatorAllows: false);
 
             var middleware = new MultiTenant(_ => { nextCalled.Value = true; return Task.CompletedTask; });
 
             // Act
-            await middleware.InvokeAsync(context, configuration, tenantCache.Object);
+            await middleware.InvokeAsync(context, configuration, tenantCache.Object, validator.Object);
 
             // Assert
             Assert.False(nextCalled.Value);
@@ -62,83 +58,19 @@ namespace WoopiAiHub.UnitTests.Middleware
             await AssertResponseErrorAsync(context);
         }
 
-        [Fact(DisplayName = "Returns 403 when authenticated user has tenant claim but no header")]
-        [Trait("InvokeAsync", "Fail")]
-        public async Task InvokeAsync_AuthenticatedClaimWithoutHeader_Returns403()
-        {
-            // Arrange
-            var (context, configuration, tenantCache, nextCalled) = CreateContext(
-                isAuthenticated: true,
-                headerTenant: null,
-                claimTenant: TenantName);
-
-            var middleware = new MultiTenant(_ => { nextCalled.Value = true; return Task.CompletedTask; });
-
-            // Act
-            await middleware.InvokeAsync(context, configuration, tenantCache.Object);
-
-            // Assert
-            Assert.False(nextCalled.Value);
-            Assert.Equal(StatusCodes.Status403Forbidden, context.Response.StatusCode);
-            Assert.Null(context.Items["TenantConnection"]);
-        }
-
-        [Fact(DisplayName = "Returns 403 when authenticated user sends header without tenant claim")]
-        [Trait("InvokeAsync", "Fail")]
-        public async Task InvokeAsync_AuthenticatedHeaderWithoutClaim_Returns403()
-        {
-            // Arrange
-            var (context, configuration, tenantCache, nextCalled) = CreateContext(
-                isAuthenticated: true,
-                headerTenant: TenantName,
-                claimTenant: null);
-
-            var middleware = new MultiTenant(_ => { nextCalled.Value = true; return Task.CompletedTask; });
-
-            // Act
-            await middleware.InvokeAsync(context, configuration, tenantCache.Object);
-
-            // Assert
-            Assert.False(nextCalled.Value);
-            Assert.Equal(StatusCodes.Status403Forbidden, context.Response.StatusCode);
-            Assert.Null(context.Items["TenantConnection"]);
-        }
-
-        [Fact(DisplayName = "Sets TenantConnection for unauthenticated request with valid header")]
+        [Fact(DisplayName = "Continues without TenantConnection when no header and validator allows")]
         [Trait("InvokeAsync", "Success")]
-        public async Task InvokeAsync_UnauthenticatedWithValidHeader_SetsTenantConnection()
+        public async Task InvokeAsync_NoHeader_DoesNotSetTenantConnection()
         {
             // Arrange
-            var (context, configuration, tenantCache, nextCalled) = CreateContext(
-                isAuthenticated: false,
-                headerTenant: TenantName,
-                claimTenant: null);
-
-            var middleware = new MultiTenant(_ => { nextCalled.Value = true; return Task.CompletedTask; });
-
-            // Act
-            await middleware.InvokeAsync(context, configuration, tenantCache.Object);
-
-            // Assert
-            Assert.True(nextCalled.Value);
-            Assert.Equal(StatusCodes.Status200OK, context.Response.StatusCode);
-            Assert.NotNull(context.Items["TenantConnection"]);
-        }
-
-        [Fact(DisplayName = "Continues without TenantConnection when unauthenticated and no header")]
-        [Trait("InvokeAsync", "Success")]
-        public async Task InvokeAsync_UnauthenticatedWithoutHeader_DoesNotSetTenantConnection()
-        {
-            // Arrange
-            var (context, configuration, tenantCache, nextCalled) = CreateContext(
-                isAuthenticated: false,
+            var (context, configuration, tenantCache, validator, nextCalled) = CreateContext(
                 headerTenant: null,
-                claimTenant: null);
+                validatorAllows: true);
 
             var middleware = new MultiTenant(_ => { nextCalled.Value = true; return Task.CompletedTask; });
 
             // Act
-            await middleware.InvokeAsync(context, configuration, tenantCache.Object);
+            await middleware.InvokeAsync(context, configuration, tenantCache.Object, validator.Object);
 
             // Assert
             Assert.True(nextCalled.Value);
@@ -149,10 +81,10 @@ namespace WoopiAiHub.UnitTests.Middleware
             HttpContext Context,
             IConfiguration Configuration,
             Mock<ITenantCacheServices> TenantCache,
+            Mock<ITenantBindingValidator> Validator,
             StrongBox<bool> NextCalled) CreateContext(
-            bool isAuthenticated,
             string? headerTenant,
-            string? claimTenant)
+            bool validatorAllows)
         {
             var context = new DefaultHttpContext
             {
@@ -162,15 +94,6 @@ namespace WoopiAiHub.UnitTests.Middleware
 
             if (!string.IsNullOrEmpty(headerTenant))
                 context.Request.Headers[HeaderNames.XTenant] = headerTenant;
-
-            if (isAuthenticated)
-            {
-                var claims = new List<Claim>();
-                if (!string.IsNullOrEmpty(claimTenant))
-                    claims.Add(new Claim(JwtClaimNames.Tenant, claimTenant));
-
-                context.User = new ClaimsPrincipal(new ClaimsIdentity(claims, authenticationType: "Bearer"));
-            }
 
             var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
@@ -188,7 +111,12 @@ namespace WoopiAiHub.UnitTests.Middleware
                     DatabaseName = "TestDB"
                 });
 
-            return (context, configuration, tenantCache, nextCalled);
+            var validator = new Mock<ITenantBindingValidator>();
+            validator
+                .Setup(v => v.TryValidateRequestBindingAsync(context, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(validatorAllows);
+
+            return (context, configuration, tenantCache, validator, nextCalled);
         }
 
         private static async Task AssertResponseErrorAsync(HttpContext context)

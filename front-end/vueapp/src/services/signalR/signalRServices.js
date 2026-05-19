@@ -33,6 +33,9 @@ class SignalRService {
             .withUrl(this.hubUrl, {
                 withCredentials: false,
                 accessTokenFactory: () => store.state.userProfile.tokenApi,
+                headers: {
+                    "X-Tenant": store.state.userProfile.tenant,
+                },
             })
             .withAutomaticReconnect(new InfiniteRetryPolicy())
             .configureLogging(signalR.LogLevel.Warning)
@@ -86,9 +89,7 @@ class SignalRService {
         }
 
         if (this.connection) {
-            callback
-                ? this.connection.off(eventName, callback)
-                : this.connection.off(eventName);
+            callback ? this.connection.off(eventName, callback) : this.connection.off(eventName);
         }
     }
 
@@ -122,7 +123,9 @@ class SignalRService {
 
         this.connection.onclose((error) => {
             if (this._intentionalStop) return;
-            logService.showMessage("SignalR connection closed. Error: " + (error || "none") + ". Restarting in 5s...");
+            logService.showMessage(
+                "SignalR connection closed. Error: " + (error || "none") + ". Restarting in 5s..."
+            );
             this._scheduleRestart();
         });
     }
