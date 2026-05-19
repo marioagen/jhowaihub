@@ -909,6 +909,17 @@ const portuguese = {
             workflow: "Visualizar Esteira de processamento",
             workflowStepAccess: "Acessar Etapas",
             workflowStepView: "Visualizar Etapas",
+            tools: {
+                prompts: "Visualizar Agentes",
+                quizzes: "Visualizar Questionários",
+                apis: "Visualizar Templates de API",
+                connectors: "Visualizar Conectores",
+            },
+            management: {
+                users: "Visualizar Gestão de Usuários",
+                teams: "Visualizar Gestão de Times",
+                profiles: "Visualizar Gestão de Perfis",
+            },
         },
         groups: {
             actions: "Ações",

@@ -116,20 +116,34 @@
                                 <div
                                     class="d-flex justify-content-between align-items-center p-2 px-3"
                                 >
-                                    <div>
-                                        <strong>
-                                            {{
-                                                $t(
-                                                    "permissions.groups." +
-                                                        group.group.toLowerCase().replace(/-/g, "")
-                                                )
-                                            }}
-                                        </strong>
-                                        <span class="text-muted ms-1">
-                                            ({{ checkedCount(group.permissions) }}
-                                            /
-                                            {{ group.permissions.length }})
-                                        </span>
+                                    <div class="d-flex align-items-center">
+                                        <div class="form-check me-1 mb-0">
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                :id="`group-${group.group}`"
+                                                :checked="isGroupAllSelected(group)"
+                                                :indeterminate="isGroupPartiallySelected(group)"
+                                                @change="toggleGroupSelection(group)"
+                                            />
+                                        </div>
+                                        <div>
+                                            <strong>
+                                                {{
+                                                    $t(
+                                                        "permissions.groups." +
+                                                            group.group
+                                                                .toLowerCase()
+                                                                .replace(/-/g, "")
+                                                    )
+                                                }}
+                                            </strong>
+                                            <span class="text-muted ms-1">
+                                                ({{ checkedCount(group.permissions) }}
+                                                /
+                                                {{ group.permissions.length }})
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <a @click="toggleCollapse(index)">
@@ -532,6 +546,31 @@
             },
             checkedCount(permissions) {
                 return permissions.filter((p) => this.selectedPermissions.includes(p.id)).length;
+            },
+            isGroupAllSelected(group) {
+                return (
+                    group.permissions.length > 0 &&
+                    group.permissions.every((p) => this.selectedPermissions.includes(p.id))
+                );
+            },
+            isGroupPartiallySelected(group) {
+                const checkedInGroup = this.checkedCount(group.permissions);
+                return checkedInGroup > 0 && checkedInGroup < group.permissions.length;
+            },
+            toggleGroupSelection(group) {
+                const isAllSelected = this.isGroupAllSelected(group);
+                const groupPermissionIds = group.permissions.map((p) => p.id);
+
+                if (isAllSelected) {
+                    this.selectedPermissions = this.selectedPermissions.filter(
+                        (id) => !groupPermissionIds.includes(id)
+                    );
+                } else {
+                    const idsToAdd = groupPermissionIds.filter(
+                        (id) => !this.selectedPermissions.includes(id)
+                    );
+                    this.selectedPermissions.push(...idsToAdd);
+                }
             },
             toggleCollapse(index) {
                 const collapse = this.$refs.collapseComponents[index];

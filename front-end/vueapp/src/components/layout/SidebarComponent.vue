@@ -69,7 +69,6 @@
                         labelKey: "common.home",
                     },
                     {
-                        permission: "Management",
                         activeKey: "DocumentList",
                         to: "/management",
                         icon: {
@@ -77,6 +76,11 @@
                             color: "#ff6900",
                         },
                         labelKey: "pages.management",
+                        requiredPermissions: [
+                            { permission: "Management", action: "Users" },
+                            { permission: "Management", action: "Teams" },
+                            { permission: "Management", action: "Profiles" },
+                        ],
                     },
                     {
                         permission: "Workflow",
@@ -99,7 +103,6 @@
                         labelKey: "pages.workflowManagement",
                     },
                     {
-                        permission: "Tools",
                         activeKey: "Tools",
                         icon: {
                             name: "PocketKnife",
@@ -108,7 +111,8 @@
                         labelKey: "pages.tools",
                         group: [
                             {
-                                permission: "Prompts",
+                                permission: "Tools",
+                                action: "Prompts",
                                 activeKey: "Prompts",
                                 to: "/prompts",
                                 icon: {
@@ -119,6 +123,7 @@
                             },
                             {
                                 permission: "Tools",
+                                action: "Connectors",
                                 activeKey: "Connectors",
                                 to: "/tools",
                                 icon: {
@@ -128,7 +133,8 @@
                                 labelKey: "pages.connectors",
                             },
                             {
-                                permission: "Templates",
+                                permission: "Tools",
+                                action: "APIs",
                                 activeKey: "Templates",
                                 to: "/templates",
                                 icon: {
@@ -138,7 +144,8 @@
                                 labelKey: "pages.templates",
                             },
                             {
-                                permission: "Quizzes",
+                                permission: "Tools",
+                                action: "Quizzes",
                                 activeKey: "ManagementQuizzes",
                                 to: "/management-quizzes",
                                 icon: {
@@ -194,10 +201,15 @@
                     return [];
                 }
                 return list.filter((item) => {
+                    if (item.requiredPermissions?.length) {
+                        return item.requiredPermissions.some((perm) =>
+                            hasPermission(perm.permission, perm.action)
+                        );
+                    }
                     if (!item.permission) {
                         return true;
                     }
-                    return hasPermission(item.permission, "View");
+                    return hasPermission(item.permission, item.action ?? "View");
                 });
             },
         },

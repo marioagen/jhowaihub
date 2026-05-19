@@ -152,8 +152,8 @@ const routes = [
         component: ManagementQuizzesPage,
         meta: {
             layout: "default",
-            module: "Quizzes",
-            action: "View",
+            module: "Tools",
+            action: "Quizzes",
         },
         beforeEnter: authenticate,
     },
@@ -163,8 +163,8 @@ const routes = [
         component: NewQuizz,
         meta: {
             layout: "default",
-            module: "Quizzes",
-            action: "View",
+            module: "Tools",
+            action: "Quizzes",
         },
         beforeEnter: authenticate,
     },
@@ -174,8 +174,8 @@ const routes = [
         component: EditQuizz,
         meta: {
             layout: "default",
-            module: "Quizzes",
-            action: "View",
+            module: "Tools",
+            action: "Quizzes",
         },
         beforeEnter: authenticate,
     },
@@ -205,10 +205,7 @@ const routes = [
         component: ManagementPage,
         meta: {
             layout: "default",
-            module: "Management",
-            action: "View",
         },
-        beforeEnter: authenticate,
     },
     {
         path: "/management/users/new",
@@ -217,7 +214,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View",
+            action: "Users",
         },
         beforeEnter: authenticate,
     },
@@ -228,7 +225,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View",
+            action: "Users",
         },
         beforeEnter: authenticate,
     },
@@ -239,7 +236,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View",
+            action: "Teams",
         },
         beforeEnter: authenticate,
     },
@@ -250,7 +247,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View",
+            action: "Teams",
         },
         beforeEnter: authenticate,
     },
@@ -261,7 +258,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View",
+            action: "Profiles",
         },
         beforeEnter: authenticate,
     },
@@ -272,7 +269,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Management",
-            action: "View",
+            action: "Profiles",
         },
         beforeEnter: authenticate,
     },
@@ -327,7 +324,7 @@ const routes = [
         meta: {
             layout: "default",
             module: "Tools",
-            action: "View",
+            action: "Connectors",
         },
         beforeEnter: authenticate,
     },
@@ -359,8 +356,8 @@ const routes = [
         component: PromptPage,
         meta: {
             layout: "default",
-            module: "Prompts",
-            action: "View",
+            module: "Tools",
+            action: "Prompts",
         },
         beforeEnter: authenticate,
     },
@@ -370,8 +367,8 @@ const routes = [
         component: PromptImport,
         meta: {
             layout: "default",
-            module: "Prompts",
-            action: "View",
+            module: "Tools",
+            action: "Prompts",
         },
         beforeEnter: authenticate,
     },
@@ -381,8 +378,8 @@ const routes = [
         component: PromptNew,
         meta: {
             layout: "default",
-            module: "Prompts",
-            action: "View",
+            module: "Tools",
+            action: "Prompts",
         },
         beforeEnter: authenticate,
         props: true,
@@ -404,8 +401,8 @@ const routes = [
         component: TemplatePage,
         meta: {
             layout: "default",
-            module: "Templates",
-            action: "View",
+            module: "Tools",
+            action: "APIs",
         },
         beforeEnter: authenticate,
     },
@@ -415,8 +412,8 @@ const routes = [
         component: TemplateDetail,
         meta: {
             layout: "default",
-            module: "Templates",
-            action: "View",
+            module: "Tools",
+            action: "APIs",
         },
         beforeEnter: authenticate,
     },
@@ -426,8 +423,8 @@ const routes = [
         component: TemplateDetail,
         meta: {
             layout: "default",
-            module: "Templates",
-            action: "View",
+            module: "Tools",
+            action: "APIs",
         },
         beforeEnter: authenticate,
     },
