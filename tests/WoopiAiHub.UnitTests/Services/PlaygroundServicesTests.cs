@@ -5,6 +5,7 @@ using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -64,7 +65,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Callback((string _, string _, string _, string _, ChatCompletionDto dto) => capturedDto = dto)
                 .ReturnsAsync(chatCompletionResponse);
             _mocker.GetMock<IUsageDailyServices>()
-                .Setup(u => u.AddByValuesAsync(MetricNames.Token, email, 42, "model", null))
+                .Setup(u => u.AddByValuesAsync(MetricNames.Token, email, 42, "model", null, It.IsAny<UsageDailyOrigin>()))
                 .ReturnsAsync(true);
 
             var result = await _playgroundServices.TestPromptWithContextAsync(promptText, contextText, tenantId, email);
@@ -78,7 +79,7 @@ namespace WoopiAiHub.UnitTests.Services
                 capturedDto.Messages[0].Content);
 
             _mocker.GetMock<IUsageDailyServices>().Verify(
-                u => u.AddByValuesAsync(MetricNames.Token, email, 42, "model", null),
+                u => u.AddByValuesAsync(MetricNames.Token, email, 42, "model", null, It.IsAny<UsageDailyOrigin>()),
                 Times.Once);
         }
 
@@ -145,7 +146,7 @@ namespace WoopiAiHub.UnitTests.Services
                     It.IsAny<ChatCompletionDto>()))
                 .ReturnsAsync(chatCompletionResponse);
             _mocker.GetMock<IUsageDailyServices>()
-                .Setup(u => u.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
+                .Setup(u => u.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<UsageDailyOrigin>()))
                 .ReturnsAsync(true);
 
             var exception = await Assert.ThrowsAsync<AppException>(async () =>
@@ -178,14 +179,14 @@ namespace WoopiAiHub.UnitTests.Services
                     It.IsAny<ChatCompletionDto>()))
                 .ReturnsAsync(chatCompletionResponse);
             _mocker.GetMock<IUsageDailyServices>()
-                .Setup(u => u.AddByValuesAsync(MetricNames.Token, "e@mail.com", 0, "model", null))
+                .Setup(u => u.AddByValuesAsync(MetricNames.Token, "e@mail.com", 0, "model", null, It.IsAny<UsageDailyOrigin>()))
                 .ReturnsAsync(true);
 
             var result = await _playgroundServices.TestPromptWithContextAsync("prompt", "", "t", "e@mail.com");
 
             Assert.Equal("Ok", result);
             _mocker.GetMock<IUsageDailyServices>().Verify(
-                u => u.AddByValuesAsync(MetricNames.Token, "e@mail.com", 0, "model", null),
+                u => u.AddByValuesAsync(MetricNames.Token, "e@mail.com", 0, "model", null, It.IsAny<UsageDailyOrigin>()),
                 Times.Once);
         }
     }

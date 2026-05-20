@@ -5,7 +5,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
 {
     public interface IUsageMonthRepository
     {
-        Task<UsageMonth?> FindByKeyAsync(int usageTypeId, int? modelEmbeddingId, Guid userId, DateTime month);
+        Task<UsageMonth?> FindByKeyAsync(int usageTypeId, int? modelEmbeddingId, Guid userId, DateTime month, int? workflowId);
         Task UpsertAsync(UsageMonth entity);
         Task<int> FindTotalUsageAsync(DateTime periodStart, DateTime periodEnd);
         Task<ICollection<DashboardUsageDto>> FindDataByUsageType(string usageType, DateTime? start, DateTime? end, List<int>? workflowIds);

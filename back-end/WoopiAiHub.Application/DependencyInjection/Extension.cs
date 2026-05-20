@@ -104,6 +104,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddHostedService<SubscriptionEndPeriodConsumer>();
             services.AddHostedService<ApiOutputConsumer>();
             services.AddHostedService<ExternalFileUploadConsumer>();
+            services.AddHostedService<UsageAccountingConsumer>();
             services.AddHostedService<OcrDeadLetterConsumer>();
             services.AddHostedService<EmbeddingsDeadLetterConsumer>();
             services.AddHostedService<PromptDeadLetterConsumer>();

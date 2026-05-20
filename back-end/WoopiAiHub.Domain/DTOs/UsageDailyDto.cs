@@ -1,3 +1,5 @@
+using WoopiAiHub.Domain.Enum;
+
 namespace WoopiAiHub.Domain.DTOs
 {
     public record UsageDailyDto(
@@ -6,6 +8,7 @@ namespace WoopiAiHub.Domain.DTOs
         Guid UserId,
         int? ModelEmbeddingId,
         bool Processed = false,
-        int? WorkflowId = null
+        int? WorkflowId = null,
+        UsageDailyOrigin Origin = UsageDailyOrigin.WoopiAi
     );
 }

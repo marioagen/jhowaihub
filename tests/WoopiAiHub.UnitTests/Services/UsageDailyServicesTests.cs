@@ -2,6 +2,7 @@ using Moq;
 using Moq.AutoMock;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
@@ -194,6 +195,70 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             _modelEmbeddingRepositoryMock.Verify(r => r.FindByNameAsync(modelEmbeddingName), Times.Once);
             _usageDailyRepositoryMock.Verify(r => r.AddAsync(It.IsAny<UsageDaily>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "AddByValuesAsync should persist provided Origin on UsageDaily")]
+        [Trait("AddByValuesAsync", "Success With Origin")]
+        public async Task AddByValuesAsync_ShouldPersistProvidedOrigin_WhenServicesSpecified()
+        {
+            // Arrange
+            var usageType = _fixture.CreateValidUsageType();
+            var userId = Guid.NewGuid();
+            var email = "test@example.com";
+            var count = 5;
+            UsageDaily? capturedUsageDaily = null;
+
+            _usageTypeServicesMock.Setup(s => s.FindByNameAsync(usageType.Name))
+                                 .ReturnsAsync(usageType);
+            _userServicesMock.Setup(s => s.FindIdByEmail(email))
+                            .Returns(userId);
+            _usageDailyRepositoryMock
+                .Setup(r => r.AddAsync(It.IsAny<UsageDaily>()))
+                .Callback<UsageDaily>(u => capturedUsageDaily = u)
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.AddByValuesAsync(
+                usageType.Name,
+                email,
+                count,
+                modelEmbedding: "",
+                workflowId: null,
+                origin: UsageDailyOrigin.Services);
+
+            // Assert
+            Assert.True(result);
+            Assert.NotNull(capturedUsageDaily);
+            Assert.Equal(UsageDailyOrigin.Services, capturedUsageDaily!.Origin);
+        }
+
+        [Fact(DisplayName = "AddByValuesAsync should default Origin to WoopiAi when not provided")]
+        [Trait("AddByValuesAsync", "Success With Default Origin")]
+        public async Task AddByValuesAsync_ShouldDefaultOriginToWoopiAi_WhenNotProvided()
+        {
+            // Arrange
+            var usageType = _fixture.CreateValidUsageType();
+            var userId = Guid.NewGuid();
+            var email = "test@example.com";
+            var count = 5;
+            UsageDaily? capturedUsageDaily = null;
+
+            _usageTypeServicesMock.Setup(s => s.FindByNameAsync(usageType.Name))
+                                 .ReturnsAsync(usageType);
+            _userServicesMock.Setup(s => s.FindIdByEmail(email))
+                            .Returns(userId);
+            _usageDailyRepositoryMock
+                .Setup(r => r.AddAsync(It.IsAny<UsageDaily>()))
+                .Callback<UsageDaily>(u => capturedUsageDaily = u)
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _service.AddByValuesAsync(usageType.Name, email, count);
+
+            // Assert
+            Assert.True(result);
+            Assert.NotNull(capturedUsageDaily);
+            Assert.Equal(UsageDailyOrigin.WoopiAi, capturedUsageDaily!.Origin);
         }
 
         [Fact(DisplayName = "AddByValuesAsync should not call model embedding repository when model embedding name is empty")]

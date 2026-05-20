@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using WoopiAiHub.Application.Messaging;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Messaging;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Services.Automation;
@@ -117,7 +118,7 @@ namespace WoopiAiHub.UnitTests.Consumers
 
             _usageDailyServices
                 .Setup(x => x.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(),
-                    It.IsAny<string>(), null))
+                    It.IsAny<string>(), null, It.IsAny<UsageDailyOrigin>()))
                 .ReturnsAsync(true);
 
             _consumerMock.Setup(x =>

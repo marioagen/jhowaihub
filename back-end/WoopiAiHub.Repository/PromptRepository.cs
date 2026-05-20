@@ -210,30 +210,27 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
-        /// Will remove the references to ApiTemplate from prompt when a Api template is deleted or is checked as no external search
+        /// Finds PromptApiTemplate records that match the given IDs.
         /// </summary>
-        /// <param name="prompt"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public async Task<bool> UpdateAndRemovePromptApisFromPrompt(Prompt prompt, List<int> data)
+        /// <param name="ids">List of PromptApiTemplate IDs to look up.</param>
+        /// <returns>The matching PromptApiTemplate entities.</returns>
+        public async Task<List<PromptApiTemplate>> FindPromptApiTemplatesByIds(List<int> ids)
         {
-            var existPrompt = await _context.Prompts.AnyAsync(p => p.Id == prompt.Id);
-            if (!existPrompt)
-            {
-                return false;
-            }
+            return await _context.PromptApiTemplates
+                .Where(p => ids.Contains(p.Id))
+                .ToListAsync();
+        }
 
-            var existPromptApiTemplates = await _context.PromptApiTemplates.Where(p => data.Contains(p.Id)).ToListAsync();
-            if (data.Count > 0 && existPromptApiTemplates.Count == 0)
-            {
-                return false;
-            }
-
+        /// <summary>
+        /// Updates the prompt and removes the given PromptApiTemplate references in a single save.
+        /// </summary>
+        /// <param name="prompt">The prompt entity to update.</param>
+        /// <param name="templatesToRemove">The already-validated PromptApiTemplate entities to remove.</param>
+        public async Task UpdateAndRemovePromptApisFromPrompt(Prompt prompt, List<PromptApiTemplate> templatesToRemove)
+        {
             _context.Prompts.Update(prompt);
-            _context.PromptApiTemplates.RemoveRange(existPromptApiTemplates);
+            _context.PromptApiTemplates.RemoveRange(templatesToRemove);
             await _context.SaveChangesAsync();
-
-            return true;
         }
     }
 }

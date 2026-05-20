@@ -296,6 +296,22 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
+        public static UsageAccountingDto FindValidUsageAccountingDto(UsageDailyOrigin origin = UsageDailyOrigin.Services)
+        {
+            var faker = new Faker<UsageAccountingDto>("pt_BR")
+                .CustomInstantiator(f => new UsageAccountingDto
+                {
+                    Tenant = f.Random.String2(10),
+                    Email = f.Internet.Email(),
+                    UsageTypeName = f.Commerce.ProductName(),
+                    Count = f.Random.Int(1, 1000),
+                    ModelEmbeddingName = f.Random.Word(),
+                    WorkflowId = f.Random.Int(1, 100),
+                    Origin = origin
+                });
+            return faker;
+        }
+
         public static ApiOutputDto FindValidApiOutputDto()
         {
             var faker = new Faker<ApiOutputDto>("pt_BR")
@@ -533,6 +549,43 @@ namespace WoopiAiHub.UnitTests.Fixture
                     Created = DateTime.Now
                 });
             return (obj, fakerPromptDto.Generate());
+        }
+
+        /// <summary>
+        /// Returns a PromptUpdateDto (with no ApiTemplatesSelected) paired with a PromptDto that
+        /// already has one PromptApiTemplate association. Used to exercise the scenario where
+        /// every existing template is being de-selected, triggering the removal path.
+        /// </summary>
+        public static (PromptUpdateDto, PromptDto) FindValidPromptUpdateDtoAndPromptDtoWithApiTemplates()
+        {
+            var faker = new Faker("pt_BR");
+            var promptId = faker.Random.Int(1, 9999);
+            var apiTemplateId = faker.Random.Int(1, 9999);
+            var promptApiTemplateId = faker.Random.Int(1, 9999);
+
+            var dto = new PromptUpdateDto
+            {
+                Id = promptId,
+                Name = faker.Name.JobArea(),
+                Description = faker.Name.JobTitle(),
+                Text = faker.Name.JobDescriptor()
+            };
+
+            var promptDto = new PromptDto
+            {
+                Id = promptId,
+                Name = faker.Name.JobArea(),
+                Description = faker.Name.JobTitle(),
+                Text = faker.Name.JobDescriptor(),
+                IdUser = Guid.NewGuid(),
+                Created = DateTime.Now,
+                PromptApiTemplates = new List<PromptApiTemplateDto>
+                {
+                    new PromptApiTemplateDto { Id = promptApiTemplateId, ApiTemplateId = apiTemplateId, PromptId = promptId }
+                }
+            };
+
+            return (dto, promptDto);
         }
     }
 

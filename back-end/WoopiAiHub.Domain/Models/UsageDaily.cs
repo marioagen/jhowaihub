@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using WoopiAiHub.Domain.Enum;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -22,6 +23,9 @@ namespace WoopiAiHub.Domain.Models
         [Column("WorkflowId", TypeName = "int")]
         public int? WorkflowId { get; private set; }
 
+        [Column("Origin", TypeName = "int")]
+        public UsageDailyOrigin Origin { get; private set; }
+
         public virtual UsageType? UsageType { get; set; }
         public virtual ModelEmbedding? ModelEmbedding { get; set; }
         public virtual User? User { get; set; }
@@ -35,7 +39,8 @@ namespace WoopiAiHub.Domain.Models
             int usageCount,
             bool processed,
             int? modelEmbeddingId,
-            int? workflowId = null
+            int? workflowId = null,
+            UsageDailyOrigin origin = UsageDailyOrigin.WoopiAi
         ) : base(id, created)
         {
             UserId = userId;
@@ -44,6 +49,7 @@ namespace WoopiAiHub.Domain.Models
             Processed = processed;
             ModelEmbeddingId = modelEmbeddingId;
             WorkflowId = workflowId;
+            Origin = origin;
         }
     }
 }

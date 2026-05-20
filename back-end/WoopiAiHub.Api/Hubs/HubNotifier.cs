@@ -70,6 +70,25 @@ namespace WoopiAiHub.Api.Hubs
         }
 
         /// <summary>
+        /// Notifies all active connections for the specified user that the kanban of a workflow must be refreshed.
+        /// Used after asynchronous events that change the cards of a workflow (e.g. external file upload processed).
+        /// </summary>
+        /// <param name="userEmail">Email of the user whose connections will receive the notification. Cannot be null or empty.</param>
+        /// <param name="workflowId">Identifier of the workflow whose kanban needs to be reloaded.</param>
+        /// <returns>A task that represents the asynchronous notification operation.</returns>
+        public async Task WorkflowKanbanRefreshAsync(string userEmail, int workflowId)
+        {
+            var connections = _connectionMapping.GetConnections(userEmail);
+            foreach (var connectionId in connections)
+            {
+                await _hubContext.Clients.Client(connectionId).SendAsync("WorkflowKanbanRefresh", new
+                {
+                    WorkflowId = workflowId
+                });
+            }
+        }
+
+        /// <summary>
         /// Notifies all active connections for the specified user that a document is ready for anonymization.
         /// </summary>
         /// <remarks>This method sends a real-time notification to all active SignalR connections

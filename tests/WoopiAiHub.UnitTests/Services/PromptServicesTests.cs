@@ -6,6 +6,7 @@ using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Refit.Functions;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -119,7 +120,7 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.False(result);
         }
 
-        [Fact(DisplayName = "Create prompt success")]
+        [Fact(DisplayName = "Update prompt success")]
         [Trait("Update", "Success")]
         public async Task Update_Success()
         {
@@ -128,44 +129,43 @@ namespace WoopiAiHub.UnitTests.Services
             var email = "user@teste.com";
             var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
-            var _unitOfWork = _mocker.GetMock<IUnitOfWork>();
-
 
             _validatePrompt.Setup(v => v.ValidateOwnership(promptDto.Id, email));
             _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns(promptDto);
             _validatePrompt.Setup(v => v.ValidateRequiredPromptFields(It.IsAny<Prompt>()));
-            _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<int>>())).ReturnsAsync(true);
-            _unitOfWork.Setup(u => u.BeginTransaction());
-            _unitOfWork.Setup(u => u.Commit());
+            _promptRepository.Setup(r => r.FindPromptApiTemplatesByIds(It.IsAny<List<int>>()))
+                .ReturnsAsync(new List<PromptApiTemplate>());
+            _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<PromptApiTemplate>>()))
+                .Returns(Task.CompletedTask);
 
             //Act
             var result = await _promptServices.Update(dto, email);
 
             //Assert
             Assert.True(result);
+            _promptRepository.Verify(r => r.FindPromptApiTemplatesByIds(It.IsAny<List<int>>()), Times.Once);
+            _promptRepository.Verify(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<PromptApiTemplate>>()), Times.Once);
         }
 
-        [Fact(DisplayName = "Not update prompt with error")]
+        [Fact(DisplayName = "Update prompt should throw ArgumentException when templates to remove are not found in database")]
         [Trait("Update", "Fail")]
-        public async Task Update_Fail_Save_Chages_Repository()
+        public async Task Update_ShouldThrowArgumentException_TemplatesNotFound()
         {
             //Arrange
-            var (dto, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDto();
+            var (dto, promptDto) = MessagingFixture.FindValidPromptUpdateDtoAndPromptDtoWithApiTemplates();
             var email = "user@teste.com";
             var _validatePrompt = _mocker.GetMock<IValidatePrompt>();
             var _promptRepository = _mocker.GetMock<IPromptRepository>();
-            var _unitOfWork = _mocker.GetMock<IUnitOfWork>();
-
 
             _validatePrompt.Setup(v => v.ValidateOwnership(promptDto.Id, email));
             _promptRepository.Setup(r => r.FindById(promptDto.Id)).Returns(promptDto);
             _validatePrompt.Setup(v => v.ValidateRequiredPromptFields(It.IsAny<Prompt>()));
-            _promptRepository.Setup(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<int>>())).ReturnsAsync(false);
-            _unitOfWork.Setup(u => u.BeginTransaction());
-            _unitOfWork.Setup(u => u.Commit());
+            _promptRepository.Setup(r => r.FindPromptApiTemplatesByIds(It.IsAny<List<int>>()))
+                .ReturnsAsync(new List<PromptApiTemplate>());
 
             //Act/Assert
             await Assert.ThrowsAsync<ArgumentException>(() => _promptServices.Update(dto, email));
+            _promptRepository.Verify(r => r.UpdateAndRemovePromptApisFromPrompt(It.IsAny<Prompt>(), It.IsAny<List<PromptApiTemplate>>()), Times.Never);
         }
 
         [Fact(DisplayName = "Update prompt should throw argumentException when is not found")]
@@ -797,7 +797,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.GetMock<IConfiguration>().Setup(c => c["PromptSettings:RefinementPrompt"]).Returns("Texto a ser convertido: {{Regra de negócio}}");
             _mocker.GetMock<ITenantCacheServices>().Setup(s => s.FindTenantAsync(tenantId)).ReturnsAsync(tenantInfo);
             _mocker.GetMock<IUsageDailyServices>()
-                .Setup(s => s.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null))
+                .Setup(s => s.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<UsageDailyOrigin>()))
                 .ReturnsAsync(true);
             _mocker.GetMock<IRagInvocationRouter>()
                 .Setup(a => a.ExecuteChatCompletionAsync(
