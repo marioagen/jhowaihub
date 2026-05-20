@@ -286,15 +286,15 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Update a prompt
+        /// Updates a prompt and reconciles its ApiTemplate associations,
+        /// removing de-selected ones and persisting newly added ones.
         /// </summary>
-        /// <param name="promptUpdateDto"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <param name="promptUpdateDto">The update payload.</param>
+        /// <param name="emailCreator">Email of the requesting user, used for ownership validation.</param>
+        /// <returns><c>true</c> when the update is persisted successfully.</returns>
         public async Task<bool> Update(PromptUpdateDto promptUpdateDto, string emailCreator)
         {
-            _validatePrompt.ValidateOwnership(promptUpdateDto.Id,
-                emailCreator);
+            _validatePrompt.ValidateOwnership(promptUpdateDto.Id, emailCreator);
 
             var promptDto = _promptRepository.FindById(promptUpdateDto.Id);
             if (promptDto == null)
@@ -306,12 +306,13 @@ namespace WoopiAiHub.Application.Services
 
             _validatePrompt.ValidateRequiredPromptFields(prompt);
 
-            var promptUpdateResult = await _promptRepository.UpdateAndRemovePromptApisFromPrompt(prompt, promptApiTemplateIds);
-
-            if (!promptUpdateResult)
+            var templatesToRemove = await _promptRepository.FindPromptApiTemplatesByIds(promptApiTemplateIds);
+            if (promptApiTemplateIds.Count > 0 && templatesToRemove.Count == 0)
             {
                 throw new ArgumentException("Update prompt Failed");
             }
+
+            await _promptRepository.UpdateAndRemovePromptApisFromPrompt(prompt, templatesToRemove);
 
             return true;
         }

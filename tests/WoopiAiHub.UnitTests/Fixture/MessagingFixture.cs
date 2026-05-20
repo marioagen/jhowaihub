@@ -550,6 +550,43 @@ namespace WoopiAiHub.UnitTests.Fixture
                 });
             return (obj, fakerPromptDto.Generate());
         }
+
+        /// <summary>
+        /// Returns a PromptUpdateDto (with no ApiTemplatesSelected) paired with a PromptDto that
+        /// already has one PromptApiTemplate association. Used to exercise the scenario where
+        /// every existing template is being de-selected, triggering the removal path.
+        /// </summary>
+        public static (PromptUpdateDto, PromptDto) FindValidPromptUpdateDtoAndPromptDtoWithApiTemplates()
+        {
+            var faker = new Faker("pt_BR");
+            var promptId = faker.Random.Int(1, 9999);
+            var apiTemplateId = faker.Random.Int(1, 9999);
+            var promptApiTemplateId = faker.Random.Int(1, 9999);
+
+            var dto = new PromptUpdateDto
+            {
+                Id = promptId,
+                Name = faker.Name.JobArea(),
+                Description = faker.Name.JobTitle(),
+                Text = faker.Name.JobDescriptor()
+            };
+
+            var promptDto = new PromptDto
+            {
+                Id = promptId,
+                Name = faker.Name.JobArea(),
+                Description = faker.Name.JobTitle(),
+                Text = faker.Name.JobDescriptor(),
+                IdUser = Guid.NewGuid(),
+                Created = DateTime.Now,
+                PromptApiTemplates = new List<PromptApiTemplateDto>
+                {
+                    new PromptApiTemplateDto { Id = promptApiTemplateId, ApiTemplateId = apiTemplateId, PromptId = promptId }
+                }
+            };
+
+            return (dto, promptDto);
+        }
     }
 
     [CollectionDefinition(nameof(MessagingCollection))]
