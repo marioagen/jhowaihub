@@ -9,9 +9,6 @@ using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 
 namespace WoopiAiHub.Repository.Cache
 {
-    /// <summary>
-    /// Resolves the list of tenants a user may access according to the marketplace, with distributed caching.
-    /// </summary>
     public class UserTenantAccessCacheService : IUserTenantAccessCacheServices
     {
         private const string CacheKeyPrefix = "user-tenants:";
