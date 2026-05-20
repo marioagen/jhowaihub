@@ -1,6 +1,8 @@
 ﻿using Bogus;
 using Microsoft.EntityFrameworkCore;
 using WoopiAiHub.Domain.DTOs;
+using WoopiAiHub.Domain.DTOs.Refit;
+using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Repository.Context;
 using Xunit;
@@ -40,6 +42,28 @@ namespace WoopiAiHub.UnitTests.Fixture
 
             return faker;
         }
+
+        public const string ValidUserEmail = "user@test.com";
+
+        public static TenantAccessDto FindValidTenantAccessDto(
+            string name = "Tenant1",
+            bool isDatabaseCreated = true) =>
+            new(name, isDatabaseCreated);
+
+        public static List<TenantAccessDto> FindValidTenantAccessList() =>
+        [
+            FindValidTenantAccessDto(),
+            FindValidTenantAccessDto("Tenant2", true)
+        ];
+
+        public static ResponseCheckAccessDto FindValidResponseCheckAccessDto(
+            bool hasAccess = true,
+            IReadOnlyList<TenantAccessDto>? tenants = null) =>
+            new()
+            {
+                HasAccess = hasAccess,
+                Tenants = tenants?.ToList() ?? [FindValidTenantAccessDto()]
+            };
     }
 
     [CollectionDefinition(nameof(TenantCollection))]

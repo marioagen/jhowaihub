@@ -5,28 +5,28 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using WoopiAiHub.Domain.DTOs.Refit;
-using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Repository.Cache;
+using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Cache
 {
+    [Collection(nameof(TenantCollection))]
     public class UserTenantAccessCacheServiceTests
     {
+        private const string TestKeyAccess = "test-key";
         private readonly Mock<IMarketPlaceApi> _marketplaceMock;
-        private readonly IConfiguration _configuration;
         private readonly MemoryDistributedCache _cache;
         private readonly UserTenantAccessCacheService _service;
 
         public UserTenantAccessCacheServiceTests()
         {
             _marketplaceMock = new Mock<IMarketPlaceApi>();
-            _configuration = new ConfigurationBuilder()
+            var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["KeyAccess"] = "test-key",
+                    ["KeyAccess"] = TestKeyAccess,
                     ["Cache:UserTenantAccessExpirationMinutes"] = "10"
                 })
                 .Build();
@@ -37,67 +37,67 @@ namespace WoopiAiHub.UnitTests.Cache
             _service = new UserTenantAccessCacheService(
                 _cache,
                 _marketplaceMock.Object,
-                _configuration,
+                configuration,
                 Mock.Of<ILogger<UserTenantAccessCacheService>>());
         }
 
-        [Fact(DisplayName = "Loads tenants from marketplace on cache miss")]
+        [Fact(DisplayName = "Tests FindAllowedTenantsByEmailAsync and calls marketplace on cache miss")]
         [Trait("FindAllowedTenantsByEmailAsync", "Success")]
         public async Task FindAllowedTenantsByEmailAsync_CacheMiss_CallsMarketplace()
         {
             // Arrange
-            var tenants = new List<TenantAccessDto> { new("Tenant1", true) };
+            var tenants = TenantFixture.FindValidTenantAccessList();
             _marketplaceMock
-                .Setup(m => m.CheckAccessByHub("test-key", "user@test.com"))
-                .ReturnsAsync(new ResponseCheckAccessDto
-                {
-                    HasAccess = true,
-                    Tenants = tenants
-                });
+                .Setup(m => m.CheckAccessByHub(TestKeyAccess, TenantFixture.ValidUserEmail))
+                .ReturnsAsync(TenantFixture.FindValidResponseCheckAccessDto(tenants: tenants));
 
             // Act
-            var result = await _service.FindAllowedTenantsByEmailAsync("user@test.com");
+            var result = await _service.FindAllowedTenantsByEmailAsync(TenantFixture.ValidUserEmail);
 
             // Assert
-            Assert.Single(result);
+            Assert.Equal(2, result.Count);
             Assert.Equal("Tenant1", result[0].Name);
-            _marketplaceMock.Verify(m => m.CheckAccessByHub("test-key", "user@test.com"), Times.Once);
+            _marketplaceMock.Verify(
+                m => m.CheckAccessByHub(TestKeyAccess, TenantFixture.ValidUserEmail),
+                Times.Once);
         }
 
-        [Fact(DisplayName = "Returns cached tenants without calling marketplace")]
+        [Fact(DisplayName = "Tests FindAllowedTenantsByEmailAsync and returns cached tenants without calling marketplace")]
         [Trait("FindAllowedTenantsByEmailAsync", "Success")]
         public async Task FindAllowedTenantsByEmailAsync_CacheHit_SkipsMarketplace()
         {
             // Arrange
-            var tenants = new List<TenantAccessDto> { new("Tenant1", true) };
-            var cacheKey = "user-tenants:user@test.com";
+            var tenants = TenantFixture.FindValidTenantAccessList();
+            var cacheKey = $"user-tenants:{TenantFixture.ValidUserEmail}";
             await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(tenants));
 
             // Act
-            var result = await _service.FindAllowedTenantsByEmailAsync("user@test.com");
+            var result = await _service.FindAllowedTenantsByEmailAsync(TenantFixture.ValidUserEmail);
 
             // Assert
-            Assert.Single(result);
-            _marketplaceMock.Verify(m => m.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            Assert.Equal(2, result.Count);
+            _marketplaceMock.Verify(
+                m => m.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
         }
 
-        [Fact(DisplayName = "Returns empty list when user has no marketplace access")]
+        [Fact(DisplayName = "Tests FindAllowedTenantsByEmailAsync and returns empty list when user has no marketplace access")]
         [Trait("FindAllowedTenantsByEmailAsync", "Success")]
         public async Task FindAllowedTenantsByEmailAsync_NoAccess_ReturnsEmpty()
         {
             // Arrange
             _marketplaceMock
-                .Setup(m => m.CheckAccessByHub("test-key", "user@test.com"))
-                .ReturnsAsync(new ResponseCheckAccessDto { HasAccess = false });
+                .Setup(m => m.CheckAccessByHub(TestKeyAccess, TenantFixture.ValidUserEmail))
+                .ReturnsAsync(TenantFixture.FindValidResponseCheckAccessDto(hasAccess: false));
 
             // Act
-            var result = await _service.FindAllowedTenantsByEmailAsync("user@test.com");
+            var result = await _service.FindAllowedTenantsByEmailAsync(TenantFixture.ValidUserEmail);
 
             // Assert
             Assert.Empty(result);
         }
 
-        [Fact(DisplayName = "Throws when marketplace call fails")]
+        [Fact(DisplayName = "Tests FindAllowedTenantsByEmailAsync and throws when marketplace call fails")]
         [Trait("FindAllowedTenantsByEmailAsync", "Fail")]
         public async Task FindAllowedTenantsByEmailAsync_MarketplaceThrows_ThrowsInvalidOperation()
         {
@@ -106,29 +106,58 @@ namespace WoopiAiHub.UnitTests.Cache
                 .Setup(m => m.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new HttpRequestException("unavailable"));
 
-            // Act / Assert
+            // Act & Assert
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _service.FindAllowedTenantsByEmailAsync("user@test.com"));
+                _service.FindAllowedTenantsByEmailAsync(TenantFixture.ValidUserEmail));
         }
 
-        [Fact(DisplayName = "IsTenantAllowedForUserAsync returns true when tenant is in list")]
+        [Fact(DisplayName = "Tests FindAllowedTenantsByEmailAsync and throws when KeyAccess is not configured")]
+        [Trait("FindAllowedTenantsByEmailAsync", "Fail")]
+        public async Task FindAllowedTenantsByEmailAsync_KeyAccessMissing_ThrowsInvalidOperation()
+        {
+            // Arrange
+            var configuration = new ConfigurationBuilder().Build();
+            var service = new UserTenantAccessCacheService(
+                _cache,
+                _marketplaceMock.Object,
+                configuration,
+                Mock.Of<ILogger<UserTenantAccessCacheService>>());
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.FindAllowedTenantsByEmailAsync(TenantFixture.ValidUserEmail));
+        }
+
+        [Fact(DisplayName = "Tests IsTenantAllowedForUserAsync and returns true when tenant is in list")]
         [Trait("IsTenantAllowedForUserAsync", "Success")]
         public async Task IsTenantAllowedForUserAsync_TenantInList_ReturnsTrue()
         {
             // Arrange
             _marketplaceMock
-                .Setup(m => m.CheckAccessByHub("test-key", "user@test.com"))
-                .ReturnsAsync(new ResponseCheckAccessDto
-                {
-                    HasAccess = true,
-                    Tenants = new List<TenantAccessDto> { new("Tenant1", true) }
-                });
+                .Setup(m => m.CheckAccessByHub(TestKeyAccess, TenantFixture.ValidUserEmail))
+                .ReturnsAsync(TenantFixture.FindValidResponseCheckAccessDto());
 
             // Act
-            var result = await _service.IsTenantAllowedForUserAsync("user@test.com", "Tenant1");
+            var result = await _service.IsTenantAllowedForUserAsync(TenantFixture.ValidUserEmail, "Tenant1");
 
             // Assert
             Assert.True(result);
+        }
+
+        [Fact(DisplayName = "Tests IsTenantAllowedForUserAsync and returns false when tenant is not in list")]
+        [Trait("IsTenantAllowedForUserAsync", "Success")]
+        public async Task IsTenantAllowedForUserAsync_TenantNotInList_ReturnsFalse()
+        {
+            // Arrange
+            _marketplaceMock
+                .Setup(m => m.CheckAccessByHub(TestKeyAccess, TenantFixture.ValidUserEmail))
+                .ReturnsAsync(TenantFixture.FindValidResponseCheckAccessDto());
+
+            // Act
+            var result = await _service.IsTenantAllowedForUserAsync(TenantFixture.ValidUserEmail, "Unknown");
+
+            // Assert
+            Assert.False(result);
         }
     }
 }

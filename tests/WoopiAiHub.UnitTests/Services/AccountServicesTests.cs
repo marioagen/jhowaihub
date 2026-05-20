@@ -441,7 +441,7 @@ namespace WoopiAiHub.UnitTests.Services
                 accountServices.RefreshTokenAsync(refreshToken, "TenantNotInList"));
 
             // Assert
-            Assert.Equal("Tenant not found", exception.Message);
+            Assert.Equal(Login.TenantNotFound, exception.LabelError);
         }
 
         [Fact(DisplayName = "Login ShouldThrowAppException_WhenTenantNotFound")]

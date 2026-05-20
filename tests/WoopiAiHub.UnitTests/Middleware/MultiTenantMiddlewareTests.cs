@@ -7,16 +7,18 @@ using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Repository.Middleware;
+using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
 namespace WoopiAiHub.UnitTests.Middleware
 {
+    [Collection(nameof(TenantCollection))]
     public class MultiTenantMiddlewareTests
     {
         private const string TemplateConnection = "Server=.;Database=___NEWDB___;";
         private const string TenantName = "tenant-alpha";
 
-        [Fact(DisplayName = "Sets TenantConnection when validator allows request")]
+        [Fact(DisplayName = "Tests InvokeAsync and sets TenantConnection when validator allows request")]
         [Trait("InvokeAsync", "Success")]
         public async Task InvokeAsync_ValidatorAllows_SetsTenantConnection()
         {
@@ -37,7 +39,7 @@ namespace WoopiAiHub.UnitTests.Middleware
             Assert.Contains("TestDB", context.Items["TenantConnection"]!.ToString());
         }
 
-        [Fact(DisplayName = "Returns 403 when validator rejects request")]
+        [Fact(DisplayName = "Tests InvokeAsync and returns 403 when validator rejects request")]
         [Trait("InvokeAsync", "Fail")]
         public async Task InvokeAsync_ValidatorRejects_Returns403()
         {
@@ -58,7 +60,7 @@ namespace WoopiAiHub.UnitTests.Middleware
             await AssertResponseErrorAsync(context);
         }
 
-        [Fact(DisplayName = "Continues without TenantConnection when no header and validator allows")]
+        [Fact(DisplayName = "Tests InvokeAsync and continues without TenantConnection when no header and validator allows")]
         [Trait("InvokeAsync", "Success")]
         public async Task InvokeAsync_NoHeader_DoesNotSetTenantConnection()
         {
