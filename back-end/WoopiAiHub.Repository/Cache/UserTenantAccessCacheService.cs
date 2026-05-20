@@ -60,12 +60,10 @@ namespace WoopiAiHub.Repository.Cache
         /// </summary>
         /// <param name="email">User email.</param>
         /// <param name="tenantName">Tenant identifier from X-Tenant.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>True when the tenant is in the cached or freshly loaded allowed list.</returns>
         public async Task<bool> IsTenantAllowedForUserAsync(
             string email,
-            string tenantName,
-            CancellationToken cancellationToken = default)
+            string tenantName)
         {
             var allowed = await FindAllowedTenantsByEmailAsync(email, cancellationToken);
             return allowed.Any(t => t.Name.Equals(tenantName, StringComparison.OrdinalIgnoreCase));
