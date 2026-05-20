@@ -75,12 +75,10 @@ namespace WoopiAiHub.Repository.Cache
         /// Loads allowed tenants from the marketplace when the distributed cache has no entry.
         /// </summary>
         /// <param name="email">User email for the access check.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Allowed tenants, or an empty list when access is denied.</returns>
         /// <exception cref="InvalidOperationException">When KeyAccess is missing or the marketplace call fails.</exception>
         private async Task<IReadOnlyList<TenantAccessDto>> LoadTenantsFromMarketplaceAsync(
-            string email,
-            CancellationToken cancellationToken)
+            string email)
         {
             var apiKey = _configuration["KeyAccess"];
             if (string.IsNullOrEmpty(apiKey))
