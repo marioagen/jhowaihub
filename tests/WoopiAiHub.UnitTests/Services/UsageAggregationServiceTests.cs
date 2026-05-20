@@ -64,7 +64,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ProcessUnprocessedUsageAsync_TenantsExist_ProcessesEachTenant()
         {
             // Arrange
-            var tenants = TenantFixture.FindValidTenantListDtos(2);
+            var tenants = TenantFixture.FindValidTenantListDtosForUsageAggregation(2);
 
             _mocker.GetMock<IMarketPlaceApi>()
                 .Setup(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
@@ -138,7 +138,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ProcessUnprocessedUsageAsync_WithDistinctWorkflowIds_UpsertsSeparateRows()
         {
             // Arrange
-            var tenants = TenantFixture.FindValidTenantListDtos(1);
+            var tenants = TenantFixture.FindValidTenantListDtosForUsageAggregation(1);
             var unprocessedRecords = UsageFixture.FindCustomUsageDailies();
             var workflowId = unprocessedRecords.First(u => u.WorkflowId != null).WorkflowId;
             _mocker.GetMock<IMarketPlaceApi>()
@@ -200,7 +200,7 @@ namespace WoopiAiHub.UnitTests.Services
         public async Task ProcessUnprocessedUsageAsync_WithUnprocessedRecords_ProcessesAndMarks()
         {
             // Arrange
-            var tenants = TenantFixture.FindValidTenantListDtos(1);
+            var tenants = TenantFixture.FindValidTenantListDtosForUsageAggregation(1);
 
             var unprocessedRecords = UsageFixture.FindValidUsageDailies(2);
 
