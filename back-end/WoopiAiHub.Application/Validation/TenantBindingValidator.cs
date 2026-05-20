@@ -12,9 +12,6 @@ using WoopiAiHub.Domain.Utils.ErrorLabels;
 
 namespace WoopiAiHub.Application.Validation
 {
-    /// <summary>
-    /// Validates X-Tenant header binding against JWT claims and marketplace-allowed tenants.
-    /// </summary>
     public class TenantBindingValidator : ITenantBindingValidator
     {
         private readonly IUserTenantAccessCacheServices _userTenantAccessCache;
@@ -65,10 +62,7 @@ namespace WoopiAiHub.Application.Validation
 
             try
             {
-                return await _userTenantAccessCache.IsTenantAllowedForUserAsync(
-                    email,
-                    headerTenant,
-                    cancellationToken);
+                return await _userTenantAccessCache.IsTenantAllowedForUserAsync(email, headerTenant);
             }
             catch (InvalidOperationException ex)
             {

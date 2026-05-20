@@ -60,7 +60,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mockJwtTokenServices = _mocker.GetMock<IJwtTokenServices>();
 
             _mocker.GetMock<IUserTenantAccessCacheServices>()
-                .Setup(s => s.FindAllowedTenantsByEmailAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Setup(s => s.FindAllowedTenantsByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(Array.Empty<TenantAccessDto>());
 
             _mocker.Use<ITenantBindingValidator>(new TenantBindingValidator(

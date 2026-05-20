@@ -36,22 +36,19 @@ namespace WoopiAiHub.Repository.Cache
         /// Returns tenants the user is allowed to access for the Hub module.
         /// </summary>
         /// <param name="email">User email used for marketplace lookup.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Allowed tenants; empty when the user has no access.</returns>
         /// <exception cref="InvalidOperationException">When the marketplace call fails (fail-closed for runtime validation).</exception>
-        public async Task<IReadOnlyList<TenantAccessDto>> FindAllowedTenantsByEmailAsync(
-            string email,
-            CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<TenantAccessDto>> FindAllowedTenantsByEmailAsync(string email)
         {
             var normalizedEmail = email.Trim().ToLowerInvariant();
             var cacheKey = $"{CacheKeyPrefix}{normalizedEmail}";
-            var cached = await _cache.GetStringAsync(cacheKey, cancellationToken);
+            var cached = await _cache.GetStringAsync(cacheKey);
 
             if (!string.IsNullOrWhiteSpace(cached))
                 return JsonSerializer.Deserialize<List<TenantAccessDto>>(cached) ?? [];
 
-            var tenants = await LoadTenantsFromMarketplaceAsync(email, cancellationToken);
-            await CacheTenantsAsync(cacheKey, tenants, cancellationToken);
+            var tenants = await LoadTenantsFromMarketplaceAsync(email);
+            await CacheTenantsAsync(cacheKey, tenants);
             return tenants;
         }
 
@@ -61,11 +58,9 @@ namespace WoopiAiHub.Repository.Cache
         /// <param name="email">User email.</param>
         /// <param name="tenantName">Tenant identifier from X-Tenant.</param>
         /// <returns>True when the tenant is in the cached or freshly loaded allowed list.</returns>
-        public async Task<bool> IsTenantAllowedForUserAsync(
-            string email,
-            string tenantName)
+        public async Task<bool> IsTenantAllowedForUserAsync(string email, string tenantName)
         {
-            var allowed = await FindAllowedTenantsByEmailAsync(email, cancellationToken);
+            var allowed = await FindAllowedTenantsByEmailAsync(email);
             return allowed.Any(t => t.Name.Equals(tenantName, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -75,8 +70,7 @@ namespace WoopiAiHub.Repository.Cache
         /// <param name="email">User email for the access check.</param>
         /// <returns>Allowed tenants, or an empty list when access is denied.</returns>
         /// <exception cref="InvalidOperationException">When KeyAccess is missing or the marketplace call fails.</exception>
-        private async Task<IReadOnlyList<TenantAccessDto>> LoadTenantsFromMarketplaceAsync(
-            string email)
+        private async Task<IReadOnlyList<TenantAccessDto>> LoadTenantsFromMarketplaceAsync(string email)
         {
             var apiKey = _configuration["KeyAccess"];
             if (string.IsNullOrEmpty(apiKey))
@@ -102,11 +96,7 @@ namespace WoopiAiHub.Repository.Cache
         /// </summary>
         /// <param name="cacheKey">Cache key for the normalized user email.</param>
         /// <param name="tenants">Tenants to serialize and store.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        private async Task CacheTenantsAsync(
-            string cacheKey,
-            IReadOnlyList<TenantAccessDto> tenants,
-            CancellationToken cancellationToken)
+        private async Task CacheTenantsAsync(string cacheKey, IReadOnlyList<TenantAccessDto> tenants)
         {
             var expirationMinutes = _configuration.GetValue("Cache:UserTenantAccessExpirationMinutes", 10);
             var json = JsonSerializer.Serialize(tenants);
@@ -116,8 +106,7 @@ namespace WoopiAiHub.Repository.Cache
                 new DistributedCacheEntryOptions
                 {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(expirationMinutes)
-                },
-                cancellationToken);
+                });
         }
     }
 }

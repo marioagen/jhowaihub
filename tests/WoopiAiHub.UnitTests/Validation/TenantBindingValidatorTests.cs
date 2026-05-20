@@ -39,7 +39,7 @@ namespace WoopiAiHub.UnitTests.Validation
             // Assert
             Assert.True(result);
             _userTenantAccessMock.Verify(
-                s => s.IsTenantAllowedForUserAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                s => s.IsTenantAllowedForUserAsync(It.IsAny<string>(), It.IsAny<string>()),
                 Times.Never);
         }
 
@@ -92,7 +92,7 @@ namespace WoopiAiHub.UnitTests.Validation
             // Assert
             Assert.True(result);
             _userTenantAccessMock.Verify(
-                s => s.IsTenantAllowedForUserAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                s => s.IsTenantAllowedForUserAsync(It.IsAny<string>(), It.IsAny<string>()),
                 Times.Never);
         }
 
@@ -108,7 +108,7 @@ namespace WoopiAiHub.UnitTests.Validation
                 email: "user@test.com");
 
             _userTenantAccessMock
-                .Setup(s => s.IsTenantAllowedForUserAsync("user@test.com", "tenant-b", It.IsAny<CancellationToken>()))
+                .Setup(s => s.IsTenantAllowedForUserAsync("user@test.com", "tenant-b"))
                 .ReturnsAsync(true);
 
             // Act
@@ -130,7 +130,7 @@ namespace WoopiAiHub.UnitTests.Validation
                 email: "user@test.com");
 
             _userTenantAccessMock
-                .Setup(s => s.IsTenantAllowedForUserAsync("user@test.com", "tenant-b", It.IsAny<CancellationToken>()))
+                .Setup(s => s.IsTenantAllowedForUserAsync("user@test.com", "tenant-b"))
                 .ReturnsAsync(false);
 
             // Act
@@ -152,7 +152,7 @@ namespace WoopiAiHub.UnitTests.Validation
                 email: "user@test.com");
 
             _userTenantAccessMock
-                .Setup(s => s.IsTenantAllowedForUserAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Setup(s => s.IsTenantAllowedForUserAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ThrowsAsync(new InvalidOperationException("marketplace down"));
 
             // Act
