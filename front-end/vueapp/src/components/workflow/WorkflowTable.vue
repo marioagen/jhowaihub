@@ -103,7 +103,11 @@
     <ConfirmModalValidationInput
         id="deleteValidationConfirm"
         title="documents.deleteValidationTitle"
-        :message="deleteValidationMessage"
+        messageKey="documents.deleteValidationMessage"
+        :messageParams="{
+            count: documentCountToDel,
+            name: selectedWorkflowName,
+        }"
         cancelText="common.cancel"
         confirmText="documents.confirmPermanentDelete"
         :placeholder="$t('documents.deleteValidationPlaceholder', { name: selectedWorkflowName })"
@@ -402,12 +406,6 @@
         computed: {
             showMultiDelete() {
                 return this.table.selectedRows.length > 1;
-            },
-            deleteValidationMessage() {
-                return this.$t("documents.deleteValidationMessage", {
-                    count: this.documentCountToDel,
-                    name: this.selectedWorkflowName,
-                });
             },
         },
     };

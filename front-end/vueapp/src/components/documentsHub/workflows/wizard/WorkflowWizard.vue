@@ -149,7 +149,11 @@
     <ConfirmModalValidationInput
         id="editValidationConfirm"
         title="documents.editValidationTitle"
-        :message="editValidationMessage"
+        messageKey="documents.editValidationMessage"
+        :messageParams="{
+            count: documentCountToEdit,
+            name: phase1Data?.name || '',
+        }"
         cancelText="common.cancel"
         confirmText="documents.confirmEdit"
         :placeholder="$t('documents.editValidationPlaceholder', { name: phase1Data?.name })"
@@ -164,7 +168,8 @@
     <ConfirmModalValidationInput
         id="removeToolValidationConfirm"
         title="workflow.removeToolValidationTitle"
-        :message="$t('workflow.removeToolValidationMessage', { name: pendingStepToRemove?.name })"
+        messageKey="workflow.removeToolValidationMessage"
+        :messageParams="{ name: pendingStepToRemove?.name || '' }"
         cancelText="common.cancel"
         confirmText="workflow.confirmRemoveTool"
         :placeholder="
@@ -248,12 +253,6 @@
                 return this.$t(
                     this.isEdit ? "workflow.formEdit.subtitle" : "workflow.formCreate.subtitle"
                 );
-            },
-            editValidationMessage() {
-                return this.$t("documents.editValidationMessage", {
-                    count: this.documentCountToEdit,
-                    name: this.phase1Data?.name || "",
-                });
             },
         },
         methods: {

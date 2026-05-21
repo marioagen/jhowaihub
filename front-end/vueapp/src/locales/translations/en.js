@@ -566,12 +566,12 @@ const english = {
         },
         deleteValidationTitle: "Confirm permanent deletion",
         deleteValidationMessage:
-            "You are about to permanently delete <b>{count} documents</b> and the workflow \"<b>{name}</b>\". This action cannot be undone. Type <span style='color: red' class='text-danger'><b>{name}</b></span> to confirm:",
+            'You are about to permanently delete {count} documents and the workflow "{name}". This action cannot be undone. Type the workflow name to confirm:',
         deleteValidationPlaceholder: "Type '{name}' to confirm",
         confirmPermanentDelete: "Permanently delete",
         editValidationTitle: "There are documents in progress in this workflow",
         editValidationMessage:
-            "We found <b>{count} documents</b> being processed in this workflow. By saving the changes, all documents and progress will be permanently deleted. Type <span style='color: red' class='text-danger'><b>{name}</b></span> to confirm:",
+            "We found {count} documents being processed in this workflow. By saving the changes, all documents in progress will be permanently deleted. Type the workflow name to confirm:",
         editValidationPlaceholder: "Type '{name}' to confirm changes",
         confirmEdit: "Delete documents and save",
         workflows: "Workflows",

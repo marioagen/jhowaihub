@@ -40,10 +40,9 @@
                     </h5>
                 </div>
 
-                <div
-                    class="modal-body text-center px-4 pt-4 pb-0 text-muted"
-                    v-html="message"
-                ></div>
+                <div class="modal-body text-center px-4 pt-4 pb-0 text-muted">
+                    {{ displayMessage }}
+                </div>
 
                 <div class="px-4 mt-4">
                     <input
@@ -113,7 +112,18 @@
             },
             message: {
                 type: String,
-                required: true,
+                required: false,
+                default: "",
+            },
+            messageKey: {
+                type: String,
+                required: false,
+                default: "",
+            },
+            messageParams: {
+                type: Object,
+                required: false,
+                default: () => ({}),
             },
             cancelText: {
                 type: String,
@@ -153,6 +163,12 @@
             };
         },
         computed: {
+            displayMessage() {
+                if (this.messageKey) {
+                    return this.$t(this.messageKey, this.messageParams);
+                }
+                return this.message;
+            },
             isValid() {
                 return this.inputValue === this.validationText;
             },

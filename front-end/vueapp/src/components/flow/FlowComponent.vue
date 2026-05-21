@@ -283,7 +283,8 @@
         <ConfirmModalValidationInput
             id="removeToolValidationConfirm"
             title="workflow.removeToolValidationTitle"
-            :message="$t('workflow.removeToolValidationMessage', { name: step?.name })"
+            messageKey="workflow.removeToolValidationMessage"
+            :messageParams="{ name: step?.name || '' }"
             cancelText="common.cancel"
             confirmText="workflow.confirmRemoveTool"
             :placeholder="$t('workflow.removeToolValidationPlaceholder', { name: step?.name })"
