@@ -62,7 +62,7 @@
                         <Phase1NameAndTeams
                             v-if="currentPhase === 1"
                             ref="phase1"
-                            :initialData="phase1Data ?? null"
+                            :initialData="phase1Data"
                             :key="phase1Data?.name"
                         />
 

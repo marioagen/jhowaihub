@@ -157,7 +157,8 @@
         props: {
             initialData: {
                 type: Object,
-                required: true,
+                required: false,
+                default: () => ({}),
             },
         },
         data() {
