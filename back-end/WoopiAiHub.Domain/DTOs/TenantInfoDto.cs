@@ -16,6 +16,7 @@ namespace WoopiAiHub.Domain.DTOs
         public int ChunkSize { get; set; }
         public string SearchMode { get; set; } = string.Empty;
         public RagProvider RagProvider { get; set; } = RagProvider.Indexer;
+        public LlmProvider LlmProvider { get; set; } = LlmProvider.AzureOpenAI;
         public string OcrModel { get; set; } = string.Empty;
         public DateTime? DateStart { get; set; }
         public DateTime? DateEnd { get; set; }
