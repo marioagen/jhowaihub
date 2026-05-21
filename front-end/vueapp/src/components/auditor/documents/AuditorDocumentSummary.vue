@@ -157,12 +157,12 @@
         methods: {
             documentStatusBadgeText(item) {
                 if (item.isRemoved) {
-                    return this.$t("auditor.documents.summary.removed");
+                    return "auditor.documents.summary.removed";
                 }
                 if (item.isFinalized) {
-                    return this.$t("auditor.documents.summary.finalized");
+                    return "auditor.documents.summary.finalized";
                 }
-                return this.$t("auditor.documents.summary.active");
+                return "auditor.documents.summary.active";
             },
             documentStatusBadgeVariant(item) {
                 if (item.isRemoved) {

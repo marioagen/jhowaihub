@@ -71,7 +71,7 @@
                                     :key="index"
                                     :value="item.id"
                                 >
-                                    {{ $t(item.description) }}
+                                    {{ toolTypeLabel(item.description) }}
                                 </option>
                             </select>
                             <span
@@ -266,6 +266,7 @@
     import ToolsTypesService from "@/services/tools/ToolsTypesService";
     import ToolsDataService from "@/services/tools/ToolsDataService";
     import ToolType from "@/constants/ToolType";
+    import { translateIfExists } from "@/utils/i18nHelpers";
 
     export default {
         components: {
@@ -318,6 +319,9 @@
             },
         },
         methods: {
+            toolTypeLabel(description) {
+                return translateIfExists(this.$te, this.$t, description);
+            },
             async validateConnector() {
                 if (this.values.connectorUrl && this.values.connectorApiKey) {
                     this.$notify({
