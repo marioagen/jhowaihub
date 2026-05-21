@@ -129,14 +129,7 @@
                                         </div>
                                         <div>
                                             <strong>
-                                                {{
-                                                    $t(
-                                                        "permissions.groups." +
-                                                            group.group
-                                                                .toLowerCase()
-                                                                .replace(/-/g, "")
-                                                    )
-                                                }}
+                                                {{ permissionGroupLabel(group.group) }}
                                             </strong>
                                             <span class="text-muted ms-1">
                                                 ({{ checkedCount(group.permissions) }}
@@ -177,7 +170,11 @@
                                                         class="form-check-label fw-semibold"
                                                         :for="`permission-${permission.id}`"
                                                     >
-                                                        {{ $t(permission.description) }}
+                                                        {{
+                                                            permissionDescriptionLabel(
+                                                                permission.description
+                                                            )
+                                                        }}
                                                     </label>
                                                 </div>
                                             </div>
@@ -261,7 +258,11 @@
                                                         class="form-check-label"
                                                         :for="`permission-${profileData.id ?? 'new'}-${step.id}-${permission.id}`"
                                                     >
-                                                        {{ $t(permission.description) }}
+                                                        {{
+                                                            permissionDescriptionLabel(
+                                                                permission.description
+                                                            )
+                                                        }}
                                                     </label>
                                                 </div>
                                             </div>
@@ -289,6 +290,7 @@
     import WorkflowService from "@/services/workflow/WorkflowService";
     import CollapseComponent from "@/components/global/CollapseComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
+    import { permissionGroupI18nKey, translateIfExists } from "@/utils/i18nHelpers";
 
     export default {
         name: "ProfilesForm",
@@ -350,7 +352,9 @@
                         const filtered = group.permissions.filter(
                             (p) =>
                                 p.name.toLowerCase().includes(term) ||
-                                this.$t(p.description).toLowerCase().includes(term)
+                                this.permissionDescriptionLabel(p.description)
+                                    .toLowerCase()
+                                    .includes(term)
                         );
 
                         return {
@@ -367,6 +371,13 @@
             this.setupEdit();
         },
         methods: {
+            permissionGroupLabel(groupValue) {
+                const key = permissionGroupI18nKey(groupValue);
+                return translateIfExists(this.$te, this.$t, key);
+            },
+            permissionDescriptionLabel(description) {
+                return translateIfExists(this.$te, this.$t, description);
+            },
             returnToTable() {
                 this.$router.push({
                     name: "Management",

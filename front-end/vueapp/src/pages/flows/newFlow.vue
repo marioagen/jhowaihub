@@ -1,20 +1,20 @@
 <template>
-    <FlowComponent 
+    <FlowComponent
         :stepId="routeStepId"
         :stepOrder="routeStepOrder"
         :phase="routePhase"
         :workflowId="routeWorkflowId"
-        :hasStepTools="hasStepTools"
+        :hasStepTools="routeHasStepTools"
     />
 </template>
-
 <script>
-    import FlowComponent from '@/components/flow/FlowComponent.vue';
-    import { useRoute } from 'vue-router';
+    import FlowComponent from "@/components/flow/FlowComponent.vue";
+    import { parseRouteBoolean } from "@/utils/routeParams";
+
     export default {
         name: "NewFlow",
         components: {
-            FlowComponent
+            FlowComponent,
         },
         data() {
             return {
@@ -29,14 +29,16 @@
                 return parseInt(this.$route.params.phase);
             },
             routeWorkflowId() {
-                return this.$route.params.workflowId ? parseInt(this.$route.params.workflowId) : null;
+                return this.$route.params.workflowId
+                    ? parseInt(this.$route.params.workflowId)
+                    : null;
             },
             routeStepId() {
                 return parseInt(this.$route.params.stepId);
             },
             routeHasStepTools() {
-                return parseInt(this.$route.params.hasStepTools);
+                return parseRouteBoolean(this.$route.params.hasStepTools);
             },
         },
-    }
+    };
 </script>

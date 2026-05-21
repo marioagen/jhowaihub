@@ -11,6 +11,8 @@
 </template>
 <script>
     import FlowComponent from "@/components/flow/FlowComponent.vue";
+    import { parseRouteBoolean } from "@/utils/routeParams";
+
     export default {
         name: "EditFlow",
         components: {
@@ -29,22 +31,18 @@
                 return parseInt(this.$route.params.stepId);
             },
             routeStepOrder() {
-                return parseInt(
-                    this.$route.params.stepOrder
-                );
+                return parseInt(this.$route.params.stepOrder);
             },
             routePhase() {
                 return parseInt(this.$route.params.phase);
             },
             routeWorkflowId() {
                 return this.$route.params.workflowId
-                    ? parseInt(
-                          this.$route.params.workflowId
-                      )
+                    ? parseInt(this.$route.params.workflowId)
                     : null;
             },
             routeHasStepTools() {
-                return this.$route.params.hasStepTools;
+                return parseRouteBoolean(this.$route.params.hasStepTools);
             },
         },
     };

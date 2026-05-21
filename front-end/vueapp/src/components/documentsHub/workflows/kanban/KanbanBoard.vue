@@ -105,6 +105,11 @@
                 required: false,
                 default: false,
             },
+            isLoading: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
             cardIdsToUpdate: {
                 type: Array,
                 required: false,

@@ -31,7 +31,7 @@
                                     :size="compact ? 12 : 16"
                                     class="icon-pill"
                                 />
-                                {{ $t(tab.label) }}
+                                {{ tabLabel(tab) }}
                             </a>
                         </li>
                     </ul>
@@ -78,7 +78,7 @@
                             :size="compact ? 12 : 16"
                             class="icon-pill"
                         />
-                        {{ $t(tab.label) }}
+                        {{ tabLabel(tab) }}
                     </a>
                 </li>
             </ul>
@@ -97,6 +97,8 @@
     </div>
 </template>
 <script>
+    import { translateIfExists } from "@/utils/i18nHelpers";
+
     export default {
         name: "TabsComponent",
         props: {
@@ -124,6 +126,10 @@
             };
         },
         methods: {
+            tabLabel(tab) {
+                const key = tab.labelKey || tab.label;
+                return translateIfExists(this.$te, this.$t, key);
+            },
             setActiveTab(tabName) {
                 this.activeTab = tabName;
                 this.$emit("selected", tabName);

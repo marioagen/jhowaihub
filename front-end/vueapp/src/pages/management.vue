@@ -5,7 +5,10 @@
                 <div class="col-12">
                     <h5 class="mb-0 fw-bold">{{ $t("management.title") }}</h5>
                     <p>{{ $t("management.subtitle") }}</p>
-                    <TabsComponent :tabs="tabsList" color="custom">
+                    <TabsComponent
+                        :tabs="tabsList"
+                        color="custom"
+                    >
                         <template #users>
                             <UsersComponent />
                         </template>
@@ -21,7 +24,6 @@
         </div>
     </main>
 </template>
-
 <script>
     import TabsComponent from "@/components/global/TabsComponent.vue";
     import TeamsComponent from "@/components/management/teams/TeamsComponent.vue";
@@ -38,14 +40,13 @@
         },
         data: () => ({
             tabsList: [
-                { name: "users", label: "labelUsers", icon: "UsersRound" },
-                { name: "teams", label: "labelTeams", icon: "Building" },
-                { name: "profiles", label: "labelProfilePermissions", icon: "Shield" },
+                { name: "users", label: "management.users.title", icon: "UsersRound" },
+                { name: "teams", label: "management.teams.title", icon: "Building" },
+                { name: "profiles", label: "management.profiles.title", icon: "Shield" },
             ],
         }),
     };
 </script>
-
 <style>
     .scroll-area {
         display: list-item;
