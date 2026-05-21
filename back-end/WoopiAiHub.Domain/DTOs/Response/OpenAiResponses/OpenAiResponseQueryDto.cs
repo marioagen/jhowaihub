@@ -15,6 +15,6 @@ namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
         public string ResponseQueue { get; set; } = string.Empty;
         public LlmProvider? LlmProvider { get; set; }
         public MetaDataAutomationDto Data { get; set; } = new ();
-        public ResponseOpenAiRequestDto OpenAiResponse { get; set; } = new();
+        public ResponseOpenAiRequestDto PromptRequest { get; set; } = new();
     }
 }

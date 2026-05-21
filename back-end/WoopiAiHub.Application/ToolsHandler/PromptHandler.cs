@@ -90,7 +90,7 @@ public class PromptHandler : IToolHandler
                 ApiVersion = _openAiSettings.ApiVersion,
                 ApplicationId = tenantInfo!.AiGatewayApplicationId.Value.ToString(),
                 ApplicationKey = tenantInfo!.AiGatewayKey,
-                OpenAiResponse = dto,
+                PromptRequest = dto,
                 Email = automationServicesDto.Email,
                 LlmProvider = tenantInfo!.LlmProvider
             }
