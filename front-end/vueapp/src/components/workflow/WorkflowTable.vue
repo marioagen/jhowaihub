@@ -192,7 +192,7 @@
             table: {
                 isLoading: true,
                 columns: [
-                    { key: "id", label: "id" },
+                    { key: "id", label: "common.id" },
                     { key: "name", label: "workflow.name" },
                     { key: "description", label: "common.description" },
                     {
