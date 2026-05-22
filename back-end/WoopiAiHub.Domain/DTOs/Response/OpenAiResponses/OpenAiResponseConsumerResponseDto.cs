@@ -7,6 +7,7 @@ namespace WoopiAiHub.Domain.DTOs.Response.OpenAiResponses
         public string ReferenceFile { get; set; } = string.Empty;
         public string Tenant { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string Model { get; set; } = string.Empty;
         public JObject Data { get; set; } = new ();
         public ResponseOpenAiResponseDto Response { get; set; } = new ();
     }

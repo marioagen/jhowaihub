@@ -86,12 +86,13 @@ public class PromptHandler : IToolHandler
                 Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
                 ReferenceFile = automationServicesDto.ReferenceFile!,
                 Tenant = automationServicesDto.Tenant,
-                Model = _openAiSettings.Model,
+                Model = tenantInfo!.LlmProvider == LlmProvider.AzureOpenAI ? _openAiSettings.Model : tenantInfo!.Model,
                 ApiVersion = _openAiSettings.ApiVersion,
                 ApplicationId = tenantInfo!.AiGatewayApplicationId.Value.ToString(),
                 ApplicationKey = tenantInfo!.AiGatewayKey,
-                OpenAiResponse = dto,
-                Email = automationServicesDto.Email
+                PromptRequest = dto,
+                Email = automationServicesDto.Email,
+                LlmProvider = tenantInfo!.LlmProvider
             }
         };
     }

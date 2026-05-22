@@ -50,6 +50,7 @@ namespace WoopiAiHub.UnitTests.Fixture
                   Name = f.Random.String(),
                   OcrModel = f.Random.String(),
                   RagProvider = RagProvider.Indexer,
+                  LlmProvider = LlmProvider.AzureOpenAI,
                   RefineTemplate = f.Random.String(),
                   SearchMode = f.Random.String(),
                   Template = f.Random.String(),
