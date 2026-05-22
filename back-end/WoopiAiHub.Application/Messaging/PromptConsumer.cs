@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
-using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Response.OpenAiResponses;
@@ -24,20 +23,17 @@ namespace WoopiAiHub.Application.Messaging
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<PromptConsumer> _logger;
         private readonly MessageQueues _queues;
-        private readonly OpenAiSettings _openAiSettings;
 
         public PromptConsumer(IServiceScopeFactory scopeFactory,
                               IConfiguration configuration,
                               IMessageConsumer<OpenAiResponseConsumerResponseDto> consumer,
                               ILogger<PromptConsumer> logger,
-                              IOptions<MessageQueues> queues,
-                              IOptions<OpenAiSettings> openAiSettings) : base(configuration)
+                              IOptions<MessageQueues> queues) : base(configuration)
         {
             _scopeFactory = scopeFactory;
             _queues = queues.Value;
             _consumer = consumer;
             _logger = logger;
-            _openAiSettings = openAiSettings.Value;
         }
 
         /// <summary>
@@ -64,7 +60,7 @@ namespace WoopiAiHub.Application.Messaging
                     var usageDailyServices = scope.ServiceProvider.GetRequiredService<IUsageDailyServices>();
 
                     var tokens = message.Response.Usage?.TotalTokens ?? 0;
-                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email, tokens, _openAiSettings.Model, result.StepTool?.Step?.WorkflowId);
+                    await usageDailyServices.AddByValuesAsync(MetricNames.Token, message.Email, tokens, message.Model, result.StepTool?.Step?.WorkflowId);
 
                     var dataDto = JsonSerializer.Deserialize<MetaDataAutomationDto>(message.Data.ToString());
                     var automationServicesDto = new AutomationServicesDto
