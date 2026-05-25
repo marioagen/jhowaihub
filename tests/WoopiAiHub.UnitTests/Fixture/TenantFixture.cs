@@ -25,7 +25,7 @@ namespace WoopiAiHub.UnitTests.Fixture
               .CustomInstantiator(f => new TenantInfoDto
               {
                   ChunkSize = f.Random.Int(),
-                  DatabaseName = f.Random.String(),
+                  DatabaseName = "database",
                   Email = f.Random.String(),
                   EmbeddingModelName = f.Random.String(),
                   KValue = f.Random.Int(),

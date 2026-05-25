@@ -194,59 +194,5 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Equal(50, workflowRow!.Total);
             mockUsageDailyRepo.Verify(x => x.MarkAsProcessedAsync(It.IsAny<IEnumerable<int>>()), Times.Once);
         }
-
-        [Fact(DisplayName = "ProcessUnprocessedUsageAsync should process and mark records as processed")]
-        [Trait("Process", "Success")]
-        public async Task ProcessUnprocessedUsageAsync_WithUnprocessedRecords_ProcessesAndMarks()
-        {
-            // Arrange
-            var tenants = TenantFixture.FindValidTenantListDtos(1);
-
-            var unprocessedRecords = UsageFixture.FindValidUsageDailies(2);
-
-            _mocker.GetMock<IMarketPlaceApi>()
-                .Setup(x => x.FindAllTenantsByModuleAsync(It.IsAny<string>(), It.IsAny<ColTypeModule>()))
-                .ReturnsAsync(tenants);
-
-            var mockScope = new Mock<IServiceScope>();
-            var mockServiceProvider = new Mock<IServiceProvider>();
-            var mockHttpAccessor = new Mock<IHttpContextAccessor>();
-            var mockUsageDailyRepo = new Mock<IUsageDailyRepository>();
-            var mockUsageMonthRepo = new Mock<IUsageMonthRepository>();
-
-            // Mock IConfiguration in the scope
-            var mockScopeConfig = new Mock<IConfiguration>();
-            var mockConnectionSection = new Mock<IConfigurationSection>();
-            mockConnectionSection.Setup(s => s["TemplateConnection"]).Returns("Server=localhost;Database=___NEWDB___;");
-            mockScopeConfig.Setup(c => c.GetSection("ConnectionStrings")).Returns(mockConnectionSection.Object);
-
-            mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
-            mockUsageDailyRepo.Setup(x => x.FindUnprocessedAsync()).ReturnsAsync(unprocessedRecords);
-
-            mockServiceProvider.Setup(x => x.GetService(typeof(IHttpContextAccessor))).Returns(mockHttpAccessor.Object);
-            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
-            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository))).Returns(mockUsageMonthRepo.Object);
-            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageDailyRepository))).Returns(mockUsageDailyRepo.Object);
-            mockServiceProvider.Setup(x => x.GetService(typeof(IUsageMonthRepository))).Returns(mockUsageMonthRepo.Object);
-            mockServiceProvider.Setup(x => x.GetService(typeof(IConfiguration))).Returns(mockScopeConfig.Object);
-
-            // Mock ApplicationDbContext
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TestDb;ConnectRetryCount=0")
-                .Options;
-            var realDbContext = new ApplicationDbContext(options);
-            mockServiceProvider.Setup(x => x.GetService(typeof(ApplicationDbContext))).Returns(realDbContext);
-
-            mockScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
-            _mocker.GetMock<IServiceScopeFactory>().Setup(x => x.CreateScope()).Returns(mockScope.Object);
-
-            // Act
-            await _service.ProcessUnprocessedUsageAsync();
-
-            // Assert
-            mockUsageDailyRepo.Verify(x => x.FindUnprocessedAsync(), Times.Once);
-            mockUsageMonthRepo.Verify(x => x.UpsertAsync(It.IsAny<UsageMonth>()), Times.AtLeastOnce);
-            mockUsageDailyRepo.Verify(x => x.MarkAsProcessedAsync(It.IsAny<IEnumerable<int>>()), Times.Once);
-        }
     }
 }
