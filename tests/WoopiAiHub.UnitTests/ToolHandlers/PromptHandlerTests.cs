@@ -224,7 +224,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.Equal(_messageQueues.OpenAiResponseQueue, result.Queue);
             var message = result.Message as OpenAiResponseQueryDto;
             Assert.NotNull(message);
-            Assert.Contains(previousPromptOutput, message!.OpenAiResponse!.Input![0].Content[0].Text);
+            Assert.Contains(previousPromptOutput, message!.PromptRequest!.Input![0].Content[0].Text);
         }
 
         [Fact(DisplayName = "Verify And Add Or Not Mcp Support When EnableAccessToMcp Is False Should Do Nothing")]
@@ -259,11 +259,11 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.IsType<OpenAiResponseQueryDto>(result.Message);
             var message = (OpenAiResponseQueryDto)result.Message;
 
-            Assert.NotNull(message.OpenAiResponse);
-            Assert.Empty(message.OpenAiResponse.Instructions);
-            Assert.Empty(((OpenAiResponseQueryDto)result.Message).OpenAiResponse.Instructions);
-            Assert.Equal(0, message.OpenAiResponse.MaxToolCalls);
-            Assert.Empty(message.OpenAiResponse.Tools);
+            Assert.NotNull(message.PromptRequest);
+            Assert.Empty(message.PromptRequest.Instructions);
+            Assert.Empty(((OpenAiResponseQueryDto)result.Message).PromptRequest.Instructions);
+            Assert.Equal(0, message.PromptRequest.MaxToolCalls);
+            Assert.Empty(message.PromptRequest.Tools);
         }
 
         [Fact(DisplayName = "Verify And Add Or Not Mcp Support When EnableAccessToMcp Is True Should Do add instructions")]
@@ -312,20 +312,20 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             Assert.IsType<OpenAiResponseQueryDto>(result.Message);
             var message = (OpenAiResponseQueryDto)result.Message;
             
-            Assert.NotNull(message.OpenAiResponse);
-            Assert.NotEmpty(message.OpenAiResponse.Instructions);
+            Assert.NotNull(message.PromptRequest);
+            Assert.NotEmpty(message.PromptRequest.Instructions);
 
-            Assert.Contains("instructions", message.OpenAiResponse.Instructions);
-            Assert.Contains(apis[0].Url, message.OpenAiResponse.Instructions);
-            Assert.Contains(apis[0].Description ?? "", message.OpenAiResponse.Instructions);
-            Assert.Contains(apis[1].Description ?? "", message.OpenAiResponse.Instructions);
+            Assert.Contains("instructions", message.PromptRequest.Instructions);
+            Assert.Contains(apis[0].Url, message.PromptRequest.Instructions);
+            Assert.Contains(apis[0].Description ?? "", message.PromptRequest.Instructions);
+            Assert.Contains(apis[1].Description ?? "", message.PromptRequest.Instructions);
 
-            Assert.Equal(_mcpSettings.MaxToolCalls, message.OpenAiResponse.MaxToolCalls);
+            Assert.Equal(_mcpSettings.MaxToolCalls, message.PromptRequest.MaxToolCalls);
 
-            Assert.NotNull(message.OpenAiResponse.Tools);
-            Assert.Single(message.OpenAiResponse.Tools);
+            Assert.NotNull(message.PromptRequest.Tools);
+            Assert.Single(message.PromptRequest.Tools);
 
-            var tool = message.OpenAiResponse.Tools[0];
+            var tool = message.PromptRequest.Tools[0];
             Assert.Equal(OpenAiResponseToolsType.Mcp, tool.Type);
             Assert.Single(tool.AllowedTools);
             Assert.Equal("generalist", tool.AllowedTools[0]);
@@ -364,7 +364,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var message = result.Message as OpenAiResponseQueryDto;
 
             // Assert
-            var apisJson = ExtractMappedApisJsonFromInstructions(message?.OpenAiResponse!.Instructions!);
+            var apisJson = ExtractMappedApisJsonFromInstructions(message?.PromptRequest!.Instructions!);
             using var doc = JsonDocument.Parse(apisJson);
             var first = doc.RootElement.EnumerateArray().First();
             var headers = first.GetProperty("headers");
@@ -402,7 +402,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var message = result.Message as OpenAiResponseQueryDto;
 
             // Assert
-            var apisJson = ExtractMappedApisJsonFromInstructions(message?.OpenAiResponse!.Instructions!);
+            var apisJson = ExtractMappedApisJsonFromInstructions(message?.PromptRequest!.Instructions!);
             using var doc = JsonDocument.Parse(apisJson);
             foreach (var el in doc.RootElement.EnumerateArray())
             {
@@ -442,7 +442,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var message = result.Message as OpenAiResponseQueryDto;
 
             // Assert
-            var apisJson = ExtractMappedApisJsonFromInstructions(message?.OpenAiResponse!.Instructions!);
+            var apisJson = ExtractMappedApisJsonFromInstructions(message?.PromptRequest!.Instructions!);
             using var doc = JsonDocument.Parse(apisJson);
             var headers = doc.RootElement[0].GetProperty("headers");
             Assert.Single(headers.EnumerateObject());
@@ -548,7 +548,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var message = result.Message as OpenAiResponseQueryDto;
 
             // Assert
-            Assert.Contains("quiz-result-value", message!.OpenAiResponse!.Input![0].Content[0].Text);
+            Assert.Contains("quiz-result-value", message!.PromptRequest!.Input![0].Content[0].Text);
         }
 
         [Fact(DisplayName = "BuildPayload should flatten JSON object from API dependency into prompt context")]
@@ -571,7 +571,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
             var message = result.Message as OpenAiResponseQueryDto;
-            var text = message!.OpenAiResponse!.Input![0].Content[0].Text;
+            var text = message!.PromptRequest!.Input![0].Content[0].Text;
 
             // Assert
             Assert.Contains("A: 1", text);
@@ -604,7 +604,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
             var message = result.Message as OpenAiResponseQueryDto;
-            var text = message!.OpenAiResponse!.Input![0].Content[0].Text;
+            var text = message!.PromptRequest!.Input![0].Content[0].Text;
 
             // Assert
             Assert.Contains("Baseado no: \"{}\"", text);
@@ -650,7 +650,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var message = result.Message as OpenAiResponseQueryDto;
 
             // Assert
-            Assert.Contains("[1,2]", message!.OpenAiResponse!.Input![0].Content[0].Text);
+            Assert.Contains("[1,2]", message!.PromptRequest!.Input![0].Content[0].Text);
         }
 
         [Fact(DisplayName = "BuildPayload should pass through JSON string literal from API dependency")]
@@ -673,7 +673,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var message = result.Message as OpenAiResponseQueryDto;
 
             // Assert
-            Assert.Contains("\"hello\"", message!.OpenAiResponse!.Input![0].Content[0].Text);
+            Assert.Contains("\"hello\"", message!.PromptRequest!.Input![0].Content[0].Text);
         }
 
         [Fact(DisplayName = "BuildPayload should trim unknown tool type output as plain context")]
@@ -696,7 +696,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             var message = result.Message as OpenAiResponseQueryDto;
 
             // Assert
-            Assert.Contains("n8n-plain", message!.OpenAiResponse!.Input![0].Content[0].Text);
+            Assert.Contains("n8n-plain", message!.PromptRequest!.Input![0].Content[0].Text);
         }
 
         [Fact(DisplayName = "BuildPayload should skip whitespace-only outputs and join multiple parts")]
@@ -719,7 +719,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [blank, first, second]);
             var message = result.Message as OpenAiResponseQueryDto;
-            var text = message!.OpenAiResponse!.Input![0].Content[0].Text;
+            var text = message!.PromptRequest!.Input![0].Content[0].Text;
 
             // Assert
             Assert.Contains("first-block", text);
@@ -793,7 +793,7 @@ namespace WoopiAiHub.UnitTests.ToolHandlers
             // Act
             var result = await _handler.BuildPayload(automationServicesDto, stepToolParameter, [output]);
             var message = result.Message as OpenAiResponseQueryDto;
-            var instructions = message!.OpenAiResponse!.Instructions!;
+            var instructions = message!.PromptRequest!.Instructions!;
 
             // Assert
             Assert.Contains("https://example.com/post", instructions);

@@ -156,7 +156,6 @@
 
             <TypesModal
                 :isEdit="false"
-                :type="modalType"
                 @reload="getDocTypes"
                 ref="TypesModal"
             />

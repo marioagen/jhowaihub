@@ -256,6 +256,7 @@
                 selectedProfiles: [],
                 searchTerm: "",
                 usersList: [],
+                profilesList: [],
                 showUsers: false,
             };
         },
@@ -302,7 +303,7 @@
                 this.isLoadingUsers = true;
                 api.get("/User/Paged", { params: paramsReq })
                     .then((response) => {
-                        this.usersList = response.data.content;
+                        this.usersList = response.data.content ?? [];
                     })
                     .catch((e) => {
                         console.log(e);
@@ -322,7 +323,7 @@
                 this.isLoadingProfiles = true;
                 api.get("/Profile/Paged", { params: paramsReq })
                     .then(({ data }) => {
-                        this.profilesList = data.content;
+                        this.profilesList = data.content ?? [];
                     })
                     .catch((e) => {
                         console.log(e);

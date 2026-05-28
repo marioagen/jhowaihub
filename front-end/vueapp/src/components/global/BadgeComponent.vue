@@ -12,10 +12,12 @@
         tabindex="0"
     >
         <slot v-if="$slots.default" />
-        <template v-else>{{ typeof text === "string" ? $t(text) : text }}</template>
+        <template v-else>{{ displayText }}</template>
     </span>
 </template>
 <script>
+    import { translateIfExists } from "@/utils/i18nHelpers";
+
     export default {
         name: "BadgeComponent",
         props: {
@@ -42,6 +44,14 @@
             iconOnly: {
                 type: Boolean,
                 default: false,
+            },
+        },
+        computed: {
+            displayText() {
+                if (typeof this.text !== "string") {
+                    return this.text;
+                }
+                return translateIfExists(this.$te, this.$t, this.text);
             },
         },
         methods: {

@@ -48,12 +48,11 @@
                 :stepId="stepId"
                 :step="step"
                 :stepOrder="stepOrder"
-                :workflowId="workflowId"
                 @openNodeConfig="openNodeConfig"
                 @nodeDeleted="onNodeDeleted"
                 @flowChanged="markFlowDirty"
                 ref="VueflowComponent"
-                :hasStepTools="hasStepTools"
+                :hasStepTools="resolvedHasStepTools"
             />
             <OffcanvasComponent
                 ref="flowOffcanvas"
@@ -283,7 +282,8 @@
         <ConfirmModalValidationInput
             id="removeToolValidationConfirm"
             title="workflow.removeToolValidationTitle"
-            :message="$t('workflow.removeToolValidationMessage', { name: step?.name })"
+            messageKey="workflow.removeToolValidationMessage"
+            :messageParams="{ name: step?.name || '' }"
             cancelText="common.cancel"
             confirmText="workflow.confirmRemoveTool"
             :placeholder="$t('workflow.removeToolValidationPlaceholder', { name: step?.name })"
@@ -324,6 +324,7 @@
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidationInput.vue";
     import OffcanvasComponent from "@/components/global/OffcanvasComponent.vue";
+    import { parseRouteBoolean } from "@/utils/routeParams";
 
     export default {
         name: "FlowPage",
@@ -1174,6 +1175,9 @@
             }, 100);
         },
         computed: {
+            resolvedHasStepTools() {
+                return parseRouteBoolean(this.hasStepTools);
+            },
             selectedItem() {
                 if (this.idSelected != 0)
                     return this.promptlist.find((item) => item.id === this.idSelected);
