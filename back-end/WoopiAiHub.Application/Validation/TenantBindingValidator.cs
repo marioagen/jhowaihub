@@ -135,6 +135,11 @@ namespace WoopiAiHub.Application.Validation
             user.FindFirst(ClaimTypes.Email)?.Value
             ?? user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
+        /// <summary>
+        /// Verifies if the request is targeting a SignalR hub endpoint, which should be exempt from strict tenant header validation to allow for flexible client connections.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         private static bool IsSignalRHubRequest(HttpContext context) =>
             context.Request.Path.StartsWithSegments(HubRoutePaths.NotificationsHub);
     }
