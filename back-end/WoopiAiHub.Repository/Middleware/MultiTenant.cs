@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Utils;
@@ -48,6 +48,11 @@ namespace WoopiAiHub.Repository.Middleware
             await _next(context);
         }
 
+        /// <summary>
+        /// Try reads the tenant identifier from the X-Tenant header. Returns null if the header is missing or empty.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         private static string? TryReadHeaderTenant(HttpContext context)
         {
             if (!context.Request.Headers.TryGetValue(HeaderNames.XTenant, out var values))
