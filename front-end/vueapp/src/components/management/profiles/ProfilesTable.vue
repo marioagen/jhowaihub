@@ -148,11 +148,14 @@
                         this.table.isLoading = false;
                     });
             },
-            getPermissions(obj) {
+            getPermissions() {
                 PermissionsService.getPermissions()
                     .then((response) => {
-                        const permissions = response.permissions;
-                        this.permissionsCount = permissions.length;
+                        const permissions = response.permissions ?? [];
+                        this.permissionsCount = permissions.reduce(
+                            (total, group) => total + (group.permissions?.length ?? 0),
+                            0
+                        );
                     })
                     .finally(() => {});
             },
