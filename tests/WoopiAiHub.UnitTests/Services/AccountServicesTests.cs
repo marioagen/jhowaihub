@@ -1,8 +1,12 @@
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.AutoMock;
+using Microsoft.Extensions.Logging;
 using WoopiAiHub.Application.Services;
 using WoopiAiHub.Application.Utils;
+using WoopiAiHub.Application.Validation;
+using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Refit;
 using WoopiAiHub.Domain.DTOs.Request;
@@ -13,6 +17,8 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.DTOs.Response.Account;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.Domain.Utils.ErrorLabels;
 using WoopiAiHub.Infrastructure.Multitenancy;
 using WoopiAiHub.UnitTests.Fixtures;
@@ -52,6 +58,14 @@ namespace WoopiAiHub.UnitTests.Services
 
             _mocker.Use(configMock);
             _mockJwtTokenServices = _mocker.GetMock<IJwtTokenServices>();
+
+            _mocker.GetMock<IUserTenantAccessCacheServices>()
+                .Setup(s => s.FindAllowedTenantsByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(Array.Empty<TenantAccessDto>());
+
+            _mocker.Use<ITenantBindingValidator>(new TenantBindingValidator(
+                _mocker.GetMock<IUserTenantAccessCacheServices>().Object,
+                Mock.Of<ILogger<TenantBindingValidator>>()));
 
             _accountServices = _mocker.CreateInstance<AccountServices>();
         }
@@ -119,10 +133,6 @@ namespace WoopiAiHub.UnitTests.Services
             _passwordHasherMock.Setup(x => x.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()))
                 .Returns(true);
 
-            var configMock = new Mock<IConfiguration>();
-
-            _mocker.Use(configMock.Object);
-
             // Act
             var result = await _accountServices.LoginSSO(authenticateDto, authenticateHeaderDto);
 
@@ -131,6 +141,9 @@ namespace WoopiAiHub.UnitTests.Services
             iMarketPlaceApi.Verify(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             _passwordHasherMock.Verify(a => a.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()), Times.Never);
             _mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Once);
+
+            var authData = Assert.IsType<AccessDataAuthDto>(result);
+            AssertTenantClaim(authData.Token, authenticateDto.Tenant);
         }
 
         [Fact(DisplayName = "Test authenticate Sucess")]
@@ -197,6 +210,9 @@ namespace WoopiAiHub.UnitTests.Services
             iMarketPlaceApi.Verify(a => a.CheckAccessByHub(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             _mockPasswordHasher.Verify(a => a.Verify(It.IsAny<string>(), It.IsAny<byte[]>(), It.IsAny<byte[]>()), Times.Once);
             _mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Once);
+
+            var authData = Assert.IsType<AccessDataAuthDto>(result);
+            AssertTenantClaim(authData.Token, loginDto.Tenant);
         }
 
         [Fact(DisplayName = "Test Authenticate fail")]
@@ -389,12 +405,43 @@ namespace WoopiAiHub.UnitTests.Services
 
             // Assert
             Assert.NotNull(result);
+            AssertTenantClaim(result!, tenant);
             _mockRefreshTokenServices.Verify(x => x.FindUserByRefreshTokenAsync(refreshToken), Times.Once);
             _mockTenantContextService.Verify(x => x.InitializeTenantAsync(It.IsAny<string>()), Times.Once);
             _mockTenantContextService.Verify(x => x.TrySetTenantConnectionAsync(_mockHttpContext.Object, It.IsAny<string>()), Times.Once);
             _mockPermissionRepository.Verify(x => x.FindUserPermissionsAsync(userEmail), Times.Once);
             _mockRefreshTokenServices.Verify(x => x.RevokeAsync(refreshToken), Times.Once);
             _mockRefreshTokenServices.Verify(x => x.SaveAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
+        }
+
+        [Fact(DisplayName = "RefreshToken throws AppException when tenant is not in marketplace list")]
+        [Trait("RefreshToken", "Fail")]
+        public async Task RefreshTokenAsync_InvalidTenant_ThrowsAppException()
+        {
+            // Arrange
+            var refreshToken = "valid-refresh-token";
+            var userEmail = "user@example.com";
+            var responseCheckAccess = _fixture.FindValidResponseCheckAccessDto();
+
+            var mockRefreshTokenServices = _mocker.GetMock<IRefreshTokenServices>();
+            var marketPlaceApiMock = _mocker.GetMock<IMarketPlaceApi>();
+
+            mockRefreshTokenServices
+                .Setup(x => x.FindUserByRefreshTokenAsync(refreshToken))
+                .ReturnsAsync(userEmail);
+
+            marketPlaceApiMock
+                .Setup(api => api.CheckAccessByHub(It.IsAny<string>(), userEmail))
+                .ReturnsAsync(responseCheckAccess);
+
+            var accountServices = _mocker.CreateInstance<AccountServices>();
+
+            // Act
+            var exception = await Assert.ThrowsAsync<AppException>(() =>
+                accountServices.RefreshTokenAsync(refreshToken, "TenantNotInList"));
+
+            // Assert
+            Assert.Equal(Login.TenantNotFound, exception.LabelError);
         }
 
         [Fact(DisplayName = "Login ShouldThrowAppException_WhenTenantNotFound")]
@@ -606,6 +653,17 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotNull(result);
             _mocker.GetMock<IGraphApi>().Verify(g => g.FindEmailUserAzure(It.IsAny<string>()), Times.Once);
             _mocker.GetMock<IMarketPlaceApi>().Verify(m => m.CheckAccessByHub(It.IsAny<string>(), authenticateDto.Login), Times.Once);
+        }
+
+        private static void AssertTenantClaim(string accessToken, string expectedTenant)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadToken(accessToken) as JwtSecurityToken;
+
+            Assert.NotNull(jwtToken);
+            var tenantClaim = jwtToken!.Claims.FirstOrDefault(c => c.Type == JwtClaimNames.Tenant);
+            Assert.NotNull(tenantClaim);
+            Assert.Equal(expectedTenant, tenantClaim!.Value);
         }
     }
 }

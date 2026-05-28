@@ -157,86 +157,86 @@
                     </div>
                 </div>
             </Form>
-        <div
-            v-if="showTeams"
-            ref="teamPanel"
-            class="row mt-2"
-        >
-        <div class="main-div shadow-sm">
-            <Form
-                @submit="createTeam"
-                ref="formRefTeam"
-                v-slot="{ meta }"
+            <div
+                v-if="showTeams"
+                ref="teamPanel"
+                class="row mt-2"
             >
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold mb-0">{{ $t("management.teams.createTitle") }}</h6>
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary"
-                        @click="closeTeamSection"
+                <div class="main-div shadow-sm">
+                    <Form
+                        @submit="createTeam"
+                        ref="formRefTeam"
+                        v-slot="{ meta }"
                     >
-                        {{ $t("common.cancel") }}
-                    </button>
-                </div>
-                <div class="mb-3">
-                    <label
-                        for="teamName"
-                        class="form-label fw-semibold mb-0"
-                    >
-                        {{ $t("management.teams.teamName") }}
-                        <span class="text-danger ms-1">*</span>
-                    </label>
-                    <Field
-                        type="text"
-                        class="form-control form-control-sm"
-                        id="teamName"
-                        ref="teamNameInput"
-                        autocomplete="off"
-                        name="teamName"
-                        v-model="teamData.name"
-                        :placeholder="$t('management.teams.typeTeamName')"
-                        :rules="'required|min:3|max:100'"
-                    />
-                    <ErrorMessage
-                        name="teamName"
-                        class="invalid-feedback d-block"
-                    />
-                </div>
-                <SelectionListComponent
-                    :id="'team-profiles'"
-                    :labelPanel="'management.profiles.profiles'"
-                    :labelSelectedQuantity="'management.profiles.selectedProfiles'"
-                    :labelSearch="'management.profiles.searchProfiles'"
-                    :items="profilesList"
-                    :loading="isLoadingProfiles"
-                    chip-icon="ShieldCheck"
-                    v-model:selectedItems="selectedProfiles"
-                />
-                <div class="d-flex justify-content-end gap-2 mt-3">
-                    <button
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary"
-                        @click="closeTeamSection"
-                    >
-                        {{ $t("common.cancel") }}
-                    </button>
-                    <button
-                        type="submit"
-                        class="btn btn-primary btn-sm"
-                        :disabled="!meta.valid"
-                    >
-                        <LucideIcon
-                            icon="Plus"
-                            :size="15"
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0">{{ $t("management.teams.createTitle") }}</h6>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                @click="closeTeamSection"
+                            >
+                                {{ $t("common.cancel") }}
+                            </button>
+                        </div>
+                        <div class="mb-3">
+                            <label
+                                for="teamName"
+                                class="form-label fw-semibold mb-0"
+                            >
+                                {{ $t("management.teams.teamName") }}
+                                <span class="text-danger ms-1">*</span>
+                            </label>
+                            <Field
+                                type="text"
+                                class="form-control form-control-sm"
+                                id="teamName"
+                                ref="teamNameInput"
+                                autocomplete="off"
+                                name="teamName"
+                                v-model="teamData.name"
+                                :placeholder="$t('management.teams.typeTeamName')"
+                                :rules="'required|min:3|max:100'"
+                            />
+                            <ErrorMessage
+                                name="teamName"
+                                class="invalid-feedback d-block"
+                            />
+                        </div>
+                        <SelectionListComponent
+                            :id="'team-profiles'"
+                            :labelPanel="'management.profiles.profiles'"
+                            :labelSelectedQuantity="'management.profiles.selectedProfiles'"
+                            :labelSearch="'management.profiles.searchProfiles'"
+                            :items="profilesList"
+                            :loading="isLoadingProfiles"
+                            chip-icon="ShieldCheck"
+                            v-model:selectedItems="selectedProfiles"
                         />
-                        {{ $t("management.teams.createBtn") }}
-                    </button>
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                @click="closeTeamSection"
+                            >
+                                {{ $t("common.cancel") }}
+                            </button>
+                            <button
+                                type="submit"
+                                class="btn btn-primary btn-sm"
+                                :disabled="!meta.valid"
+                            >
+                                <LucideIcon
+                                    icon="Plus"
+                                    :size="15"
+                                />
+                                {{ $t("management.teams.createBtn") }}
+                            </button>
+                        </div>
+                    </Form>
                 </div>
-            </Form>
+            </div>
         </div>
-        </div>
-    </div>
-</main>
+    </main>
 </template>
 <script>
     import api from "@/services/api";
@@ -422,7 +422,10 @@
                 this.showTeams = !this.showTeams;
                 if (this.showTeams) {
                     this.$nextTick(() => {
-                        this.$refs.teamPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        this.$refs.teamPanel?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                        });
                     });
                 }
             },

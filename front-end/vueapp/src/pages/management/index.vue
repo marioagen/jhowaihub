@@ -25,7 +25,6 @@
         </div>
     </main>
 </template>
-
 <script>
     import TabsComponent from "@/components/global/TabsComponent.vue";
     import TeamsComponent from "@/components/management/teams/TeamsComponent.vue";
@@ -92,7 +91,6 @@
         },
     };
 </script>
-
 <style>
     .scroll-area {
         display: list-item;

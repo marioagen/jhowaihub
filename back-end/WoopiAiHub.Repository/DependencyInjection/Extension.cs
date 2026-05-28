@@ -28,6 +28,7 @@ namespace WoopiAiHub.Repository.DependencyInjection
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IServiceProvider, ServiceProvider>();
             services.AddScoped<ITenantCacheServices, TenantCacheService>();
+            services.AddScoped<IUserTenantAccessCacheServices, UserTenantAccessCacheService>();
             services.AddScoped<ITeamRepository, TeamRepository>();
             services.AddScoped<IProfileRepository, ProfileRepository>();
             services.AddScoped<IPermissionRepository, PermissionRepository>();
