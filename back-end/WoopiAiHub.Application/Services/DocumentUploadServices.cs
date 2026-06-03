@@ -31,7 +31,9 @@ namespace WoopiAiHub.Application.Services
         private readonly IAuditCardService _auditCardService;
         private readonly IDocumentBatchRepository _documentBatchRepository;
         private readonly ILogger<DocumentUploadServices> _logger;
-        private const string BatchCacheKey = "batchCacheKey";
+        private const string BatchCacheKeyPrefix = "batchCacheKey";
+
+        private static string BuildBatchCacheKey(int workflowId) => $"{BatchCacheKeyPrefix}:{workflowId}";
 
         public DocumentUploadServices(
             IDocumentRepository documentRepository,
@@ -81,7 +83,8 @@ namespace WoopiAiHub.Application.Services
 
                 if (requestCreateDocumentDto.IsLastFile)
                 {
-                    _cache.Remove(BatchCacheKey);
+                    foreach (var workflowId in requestCreateDocumentDto.Workflows)
+                        _cache.Remove(BuildBatchCacheKey(workflowId));
                 }
             }
         }
@@ -243,47 +246,56 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Create card by a collections of teams
+        /// Creates one card per workflow, assigning each card its own workflow-scoped
+        /// DocumentBatch when the upload is part of a batch operation.
         /// </summary>
-        /// <param name="requestCreateDocumentDto"></param>
-        /// <param name="teams"></param>
-        /// <returns></returns>
+        /// <param name="requestCreateDocumentDto">Upload request data.</param>
+        /// <param name="workflows">Workflows the document belongs to.</param>
+        /// <returns>List of cards, one per workflow.</returns>
         private async Task<List<Card>> CreateDocumentCard(RequestCreateDocumentDto requestCreateDocumentDto,
-            ICollection<Workflow> workflow)
+            ICollection<Workflow> workflows)
         {
-            int? documentBatchId = null;
+            var cards = new List<Card>();
 
-            if (requestCreateDocumentDto.IsDocumentBatch)
+            foreach (var workflow in workflows)
             {
-                documentBatchId = _cache.Get<int?>(BatchCacheKey);
+                var step = workflow.Steps.OrderBy(s => s.Order).FirstOrDefault();
+                if (step == null) continue;
 
-                if (documentBatchId == null)
-                {
-                    var documentBatch = new DocumentBatch(0, DateTime.UtcNow);
-                    documentBatch = await _documentBatchRepository.CreateAsync(documentBatch) ?? throw new AppException(ErrorCode.UploadFailed, "Error on create new document batch", DocumentLabel.BatchError);
+                int? documentBatchId = null;
+                if (requestCreateDocumentDto.IsDocumentBatch)
+                    documentBatchId = await FindOrCreateBatchIdAsync(workflow.Id);
 
-                    documentBatchId = documentBatch.Id;
-                    _cache.Set(BatchCacheKey, documentBatchId, new MemoryCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
-                    });
-                }
+                cards.Add(new Card(0, DateTime.UtcNow, step.Id, 0,
+                    requestCreateDocumentDto.Filename, step.StatusId, null, documentBatchId));
             }
 
-            return [.. workflow
-                .Select(w => w.Steps.OrderBy(s => s.Order).FirstOrDefault())
-                .Where(step => step != null)
-                .Select(step => new Card
-                (
-                    0,
-                    DateTime.UtcNow,
-                    step!.Id,
-                    0,
-                    requestCreateDocumentDto.Filename,
-                    step.StatusId,
-                    null,
-                    documentBatchId
-                ))];
+            return cards;
+        }
+
+        /// <summary>
+        /// Returns the cached DocumentBatch ID for the given workflow, creating and caching
+        /// a new one when no batch exists yet for this upload session.
+        /// </summary>
+        /// <param name="workflowId">ID of the workflow that owns the batch.</param>
+        /// <returns>The DocumentBatch ID scoped to the workflow.</returns>
+        private async Task<int> FindOrCreateBatchIdAsync(int workflowId)
+        {
+            var cacheKey = BuildBatchCacheKey(workflowId);
+            var cachedId = _cache.Get<int?>(cacheKey);
+
+            if (cachedId.HasValue) return cachedId.Value;
+
+            var documentBatch = new DocumentBatch(0, DateTime.UtcNow);
+            documentBatch = await _documentBatchRepository.CreateAsync(documentBatch)
+                ?? throw new AppException(ErrorCode.UploadFailed, "Error on create new document batch", DocumentLabel.BatchError);
+
+            _cache.Set(cacheKey, documentBatch.Id, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+            });
+
+            return documentBatch.Id;
         }
     }
 }

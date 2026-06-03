@@ -253,6 +253,27 @@ namespace WoopiAiHub.UnitTests.Fixture
             return dto;
         }
 
+        public static RequestCreateDocumentDto FindValidRequestCreateDocumentDtoForBatchWithWorkflows(
+            string fileName, bool isLastFile, ICollection<int> workflowIds)
+        {
+            var filePath = @"../../../Files/TestPDF.pdf";
+            var file = new FileInfo(filePath);
+            var formFile = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, file.Length, "Chunk", file.Name);
+            var faker = new Faker("pt_BR");
+
+            return new RequestCreateDocumentDto(
+                Chunk: formFile,
+                Filename: "title",
+                IsLast: true,
+                Name: fileName,
+                Description: "desc",
+                EmailCreator: faker.Internet.Email(),
+                Workflows: workflowIds,
+                IsLastFile: isLastFile,
+                IsDocumentBatch: true
+            );
+        }
+
         public static FileUploadSummaryDto FindValidFileUploadSummaryDto()
         {
             FileUploadSummaryDto fileUploadSummaryDto = new Faker<FileUploadSummaryDto>("pt_BR")

@@ -259,6 +259,23 @@ namespace WoopiAiHub.UnitTests.Fixture
             return workflow;
         }
 
+        /// <summary>
+        /// Creates one Workflow per provided ID, each with a single Step, for use in
+        /// tests that need deterministic workflow IDs (e.g. multi-workflow batch tests).
+        /// </summary>
+        public static List<Workflow> FindValidWorkflowsWithIds(IEnumerable<int> ids)
+        {
+            return ids.Select(id => new Workflow(
+                id,
+                DateTime.Now.AddYears(-1),
+                new List<Team>() { DocumentFixture.FindValidTeam() },
+                $"Workflow-{id}"
+            )
+            {
+                Steps = new List<Step> { FindValidStep(id) }
+            }).ToList();
+        }
+
         public static Step FindValidStep(int? workflowId = null)
         {
             var f = new Faker("pt_BR");
