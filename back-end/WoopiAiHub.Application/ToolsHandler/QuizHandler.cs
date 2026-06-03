@@ -41,6 +41,7 @@ namespace WoopiAiHub.Application.ToolsHandler
             var quizDto = _quizServices.FindById(quizId);
             var apikey = _config["IndexerApiKey"]!;
             var apiVersion = _config["ChatCompletionSettings:ApiVersion"]!;
+            var model = _config["OpenAiSettings:Model"]!;
 
             return new ExecutionMessageDto
             {
@@ -61,7 +62,7 @@ namespace WoopiAiHub.Application.ToolsHandler
                     EmbeddingModelName = tenantInfo.EmbeddingModelName,
                     ApiVersion = apiVersion,
                     ReferenceFile = automationServicesDto.ReferenceFile!,
-                    Model = tenantInfo!.Model,
+                    Model = model,
                     kValue = tenantInfo.KValue,
                     Temperature = 0,
                     Template = tenantInfo.Template.Replace("{language}", "pt"),
