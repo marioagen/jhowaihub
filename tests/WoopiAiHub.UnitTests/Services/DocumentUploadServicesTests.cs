@@ -72,7 +72,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             var fileUploadSummaryDto = DocumentFixture.FindValidFileUploadSummaryDto();
             var tenant = DocumentFixture.FindValidTenantInfoDto();
-            var workflows = WorkflowFixture.FindValidWorkflows();
+            var workflows = WorkflowFixture.FindValidWorkflowsWithIds([10]);
             var documentBatch = new DocumentBatch(1, DateTime.UtcNow);
 
             _mocker.Use<IMemoryCache>(new MemoryCache(new MemoryCacheOptions()));
@@ -123,7 +123,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             var fileUploadSummaryDto = DocumentFixture.FindValidFileUploadSummaryDto();
             var tenant = DocumentFixture.FindValidTenantInfoDto();
-            var workflows = WorkflowFixture.FindValidWorkflows();
+            var workflows = WorkflowFixture.FindValidWorkflowsWithIds([10]);
             var documentBatch = new DocumentBatch(1, DateTime.UtcNow);
 
             _mocker.Use<IMemoryCache>(new MemoryCache(new MemoryCacheOptions()));
@@ -163,6 +163,55 @@ namespace WoopiAiHub.UnitTests.Services
             // Assert
             fileRepositoryApi.Verify(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>()), Times.Exactly(2));
             documentBatchRepositoryMock.Verify(a => a.CreateAsync(It.IsAny<DocumentBatch>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "ProcessChunks with DocumentBatch - Should create one batch per workflow when multiple workflows are involved")]
+        [Trait("ProcessChunks", "DocumentBatch")]
+        public async Task ProcessChunks_WithDocumentBatch_MultipleWorkflows_CreatesBatchPerWorkflow()
+        {
+            // Arrange
+            var workflowIds = new List<int> { 10, 20 };
+            var requestCreateDocumentDto = DocumentFixture.FindValidRequestCreateDocumentDtoForBatchWithWorkflows("file1", false, workflowIds);
+
+            var fileUploadSummaryDto = DocumentFixture.FindValidFileUploadSummaryDto();
+            var workflows = WorkflowFixture.FindValidWorkflowsWithIds(workflowIds);
+            var documentBatchA = new DocumentBatch(1, DateTime.UtcNow);
+            var documentBatchB = new DocumentBatch(2, DateTime.UtcNow);
+
+            _mocker.Use<IMemoryCache>(new MemoryCache(new MemoryCacheOptions()));
+            var validatorMock = _mocker.GetMock<IValidator<Application.Dto.RequestCreateDocumentDto>>();
+            validatorMock.Setup(x => x.ValidateAsync(It.IsAny<Application.Dto.RequestCreateDocumentDto>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new FluentValidation.Results.ValidationResult());
+
+            var fileRepositoryApi = _mocker.GetMock<IFileRepositoryApi>();
+            fileRepositoryApi.Setup(a => a.Upload(It.IsAny<ByteArrayPart>(), It.IsAny<string>())).ReturnsAsync(fileUploadSummaryDto);
+
+            var workflowRepositoryMock = _mocker.GetMock<IWorkflowRepository>();
+            workflowRepositoryMock.Setup(a => a.FindByIdsAsync(It.IsAny<List<int>>())).ReturnsAsync(workflows);
+
+            var documentBatchRepositoryMock = _mocker.GetMock<IDocumentBatchRepository>();
+            documentBatchRepositoryMock.SetupSequence(a => a.CreateAsync(It.IsAny<DocumentBatch>()))
+                .ReturnsAsync(documentBatchA)
+                .ReturnsAsync(documentBatchB);
+
+            var automationServicesMock = _mocker.GetMock<IAutomationServices>();
+            automationServicesMock.Setup(a => a.PrepareExecutionAsync(It.IsAny<List<Workflow>>())).ReturnsAsync(false);
+
+            var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
+            currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
+            currentUserServiceMock.Setup(s => s.Id).Returns((Guid?)Guid.NewGuid());
+            _mocker.Use<ICurrentUserService>(currentUserServiceMock.Object);
+
+            var auditCardRepositoryMock = _mocker.GetMock<IAuditCardRepository>();
+            auditCardRepositoryMock.Setup(a => a.AddRangeAsync(It.IsAny<IEnumerable<Domain.Models.Audit.AuditCard>>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            var documentUploadServices = _mocker.CreateInstance<DocumentUploadServices>();
+
+            // Act
+            await documentUploadServices.ProcessChunks(requestCreateDocumentDto, "tenant");
+
+            // Assert — one batch created per workflow, not a single shared batch
+            documentBatchRepositoryMock.Verify(a => a.CreateAsync(It.IsAny<DocumentBatch>()), Times.Exactly(2));
         }
     }
 }
