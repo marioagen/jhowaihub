@@ -8,7 +8,7 @@
 <script>
     import UsersForm from '@/components/management/users/UsersForm.vue';
     export default {
-        name: "EditQuizz",
+        name: "EditUser",
         components: {
             UsersForm
         },

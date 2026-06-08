@@ -109,6 +109,12 @@
                                 >
                                     {{ $t("management.users.password") }}
                                 </label>
+                                <small
+                                    v-if="isEdit"
+                                    class="text-muted d-block mb-1"
+                                >
+                                    {{ $t("management.users.passwordOptionalHint") }}
+                                </small>
                                 <PasswordInputComponent
                                     :placeholder="$t('management.users.typePassword')"
                                     :rules="passwordRules"
