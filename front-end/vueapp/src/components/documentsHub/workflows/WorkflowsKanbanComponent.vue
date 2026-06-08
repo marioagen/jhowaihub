@@ -248,6 +248,26 @@
                                         </ul>
                                     </div>
                                     <button
+                                        v-if="canBulkFinalize"
+                                        type="button"
+                                        class="btn btn-success btn-sm d-inline-flex align-items-center gap-1"
+                                        :disabled="isBulkFinalizing"
+                                        @click="finalizeRange"
+                                    >
+                                        <LucideIcon
+                                            v-if="!isBulkFinalizing"
+                                            icon="CheckCircle"
+                                            :size="16"
+                                        />
+                                        <LucideIcon
+                                            v-else
+                                            icon="Loader"
+                                            :size="16"
+                                            class="animate-spin"
+                                        />
+                                        {{ $t("workflow.bulk.finalize") }}
+                                    </button>
+                                    <button
                                         v-if="canBulkReject"
                                         type="button"
                                         class="btn btn-danger btn-sm d-inline-flex align-items-center gap-1"
@@ -331,6 +351,7 @@
     import WorkflowAccordionComponent from "@/components/documentsHub/workflows/accordion/WorkflowAccordionComponent.vue";
     import DocumentRejectionModal from "@/components/analyze/modals/DocumentRejectionModal.vue";
     import CardsServices from "@/services/cards/CardsServices";
+    import StatusService from "@/services/status/StatusService";
     export default {
         name: "WorkflowPage",
         data() {
@@ -360,6 +381,8 @@
                 isKanbanView: true,
                 selectedCardIds: [],
                 isBulkAssigning: false,
+                isBulkFinalizing: false,
+                finalizeStatusId: null,
                 bulkAssignUserSearchText: "",
             };
         },
@@ -426,6 +449,29 @@
             isRejectionDisabled() {
                 return this.hasFirstStepCardInSelection || this.hasMultipleStepsInSelection;
             },
+            isSingleStepWorkflow() {
+                return this.workflowSteps.length === 1;
+            },
+            lastStepCardIds() {
+                const steps = this.workflowSteps;
+                if (steps.length === 0) return [];
+                const maxOrder = Math.max(...steps.map((s) => s.order));
+                return steps
+                    .filter((s) => s.order === maxOrder)
+                    .flatMap((s) => (s.cards || []).map((c) => c.id));
+            },
+            isAllSelectedOnLastStep() {
+                if (!this.selectedCardIds.length) return false;
+                return this.selectedCardIds.every((id) =>
+                    this.lastStepCardIds.some((lid) => lid === id || lid == id)
+                );
+            },
+            canBulkFinalize() {
+                return (
+                    this.selectedCardIds.length > 0 &&
+                    (this.isSingleStepWorkflow || this.isAllSelectedOnLastStep)
+                );
+            },
         },
         methods: {
             clearBulkSelection() {
@@ -486,6 +532,46 @@
                     });
                 } finally {
                     this.isBulkAssigning = false;
+                }
+            },
+            async finalizeRange() {
+                if (!this.canBulkFinalize || this.selectedCardIds.length === 0 || !this.finalizeStatusId) {
+                    return;
+                }
+                const cardIds = [...new Set(this.selectedCardIds)];
+                const params = {
+                    StatusId: this.finalizeStatusId,
+                    CardIds: cardIds,
+                };
+                this.isBulkFinalizing = true;
+                try {
+                    const response = await CardsServices.finalizeRange(params);
+                    if (response?.error !== undefined) {
+                        this.$notify({
+                            title: this.$t("common.error"),
+                            message: this.$t("workflow.bulk.finalizeError"),
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                        return;
+                    }
+                    this.$notify({
+                        title: this.$t("common.success"),
+                        message: this.$t("workflow.bulk.finalizeSuccess"),
+                        variant: "success",
+                        icon: "CircleCheckBig",
+                    });
+                    this.reloadKanban();
+                    this.clearBulkSelection();
+                } catch (e) {
+                    this.$notify({
+                        title: this.$t("common.error"),
+                        message: this.$t("workflow.bulk.finalizeError"),
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isBulkFinalizing = false;
                 }
             },
             rejectRange() {
@@ -804,6 +890,13 @@
             GlobalEventService.on("refresh-once", this.getWorkflowByUser);
         },
         async mounted() {
+            const statusResponse = await StatusService.getStatus();
+            if (statusResponse?.error === undefined && Array.isArray(statusResponse)) {
+                const finalize = statusResponse.find(
+                    (s) => s.name && s.name.toLowerCase() === "finalize"
+                );
+                if (finalize) this.finalizeStatusId = finalize.id;
+            }
             await signalRService.startConnection();
             signalRService.on(this.signalrEventExecutionChanged, (message) => {
                 const steps = Array.isArray(this.kanbanCards)

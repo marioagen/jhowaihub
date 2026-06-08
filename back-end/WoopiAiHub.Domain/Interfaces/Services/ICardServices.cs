@@ -13,6 +13,14 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<bool> AssignUser(UpdateAssignedUserDto updateAssingnedUserDto);
         Task<bool> UnassignUser(int cardId);
         Task<bool> AssignRangeAsync(AssignRangeDto assignRangeDto);
+
+        /// <summary>
+        /// Finalizes multiple cards in bulk by updating their status to the given status id.
+        /// Only cards that belong to the last step of their workflow should be submitted.
+        /// </summary>
+        /// <param name="request">Status id and the list of card ids to finalize.</param>
+        /// <returns><see langword="true"/> if all cards were finalized successfully.</returns>
+        Task<bool> FinalizeRangeAsync(FinalizeRangeDto request);
         Task<DocumentAnalyzeStepsDto> FindByIdAnalyzeWithSteps(int cardId,
             HeadersDto headersDto);
         Task<CardHeaderDto> FindHeaderInfoAsync(int cardId);

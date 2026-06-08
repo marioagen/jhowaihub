@@ -1374,6 +1374,9 @@ const portuguese = {
             defaultRejectJustification: "Reprovação em massa pela lista da esteira.",
             rejectSuccess: "Documentos reprovados com sucesso.",
             rejectError: "Não foi possível reprovar os documentos selecionados.",
+            finalize: "Finalizar",
+            finalizeSuccess: "Documentos finalizados com sucesso.",
+            finalizeError: "Não foi possível finalizar os documentos selecionados.",
             deleteTitle: "Excluir documentos",
             deleteConfirmSimple:
                 "Excluir os documentos selecionados? Esta ação não pode ser desfeita.",
