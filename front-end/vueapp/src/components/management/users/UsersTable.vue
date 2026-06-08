@@ -54,7 +54,7 @@
                 <span v-if="data.row.lastLoginAt">{{
                     formatDateWithTime(data.row.lastLoginAt)
                 }}</span>
-                <span v-else>"N/A"</span>
+                <span v-else>{{ $t("common.notAvailable") }}</span>
             </template>
             <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
@@ -183,8 +183,8 @@
                             this.$refs.DeleteDialog.close();
                             this.getUsers({ search: "", page: 1, type: null });
                             this.$notify({
-                                title: "users.title",
-                                message: "users.removeSuccess",
+                                title: "management.users.title",
+                                message: "management.users.deleteSuccess",
                                 variant: "success",
                                 icon: "CircleX",
                             });

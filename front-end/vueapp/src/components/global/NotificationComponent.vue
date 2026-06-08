@@ -17,7 +17,7 @@
                 <button
                     type="button"
                     class="btn-close ms-2"
-                    aria-label="Close"
+                    :aria-label="$t('common.close')"
                     @mousedown.prevent
                     @click.stop="remove(notification.id)"
                 ></button>

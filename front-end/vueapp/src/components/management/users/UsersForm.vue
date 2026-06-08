@@ -109,6 +109,12 @@
                                 >
                                     {{ $t("management.users.password") }}
                                 </label>
+                                <small
+                                    v-if="isEdit"
+                                    class="text-muted d-block mb-1"
+                                >
+                                    {{ $t("management.users.passwordOptionalHint") }}
+                                </small>
                                 <PasswordInputComponent
                                     :placeholder="$t('management.users.typePassword')"
                                     :rules="passwordRules"
@@ -464,7 +470,7 @@
                             title: "management.users.title",
                             message: "management.users.saveSuccess",
                             variant: "success",
-                            icon: "CircleX",
+                            icon: "CircleCheckBig",
                         });
                     })
                     .catch((e) => {
@@ -486,10 +492,10 @@
                             }
                         }
                         const notifyMessage = isNameDuplicated
-                            ? this.$t("management.users.errors.duplicated")
+                            ? "management.users.errors.duplicated"
                             : errorCode === ErrorCode.Duplicated
-                              ? this.$t("management.users.errors.emailDuplicated")
-                              : this.$t("management.users.errors.saveError");
+                              ? "management.users.errors.emailDuplicated"
+                              : "management.users.errors.saveError";
                         this.$notify({
                             title: "management.users.title",
                             message: notifyMessage,
@@ -532,8 +538,8 @@
                 api.post("Team", team)
                     .then(() => {
                         this.$notify({
-                            title: this.$t("management.teams.title"),
-                            message: this.$t("management.teams.saveSuccess"),
+                            title: "management.teams.title",
+                            message: "management.teams.saveSuccess",
                             variant: "success",
                             icon: "CircleCheckBig",
                         });
@@ -542,16 +548,16 @@
                     })
                     .catch((err) => {
                         const errorCode = err?.response?.data?.errorCode;
-                        let notifyMessage = this.$t("management.teams.invalid");
+                        let notifyMessage = "management.teams.invalid";
                         if (errorCode && errorCode === ErrorCode.Duplicated) {
                             this.$refs.formRefTeam.setFieldError(
                                 "teamName",
                                 this.$t("management.teams.duplicated")
                             );
-                            notifyMessage = this.$t("management.teams.duplicated");
+                            notifyMessage = "management.teams.duplicated";
                         }
                         this.$notify({
-                            title: this.$t("management.teams.title"),
+                            title: "management.teams.title",
                             message: notifyMessage,
                             variant: "danger",
                             icon: "CircleX",

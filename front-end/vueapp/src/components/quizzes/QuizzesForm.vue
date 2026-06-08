@@ -169,6 +169,7 @@
     import QuestionsService from "@/services/questions/QuestionsService";
     import QuizzesService from "@/services/quizzes/QuizzesService";
     import TypesModal from "@/components/types/TypesModal.vue";
+    import { resolveErrorMessageKey } from "@/utils/errorMessage";
 
     export default {
         name: "QuizFormNew",
@@ -266,7 +267,7 @@
                     }
                     this.$notify({
                         title: "quizzes.title",
-                        message: response.error,
+                        message: resolveErrorMessageKey(response.error),
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -292,7 +293,7 @@
                     }
                     this.$notify({
                         title: "quizzes.title",
-                        message: response.error,
+                        message: resolveErrorMessageKey(response.error),
                         variant: "danger",
                         icon: "CircleX",
                     });

@@ -227,6 +227,7 @@
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import AvatarComponent from "@/components/global/AvatarComponent.vue";
     import PromptService from "@/services/prompts/PromptsService";
+    import { resolveErrorMessageKey } from "@/utils/errorMessage";
     export default {
         name: "PromptComponent",
         emits: ["showAlertToast"],
@@ -335,8 +336,8 @@
                 PromptService.getPromptList(paramsReq).then((response) => {
                     if (response.error !== undefined) {
                         return this.$notify({
-                            title: "prompt.title",
-                            message: response.error,
+                            title: "prompts.title",
+                            message: resolveErrorMessageKey(response.error),
                             variant: "danger",
                             icon: "CircleX",
                         });
@@ -439,8 +440,8 @@
                 PromptService.getPromptByUserId(paramsReq, userId).then((response) => {
                     if (response.error !== undefined) {
                         return this.$notify({
-                            title: "prompt.title",
-                            message: response.error,
+                            title: "prompts.title",
+                            message: resolveErrorMessageKey(response.error),
                             variant: "danger",
                             icon: "CircleX",
                         });

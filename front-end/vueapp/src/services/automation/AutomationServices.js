@@ -1,4 +1,5 @@
 import api from "@/services/api";
+import { resolveErrorMessageKey } from "@/utils/errorMessage";
 
 export default {
     getWorkflows(toolId) {
@@ -8,9 +9,8 @@ export default {
                 return response.data;
             })
             .catch((e) => {
-                const message = e?.response?.data?.message || "Erro desconhecido";
                 return {
-                    error: message,
+                    error: resolveErrorMessageKey(e),
                 };
             });
     },
@@ -21,9 +21,8 @@ export default {
                 return response.data;
             })
             .catch((e) => {
-                const message = e?.response?.data?.message || "Erro desconhecido";
                 return {
-                    error: message,
+                    error: resolveErrorMessageKey(e),
                 };
             });
     },

@@ -34,7 +34,7 @@
                                         }
                                     "
                                     @keyup.enter="flushTitle($event)"
-                                    placeholder="Title"
+                                    :placeholder="$t('workflow.stepTitle')"
                                     autofocus
                                 />
                                 <span
@@ -75,7 +75,7 @@
                                 class="form-select form-select-sm"
                                 v-bind="field"
                             >
-                                <option value="">Select status</option>
+                                <option value="">{{ $t("workflow.selectStatus") }}</option>
                                 <option
                                     v-for="s in statusList"
                                     :key="s.id"

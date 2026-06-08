@@ -8,7 +8,7 @@
                 <a
                     class="page-link page-link--icon"
                     href="#"
-                    aria-label="First page"
+                    :aria-label="$t('common.pagination.first')"
                     @click.prevent="changePage(1)"
                 >
                     <LucideIcon
@@ -24,7 +24,7 @@
                 <a
                     class="page-link page-link--icon"
                     href="#"
-                    aria-label="Previous page"
+                    :aria-label="$t('common.pagination.previous')"
                     @click.prevent="changePage(current - 1)"
                 >
                     <LucideIcon
@@ -56,7 +56,7 @@
                 <a
                     class="page-link page-link--icon"
                     href="#"
-                    aria-label="Next page"
+                    :aria-label="$t('common.pagination.next')"
                     @click.prevent="changePage(current + 1)"
                 >
                     <LucideIcon
@@ -72,7 +72,7 @@
                 <a
                     class="page-link page-link--icon"
                     href="#"
-                    aria-label="Last page"
+                    :aria-label="$t('common.pagination.last')"
                     @click.prevent="changePage(totalPages)"
                 >
                     <LucideIcon

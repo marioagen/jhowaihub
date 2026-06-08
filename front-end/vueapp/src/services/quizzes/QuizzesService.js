@@ -1,4 +1,5 @@
 import api from "@/services/api";
+import { resolveErrorMessageKey } from "@/utils/errorMessage";
 
 export default {
     getQuizzes(params) {
@@ -40,9 +41,8 @@ export default {
                 return true;
             })
             .catch(function (e) {
-                const message = e?.response?.data?.message || "Erro desconhecido";
                 return {
-                    error: message,
+                    error: resolveErrorMessageKey(e),
                 };
             });
     },
@@ -53,9 +53,8 @@ export default {
                 return true;
             })
             .catch((e) => {
-                const message = e?.response?.data?.message || "Erro desconhecido";
                 return {
-                    error: message,
+                    error: resolveErrorMessageKey(e),
                 };
             });
     },

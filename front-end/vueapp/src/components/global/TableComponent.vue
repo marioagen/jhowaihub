@@ -68,7 +68,7 @@
                                 class="spinner-border"
                                 role="status"
                             >
-                                <span class="visually-hidden">Loading...</span>
+                                <span class="visually-hidden">{{ $t("common.loading") }}</span>
                             </div>
                         </div>
                     </td>
@@ -135,7 +135,7 @@
             emptyMessage: {
                 type: String,
                 required: false,
-                default: "No data available.",
+                default: "common.noData",
             },
             data: {
                 type: Array,

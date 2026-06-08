@@ -70,7 +70,7 @@
                             type="button"
                             class="btn-close text-reset"
                             data-bs-dismiss="offcanvas"
-                            aria-label="Close"
+                            :aria-label="$t('common.closeModal')"
                             @click="closeSidebar"
                         ></button>
                     </div>
@@ -219,7 +219,7 @@
                     </div>
                 </div>
                 <div v-else-if="isQuizTool">
-                    <h6>Quiz</h6>
+                    <h6>{{ $t("quizzes.title") }}</h6>
                     <div class="background-div">
                         <select
                             class="form-select"

@@ -468,7 +468,7 @@
                         if (result.success) {
                             this.returnToTable();
                             return this.$notify({
-                                title: "Profiles",
+                                title: "management.profiles.profiles",
                                 message: this.$t("management.profiles.saveSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
@@ -478,7 +478,7 @@
                                 this.nameError = this.$t("management.profiles.errors.duplicated");
                             }
                             this.$notify({
-                                title: "Profiles",
+                                title: "management.profiles.profiles",
                                 message:
                                     result.errorCode === ErrorCode.Duplicated
                                         ? this.$t("management.profiles.errors.duplicated")

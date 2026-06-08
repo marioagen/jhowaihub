@@ -13,7 +13,7 @@
                         type="button"
                         class="btn-close"
                         data-bs-dismiss="modal"
-                        aria-label="Close"
+                        :aria-label="$t('common.closeModal')"
                         :disabled="isLoading"
                     />
                 </div>

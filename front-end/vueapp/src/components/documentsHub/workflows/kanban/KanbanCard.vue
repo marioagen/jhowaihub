@@ -319,6 +319,7 @@
     import CardsServices from "@/services/cards/CardsServices";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import dates from "@/helpers/date";
+    import { resolveErrorMessageKey } from "@/utils/errorMessage";
 
     export default {
         name: "CardComponent",
@@ -398,8 +399,8 @@
                 const response = await CardsServices.assignUser(params);
                 if (response?.error !== undefined) {
                     this.$notify({
-                        title: "Error",
-                        message: response.error,
+                        title: "common.error",
+                        message: resolveErrorMessageKey(response.error),
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -424,8 +425,8 @@
                 const response = await CardsServices.unassignUser(this.dataCard.id);
                 if (response?.error !== undefined) {
                     this.$notify({
-                        title: "Error",
-                        message: response.error,
+                        title: "common.error",
+                        message: resolveErrorMessageKey(response.error),
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -448,8 +449,8 @@
                     this.reloadList();
                 } catch (e) {
                     this.$notify({
-                        title: "Error",
-                        message: this.$t("card.errorAdvancingCard"),
+                        title: "common.error",
+                        message: "card.errorAdvancingCard",
                         variant: "danger",
                         icon: "CircleX",
                     });

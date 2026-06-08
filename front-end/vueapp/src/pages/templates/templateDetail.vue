@@ -124,7 +124,7 @@
                                             id="description"
                                             rows="3"
                                             :class="{ 'is-invalid': errorMessage }"
-                                            :placeholder="'Descrição da api'"
+                                            :placeholder="$t('template.apiDescriptionPlaceholder')"
                                         ></textarea>
                                         <span
                                             v-if="errorMessage"

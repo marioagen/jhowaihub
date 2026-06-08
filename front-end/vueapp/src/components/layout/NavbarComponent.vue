@@ -23,7 +23,7 @@
                             >
                                 <img
                                     :src="profileImage"
-                                    alt="Imagem do perfil"
+                                    :alt="$t('common.profileImageAlt')"
                                     width="32"
                                     height="32"
                                     class="rounded-circle me-2"
@@ -42,7 +42,7 @@
                                         :to="{
                                             name: 'Logout',
                                         }"
-                                        title="Sair"
+                                        :title="$t('common.signOut')"
                                     >
                                         <LucideIcon icon="LogOut" />
                                         {{ $t("common.signOut") }}

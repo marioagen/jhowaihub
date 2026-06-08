@@ -16,7 +16,7 @@
                         type="button"
                         class="btn-close position-absolute top-0 end-0 m-3"
                         data-bs-dismiss="modal"
-                        aria-label="Close"
+                        :aria-label="$t('common.closeModal')"
                         :disabled="isLoading"
                         @click="$emit('cancel')"
                     />
@@ -48,7 +48,7 @@
                     <input
                         type="text"
                         class="form-control"
-                        :placeholder="placeholder"
+                        :placeholder="displayPlaceholder"
                         v-model="inputValue"
                         :disabled="isLoading"
                         @keyup.enter="handleEnter"
@@ -127,15 +127,15 @@
             },
             cancelText: {
                 type: String,
-                default: "Cancelar",
+                default: "common.cancel",
             },
             confirmText: {
                 type: String,
-                default: "Confirmar",
+                default: "common.confirm",
             },
             placeholder: {
                 type: String,
-                default: "Digite para confirmar",
+                default: "",
             },
             validationText: {
                 type: String,
@@ -168,6 +168,9 @@
                     return this.$t(this.messageKey, this.messageParams);
                 }
                 return this.message;
+            },
+            displayPlaceholder() {
+                return this.placeholder || this.$t("common.typeToConfirm");
             },
             isValid() {
                 return this.inputValue === this.validationText;

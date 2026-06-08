@@ -12,7 +12,7 @@
                     }"
                     @click="setCurrentMonth"
                 >
-                    Este mês
+                    {{ $t("dashboard.filters.currentMonth") }}
                 </button>
                 <button
                     class="btn btn-sm w-100 text-start mb-1 date-preset-btn"
@@ -21,7 +21,7 @@
                     }"
                     @click="setLastMonth"
                 >
-                    Mês passado
+                    {{ $t("dashboard.filters.lastMonth") }}
                 </button>
                 <button
                     class="btn btn-sm w-100 text-start mb-1 date-preset-btn"
@@ -30,7 +30,7 @@
                     }"
                     @click="setPreviousSeven"
                 >
-                    Últimos 7 dias
+                    {{ $t("dashboard.filters.previousSeven") }}
                 </button>
                 <button
                     class="btn btn-sm w-100 text-start mb-1 date-preset-btn"
@@ -39,12 +39,12 @@
                     }"
                     @click="setPreviousNinety"
                 >
-                    Últimos 90 dias
+                    {{ $t("dashboard.filters.previousNinety") }}
                 </button>
             </div>
             <div class="p-3 flex-grow-1">
                 <div class="mb-3">
-                    <label class="form-label">Data de Início</label>
+                    <label class="form-label">{{ $t("dashboard.filters.startDate") }}</label>
                     <input
                         type="date"
                         class="form-control form-control-sm"
@@ -52,7 +52,7 @@
                     />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Data Final</label>
+                    <label class="form-label">{{ $t("dashboard.filters.endDate") }}</label>
                     <input
                         type="date"
                         class="form-control form-control-sm"
@@ -65,13 +65,13 @@
                         class="btn btn-light btn-sm"
                         @click="$emit('close')"
                     >
-                        Cancelar
+                        {{ $t("common.cancel") }}
                     </button>
                     <button
                         class="btn btn-primary btn-sm"
                         @click="filter"
                     >
-                        Aplicar
+                        {{ $t("common.apply") }}
                     </button>
                 </div>
             </div>

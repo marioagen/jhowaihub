@@ -26,7 +26,7 @@
                             for="email"
                             class="form-label"
                         >
-                            Email
+                            {{ $t("login.email") }}
                         </label>
                         <Field
                             name="email"
@@ -46,7 +46,7 @@
                                     id="email"
                                     class="form-control form-control-sm border-start-0"
                                     :class="{ 'is-invalid': errorMessage }"
-                                    placeholder="user@mail.com"
+                                    :placeholder="$t('login.emailPlaceholder')"
                                 />
                             </div>
                             <span
@@ -76,7 +76,7 @@
                                 v-bind="field"
                                 id="password"
                                 name="password"
-                                placeholder="******"
+                                :placeholder="$t('login.passwordPlaceholder')"
                                 v-model="credentials.password"
                                 class="form-control form-control-sm border-start-0 border-end-0"
                                 :type="showPassword ? 'text' : 'password'"
@@ -118,13 +118,13 @@
                                 :size="15"
                                 class="me-1"
                             />
-                            Login
+                            {{ $t("login.submit") }}
                         </button>
                     </div>
 
                     <div class="d-flex align-items-center my-3">
                         <hr class="flex-grow-1" />
-                        <span class="px-2 text-muted">Or</span>
+                        <span class="px-2 text-muted">{{ $t("common.or") }}</span>
                         <hr class="flex-grow-1" />
                     </div>
 

@@ -32,7 +32,7 @@
                         class="spinner-border text-primary"
                         role="status"
                     >
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">{{ $t("common.loading") }}</span>
                     </div>
                 </div>
                 <div
@@ -77,7 +77,7 @@
                         v-if="rejections.length === 0 && !loading"
                         class="text-center text-muted py-3"
                     >
-                        Nenhuma justificativa encontrada
+                        {{ $t("analyze.justification.noJustificationsFound") }}
                     </div>
                 </div>
             </div>

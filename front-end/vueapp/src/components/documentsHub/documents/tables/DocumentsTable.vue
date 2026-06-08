@@ -212,8 +212,8 @@
                     .then((response) => {
                         if (response?.error !== undefined) {
                             this.$notify({
-                                title: "Error",
-                                message: "response.error",
+                                title: "common.error",
+                                message: "documents.loadError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -272,7 +272,7 @@
                 if (this.docDataEmbedding === undefined) {
                     return this.$notify({
                         title: "documents.title",
-                        message: "documents.embeddError",
+                        message: "documents.embedError",
                         variant: "danger",
                         icon: "CircleX",
                     });
@@ -308,11 +308,8 @@
                         this.$refs.DocumentAnonymizationsModal.open(response.data);
                     } else {
                         this.$notify({
-                            title: this.$t("analyze.title"),
-                            message:
-                                this.$t("analyze.anonymizations") +
-                                ": " +
-                                (response?.error || "Error loading anonymizations"),
+                            title: "common.error",
+                            message: "analyze.anonymizationsLoadError",
                             variant: "danger",
                             icon: "CircleX",
                         });

@@ -10,8 +10,8 @@
             <input
                 type="text"
                 class="form-control form-control-sm border-start-0 py-1"
-                placeholder="ID, nome do documento ou esteira..."
-                aria-label="Buscar Documento"
+                :placeholder="$t('auditor.documents.filters.searchPlaceholder')"
+                :aria-label="$t('auditor.documents.filters.searchAria')"
                 :value="filters.search"
                 @input="onSearchInput($event.target.value)"
             />
@@ -20,7 +20,7 @@
                 class="input-group-text border-start-0 py-1 clear-search"
                 role="button"
                 tabindex="0"
-                aria-label="Limpar busca"
+                :aria-label="$t('auditor.documents.filters.clearSearch')"
                 @click="cleanInput"
                 @keydown.enter="cleanInput"
             >
@@ -45,7 +45,7 @@
                 {{
                     filters.statusId
                         ? statusList.find((opt) => opt.value === filters.statusId)?.label
-                        : "Todos os status"
+                        : $t("auditor.documents.filters.allStatuses")
                 }}
                 <LucideIcon
                     icon="ChevronDown"

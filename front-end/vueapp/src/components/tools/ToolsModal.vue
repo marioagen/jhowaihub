@@ -103,7 +103,7 @@
                                 :class="{
                                     'is-invalid': errorMessage,
                                 }"
-                                placeholder="https://your-n8n-instance.com"
+                                :placeholder="$t('tools.form.connectorUrlPlaceholder')"
                                 @blur="validateConnector"
                             />
                             <span
