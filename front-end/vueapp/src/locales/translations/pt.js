@@ -741,7 +741,7 @@ const portuguese = {
         authSSO: "Autenticado na Microsoft",
         continue: "Continuar",
         email: "E-mail",
-        emailPlaceholder: "usuario@empresa.com",
+        emailPlaceholder: "usuario{'@'}empresa.com",
         error: "Erro",
         index: "Login",
         invalid: "Campos inválidos",
