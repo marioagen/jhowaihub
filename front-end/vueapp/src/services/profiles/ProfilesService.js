@@ -1,4 +1,5 @@
 import api from "@/services/api";
+import { resolveErrorMessageKey } from "@/utils/errorMessage";
 
 export default {
     getProfiles(params) {
@@ -55,7 +56,7 @@ export default {
             .catch((e) => {
                 const status = e?.response?.status ?? 500;
                 const data = e?.response?.data ?? {};
-                const message = data.detail || data.message || "Erro desconhecido";
+                const message = resolveErrorMessageKey(e);
                 return {
                     success: false,
                     status,
@@ -77,7 +78,7 @@ export default {
             .catch((e) => {
                 const status = e?.response?.status ?? 500;
                 const data = e?.response?.data ?? {};
-                const message = data.detail || data.message || "Erro desconhecido";
+                const message = resolveErrorMessageKey(e);
                 return {
                     success: false,
                     status,

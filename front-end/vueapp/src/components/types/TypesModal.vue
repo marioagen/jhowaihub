@@ -19,7 +19,7 @@
         </template>
         <template #body>
             <div class="modal-body">
-                <label>Name</label>
+                <label>{{ $t("common.name") }}</label>
                 <input
                     v-model="typeData.name"
                     class="form-control form-control-sm"
@@ -110,7 +110,7 @@
                                 result.data
                             );
                             return this.$notify({
-                                title: "Tipos",
+                                title: "types.title",
                                 message: this.$t(
                                     "types.createSuccess"
                                 ),
@@ -123,7 +123,7 @@
                                 ? "types.typeDocAlreadyExists"
                                 : "types.errors.invalid";
                         this.$notify({
-                            title: "Tipos",
+                            title: "types.title",
                             message: this.$t(messageKey),
                             variant: "danger",
                             icon: "CircleX",
@@ -143,7 +143,7 @@
                                 result.data
                             );
                             return this.$notify({
-                                title: "Tipos",
+                                title: "types.title",
                                 message: this.$t(
                                     "types.editSuccess"
                                 ),
@@ -157,7 +157,7 @@
                                 ? "types.typeDocAlreadyExists"
                                 : "types.errors.invalid";
                         this.$notify({
-                            title: "Tipos",
+                            title: "types.title",
                             message: this.$t(messageKey),
                             variant: "danger",
                             icon: "CircleX",

@@ -222,14 +222,14 @@
                                 type: null,
                             });
                             this.$notify({
-                                title: "Profiles",
+                                title: "management.profiles.profiles",
                                 message: "management.profiles.deleteSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: "Profiles",
+                                title: "management.profiles.profiles",
                                 message: "management.profiles.errors.deleteError",
                                 variant: "danger",
                                 icon: "CircleX",

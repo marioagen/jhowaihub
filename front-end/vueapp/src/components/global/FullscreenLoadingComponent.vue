@@ -1,10 +1,16 @@
 <template>
     <div class="loading-overlay">
         <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden">{{ $t("common.loading") }}</span>
         </div>
     </div>
 </template>
+
+<script>
+    export default {
+        name: "FullscreenLoadingComponent",
+    };
+</script>
 
 <style scoped>
     .loading-overlay {

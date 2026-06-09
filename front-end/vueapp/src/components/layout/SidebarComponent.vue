@@ -15,7 +15,7 @@
             <button
                 class="btn toggle-button"
                 type="button"
-                aria-label="Toggle sidebar"
+                :aria-label="$t('common.toggleSidebar')"
             >
                 <LucideIcon
                     v-if="isCollapsed"

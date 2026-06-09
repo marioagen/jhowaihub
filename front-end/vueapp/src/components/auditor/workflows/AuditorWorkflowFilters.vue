@@ -10,8 +10,8 @@
             <input
                 type="text"
                 class="form-control form-control-sm border-start-0 py-1"
-                placeholder="Nome da esteira ou time..."
-                aria-label="Buscar Esteira"
+                :placeholder="$t('auditor.workflows.filters.searchPlaceholder')"
+                :aria-label="$t('auditor.workflows.filters.searchAria')"
                 :value="filters.search"
                 @input="onSearchInput($event.target.value)"
             />
@@ -20,7 +20,7 @@
                 class="input-group-text border-start-0 py-1 clear-search"
                 role="button"
                 tabindex="0"
-                aria-label="Limpar busca"
+                :aria-label="$t('auditor.workflows.filters.clearSearch')"
                 @click="cleanInput"
                 @keydown.enter="cleanInput"
             >

@@ -1,4 +1,5 @@
 import api from "@/services/api";
+import { resolveErrorMessageKey } from "@/utils/errorMessage";
 
 export default {
     getTypes(params) {
@@ -42,7 +43,7 @@ export default {
             })
             .catch((e) => {
                 const status = e?.response?.status ?? 500;
-                const message = e?.response?.data?.message || "Erro desconhecido";
+                const message = resolveErrorMessageKey(e);
                 return {
                     success: false,
                     status,
@@ -74,7 +75,7 @@ export default {
             })
             .catch((e) => {
                 const status = e?.response?.status ?? 500;
-                const message = e?.response?.data?.message || "Erro desconhecido";
+                const message = resolveErrorMessageKey(e);
                 return {
                     success: false,
                     status,

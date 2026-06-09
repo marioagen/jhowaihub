@@ -215,6 +215,7 @@
     import StatusService from "@/services/status/StatusService";
     import ProfilesService from "@/services/profiles/ProfilesService";
     import WorkflowService from "@/services/workflow/WorkflowService";
+    import { resolveErrorMessageKey } from "@/utils/errorMessage";
     import FullscreenLoadingComponent from "@/components/global/FullscreenLoadingComponent.vue";
 
     export default {
@@ -325,7 +326,7 @@
                                 });
                                 return this.$notify({
                                     title: "workflow.index",
-                                    message: response.error,
+                                    message: resolveErrorMessageKey(response.error),
                                     variant: "danger",
                                     icon: "CircleX",
                                 });

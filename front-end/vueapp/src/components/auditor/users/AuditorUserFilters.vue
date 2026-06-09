@@ -10,8 +10,8 @@
             <input
                 type="text"
                 class="form-control form-control-sm border-start-0 py-1"
-                placeholder="Nome do usuário..."
-                aria-label="Buscar Usuário"
+                :placeholder="$t('auditor.users.filters.searchPlaceholder')"
+                :aria-label="$t('auditor.users.filters.searchAria')"
                 :value="filters.search"
                 @input="onSearchInput($event.target.value)"
             />
@@ -20,7 +20,7 @@
                 class="input-group-text border-start-0 py-1 clear-search"
                 role="button"
                 tabindex="0"
-                aria-label="Limpar busca"
+                :aria-label="$t('auditor.users.filters.clearSearch')"
                 @click="cleanInput"
                 @keydown.enter="cleanInput"
             >
@@ -45,7 +45,7 @@
                 {{
                     filters.teamId
                         ? teamList.find((opt) => opt.value === filters.teamId)?.label
-                        : "Todos os times"
+                        : $t("auditor.users.filters.allTeams")
                 }}
                 <LucideIcon
                     icon="ChevronDown"
@@ -78,7 +78,7 @@
         emits: ["filter"],
         data() {
             return {
-                teamList: [{ value: "", label: "Todos os times" }],
+                teamList: [],
                 filters: {
                     search: "",
                     teamId: "",
@@ -106,12 +106,16 @@
                             value: String(t.id),
                             label: t.name || "",
                         }));
-                        this.teamList = [{ value: "", label: "Todos os times" }, ...options];
+                        this.teamList = [
+                            { value: "", label: this.$t("auditor.users.filters.allTeams") },
+                            ...options,
+                        ];
                     })
                     .catch(() => {});
             },
         },
         created() {
+            this.teamList = [{ value: "", label: this.$t("auditor.users.filters.allTeams") }];
             this.loadTeams();
         },
     };

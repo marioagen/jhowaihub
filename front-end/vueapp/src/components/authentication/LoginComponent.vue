@@ -76,7 +76,7 @@
                                 v-bind="field"
                                 id="password"
                                 name="password"
-                                placeholder="******"
+                                :placeholder="$t('login.passwordPlaceholder')"
                                 v-model="credentials.password"
                                 class="form-control form-control-sm border-start-0 border-end-0"
                                 :type="showPassword ? 'text' : 'password'"

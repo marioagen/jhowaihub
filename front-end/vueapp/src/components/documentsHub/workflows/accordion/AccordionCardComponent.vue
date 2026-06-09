@@ -250,8 +250,8 @@
                     });
                 } catch (e) {
                     this.$notify({
-                        title: "Error",
-                        message: this.$t("card.errorAdvancingCard"),
+                        title: "common.error",
+                        message: "card.errorAdvancingCard",
                         variant: "danger",
                         icon: "CircleX",
                     });

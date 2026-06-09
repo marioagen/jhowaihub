@@ -799,6 +799,8 @@
             },
         },
         created() {
+            this.selectedOption.name = this.$t("filters.workflowSelect.none");
+            this.selectedOption.teamName = this.$t("filters.teamsSelect.none");
             this.getWorkflowByUser();
             GlobalEventService.on("all-uploads-complete", this.getWorkflowByUser);
             GlobalEventService.on("refresh-once", this.getWorkflowByUser);

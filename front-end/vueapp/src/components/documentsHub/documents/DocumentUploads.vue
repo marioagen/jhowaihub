@@ -437,7 +437,7 @@
             },
             getName(id) {
                 const workflow = this.workflowsList.find((t) => t.id === id);
-                return workflow ? workflow.name : "Desconhecido";
+                return workflow ? workflow.name : this.$t("common.notAvailable");
             },
             selectAll(event) {
                 event.target.blur();

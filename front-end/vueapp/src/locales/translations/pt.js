@@ -29,6 +29,7 @@ const portuguese = {
             title: "Justificativa da Reprovação",
             subtitle: "Este documento foi retornado para correção. Veja os detalhes abaixo.",
             viewJustification: "Ver Justificativa",
+            noJustificationsFound: "Nenhuma justificativa encontrada",
         },
         nextStep: "Próxima etapa",
         noDataInDocument: "Não há dados disponíveis",
@@ -92,6 +93,7 @@ const portuguese = {
         },
         anonymizeDocument: "Anonimizar documento",
         anonymizations: "Anonimizações",
+        anonymizationsLoadError: "Erro ao carregar anonimizações",
         anonymizationHistoryModal: {
             title: "Histórico de Anonimizações",
             versionSingular: "versão gerada",
@@ -114,6 +116,8 @@ const portuguese = {
         success: "Processo de anonimização iniciado com sucesso.",
         error: "Erro ao anonimizar documento.",
         validationError: "Por favor, preencha todos os campos obrigatórios.",
+        readyNotification:
+            "O documento #{documentId} foi anonimizado com sucesso e está pronto para visualização.",
         types: {
             partialMasking: "Mascaramento Parcial",
             totalMasking: "Mascaramento Total",
@@ -381,6 +385,20 @@ const portuguese = {
             "Esta ação não poderá ser desfeita. Tem certeza que deseja removê-lo?",
         upload: "Carregar",
         warning: "Atenção",
+        unknownError: "Erro desconhecido.",
+        noData: "Nenhum dado disponível.",
+        notAvailable: "N/D",
+        typeToConfirm: "Digite para confirmar",
+        profileImageAlt: "Imagem do perfil",
+        clearSearch: "Limpar busca",
+        toggleSidebar: "Alternar menu lateral",
+        closeModal: "Fechar modal",
+        pagination: {
+            first: "Primeira página",
+            previous: "Página anterior",
+            next: "Próxima página",
+            last: "Última página",
+        },
     },
     documentsHub: {
         title: "Esteiras de processamento",
@@ -405,6 +423,8 @@ const portuguese = {
             lastMonth: "Mês passado",
             previousNinety: "Últimos 90 dias",
             previousSeven: "Últimos 7 dias",
+            startDate: "Data de início",
+            endDate: "Data final",
         },
         graphs: {
             pagesGraphSubtitle: "Consumo Diário",
@@ -481,6 +501,8 @@ const portuguese = {
         historic: "Registro de respostas",
         inclusionDate: "Data de inclusão",
         listing: "Listagem",
+        loadError: "Erro ao carregar documentos",
+        embedError: "Erro ao preparar dados para embedding",
         loadingFilePleaseWait: "Carregando o arquivo, por favor aguarde",
         loadingTheText: "Carregando o texto",
         mostOlder: "Mais antigos",
@@ -725,6 +747,7 @@ const portuguese = {
         invalid: "Campos inválidos",
         loading: "Carregando...",
         password: "Senha",
+        passwordPlaceholder: "••••••",
         submit: "Entrar",
         selectTenant: "Selecione o tenant para continuar",
         sso: "Login com Microsoft",
@@ -1120,6 +1143,7 @@ const portuguese = {
         tabBody: "Corpo",
         tabTests: "Testes",
         description: "Descrição",
+        apiDescriptionPlaceholder: "Descrição da API",
         enableMcp: "Habilitar consulta externa de IA",
         tests: {
             detectedVariables: "Variáveis Detectadas",
@@ -1193,6 +1217,7 @@ const portuguese = {
         form: {
             connectorApiKey: "Chave de API",
             connectorUrl: "n8n URL",
+            connectorUrlPlaceholder: "https://sua-instancia-n8n.com",
             entries: "Entrada (Input)",
             entriesEditable: "Entrada editável",
             entriesSelect: "Selecione o tipo de entrada",

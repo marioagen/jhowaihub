@@ -195,14 +195,14 @@
                                 type: null,
                             });
                             this.$notify({
-                                title: "Tipos",
+                                title: "types.title",
                                 message: this.$t("types.removeSuccess"),
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: "Tipos",
+                                title: "types.title",
                                 message: this.$t("types.errors.removeError"),
                                 variant: "danger",
                                 icon: "CircleX",

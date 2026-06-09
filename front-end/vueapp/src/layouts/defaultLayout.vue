@@ -42,6 +42,7 @@
     import GlobalEventService from "@/services/globalEventService";
     import SidebarComponent from "@/components/layout/SidebarComponent.vue";
     import NavbarComponent from "@/components/layout/NavbarComponent.vue";
+    import i18n from "@/locales/i18n";
 
     const SIDEBAR_COLLAPSE_WIDTH = 768;
 
@@ -81,7 +82,9 @@
             signalRService.on(this.signalrAnonymizationReady, (message) => {
                 this.$store.commit("addAnonimyzationNotification", {
                     id: `anon-${message.documentId}`,
-                    fileName: `O documento #${message.documentId} foi anonimizado com sucesso e está pronto para visualização.`,
+                    fileName: i18n.global.t("anonymization.readyNotification", {
+                        documentId: message.documentId,
+                    }),
                     link: message.url,
                 });
             });
