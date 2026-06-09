@@ -865,6 +865,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Fail")]
         public async Task AssignRangeAsync_CardNotFound_Null_ThrowsAppException()
         {
+            //Arrange
             var cardId = 1;
             var userId = Guid.NewGuid();
             _mocker.GetMock<IWorkflowRepository>()
@@ -874,6 +875,8 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync((List<Card>?)null);
 
             var request = new AssignRangeDto(userId, new List<int> { cardId });
+
+            //Act//Assert
             var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignRangeAsync(request));
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
             Assert.Equal(CardLabel.NotFound, ex.LabelError);
@@ -883,6 +886,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Fail")]
         public async Task AssignRangeAsync_CardNotFound_EmptyList_ThrowsAppException()
         {
+            //Arrange
             var cardId = 1;
             var userId = Guid.NewGuid();
             _mocker.GetMock<IWorkflowRepository>()
@@ -892,6 +896,8 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(new List<Card>());
 
             var request = new AssignRangeDto(userId, new List<int> { cardId });
+
+            // Act//Assert
             var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignRangeAsync(request));
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
             Assert.Equal(CardLabel.NotFound, ex.LabelError);
@@ -901,6 +907,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Success")]
         public async Task AssignRangeAsync_ValidSingleCard_ReturnsTrue_AndAuditsAssign()
         {
+            //Arrange
             var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
             var cardId = 1;
             var card = CardFixture.FindValidCard();
@@ -925,8 +932,10 @@ namespace WoopiAiHub.UnitTests.Services
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
+            //Act
             var result = await _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { cardId }));
 
+            //Assert
             Assert.True(result);
             Assert.Equal(userId, card.AssignedUserId);
             _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
@@ -941,6 +950,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "DocumentBatch")]
         public async Task AssignRangeAsync_WithDocumentBatch_UpdatesAllBatchCards()
         {
+            //Arrange
             var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
             var documentBatchId = 100;
             var batchCards = CardFixture.FindDocumentBatchCardsWithoutAssignedUser(documentBatchId);
@@ -964,8 +974,10 @@ namespace WoopiAiHub.UnitTests.Services
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
+            //Act
             var result = await _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { 1, 2, 3 }));
 
+            //Assert
             Assert.True(result);
             Assert.All(batchCards, c => Assert.Equal(userId, c.AssignedUserId));
             _cardRepositoryMock.Verify(repo => repo.UpdateList(It.Is<List<Card>>(l => l.Count == 3)), Times.Once);
@@ -975,6 +987,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Success")]
         public async Task AssignRangeAsync_UpdateListReturnsFalse_ReturnsFalse()
         {
+            //Arrange
             var userId = Guid.NewGuid();
             var cardId = 1;
             var card = CardFixture.FindValidCard();
@@ -999,8 +1012,10 @@ namespace WoopiAiHub.UnitTests.Services
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
+            //Act
             var result = await _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { cardId }));
 
+            //Assert
             Assert.False(result);
         }
 
@@ -1008,7 +1023,10 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Fail")]
         public async Task AssignRangeAsync_EmptyCardIds_ThrowsArgumentException()
         {
+            //Arrange
             var request = new AssignRangeDto(Guid.NewGuid(), new List<int>());
+
+            //Act /Assert
             await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.AssignRangeAsync(request));
         }
 
@@ -1016,6 +1034,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Fail")]
         public async Task AssignRangeAsync_NullRequest_ThrowsArgumentNullException()
         {
+            //Act /Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _cardServices.AssignRangeAsync(null!));
         }
 
@@ -1023,6 +1042,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Success")]
         public async Task AssignRangeAsync_DistinctCardIds_SingleExpandAndSingleUpdate()
         {
+            //Arrange
             var userId = Guid.NewGuid();
             var request = new AssignRangeDto(userId, new List<int> { 1, 1, 2 });
 
@@ -1046,8 +1066,10 @@ namespace WoopiAiHub.UnitTests.Services
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
+            //Act
             var result = await _cardServices.AssignRangeAsync(request);
 
+            //Assert
             Assert.True(result);
             _cardRepositoryMock.Verify(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2 && ids.Contains(1) && ids.Contains(2))), Times.Once);
             _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
@@ -1243,10 +1265,12 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("UpdateStatus", "Fail")]
         public async Task UpdateStatus_EmptyCardList_ThrowsAppException()
         {
+            //Arrange
             var dto = CardFixture.FindValidCardStatusDto();
             _cardRepositoryMock.Setup(r => r.FindCardOrBatchWithStepWorkflowAsync(dto.CardId))
                 .ReturnsAsync(new List<Card>());
 
+            //Act /Assert
             await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStatus(dto));
         }
 
@@ -1569,6 +1593,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FinalizeRangeAsync", "Fail")]
         public async Task FinalizeRangeAsync_NullRequest_ThrowsArgumentNullException()
         {
+            //Act /Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _cardServices.FinalizeRangeAsync(null!));
         }
 
@@ -1576,10 +1601,13 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FinalizeRangeAsync", "Fail")]
         public async Task FinalizeRangeAsync_NullCardIds_ThrowsArgumentException()
         {
+            //Arrange
             var request = new FinalizeRangeDto(1, null!);
 
+            //Act
             var ex = await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.FinalizeRangeAsync(request));
 
+            //Assert
             Assert.Contains("CardIds", ex.Message, StringComparison.Ordinal);
         }
 
@@ -1587,10 +1615,13 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FinalizeRangeAsync", "Fail")]
         public async Task FinalizeRangeAsync_EmptyCardIds_ThrowsArgumentException()
         {
+            //Arrange
             var request = new FinalizeRangeDto(1, new List<int>());
 
+            //Act
             var ex = await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.FinalizeRangeAsync(request));
 
+            //Assert
             Assert.Contains("CardIds", ex.Message, StringComparison.Ordinal);
         }
 
@@ -1598,14 +1629,17 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FinalizeRangeAsync", "Fail")]
         public async Task FinalizeRangeAsync_RepositoryReturnsNull_ThrowsAppException()
         {
+            //Arrange
             _cardRepositoryMock
                 .Setup(r => r.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
                 .ReturnsAsync((List<Card>?)null);
 
             var request = new FinalizeRangeDto(2, new List<int> { 1 });
 
+            //Act
             var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.FinalizeRangeAsync(request));
 
+            //Assert
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
             Assert.Equal(CardLabel.NotFound, ex.LabelError);
         }
@@ -1614,12 +1648,14 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FinalizeRangeAsync", "Fail")]
         public async Task FinalizeRangeAsync_RepositoryReturnsEmptyList_ThrowsAppException()
         {
+            //Arrange
             _cardRepositoryMock
                 .Setup(r => r.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
                 .ReturnsAsync(new List<Card>());
 
             var request = new FinalizeRangeDto(2, new List<int> { 1 });
 
+            //Act /Assert
             var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.FinalizeRangeAsync(request));
 
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
@@ -1630,6 +1666,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("FinalizeRangeAsync", "Fail")]
         public async Task FinalizeRangeAsync_PartialCardList_ThrowsAppException()
         {
+            //Arrange
             var card = CardFixture.FindValidCard();
             _cardRepositoryMock
                 .Setup(r => r.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
@@ -1637,6 +1674,7 @@ namespace WoopiAiHub.UnitTests.Services
 
             var request = new FinalizeRangeDto(2, new List<int> { 1, 2 });
 
+            //Act /Assert
             var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.FinalizeRangeAsync(request));
 
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
