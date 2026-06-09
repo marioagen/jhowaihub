@@ -20,12 +20,18 @@ defineRule("email", (value) => {
 });
 
 defineRule("custom_password", (value) => {
-    if (!value || value.trim() === "") {
-        return i18n.global.t("validation.required") || "A senha é obrigatória.";
+    if (!value || !value.length) {
+        return true;
     }
     if (value.length < 6) {
         return (
             i18n.global.t("validation.password_min") || "A senha deve ter no mínimo 6 caracteres."
+        );
+    }
+    if (!/[a-z]/.test(value)) {
+        return (
+            i18n.global.t("validation.password_lowercase") ||
+            "A senha deve conter uma letra minúscula."
         );
     }
     if (!/[A-Z]/.test(value)) {
@@ -36,6 +42,12 @@ defineRule("custom_password", (value) => {
     }
     if (!/[0-9]/.test(value)) {
         return i18n.global.t("validation.password_number") || "A senha deve conter um número.";
+    }
+    if (!/[^A-Za-z0-9]/.test(value)) {
+        return (
+            i18n.global.t("validation.password_special") ||
+            "A senha deve conter um caractere especial."
+        );
     }
     return true;
 });
@@ -65,34 +77,6 @@ defineRule("confirmed", (value, [target], ctx) => {
     if (value !== targetValue) {
         return (
             i18n.global.t("validation.password_confirmed") || "A confirmação da senha não confere."
-        );
-    }
-    return true;
-});
-
-defineRule("custom_password", (value) => {
-    if (!value || !value.length) {
-        return true;
-    }
-    if (!/[a-z]/.test(value)) {
-        return (
-            i18n.global.t("validation.password_lowercase") ||
-            "A senha deve conter uma letra maiúscula."
-        );
-    }
-    if (!/[A-Z]/.test(value)) {
-        return (
-            i18n.global.t("validation.password_uppercase") ||
-            "A senha deve conter uma letra maiúscula."
-        );
-    }
-    if (!/[0-9]/.test(value)) {
-        return i18n.global.t("validation.password_number") || "A senha deve conter um número.";
-    }
-    if (!/[^A-Za-z0-9]/.test(value)) {
-        return (
-            i18n.global.t("validation.password_special") ||
-            "A senha deve conter um caractere especial."
         );
     }
     return true;
