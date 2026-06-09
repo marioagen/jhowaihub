@@ -748,7 +748,7 @@ const english = {
         authSSO: "Authenticated with Microsoft",
         continue: "Continue",
         email: "Email",
-        emailPlaceholder: "user@company.com",
+        emailPlaceholder: "user{'@'}company.com",
         error: "Error",
         index: "Login",
         invalid: "Invalid fields",
