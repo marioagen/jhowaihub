@@ -72,12 +72,13 @@ namespace WoopiAiHub.Application.Services
                     ?? throw new AppException(ErrorCode.NotFound, "Questionnaire not found", null);
 
                 var tenantInfo = await _tenantCacheServices.FindTenantAsync(headersDto.Tenant);
+                var model = _config["OpenAiSettings:Model"]!;
+                var apikey = _config["IndexerApiKey"]!;
 
                 foreach (var description in questionnaire.Questions.Select(u => u.Description))
                 {
                     var customQueryRequestDto =
-                        CreateCustomQueryRequestDto(description, headersDto.Tenant, headersDto.Language, tenantInfo!);
-                    var apikey = _config["IndexerApiKey"]!;
+                        CreateCustomQueryRequestDto(description, headersDto.Tenant, headersDto.Language, tenantInfo!, model);
 
                     var executionResult = await _ragInvocationRouter.ExecuteCustomQueryAsync(
                         tenantInfo!,
@@ -117,9 +118,10 @@ namespace WoopiAiHub.Application.Services
             {
                 var documentDb = _documentRepository.FindById(documentInputDto.Id);
                 var tenantInfo = await _tenantCacheServices.FindTenantAsync(headersDto.Tenant);
+                var model = _config["OpenAiSettings:Model"]!;
                 var customQueryRequestDto =
                     CreateCustomQueryRequestDto(documentInputDto.Input, headersDto.Tenant, headersDto.Language,
-                        tenantInfo!);
+                        tenantInfo!, model);
 
                 var apikey = _config["IndexerApiKey"]!;
 
@@ -195,12 +197,13 @@ namespace WoopiAiHub.Application.Services
         private static CustomQueryRequestRefitDto CreateCustomQueryRequestDto(string input,
             string tenantName,
             string language,
-            TenantInfoDto tenant)
+            TenantInfoDto tenant,
+            string model)
         {
             return new CustomQueryRequestRefitDto
             {
                 Question = input,
-                Model = tenant.Model,
+                Model = model,
                 kValue = tenant.KValue,
                 Temperature = 0,
                 Template = tenant.Template.Replace("{language}", language.ConvertLanguageCodeToName()),
