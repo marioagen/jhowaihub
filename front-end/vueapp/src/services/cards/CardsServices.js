@@ -49,6 +49,18 @@ export default {
                 };
             });
     },
+    finalizeRange(params) {
+        return api
+            .put(`/Card/FinalizeRange`, params)
+            .then((result) => {
+                return result.data;
+            })
+            .catch((error) => {
+                return {
+                    error: error,
+                };
+            });
+    },
     unassignUser(cardId) {
         return api
             .put(`/Card/UnassignUser/${cardId}`)

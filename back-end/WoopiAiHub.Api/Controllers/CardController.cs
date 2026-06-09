@@ -95,6 +95,21 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
+        /// Finalizes multiple cards in bulk by updating their status.
+        /// Only cards on the last workflow step should be submitted.
+        /// </summary>
+        /// <param name="request">Status id and the list of card ids to finalize.</param>
+        /// <returns><see langword="true"/> if all cards were finalized successfully.</returns>
+        [HttpPut("FinalizeRange")]
+        [SwaggerOperation("Finalizes multiple cards in bulk (FinalizeRange)")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FinalizeRange([FromBody] FinalizeRangeDto request)
+        {
+            var result = await _cardServices.FinalizeRangeAsync(request);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// It receives a card id and returns document information grouped by processing steps.
         /// </summary>
         /// <param name="id">Card ID</param>

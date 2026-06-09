@@ -146,6 +146,41 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Finalizes multiple cards in bulk by updating each card's status to <paramref name="request"/>.StatusId.
+        /// All cards must already exist; cards belonging to a batch are resolved and updated together.
+        /// </summary>
+        /// <param name="request">Status id and the list of distinct card ids to finalize.</param>
+        /// <returns><see langword="true"/> if all cards were persisted successfully.</returns>
+        public async Task<bool> FinalizeRangeAsync(FinalizeRangeDto request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            if (request.CardIds == null || request.CardIds.Count == 0)
+                throw new ArgumentException("CardIds cannot be empty.", nameof(request));
+
+            var uniqueCardIds = request.CardIds.Distinct().ToList();
+
+            var cards = await _cardRepository.FindByCardIdsAsync(uniqueCardIds);
+            if (cards == null || cards.Count == 0)
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
+
+            if (cards.Count != uniqueCardIds.Count)
+                throw new AppException(ErrorCode.NotFound, CardNotFoundMessage, CardLabel.NotFound);
+
+            foreach (var card in cards)
+                card.UpdateStepAndStatus(card.StepId, request.StatusId);
+
+            var cardWorkflows = cards
+                .Where(card => card.Step != null)
+                .Select(card => (card.Id, card.Step!.WorkflowId, card.DocumentId))
+                .ToList();
+
+            if (cardWorkflows.Count > 0)
+                await _auditCardService.CreateBatchAndSaveAsync(cardWorkflows, AuditCardActionType.Finalize);
+
+            return await _cardRepository.UpdateList(cards);
+        }
+
+        /// <summary>
         /// Updates the step and status of a card.
         /// </summary>
         /// <param name="updateCardStepStatusDto"></param>

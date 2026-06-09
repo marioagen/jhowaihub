@@ -1413,6 +1413,9 @@ const spanish = {
             defaultRejectJustification: "Rechazo masivo desde la lista del flujo.",
             rejectSuccess: "Documentos rechazados correctamente.",
             rejectError: "No se pudieron rechazar los documentos seleccionados.",
+            finalize: "Finalizar",
+            finalizeSuccess: "Documentos finalizados correctamente.",
+            finalizeError: "No se pudieron finalizar los documentos seleccionados.",
             deleteTitle: "Eliminar documentos",
             deleteConfirmSimple:
                 "¿Eliminar los documentos seleccionados? Esta acción no se puede deshacer.",

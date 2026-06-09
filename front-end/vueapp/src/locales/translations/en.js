@@ -1408,6 +1408,9 @@ const english = {
             defaultRejectJustification: "Bulk rejection from workflow list.",
             rejectSuccess: "Documents rejected successfully.",
             rejectError: "Could not reject the selected documents.",
+            finalize: "Finalize",
+            finalizeSuccess: "Documents finalized successfully.",
+            finalizeError: "Could not finalize the selected documents.",
             deleteTitle: "Delete documents",
             deleteConfirmSimple: "Delete the selected documents? This action cannot be undone.",
             deleteMessage:

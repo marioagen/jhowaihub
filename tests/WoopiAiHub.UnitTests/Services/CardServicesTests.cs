@@ -865,6 +865,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Fail")]
         public async Task AssignRangeAsync_CardNotFound_Null_ThrowsAppException()
         {
+            //Arrange
             var cardId = 1;
             var userId = Guid.NewGuid();
             _mocker.GetMock<IWorkflowRepository>()
@@ -874,6 +875,8 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync((List<Card>?)null);
 
             var request = new AssignRangeDto(userId, new List<int> { cardId });
+
+            //Act//Assert
             var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignRangeAsync(request));
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
             Assert.Equal(CardLabel.NotFound, ex.LabelError);
@@ -883,6 +886,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Fail")]
         public async Task AssignRangeAsync_CardNotFound_EmptyList_ThrowsAppException()
         {
+            //Arrange
             var cardId = 1;
             var userId = Guid.NewGuid();
             _mocker.GetMock<IWorkflowRepository>()
@@ -892,6 +896,8 @@ namespace WoopiAiHub.UnitTests.Services
                 .ReturnsAsync(new List<Card>());
 
             var request = new AssignRangeDto(userId, new List<int> { cardId });
+
+            // Act//Assert
             var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.AssignRangeAsync(request));
             Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
             Assert.Equal(CardLabel.NotFound, ex.LabelError);
@@ -901,6 +907,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Success")]
         public async Task AssignRangeAsync_ValidSingleCard_ReturnsTrue_AndAuditsAssign()
         {
+            //Arrange
             var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
             var cardId = 1;
             var card = CardFixture.FindValidCard();
@@ -925,8 +932,10 @@ namespace WoopiAiHub.UnitTests.Services
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
+            //Act
             var result = await _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { cardId }));
 
+            //Assert
             Assert.True(result);
             Assert.Equal(userId, card.AssignedUserId);
             _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
@@ -941,6 +950,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "DocumentBatch")]
         public async Task AssignRangeAsync_WithDocumentBatch_UpdatesAllBatchCards()
         {
+            //Arrange
             var userId = Guid.Parse("20c41dd6-1518-468b-8b0c-b5d8c0d31dec");
             var documentBatchId = 100;
             var batchCards = CardFixture.FindDocumentBatchCardsWithoutAssignedUser(documentBatchId);
@@ -964,8 +974,10 @@ namespace WoopiAiHub.UnitTests.Services
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
+            //Act
             var result = await _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { 1, 2, 3 }));
 
+            //Assert
             Assert.True(result);
             Assert.All(batchCards, c => Assert.Equal(userId, c.AssignedUserId));
             _cardRepositoryMock.Verify(repo => repo.UpdateList(It.Is<List<Card>>(l => l.Count == 3)), Times.Once);
@@ -975,6 +987,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Success")]
         public async Task AssignRangeAsync_UpdateListReturnsFalse_ReturnsFalse()
         {
+            //Arrange
             var userId = Guid.NewGuid();
             var cardId = 1;
             var card = CardFixture.FindValidCard();
@@ -999,8 +1012,10 @@ namespace WoopiAiHub.UnitTests.Services
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
+            //Act
             var result = await _cardServices.AssignRangeAsync(new AssignRangeDto(userId, new List<int> { cardId }));
 
+            //Assert
             Assert.False(result);
         }
 
@@ -1008,7 +1023,10 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Fail")]
         public async Task AssignRangeAsync_EmptyCardIds_ThrowsArgumentException()
         {
+            //Arrange
             var request = new AssignRangeDto(Guid.NewGuid(), new List<int>());
+
+            //Act /Assert
             await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.AssignRangeAsync(request));
         }
 
@@ -1016,6 +1034,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Fail")]
         public async Task AssignRangeAsync_NullRequest_ThrowsArgumentNullException()
         {
+            //Act /Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => _cardServices.AssignRangeAsync(null!));
         }
 
@@ -1023,6 +1042,7 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("AssignRangeAsync", "Success")]
         public async Task AssignRangeAsync_DistinctCardIds_SingleExpandAndSingleUpdate()
         {
+            //Arrange
             var userId = Guid.NewGuid();
             var request = new AssignRangeDto(userId, new List<int> { 1, 1, 2 });
 
@@ -1046,8 +1066,10 @@ namespace WoopiAiHub.UnitTests.Services
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
+            //Act
             var result = await _cardServices.AssignRangeAsync(request);
 
+            //Assert
             Assert.True(result);
             _cardRepositoryMock.Verify(repo => repo.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2 && ids.Contains(1) && ids.Contains(2))), Times.Once);
             _cardRepositoryMock.Verify(repo => repo.UpdateList(It.IsAny<List<Card>>()), Times.Once);
@@ -1243,10 +1265,12 @@ namespace WoopiAiHub.UnitTests.Services
         [Trait("UpdateStatus", "Fail")]
         public async Task UpdateStatus_EmptyCardList_ThrowsAppException()
         {
+            //Arrange
             var dto = CardFixture.FindValidCardStatusDto();
             _cardRepositoryMock.Setup(r => r.FindCardOrBatchWithStepWorkflowAsync(dto.CardId))
                 .ReturnsAsync(new List<Card>());
 
+            //Act /Assert
             await Assert.ThrowsAsync<AppException>(() => _cardServices.UpdateStatus(dto));
         }
 
@@ -1563,6 +1587,297 @@ namespace WoopiAiHub.UnitTests.Services
                 _cardServices.ReprocessCard(cardId, tenant, email));
 
             _cardRepositoryMock.Verify(repo => repo.Update(It.IsAny<Card>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync throws ArgumentNullException when request is null")]
+        [Trait("FinalizeRangeAsync", "Fail")]
+        public async Task FinalizeRangeAsync_NullRequest_ThrowsArgumentNullException()
+        {
+            //Act /Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _cardServices.FinalizeRangeAsync(null!));
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync throws ArgumentException when CardIds is null")]
+        [Trait("FinalizeRangeAsync", "Fail")]
+        public async Task FinalizeRangeAsync_NullCardIds_ThrowsArgumentException()
+        {
+            //Arrange
+            var request = new FinalizeRangeDto(1, null!);
+
+            //Act
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.FinalizeRangeAsync(request));
+
+            //Assert
+            Assert.Contains("CardIds", ex.Message, StringComparison.Ordinal);
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync throws ArgumentException when CardIds is empty")]
+        [Trait("FinalizeRangeAsync", "Fail")]
+        public async Task FinalizeRangeAsync_EmptyCardIds_ThrowsArgumentException()
+        {
+            //Arrange
+            var request = new FinalizeRangeDto(1, new List<int>());
+
+            //Act
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() => _cardServices.FinalizeRangeAsync(request));
+
+            //Assert
+            Assert.Contains("CardIds", ex.Message, StringComparison.Ordinal);
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync throws AppException when repository returns null")]
+        [Trait("FinalizeRangeAsync", "Fail")]
+        public async Task FinalizeRangeAsync_RepositoryReturnsNull_ThrowsAppException()
+        {
+            //Arrange
+            _cardRepositoryMock
+                .Setup(r => r.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync((List<Card>?)null);
+
+            var request = new FinalizeRangeDto(2, new List<int> { 1 });
+
+            //Act
+            var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.FinalizeRangeAsync(request));
+
+            //Assert
+            Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, ex.LabelError);
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync throws AppException when repository returns empty list")]
+        [Trait("FinalizeRangeAsync", "Fail")]
+        public async Task FinalizeRangeAsync_RepositoryReturnsEmptyList_ThrowsAppException()
+        {
+            //Arrange
+            _cardRepositoryMock
+                .Setup(r => r.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card>());
+
+            var request = new FinalizeRangeDto(2, new List<int> { 1 });
+
+            //Act /Assert
+            var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.FinalizeRangeAsync(request));
+
+            Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, ex.LabelError);
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync throws AppException when fewer cards are returned than requested ids")]
+        [Trait("FinalizeRangeAsync", "Fail")]
+        public async Task FinalizeRangeAsync_PartialCardList_ThrowsAppException()
+        {
+            //Arrange
+            var card = CardFixture.FindValidCard();
+            _cardRepositoryMock
+                .Setup(r => r.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card });
+
+            var request = new FinalizeRangeDto(2, new List<int> { 1, 2 });
+
+            //Act /Assert
+            var ex = await Assert.ThrowsAsync<AppException>(() => _cardServices.FinalizeRangeAsync(request));
+
+            Assert.Equal(ErrorCode.NotFound, ex.ErrorCode);
+            Assert.Equal(CardLabel.NotFound, ex.LabelError);
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync updates card status and calls audit with Finalize action type")]
+        [Trait("FinalizeRangeAsync", "Success")]
+        public async Task FinalizeRangeAsync_ValidSingleCardWithStep_UpdatesStatusAndAudits()
+        {
+            // Arrange
+            var statusId = 5;
+            var card = CardFixture.FindValidCard();
+            card.Step = CardFixture.FindValidStepWithWorkflow();
+
+            _cardRepositoryMock
+                .Setup(r => r.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 1)))
+                .ReturnsAsync(new List<Card> { card });
+            _cardRepositoryMock.Setup(r => r.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
+
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
+            auditCardServiceMock.Setup(s => s.CreateBatchAndSaveAsync(
+                It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                It.IsAny<AuditCardActionType>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            var request = new FinalizeRangeDto(statusId, new List<int> { card.Id });
+
+            // Act
+            var result = await _cardServices.FinalizeRangeAsync(request);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(statusId, card.StatusId);
+            _cardRepositoryMock.Verify(r => r.UpdateList(It.IsAny<List<Card>>()), Times.Once);
+            auditCardServiceMock.Verify(s => s.CreateBatchAndSaveAsync(
+                It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                AuditCardActionType.Finalize,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync updates all cards when multiple valid ids are provided")]
+        [Trait("FinalizeRangeAsync", "Success")]
+        public async Task FinalizeRangeAsync_MultipleCards_UpdatesAllAndPersistsInSingleCall()
+        {
+            // Arrange
+            var statusId = 3;
+            var card1 = CardFixture.FindCard(1, 1, "C1");
+            card1.Step = CardFixture.FindValidStepWithWorkflow();
+            var card2 = CardFixture.FindCard(2, 2, "C2");
+            card2.Step = CardFixture.FindValidStepWithWorkflow();
+
+            _cardRepositoryMock
+                .Setup(r => r.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2)))
+                .ReturnsAsync(new List<Card> { card1, card2 });
+            _cardRepositoryMock.Setup(r => r.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
+
+            _mocker.GetMock<IAuditCardService>()
+                .Setup(s => s.CreateBatchAndSaveAsync(
+                    It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                    It.IsAny<AuditCardActionType>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            var request = new FinalizeRangeDto(statusId, new List<int> { 1, 2 });
+
+            // Act
+            var result = await _cardServices.FinalizeRangeAsync(request);
+
+            // Assert
+            Assert.True(result);
+            Assert.All(new[] { card1, card2 }, c => Assert.Equal(statusId, c.StatusId));
+            _cardRepositoryMock.Verify(r => r.UpdateList(It.Is<List<Card>>(cards => cards.Count == 2)), Times.Once);
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync deduplicates CardIds and makes a single repository call")]
+        [Trait("FinalizeRangeAsync", "Success")]
+        public async Task FinalizeRangeAsync_DuplicateCardIds_DeduplicatesBeforeQuerying()
+        {
+            // Arrange
+            var card = CardFixture.FindValidCard();
+            card.Step = CardFixture.FindValidStepWithWorkflow();
+
+            _cardRepositoryMock
+                .Setup(r => r.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 1 && ids[0] == card.Id)))
+                .ReturnsAsync(new List<Card> { card });
+            _cardRepositoryMock.Setup(r => r.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
+
+            _mocker.GetMock<IAuditCardService>()
+                .Setup(s => s.CreateBatchAndSaveAsync(
+                    It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                    It.IsAny<AuditCardActionType>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            var request = new FinalizeRangeDto(2, new List<int> { card.Id, card.Id, card.Id });
+
+            // Act
+            var result = await _cardServices.FinalizeRangeAsync(request);
+
+            // Assert
+            Assert.True(result);
+            _cardRepositoryMock.Verify(
+                r => r.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 1)),
+                Times.Once);
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync skips audit when all cards have no Step")]
+        [Trait("FinalizeRangeAsync", "Success")]
+        public async Task FinalizeRangeAsync_CardsWithoutStep_SkipsAuditAndReturnsUpdateResult()
+        {
+            // Arrange
+            var card = CardFixture.FindValidCard();
+            card.Step = null;
+
+            _cardRepositoryMock
+                .Setup(r => r.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card });
+            _cardRepositoryMock.Setup(r => r.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
+
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
+
+            var request = new FinalizeRangeDto(4, new List<int> { card.Id });
+
+            // Act
+            var result = await _cardServices.FinalizeRangeAsync(request);
+
+            // Assert
+            Assert.True(result);
+            auditCardServiceMock.Verify(
+                s => s.CreateBatchAndSaveAsync(
+                    It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                    It.IsAny<AuditCardActionType>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Never);
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync audits only cards that have a Step")]
+        [Trait("FinalizeRangeAsync", "Success")]
+        public async Task FinalizeRangeAsync_MixedStepPresence_AuditsOnlyCardsWithStep()
+        {
+            // Arrange
+            var cardWithStep = CardFixture.FindCard(1, 1, "WithStep");
+            cardWithStep.Step = CardFixture.FindValidStepWithWorkflow();
+            var cardWithoutStep = CardFixture.FindCard(2, 2, "NoStep");
+            cardWithoutStep.Step = null;
+
+            _cardRepositoryMock
+                .Setup(r => r.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 2)))
+                .ReturnsAsync(new List<Card> { cardWithStep, cardWithoutStep });
+            _cardRepositoryMock.Setup(r => r.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(true);
+
+            var auditCardServiceMock = _mocker.GetMock<IAuditCardService>();
+            auditCardServiceMock.Setup(s => s.CreateBatchAndSaveAsync(
+                It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                It.IsAny<AuditCardActionType>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            var request = new FinalizeRangeDto(3, new List<int> { 1, 2 });
+
+            // Act
+            var result = await _cardServices.FinalizeRangeAsync(request);
+
+            // Assert
+            Assert.True(result);
+            auditCardServiceMock.Verify(s => s.CreateBatchAndSaveAsync(
+                It.Is<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(list => list.Count == 1),
+                AuditCardActionType.Finalize,
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact(DisplayName = "FinalizeRangeAsync returns false when UpdateList returns false")]
+        [Trait("FinalizeRangeAsync", "Fail")]
+        public async Task FinalizeRangeAsync_UpdateListReturnsFalse_ReturnsFalse()
+        {
+            // Arrange
+            var card = CardFixture.FindValidCard();
+            card.Step = CardFixture.FindValidStepWithWorkflow();
+
+            _cardRepositoryMock
+                .Setup(r => r.FindByCardIdsAsync(It.IsAny<IReadOnlyList<int>>()))
+                .ReturnsAsync(new List<Card> { card });
+            _cardRepositoryMock.Setup(r => r.UpdateList(It.IsAny<List<Card>>())).ReturnsAsync(false);
+
+            _mocker.GetMock<IAuditCardService>()
+                .Setup(s => s.CreateBatchAndSaveAsync(
+                    It.IsAny<IReadOnlyList<(int cardId, int workflowId, int documentId)>>(),
+                    It.IsAny<AuditCardActionType>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+            var request = new FinalizeRangeDto(2, new List<int> { card.Id });
+
+            // Act
+            var result = await _cardServices.FinalizeRangeAsync(request);
+
+            // Assert
+            Assert.False(result);
         }
     }
 }
