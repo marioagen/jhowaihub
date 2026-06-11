@@ -97,9 +97,9 @@ export default {
                 };
             });
     },
-    getCardsByBatch(documentBatchId) {
+    getCardsByBatch(documentBatchId, workflowId) {
         return api
-            .get(`/Card/Batch/${documentBatchId}`)
+            .get(`/Card/Batch/${documentBatchId}`, { params: { workflowId } })
             .then(({ data }) => {
                 return data;
             })

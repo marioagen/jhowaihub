@@ -7,5 +7,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public int WorkflowId { get; set; }
         public string StatusName { get; set; } = string.Empty;
         public int CurrentStepOrder { get; set; }
+        public int? DocumentBatchId { get; set; }
     }
 }

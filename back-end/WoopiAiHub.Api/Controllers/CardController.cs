@@ -142,20 +142,18 @@ namespace WoopiAiHub.Api.Controllers
         }
 
         /// <summary>
-        /// Retrieves the collection of card batches associated with the specified document batch identifier.
+        /// Retrieves the cards in the given batch that belong to the specified workflow,
+        /// so the analyze page can list only documents from the same esteira.
         /// </summary>
-        /// <remarks>This method is asynchronous and may involve I/O operations. Ensure that the
-        /// documentBatchId parameter is valid to avoid exceptions.</remarks>
-        /// <param name="documentBatchId">The unique identifier of the document batch for which to retrieve associated card batches. Must be a
-        /// positive integer.</param>
-        /// <returns>An IActionResult containing a collection of CardBatchDto objects that represent the card batches linked to
-        /// the specified document batch identifier. Returns an empty collection if no card batches are found.</returns>
+        /// <param name="documentBatchId">The unique identifier of the document batch.</param>
+        /// <param name="workflowId">The workflow to scope the results to.</param>
+        /// <returns>A collection of <see cref="CardBatchDto"/> scoped to the workflow.</returns>
         [HttpGet("Batch/{documentBatchId}")]
-        [SwaggerOperation("Retrieves the collection of card batches associated with the specified document batch identifier.")]
+        [SwaggerOperation("Retrieves cards in the batch scoped to the given workflow.")]
         [ProducesResponseType(typeof(ICollection<CardBatchDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> FindCardsByDocumentBatchId(int documentBatchId)
+        public async Task<IActionResult> FindCardsByDocumentBatchId(int documentBatchId, [FromQuery] int workflowId)
         {
-            var result = await _cardServices.FindCardsByDocumentBatchId(documentBatchId);
+            var result = await _cardServices.FindCardsByDocumentBatchId(documentBatchId, workflowId);
             return Ok(result);
         }
 

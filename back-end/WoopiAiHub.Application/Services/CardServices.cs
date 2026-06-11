@@ -733,18 +733,16 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// Asynchronously retrieves a collection of card batch data transfer objects associated with the specified
-        /// document batch identifier.
+        /// Asynchronously retrieves cards in the given batch that belong to the specified workflow,
+        /// returning only the documents the user can switch between while staying in the same esteira.
         /// </summary>
-        /// <remarks>If no card batches are associated with the provided document batch identifier, the
-        /// method returns <see langword="null"/> instead of an empty collection.</remarks>
-        /// <param name="documentBatchId">The unique identifier of the document batch for which to retrieve associated card batches. Must be a
-        /// positive integer.</param>
-        /// <returns>A collection of <see cref="CardBatchDto"/> objects representing the card batches linked to the specified
-        /// document batch identifier, or <see langword="null"/> if no card batches are found.</returns>
-        public async Task<ICollection<CardBatchDto>?> FindCardsByDocumentBatchId(int documentBatchId)
+        /// <remarks>Returns <see langword="null"/> when no matching cards are found.</remarks>
+        /// <param name="documentBatchId">The batch identifier shared by all uploaded documents.</param>
+        /// <param name="workflowId">The workflow whose cards should be returned.</param>
+        /// <returns>A collection of <see cref="CardBatchDto"/> scoped to the workflow, or <see langword="null"/> if none are found.</returns>
+        public async Task<ICollection<CardBatchDto>?> FindCardsByDocumentBatchId(int documentBatchId, int workflowId)
         {
-            var cards = await _cardRepository.FindByDocumentBatchId(documentBatchId);
+            var cards = await _cardRepository.FindByDocumentBatchIdAndWorkflow(documentBatchId, workflowId);
             if (cards is null || cards.Count <= 0)
             {
                 return null;
@@ -754,7 +752,8 @@ namespace WoopiAiHub.Application.Services
             {
                 CardId = card.Id,
                 DocumentId = card.DocumentId,
-                DocumentName = card.Name
+                DocumentName = card.Name,
+                WorkflowId = card.Step?.WorkflowId ?? 0
             })];
         }
 

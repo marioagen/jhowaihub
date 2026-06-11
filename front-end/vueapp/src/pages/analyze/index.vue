@@ -352,14 +352,8 @@
                 this.dataPushHistoryList = data;
             },
             async getDataDocument() {
-                await DocumentMetadataServices.getDocumentAnalyze(this.documentId).then(
-                    (result) => {
-                        this.hashDocument = result.referenceFile;
-                        if (result && result.documentBatchId != null) {
-                            this.getBatchDocuments(result.documentBatchId);
-                        }
-                    }
-                );
+                const result = await DocumentMetadataServices.getDocumentAnalyze(this.documentId);
+                this.hashDocument = result.referenceFile;
             },
             async getCardHeaderInfo() {
                 const result = await CardsServices.findCardHeaderInfo(this.cardId);
@@ -369,7 +363,9 @@
                     this.workflowId = result.workflowId ?? null;
                     this.currentStepOrder = result.currentStepOrder;
                     this.cardStatus = result.statusName ?? "";
+                    return result.documentBatchId ?? null;
                 }
+                return null;
             },
             goBack() {
                 if (this.backPage) {
@@ -400,20 +396,19 @@
             openViewRejectionModal() {
                 this.$refs.modalViewRejection.open(this.cardId);
             },
-            getBatchDocuments(documentBatchId) {
-                CardsServices.getCardsByBatch(documentBatchId)
-                    .then((response) => {
-                        if (response && !response.error) {
-                            this.documentsBatch = response;
-                        }
-                    })
-                    .catch((e) => {
-                        LogService.showMessage("Error loading batch documents: " + e);
-                    });
+            async getBatchDocuments(documentBatchId) {
+                try {
+                    const response = await CardsServices.getCardsByBatch(documentBatchId, this.workflowId);
+                    if (response && !response.error && response.length > 1) {
+                        this.documentsBatch = response;
+                    }
+                } catch (e) {
+                    LogService.showMessage("Error loading batch documents: " + e);
+                }
             },
             changeDocument() {
                 const selectedDocument = this.documentsBatch.find(
-                    (doc) => doc.cardId === this.cardId
+                    (doc) => Number(doc.cardId) === Number(this.cardId)
                 );
 
                 this.$router.push({
@@ -446,7 +441,10 @@
         },
         async created() {
             await this.getDataDocument();
-            await this.getCardHeaderInfo();
+            const documentBatchId = await this.getCardHeaderInfo();
+            if (documentBatchId != null) {
+                await this.getBatchDocuments(documentBatchId);
+            }
             await this.getDocumentsAnonymizationByDocument();
         },
     };
