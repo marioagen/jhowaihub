@@ -682,6 +682,48 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.NotNull(result);
             Assert.Equal(expectedDto.CardName, result.CardName);
             Assert.Equal(expectedDto.WorkflowName, result.WorkflowName);
+            Assert.Equal(expectedDto.WorkflowId, result.WorkflowId);
+            _cardRepositoryMock.Verify(repo => repo.FindHeaderInfoAsync(cardId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindCardHeaderInfoAsync returns DocumentBatchId when card belongs to a batch")]
+        [Trait("FindCardHeaderInfoAsync", "Success")]
+        public async Task FindCardHeaderInfoAsync_CardInBatch_ReturnsDocumentBatchId()
+        {
+            // Arrange
+            var cardId = 1;
+            const int documentBatchId = 50;
+            var expectedDto = CardFixture.FindValidCardHeaderDtoWithBatchId(documentBatchId);
+
+            _cardRepositoryMock.Setup(repo => repo.FindHeaderInfoAsync(cardId))
+                .ReturnsAsync(expectedDto);
+
+            // Act
+            var result = await _cardServices.FindHeaderInfoAsync(cardId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(documentBatchId, result.DocumentBatchId);
+            _cardRepositoryMock.Verify(repo => repo.FindHeaderInfoAsync(cardId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindCardHeaderInfoAsync returns null DocumentBatchId when card is not in a batch")]
+        [Trait("FindCardHeaderInfoAsync", "Success")]
+        public async Task FindCardHeaderInfoAsync_CardNotInBatch_ReturnsNullDocumentBatchId()
+        {
+            // Arrange
+            var cardId = 1;
+            var expectedDto = CardFixture.FindValidCardHeaderDto();
+
+            _cardRepositoryMock.Setup(repo => repo.FindHeaderInfoAsync(cardId))
+                .ReturnsAsync(expectedDto);
+
+            // Act
+            var result = await _cardServices.FindHeaderInfoAsync(cardId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Null(result.DocumentBatchId);
             _cardRepositoryMock.Verify(repo => repo.FindHeaderInfoAsync(cardId), Times.Once);
         }
 
@@ -1110,44 +1152,125 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.Empty(result);
         }
 
-        [Fact(DisplayName = "FindCardsByDocumentBatchId returns null when repository returns null or empty")]
-        [Trait("FindCardsByDocumentBatchId", "Success")]
-        public async Task FindCardsByDocumentBatchId_NullOrEmpty_ReturnsNull()
+        [Fact(DisplayName = "FindCardsByDocumentBatchId returns null when repository returns null")]
+        [Trait("FindCardsByDocumentBatchId", "Fail")]
+        public async Task FindCardsByDocumentBatchId_RepositoryReturnsNull_ReturnsNull()
         {
             // Arrange
-            _cardRepositoryMock.Setup(r => r.FindByDocumentBatchId(1)).ReturnsAsync((List<Card>)null!);
-            _cardRepositoryMock.Setup(r => r.FindByDocumentBatchId(2)).ReturnsAsync(new List<Card>());
+            const int batchId = 1;
+            const int workflowId = 38;
+            _cardRepositoryMock
+                .Setup(r => r.FindByDocumentBatchIdAndWorkflow(batchId, workflowId))
+                .ReturnsAsync((List<Card>)null!);
 
             // Act
-            var nullResult = await _cardServices.FindCardsByDocumentBatchId(1);
-            var emptyResult = await _cardServices.FindCardsByDocumentBatchId(2);
+            var result = await _cardServices.FindCardsByDocumentBatchId(batchId, workflowId);
 
             // Assert
-            Assert.Null(nullResult);
-            Assert.Null(emptyResult);
+            Assert.Null(result);
+            _cardRepositoryMock.Verify(r => r.FindByDocumentBatchIdAndWorkflow(batchId, workflowId), Times.Once);
         }
 
-        [Fact(DisplayName = "FindCardsByDocumentBatchId maps cards to CardBatchDto")]
+        [Fact(DisplayName = "FindCardsByDocumentBatchId returns null when repository returns empty list")]
+        [Trait("FindCardsByDocumentBatchId", "Fail")]
+        public async Task FindCardsByDocumentBatchId_RepositoryReturnsEmpty_ReturnsNull()
+        {
+            // Arrange
+            const int batchId = 2;
+            const int workflowId = 74;
+            _cardRepositoryMock
+                .Setup(r => r.FindByDocumentBatchIdAndWorkflow(batchId, workflowId))
+                .ReturnsAsync(new List<Card>());
+
+            // Act
+            var result = await _cardServices.FindCardsByDocumentBatchId(batchId, workflowId);
+
+            // Assert
+            Assert.Null(result);
+            _cardRepositoryMock.Verify(r => r.FindByDocumentBatchIdAndWorkflow(batchId, workflowId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindCardsByDocumentBatchId maps cards to CardBatchDto with correct fields")]
         [Trait("FindCardsByDocumentBatchId", "Success")]
         public async Task FindCardsByDocumentBatchId_WithCards_ReturnsMappedDtos()
         {
             // Arrange
-            var batchId = 50;
-            var cards = new List<Card>
-            {
-                CardFixture.FindCard(10, 100, "Doc A", batchId),
-                CardFixture.FindCard(11, 101, "Doc B", batchId)
-            };
-            _cardRepositoryMock.Setup(r => r.FindByDocumentBatchId(batchId)).ReturnsAsync(cards);
+            const int batchId = 50;
+            const int workflowId = 38;
+            var cards = CardFixture.FindBatchCardsForWorkflow(batchId, workflowId, count: 2);
+            _cardRepositoryMock
+                .Setup(r => r.FindByDocumentBatchIdAndWorkflow(batchId, workflowId))
+                .ReturnsAsync(cards);
 
             // Act
-            var result = await _cardServices.FindCardsByDocumentBatchId(batchId);
+            var result = await _cardServices.FindCardsByDocumentBatchId(batchId, workflowId);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
-            Assert.Contains(result, x => x.CardId == 10 && x.DocumentId == 100 && x.DocumentName == "Doc A");
-            Assert.Contains(result, x => x.CardId == 11 && x.DocumentId == 101 && x.DocumentName == "Doc B");
+            Assert.Contains(result, x => x.CardId == cards[0].Id && x.DocumentId == cards[0].DocumentId && x.DocumentName == cards[0].Name);
+            Assert.Contains(result, x => x.CardId == cards[1].Id && x.DocumentId == cards[1].DocumentId && x.DocumentName == cards[1].Name);
+            _cardRepositoryMock.Verify(r => r.FindByDocumentBatchIdAndWorkflow(batchId, workflowId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindCardsByDocumentBatchId maps WorkflowId from card Step")]
+        [Trait("FindCardsByDocumentBatchId", "Success")]
+        public async Task FindCardsByDocumentBatchId_MapsWorkflowIdFromStep()
+        {
+            // Arrange
+            const int batchId = 50;
+            const int workflowId = 74;
+            var cards = CardFixture.FindBatchCardsForWorkflow(batchId, workflowId, count: 2);
+            _cardRepositoryMock
+                .Setup(r => r.FindByDocumentBatchIdAndWorkflow(batchId, workflowId))
+                .ReturnsAsync(cards);
+
+            // Act
+            var result = await _cardServices.FindCardsByDocumentBatchId(batchId, workflowId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.All(result, dto => Assert.Equal(workflowId, dto.WorkflowId));
+        }
+
+        [Fact(DisplayName = "FindCardsByDocumentBatchId maps WorkflowId as 0 when card has no Step")]
+        [Trait("FindCardsByDocumentBatchId", "Success")]
+        public async Task FindCardsByDocumentBatchId_CardWithNullStep_MapsWorkflowIdAsZero()
+        {
+            // Arrange
+            const int batchId = 50;
+            const int workflowId = 38;
+            var card = CardFixture.FindCard(1, 10, "Doc 1", batchId);
+            _cardRepositoryMock
+                .Setup(r => r.FindByDocumentBatchIdAndWorkflow(batchId, workflowId))
+                .ReturnsAsync(new List<Card> { card });
+
+            // Act
+            var result = await _cardServices.FindCardsByDocumentBatchId(batchId, workflowId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result);
+            Assert.Equal(0, result.First().WorkflowId);
+        }
+
+        [Fact(DisplayName = "FindCardsByDocumentBatchId delegates to FindByDocumentBatchIdAndWorkflow and not FindByDocumentBatchId")]
+        [Trait("FindCardsByDocumentBatchId", "Success")]
+        public async Task FindCardsByDocumentBatchId_DelegatesToWorkflowScopedMethod()
+        {
+            // Arrange
+            const int batchId = 10;
+            const int workflowId = 120;
+            _cardRepositoryMock
+                .Setup(r => r.FindByDocumentBatchIdAndWorkflow(batchId, workflowId))
+                .ReturnsAsync(CardFixture.FindBatchCardsForWorkflow(batchId, workflowId));
+
+            // Act
+            await _cardServices.FindCardsByDocumentBatchId(batchId, workflowId);
+
+            // Assert
+            _cardRepositoryMock.Verify(r => r.FindByDocumentBatchIdAndWorkflow(batchId, workflowId), Times.Once);
+            _cardRepositoryMock.Verify(r => r.FindByDocumentBatchId(It.IsAny<int>()), Times.Never);
         }
 
         [Fact(DisplayName = "AssignRangeAsync throws when user is not valid for the card ids")]

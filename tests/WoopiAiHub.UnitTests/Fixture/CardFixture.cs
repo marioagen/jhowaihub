@@ -117,8 +117,34 @@ namespace WoopiAiHub.UnitTests.Fixture
             return new CardHeaderDto
             {
                 CardName = cardName,
-                WorkflowName = workflowName
+                WorkflowName = workflowName,
+                WorkflowId = 1
             };
+        }
+
+        public static CardHeaderDto FindValidCardHeaderDtoWithBatchId(int documentBatchId = 50)
+        {
+            return new CardHeaderDto
+            {
+                CardName = "Test Card",
+                WorkflowName = "Test Workflow",
+                WorkflowId = 1,
+                DocumentBatchId = documentBatchId
+            };
+        }
+
+        public static Card FindCardWithStepForWorkflow(int id, int documentId, string name, int workflowId, int? documentBatchId = null)
+        {
+            var card = FindCard(id, documentId, name, documentBatchId);
+            card.Step = new Step(1, DateTime.UtcNow, workflowId, "Step", 1, 1, 1);
+            return card;
+        }
+
+        public static List<Card> FindBatchCardsForWorkflow(int documentBatchId, int workflowId, int count = 3)
+        {
+            return Enumerable.Range(1, count)
+                .Select(i => FindCardWithStepForWorkflow(i, i * 10, $"Doc {i}", workflowId, documentBatchId))
+                .ToList();
         }
 
         public static Status FindValidStatus()
