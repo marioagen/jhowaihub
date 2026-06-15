@@ -69,7 +69,8 @@ namespace WoopiAiHub.Application.Services
                 chatCompletionDto);
 
             var tokens = response.Usage?.TotalTokens ?? 0;
-            await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model);
+            await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model,
+                workflowId: null, UsageDailyOrigin.Playground);
 
             var content = response.Choices.FirstOrDefault()?.Message?.Content;
             if (string.IsNullOrEmpty(content))

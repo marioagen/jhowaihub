@@ -668,7 +668,8 @@ namespace WoopiAiHub.Application.Services
                 CancellationToken.None);
 
             var tokens = response.Usage?.TotalTokens ?? 0;
-            await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model);
+            await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model,
+                workflowId: null, UsageDailyOrigin.PromptRefinement);
 
             return response.Choices[0].Message.Content;
         }

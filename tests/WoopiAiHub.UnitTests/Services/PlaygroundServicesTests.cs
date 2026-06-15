@@ -65,7 +65,7 @@ namespace WoopiAiHub.UnitTests.Services
                 .Callback((string _, string _, string _, string _, ChatCompletionDto dto) => capturedDto = dto)
                 .ReturnsAsync(chatCompletionResponse);
             _mocker.GetMock<IUsageDailyServices>()
-                .Setup(u => u.AddByValuesAsync(MetricNames.Token, email, 42, "model", null, It.IsAny<UsageDailyOrigin>()))
+                .Setup(u => u.AddByValuesAsync(MetricNames.Token, email, 42, "model", null, UsageDailyOrigin.Playground))
                 .ReturnsAsync(true);
 
             var result = await _playgroundServices.TestPromptWithContextAsync(promptText, contextText, tenantId, email);
@@ -79,7 +79,7 @@ namespace WoopiAiHub.UnitTests.Services
                 capturedDto.Messages[0].Content);
 
             _mocker.GetMock<IUsageDailyServices>().Verify(
-                u => u.AddByValuesAsync(MetricNames.Token, email, 42, "model", null, It.IsAny<UsageDailyOrigin>()),
+                u => u.AddByValuesAsync(MetricNames.Token, email, 42, "model", null, UsageDailyOrigin.Playground),
                 Times.Once);
         }
 
@@ -179,14 +179,14 @@ namespace WoopiAiHub.UnitTests.Services
                     It.IsAny<ChatCompletionDto>()))
                 .ReturnsAsync(chatCompletionResponse);
             _mocker.GetMock<IUsageDailyServices>()
-                .Setup(u => u.AddByValuesAsync(MetricNames.Token, "e@mail.com", 0, "model", null, It.IsAny<UsageDailyOrigin>()))
+                .Setup(u => u.AddByValuesAsync(MetricNames.Token, "e@mail.com", 0, "model", null, UsageDailyOrigin.Playground))
                 .ReturnsAsync(true);
 
             var result = await _playgroundServices.TestPromptWithContextAsync("prompt", "", "t", "e@mail.com");
 
             Assert.Equal("Ok", result);
             _mocker.GetMock<IUsageDailyServices>().Verify(
-                u => u.AddByValuesAsync(MetricNames.Token, "e@mail.com", 0, "model", null, It.IsAny<UsageDailyOrigin>()),
+                u => u.AddByValuesAsync(MetricNames.Token, "e@mail.com", 0, "model", null, UsageDailyOrigin.Playground),
                 Times.Once);
         }
     }
