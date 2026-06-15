@@ -104,9 +104,10 @@
                             {{ $t("dashboard.totalWTC") }}
                         </span>
                         <LucideIcon
-                            v-tooltip.right="$t('dashboard.WTCText')"
+                            v-popover.right="$t('dashboard.WTCText')"
                             icon="Info"
                             :size="17"
+                            style="cursor: pointer"
                         />
                     </div>
                     <LoadingComponent v-if="isLoading" />

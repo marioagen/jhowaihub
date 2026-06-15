@@ -7,6 +7,7 @@ import store from "./store";
 import i18n from "./locales/i18n";
 import VueGtag from "vue-gtag";
 import tooltip from "@/directives/bootstrapTooltip";
+import popover from "@/directives/bootstrapPopover";
 import outsideClick from "@/directives/outsideClick.js";
 import FloatingVue from "floating-vue";
 import "@/validators/validationRules";
@@ -48,6 +49,7 @@ app.use(
 
 app.directive("outsideClick", outsideClick);
 app.directive("tooltip", tooltip);
+app.directive("popover", popover);
 app.component("NotificationComponent", NotificationComponent);
 app.component("LucideIcon", LucideIcon);
 

@@ -58,7 +58,7 @@
     />
     <ConfirmModal
         id="deleteConfirm"
-        title="tools.removeTitle"
+        title="connectors.removeTitle"
         message="common.thisActionCannotBeUndone"
         cancelText="common.cancel"
         confirmText="common.confirm"
@@ -92,11 +92,11 @@
                     { key: "name", label: "common.name" },
                     {
                         key: "toolType",
-                        label: "tools.type",
+                        label: "connectors.type",
                     },
                     {
                         key: "inputData",
-                        label: "tools.entry",
+                        label: "connectors.entry",
                     },
                     {
                         key: "outputData",
