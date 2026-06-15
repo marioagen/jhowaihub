@@ -5,5 +5,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public int CardId { get; set; }
         public int DocumentId { get; set; }
         public string DocumentName { get; set; } = string.Empty;
+        public int WorkflowId { get; set; }
     }
 }

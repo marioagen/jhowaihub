@@ -369,7 +369,8 @@ namespace WoopiAiHub.Repository
                     WorkflowName = c.Step != null && c.Step.Workflow != null ? c.Step.Workflow.Name : string.Empty,
                     WorkflowId = c.Step != null && c.Step.Workflow != null ? c.Step.Workflow.Id : 0,
                     StatusName = c.Status != null ? c.Status.Name : string.Empty,
-                    CurrentStepOrder = c.Step != null ? c.Step.Order : 0
+                    CurrentStepOrder = c.Step != null ? c.Step.Order : 0,
+                    DocumentBatchId = c.DocumentBatchId
                 })
                 .FirstOrDefaultAsync();
         }
@@ -402,6 +403,24 @@ namespace WoopiAiHub.Repository
                 .Include(c => c.Document)
                 .Include(c => c.Step)
                 .Where(c => c.DocumentBatchId == documentBatchId)
+                .OrderBy(c => c.Id)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Asynchronously retrieves cards in the given batch that belong to the specified workflow,
+        /// allowing the analyze page to list only documents from the same esteira.
+        /// </summary>
+        /// <param name="documentBatchId">The batch identifier shared by all uploaded documents.</param>
+        /// <param name="workflowId">The workflow whose cards should be returned.</param>
+        /// <returns>Cards in the batch whose step belongs to <paramref name="workflowId"/>, ordered by card id.</returns>
+        public async Task<List<Card>> FindByDocumentBatchIdAndWorkflow(int documentBatchId, int workflowId)
+        {
+            return await _context.Cards
+                .AsNoTracking()
+                .Include(c => c.Document)
+                .Include(c => c.Step)
+                .Where(c => c.DocumentBatchId == documentBatchId && c.Step != null && c.Step.WorkflowId == workflowId)
                 .OrderBy(c => c.Id)
                 .ToListAsync();
         }

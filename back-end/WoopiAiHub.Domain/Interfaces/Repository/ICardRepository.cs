@@ -27,6 +27,7 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<CardHeaderDto?> FindHeaderInfoAsync(int cardId);
         Task<ICollection<int>> FindCardIdsByDocumentIdsAsync(IEnumerable<int> documentIds);
         Task<List<Card>> FindByDocumentBatchId(int documentBatchId);
+        Task<List<Card>> FindByDocumentBatchIdAndWorkflow(int documentBatchId, int workflowId);
         Task<List<Card>?> FindCardOrBatchWithStepWorkflowAsync(int cardId);
         Task<List<Card>?> FindByCardIdsAsync(IReadOnlyList<int> cardIds);
         Task<List<Card>?> FindCardOrBatchWithDocumentAsync(int cardId);
