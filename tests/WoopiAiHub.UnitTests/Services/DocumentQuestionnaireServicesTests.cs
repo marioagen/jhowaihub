@@ -10,6 +10,7 @@ using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Models;
+using WoopiAiHub.Domain.Utils;
 using WoopiAiHub.UnitTests.Fixture;
 using Xunit;
 
