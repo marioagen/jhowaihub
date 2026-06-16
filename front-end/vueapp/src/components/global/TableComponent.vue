@@ -202,6 +202,7 @@
                 this.selectedRows = [];
             },
             changePage(page) {
+                this.cleanSelection();
                 this.$emit("change-page", page);
             },
             setOrder(columnKey) {
