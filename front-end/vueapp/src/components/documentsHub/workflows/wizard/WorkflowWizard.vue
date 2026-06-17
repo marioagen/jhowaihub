@@ -263,7 +263,7 @@
                         title: "workflow.index",
                         message: "validation.hasInvalid",
                         variant: "warning",
-                        icon: "CircleAlert",
+                        icon: "AlertTriangle",
                     });
                 }
 
@@ -354,7 +354,7 @@
                     title: "workflow.index",
                     message: "validation.hasInvalid",
                     variant: "warning",
-                    icon: "CircleAlert",
+                    icon: "AlertTriangle",
                 });
             },
             async savePhase1() {
@@ -413,7 +413,7 @@
                         title: "workflow.index",
                         message: "validation.oneStep",
                         variant: "warning",
-                        icon: "CircleAlert",
+                        icon: "AlertTriangle",
                     });
                     this.isLoading = false;
                     return;

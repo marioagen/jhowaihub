@@ -237,7 +237,7 @@ body {
     --color-bg-toast-content-primary: #1c398e;
     --color-bg-toast-content-upload: #2d3354;
     --color-bg-toast-content-success: #0d542b;
-    --color-bg-toast-content-warning: rgba(124, 45, 18, 0.4);
+    --color-bg-toast-content-warning: #7a5500;
     --color-bg-toast-content-danger: #82181a;
     --color-bg-toast: rgba(255, 255, 255, 0.85);
     --color-toast-content: #ffffff;

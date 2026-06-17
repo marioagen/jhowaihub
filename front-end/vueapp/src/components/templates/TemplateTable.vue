@@ -150,7 +150,7 @@
                         title: "common.warning",
                         message: "template.unselected",
                         variant: "warning",
-                        icon: "TriangleAlert",
+                        icon: "AlertTriangle",
                     });
                     return;
                 }

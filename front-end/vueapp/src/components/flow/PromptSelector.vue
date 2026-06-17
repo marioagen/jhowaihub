@@ -175,7 +175,7 @@
                         title: "common.warning",
                         message: "flow.formFlow.promptRequired",
                         variant: "warning",
-                        icon: "TriangleAlert",
+                        icon: "AlertTriangle",
                     });
                     return;
                 }
@@ -185,7 +185,7 @@
                         title: "common.warning",
                         message: "flow.formFlow.dependenciesRequired",
                         variant: "warning",
-                        icon: "TriangleAlert",
+                        icon: "AlertTriangle",
                     });
                     return;
                 }
@@ -197,7 +197,7 @@
                         title: "common.warning",
                         message: "flow.formFlow.dependenciesInvalidOrRemoved",
                         variant: "warning",
-                        icon: "TriangleAlert",
+                        icon: "AlertTriangle",
                     });
                     return;
                 }
@@ -217,7 +217,7 @@
                         title: "common.warning",
                         message: "flow.formFlow.configurationSaved",
                         variant: "warning",
-                        icon: "TriangleAlert",
+                        icon: "AlertTriangle",
                     });
                     return;
                 }

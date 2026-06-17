@@ -491,10 +491,10 @@
                     .then((response) => {
                         if (response.data === true) {
                             this.$notify({
-                                title: "documents.numberOfPagesHasBeenExceeded",
+                                title: "documents.upload.title",
                                 message: "documents.numberOfPagesHasBeenExceeded",
                                 variant: "warning",
-                                icon: "CircleX",
+                                icon: "AlertTriangle",
                             });
                         }
                     })
@@ -506,18 +506,18 @@
                 let valid = true;
                 if (this.filesList.length == 0) {
                     this.$notify({
-                        title: "documents.upload.noFileChosen",
+                        title: "documents.upload.title",
                         message: "documents.upload.noFileChosen",
                         variant: "warning",
-                        icon: "CircleX",
+                        icon: "AlertTriangle",
                     });
                     valid = false;
                 } else if (this.selectedWorkflows.length == 0) {
                     this.$notify({
-                        title: "documents.upload.noTeamChosen",
+                        title: "documents.upload.title",
                         message: "documents.upload.noTeamChosen",
                         variant: "warning",
-                        icon: "CircleX",
+                        icon: "AlertTriangle",
                     });
                     valid = false;
                 }
@@ -630,10 +630,10 @@
                     this.$refs.DeleteDialog?.open();
                 } else {
                     this.$notify({
-                        title: "documents.upload.noFileChosen",
+                        title: "documents.upload.title",
                         message: "documents.upload.noFileChosen",
                         variant: "warning",
-                        icon: "CircleX",
+                        icon: "AlertTriangle",
                     });
                 }
             },

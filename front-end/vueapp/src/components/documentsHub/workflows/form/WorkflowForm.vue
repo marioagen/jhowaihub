@@ -401,7 +401,7 @@
                         title: "workflow.index",
                         message: "validation.oneStep",
                         variant: "warning",
-                        icon: "CircleAlert",
+                        icon: "AlertTriangle",
                     });
                 }
 
@@ -421,7 +421,7 @@
                         title: "workflow.index",
                         message: "validation.hasInvalid",
                         variant: "warning",
-                        icon: "CircleAlert",
+                        icon: "AlertTriangle",
                     });
                 }
 
