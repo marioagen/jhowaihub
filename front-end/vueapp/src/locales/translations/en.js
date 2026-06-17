@@ -645,6 +645,8 @@ const english = {
             none: "Select a user",
         },
         workflowInput: "Search by document, description or requester",
+        workflowManagementInput: "Search by workflow name, description, team or user",
+        templateInput: "Search by template name, URL or HTTP method",
         workflowSelect: {
             none: "Select a workflow",
             withWorkflow: "All with associated workflow",
@@ -880,6 +882,7 @@ const english = {
             passwordOptionalHint: "Leave blank to keep the current password.",
             saveSuccess: "User saved successfully",
             searchUsers: "Search users...",
+            searchUsersPlaceholder: "Search by username, email, profile, or team",
             selectedUsers: "Selected users",
             subtitle: "Manage system users",
             title: "Users",

@@ -18,7 +18,7 @@
                     v-model="filters.input"
                     @keydown.enter="setFilters"
                     @keydown.delete="setFilters"
-                    :placeholder="$t('filters.workflowInput')"
+                    :placeholder="$t('filters.templateInput')"
                     ref="searchInpt"
                 />
                 <span

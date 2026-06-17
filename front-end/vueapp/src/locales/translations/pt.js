@@ -633,6 +633,8 @@ const portuguese = {
             none: "Selecione um usuário",
         },
         workflowInput: "Buscar por documento",
+        workflowManagementInput: "Buscar por nome da esteira, descrição, time ou usuário",
+        templateInput: "Buscar por nome do template, URL ou método HTTP",
         workflowSelect: {
             none: "Selecione uma esteira de processamento",
             withWorkflow: "Todos com esteira associadas",
@@ -874,6 +876,7 @@ const portuguese = {
             passwordOptionalHint: "Deixe em branco para manter a senha atual.",
             saveSuccess: "Usuário salvo com sucesso",
             searchUsers: "Buscar usuários...",
+            searchUsersPlaceholder: "Buscar por nome de usuário, email, perfil e time",
             selectedUsers: "Usuários selecionados",
             subtitle: "Gerencie os usuários do sistema",
             title: "Usuários",

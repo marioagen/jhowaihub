@@ -68,6 +68,13 @@
                     name: 'NewUser',
                 });
             },
+            setEntitySearch() {
+                this.entitySearch = {
+                    screen: "user",
+                    labelInput: this.$t("management.users.searchUsers"),
+                    placeholderInput: this.$t("management.users.searchUsersPlaceholder"),
+                };
+            },
             reloadTable(params) {
                 this.$refs.UserTable.getUsers(params);
             },
@@ -78,6 +85,9 @@
                 this.$refs.SearchComponent.searchInput = searchValue;
                 this.reloadTable({ search: searchValue, page: this.queryPage, type: null });
             },
+        },
+        created() {
+            this.setEntitySearch();
         },
     };
 </script>
