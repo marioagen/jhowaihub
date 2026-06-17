@@ -119,6 +119,7 @@
                                     :placeholder="$t('management.users.typePassword')"
                                     :rules="passwordRules"
                                     name="userPassword"
+                                    autocomplete="new-password"
                                     v-model="userData.password"
                                 />
                             </div>
@@ -133,6 +134,7 @@
                                     :placeholder="$t('management.users.typeConfirmedPassword')"
                                     :rules="confirmedPasswordRules"
                                     name="userConfirmedPassword"
+                                    autocomplete="new-password"
                                     v-model="userData.confirmedPassword"
                                 />
                             </div>
@@ -284,6 +286,7 @@
                     teams: [],
                     profiles: [],
                     password: "",
+                    confirmedPassword: "",
                 },
                 teamData: {},
                 selectedTeams: [],
@@ -334,8 +337,20 @@
             this.getTeams();
             this.getProfiles();
             this.setupEdit();
+            this.clearPasswordFields();
         },
         methods: {
+            clearPasswordFields() {
+                const clear = () => {
+                    this.userData.password = "";
+                    this.userData.confirmedPassword = "";
+                };
+
+                // Browsers can autofill a bit after mount/navigation, so clear again.
+                clear();
+                this.$nextTick(clear);
+                setTimeout(clear, 200);
+            },
             async validateEmailBackend() {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(this.userData.email.trim())) {
@@ -515,7 +530,10 @@
                 }
             },
             setupEdit() {
-                if (!this.isEdit) return;
+                if (!this.isEdit) {
+                    this.clearPasswordFields();
+                    return;
+                }
                 UserService.getUserByEmail(this.email).then((response) => {
                     if (response.error !== undefined) {
                         this.returnToTable();
@@ -526,8 +544,13 @@
                             icon: "CircleX",
                         });
                     }
-                    this.userData = response;
+                    this.userData = {
+                        ...response,
+                        password: "",
+                        confirmedPassword: "",
+                    };
                     this.selectedTeams = response.teams.map((t) => t.id);
+                    this.clearPasswordFields();
                 });
             },
             createTeam() {

@@ -5,7 +5,7 @@
             class="form-control form-control-sm"
             :id="name"
             :ref="name"
-            autocomplete="off"
+            :autocomplete="autocomplete"
             :name="name"
             :rules="rules"
             :model-value="modelValue"
@@ -43,6 +43,10 @@
             name: {
                 type: String,
                 required: true,
+            },
+            autocomplete: {
+                type: String,
+                default: "off",
             },
         },
         emits: ["update:modelValue"],
