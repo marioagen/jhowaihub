@@ -151,6 +151,27 @@
                             {{ $t("login.loading") }}
                         </a>
                     </div>
+
+                    <div
+                        v-if="subscribePlanUrl"
+                        class="text-center mt-2"
+                    >
+                        <small class="text-muted">
+                            {{ $t("login.noAccount") }}
+                            <a
+                                :href="subscribePlanUrl"
+                                target="_blank"
+                                rel="noopener"
+                                class="fw-bold text-decoration-none"
+                            >
+                                {{ $t("login.subscribePlan") }}
+                                <LucideIcon
+                                    icon="ArrowRight"
+                                    :size="14"
+                                />
+                            </a>
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -208,6 +229,9 @@
                 const theme =
                     this.$store.state.theme || localStorage.getItem("theme") || "css-theme-light";
                 return theme === "css-theme-dark" ? logoLight : logoDark;
+            },
+            subscribePlanUrl() {
+                return ENV_CONFIG?.VUE_APP_SUBSCRIBE_PLAN_URL || "";
             },
         },
         methods: {

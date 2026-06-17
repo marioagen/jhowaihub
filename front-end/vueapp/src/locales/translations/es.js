@@ -762,11 +762,13 @@ const spanish = {
         index: "Iniciar sesión",
         invalid: "Campos inválidos",
         loading: "Cargando...",
+        noAccount: "¿No tienes una cuenta?",
         password: "Contraseña",
         passwordPlaceholder: "••••••",
         submit: "Iniciar sesión",
         selectTenant: "Selecciona el tenant para continuar",
         sso: "Login con Microsoft",
+        subscribePlan: "Suscríbete a un plan",
         subtitle: "Accede a tu cuenta para gestionar documentos",
         tenantDatabaseNotReady:
             "El ambiente se está preparando. Inténtelo de nuevo en unos minutos.",

@@ -12,7 +12,8 @@ const ENV_CONFIG = (() => {
         VUE_APP_HOME_DOCS_URL: "",
         VUE_APP_WHATSAPP_LINK: "https://api.whatsapp.com/send/?phone=%2B5511918020002&text&type=phone_number&app_absent=0",
         VUE_APP_SHOW_WHATSAPP_LINK: true,
-        VUE_APP_MCP_IS_ACTIVE: true
+        VUE_APP_MCP_IS_ACTIVE: true,
+        VUE_APP_SUBSCRIBE_PLAN_URL: "https://site.qa.woopi.ai/planos.html"
     };
 })();
 
