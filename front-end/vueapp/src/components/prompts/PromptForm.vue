@@ -709,7 +709,7 @@
                         title: "prompts.title",
                         message: "prompts.emptyPromptError",
                         variant: "warning",
-                        icon: "AlertCircle",
+                        icon: "AlertTriangle",
                     });
                 }
                 this.isRefining = true;

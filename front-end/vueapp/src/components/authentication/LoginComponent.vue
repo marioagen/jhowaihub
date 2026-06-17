@@ -231,7 +231,7 @@
                         title: "login.index",
                         message: "login.invalid",
                         variant: "warning",
-                        icon: "CircleAlert",
+                        icon: "AlertTriangle",
                     });
                 }
 

@@ -672,7 +672,7 @@
                         title: "common.warning",
                         message: "flow.formFlow.dependenciesRequired",
                         variant: "warning",
-                        icon: "TriangleAlert",
+                        icon: "AlertTriangle",
                     });
                     return;
                 }

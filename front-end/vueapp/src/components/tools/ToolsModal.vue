@@ -328,7 +328,7 @@
                         title: "tools.index",
                         message: "tools.form.validatingConnector",
                         variant: "warning",
-                        icon: "CircleAlert",
+                        icon: "AlertTriangle",
                     });
                     let params = {
                         connectorUrl: this.values.connectorUrl,
@@ -412,7 +412,7 @@
                         title: "tools.index",
                         message: "tools.validationError",
                         variant: "warning",
-                        icon: "CircleAlert",
+                        icon: "AlertTriangle",
                     });
                 }
 
