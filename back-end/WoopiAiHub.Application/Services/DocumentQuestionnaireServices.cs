@@ -75,6 +75,9 @@ namespace WoopiAiHub.Application.Services
                 var model = _config["OpenAiSettings:Model"]!;
                 var apikey = _config["IndexerApiKey"]!;
 
+                var cards = await FindDocumentCardsAsync(documentQuestionnaireDto.IdDocument);
+                var workflowId = ExtractWorkflowId(cards);
+
                 foreach (var description in questionnaire.Questions.Select(u => u.Description))
                 {
                     var customQueryRequestDto =
@@ -92,11 +95,11 @@ namespace WoopiAiHub.Application.Services
                         documentQuestionnaireDto.IdDocument,
                         description,
                         headersDto.EmailCreator,
-                        isFromQuestionnaire: true);
+                        isFromQuestionnaire: true,
+                        workflowId);
                 }
 
-                await CreateAuditLogForDocumentCardsAsync(documentQuestionnaireDto.IdDocument,
-                    AuditCardActionType.InputQuestionnaire);
+                await CreateAuditLogForDocumentCardsAsync(cards, AuditCardActionType.InputQuestionnaire);
 
                 return true;
             }
@@ -133,13 +136,17 @@ namespace WoopiAiHub.Application.Services
                     customQueryRequestDto,
                     CancellationToken.None);
 
+                var cards = await FindDocumentCardsAsync(documentInputDto.Id);
+                var workflowId = ExtractWorkflowId(cards);
+
                 var textResponse = await ProcessCustomQueryExecutionResult(executionResult,
                     documentInputDto.Id,
                     documentInputDto.Input,
                     headersDto.EmailCreator,
-                    isFromQuestionnaire: false);
+                    isFromQuestionnaire: false,
+                    workflowId);
 
-                await CreateAuditLogForDocumentCardsAsync(documentInputDto.Id, AuditCardActionType.InputDocument);
+                await CreateAuditLogForDocumentCardsAsync(cards, AuditCardActionType.InputDocument);
 
                 return textResponse;
             }
@@ -157,7 +164,8 @@ namespace WoopiAiHub.Application.Services
             int id,
             string input,
             string emailCreator,
-            bool isFromQuestionnaire)
+            bool isFromQuestionnaire,
+            int? workflowId = null)
         {
             var userId = _userRepository.FindIdByEmail(emailCreator);
             var userIdOrNull = (userId == Guid.Empty) ? (Guid?)null : userId;
@@ -170,7 +178,7 @@ namespace WoopiAiHub.Application.Services
             foreach (var usage in result.Usage)
             {
                 await _usageDailyServices.AddByValuesAsync(MetricNames.Token, emailCreator, usage.Total_usage ?? 0,
-                    usage.Model);
+                    usage.Model, workflowId);
             }
 
             _documentHistoryServices.Create(documentHistoryForDb);
@@ -179,11 +187,22 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Returns all cards linked to the document together with their Step and Workflow navigation properties.
+        /// </summary>
+        private async Task<IReadOnlyList<Card>> FindDocumentCardsAsync(int documentId)
+            => await _cardServices.FindCardsByDocumentIdWithStepWorkflowAsync(documentId) ?? Array.Empty<Card>();
+
+        /// <summary>
+        /// Returns the first WorkflowId found among the document cards, or null when the document has no workflow context.
+        /// </summary>
+        private static int? ExtractWorkflowId(IReadOnlyList<Card> cards)
+            => cards.FirstOrDefault(c => c.Step?.WorkflowId != null)?.Step?.WorkflowId;
+
+        /// <summary>
         /// Creates audit log entries for all cards associated with the document (no-op when document has no cards).
         /// </summary>
-        private async Task CreateAuditLogForDocumentCardsAsync(int documentId, AuditCardActionType actionType)
+        private async Task CreateAuditLogForDocumentCardsAsync(IReadOnlyList<Card> cards, AuditCardActionType actionType)
         {
-            var cards = await _cardServices.FindCardsByDocumentIdWithStepWorkflowAsync(documentId) ?? Array.Empty<Card>();
             var cardWorkflows = cards.Where(c => c.Step != null).Select(c => (c.Id, c.Step!.WorkflowId, c.DocumentId)).ToList();
             if (cardWorkflows.Count > 0)
             {

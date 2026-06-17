@@ -797,7 +797,7 @@ namespace WoopiAiHub.UnitTests.Services
             _mocker.GetMock<IConfiguration>().Setup(c => c["PromptSettings:RefinementPrompt"]).Returns("Texto a ser convertido: {{Regra de negócio}}");
             _mocker.GetMock<ITenantCacheServices>().Setup(s => s.FindTenantAsync(tenantId)).ReturnsAsync(tenantInfo);
             _mocker.GetMock<IUsageDailyServices>()
-                .Setup(s => s.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null, It.IsAny<UsageDailyOrigin>()))
+                .Setup(s => s.AddByValuesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), null, UsageDailyOrigin.PromptRefinement))
                 .ReturnsAsync(true);
             _mocker.GetMock<IRagInvocationRouter>()
                 .Setup(a => a.ExecuteChatCompletionAsync(
@@ -814,6 +814,9 @@ namespace WoopiAiHub.UnitTests.Services
 
             //Assert
             Assert.Equal("Prompt refinado", result);
+            _mocker.GetMock<IUsageDailyServices>().Verify(
+                s => s.AddByValuesAsync(It.IsAny<string>(), email, It.IsAny<int>(), It.IsAny<string>(), null, UsageDailyOrigin.PromptRefinement),
+                Times.Once);
         }
 
         [Fact(DisplayName = "AiPromptRefinement should throw argument exception when tenant info is invalid")]

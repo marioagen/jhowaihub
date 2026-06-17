@@ -530,6 +530,16 @@ namespace WoopiAiHub.UnitTests.Fixture
             return faker;
         }
 
+        public static IReadOnlyList<Card> FindCardsWithWorkflowId(int workflowId = 99)
+        {
+            var step = new Step(1, DateTime.Now, workflowId, "step-name", 1, 1, 1);
+            var card = new Card(1, DateTime.Now, 1, 1, "card-name", 1, Guid.NewGuid())
+            {
+                Step = step
+            };
+            return new List<Card> { card };
+        }
+
         public static DocumentBatch FindValidDocumentBatch()
         {
             var faker = new Faker("pt_BR");
