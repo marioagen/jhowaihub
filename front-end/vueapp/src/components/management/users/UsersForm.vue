@@ -355,7 +355,6 @@
                     input.value = "";
                 });
 
-                // Keep fields clean without marking them as touched/invalid on load.
                 this.$refs.formRef?.resetForm({
                     values: {
                         userName: "",
