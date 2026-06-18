@@ -1414,6 +1414,8 @@ const spanish = {
             rejectSuccess: "Documentos rechazados correctamente.",
             rejectError: "No se pudieron rechazar los documentos seleccionados.",
             finalize: "Finalizar",
+            finalizeConfirmTitle: "Finalizar Documentos",
+            finalizeConfirmMessage: "¿Está seguro de que desea finalizar estos documentos?",
             finalizeSuccess: "Documentos finalizados correctamente.",
             finalizeError: "No se pudieron finalizar los documentos seleccionados.",
             deleteTitle: "Eliminar documentos",

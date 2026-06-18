@@ -252,7 +252,7 @@
                                         type="button"
                                         class="btn btn-success btn-sm d-inline-flex align-items-center gap-1"
                                         :disabled="isBulkFinalizing"
-                                        @click="finalizeRange"
+                                        @click="openBulkFinalizeConfirm"
                                     >
                                         <LucideIcon
                                             v-if="!isBulkFinalizing"
@@ -334,6 +334,18 @@
             :card-ids="selectedCardIds"
             @success="onBulkRejectSuccess"
         />
+        <ConfirmModal
+            id="bulk-finalize-confirm-modal"
+            ref="bulkFinalizeConfirmModalRef"
+            :isLoading="isBulkFinalizing"
+            :title="'workflow.bulk.finalizeConfirmTitle'"
+            :message="'workflow.bulk.finalizeConfirmMessage'"
+            :confirmText="'workflow.bulk.finalize'"
+            confirmVariant="success"
+            iconeName="CheckCircle"
+            iconVariant="success"
+            @confirm="finalizeRange"
+        />
     </div>
 </template>
 <script>
@@ -350,6 +362,7 @@
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import WorkflowAccordionComponent from "@/components/documentsHub/workflows/accordion/WorkflowAccordionComponent.vue";
     import DocumentRejectionModal from "@/components/analyze/modals/DocumentRejectionModal.vue";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import CardsServices from "@/services/cards/CardsServices";
     import StatusService from "@/services/status/StatusService";
     export default {
@@ -392,6 +405,7 @@
             KanbanBoard,
             WorkflowAccordionComponent,
             DocumentRejectionModal,
+            ConfirmModal,
         },
         computed: {
             hasList() {
@@ -534,6 +548,12 @@
                     this.isBulkAssigning = false;
                 }
             },
+            openBulkFinalizeConfirm() {
+                if (!this.canBulkFinalize || this.selectedCardIds.length === 0) {
+                    return;
+                }
+                this.$refs.bulkFinalizeConfirmModalRef?.open();
+            },
             async finalizeRange() {
                 if (!this.canBulkFinalize || this.selectedCardIds.length === 0 || !this.finalizeStatusId) {
                     return;
@@ -555,6 +575,7 @@
                         });
                         return;
                     }
+                    this.$refs.bulkFinalizeConfirmModalRef?.close();
                     this.$notify({
                         title: this.$t("common.success"),
                         message: this.$t("workflow.bulk.finalizeSuccess"),
