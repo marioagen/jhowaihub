@@ -1,17 +1,15 @@
 <template>
     <div class="input-group">
-        <Field
-            :type="show ? 'text' : 'password'"
-            class="form-control form-control-sm"
-            :id="name"
-            :ref="name"
-            :autocomplete="autocomplete"
-            :name="name"
-            :rules="rules"
-            :model-value="modelValue"
-            @update:model-value="$emit('update:modelValue', $event)"
-            :placeholder="placeholder"
-        />
+        <Field :type="show ? 'text' : 'password'"
+               class="form-control form-control-sm"
+               :id="name"
+               :ref="name"
+               autocomplete="off"
+               :name="name"
+               :rules="rules"
+               :model-value="modelValue"
+               @update:model-value="$emit('update:modelValue', $event)"
+               :placeholder="placeholder" />
         <span class="input-group-text" style="cursor: pointer" @click="show = !show">
             <LucideIcon :icon="show ? 'EyeOff' : 'Eye'" :size="12" />
         </span>
@@ -44,10 +42,6 @@
                 type: String,
                 required: true,
             },
-            autocomplete: {
-                type: String,
-                default: "off",
-            },
         },
         emits: ["update:modelValue"],
         data() {
@@ -61,6 +55,7 @@
     .input-group input {
         border-right-width: 0px;
     }
+
     .input-group span {
         border-left-width: 0px;
     }
