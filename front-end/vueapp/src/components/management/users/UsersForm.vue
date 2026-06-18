@@ -113,7 +113,6 @@
                                     :placeholder="$t('management.users.typePassword')"
                                     :rules="passwordRules"
                                     name="userPassword"
-                                    autocomplete="new-password"
                                     v-model="userData.password"
                                 />
                             </div>
@@ -128,7 +127,6 @@
                                     :placeholder="$t('management.users.typeConfirmedPassword')"
                                     :rules="confirmedPasswordRules"
                                     name="userConfirmedPassword"
-                                    autocomplete="new-password"
                                     v-model="userData.confirmedPassword"
                                 />
                             </div>
