@@ -651,6 +651,8 @@ const spanish = {
             none: "Selecciona un usuario",
         },
         workflowInput: "Buscar por documento, descripción o solicitante",
+        workflowManagementInput: "Buscar por nombre del workflow, descripción, equipo o usuario",
+        templateInput: "Buscar por nombre de plantilla, URL o método HTTP",
         workflowSelect: {
             none: "Selecciona un flujo de trabajo",
             withWorkflow: "Todos con workflow asociado",
@@ -890,6 +892,7 @@ const spanish = {
             passwordOptionalHint: "Deje en blanco para mantener la contraseña actual.",
             saveSuccess: "Usuario guardado con éxito",
             searchUsers: "Buscar usuarios...",
+            searchUsersPlaceholder: "Buscar por usuario, email, perfil o equipo",
             selectedUsers: "Usuarios seleccionados",
             subtitle: "Administra los usuarios del sistema",
             title: "Usuarios",
