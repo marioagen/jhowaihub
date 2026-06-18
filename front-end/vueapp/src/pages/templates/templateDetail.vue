@@ -803,9 +803,9 @@
             },
         },
         methods: {
-            toolTypeDisplayName(apiName) {
+            connectorsTypeDisplayName(apiName) {
                 if (!apiName) return "";
-                const key = "tools.typeDisplay." + apiName;
+                const key = "connectors.typeDisplay." + apiName;
                 const translated = this.$t(key);
                 return translated !== key ? translated : apiName;
             },
@@ -814,7 +814,7 @@
                     .then((tools) => {
                         if (tools && Array.isArray(tools)) {
                             this.autocompleteOptions = tools.map((tool) => {
-                                const translatedType = this.toolTypeDisplayName(tool.toolType);
+                                const translatedType = this.connectorsTypeDisplayName(tool.toolType);
                                 const sanitizedType = textHelper.sanitizeToolNameForVariable(
                                     tool.toolType
                                 );
