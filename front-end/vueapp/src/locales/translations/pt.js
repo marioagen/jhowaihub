@@ -748,11 +748,13 @@ const portuguese = {
         index: "Login",
         invalid: "Campos inválidos",
         loading: "Carregando...",
+        noAccount: "Não tem uma conta?",
         password: "Senha",
         passwordPlaceholder: "••••••",
         submit: "Entrar",
         selectTenant: "Selecione o tenant para continuar",
         sso: "Login com Microsoft",
+        subscribePlan: "Assine um plano",
         subtitle: "Acesse sua conta para gerenciar documentos",
         tenantDatabaseNotReady:
             "O ambiente está sendo preparado. Por favor, tente novamente em alguns minutos.",

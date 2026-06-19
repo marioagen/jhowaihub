@@ -755,11 +755,13 @@ const english = {
         index: "Login",
         invalid: "Invalid fields",
         loading: "Loading...",
+        noAccount: "Don't have an account?",
         password: "Password",
         passwordPlaceholder: "••••••",
         submit: "Sign in",
         selectTenant: "Select the tenant to continue",
         sso: "Login with Microsoft",
+        subscribePlan: "Subscribe to a plan",
         subtitle: "Access your account to manage documents",
         tenantDatabaseNotReady:
             "The environment is being prepared. Please try again in a few minutes.",
