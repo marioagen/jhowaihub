@@ -68,7 +68,11 @@ export default {
     getUserByEmail(email) {
         return api.get(`/User/${email}`)
             .then(({ data }) => {
-                return data;
+                return {
+                    ...data,
+                    password: "",
+                    confirmedPassword: "",
+                };
             })
             .catch((e) => {
                 logService.showMessage(e);

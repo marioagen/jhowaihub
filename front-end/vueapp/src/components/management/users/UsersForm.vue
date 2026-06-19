@@ -4,6 +4,7 @@
             <Form
                 ref="formRef"
                 v-slot="{ meta }"
+                autocomplete="off"
             >
                 <div class="row align-items-center">
                     <div class="col-6">
@@ -62,7 +63,7 @@
                                         class="form-control form-control-sm"
                                         id="userName"
                                         ref="userNameInput"
-                                        autocomplete="off"
+                                        autocomplete="new-username"
                                         name="userName"
                                         :rules="'required|min:3|max:150'"
                                         v-model="userData.name"
@@ -109,16 +110,11 @@
                                 >
                                     {{ $t("management.users.password") }}
                                 </label>
-                                <small
-                                    v-if="isEdit"
-                                    class="text-muted d-block mb-1"
-                                >
-                                    {{ $t("management.users.passwordOptionalHint") }}
-                                </small>
                                 <PasswordInputComponent
                                     :placeholder="$t('management.users.typePassword')"
                                     :rules="passwordRules"
                                     name="userPassword"
+                                    autocomplete="new-password"
                                     v-model="userData.password"
                                 />
                             </div>
@@ -133,6 +129,7 @@
                                     :placeholder="$t('management.users.typeConfirmedPassword')"
                                     :rules="confirmedPasswordRules"
                                     name="userConfirmedPassword"
+                                    autocomplete="new-password"
                                     v-model="userData.confirmedPassword"
                                 />
                             </div>
@@ -284,6 +281,7 @@
                     teams: [],
                     profiles: [],
                     password: "",
+                    confirmedPassword: "",
                 },
                 teamData: {},
                 selectedTeams: [],
@@ -334,8 +332,38 @@
             this.getTeams();
             this.getProfiles();
             this.setupEdit();
+            if (!this.isEdit) {
+                this.clearAutofilledCreateFields();
+                this.$nextTick(() => this.clearAutofilledCreateFields());
+                setTimeout(() => this.clearAutofilledCreateFields(), 150);
+                setTimeout(() => this.clearAutofilledCreateFields(), 700);
+            }
         },
         methods: {
+            clearAutofilledCreateFields() {
+                if (this.isEdit) return;
+
+                this.userData.name = "";
+                this.userData.email = "";
+                this.userData.password = "";
+                this.userData.confirmedPassword = "";
+
+                ["userName", "userEmail", "userPassword", "userConfirmedPassword"].forEach((id) => {
+                    const input = document.getElementById(id);
+                    if (!input) return;
+
+                    input.value = "";
+                });
+
+                this.$refs.formRef?.resetForm({
+                    values: {
+                        userName: "",
+                        userEmail: "",
+                        userPassword: "",
+                        userConfirmedPassword: "",
+                    },
+                });
+            },
             async validateEmailBackend() {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(this.userData.email.trim())) {
