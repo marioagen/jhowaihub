@@ -53,7 +53,7 @@
                     :key="toolType.id"
                     :value="toolType.id"
                 >
-                    {{ toolTypeDisplayName(toolType.name) }}
+                    {{ connectorTypeDisplayName(toolType.name) }}
                 </option>
             </select>
         </div>
@@ -74,9 +74,9 @@
             };
         },
         methods: {
-            toolTypeDisplayName(apiName) {
+            connectorTypeDisplayName(apiName) {
                 if (!apiName) return "";
-                const key = "tools.typeDisplay." + apiName;
+                const key = "connectors.typeDisplay." + apiName;
                 const translated = this.$t(key);
                 return translated !== key ? translated : apiName;
             },

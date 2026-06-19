@@ -64,7 +64,7 @@
     </div>
     <ConfirmModal
         id="deleteConfirm"
-        title="questions.removeTitle"
+        title="quizzes.removeTitle"
         message="common.thisActionCannotBeUndone"
         cancelText="common.cancel"
         confirmText="common.confirm"

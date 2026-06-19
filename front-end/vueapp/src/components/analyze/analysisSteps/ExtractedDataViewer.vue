@@ -236,7 +236,7 @@
         methods: {
             outputTypeLabel(field) {
                 if (!field || !field.outputType) return "";
-                const key = `tools.typeDisplay.${field.outputType}`;
+                const key = `connectors.typeDisplay.${field.outputType}`;
                 const translated = this.$t(key);
                 return translated && translated !== key ? translated : field.outputType;
             },

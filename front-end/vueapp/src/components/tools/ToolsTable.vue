@@ -12,8 +12,8 @@
     </button>
     <div>
         <TableComponent
-            modalName="tools.index"
-            emptyMessage="tools.notFound"
+            modalName="connectors.index"
+            emptyMessage="connectors.notFound"
             :data="table.data"
             :columns="table.columns"
             :isLoading="table.isLoading"
@@ -28,7 +28,7 @@
                 {{ data.row.outputData }}
             </template>
             <template #cell-toolType="{ data }">
-                {{ toolTypeDisplayName(data.row.toolType) }}
+                {{ connectorsTypeDisplayName(data.row.toolType) }}
             </template>
             <template #cell-actions="{ data }">
                 <ActionTableListComponent v-slot="{ actionClass }">
@@ -58,7 +58,7 @@
     />
     <ConfirmModal
         id="deleteConfirm"
-        title="tools.removeTitle"
+        title="connectors.removeTitle"
         message="common.thisActionCannotBeUndone"
         cancelText="common.cancel"
         confirmText="common.confirm"
@@ -92,11 +92,11 @@
                     { key: "name", label: "common.name" },
                     {
                         key: "toolType",
-                        label: "tools.type",
+                        label: "connectors.type",
                     },
                     {
                         key: "inputData",
-                        label: "tools.entry",
+                        label: "connectors.entry",
                     },
                     {
                         key: "outputData",
@@ -124,9 +124,9 @@
             isDeleting: false,
         }),
         methods: {
-            toolTypeDisplayName(apiName) {
+            connectorsTypeDisplayName(apiName) {
                 if (!apiName) return "";
-                const key = "tools.typeDisplay." + apiName;
+                const key = "connectors.typeDisplay." + apiName;
                 const translated = this.$t(key);
                 return translated !== key ? translated : apiName;
             },
@@ -178,15 +178,15 @@
                             this.$refs.DeleteDialog.close();
                             this.getTools();
                             this.$notify({
-                                title: "tools.index",
-                                message: "tools.removeSuccess",
+                                title: "connectors.index",
+                                message: "connectors.removeSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: "tools.index",
-                                message: "tools.removeError",
+                                title: "connectors.index",
+                                message: "connectors.removeError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });

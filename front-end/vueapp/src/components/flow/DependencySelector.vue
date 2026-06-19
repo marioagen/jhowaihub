@@ -219,17 +219,17 @@
                 }
                 return "";
             },
-            normalizeToolTypeForI18n(toolType) {
-                const raw = (toolType || "").toString();
+            normalizeConnectorTypeForI18n(connectorType) {
+                const raw = (connectorType || "").toString();
                 if (!raw) return "";
                 if (/^api$/i.test(raw)) return "Api";
                 if (/^n8n$/i.test(raw)) return "N8N";
                 return raw;
             },
-            localizeToolTypeDisplay(toolType) {
-                const key = this.normalizeToolTypeForI18n(toolType);
+            localizeConnectorTypeDisplay(connectorType) {
+                const key = this.normalizeConnectorTypeForI18n(connectorType);
                 if (!key) return "";
-                const path = `tools.typeDisplay.${key}`;
+                const path = `connectors.typeDisplay.${key}`;
                 if (this.$te(path)) return this.$t(path);
                 return toolType || "";
             },
@@ -248,7 +248,7 @@
                     return this.$t("flow.dependencies.optionQuiz", { name });
                 }
                 const toolName = stepTool.tool.name || "";
-                const typeLabel = this.localizeToolTypeDisplay(tt);
+                const typeLabel = this.localizeConnectorTypeDisplay(tt);
                 if (toolName && typeLabel) {
                     return `${toolName} (${typeLabel})`;
                 }

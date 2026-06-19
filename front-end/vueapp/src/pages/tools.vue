@@ -4,9 +4,9 @@
             <div class="mt-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h5 class="mb-0 fw-bold">{{ $t("tools.title") }}</h5>
+                        <h5 class="mb-0 fw-bold">{{ $t("connectors.title") }}</h5>
                         <p>
-                            <small class="text-muted">{{ $t("tools.subtitle") }}</small>
+                            <small class="text-muted">{{ $t("connectors.subtitle") }}</small>
                         </p>
                     </div>
                     <button
@@ -17,7 +17,7 @@
                             icon="Plus"
                             :size="17"
                         />
-                        {{ $t("tools.createBtn") }}
+                        {{ $t("connectors.createBtn") }}
                     </button>
                 </div>
                 <div class="card mb-3">

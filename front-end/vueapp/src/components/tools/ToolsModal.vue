@@ -22,7 +22,7 @@
                 <div class="row mb-3">
                     <div class="col">
                         <label>
-                            {{ $t("tools.form.name") }}
+                            {{ $t("connectors.form.name") }}
                         </label>
                         <Field
                             name="name"
@@ -48,7 +48,7 @@
                 <div class="row mb-3">
                     <div class="col">
                         <label>
-                            {{ $t("tools.form.types") }}
+                            {{ $t("connectors.form.types") }}
                         </label>
                         <Field
                             name="toolTypeId"
@@ -64,7 +64,7 @@
                                 @change="changeToolType"
                             >
                                 <option value="">
-                                    {{ $t("tools.form.typesSelect") }}
+                                    {{ $t("connectors.form.typesSelect") }}
                                 </option>
                                 <option
                                     v-for="(item, index) in typesList"
@@ -89,7 +89,7 @@
                 >
                     <div class="col-6">
                         <label>
-                            {{ $t("tools.form.connectorUrl") }}
+                            {{ $t("connectors.form.connectorUrl") }}
                         </label>
                         <Field
                             name="connectorUrl"
@@ -116,7 +116,7 @@
                     </div>
                     <div class="col-6">
                         <label>
-                            {{ $t("tools.form.connectorApiKey") }}
+                            {{ $t("connectors.form.connectorApiKey") }}
                         </label>
                         <Field
                             name="connectorApiKey"
@@ -145,7 +145,7 @@
                 <div class="row mb-3">
                     <div class="col-6">
                         <label>
-                            {{ $t("tools.form.entries") }}
+                            {{ $t("connectors.form.entries") }}
                         </label>
                         <Field
                             name="inputDataId"
@@ -160,7 +160,7 @@
                                 }"
                             >
                                 <option value="">
-                                    {{ $t("tools.form.entriesSelect") }}
+                                    {{ $t("connectors.form.entriesSelect") }}
                                 </option>
                                 <option
                                     v-for="(item, index) in inputsList"
@@ -193,11 +193,9 @@
                                     :value="true"
                                     id="isEditableInput"
                                 />
-                                <label
-                                    class="form-check-label ps-1"
-                                    for="isEditableInput"
-                                >
-                                    {{ $t("tools.form.entriesEditable") }}
+                                <label class="form-check-label ps-1"
+                                       for="isEditableInput">
+                                    {{ $t("connectors.form.entriesEditable") }}
                                 </label>
                             </div>
                         </Field>
@@ -219,7 +217,7 @@
                                 }"
                             >
                                 <option value="">
-                                    {{ $t("tools.form.outputSelect") }}
+                                    {{ $t("connectors.form.outputSelect") }}
                                 </option>
                                 <option
                                     v-for="(item, index) in outputsList"
@@ -309,10 +307,10 @@
         }),
         computed: {
             titleText() {
-                return this.isEdit ? "tools.formEdit.title" : "tools.formCreate.title";
+                return this.isEdit ? "connectors.formEdit.title" : "connectors.formCreate.title";
             },
             saveText() {
-                return this.isEdit ? "tools.editBtn" : "tools.createBtn";
+                return this.isEdit ? "connectors.editBtn" : "connectors.createBtn";
             },
             apiKeyRequired() {
                 return this.isEdit && this.isN8NConnectorToolType ? false : true;
@@ -325,8 +323,8 @@
             async validateConnector() {
                 if (this.values.connectorUrl && this.values.connectorApiKey) {
                     this.$notify({
-                        title: "tools.index",
-                        message: "tools.form.validatingConnector",
+                        title: "connectors.index",
+                        message: "connectors.form.validatingConnector",
                         variant: "warning",
                         icon: "AlertTriangle",
                     });
@@ -337,15 +335,15 @@
                     ToolsService.validateConnector(params).then((result) => {
                         if (result) {
                             return this.$notify({
-                                title: "tools.index",
-                                message: "tools.form.validConnector",
+                                title: "connectors.index",
+                                message: "connectors.form.validConnector",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: "tools.index",
-                                message: "tools.form.invalidConnector",
+                                title: "connectors.index",
+                                message: "connectors.form.invalidConnector",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
@@ -409,8 +407,8 @@
                 const result = await this.validate();
                 if (!result.valid) {
                     return this.$notify({
-                        title: "tools.index",
-                        message: "tools.validationError",
+                        title: "connectors.index",
+                        message: "connectors.validationError",
                         variant: "warning",
                         icon: "AlertTriangle",
                     });
@@ -429,23 +427,23 @@
                             this.$emit("reload");
                             this.close();
                             return this.$notify({
-                                title: "tools.index",
-                                message: "tools.createSuccess",
+                                title: "connectors.index",
+                                message: "connectors.createSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             if (result.error == 1) {
                                 this.$notify({
-                                    title: "tools.index",
-                                    message: "tools.duplicated",
+                                    title: "connectors.index",
+                                    message: "connectors.duplicated",
                                     variant: "danger",
                                     icon: "CircleX",
                                 });
                             } else {
                                 this.$notify({
-                                    title: "tools.index",
-                                    message: "tools.createError",
+                                    title: "connectors.index",
+                                    message: "connectors.createError",
                                     variant: "danger",
                                     icon: "CircleX",
                                 });
@@ -464,15 +462,15 @@
                             this.$emit("reload");
                             this.close();
                             return this.$notify({
-                                title: "tools.index",
-                                message: "tools.editSuccess",
+                                title: "connectors.index",
+                                message: "connectors.editSuccess",
                                 variant: "success",
                                 icon: "CircleCheckBig",
                             });
                         } else {
                             this.$notify({
-                                title: "tools.index",
-                                message: "tools.editError",
+                                title: "connectors.index",
+                                message: "connectors.editError",
                                 variant: "danger",
                                 icon: "CircleX",
                             });
