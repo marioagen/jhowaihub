@@ -36,7 +36,7 @@
                                 aria-labelledby="dropdownUser1"
                                 id="dropdown-menu-button"
                             >
-                                <li class="remove-hover mt-2">
+                                <li class="remove-hover mt-2 ms-2">
                                     <router-link
                                         class="dropdown-item px-2 my-2"
                                         :to="{
