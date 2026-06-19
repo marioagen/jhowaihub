@@ -1411,6 +1411,8 @@ const portuguese = {
             rejectSuccess: "Documentos reprovados com sucesso.",
             rejectError: "Não foi possível reprovar os documentos selecionados.",
             finalize: "Finalizar",
+            finalizeConfirmTitle: "Finalizar Documentos",
+            finalizeConfirmMessage: "Você tem certeza de que deseja finalizar estes documentos?",
             finalizeSuccess: "Documentos finalizados com sucesso.",
             finalizeError: "Não foi possível finalizar os documentos selecionados.",
             deleteTitle: "Excluir documentos",

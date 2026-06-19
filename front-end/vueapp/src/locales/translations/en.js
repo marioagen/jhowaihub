@@ -1415,6 +1415,8 @@ const english = {
             rejectSuccess: "Documents rejected successfully.",
             rejectError: "Could not reject the selected documents.",
             finalize: "Finalize",
+            finalizeConfirmTitle: "Finalize Documents",
+            finalizeConfirmMessage: "Are you sure you want to finalize these documents?",
             finalizeSuccess: "Documents finalized successfully.",
             finalizeError: "Could not finalize the selected documents.",
             deleteTitle: "Delete documents",
