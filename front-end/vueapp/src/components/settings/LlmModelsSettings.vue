@@ -534,8 +534,8 @@
         letter-spacing: 0.03em;
         padding: 0.15rem 0.45rem;
         border-radius: 999px;
-        background: var(--color-bg-warning-badge);
-        color: var(--color-text-warning-badge);
+        background: rgba(255, 224, 130, 0.2);
+        color: rgba(236, 109, 24, 1);
     }
 
     .llm-scope-card__callout {
