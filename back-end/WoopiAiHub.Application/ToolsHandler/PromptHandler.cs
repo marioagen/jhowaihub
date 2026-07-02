@@ -28,6 +28,7 @@ public class PromptHandler : IToolHandler
     private readonly IApiTemplateServices _apiTemplateServices;
     private readonly IJwtTokenServices _jwtTokenServices;
     private readonly OpenAiSettings _openAiSettings;
+    private readonly ILlmModelResolver _llmModelResolver;
 
     public PromptHandler(IOptions<MessageQueues> messageQueues,
                          IPromptServices promptServices,
@@ -35,7 +36,8 @@ public class PromptHandler : IToolHandler
                          IApiTemplateServices apiTemplateServices,
                          IOptions<OpenAiSettings> openAiSettings,
                          IOptions<McpSettings> mcpSettings,
-                         IJwtTokenServices jwtTokenServices)
+                         IJwtTokenServices jwtTokenServices,
+                         ILlmModelResolver llmModelResolver)
     {
         _messageQueues = messageQueues.Value;
         _promptServices = promptServices;
@@ -44,6 +46,7 @@ public class PromptHandler : IToolHandler
         _openAiSettings = openAiSettings.Value;
         _mcpSettings = mcpSettings.Value;
         _jwtTokenServices = jwtTokenServices;
+        _llmModelResolver = llmModelResolver;
     }
 
     /// <summary>
@@ -74,8 +77,11 @@ public class PromptHandler : IToolHandler
 
         var promptId = int.Parse(input!.Value);
         var promptDto = _promptServices.FindById(promptId);
+        var modelScope = promptDto!.EnableAccessToMcp ? LlmModelScope.Mcp : LlmModelScope.Agents;
+        var resolvedModel = await _llmModelResolver.ResolveModelAsync(automationServicesDto.Tenant, modelScope);
+        var resolvedApiVersion = await _llmModelResolver.ResolveApiVersionAsync(modelScope);
 
-        ResponseOpenAiRequestDto dto = await GenerateOpenAiResponseRequestDto(promptDto, fullText);
+        ResponseOpenAiRequestDto dto = await GenerateOpenAiResponseRequestDto(promptDto, fullText, resolvedModel);
 
         return new ExecutionMessageDto
         {
@@ -86,8 +92,8 @@ public class PromptHandler : IToolHandler
                 Data = new MetaDataAutomationDto(automationServicesDto.CardId, automationServicesDto.StepToolId),
                 ReferenceFile = automationServicesDto.ReferenceFile!,
                 Tenant = automationServicesDto.Tenant,
-                Model = tenantInfo!.LlmProvider == LlmProvider.AzureOpenAI ? _openAiSettings.Model : tenantInfo!.Model,
-                ApiVersion = _openAiSettings.ApiVersion,
+                Model = resolvedModel,
+                ApiVersion = resolvedApiVersion,
                 ApplicationId = tenantInfo!.AiGatewayApplicationId.Value.ToString(),
                 ApplicationKey = tenantInfo!.AiGatewayKey,
                 PromptRequest = dto,
@@ -103,11 +109,14 @@ public class PromptHandler : IToolHandler
     /// <param name="promptDto"></param>
     /// <param name="fullText"></param>
     /// <returns></returns>
-    private async Task<ResponseOpenAiRequestDto> GenerateOpenAiResponseRequestDto(PromptDto? promptDto, string fullText)
+    private async Task<ResponseOpenAiRequestDto> GenerateOpenAiResponseRequestDto(
+        PromptDto? promptDto,
+        string fullText,
+        string modelName)
     {
         var dto = new ResponseOpenAiRequestDto
         {
-            Model = _openAiSettings.Model,
+            Model = modelName,
             Input = new List<ResponseOpenAiRequestInputDto> {
                     new ResponseOpenAiRequestInputDto {
                         Type = OpenAiResponsesTypes.Message,
@@ -261,7 +270,7 @@ public class PromptHandler : IToolHandler
             var toolType = output.StepTool?.Tool?.ToolType?.Name;
             switch (toolType)
             {
-                case string t when string.Equals(t, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase):
+                case string t when HandlersTypes.IsTextExtractionTool(t):
                     TryAddOcrText(value, parts);
                     break;
                 case string t when string.Equals(t, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase):

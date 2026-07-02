@@ -27,6 +27,7 @@ import EditQuizz from "@/pages/managementQuizzes/quizzes/editQuizz.vue";
 import WorkflowPage from "@/pages/workflow/index.vue";
 import NewWorkflow from "@/pages/workflow/newWorkflow.vue";
 import EditWorkflow from "@/pages/workflow/editWorkflow.vue";
+import WorkflowStore from "@/pages/workflow/store.vue";
 
 import ToolsPage from "@/pages/tools.vue";
 import NewFlow from "@/pages/flows/newFlow.vue";
@@ -36,6 +37,8 @@ import PromptPage from "@/pages/prompts/index.vue";
 import PromptNew from "@/pages/prompts/newPrompt.vue";
 import PromptImport from "@/pages/prompts/import.vue";
 import HomePage from "@/pages/home.vue";
+import ChatPage from "@/pages/chat/index.vue";
+import SettingsPage from "@/pages/settings/index.vue";
 
 import TemplatePage from "@/pages/templates/index.vue";
 import TemplateDetail from "@/pages/templates/templateDetail.vue";
@@ -46,6 +49,7 @@ import AuditorPage from "@/pages/auditor.vue";
 import PromptSelector from "@/components/flow/PromptSelector.vue";
 
 import { hasPermission } from "@/utils/permissions";
+import { isMockMode } from "@/mock/mockConfig.js";
 
 function authenticate(to, from, next) {
     const userStr = window.localStorage.getItem("project");
@@ -108,6 +112,24 @@ const routes = [
         path: "/home",
         name: "Home",
         component: HomePage,
+        meta: {
+            layout: "default",
+        },
+        beforeEnter: authenticateBasic,
+    },
+    {
+        path: "/chat",
+        name: "Chat",
+        component: ChatPage,
+        meta: {
+            layout: "default",
+        },
+        beforeEnter: authenticateBasic,
+    },
+    {
+        path: "/settings",
+        name: "Settings",
+        component: SettingsPage,
         meta: {
             layout: "default",
         },
@@ -318,6 +340,17 @@ const routes = [
         beforeEnter: authenticate,
     },
     {
+        path: "/workflow/store",
+        name: "WorkflowStore",
+        component: WorkflowStore,
+        meta: {
+            layout: "default",
+            module: "WorkflowManagement",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
         path: "/tools",
         name: "Tools",
         component: ToolsPage,
@@ -467,4 +500,19 @@ const router = createRouter({
     history: createWebHashHistory(),
     routes,
 });
+
+router.beforeEach((to, from, next) => {
+    if (!isMockMode() || to.name !== "Login") {
+        return next();
+    }
+
+    const userStr = window.localStorage.getItem("project");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (user?.isLogged === true) {
+        return next({ name: "Home" });
+    }
+
+    return next();
+});
+
 export default router;

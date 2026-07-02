@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Domain.Models
 {
@@ -25,6 +26,9 @@ namespace WoopiAiHub.Domain.Models
         [Column("Enable", TypeName = "bit")]
         public bool Enable { get; private set; } = true;
 
+        [Column("Extraction_Mode", TypeName = "varchar(20)")]
+        public string? ExtractionMode { get; private set; }
+
         public virtual ICollection<DocumentHistory> DocumentHistories { get; set; }
         public virtual DocumentNormalized? DocumentNormalized { get; set; }
         public virtual ICollection<Card> Cards { get; set; }
@@ -39,7 +43,8 @@ namespace WoopiAiHub.Domain.Models
                        int id,
                        List<Workflow> workflow,
                        DateTime created,
-                       bool hasBatch = false) : base(id, created)
+                       bool hasBatch = false,
+                       string? extractionMode = null) : base(id, created)
         {
             Name = name;
             Description = description;
@@ -48,6 +53,17 @@ namespace WoopiAiHub.Domain.Models
             Workflows = workflow;
             EmailCreator = emailCreator;
             HasBatch = hasBatch;
+            ExtractionMode = NormalizeExtractionMode(extractionMode);
+        }
+
+        private static string? NormalizeExtractionMode(string? extractionMode)
+        {
+            if (string.IsNullOrWhiteSpace(extractionMode))
+                return null;
+
+            return DocumentExtractionModes.IsValid(extractionMode)
+                ? extractionMode
+                : null;
         }
 
         public void Disable()

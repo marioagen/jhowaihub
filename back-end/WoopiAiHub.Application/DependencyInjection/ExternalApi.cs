@@ -49,6 +49,7 @@ namespace WoopiAiHub.Application.DependencyInjection
 
             services.Configure<EncryptionSettings>(configuration.GetSection("EncryptionSettings"));
             services.Configure<PromptSettings>(configuration.GetSection("PromptSettings"));
+            services.Configure<WorkflowTemplateSettings>(configuration.GetSection("WorkflowTemplateSettings"));
 
             return services;
         }

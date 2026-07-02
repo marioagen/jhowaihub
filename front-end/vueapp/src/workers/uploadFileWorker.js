@@ -78,6 +78,9 @@ async function uploadChunk(
     formData.append("emailCreator", additionalData.emailCreator);
     formData.append("isLastFile", isLastFile);
     formData.append("isDocumentBatch", isDocumentBatch);
+    if (additionalData.extractionMode) {
+        formData.append("extractionMode", additionalData.extractionMode);
+    }
     additionalData.workflows.forEach((id) => formData.append("workflows", id));
     const fullURL = url + "/api/Document/UploadByChunks";
 

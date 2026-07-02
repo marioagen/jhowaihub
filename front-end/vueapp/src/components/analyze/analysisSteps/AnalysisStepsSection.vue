@@ -5,12 +5,16 @@
             v-if="documentData && documentData.canAnswer"
         />
 
-        <StepsViewer
+        <div
             v-if="documentData && documentData.steps && documentData.steps.length > 0"
-            :steps="documentData.steps"
-            :initial-step-id="documentData.lastProcessedStepId"
-            @step-changed="handleStepChange"
-        />
+            class="step-analysis-container__stepper"
+        >
+            <StepsViewer
+                :steps="documentData.steps"
+                :initial-step-id="documentData.lastProcessedStepId"
+                @step-changed="handleStepChange"
+            />
+        </div>
 
         <ExtractedDataViewer
             v-if="currentStepData"
@@ -137,8 +141,16 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        overflow-y: auto;
-        height: 100%;
+    }
+
+    .step-analysis-container__stepper {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        flex-shrink: 0;
+        background: var(--color-bg-body-content, #fff);
+        padding-bottom: 0.25rem;
+        box-shadow: 0 4px 6px -4px rgba(0, 0, 0, 0.12);
     }
 
     @media (max-width: 768px) {

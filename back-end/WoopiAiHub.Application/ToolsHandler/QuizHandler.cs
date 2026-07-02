@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Messaging;
 using WoopiAiHub.Domain.DTOs.Request.Automation;
+using WoopiAiHub.Domain.Enum;
 using WoopiAiHub.Domain.Interfaces.Handlers;
 using WoopiAiHub.Domain.Interfaces.Repository.Cache;
 using WoopiAiHub.Domain.Interfaces.Services;
@@ -20,13 +21,20 @@ namespace WoopiAiHub.Application.ToolsHandler
         private readonly MessageQueues _messageQueues;
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly IQuestionnaireServices _quizServices;
+        private readonly ILlmModelResolver _llmModelResolver;
         private readonly IConfiguration _config;
 
-        public QuizHandler(ITenantCacheServices tenantCacheServices, IOptions<MessageQueues> messageQueues, IQuestionnaireServices quizServices, IConfiguration config)
+        public QuizHandler(
+            ITenantCacheServices tenantCacheServices,
+            IOptions<MessageQueues> messageQueues,
+            IQuestionnaireServices quizServices,
+            ILlmModelResolver llmModelResolver,
+            IConfiguration config)
         {
             _tenantCacheServices = tenantCacheServices;
             _messageQueues = messageQueues.Value;
             _quizServices = quizServices;
+            _llmModelResolver = llmModelResolver;
             _config = config;
         }
 
@@ -40,8 +48,8 @@ namespace WoopiAiHub.Application.ToolsHandler
             var quizId = int.Parse(input!.Value);
             var quizDto = _quizServices.FindById(quizId);
             var apikey = _config["IndexerApiKey"]!;
-            var apiVersion = _config["ChatCompletionSettings:ApiVersion"]!;
-            var model = _config["OpenAiSettings:Model"]!;
+            var apiVersion = await _llmModelResolver.ResolveApiVersionAsync(LlmModelScope.Questionnaires);
+            var model = await _llmModelResolver.ResolveModelAsync(automationServicesDto.Tenant, LlmModelScope.Questionnaires);
 
             return new ExecutionMessageDto
             {

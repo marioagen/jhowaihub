@@ -2,9 +2,31 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 import fs from 'node:fs';
-const isDev = process.env.NODE_ENV === 'development';
 
-export default defineConfig({
+const prototypeAppsettingsPath = path.resolve('public/config/appsettings.prototype.js');
+
+function copyPrototypeAppsettingsPlugin() {
+    return {
+        name: 'copy-prototype-appsettings',
+        closeBundle() {
+            const target = path.resolve('dist/config/appsettings.js');
+
+            if (!fs.existsSync(prototypeAppsettingsPath)) {
+                throw new Error('Missing public/config/appsettings.prototype.js for mock build.');
+            }
+
+            fs.mkdirSync(path.dirname(target), { recursive: true });
+            fs.copyFileSync(prototypeAppsettingsPath, target);
+            console.info('[prototype] dist/config/appsettings.js configured for mock deployment');
+        },
+    };
+}
+
+export default defineConfig(({ mode }) => {
+const isDev = process.env.NODE_ENV === 'development';
+const isMockBuild = mode === 'mock';
+
+return {
     build: {
             assetsDir: 'assets',
             sourcemap: false,
@@ -26,7 +48,8 @@ export default defineConfig({
     base: './',
     plugins: [
         vue(),
-    ],
+        isMockBuild && copyPrototypeAppsettingsPlugin(),
+    ].filter(Boolean),
     server: (() => {
         if (!isDev) return undefined;
 
@@ -62,4 +85,5 @@ export default defineConfig({
         __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false'
     },
     logLevel: 'info'
-})
+};
+});

@@ -5,6 +5,12 @@
             id="navbarSupportedContent"
         >
             <div class="navbar-main-area d-flex align-items-center flex-grow-1 ps-4">
+                <span
+                    v-if="isMockMode"
+                    class="badge bg-warning text-dark me-2"
+                >
+                    Protótipo (mock)
+                </span>
                 <span class="badge bg-light text-dark border">{{ this.selectedTenant }}</span>
                 <div class="navbar-right-group d-flex align-items-center gap-1 pe-2 ms-auto">
                     <NavbarNotificationComponent />
@@ -26,25 +32,62 @@
                                     :alt="$t('common.profileImageAlt')"
                                     width="32"
                                     height="32"
-                                    class="rounded-circle me-2"
+                                    class="rounded-circle me-2 navbar-user-photo"
                                     v-if="profileImage !== ''"
                                 />
+                                <span
+                                    v-else
+                                    class="navbar-user-avatar rounded-circle me-2"
+                                    aria-hidden="true"
+                                >
+                                    {{ userInitials }}
+                                </span>
                                 {{ setBreakWord(user) }}
                             </a>
                             <ul
-                                class="dropdown-menu dropdown-menu-sidebar text-small shadow menu-right"
+                                class="dropdown-menu dropdown-menu-sidebar text-small shadow menu-right user-profile-menu"
                                 aria-labelledby="dropdownUser1"
                                 id="dropdown-menu-button"
                             >
-                                <li class="remove-hover mt-2 ms-2">
+                                <li>
+                                    <a
+                                        class="dropdown-item user-profile-menu__item"
+                                        href="#"
+                                        @click.prevent
+                                    >
+                                        <LucideIcon
+                                            icon="User"
+                                            :size="16"
+                                        />
+                                        {{ $t("common.myAccount") }}
+                                    </a>
+                                </li>
+                                <li>
                                     <router-link
-                                        class="dropdown-item px-2 my-2"
+                                        class="dropdown-item user-profile-menu__item"
+                                        :to="{ name: 'Settings' }"
+                                        :title="$t('pages.settings')"
+                                    >
+                                        <LucideIcon
+                                            icon="Settings"
+                                            :size="16"
+                                        />
+                                        {{ $t("pages.settings") }}
+                                    </router-link>
+                                </li>
+                                <li><hr class="dropdown-divider user-profile-menu__divider" /></li>
+                                <li>
+                                    <router-link
+                                        class="dropdown-item user-profile-menu__item user-profile-menu__item--danger"
                                         :to="{
                                             name: 'Logout',
                                         }"
                                         :title="$t('common.signOut')"
                                     >
-                                        <LucideIcon icon="LogOut" />
+                                        <LucideIcon
+                                            icon="LogOut"
+                                            :size="16"
+                                        />
                                         {{ $t("common.signOut") }}
                                     </router-link>
                                 </li>
@@ -63,6 +106,7 @@
     import LanguageComponent from "@/components/layout/LanguageComponent.vue";
     import NavbarNotificationComponent from "@/components/layout/NavbarNotificationComponent.vue";
     import ThemeSwitchComponent from "@/components/layout/ThemeSwitchComponent.vue";
+    import { isMockMode } from "@/mock/mockConfig.js";
 
     export default {
         name: "NavBarComponent",
@@ -84,6 +128,7 @@
                 profileImage: "",
                 user: this.$store.state.userProfile.name,
                 selectedTenant: null,
+                isMockMode: isMockMode(),
             };
         },
         methods: {
@@ -98,6 +143,9 @@
                 }
             },
             getProfileImage() {
+                if (isMockMode()) {
+                    return;
+                }
                 axios
                     .get("https://graph.microsoft.com/v1.0/me/photos/48x48/$value", {
                         headers: {
@@ -136,6 +184,24 @@
                 const first = splits[0]?.[0] || "";
                 const last = splits[splits.length - 1]?.[0] || "";
 
+                return (first + last).toUpperCase();
+            },
+            userInitials() {
+                const displayName = (this.user || "").trim();
+                if (!displayName) {
+                    return this.initials;
+                }
+
+                const parts = displayName.split(/\s+/).filter(Boolean);
+                if (parts.length === 1) {
+                    const name = parts[0];
+                    return (
+                        (name[0] || "").toUpperCase() + (name[name.length - 1] || "").toUpperCase()
+                    );
+                }
+
+                const first = parts[0][0] || "";
+                const last = parts[parts.length - 1][0] || "";
                 return (first + last).toUpperCase();
             },
         },
@@ -255,7 +321,62 @@
     }
 
     #dropdown-menu-button {
-        margin-top: 1rem !important;
+        margin-top: 0.65rem !important;
+    }
+
+    .navbar-user-photo {
+        object-fit: cover;
+    }
+
+    .navbar-user-avatar {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--color-bg-btn-primary);
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        flex-shrink: 0;
+    }
+
+    .user-profile-menu {
+        min-width: 11.5rem;
+        padding: 0.35rem 0;
+        border: 1px solid var(--color-border-form-control);
+        border-radius: 0.55rem;
+        overflow: hidden;
+    }
+
+    .user-profile-menu__item {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.55rem 0.95rem !important;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--color-body-content) !important;
+        background-color: transparent !important;
+    }
+
+    .user-profile-menu__item:hover,
+    .user-profile-menu__item:focus {
+        background-color: var(--color-bg-sidebar-li-selected) !important;
+        color: var(--color-body-content) !important;
+    }
+
+    .user-profile-menu__item--danger,
+    .user-profile-menu__item--danger:hover,
+    .user-profile-menu__item--danger:focus {
+        color: #dc3545 !important;
+    }
+
+    .user-profile-menu__divider {
+        margin: 0.25rem 0;
+        border-color: var(--color-border-form-control);
+        opacity: 1;
     }
 
     @media (max-width: 309px) {

@@ -1,6 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 import logService from "@/services/log/logService.js";
 import store from "@/store";
+import { isMockMode } from "@/mock/mockConfig.js";
 
 const RECONNECT_INTERVALS_MS = [0, 2000, 5000, 10000, 20000, 30000, 60000];
 
@@ -24,6 +25,9 @@ class SignalRService {
     }
 
     async startConnection() {
+        if (isMockMode()) {
+            return;
+        }
         this._intentionalStop = false;
         if (this._isStarting || this._isConnectedOrConnecting()) return;
         this._isStarting = true;

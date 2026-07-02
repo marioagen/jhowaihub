@@ -121,11 +121,12 @@ namespace WoopiAiHub.Application.Services.Automation
                 externalFileUploadDto.FileName,
                 string.Empty,
                 externalFileUploadDto.FileReference,
-                (int)Domain.Enum.DocumentStatus.NotAnalyzed,
+                Domain.Enum.DocumentStatus.NotAnalyzed,
                 externalFileUploadDto.Email,
                 0,
                 [workflow],
-                DateTime.Now
+                DateTime.Now,
+                extractionMode: externalFileUploadDto.ExtractionMode
             );
         }
     }

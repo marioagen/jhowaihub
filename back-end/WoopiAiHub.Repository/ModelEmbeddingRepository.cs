@@ -35,5 +35,10 @@ namespace WoopiAiHub.Repository
         {
             return await _context.ModelEmbeddings.AsNoTracking().Where(x => names.Contains(x.Name)).ToListAsync();
         }
+
+        public async Task<IReadOnlyList<ModelEmbedding>> FindAllAsync()
+        {
+            return await _context.ModelEmbeddings.AsNoTracking().OrderBy(x => x.Name).ToListAsync();
+        }
     }
 }

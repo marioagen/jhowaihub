@@ -2,7 +2,7 @@
     <div class="kanban-board-container">
         <div class="d-flex flex-nowrap">
             <div
-                class="col-3 kanban-col me-3"
+                class="kanban-col me-3"
                 v-for="step in stepsList"
                 :key="step.id"
             >
@@ -207,26 +207,33 @@
 <style scoped>
     .kanban-board-container {
         height: 100%;
-        width: 100%;
+        min-height: 0;
+        width: max-content;
+        min-width: 100%;
         padding: 0.5rem 0;
-        overflow: visible;
     }
 
     .kanban-board-container > .d-flex {
         height: 100%;
+        min-height: 0;
+        width: max-content;
+        min-width: 100%;
         align-items: stretch;
     }
 
     .kanban-col {
         height: 100%;
+        min-height: 0;
         display: flex;
         flex-direction: column;
-        flex-shrink: 0;
-        min-width: 0;
+        flex: 0 0 280px;
+        width: 280px;
+        max-width: 280px;
     }
 
     .kanban-column-card {
         height: 100%;
+        min-height: 0;
         display: flex;
         flex-direction: column;
         min-width: 0;

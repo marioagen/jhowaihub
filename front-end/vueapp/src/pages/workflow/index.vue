@@ -13,16 +13,28 @@
                             </small>
                         </p>
                     </div>
-                    <button
-                        class="btn btn-primary btn-sm"
-                        @click="redirectToForm"
-                    >
+                    <div class="d-flex gap-2">
+                        <button
+                            class="btn btn-outline-primary btn-sm"
+                            @click="redirectToStore"
+                        >
+                            <LucideIcon
+                                icon="Store"
+                                :size="17"
+                            />
+                            {{ $t("workflow.storeBrowse") }}
+                        </button>
+                        <button
+                            class="btn btn-primary btn-sm"
+                            @click="redirectToForm"
+                        >
                         <LucideIcon
                             icon="Plus"
                             :size="17"
                         />
                         {{ $t("workflow.createBtn") }}
-                    </button>
+                        </button>
+                    </div>
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
@@ -63,6 +75,9 @@
             },
             redirectToForm() {
                 this.$router.push({ name: "NewWorkflow" });
+            },
+            redirectToStore() {
+                this.$router.push({ name: "WorkflowStore" });
             },
             getTeams() {
                 TeamsService.getTeamList().then((response) => {

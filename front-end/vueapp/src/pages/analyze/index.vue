@@ -477,9 +477,11 @@
 
     #docHistory {
         overflow-y: auto;
+        overflow-x: hidden;
         max-height: calc(100vh - 200px);
         min-height: 300px;
         height: auto !important;
+        -webkit-overflow-scrolling: touch;
     }
 
     @media (min-width: 320px) and (max-width: 767px) {

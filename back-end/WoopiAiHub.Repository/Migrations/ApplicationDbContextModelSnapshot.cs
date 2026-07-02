@@ -335,6 +335,11 @@ namespace WoopiAiHub.Repository.Migrations
                         .HasDefaultValue(true)
                         .HasColumnName("Enable");
 
+                    b.Property<string>("ExtractionMode")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("Extraction_Mode");
+
                     b.Property<bool>("HasBatch")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -1136,6 +1141,31 @@ namespace WoopiAiHub.Repository.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Teams", (string)null);
+                });
+
+            modelBuilder.Entity("WoopiAiHub.Domain.Models.TenantLlmModelSetting", b =>
+                {
+                    b.Property<string>("Scope")
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Scope");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("ModelName");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("UpdatedAt");
+
+                    b.Property<string>("UpdatedByEmail")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("UpdatedByEmail");
+
+                    b.HasKey("Scope");
+
+                    b.ToTable("TenantLlmModelSettings", (string)null);
                 });
 
             modelBuilder.Entity("WoopiAiHub.Domain.Models.Tool", b =>

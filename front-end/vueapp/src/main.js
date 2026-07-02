@@ -1,5 +1,7 @@
 import "./versionCheck.js";
 import "@/assets/css/global.css";
+import { isMockMode } from "@/mock/mockConfig.js";
+import { bootstrapMockSession } from "@/mock/mockBootstrap.js";
 import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
@@ -24,6 +26,11 @@ import "@vueform/multiselect/themes/default.css";
 const savedTheme = localStorage.getItem("theme");
 const themeClass = savedTheme === "css-theme-dark" ? "css-theme-dark" : "css-theme-light";
 document.documentElement.className = themeClass;
+
+if (isMockMode()) {
+    document.documentElement.dataset.mockMode = "true";
+    bootstrapMockSession();
+}
 
 const app = createApp(App);
 app.use(FloatingVue);

@@ -69,6 +69,15 @@
                         labelKey: "common.home",
                     },
                     {
+                        activeKey: "Chat",
+                        to: "/chat",
+                        icon: {
+                            name: "MessageCircleMore",
+                            color: "#0d6efd",
+                        },
+                        labelKey: "pages.chat",
+                    },
+                    {
                         activeKey: "DocumentList",
                         to: "/management",
                         icon: {

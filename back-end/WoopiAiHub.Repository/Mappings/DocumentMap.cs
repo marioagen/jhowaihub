@@ -44,6 +44,10 @@ namespace WoopiAiHub.Repository.Mappings
                 .HasDefaultValue(true)
                 .IsRequired();
 
+            builder.Property(u => u.ExtractionMode)
+                .HasMaxLength(20)
+                .HasColumnName("Extraction_Mode");
+
             builder.HasQueryFilter(d => d.Enable);
 
             builder.HasMany(u => u.DocumentHistories)

@@ -151,6 +151,30 @@
                                         </a>
                                     </div>
                                 </div>
+                                <div class="mb-3">
+                                    <label
+                                        class="form-label"
+                                        for="extractionModeId"
+                                    >
+                                        {{ $t("documents.upload.extractionMode") }}
+                                    </label>
+                                    <select
+                                        id="extractionModeId"
+                                        class="form-select form-select-sm"
+                                        v-model="extractionMode"
+                                    >
+                                        <option
+                                            v-for="mode in extractionModeOptions"
+                                            :key="mode.value"
+                                            :value="mode.value"
+                                        >
+                                            {{ mode.label }}
+                                        </option>
+                                    </select>
+                                    <div class="text-muted small mt-1">
+                                        {{ $t("documents.upload.extractionModeHint") }}
+                                    </div>
+                                </div>
                                 <div
                                     class="mb-3 team-selector-container rounded p-3"
                                     :class="{
@@ -365,6 +389,7 @@
     import GlobalEventService from "@/services/globalEventService";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
+    import DocumentExtractionMode from "@/constants/DocumentExtractionMode";
 
     export default {
         name: "DocumentUpload",
@@ -412,6 +437,7 @@
                 selectedWorkflows: [],
                 hasError: true,
                 isDocumentsBatch: false,
+                extractionMode: DocumentExtractionMode.Auto,
             };
         },
         components: {
@@ -552,6 +578,10 @@
                         emailCreator: this.$store.state.userProfile.login,
                         filesNames: filesNames,
                         workflows: this.selectedWorkflows.slice(),
+                        extractionMode:
+                            this.extractionMode !== DocumentExtractionMode.Auto
+                                ? this.extractionMode
+                                : null,
                     };
 
                     return this.readFileAsArrayBuffer(file).then((arrayBuffer) => {
@@ -657,6 +687,26 @@
             },
         },
         computed: {
+            extractionModeOptions() {
+                return [
+                    {
+                        value: DocumentExtractionMode.Auto,
+                        label: this.$t("flow.parser.modes.Auto"),
+                    },
+                    {
+                        value: DocumentExtractionMode.Native,
+                        label: this.$t("flow.parser.modes.Native"),
+                    },
+                    {
+                        value: DocumentExtractionMode.Multimodal,
+                        label: this.$t("flow.parser.modes.Multimodal"),
+                    },
+                    {
+                        value: DocumentExtractionMode.ForceOcr,
+                        label: this.$t("flow.parser.modes.ForceOcr"),
+                    },
+                ];
+            },
             filtersWorkflowList() {
                 if (!this.searchTerm) {
                     return this.workflowsList;

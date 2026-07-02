@@ -1,0 +1,225 @@
+{
+  "workflows": [
+    {
+      "schemaVersion": "1.1",
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Análise Documental Básica",
+      "description": "Esteira comercial para extração de texto (OCR) e análise por agente de IA. Ideal para contratos, relatórios e documentos escaneados.",
+      "category": "Documentos",
+      "version": "1.0.0",
+      "created": "2026-01-15T10:00:00Z",
+      "teamNames": ["Admin"],
+      "teamCodes": ["ADMIN"],
+      "requiredSecrets": [],
+      "steps": [
+        {
+          "order": 1,
+          "name": "Análise inicial",
+          "profileName": "Admin",
+          "profileCode": "ADMIN",
+          "statusName": "AwaitingAnalysis",
+          "statusCode": "AWAITING_ANALYSIS",
+          "stepTools": [
+            {
+              "order": 1,
+              "toolType": "OCR",
+              "positionX": 100,
+              "positionY": 200,
+              "dependencies": [],
+              "parameters": []
+            },
+            {
+              "order": 2,
+              "toolType": "Prompt",
+              "positionX": 400,
+              "positionY": 200,
+              "dependencies": [
+                { "stepOrder": 1, "stepToolOrder": 1 }
+              ],
+              "parameters": [
+                {
+                  "value": "prompt-analise-basica",
+                  "requiredFile": false
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "prompts": [
+        {
+          "ref": "prompt-analise-basica",
+          "name": "Análise Documental Básica",
+          "description": "Agente para resumo e extração de informações principais de documentos.",
+          "text": "Você é um analista documental especializado.\n\nAnalise o texto extraído do documento e produza:\n1. Um resumo objetivo (máximo 3 parágrafos)\n2. Tipo provável do documento\n3. Principais entidades mencionadas (pessoas, empresas, datas, valores)\n4. Pontos de atenção ou inconsistências\n\nResponda em português, de forma clara e estruturada.",
+          "enableAccessToMcp": false
+        }
+      ],
+      "apiTemplates": []
+    },
+    {
+      "schemaVersion": "1.1",
+      "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "name": "Pipeline OCR + Parser Nativo",
+      "description": "Esteira com extração nativa de PDF (Parser) e consolidação por agente. Recomendada para PDFs digitais com texto selecionável.",
+      "category": "Documentos",
+      "version": "1.0.0",
+      "created": "2026-02-01T10:00:00Z",
+      "teamNames": ["Admin"],
+      "teamCodes": ["ADMIN"],
+      "requiredSecrets": [],
+      "steps": [
+        {
+          "order": 1,
+          "name": "Extração e consolidação",
+          "profileName": "IA",
+          "profileCode": "IA",
+          "statusName": "AwaitingAnalysis",
+          "statusCode": "AWAITING_ANALYSIS",
+          "stepTools": [
+            {
+              "order": 1,
+              "toolType": "Parser",
+              "positionX": 80,
+              "positionY": 180,
+              "dependencies": [],
+              "parameters": [
+                {
+                  "value": "Native",
+                  "requiredFile": false
+                }
+              ]
+            },
+            {
+              "order": 2,
+              "toolType": "Prompt",
+              "positionX": 380,
+              "positionY": 180,
+              "dependencies": [
+                { "stepOrder": 1, "stepToolOrder": 1 }
+              ],
+              "parameters": [
+                {
+                  "value": "prompt-consolidacao",
+                  "requiredFile": false
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "prompts": [
+        {
+          "ref": "prompt-consolidacao",
+          "name": "Consolidação de Conteúdo",
+          "description": "Consolida e estrutura o texto extraído nativamente do PDF.",
+          "text": "Você recebeu o texto extraído nativamente de um PDF digital.\n\nOrganize o conteúdo em seções lógicas, remova artefatos de formatação e produza um relatório estruturado com:\n- Título inferido\n- Seções identificadas\n- Resumo executivo\n- Dados relevantes em formato de lista\n\nMantenha fidelidade ao conteúdo original.",
+          "enableAccessToMcp": false
+        }
+      ],
+      "apiTemplates": []
+    },
+    {
+      "schemaVersion": "1.1",
+      "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+      "name": "Lab: Secrets & Códigos Canônicos",
+      "description": "Esteira de validação para importação cross-tenant. Testa resolução por profileCode/statusCode (IA + WAITING_FOR_APPROVAL), modal de credenciais na loja e recriação de ApiTemplate com secrets substituídos. Ao importar, informe valores de exemplo: Bearer test-token-lab-12345678, api_key=lab-api-key-12345678, client_secret=lab-client-secret-12345678.",
+      "category": "Validação",
+      "version": "1.0.0",
+      "created": "2026-06-25T12:00:00Z",
+      "teamNames": ["Admin"],
+      "teamCodes": ["ADMIN"],
+      "requiredSecrets": [
+        "api_validacao_webhook_body_client_secret",
+        "api_validacao_webhook_header_bearer",
+        "api_validacao_webhook_header_x_api_key",
+        "api_validacao_webhook_query_api_key"
+      ],
+      "steps": [
+        {
+          "order": 1,
+          "name": "Chamada API autenticada",
+          "profileName": "IA",
+          "profileCode": "IA",
+          "statusName": "WaitingForApproval",
+          "statusCode": "WAITING_FOR_APPROVAL",
+          "stepTools": [
+            {
+              "order": 1,
+              "toolType": "API",
+              "positionX": 120,
+              "positionY": 180,
+              "dependencies": [],
+              "parameters": [
+                {
+                  "value": "{\"apiTemplateRef\":\"api-validacao-webhook\",\"templateName\":\"[Lab] Webhook com credenciais\"}",
+                  "requiredFile": false
+                }
+              ]
+            },
+            {
+              "order": 2,
+              "toolType": "Prompt",
+              "positionX": 420,
+              "positionY": 180,
+              "dependencies": [
+                { "stepOrder": 1, "stepToolOrder": 1 }
+              ],
+              "parameters": [
+                {
+                  "value": "prompt-lab-pos-api",
+                  "requiredFile": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "name": "Encerramento",
+          "profileName": "Admin",
+          "profileCode": "ADMIN",
+          "statusName": "Done",
+          "statusCode": "DONE",
+          "stepTools": [
+            {
+              "order": 1,
+              "toolType": "N8N",
+              "positionX": 200,
+              "positionY": 220,
+              "dependencies": [],
+              "parameters": [
+                {
+                  "value": "",
+                  "requiredFile": false
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "prompts": [
+        {
+          "ref": "prompt-lab-pos-api",
+          "name": "[Lab] Pós-processamento API",
+          "description": "Prompt auxiliar para validar encadeamento após tool API na importação.",
+          "text": "Você recebeu a resposta de uma integração externa.\n\nResuma em até 5 linhas o resultado e indique se a chamada parece ter sido bem-sucedida.\n\nResponda em português.",
+          "enableAccessToMcp": false
+        }
+      ],
+      "apiTemplates": [
+        {
+          "ref": "api-validacao-webhook",
+          "name": "[Lab] Webhook com credenciais",
+          "method": "POST",
+          "url": "https://httpbin.org/post",
+          "queryTemplate": "[{\"key\":\"api_key\",\"value\":\"{{SECRET:api_validacao_webhook_query_api_key}}\"}]",
+          "headerTemplate": "[{\"key\":\"Authorization\",\"value\":\"Bearer {{SECRET:api_validacao_webhook_header_bearer}}\"},{\"key\":\"X-Api-Key\",\"value\":\"{{SECRET:api_validacao_webhook_header_x_api_key}}\"}]",
+          "bodyTemplate": "{\"client_secret\":\"{{SECRET:api_validacao_webhook_body_client_secret}}\",\"event\":\"workflow.lab.validated\",\"source\":\"woopiai-store\"}",
+          "description": "ApiTemplate de laboratório — credenciais substituídas por placeholders {{SECRET:*}}.",
+          "enableAccessFromMcp": false
+        }
+      ]
+    }
+  ]
+}

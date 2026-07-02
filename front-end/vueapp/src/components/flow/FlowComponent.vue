@@ -246,6 +246,35 @@
                         </button>
                     </div>
                 </div>
+                <div v-else-if="isParserTool">
+                    <h6>{{ $t("flow.parser.title") }}</h6>
+                    <div class="background-div">
+                        <label class="form-label">{{ $t("flow.parser.extractionMode") }}</label>
+                        <select
+                            class="form-select"
+                            v-model="selectedExtractionMode"
+                            @change="onParserModeSelect"
+                        >
+                            <option
+                                v-for="mode in extractionModeOptions"
+                                :key="mode.value"
+                                :value="mode.value"
+                            >
+                                {{ mode.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="mt-4">
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            @click="updateNode"
+                        >
+                            {{ $t("common.save") }}
+                        </button>
+                    </div>
+                </div>
                 <div
                     v-else
                     class="mb-3"
@@ -321,6 +350,7 @@
     import WorkflowService from "@/services/workflow/WorkflowService";
     import LogService from "@/services/log/logService";
     import ToolType from "@/constants/ToolType";
+    import DocumentExtractionMode from "@/constants/DocumentExtractionMode";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import ConfirmModalValidationInput from "@/components/global/ConfirmModalValidationInput.vue";
     import OffcanvasComponent from "@/components/global/OffcanvasComponent.vue";
@@ -391,6 +421,7 @@
                 idSelected: 0,
                 promptlist: [],
                 quizlist: [],
+                selectedExtractionMode: DocumentExtractionMode.Auto,
                 toolType: "",
                 previousStepTools: [],
                 selectedDependencies: [],
@@ -611,6 +642,20 @@
                     } else {
                         this.idSelected = parseInt(this.parameters[0]?.value);
                     }
+                } else if (this.isTargetTool(ToolType.Parser)) {
+                    if (this.parameters.length === 0) {
+                        this.selectedExtractionMode = DocumentExtractionMode.Auto;
+                        this.parameters.push({
+                            stepToolId: 0,
+                            value: DocumentExtractionMode.Auto,
+                            requiredFile: false,
+                            webhookId: null,
+                        });
+                    } else {
+                        this.selectedExtractionMode =
+                            this.parameters[0]?.value || DocumentExtractionMode.Auto;
+                    }
+                    this.onParserModeSelect();
                 } else if (this.parameters.length === 0 && !this.isEmbeddingTool) {
                     this.parameters.push({
                         stepToolId: 0,
@@ -656,7 +701,12 @@
                 this.markFlowDirty();
             },
             updateNode() {
-                if (this.idSelected) {
+                if (this.isParserTool) {
+                    this.parameters[0].value = this.selectedExtractionMode;
+                    this.nodeFlow.data.subtitle = this.getExtractionModeLabel(
+                        this.selectedExtractionMode
+                    );
+                } else if (this.idSelected) {
                     this.parameters[0].value = this.idSelected.toString();
                     const selectedPrompt = this.promptlist.find((p) => p.id === this.idSelected);
                     if (selectedPrompt) {
@@ -1152,6 +1202,15 @@
                     this.nodeFlow.data.subtitle = selectedQuiz.name;
                 }
             },
+            onParserModeSelect() {
+                this.nodeFlow.data.subtitle = this.getExtractionModeLabel(
+                    this.selectedExtractionMode
+                );
+            },
+            getExtractionModeLabel(mode) {
+                const key = `flow.parser.modes.${mode}`;
+                return this.$te(key) ? this.$t(key) : mode;
+            },
             checkNavigation(next) {
                 this.pendingNavegation = next;
                 this.$refs.confirmLeaveModal.open();
@@ -1192,8 +1251,31 @@
             isQuizTool() {
                 return this.isTargetTool(ToolType.Quiz);
             },
+            isParserTool() {
+                return this.isTargetTool(ToolType.Parser);
+            },
             isEmbeddingTool() {
                 return this.isTargetTool(ToolType.Embeddings);
+            },
+            extractionModeOptions() {
+                return [
+                    {
+                        value: DocumentExtractionMode.Auto,
+                        label: this.$t("flow.parser.modes.Auto"),
+                    },
+                    {
+                        value: DocumentExtractionMode.Native,
+                        label: this.$t("flow.parser.modes.Native"),
+                    },
+                    {
+                        value: DocumentExtractionMode.Multimodal,
+                        label: this.$t("flow.parser.modes.Multimodal"),
+                    },
+                    {
+                        value: DocumentExtractionMode.ForceOcr,
+                        label: this.$t("flow.parser.modes.ForceOcr"),
+                    },
+                ];
             },
         },
     };

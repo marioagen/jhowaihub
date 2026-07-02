@@ -21,6 +21,14 @@
                 </div>
 
                 <div class="card-body">
+                    <div
+                        v-if="isMockMode"
+                        class="alert alert-warning small py-2 mb-3"
+                        role="status"
+                    >
+                        <strong>Modo protótipo.</strong>
+                        Login simulado — use qualquer e-mail e senha válidos.
+                    </div>
                     <div class="mb-3">
                         <label
                             for="email"
@@ -189,6 +197,7 @@
     import { scheduleTokenRefresh } from "@/services/api";
     import AuthService from "@/services/authenticate/AuthService";
     import TenantModal from "@/components/authentication/TenantModal.vue";
+    import { isMockMode, MOCK_USER_EMAIL } from "@/mock/mockConfig.js";
     import logoDark from "@/assets/img/woopiai-logo-dark.png";
     import logoLight from "@/assets/img/woopiai-logo-light.png";
 
@@ -199,7 +208,11 @@
             TenantModal,
         },
         setup() {
-            const { validate, values } = useForm();
+            const { validate, values } = useForm({
+                initialValues: {
+                    email: isMockMode() ? MOCK_USER_EMAIL : "",
+                },
+            });
             return {
                 validate,
                 values,
@@ -211,8 +224,8 @@
                 isLoadingSSO: false,
                 showPassword: false,
                 credentials: {
-                    email: "",
-                    password: "",
+                    email: isMockMode() ? MOCK_USER_EMAIL : "",
+                    password: isMockMode() ? "demo" : "",
                     tenant: "",
                 },
                 field: {
@@ -232,6 +245,9 @@
             },
             subscribePlanUrl() {
                 return ENV_CONFIG?.VUE_APP_SUBSCRIBE_PLAN_URL || "";
+            },
+            isMockMode() {
+                return isMockMode();
             },
         },
         methods: {

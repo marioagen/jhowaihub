@@ -11,7 +11,8 @@ namespace WoopiAiHub.Application.Dto
         string EmailCreator,
         ICollection<int> Workflows,
         bool IsLastFile = false,
-        bool IsDocumentBatch = false
+        bool IsDocumentBatch = false,
+        string? ExtractionMode = null
     );
 }
 

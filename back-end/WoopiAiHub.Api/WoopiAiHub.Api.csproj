@@ -26,4 +26,10 @@
     <ProjectReference Include="..\WoopiAiHub.Repository\WoopiAiHub.Repository.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Data\workflow-templates.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

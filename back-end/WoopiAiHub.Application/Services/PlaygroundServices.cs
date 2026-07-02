@@ -15,17 +15,20 @@ namespace WoopiAiHub.Application.Services
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly IChatCompletionApi _chatCompletionApi;
         private readonly ChatCompletionSettings _chatCompletionSettings;
+        private readonly ILlmModelResolver _llmModelResolver;
         private readonly IUsageDailyServices _usageDailyServices;
 
         public PlaygroundServices(
             ITenantCacheServices tenantCacheServices,
             IChatCompletionApi chatCompletionApi,
             IOptions<ChatCompletionSettings> chatCompletionSettings,
+            ILlmModelResolver llmModelResolver,
             IUsageDailyServices usageDailyServices)
         {
             _tenantCacheServices = tenantCacheServices;
             _chatCompletionApi = chatCompletionApi;
             _chatCompletionSettings = chatCompletionSettings.Value;
+            _llmModelResolver = llmModelResolver;
             _usageDailyServices = usageDailyServices;
         }
 
@@ -61,15 +64,18 @@ namespace WoopiAiHub.Application.Services
                 }
             };
 
+            var resolvedModel = await _llmModelResolver.ResolveModelAsync(tenantId, LlmModelScope.Chat);
+            var resolvedApiVersion = await _llmModelResolver.ResolveApiVersionAsync(LlmModelScope.Chat);
+
             var response = await _chatCompletionApi.GetChatCompletion(
                 tenantInfo.AiGatewayApplicationId.Value.ToString(),
-                _chatCompletionSettings.Model,
-                _chatCompletionSettings.ApiVersion,
+                resolvedModel,
+                resolvedApiVersion,
                 tenantInfo.AiGatewayKey,
                 chatCompletionDto);
 
             var tokens = response.Usage?.TotalTokens ?? 0;
-            await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model,
+            await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, resolvedModel,
                 workflowId: null, UsageDailyOrigin.Playground);
 
             var content = response.Choices.FirstOrDefault()?.Message?.Content;

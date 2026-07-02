@@ -322,7 +322,7 @@ namespace WoopiAiHub.Application.Services
             var executions = await _stepToolExecutionRepository.FindByStepToolByCardIdAsync(card.Id);
 
             bool hasOcrReady = executions.Any(execution =>
-                execution.StepTool.Tool.ToolType.Name.Equals(HandlersTypes.Ocr) &&
+                HandlersTypes.IsTextExtractionTool(execution.StepTool.Tool.ToolType.Name) &&
                 execution.Status == StatusExecution.Ready);
 
             bool hasEmbeddingsReady = executions.Any(execution =>
@@ -435,7 +435,7 @@ namespace WoopiAiHub.Application.Services
                 return true;
 
             var toolTypeName = output.StepTool.Tool.ToolType;
-            return toolTypeName == HandlersTypes.Ocr || toolTypeName == HandlersTypes.Embeddings;
+            return HandlersTypes.IsTextExtractionTool(toolTypeName) || toolTypeName == HandlersTypes.Embeddings;
         }
 
         /// <summary>

@@ -4,7 +4,10 @@
     "private": true,
     "scripts": {
         "dev": "vite",
+        "dev:mock": "vite --mode mock",
         "build": "vite build",
+        "build:mock": "vite build --mode mock",
+        "preview:mock": "vite preview --mode mock",
         "lint": "eslint .",
         "format": "prettier --write . --ignore-path .prettierignore",
         "format:changed": "node ../../scripts/format-changed.js frontend",

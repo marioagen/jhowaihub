@@ -7,5 +7,6 @@ namespace WoopiAiHub.Domain.DTOs.Messaging
         public string Tenant { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public int WorkflowId { get; set; }
+        public string ExtractionMode { get; set; } = string.Empty;
     }
 }

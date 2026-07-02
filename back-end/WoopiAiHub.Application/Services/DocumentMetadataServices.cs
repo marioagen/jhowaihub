@@ -124,7 +124,7 @@ namespace WoopiAiHub.Application.Services
                                      e.StepTool != null &&
                                      e.StepTool.Tool != null &&
                                      e.StepTool.Tool.ToolType != null &&
-                                     e.StepTool.Tool.ToolType.Name == HandlersTypes.Ocr);
+                                     HandlersTypes.IsTextExtractionTool(e.StepTool.Tool.ToolType.Name));
         }
 
         /// <summary>

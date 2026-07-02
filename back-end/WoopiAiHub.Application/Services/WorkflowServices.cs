@@ -1272,6 +1272,7 @@ namespace WoopiAiHub.Application.Services
                 if (typeName != HandlersTypes.API
                     && typeName != HandlersTypes.Quiz
                     && typeName != HandlersTypes.Ocr
+                    && typeName != HandlersTypes.Parser
                     && typeName!= HandlersTypes.Prompt)
                 {
                     throw new AppException(

@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using WoopiAiHub.Application.Dto;
+using WoopiAiHub.Domain.Utils;
 
 namespace WoopiAiHub.Domain.Validations.DTOs
 {
@@ -13,6 +14,9 @@ namespace WoopiAiHub.Domain.Validations.DTOs
             RuleFor(i => i.EmailCreator).NotEmpty();
             RuleFor(i => i.IsLast).NotEmpty();
             RuleFor(i => i.Filename).NotEmpty();
+            RuleFor(i => i.ExtractionMode)
+                .Must(mode => string.IsNullOrWhiteSpace(mode) || DocumentExtractionModes.IsValid(mode))
+                .WithMessage("Invalid extraction mode.");
         }
     }
 }

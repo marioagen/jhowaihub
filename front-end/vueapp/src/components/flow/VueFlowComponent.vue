@@ -116,6 +116,7 @@
     import ToolsServices from "@/services/tools/ToolsServices";
     import PromptService from "@/services/prompts/PromptsService";
     import ToolType from "@/constants/ToolType";
+    import DocumentExtractionMode from "@/constants/DocumentExtractionMode";
 
     export default {
         name: "VueFlowComponent",
@@ -445,6 +446,8 @@
                     API: "chip-api",
                     Quiz: "chip-quiz",
                     Embeddings: "chip-embeddings",
+                    Parser: "chip-parser",
+                    OCR: "chip-ocr",
                 };
                 return classMap[toolType] || "chip-default";
             },
@@ -455,6 +458,8 @@
                     API: "Globe",
                     Quiz: "ClipboardList",
                     Embeddings: "Database",
+                    Parser: "FileSearch",
+                    OCR: "ScanText",
                 };
                 return icons[toolType] || "Activity";
             },
@@ -477,6 +482,15 @@
                         }
                     });
                 }
+
+                const parserNodes = nodes.filter(
+                    (n) => n.data?.toolType === ToolType.Parser && n.data?.parameters?.length > 0
+                );
+                parserNodes.forEach((node) => {
+                    const mode = node.data.parameters[0].value || DocumentExtractionMode.Auto;
+                    const key = `flow.parser.modes.${mode}`;
+                    node.data.subtitle = this.$te(key) ? this.$t(key) : mode;
+                });
             },
         },
         async mounted() {
@@ -601,6 +615,13 @@
         background-color: var(--chip-embeddings-bg);
         color: var(--chip-embeddings-text);
         border-color: var(--chip-embeddings-border);
+    }
+
+    .chip-parser,
+    .chip-ocr {
+        background-color: var(--chip-default-bg);
+        color: var(--chip-default-text);
+        border-color: var(--chip-default-border);
     }
 
     .chip-default {

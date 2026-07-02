@@ -5,6 +5,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
+using WoopiAiHub.Domain.DTOs.WorkflowTemplate;
 using WoopiAiHub.Domain.Interfaces.Services;
 
 namespace WoopiAiHub.Api.Controllers
@@ -15,10 +16,13 @@ namespace WoopiAiHub.Api.Controllers
     public class WorkflowController : ControllerBase
     {
         private readonly IWorkflowServices _workflowServices;
+        private readonly IWorkflowTemplateServices _workflowTemplateServices;
 
-        public WorkflowController(IWorkflowServices workflowServices)
+        public WorkflowController(IWorkflowServices workflowServices,
+                                  IWorkflowTemplateServices workflowTemplateServices)
         {
             _workflowServices = workflowServices;
+            _workflowTemplateServices = workflowTemplateServices;
         }
 
         /// <summary>
@@ -298,6 +302,57 @@ namespace WoopiAiHub.Api.Controllers
         {
             var hasConstraints = await _workflowServices.HasStepToolConstraints(stepId);
             return Ok(hasConstraints);
+        }
+
+        /// <summary>
+        /// Lists workflow templates available in the store catalog.
+        /// </summary>
+        [HttpGet("Templates")]
+        [SwaggerOperation("List workflow templates from the store catalog")]
+        [ProducesResponseType(typeof(List<WorkflowTemplateListItemDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindTemplates([FromQuery] string? query, [FromQuery] string? orderBy)
+        {
+            var result = await _workflowTemplateServices.FindTemplatesAsync(query, orderBy);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Returns a single workflow template package from the store catalog.
+        /// </summary>
+        [HttpGet("Templates/{id:guid}")]
+        [SwaggerOperation("Get workflow template details from the store catalog")]
+        [ProducesResponseType(typeof(WorkflowTemplatePackageDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindTemplateById(Guid id)
+        {
+            var result = await _workflowTemplateServices.FindTemplateByIdAsync(id);
+            if (result == null)
+                return NotFound();
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Imports selected workflow templates from the store into the current tenant.
+        /// </summary>
+        [HttpPost("Templates/Import")]
+        [SwaggerOperation("Import workflow templates from the store catalog")]
+        [ProducesResponseType(typeof(List<WorkflowTemplateImportResultDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> ImportTemplates([FromBody] WorkflowTemplateImportRequestDto request,
+                                                           [FromHeader] HeadersDto headersDto)
+        {
+            var result = await _workflowTemplateServices.ImportByIdsAsync(request, headersDto.EmailCreator);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Exports a workflow as a portable template package (JSON snapshot).
+        /// </summary>
+        [HttpGet("{id}/Export")]
+        [SwaggerOperation("Export workflow as a portable template package")]
+        [ProducesResponseType(typeof(WorkflowTemplatePackageDto), StatusCodes.Status200OK)]
+        public async Task<IActionResult> Export(int id)
+        {
+            var package = await _workflowTemplateServices.ExportAsync(id);
+            return Ok(package);
         }
     }
 }

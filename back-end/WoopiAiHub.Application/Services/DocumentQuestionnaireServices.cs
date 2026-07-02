@@ -23,6 +23,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IConfiguration _config;
         private readonly IDocumentHistoryServices _documentHistoryServices;
         private readonly ITenantCacheServices _tenantCacheServices;
+        private readonly ILlmModelResolver _llmModelResolver;
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly IUserRepository _userRepository;
         private readonly ICardServices _cardServices;
@@ -39,6 +40,7 @@ namespace WoopiAiHub.Application.Services
             IConfiguration config,
             IDocumentHistoryServices documentHistoryServices,
             ITenantCacheServices tenantCacheServices,
+            ILlmModelResolver llmModelResolver,
             IUsageDailyServices usageDailyServices,
             IUserRepository userRepository,
             ICardServices cardServices,
@@ -51,6 +53,7 @@ namespace WoopiAiHub.Application.Services
             _config = config;
             _documentHistoryServices = documentHistoryServices;
             _tenantCacheServices = tenantCacheServices;
+            _llmModelResolver = llmModelResolver;
             _usageDailyServices = usageDailyServices;
             _userRepository = userRepository;
             _cardServices = cardServices;
@@ -72,7 +75,9 @@ namespace WoopiAiHub.Application.Services
                     ?? throw new AppException(ErrorCode.NotFound, "Questionnaire not found", null);
 
                 var tenantInfo = await _tenantCacheServices.FindTenantAsync(headersDto.Tenant);
-                var model = _config["OpenAiSettings:Model"]!;
+                var model = await _llmModelResolver.ResolveModelAsync(
+                    headersDto.Tenant,
+                    LlmModelScope.Questionnaires);
                 var apikey = _config["IndexerApiKey"]!;
 
                 var cards = await FindDocumentCardsAsync(documentQuestionnaireDto.IdDocument);
@@ -121,7 +126,9 @@ namespace WoopiAiHub.Application.Services
             {
                 var documentDb = _documentRepository.FindById(documentInputDto.Id);
                 var tenantInfo = await _tenantCacheServices.FindTenantAsync(headersDto.Tenant);
-                var model = _config["OpenAiSettings:Model"]!;
+                var model = await _llmModelResolver.ResolveModelAsync(
+                    headersDto.Tenant,
+                    LlmModelScope.Documents);
                 var customQueryRequestDto =
                     CreateCustomQueryRequestDto(documentInputDto.Input, headersDto.Tenant, headersDto.Language,
                         tenantInfo!, model);

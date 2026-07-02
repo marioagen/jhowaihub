@@ -287,13 +287,74 @@
                 </div>
             </div>
         </div>
+        <div
+            v-if="isKanbanMockActive"
+            class="alert alert-warning py-2 px-3 mb-2 small d-flex align-items-center justify-content-between flex-wrap gap-2"
+            role="status"
+        >
+            <span>{{ $t("workflow.kanbanMock.active") }}</span>
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-dark"
+                @click="disableKanbanMock"
+            >
+                {{ $t("workflow.kanbanMock.disable") }}
+            </button>
+        </div>
+        <div
+            v-else-if="showKanbanMockPrompt"
+            class="alert alert-info py-2 px-3 mb-2 small d-flex align-items-center justify-content-between flex-wrap gap-2"
+            role="status"
+        >
+            <span>{{ $t("workflow.kanbanMock.prompt") }}</span>
+            <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                @click="enableKanbanMock"
+            >
+                {{ $t("workflow.kanbanMock.enable") }}
+            </button>
+        </div>
         <div v-if="isLoadingKanban">
             <LoadingComponent />
         </div>
         <div v-else-if="hasList">
             <div class="card custom-height">
                 <div class="card-body d-flex flex-column p-2 card-container">
-                    <div class="kanban-wrapper">
+                    <div
+                        v-if="showKanbanScrollArrows"
+                        class="kanban-scroll-arrows"
+                    >
+                        <button
+                            type="button"
+                            class="kanban-scroll-arrows__btn"
+                            :disabled="!canScrollKanbanLeft"
+                            :aria-label="$t('workflow.boardScrollLeft')"
+                            @click="scrollKanbanHorizontal(-1)"
+                        >
+                            <LucideIcon
+                                icon="ChevronLeft"
+                                :size="16"
+                            />
+                        </button>
+                        <button
+                            type="button"
+                            class="kanban-scroll-arrows__btn"
+                            :disabled="!canScrollKanbanRight"
+                            :aria-label="$t('workflow.boardScrollRight')"
+                            @click="scrollKanbanHorizontal(1)"
+                        >
+                            <LucideIcon
+                                icon="ChevronRight"
+                                :size="16"
+                            />
+                        </button>
+                    </div>
+                    <div
+                        ref="kanbanWrapperRef"
+                        class="kanban-wrapper"
+                        @scroll="updateKanbanScrollState"
+                    >
                         <KanbanBoard
                             v-if="isKanbanView"
                             :kanbanData="kanbanCards"
@@ -365,6 +426,10 @@
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import CardsServices from "@/services/cards/CardsServices";
     import StatusService from "@/services/status/StatusService";
+    import {
+        applyKanbanMockData,
+        isKanbanMockQueryEnabled,
+    } from "@/services/workflow/kanbanMockData.js";
     export default {
         name: "WorkflowPage",
         data() {
@@ -397,6 +462,11 @@
                 isBulkFinalizing: false,
                 finalizeStatusId: null,
                 bulkAssignUserSearchText: "",
+                kanbanScrollLeft: 0,
+                kanbanScrollWidth: 0,
+                kanbanClientWidth: 0,
+                kanbanScrollResizeObserver: null,
+                kanbanMockEnabled: false,
             };
         },
         components: {
@@ -410,6 +480,23 @@
         computed: {
             hasList() {
                 return this.workflowList.length > 0;
+            },
+            showKanbanScrollArrows() {
+                return (
+                    this.isKanbanView &&
+                    !this.isLoadingKanban &&
+                    this.workflowSteps.length > 1 &&
+                    this.kanbanScrollWidth > this.kanbanClientWidth + 1
+                );
+            },
+            canScrollKanbanLeft() {
+                return this.kanbanScrollLeft > 1;
+            },
+            canScrollKanbanRight() {
+                return (
+                    this.kanbanScrollLeft + this.kanbanClientWidth <
+                    this.kanbanScrollWidth - 1
+                );
             },
             canManageWorkflow() {
                 return hasPermission("WorkflowManagement", "View");
@@ -485,6 +572,12 @@
                     this.selectedCardIds.length > 0 &&
                     (this.isSingleStepWorkflow || this.isAllSelectedOnLastStep)
                 );
+            },
+            isKanbanMockActive() {
+                return this.kanbanMockEnabled;
+            },
+            showKanbanMockPrompt() {
+                return import.meta.env.DEV && !this.kanbanMockEnabled && this.hasList;
             },
         },
         methods: {
@@ -688,11 +781,35 @@
                 this.isLoadingKanban = true;
                 WorkflowService.getWorkflowStepsById(workflowId, this.filters)
                     .then((response) => {
-                        this.kanbanCards = response;
+                        if (response?.error !== undefined) {
+                            this.kanbanCards = response;
+                            return;
+                        }
+
+                        this.kanbanCards = this.applyKanbanMockIfEnabled(response);
                     })
                     .finally(() => {
                         this.isLoadingKanban = false;
                     });
+            },
+            applyKanbanMockIfEnabled(steps) {
+                if (!this.kanbanMockEnabled) {
+                    return steps;
+                }
+
+                return applyKanbanMockData(steps);
+            },
+            enableKanbanMock() {
+                this.kanbanMockEnabled = true;
+                if (this.selectedOption?.id) {
+                    this.getWorkflowStepsById(this.selectedOption.id);
+                }
+            },
+            disableKanbanMock() {
+                this.kanbanMockEnabled = false;
+                if (this.selectedOption?.id) {
+                    this.getWorkflowStepsById(this.selectedOption.id);
+                }
             },
             getUsersByTeams(teams) {
                 if (!teams || teams.length === 0) {
@@ -891,6 +1008,51 @@
                         (o.teams && o.teams.name && o.teams.name.toLowerCase().includes(searchText))
                 );
             },
+            updateKanbanScrollState() {
+                const el = this.$refs.kanbanWrapperRef;
+                if (!el || !this.isKanbanView) {
+                    return;
+                }
+
+                this.kanbanScrollLeft = el.scrollLeft;
+                this.kanbanScrollWidth = el.scrollWidth;
+                this.kanbanClientWidth = el.clientWidth;
+            },
+            initKanbanScrollObserver() {
+                this.teardownKanbanScrollObserver();
+
+                const el = this.$refs.kanbanWrapperRef;
+                if (!el) {
+                    return;
+                }
+
+                el.addEventListener("scroll", this.updateKanbanScrollState, { passive: true });
+                this.kanbanScrollResizeObserver = new ResizeObserver(() => {
+                    this.updateKanbanScrollState();
+                });
+                this.kanbanScrollResizeObserver.observe(el);
+                this.updateKanbanScrollState();
+            },
+            teardownKanbanScrollObserver() {
+                const el = this.$refs.kanbanWrapperRef;
+                if (el) {
+                    el.removeEventListener("scroll", this.updateKanbanScrollState);
+                }
+
+                if (this.kanbanScrollResizeObserver) {
+                    this.kanbanScrollResizeObserver.disconnect();
+                    this.kanbanScrollResizeObserver = null;
+                }
+            },
+            scrollKanbanHorizontal(direction) {
+                const el = this.$refs.kanbanWrapperRef;
+                if (!el) {
+                    return;
+                }
+
+                const amount = Math.max(el.clientWidth * 0.65, 280);
+                el.scrollBy({ left: direction * amount, behavior: "smooth" });
+            },
             redirectToWorkflowEditPage() {
                 if (!this.canManageWorkflow || !this.selectedOption.id) {
                     return;
@@ -906,11 +1068,39 @@
             },
         },
         created() {
+            if (this.$route.query.mockKanban === "0" || this.$route.query.mockKanban === "false") {
+                this.kanbanMockEnabled = false;
+            } else if (isKanbanMockQueryEnabled(this.$route.query) || import.meta.env.DEV) {
+                this.kanbanMockEnabled = true;
+            }
+
             this.selectedOption.name = this.$t("filters.workflowSelect.none");
             this.selectedOption.teamName = this.$t("filters.teamsSelect.none");
             this.getWorkflowByUser();
             GlobalEventService.on("all-uploads-complete", this.getWorkflowByUser);
             GlobalEventService.on("refresh-once", this.getWorkflowByUser);
+        },
+        watch: {
+            isKanbanView() {
+                this.$nextTick(() => {
+                    if (this.isKanbanView) {
+                        this.initKanbanScrollObserver();
+                    } else {
+                        this.teardownKanbanScrollObserver();
+                    }
+                });
+            },
+            kanbanCards: {
+                deep: true,
+                handler() {
+                    this.$nextTick(() => this.updateKanbanScrollState());
+                },
+            },
+            isLoadingKanban(isLoading) {
+                if (!isLoading) {
+                    this.$nextTick(() => this.initKanbanScrollObserver());
+                }
+            },
         },
         async mounted() {
             const statusResponse = await StatusService.getStatus();
@@ -980,8 +1170,10 @@
                 }
                 this.reloadKanban();
             });
+            this.$nextTick(() => this.initKanbanScrollObserver());
         },
         beforeUnmount() {
+            this.teardownKanbanScrollObserver();
             if (this.updateCardsDebounceTimer) {
                 clearTimeout(this.updateCardsDebounceTimer);
             }
@@ -1017,6 +1209,7 @@
 
     .card-container {
         height: 100%;
+        min-height: 0;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -1027,9 +1220,49 @@
         overflow-x: auto;
         overflow-y: hidden;
         min-height: 0;
-        display: flex;
-        align-items: stretch;
         -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .kanban-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+
+    .kanban-wrapper :deep(.kanban-board-container) {
+        min-width: min-content;
+    }
+
+    .kanban-scroll-arrows {
+        flex-shrink: 0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.25rem;
+        padding: 0 0.15rem 0.35rem;
+    }
+
+    .kanban-scroll-arrows__btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.75rem;
+        height: 1.75rem;
+        padding: 0;
+        border: 1px solid var(--color-border-form-control);
+        border-radius: 0.25rem;
+        background: var(--color-card-content, #fff);
+        color: var(--bs-primary, #0d6efd);
+        line-height: 1;
+        transition: background-color 0.15s ease;
+    }
+
+    .kanban-scroll-arrows__btn:hover:not(:disabled) {
+        background: var(--color-hover-transfer, rgba(13, 110, 253, 0.08));
+    }
+
+    .kanban-scroll-arrows__btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
     }
 
     .workflow-bulk-selection-meta {
@@ -1048,6 +1281,14 @@
 
     .custom-height {
         height: calc(100vh - 230px);
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .custom-height :deep(.card-body) {
+        flex: 1;
+        min-height: 0;
     }
 
     .new-doc-btn {

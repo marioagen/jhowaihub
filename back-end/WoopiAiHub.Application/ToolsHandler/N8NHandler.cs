@@ -96,7 +96,7 @@ namespace WoopiAiHub.Application.ToolsHandler
                     continue;
 
                 key = key.ToLowerInvariant();
-                dict[key] = key.Equals(HandlersTypes.Ocr.ToLowerInvariant())
+                dict[key] = HandlersTypes.IsTextExtractionTool(o!.StepTool?.Tool?.ToolType?.Name)
                     ? ExtractOcrTextFromOutput(o!.Value!)
                     : o!.Value ?? string.Empty;
             }

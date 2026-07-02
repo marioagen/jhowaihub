@@ -170,11 +170,12 @@ namespace WoopiAiHub.Application.Services
                 requestCreateDocumentDto.Name,
                 requestCreateDocumentDto.Description,
                 referenceFile,
-                (int)Domain.Enum.DocumentStatus.NotAnalyzed,
+                Domain.Enum.DocumentStatus.NotAnalyzed,
                 requestCreateDocumentDto.EmailCreator,
                 0,
                 workflow,
-                DateTime.Now
+                DateTime.Now,
+                extractionMode: requestCreateDocumentDto.ExtractionMode
             );
         }
 

@@ -5,8 +5,11 @@ import store from "@/store";
 import { pageview } from "vue-gtag";
 import { jwtDecode } from "jwt-decode";
 import LogService from "@/services/log/logService";
+import { isMockMode } from "@/mock/mockConfig.js";
+import { installMockApi } from "@/mock/installMockApi.js";
 
 const api = axios.create();
+installMockApi(api);
 
 let _refreshTimerId = null;
 
@@ -93,6 +96,10 @@ api.interceptors.response.use(
             originalRequest.url === "/Account/Login" ||
             originalRequest.url === "/Account/refresh-token" ||
             originalRequest.url === "/Account/logout";
+
+        if (isMockMode()) {
+            return Promise.reject(error);
+        }
 
         if (!isAuthEndpoint && error.response?.status === 401) {
             originalRequest._refreshCount = (originalRequest._refreshCount || 0) + 1;

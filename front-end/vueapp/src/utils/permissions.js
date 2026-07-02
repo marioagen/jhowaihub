@@ -1,7 +1,9 @@
 import { jwtDecode } from "jwt-decode";
 import store from "@/store";
+import { isMockMode } from "@/mock/mockConfig.js";
 
 export const hasPermission = (module, action) => {
+    if (isMockMode()) return true;
     if (store.state.userProfile.isAdmin) return true;
 
     const permissions = store.state.permissions;

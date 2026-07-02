@@ -6,5 +6,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
     {
         Task<ModelEmbedding?> FindByNameAsync(string name);
         Task<IEnumerable<ModelEmbedding>> FindAllByNamesListAsync(List<string> names);
+        Task<IReadOnlyList<ModelEmbedding>> FindAllAsync();
     }
 }

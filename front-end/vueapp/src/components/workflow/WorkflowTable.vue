@@ -78,6 +78,14 @@
                     </a>
                     <a
                         :class="actionClass"
+                        class="text-primary"
+                        @click="exportWorkflow(data.row)"
+                        v-tooltip="$t('workflow.export')"
+                    >
+                        <LucideIcon icon="Download" />
+                    </a>
+                    <a
+                        :class="actionClass"
                         class="text-danger"
                         style="color: red"
                         @click="openConfirmation(data.row)"
@@ -365,6 +373,42 @@
                     .finally(() => {
                         this.isCloning = false;
                     });
+            },
+            async exportWorkflow(workflow) {
+                try {
+                    const result = await WorkflowService.exportWorkflow(workflow.id);
+                    if (result.error) {
+                        this.$notify({
+                            title: "workflow.index",
+                            message: "workflow.exportError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                        return;
+                    }
+                    const blob = new Blob([JSON.stringify(result, null, 2)], {
+                        type: "application/json",
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = `${workflow.name.replace(/[^\w\-]+/g, "_")}-template.json`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    this.$notify({
+                        title: "workflow.index",
+                        message: "workflow.exportSuccess",
+                        variant: "success",
+                        icon: "CircleCheckBig",
+                    });
+                } catch {
+                    this.$notify({
+                        title: "workflow.index",
+                        message: "workflow.exportError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                }
             },
             deleteWorkflow() {
                 this.isDeleting = true;

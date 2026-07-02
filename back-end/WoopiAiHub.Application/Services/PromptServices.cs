@@ -35,6 +35,7 @@ namespace WoopiAiHub.Application.Services
         private readonly ITenantCacheServices _tenantCacheServices;
         private readonly IRagInvocationRouter _ragInvocationRouter;
         private readonly ChatCompletionSettings _chatCompletionSettings;
+        private readonly ILlmModelResolver _llmModelResolver;
         private readonly IUsageDailyServices _usageDailyServices;
         private readonly IExecutionServices _executionServices;
 
@@ -51,6 +52,7 @@ namespace WoopiAiHub.Application.Services
             ITenantCacheServices tenantCacheServices,
             IRagInvocationRouter ragInvocationRouter,
             IOptions<ChatCompletionSettings> chatCompletionSettings,
+            ILlmModelResolver llmModelResolver,
             IUsageDailyServices usageDailyServices,
             IExecutionServices executionServices)
         {
@@ -67,6 +69,7 @@ namespace WoopiAiHub.Application.Services
             _tenantCacheServices = tenantCacheServices;
             _ragInvocationRouter = ragInvocationRouter;
             _chatCompletionSettings = chatCompletionSettings.Value;
+            _llmModelResolver = llmModelResolver;
             _usageDailyServices = usageDailyServices;
             _executionServices = executionServices;
         }
@@ -659,16 +662,19 @@ namespace WoopiAiHub.Application.Services
                 MaxTokens = _chatCompletionSettings.MaxTokens,
                 Messages = new List<ChatMessageDto> { new ChatMessageDto { Role = "system", Content = fullPrompt } }
             };
+            var resolvedModel = await _llmModelResolver.ResolveModelAsync(tenantId, LlmModelScope.Agents);
+            var resolvedApiVersion = await _llmModelResolver.ResolveApiVersionAsync(LlmModelScope.Agents);
+
             var response = await _ragInvocationRouter.ExecuteChatCompletionAsync(
                 tenantInfo,
                 email,
                 chatCompletionDto,
-                _chatCompletionSettings.Model,
-                _chatCompletionSettings.ApiVersion,
+                resolvedModel,
+                resolvedApiVersion,
                 CancellationToken.None);
 
             var tokens = response.Usage?.TotalTokens ?? 0;
-            await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, _chatCompletionSettings.Model,
+            await _usageDailyServices.AddByValuesAsync(MetricNames.Token, email, tokens, resolvedModel,
                 workflowId: null, UsageDailyOrigin.PromptRefinement);
 
             return response.Choices[0].Message.Content;

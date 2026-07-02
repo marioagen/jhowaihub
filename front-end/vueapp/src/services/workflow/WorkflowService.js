@@ -276,4 +276,22 @@ export default {
             .then(({ data }) => data)
             .catch((error) => ({ error }));
     },
+    findWorkflowTemplates(query, orderBy) {
+        return api
+            .get("/Workflow/Templates", { params: { query, orderBy } })
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
+    },
+    importWorkflowTemplates(templateIds, secretValues = {}) {
+        return api
+            .post("/Workflow/Templates/Import", { templateIds, secretValues })
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
+    },
+    exportWorkflow(workflowId) {
+        return api
+            .get(`/Workflow/${workflowId}/Export`)
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
+    },
 };

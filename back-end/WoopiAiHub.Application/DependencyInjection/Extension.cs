@@ -34,6 +34,8 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IDocumentPipelineServices, DocumentPipelineServices>();
             services.AddScoped<IDocumentHistoryServices, DocumentHistoryServices>();
             services.AddScoped<IDocumentMetadataServices, DocumentMetadataServices>();
+            services.AddScoped<ILlmModelResolver, LlmModelResolver>();
+            services.AddScoped<ILlmModelsSettingsServices, LlmModelsSettingsServices>();
             services.AddScoped<IDocumentQuestionnaireServices, DocumentQuestionnaireServices>();
             services.AddScoped<IRagInvocationRouter, RagInvocationRouter>();
             services.AddScoped<IDocumentNormalizedServices, DocumentNormalizedServices>();
@@ -42,6 +44,8 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<ITenantServices, TenantServices>();
             services.AddScoped<IOcrGoogle, OcrGoogle>();
             services.AddScoped<IOcrAzure, OcrAzure>();
+            services.AddScoped<INativePdfTextExtractor, NativePdfTextExtractor>();
+            services.AddScoped<DocumentFileRetriever>();
             services.AddScoped<IQuestionnaireServices, QuestionnaireServices>();
             services.AddScoped<IQuestionServices, QuestionServices>();
             services.AddScoped<ITypeDocServices, TypeDocServices>();
@@ -58,6 +62,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IJwtTokenServices, JwtTokenServices>();
             services.AddScoped<IStatusServices, StatusServices>();
             services.AddScoped<IWorkflowServices, WorkflowServices>();
+            services.AddScoped<IWorkflowTemplateServices, WorkflowTemplateServices>();
             services.AddScoped<IValidateStep, ValidateStep>();
             services.AddScoped<IValidateWorkflow, ValidateWorkflow>();
             services.AddScoped<ICardServices, CardServices>();
@@ -78,6 +83,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IValidatePrompt, ValidatePrompt>();
             services.AddScoped<IToolHandler, EmbeddingsHandler>();
             services.AddScoped<IToolHandler, OcrHandler>();
+            services.AddScoped<IToolHandler, ParserHandler>();
             services.AddScoped<IToolHandler, PromptHandler>();
             services.AddScoped<IToolHandler, N8NHandler>();
             services.AddScoped<IToolHandler, ApiHandler>();
@@ -96,6 +102,7 @@ namespace WoopiAiHub.Application.DependencyInjection
             services.AddScoped<IExternalFileUploadServices, ExternalFileUploadServices>();
             services.AddScoped<IAnonymizationServices, AnonymizationServices>();
             services.AddHostedService<OcrConsumer>();
+            services.AddHostedService<ParserNativeConsumer>();
             services.AddHostedService<DocumentEmbeddingsConsumer>();
             services.AddHostedService<N8NConsumer>();
             services.AddHostedService<PromptConsumer>();

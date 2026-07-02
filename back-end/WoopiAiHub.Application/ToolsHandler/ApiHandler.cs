@@ -280,7 +280,7 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// Returns whether a single value for the given tool type should be inserted as raw plain text in structured JSON substitution.
         /// </summary>
         private static bool IsPlainTextToolTypeForStructuredSingle(string toolType) =>
-            string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase)
+            HandlersTypes.IsTextExtractionTool(toolType)
             || string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
@@ -288,7 +288,7 @@ namespace WoopiAiHub.Application.ToolsHandler
         /// </summary>
         private static string GetRawSingleOutputText(string toolType, string? rawValue)
         {
-            if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
+            if (HandlersTypes.IsTextExtractionTool(toolType))
                 return ExtractOcrText(rawValue ?? string.Empty);
             return rawValue ?? string.Empty;
         }
@@ -347,7 +347,7 @@ namespace WoopiAiHub.Application.ToolsHandler
         {
             var raw = rawValue ?? string.Empty;
 
-            if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
+            if (HandlersTypes.IsTextExtractionTool(toolType))
                 return ExtractOcrText(raw);
 
             return raw;
@@ -363,9 +363,14 @@ namespace WoopiAiHub.Application.ToolsHandler
         private static bool TryGetToolConfig(string toolType, out string placeholder, out bool isJsonNode)
         {
             isJsonNode = false;
-            if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
+            if (HandlersTypes.IsTextExtractionTool(toolType))
             {
                 placeholder = "{{ocr}}";
+                return true;
+            }
+            if (string.Equals(toolType, HandlersTypes.Parser, StringComparison.OrdinalIgnoreCase))
+            {
+                placeholder = "{{parser}}";
                 return true;
             }
             if (string.Equals(toolType, HandlersTypes.Prompt, StringComparison.OrdinalIgnoreCase))
@@ -407,7 +412,7 @@ namespace WoopiAiHub.Application.ToolsHandler
             var raw = rawValue ?? string.Empty;
             string processed;
 
-            if (string.Equals(toolType, HandlersTypes.Ocr, StringComparison.OrdinalIgnoreCase))
+            if (HandlersTypes.IsTextExtractionTool(toolType))
             {
                 processed = ExtractOcrText(raw);
             }
