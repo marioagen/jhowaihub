@@ -153,6 +153,13 @@
 
     .chat-composer__file .btn-link {
         color: var(--color-text-muted);
+        min-width: 24px;
+        min-height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
     }
 
     .chat-composer__file .btn-link:hover {

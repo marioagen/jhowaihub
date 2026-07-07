@@ -315,13 +315,17 @@
         border: none;
         background: transparent;
         color: inherit;
-        padding: 0 0 0 4px;
-        margin: 0;
+        padding: 0;
+        margin: 0 0 0 2px;
         line-height: 1;
+        min-width: 24px;
+        min-height: 24px;
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         cursor: pointer;
         opacity: 0.85;
+        flex-shrink: 0;
     }
 
     .chip-remove-btn:hover,

@@ -21,7 +21,9 @@
                 />
                 <span
                     v-if="showCleanBtn"
-                    class="input-group-text border-start-0"
+                    class="input-group-text border-start-0 search-clear-btn"
+                    role="button"
+                    :aria-label="$t('common.clearSearch')"
                     @click="cleanBtn"
                 >
                     <LucideIcon
@@ -90,7 +92,7 @@
         },
     };
 </script>
-<style scooped>
+<style scoped>
     .custom-input {
         font-size: 12px;
     }
@@ -98,5 +100,18 @@
     .custom-input::placeholder {
         font-size: 12px;
         color: #999;
+    }
+
+    .search-clear-btn {
+        cursor: pointer;
+        min-width: 32px;
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .search-clear-btn:hover {
+        color: var(--color-bg-btn-danger, #dc3545);
     }
 </style>

@@ -144,6 +144,8 @@
         border-radius: 8px;
         padding: 0.55rem 0.5rem;
         color: var(--color-body-content);
+        cursor: pointer;
+        min-height: 44px;
     }
 
     .chat-session-item:hover {
@@ -174,6 +176,13 @@
     .chat-session-item__delete {
         opacity: 0;
         color: var(--color-text-muted);
+        min-width: 32px;
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        cursor: pointer;
     }
 
     .chat-session-item__delete:hover {

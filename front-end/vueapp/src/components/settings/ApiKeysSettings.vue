@@ -325,6 +325,12 @@
 
     .api-keys-table__copy {
         color: var(--color-text-muted);
+        min-width: 32px;
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
     }
 
     .api-keys-table__copy:hover {

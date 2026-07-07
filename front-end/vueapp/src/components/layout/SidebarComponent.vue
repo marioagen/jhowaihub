@@ -254,8 +254,10 @@
         border: none;
         font-size: 12px;
         color: #737477;
-        width: 28px;
+        min-width: 32px;
+        width: 32px;
         height: 40px;
+        cursor: pointer;
     }
 
     .sidebar-horizontal-separator {

@@ -187,7 +187,7 @@
         color: #0d6efd !important;
         font-weight: 600;
         box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
-        cursor: default;
+        cursor: pointer;
     }
 
     .btn-toggle-nav button.sidebar-group-toggle.active {
@@ -240,6 +240,7 @@
         transition: background-color 0.2s ease;
         height: 44px;
         line-height: 1.5;
+        cursor: pointer;
     }
 
     .custom-menu-item:hover:not(.active):not(.sidebar-group-toggle) {

@@ -204,6 +204,15 @@
         border: 1px solid #fff;
     }
 
+    .notification-remove {
+        min-width: 32px;
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
     .notification-remove:hover {
         color: var(--color-body-content) !important;
     }

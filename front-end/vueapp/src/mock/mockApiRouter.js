@@ -129,6 +129,22 @@ function resolveMockRequest(config) {
     if (method === "DELETE" && path === "/User/DeactivateByIds") {
         return buildSuccessBody(true);
     }
+    if (method === "POST" && path === "/User/BulkImport") {
+        const payload = typeof body === "string" ? JSON.parse(body) : body;
+        const newUsers = payload?.users || [];
+        newUsers.forEach((user, i) => {
+            mockState.users.push({
+                id: mockState.users.length + i + 100,
+                name: user.nome || user.name || "",
+                email: user.email || "",
+                active: true,
+                lastLoginAt: new Date().toISOString(),
+                teams: [],
+                profiles: [],
+            });
+        });
+        return { created: newUsers.length, errors: [] };
+    }
 
     if (method === "GET" && (path === "/Team/Paged" || path === "/Team/Paged/")) {
         return buildPagedResponse(mockState.teams, params);

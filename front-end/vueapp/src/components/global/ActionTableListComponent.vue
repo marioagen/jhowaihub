@@ -16,6 +16,7 @@
 <style scoped>
     :deep(.link-action) {
         color: var(--color-bg-icon-active);
+        cursor: pointer;
     }
     :deep(.link-action:hover) {
         cursor: pointer;

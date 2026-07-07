@@ -77,9 +77,11 @@
     .btn.btn-light.lang-link:hover,
     .btn.btn-light.lang-link.lang-active,
     .btn.btn-light.lang-link.lang-active:hover {
-        padding: 0.1rem 0.3rem;
+        padding: 0.35rem 0.55rem;
         background-color: transparent;
         border: none;
+        cursor: pointer;
+        min-height: 32px;
     }
 
     .lang-link {

@@ -148,6 +148,8 @@
         font-size: 0.775rem;
         font-weight: 500;
         color: var(--color-body-content) !important;
+        cursor: pointer;
+        min-height: 32px;
     }
     .nav-pills .nav-link.btn-custom.active {
         background-color: var(--color-bg-navbar) !important;

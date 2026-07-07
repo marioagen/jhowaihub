@@ -7,13 +7,22 @@
                     <small class="text-muted">{{ $t("management.users.subtitle") }}</small>
                 </p>
             </div>
-            <button 
-                class="btn btn-primary btn-sm" 
-                @click="redirectToForm"
-            >
-                <LucideIcon icon="Plus" />
-                {{ $t("management.users.createBtn") }}
-            </button>
+            <div class="d-flex gap-2">
+                <button
+                    class="btn btn-outline-primary btn-sm"
+                    @click="$refs.csvImportModal.open()"
+                >
+                    <LucideIcon icon="FileUp" :size="16" />
+                    {{ $t("management.users.csvImport.btnLabel") }}
+                </button>
+                <button
+                    class="btn btn-primary btn-sm"
+                    @click="redirectToForm"
+                >
+                    <LucideIcon icon="Plus" />
+                    {{ $t("management.users.createBtn") }}
+                </button>
+            </div>
         </div>
         <div class="card mb-3">
             <div class="card-body">
@@ -26,15 +35,21 @@
                 />
             </div>
         </div>
-        <UsersTable 
-            @setFilter="setFilter" 
-            ref="UserTable" 
+        <UsersTable
+            @setFilter="setFilter"
+            ref="UserTable"
+        />
+
+        <CsvImportModal
+            ref="csvImportModal"
+            @imported="reloadTable({ search: '', page: 1, type: null })"
         />
     </div>
 </template>
 
 <script>
     import UsersTable from "@/components/management/users/UsersTable.vue";
+    import CsvImportModal from "@/components/management/users/CsvImportModal.vue";
     import SearchComponent from "@/components/global/SearchComponent.vue";
 
     export default {
@@ -60,6 +75,7 @@
         },
         components: {
             UsersTable,
+            CsvImportModal,
             SearchComponent,
         },
         methods: {
