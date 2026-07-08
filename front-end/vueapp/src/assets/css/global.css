@@ -537,6 +537,7 @@ input.form-check-input:checked {
     background-color: var(--color-bg-form-control) !important;
     color: var(--color-body-content) !important;
     border-color: var(--color-border-form-control) !important;
+    cursor: pointer;
     background-image: var(--image-chevron) !important;
 }
 
@@ -547,6 +548,11 @@ input.form-check-input:checked {
     background-color: var(--color-bg-form-control) !important;
     border-color: var(--color-border-form-control) !important;
     color: var(--color-body-content) !important;
+}
+
+.multiselect,
+.multiselect-wrapper {
+    cursor: pointer;
 }
 
 .multiselect-tags {

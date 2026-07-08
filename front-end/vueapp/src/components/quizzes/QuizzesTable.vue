@@ -1,23 +1,21 @@
 <template>
-    <div class="d-flex flex-column justify-content-between align-items-start mb-2">
-        <div class="delete-container">
+    <div v-if="showMultiDelete" class="bulk-selection-bar mb-2">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge rounded-pill bg-primary bulk-count-badge">
+                    {{ table.selectedRows.length }}
+                </span>
+                <span class="text-secondary small">
+                    {{ $t("common.itemsSelected") }}
+                </span>
+            </div>
             <button
-                class="btn btn-outline-danger btn-sm delete-button"
+                class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-1"
                 @click="openConfirmationMultiple"
-                :disabled="!showMultiDelete"
             >
-                <LucideIcon
-                    icon="Trash2"
-                    :size="15"
-                />
+                <LucideIcon icon="Trash2" :size="14" />
                 {{ $t("common.delete") }}
             </button>
-            <small
-                v-if="!showMultiDelete"
-                class="text-danger delete-tooltip"
-            >
-                {{ $t("quizzes.selectToDelete") }}
-            </small>
         </div>
     </div>
     <div>
@@ -265,59 +263,19 @@
         },
     };
 </script>
+
 <style scoped>
-    .delete-container {
-        position: relative;
-        display: inline-block;
-    }
+.bulk-selection-bar {
+    padding: 0.5rem 0.75rem;
+    background-color: var(--bs-white, #fff);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
 
-    .delete-button {
-        position: relative;
-    }
-
-    .delete-tooltip {
-        opacity: 0;
-        pointer-events: none;
-        visibility: hidden;
-        transition:
-            opacity 0.2s ease,
-            visibility 0.2s ease;
-        position: absolute;
-        top: calc(100% + 8px);
-        left: 0;
-        white-space: nowrap;
-        background-color: #fff;
-        border: 1px solid #dc3545;
-        border-radius: 6px;
-        padding: 6px 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
-    }
-
-    .delete-tooltip::before {
-        content: "";
-        position: absolute;
-        bottom: 100%;
-        left: 20px;
-        border: 6px solid transparent;
-        border-bottom-color: #dc3545;
-    }
-
-    .delete-tooltip::after {
-        content: "";
-        position: absolute;
-        bottom: 100%;
-        left: 21px;
-        border: 5px solid transparent;
-        border-bottom-color: #fff;
-    }
-
-    .delete-container:hover .delete-tooltip {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .delete-button:not(:disabled) ~ .delete-tooltip {
-        display: none !important;
-    }
+.bulk-count-badge {
+    font-size: 0.75rem;
+    min-width: 1.5rem;
+    padding: 0.25rem 0.5rem;
+}
 </style>

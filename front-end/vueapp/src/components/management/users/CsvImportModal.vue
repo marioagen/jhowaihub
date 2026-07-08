@@ -336,7 +336,7 @@
                         :disabled="!file"
                         @click="parseAndNext"
                     >
-                        {{ $t("common.next") }}
+                        {{ $t("management.users.csvImport.btnValidate") }}
                         <LucideIcon icon="ChevronRight" :size="15" />
                     </button>
 
@@ -347,7 +347,7 @@
                         :disabled="rows.length === 0"
                         @click="step = 3"
                     >
-                        {{ $t("common.next") }}
+                        {{ $t("management.users.csvImport.btnConfirm") }}
                         <LucideIcon icon="ChevronRight" :size="15" />
                     </button>
 

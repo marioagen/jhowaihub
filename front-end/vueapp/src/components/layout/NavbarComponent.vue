@@ -255,6 +255,7 @@
 
     .dropdown-toggle {
         outline: 0;
+        cursor: pointer;
     }
 
     .dropdown-item {

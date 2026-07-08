@@ -86,7 +86,7 @@
                             <button
                                 v-if="canManageWorkflow"
                                 type="button"
-                                class="btn btn-primary borderless p-0 d-inline-flex align-items-center"
+                                class="btn kanban-edit-btn"
                                 :disabled="!selectedOption.id || isLoadingKanban"
                                 v-tooltip="$t('workflow.editWorkflowBoard')"
                                 :aria-label="$t('workflow.editWorkflowBoard')"
@@ -94,7 +94,7 @@
                             >
                                 <LucideIcon
                                     icon="SquarePen"
-                                    :size="20"
+                                    :size="16"
                                 />
                             </button>
                         </div>
@@ -1185,6 +1185,34 @@
     };
 </script>
 <style scoped>
+    .kanban-edit-btn {
+        border: none;
+        background: transparent;
+        color: var(--color-bg-btn-primary);
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.375rem;
+        transition: background-color 0.15s ease, color 0.15s ease;
+        line-height: 1;
+    }
+
+    .kanban-edit-btn:hover:not(:disabled) {
+        background-color: color-mix(in srgb, var(--color-bg-btn-primary) 10%, transparent);
+        color: var(--color-bg-btn-primary);
+    }
+
+    .kanban-edit-btn:disabled {
+        color: var(--color-text-muted);
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
     .border-top {
         border-color: var(--color-border-form-control) !important;
     }

@@ -134,7 +134,7 @@
         },
     };
 </script>
-<style scooped>
+<style scoped>
     .custom-input {
         font-size: 12px;
     }

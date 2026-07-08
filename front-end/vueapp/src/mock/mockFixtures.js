@@ -407,12 +407,12 @@ function buildMockPrompts() {
 
 function buildMockQuestions() {
     return [
-        { id: 1, description: "O contrato possui cláusula de confidencialidade?" },
-        { id: 2, description: "Há multa rescisória definida?" },
-        { id: 3, description: "Existe cláusula de SLA com penalidade?" },
-        { id: 4, description: "O documento menciona tratamento de dados pessoais?" },
-        { id: 5, description: "Há prazo de vigência explícito?" },
-        { id: 6, description: "Existem anexos técnicos referenciados?" },
+        { id: 1, description: "O contrato possui cláusula de confidencialidade?", created: "2026-03-10T09:00:00.000Z", emailCreator: MOCK_USER_EMAIL },
+        { id: 2, description: "Há multa rescisória definida?", created: "2026-03-11T10:30:00.000Z", emailCreator: MOCK_USER_EMAIL },
+        { id: 3, description: "Existe cláusula de SLA com penalidade?", created: "2026-04-01T08:15:00.000Z", emailCreator: "ana.silva@prototype.local" },
+        { id: 4, description: "O documento menciona tratamento de dados pessoais?", created: "2026-04-15T14:00:00.000Z", emailCreator: "ana.silva@prototype.local" },
+        { id: 5, description: "Há prazo de vigência explícito?", created: "2026-05-02T11:20:00.000Z", emailCreator: "bruno.costa@prototype.local" },
+        { id: 6, description: "Existem anexos técnicos referenciados?", created: "2026-05-20T16:45:00.000Z", emailCreator: "bruno.costa@prototype.local" },
     ];
 }
 
@@ -420,21 +420,48 @@ function buildMockQuestionnaires() {
     return [
         {
             id: 1,
+            title: "Questionário de conformidade LGPD",
             name: "Questionário de conformidade LGPD",
             description: "Checklist para documentos com dados pessoais",
+            typeDocName: "Contrato",
             active: true,
+            created: "2026-03-15T10:00:00.000Z",
+            emailCreator: MOCK_USER_EMAIL,
+            questions: [
+                { id: 4, description: "O documento menciona tratamento de dados pessoais?" },
+                { id: 1, description: "O contrato possui cláusula de confidencialidade?" },
+                { id: 5, description: "Há prazo de vigência explícito?" },
+            ],
         },
         {
             id: 2,
+            title: "Homologação de fornecedor",
             name: "Homologação de fornecedor",
             description: "Perguntas cadastrais e documentais",
+            typeDocName: "Proposta",
             active: true,
+            created: "2026-04-20T08:30:00.000Z",
+            emailCreator: "ana.silva@prototype.local",
+            questions: [
+                { id: 2, description: "Há multa rescisória definida?" },
+                { id: 6, description: "Existem anexos técnicos referenciados?" },
+            ],
         },
         {
             id: 3,
+            title: "Revisão contratual padrão",
             name: "Revisão contratual padrão",
             description: "Questionário jurídico base",
+            typeDocName: "Contrato",
             active: true,
+            created: "2026-05-10T14:00:00.000Z",
+            emailCreator: "ana.silva@prototype.local",
+            questions: [
+                { id: 1, description: "O contrato possui cláusula de confidencialidade?" },
+                { id: 2, description: "Há multa rescisória definida?" },
+                { id: 3, description: "Existe cláusula de SLA com penalidade?" },
+                { id: 5, description: "Há prazo de vigência explícito?" },
+            ],
         },
     ];
 }
@@ -829,11 +856,11 @@ export function buildAuditorUserDetail(userId) {
 
 export function buildTypeDocList() {
     return [
-        { id: 1, name: "Contrato" },
-        { id: 2, name: "Proposta" },
-        { id: 3, name: "Nota Fiscal" },
-        { id: 4, name: "Política Interna" },
-        { id: 5, name: "Aditivo" },
+        { id: 1, name: "Contrato", created: "2026-01-10T08:00:00.000Z", emailCreator: MOCK_USER_EMAIL },
+        { id: 2, name: "Proposta", created: "2026-01-15T09:00:00.000Z", emailCreator: MOCK_USER_EMAIL },
+        { id: 3, name: "Nota Fiscal", created: "2026-02-01T10:00:00.000Z", emailCreator: "ana.silva@prototype.local" },
+        { id: 4, name: "Política Interna", created: "2026-02-20T11:00:00.000Z", emailCreator: "ana.silva@prototype.local" },
+        { id: 5, name: "Aditivo", created: "2026-03-05T12:00:00.000Z", emailCreator: "bruno.costa@prototype.local" },
     ];
 }
 

@@ -72,20 +72,22 @@
                         size="16"
                     />
                 </span>
-                <Multiselect
+                <select
+                    class="form-select form-select-sm border-start-0"
                     v-model="filters.teamId"
-                    :options="teamsListOptions"
-                    valueProp="id"
-                    label="name"
-                    trackBy="name"
-                    :searchable="true"
-                    :placeholder="$t('filters.teamsSelect.all')"
-                    mode="single"
-                    :canClear="true"
-                    :append-to-body="true"
                     @change="filterData"
-                    class="border-start-0 workflow-filters-team-select"
-                />
+                >
+                    <option value="">
+                        {{ $t("filters.teamsSelect.all") }}
+                    </option>
+                    <option
+                        v-for="team in teamsList"
+                        :key="team.id"
+                        :value="team.id"
+                    >
+                        {{ team.name }}
+                    </option>
+                </select>
             </div>
         </div>
         <div
@@ -121,12 +123,8 @@
 </template>
 
 <script>
-    import Multiselect from "@vueform/multiselect";
     export default {
         name: "WorkflowFilters",
-        components: {
-            Multiselect,
-        },
         props: {
             teamsList: {
                 type: Array,
@@ -146,7 +144,7 @@
                     input: null,
                     isAllUsers: true,
                     login: this.$store.state.userProfile.login,
-                    teamId: null,
+                    teamId: "",
                     userId: null,
                 },
             };
@@ -188,56 +186,18 @@
             hasUsers() {
                 return this.usersList.length > 0;
             },
-            teamsListOptions() {
-                return [
-                    {
-                        id: "",
-                        name: this.$t("filters.teamsSelect.all"),
-                    },
-                    ...this.teamsList,
-                ];
-            },
         },
     };
 </script>
 
 <style scoped>
-    .custom-input {
-        font-size: 12px;
+    .custom-input,
+    .custom-input::placeholder,
+    .form-select {
+        font-size: 0.875rem;
     }
 
     .custom-input::placeholder {
-        font-size: 12px;
         color: #999;
-    }
-
-    .workflow-filters-team-select {
-        --ms-font-size: 0.875rem;
-        --ms-option-font-size: 0.875rem;
-        min-height: 31px;
-        --ms-py: 1px;
-        flex: 1 1 auto;
-        width: auto;
-        min-width: 0;
-    }
-
-    .workflow-filters-team-select :deep(.multiselect-wrapper) {
-        min-width: 0;
-        overflow: hidden;
-    }
-
-    .workflow-filters-team-select :deep(.multiselect-placeholder) {
-        right: 0;
-        min-width: 0;
-        box-sizing: border-box;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        justify-content: flex-start;
-    }
-
-    .workflow-filters-team-select :deep(.multiselect-single-label) {
-        right: 0;
-        min-width: 0;
     }
 </style>
