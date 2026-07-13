@@ -124,6 +124,17 @@ function resolveMockRequest(config) {
         return buildSuccessBody(true);
     }
     if (method === "PUT" && path === "/User") {
+        const payload = typeof body === "string" ? JSON.parse(body) : body;
+        const userIndex = mockState.users.findIndex(
+            (user) => user.id === payload.id || user.email === payload.email
+        );
+        if (userIndex >= 0) {
+            mockState.users[userIndex] = {
+                ...mockState.users[userIndex],
+                name: payload.name || mockState.users[userIndex].name,
+                email: payload.email || mockState.users[userIndex].email,
+            };
+        }
         return buildSuccessBody(true);
     }
     if (method === "DELETE" && path === "/User/DeactivateByIds") {

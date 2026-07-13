@@ -50,17 +50,17 @@
                                 id="dropdown-menu-button"
                             >
                                 <li>
-                                    <a
+                                    <router-link
                                         class="dropdown-item user-profile-menu__item"
-                                        href="#"
-                                        @click.prevent
+                                        :to="{ name: 'MyAccount' }"
+                                        :title="$t('common.myAccount')"
                                     >
                                         <LucideIcon
                                             icon="User"
                                             :size="16"
                                         />
                                         {{ $t("common.myAccount") }}
-                                    </a>
+                                    </router-link>
                                 </li>
                                 <li>
                                     <router-link

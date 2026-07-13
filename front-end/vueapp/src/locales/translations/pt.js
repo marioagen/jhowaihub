@@ -1,5 +1,28 @@
 const portuguese = {
     Admin: "Admin",
+    account: {
+        title: "Minha Conta",
+        subtitle: "Atualize suas informações pessoais e configurações de segurança",
+        updateProfile: "Atualizar Perfil",
+        saveSuccess: "Perfil atualizado com sucesso",
+        saveError: "Erro ao atualizar perfil",
+        loadError: "Não foi possível carregar seus dados",
+        profileSection: {
+            title: "Informações do Perfil",
+            description: "Mantenha suas informações atualizadas para melhor experiência",
+            fullName: "Nome Completo",
+            email: "Email",
+        },
+        passwordSection: {
+            title: "Alterar Senha",
+            description: "Deixe em branco se não quiser alterar a senha",
+            newPassword: "Nova Senha",
+            confirmPassword: "Confirmar Nova Senha",
+            newPasswordPlaceholder: "Digite sua nova senha (mínimo 6 caracteres)",
+            confirmPasswordPlaceholder: "Confirme sua nova senha",
+            mismatch: "Preencha e confirme a nova senha para alterá-la",
+        },
+    },
     analyze: {
         answer: "Resposta",
         applyQuestionnaire: "Aplicar Questionário",

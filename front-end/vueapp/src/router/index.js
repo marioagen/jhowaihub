@@ -39,6 +39,7 @@ import PromptImport from "@/pages/prompts/import.vue";
 import HomePage from "@/pages/home.vue";
 import ChatPage from "@/pages/chat/index.vue";
 import SettingsPage from "@/pages/settings/index.vue";
+import MyAccountPage from "@/pages/account/index.vue";
 
 import TemplatePage from "@/pages/templates/index.vue";
 import TemplateDetail from "@/pages/templates/templateDetail.vue";
@@ -121,6 +122,15 @@ const routes = [
         path: "/chat",
         name: "Chat",
         component: ChatPage,
+        meta: {
+            layout: "default",
+        },
+        beforeEnter: authenticateBasic,
+    },
+    {
+        path: "/account",
+        name: "MyAccount",
+        component: MyAccountPage,
         meta: {
             layout: "default",
         },

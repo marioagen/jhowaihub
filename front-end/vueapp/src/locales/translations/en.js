@@ -1,5 +1,28 @@
 const english = {
     Admin: "Admin",
+    account: {
+        title: "My Account",
+        subtitle: "Update your personal information and security settings",
+        updateProfile: "Update Profile",
+        saveSuccess: "Profile updated successfully",
+        saveError: "Failed to update profile",
+        loadError: "Could not load your account data",
+        profileSection: {
+            title: "Profile Information",
+            description: "Keep your information up to date for a better experience",
+            fullName: "Full Name",
+            email: "Email",
+        },
+        passwordSection: {
+            title: "Change Password",
+            description: "Leave blank if you do not want to change your password",
+            newPassword: "New Password",
+            confirmPassword: "Confirm New Password",
+            newPasswordPlaceholder: "Enter your new password (minimum 6 characters)",
+            confirmPasswordPlaceholder: "Confirm your new password",
+            mismatch: "Fill in and confirm the new password to change it",
+        },
+    },
     analyze: {
         answer: "Answer",
         applyQuestionnaire: "Apply Questionnaire",
