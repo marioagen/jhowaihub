@@ -169,11 +169,19 @@
                                 {{ $t("management.users.csvImport.validCount") }}
                             </span>
                             <span
-                                v-if="errorRows.length"
+                                v-if="existingUserRows.length"
+                                class="csv-badge csv-badge--warning"
+                            >
+                                <LucideIcon icon="UserX" :size="12" />
+                                {{ existingUserRows.length }}
+                                {{ $t("management.users.csvImport.alreadyRegisteredCount") }}
+                            </span>
+                            <span
+                                v-if="otherErrorRows.length"
                                 class="csv-badge csv-badge--error"
                             >
                                 <LucideIcon icon="CircleX" :size="12" />
-                                {{ errorRows.length }}
+                                {{ otherErrorRows.length }}
                                 {{ $t("management.users.csvImport.withErrors") }}
                             </span>
                         </div>
@@ -194,7 +202,7 @@
                                     <tr
                                         v-for="(row, i) in rows"
                                         :key="i"
-                                        :class="row.errors.length ? 'csv-row--error' : 'csv-row--valid'"
+                                        :class="rowClass(row)"
                                     >
                                         <td class="csv-col-num text-muted">{{ i + 1 }}</td>
                                         <td>
@@ -210,21 +218,13 @@
                                         <td class="csv-col-status">
                                             <span
                                                 class="csv-status-chip"
-                                                :class="
-                                                    row.errors.length
-                                                        ? 'csv-status-chip--error'
-                                                        : 'csv-status-chip--valid'
-                                                "
+                                                :class="statusChipClass(row)"
                                             >
                                                 <LucideIcon
-                                                    :icon="row.errors.length ? 'CircleX' : 'CircleCheck'"
+                                                    :icon="statusIcon(row)"
                                                     :size="11"
                                                 />
-                                                {{
-                                                    row.errors.length
-                                                        ? $t("management.users.csvImport.invalidLabel")
-                                                        : $t("management.users.csvImport.validLabel")
-                                                }}
+                                                {{ statusLabel(row) }}
                                             </span>
                                             <div
                                                 v-if="row.errors.length"
@@ -258,11 +258,22 @@
                                     </div>
                                 </div>
                                 <div
-                                    v-if="errorRows.length"
+                                    v-if="existingUserRows.length"
+                                    class="csv-confirm__stat"
+                                >
+                                    <div class="csv-confirm__num csv-confirm__num--warning">
+                                        {{ existingUserRows.length }}
+                                    </div>
+                                    <div class="csv-confirm__label">
+                                        {{ $t("management.users.csvImport.alreadyRegisteredCount") }}
+                                    </div>
+                                </div>
+                                <div
+                                    v-if="otherErrorRows.length"
                                     class="csv-confirm__stat"
                                 >
                                     <div class="csv-confirm__num csv-confirm__num--error">
-                                        {{ errorRows.length }}
+                                        {{ otherErrorRows.length }}
                                     </div>
                                     <div class="csv-confirm__label">
                                         {{ $t("management.users.csvImport.willBeIgnored") }}
@@ -333,11 +344,24 @@
                         v-if="step === 1"
                         type="button"
                         class="btn btn-primary btn-sm"
-                        :disabled="!file"
+                        :disabled="!file || validating"
                         @click="parseAndNext"
                     >
-                        {{ $t("management.users.csvImport.btnValidate") }}
-                        <LucideIcon icon="ChevronRight" :size="15" />
+                        <span
+                            v-if="validating"
+                            class="spinner-border spinner-border-sm me-1"
+                            role="status"
+                        />
+                        {{
+                            validating
+                                ? $t("management.users.csvImport.validating")
+                                : $t("management.users.csvImport.btnValidate")
+                        }}
+                        <LucideIcon
+                            v-if="!validating"
+                            icon="ChevronRight"
+                            :size="15"
+                        />
                     </button>
 
                     <button
@@ -378,6 +402,7 @@
 
 <script>
     import api from "@/services/api";
+    import UserService from "@/services/users/UserService";
 
     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -438,6 +463,7 @@
                 isDragging: false,
                 rows: [],
                 importing: false,
+                validating: false,
             };
         },
         computed: {
@@ -446,6 +472,12 @@
             },
             errorRows() {
                 return this.rows.filter((r) => r.errors.length > 0);
+            },
+            existingUserRows() {
+                return this.rows.filter((r) => r.isExistingUser);
+            },
+            otherErrorRows() {
+                return this.rows.filter((r) => r.errors.length > 0 && !r.isExistingUser);
             },
             validPct() {
                 if (!this.rows.length) return 0;
@@ -477,6 +509,7 @@
                 this.file = null;
                 this.rows = [];
                 this.importing = false;
+                this.validating = false;
                 this.isDragging = false;
                 if (this.$refs.fileInput) {
                     this.$refs.fileInput.value = "";
@@ -508,31 +541,81 @@
                 URL.revokeObjectURL(url);
             },
             async parseAndNext() {
-                if (!this.file) return;
-                const text = await this.file.text();
-                const parsed = parseCsv(text);
+                if (!this.file || this.validating) return;
+                this.validating = true;
 
-                const seenEmails = new Set();
+                try {
+                    const text = await this.file.text();
+                    const parsed = parseCsv(text);
+                    const existingEmails = await this.findExistingEmails();
+                    const seenEmails = new Set();
 
-                this.rows = parsed.map((row) => {
-                    const errors = [];
+                    this.rows = parsed.map((row) => {
+                        const errors = [];
+                        let isExistingUser = false;
+                        const normalizedEmail = (row.email || "").trim().toLowerCase();
 
-                    if (!row.nome || row.nome.length < 2) {
-                        errors.push(this.$t("management.users.csvImport.errEmptyName"));
-                    }
+                        if (!row.nome || row.nome.length < 2) {
+                            errors.push(this.$t("management.users.csvImport.errEmptyName"));
+                        }
 
-                    if (!row.email || !EMAIL_RE.test(row.email)) {
-                        errors.push(this.$t("management.users.csvImport.errInvalidEmail"));
-                    } else if (seenEmails.has(row.email.toLowerCase())) {
-                        errors.push(this.$t("management.users.csvImport.errDuplicateEmail"));
-                    } else {
-                        seenEmails.add(row.email.toLowerCase());
-                    }
+                        if (!row.email || !EMAIL_RE.test(row.email)) {
+                            errors.push(this.$t("management.users.csvImport.errInvalidEmail"));
+                        } else if (seenEmails.has(normalizedEmail)) {
+                            errors.push(this.$t("management.users.csvImport.errDuplicateEmail"));
+                        } else if (existingEmails.has(normalizedEmail)) {
+                            errors.push(this.$t("management.users.csvImport.errEmailAlreadyExists"));
+                            isExistingUser = true;
+                        } else {
+                            seenEmails.add(normalizedEmail);
+                        }
 
-                    return { ...row, errors };
-                });
+                        return { ...row, errors, isExistingUser };
+                    });
 
-                this.step = 2;
+                    this.step = 2;
+                } finally {
+                    this.validating = false;
+                }
+            },
+            async findExistingEmails() {
+                const users = await UserService.getAllUsers();
+                const emails = new Set();
+
+                if (Array.isArray(users)) {
+                    users.forEach((user) => {
+                        const email = user?.email?.trim().toLowerCase();
+                        if (email) {
+                            emails.add(email);
+                        }
+                    });
+                }
+
+                return emails;
+            },
+            rowClass(row) {
+                if (!row.errors.length) return "csv-row--valid";
+                if (row.isExistingUser) return "csv-row--warning";
+                return "csv-row--error";
+            },
+            statusChipClass(row) {
+                if (!row.errors.length) return "csv-status-chip--valid";
+                if (row.isExistingUser) return "csv-status-chip--warning";
+                return "csv-status-chip--error";
+            },
+            statusIcon(row) {
+                if (!row.errors.length) return "CircleCheck";
+                if (row.isExistingUser) return "UserX";
+                return "CircleX";
+            },
+            statusLabel(row) {
+                if (!row.errors.length) {
+                    return this.$t("management.users.csvImport.validLabel");
+                }
+                if (row.isExistingUser) {
+                    return this.$t("management.users.csvImport.alreadyRegisteredLabel");
+                }
+                return this.$t("management.users.csvImport.invalidLabel");
             },
             isValidEmail(email) {
                 return email && EMAIL_RE.test(email);
@@ -541,12 +624,21 @@
                 if (!this.validRows.length) return;
                 this.importing = true;
                 try {
-                    await api.post("/User/BulkImport", { users: this.validRows });
+                    const { data } = await api.post("/User/BulkImport", { users: this.validRows });
+                    const created = data?.created ?? this.validRows.length;
+                    const skipped = data?.skipped ?? 0;
+
                     this.$notify({
                         title: "management.users.csvImport.title",
-                        message: "management.users.csvImport.successMsg",
-                        variant: "success",
-                        icon: "CircleCheck",
+                        message:
+                            skipped > 0
+                                ? this.$t("management.users.csvImport.successPartialMsg", {
+                                      created,
+                                      skipped,
+                                  })
+                                : "management.users.csvImport.successMsg",
+                        variant: skipped > 0 ? "warning" : "success",
+                        icon: skipped > 0 ? "TriangleAlert" : "CircleCheck",
                     });
                     this.$emit("imported");
                     this.close();
@@ -799,6 +891,11 @@
     color: #b91c1c;
 }
 
+.csv-badge--warning {
+    background: color-mix(in srgb, #f59e0b 16%, transparent);
+    color: #b45309;
+}
+
 .csv-preview-table-wrap {
     max-height: 330px;
     overflow-y: auto;
@@ -835,6 +932,10 @@
     background: color-mix(in srgb, #ef4444 5%, transparent);
 }
 
+.csv-row--warning {
+    background: color-mix(in srgb, #f59e0b 7%, transparent);
+}
+
 .csv-col-num {
     width: 36px;
     text-align: center;
@@ -864,6 +965,11 @@
 .csv-status-chip--error {
     background: color-mix(in srgb, #ef4444 14%, transparent);
     color: #b91c1c;
+}
+
+.csv-status-chip--warning {
+    background: color-mix(in srgb, #f59e0b 16%, transparent);
+    color: #b45309;
 }
 
 .csv-row-errors {
@@ -914,6 +1020,10 @@
 
 .csv-confirm__num--error {
     color: #ef4444;
+}
+
+.csv-confirm__num--warning {
+    color: #f59e0b;
 }
 
 .csv-confirm__label {

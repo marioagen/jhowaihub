@@ -143,9 +143,22 @@ function resolveMockRequest(config) {
     if (method === "POST" && path === "/User/BulkImport") {
         const payload = typeof body === "string" ? JSON.parse(body) : body;
         const newUsers = payload?.users || [];
-        newUsers.forEach((user, i) => {
+        const errors = [];
+        let created = 0;
+
+        newUsers.forEach((user) => {
+            const email = (user.email || "").trim().toLowerCase();
+            const alreadyExists = mockState.users.some(
+                (existingUser) => existingUser.email?.trim().toLowerCase() === email
+            );
+
+            if (alreadyExists) {
+                errors.push({ email: user.email, reason: "already_exists" });
+                return;
+            }
+
             mockState.users.push({
-                id: mockState.users.length + i + 100,
+                id: mockState.users.length + created + 100,
                 name: user.nome || user.name || "",
                 email: user.email || "",
                 active: true,
@@ -153,8 +166,10 @@ function resolveMockRequest(config) {
                 teams: [],
                 profiles: [],
             });
+            created++;
         });
-        return { created: newUsers.length, errors: [] };
+
+        return { created, errors, skipped: errors.length };
     }
 
     if (method === "GET" && (path === "/Team/Paged" || path === "/Team/Paged/")) {
