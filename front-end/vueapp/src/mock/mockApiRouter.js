@@ -27,6 +27,8 @@ import {
     mockState,
 } from "@/mock/mockFixtures.js";
 
+const MOCK_NEW_WORKFLOW_ID = 99;
+
 function normalizePath(url = "") {
     let path = url;
     if (path.includes("://")) {
@@ -53,6 +55,48 @@ function parseIdFromPath(path, segmentIndex) {
     const value = parts[segmentIndex];
     const numeric = Number(value);
     return Number.isNaN(numeric) ? value : numeric;
+}
+
+function normalizeWorkflowId(rawId) {
+    if (typeof rawId === "object" && rawId !== null) {
+        return rawId.id ?? MOCK_NEW_WORKFLOW_ID;
+    }
+    const n = Number(rawId);
+    return Number.isNaN(n) ? MOCK_NEW_WORKFLOW_ID : n;
+}
+
+function enrichStep(step, index) {
+    const statuses = buildStatusList();
+    const profId = parseInt(step.profileId ?? step.profile?.id) || 1;
+    const statId = parseInt(step.statusId ?? step.status?.id) || 1;
+    const profile =
+        mockState.profiles.find((p) => p.id === profId) || { id: 1, name: "Administrador" };
+    const status = statuses.find((s) => s.id === statId) || statuses[0];
+
+    return {
+        id: step.id || 8800000 + index + 1,
+        name: step.name || `Etapa ${index + 1}`,
+        order: step.order ?? index + 1,
+        profile: { id: profile.id, name: profile.name },
+        status: { id: status.id, name: status.name, label: status.label, color: status.color },
+        hasStepTools: step.hasStepTools || false,
+        stepTools: step.stepTools || [],
+    };
+}
+
+function saveWizardPhase2Steps(body) {
+    const payload = typeof body === "string" ? JSON.parse(body) : body;
+    const workflowId = normalizeWorkflowId(payload?.workflowId);
+    const steps = (payload?.steps || []).map(enrichStep);
+    mockState.wizardWorkflows[workflowId] = steps;
+}
+
+function buildPhase2Steps(workflowId) {
+    const stored = mockState.wizardWorkflows?.[workflowId];
+    if (stored?.length > 0) {
+        return stored;
+    }
+    return findWorkflowSteps(workflowId).map((step, i) => enrichStep(step, i));
 }
 
 function resolveMockRequest(config) {
@@ -242,10 +286,10 @@ function resolveMockRequest(config) {
         return buildWorkflowPhase(parseIdFromPath(path, 2), 1);
     }
     if (method === "GET" && matchPath(path, "/Workflow/Phase2/:workflowId")) {
-        return buildWorkflowPhase(parseIdFromPath(path, 2), 2);
+        return buildPhase2Steps(parseIdFromPath(path, 2));
     }
     if (method === "GET" && matchPath(path, "/Workflow/Phase3/:workflowId")) {
-        return buildWorkflowPhase(parseIdFromPath(path, 2), 3);
+        return buildPhase2Steps(parseIdFromPath(path, 2));
     }
     if (method === "GET" && matchPath(path, "/Workflow/Step/:stepId")) {
         const steps = findWorkflowSteps(1);
@@ -268,8 +312,15 @@ function resolveMockRequest(config) {
         const workflowId = parseIdFromPath(path, 1);
         return mockState.workflows.find((workflow) => workflow.id === workflowId) || mockState.workflows[0];
     }
+    if (method === "POST" && path === "/Workflow/Phase1") {
+        return MOCK_NEW_WORKFLOW_ID;
+    }
+    if (method === "PUT" && path === "/Workflow/Phase2") {
+        saveWizardPhase2Steps(body);
+        return buildSuccessBody(true);
+    }
     if (method === "POST" && path.startsWith("/Workflow")) {
-        return buildSuccessBody({ id: 99, name: "Workflow Simulado" });
+        return buildSuccessBody({ id: MOCK_NEW_WORKFLOW_ID, name: "Workflow Simulado" });
     }
     if (method === "PUT" && path.startsWith("/Workflow")) {
         return buildSuccessBody(true);

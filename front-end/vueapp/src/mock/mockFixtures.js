@@ -567,6 +567,7 @@ export const mockState = {
     teams: buildMockTeams(),
     profiles: buildMockProfiles(),
     workflows: buildMockWorkflows(),
+    wizardWorkflows: {},
     documents: buildMockDocuments(),
     prompts: buildMockPrompts(),
     tools: buildMockTools(),

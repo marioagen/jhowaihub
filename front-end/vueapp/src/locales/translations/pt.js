@@ -1620,6 +1620,11 @@ const portuguese = {
         namePlaceholder: "Ex: Aprovação de Contratos",
         next: "Próximo",
         noStepsAvailable: "Nenhuma etapa disponível. Por favor, adicione etapas na fase anterior.",
+        noStepsHint: "Volte para a etapa 2 e configure ao menos uma etapa de processamento.",
+        phase3Hint: "{count} etapa(s) ainda sem fluxo de ferramentas. Clique em \"Adicionar\" para configurar.",
+        configuredLabel: "Configurado",
+        pendingLabel: "Pendente",
+        addToolFlowHint: "Configure as ferramentas que serão executadas nesta etapa do processo.",
         noCardsForStep: "Nenhum documento nesta etapa",
         listView: {
             colId: "ID",

@@ -7,98 +7,129 @@
                 </p>
             </div>
         </div>
+
         <div
             v-if="!workflowSteps || workflowSteps.length === 0"
-            class="text-center py-5"
+            class="phase3-empty text-center py-5"
         >
-            <p>{{ $t("workflow.noStepsAvailable") }}</p>
+            <LucideIcon
+                icon="Wrench"
+                :size="40"
+                class="phase3-empty__icon mb-3"
+            />
+            <p class="fw-semibold mb-1">{{ $t("workflow.noStepsAvailable") }}</p>
+            <p class="text-muted small">{{ $t("workflow.noStepsHint") }}</p>
         </div>
+
         <div
             v-else
             class="row"
         >
             <div class="col-12">
                 <div
+                    class="phase3-hint mb-3 d-flex align-items-start gap-2"
+                    v-if="stepsWithoutTools > 0"
+                >
+                    <LucideIcon
+                        icon="Info"
+                        :size="16"
+                        class="phase3-hint__icon flex-shrink-0 mt-1"
+                    />
+                    <p class="mb-0 small">
+                        {{ $t("workflow.phase3Hint", { count: stepsWithoutTools }) }}
+                    </p>
+                </div>
+
+                <div
                     v-for="(step, index) in workflowSteps"
                     :key="step.id || index"
                     class="step-tool-card card shadow-sm rounded-3 mb-3"
+                    :class="{ 'step-tool-card--configured': step.hasStepTools }"
                 >
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
                             <div class="step-badge">
-                                <LucideIcon
-                                    icon="Info"
-                                    :size="16"
-                                />
+                                {{ step.order || index + 1 }}
                             </div>
-                            <h6 class="mb-0">
-                                {{ step.name }}
-                            </h6>
-                        </div>
-                        <div class="small">
-                            <LucideIcon
-                                icon="Users"
-                                :size="14"
-                                class="me-1"
-                            />
-                            {{ getProfileName(step.profileId) }}
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label small text-muted">
-                                {{ $t("workflow.responsible") }}
-                            </label>
-                            <div class="d-flex align-items-center">
-                                <LucideIcon
-                                    icon="Users"
-                                    :size="16"
-                                    class="me-2 text-primary"
-                                />
-                                <span>
+                            <div>
+                                <h6 class="mb-0">{{ step.name }}</h6>
+                                <span class="small text-muted d-flex align-items-center gap-1 mt-1">
+                                    <LucideIcon
+                                        icon="Users"
+                                        :size="12"
+                                    />
                                     {{ getProfileName(step.profileId) }}
                                 </span>
                             </div>
                         </div>
+                        <span
+                            v-if="step.hasStepTools"
+                            class="badge bg-success-subtle text-success d-flex align-items-center gap-1"
+                        >
+                            <LucideIcon
+                                icon="CircleCheck"
+                                :size="13"
+                            />
+                            {{ $t("workflow.configuredLabel") }}
+                        </span>
+                        <span
+                            v-else
+                            class="badge bg-warning-subtle text-warning d-flex align-items-center gap-1"
+                        >
+                            <LucideIcon
+                                icon="CircleDashed"
+                                :size="13"
+                            />
+                            {{ $t("workflow.pendingLabel") }}
+                        </span>
+                    </div>
+                    <div class="card-body">
                         <div
                             v-if="step.hasStepTools"
                             class="tools-list"
                         >
-                            <p class="small text-muted mb-2">
-                                {{ $t("workflow.configuredTools") }}: {{ step.length }}
+                            <p class="small text-muted mb-3">
+                                <LucideIcon
+                                    icon="Wrench"
+                                    :size="14"
+                                    class="me-1"
+                                />
+                                {{ $t("workflow.configuredTools") }}: {{ step.stepTools?.length ?? 0 }}
                             </p>
-                            <button
-                                class="btn btn-outline-primary btn-sm w-100 mb-2"
-                                @click="editToolFlow(step)"
-                            >
-                                <LucideIcon
-                                    icon="SquarePen"
-                                    :size="15"
-                                    class="me-1"
-                                />
-                                {{ $t("workflow.editToolFlow") }}
-                            </button>
-                            <button
-                                class="btn btn-outline-danger btn-sm w-100"
-                                @click="removeToolFlow(step)"
-                            >
-                                <LucideIcon
-                                    icon="Trash"
-                                    :size="15"
-                                    class="me-1"
-                                />
-                                {{ $t("workflow.removeToolFlow") }}
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button
+                                    class="btn btn-outline-primary btn-sm flex-grow-1 d-inline-flex align-items-center justify-content-center gap-1"
+                                    @click="editToolFlow(step)"
+                                >
+                                    <LucideIcon
+                                        icon="SquarePen"
+                                        :size="14"
+                                    />
+                                    {{ $t("workflow.editToolFlow") }}
+                                </button>
+                                <button
+                                    class="btn btn-outline-danger btn-sm d-inline-flex align-items-center justify-content-center gap-1"
+                                    @click="removeToolFlow(step)"
+                                    :title="$t('workflow.removeToolFlow')"
+                                >
+                                    <LucideIcon
+                                        icon="Trash2"
+                                        :size="14"
+                                    />
+                                </button>
+                            </div>
                         </div>
                         <div v-else>
+                            <p class="text-muted small mb-2">
+                                {{ $t("workflow.addToolFlowHint") }}
+                            </p>
                             <button
-                                class="btn btn-outline-primary btn-sm w-100"
+                                class="btn btn-primary btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-1"
                                 @click="addToolFlow(step)"
                             >
                                 <LucideIcon
                                     icon="Plus"
                                     :size="15"
-                                    class="me-1"
                                 />
                                 {{ $t("workflow.addToolFlow") }}
                             </button>
@@ -132,10 +163,15 @@
                 default: false,
             },
         },
+        computed: {
+            stepsWithoutTools() {
+                return (this.workflowSteps || []).filter((s) => !s.hasStepTools).length;
+            },
+        },
         methods: {
             getProfileName(profileId) {
                 const profile = this.profilesList.find((p) => p.id === parseInt(profileId));
-                return profile ? profile.text : "N/A";
+                return profile ? profile.text : "—";
             },
             addToolFlow(step) {
                 this.$emit("add-tool-flow", step, this.phase);
@@ -189,12 +225,40 @@
         border-radius: 50%;
         background-color: #2f80ed;
         color: white;
+        font-weight: 600;
+        font-size: 0.85rem;
         margin-right: 12px;
+        flex-shrink: 0;
+    }
+
+    .step-tool-card--configured {
+        border-color: var(--bs-success-border-subtle, #a3cfbb);
+    }
+
+    .step-tool-card--configured .card-header {
+        background-color: rgba(25, 135, 84, 0.04) !important;
     }
 
     .tools-list {
         border-top: 1px solid var(--color-border-form-control);
         padding-top: 12px;
+    }
+
+    .phase3-hint {
+        background: rgba(13, 110, 253, 0.06);
+        border: 1px solid rgba(13, 110, 253, 0.15);
+        border-radius: 0.5rem;
+        padding: 0.65rem 0.85rem;
+        color: var(--bs-body-color);
+    }
+
+    .phase3-hint__icon {
+        color: var(--color-bg-btn-primary, #0d6efd);
+    }
+
+    .phase3-empty__icon {
+        color: var(--bs-secondary-color, #6c757d);
+        opacity: 0.5;
     }
 
     @media (max-width: 768px) {

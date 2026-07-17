@@ -1629,6 +1629,11 @@ const spanish = {
         namePlaceholder: "Ex: Contract Approval",
         next: "Próximo",
         noStepsAvailable: "No hay pasos disponibles. Agregue los pasos de la fase anterior.",
+        noStepsHint: "Vuelva al paso 2 y configure al menos un paso de procesamiento.",
+        phase3Hint: "{count} paso(s) sin flujo de herramientas. Haga clic en \"Agregar\" para configurar.",
+        configuredLabel: "Configurado",
+        pendingLabel: "Pendiente",
+        addToolFlowHint: "Configure las herramientas que se ejecutarán en este paso del proceso.",
         noCardsForStep: "No hay documentos en este paso",
         listView: {
             colId: "ID",

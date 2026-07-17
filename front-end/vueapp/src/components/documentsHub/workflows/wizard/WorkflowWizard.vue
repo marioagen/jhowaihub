@@ -1,8 +1,9 @@
 <template>
-    <main>
+    <main class="workflow-wizard-page">
         <FullscreenLoadingComponent v-if="isLoading" />
-        <div class="container-fluid scroll-area mx-4 mt-4">
-            <div class="row align-items-center mb-4">
+        <div class="container-fluid scroll-area">
+            <div class="workflow-wizard-page__inner">
+            <div class="row align-items-center mb-4 workflow-wizard-page__header">
                 <div class="col-auto">
                     <button
                         class="btn btn-outline-primary btn-table btn-sm"
@@ -88,7 +89,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mt-4 mb-2">
+            <div class="row mt-4 mb-2 workflow-wizard-page__footer">
                 <div class="col-12 d-flex justify-content-between">
                     <button
                         v-if="currentPhase > 1"
@@ -129,6 +130,7 @@
                         {{ isEdit ? $t("workflow.finalize") : $t("workflow.createWorkflow") }}
                     </button>
                 </div>
+            </div>
             </div>
         </div>
     </main>
@@ -842,16 +844,65 @@
     };
 </script>
 <style scoped>
+    .workflow-wizard-page {
+        width: 100%;
+        min-width: 0;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        height: calc(100vh - 58px);
+        max-height: calc(100vh - 58px);
+    }
+
+    .scroll-area {
+        flex: 1;
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 1.25rem 0 2rem;
+        box-sizing: border-box;
+    }
+
+    .workflow-wizard-page__inner {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-left: 2rem;
+        padding-right: 2rem;
+        box-sizing: border-box;
+    }
+
+    .workflow-wizard-page__inner :deep(.row) {
+        --bs-gutter-x: 1.5rem;
+        margin-left: 0;
+        margin-right: 0;
+    }
+
     .container-fluid {
-        padding: 0 13px;
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+        box-sizing: border-box;
     }
 
     .main-div {
         min-height: 400px;
+        min-width: 0;
+        background: var(--bs-body-bg, #fff);
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        border-radius: 0.5rem;
     }
 
     .phase-nav {
         position: relative;
+        width: 100%;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 0 0.5rem;
+        box-sizing: border-box;
     }
 
     .phase-item {
@@ -859,8 +910,10 @@
         flex-direction: column;
         align-items: center;
         position: relative;
-        flex: 1;
-        max-width: 200px;
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: none;
+        padding: 0 0.25rem;
     }
 
     .phase-item.phase-clickable {
@@ -900,10 +953,14 @@
 
     .phase-label {
         margin-top: 8px;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 500;
         color: #6b7280;
         text-align: center;
+        line-height: 1.35;
+        max-width: 100%;
+        padding: 0 2px;
+        word-break: break-word;
     }
 
     .phase-item.active .phase-label {
@@ -927,5 +984,11 @@
 
     .phase-item.completed .phase-connector {
         background-color: var(--color-bg-phase-circle-success) !important;
+    }
+    @media (max-width: 768px) {
+        .workflow-wizard-page__inner {
+            padding-left: 1.25rem;
+            padding-right: 1.25rem;
+        }
     }
 </style>

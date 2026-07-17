@@ -1623,6 +1623,11 @@ const english = {
         namePlaceholder: "Ex: Contract Approval",
         next: "Next",
         noStepsAvailable: "No steps available. Please add steps in the previous phase.",
+        noStepsHint: "Go back to step 2 and configure at least one processing step.",
+        phase3Hint: "{count} step(s) without a tool flow yet. Click \"Add\" to configure.",
+        configuredLabel: "Configured",
+        pendingLabel: "Pending",
+        addToolFlowHint: "Configure the tools that will run in this step of the process.",
         noCardsForStep: "No cards for the step",
         listView: {
             colId: "ID",
