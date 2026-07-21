@@ -200,24 +200,35 @@
                                                     />
                                                 </span>
                                                 <div class="dropdown flex-grow-1 min-w-0">
-                                                    <button
-                                                        class="btn btn-light border form-select-sm text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle border-start-0 rounded-start-0 pe-1 profile-select-trigger"
-                                                        type="button"
-                                                        @click.stop="toggleProfileMenu(step, $event)"
-                                                        aria-expanded="false"
-                                                    >
-                                                        <span class="text-truncate profile-label">
-                                                            {{
-                                                                getProfileName(step.profileId) ||
-                                                                $t("workflow.selectProfile")
-                                                            }}
-                                                        </span>
-                                                        <LucideIcon
-                                                            icon="ChevronDown"
-                                                            :size="14"
-                                                            class="ms-1 text-muted flex-shrink-0"
-                                                        />
-                                                    </button>
+                            <button
+                                        :class="[
+                                            'btn border form-select-sm text-start d-flex justify-content-between align-items-center w-100 dropdown-toggle border-start-0 rounded-start-0 pe-1 profile-select-trigger',
+                                            isAutoProfileById(step.profileId)
+                                                ? 'profile-select-trigger--auto'
+                                                : 'btn-light',
+                                        ]"
+                                        type="button"
+                                        @click.stop="toggleProfileMenu(step, $event)"
+                                        aria-expanded="false"
+                                    >
+                                        <span class="d-flex align-items-center gap-1 text-truncate profile-label">
+                                            <LucideIcon
+                                                v-if="isAutoProfileById(step.profileId)"
+                                                icon="Zap"
+                                                :size="13"
+                                                class="profile-auto-icon flex-shrink-0"
+                                            />
+                                            {{
+                                                getProfileName(step.profileId) ||
+                                                $t("workflow.selectProfile")
+                                            }}
+                                        </span>
+                                        <LucideIcon
+                                            icon="ChevronDown"
+                                            :size="14"
+                                            class="ms-1 text-muted flex-shrink-0"
+                                        />
+                                    </button>
                                                 </div>
                                             </div>
 
@@ -288,15 +299,41 @@
                     {{ $t("workflow.selectProfile") }}
                 </a>
             </li>
+
+            <template v-if="!profileSearches[openProfileMenuStepId]">
+                <li
+                    v-for="p in autoProfiles"
+                    :key="`auto-${p.id}`"
+                >
+                    <a
+                        class="dropdown-item dropdown-item--auto small d-flex align-items-center gap-2"
+                        :class="{ active: String(p.id) === String(getOpenStepProfileId()) }"
+                        @click="selectProfile(openProfileMenuStepId, String(p.id))"
+                    >
+                        <span class="auto-profile-icon-wrap">
+                            <LucideIcon icon="Zap" :size="13" />
+                        </span>
+                        <span class="fw-semibold">{{ p.text }}</span>
+                        <span class="auto-profile-badge ms-auto">IA</span>
+                    </a>
+                </li>
+                <li v-if="autoProfiles.length > 0 && regularProfiles.length > 0">
+                    <hr class="dropdown-divider my-1" />
+                </li>
+            </template>
+
             <li
-                v-for="p in getFilteredProfilesByStepId(openProfileMenuStepId)"
+                v-for="p in profileSearches[openProfileMenuStepId]
+                    ? getFilteredProfilesByStepId(openProfileMenuStepId)
+                    : regularProfiles"
                 :key="p.id"
             >
                 <a
-                    class="dropdown-item small"
+                    class="dropdown-item small d-flex align-items-center gap-2"
                     :class="{ active: String(p.id) === String(getOpenStepProfileId()) }"
                     @click="selectProfile(openProfileMenuStepId, String(p.id))"
                 >
+                    <LucideIcon icon="User" :size="13" class="text-muted flex-shrink-0" />
                     {{ p.text }}
                 </a>
             </li>
@@ -348,6 +385,12 @@
         computed: {
             activeStepsList() {
                 return this.steps.filter((s) => s.isActive !== false);
+            },
+            autoProfiles() {
+                return this.profilesList.filter((p) => this.isAutoProfile(p));
+            },
+            regularProfiles() {
+                return this.profilesList.filter((p) => !this.isAutoProfile(p));
             },
         },
 
@@ -422,6 +465,14 @@
                 const step = this.steps.find((s) => s.tempId === stepTempId);
                 if (!step) return this.profilesList;
                 return this.getFilteredProfiles(step);
+            },
+            isAutoProfile(profile) {
+                return profile?.text === "Avanço automático";
+            },
+            isAutoProfileById(profileId) {
+                if (!profileId) return false;
+                const profile = this.profilesList.find((p) => String(p.id) === String(profileId));
+                return this.isAutoProfile(profile);
             },
             getProfileName(profileId) {
                 if (!profileId) return "";
@@ -651,6 +702,66 @@
     .dropdown-toggle::after {
         display: none;
     }
+
+    /* ── Auto-advance profile: trigger ── */
+    .profile-select-trigger--auto {
+        background-color: var(--auto-profile-bg);
+        border-color: var(--auto-profile-border) !important;
+        color: var(--auto-profile-text);
+    }
+
+    .profile-select-trigger--auto:hover {
+        background-color: var(--auto-profile-bg-hover);
+    }
+
+    .profile-auto-icon {
+        color: var(--auto-profile-icon);
+        flex-shrink: 0;
+    }
+
+    /* ── Auto-advance profile: dropdown item ── */
+    .dropdown-item--auto {
+        background-color: var(--auto-profile-bg);
+        color: var(--auto-profile-text) !important;
+        border-radius: 6px;
+        margin-bottom: 2px;
+        font-weight: 500;
+    }
+
+    .dropdown-item--auto:hover,
+    .dropdown-item--auto:focus {
+        background-color: var(--auto-profile-bg-hover) !important;
+        color: var(--auto-profile-text-hover) !important;
+    }
+
+    .dropdown-item--auto.active {
+        background-color: var(--auto-profile-bg-hover) !important;
+        color: var(--auto-profile-text-hover) !important;
+    }
+
+    .auto-profile-icon-wrap {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background-color: var(--auto-profile-badge-bg);
+        color: var(--auto-profile-icon);
+        flex-shrink: 0;
+    }
+
+    .auto-profile-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        padding: 1px 6px;
+        border-radius: 4px;
+        background-color: var(--auto-profile-badge-bg);
+        color: var(--auto-profile-badge-text);
+        white-space: nowrap;
+    }
+
     .border {
         border-color: var(--color-border-form-control) !important;
     }

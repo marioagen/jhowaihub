@@ -186,6 +186,14 @@ function buildMockProfiles() {
             ],
             workflowPermission: [],
         },
+        {
+            id: 99,
+            name: "Avanço automático",
+            description: "Perfil reservado para etapas sem revisão humana — avança automaticamente via IA",
+            users: [],
+            permissions: [],
+            workflowPermission: [],
+        },
     ];
 }
 
