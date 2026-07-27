@@ -142,29 +142,50 @@
         background-color: var(--color-bg-nav-pills) !important;
         border-radius: 50rem !important;
         border-color: none;
+        display: flex;
+        align-items: stretch;
+        padding: 3px;
+        gap: 2px;
+    }
+
+    .nav-pills .nav-item {
+        display: flex;
+        align-items: stretch;
     }
     .nav-pills .nav-link.btn-custom {
-        padding: 0.25rem 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0 0.75rem;
+        height: 32px;
+        min-height: 32px;
+        line-height: 1;
         font-size: 0.775rem;
         font-weight: 500;
         color: var(--color-body-content) !important;
         cursor: pointer;
-        min-height: 32px;
+        white-space: nowrap;
     }
     .nav-pills .nav-link.btn-custom.active {
         background-color: var(--color-bg-navbar) !important;
         color: var(--color-body-content) !important;
     }
     .icon-pill {
-        vertical-align: text-bottom;
-        margin-right: 5px;
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+        margin-right: 0;
     }
     .nav-pills-compact .nav-link.btn-custom {
-        padding: 0.15rem 0.35rem;
+        padding: 0 0.5rem;
+        height: 26px;
+        min-height: 26px;
         font-size: 0.7rem;
+        gap: 0.25rem;
     }
     .nav-pills-compact .icon-pill {
-        margin-right: 3px;
+        margin-right: 0;
     }
     .tab-pane {
         padding: 0;
