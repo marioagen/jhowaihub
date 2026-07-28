@@ -518,8 +518,13 @@
     .analyze-reject-btn {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 6px;
+        min-height: 32px;
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
         font-weight: 500;
+        cursor: pointer;
         transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
 

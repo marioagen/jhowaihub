@@ -861,12 +861,15 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 26px;
-        height: 26px;
+        min-width: 32px;
+        min-height: 32px;
+        width: 32px;
+        height: 32px;
         padding: 0;
         border: none;
         background: transparent;
         border-radius: 50%;
+        cursor: pointer;
         transition: background-color 0.15s ease, transform 0.1s ease;
         flex-shrink: 0;
     }
