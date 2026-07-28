@@ -70,6 +70,7 @@
                                         @reload="reloadList"
                                         @cardMoved="handleCardMoved"
                                         @cardUpdated="handleCardUpdated"
+                                        @cardReject="handleCardReject"
                                         label="common.analyze"
                                         :users="users"
                                     />
@@ -87,6 +88,7 @@
     import StatusService from "@/services/status/StatusService";
     export default {
         name: "KanbanBoard",
+        emits: ["reload", "cardMoved", "cardUpdated", "cardReject"],
         components: {
             KanbanCard,
         },
@@ -159,6 +161,9 @@
             },
             handleCardUpdated(cardUpdateData) {
                 this.$emit("cardUpdated", cardUpdateData);
+            },
+            handleCardReject(payload) {
+                this.$emit("cardReject", payload);
             },
             setCard() {
                 this.stepsList = this.kanbanData;

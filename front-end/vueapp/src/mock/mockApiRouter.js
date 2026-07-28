@@ -377,6 +377,12 @@ function resolveMockRequest(config) {
     if (method === "POST" && path.startsWith("/DocumentAnalysisRejection")) {
         return buildSuccessBody(true);
     }
+    if (method === "GET" && path.includes("/DocumentAnalysisRejection/WorkflowPreviousSteps")) {
+        return [
+            { id: 1, name: "Etapa 1 - Triagem" },
+            { id: 2, name: "Etapa 2 - Análise" },
+        ];
+    }
     if (method === "GET" && path.startsWith("/DocumentAnalysisRejection")) {
         return [];
     }

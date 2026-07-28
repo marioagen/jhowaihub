@@ -102,7 +102,7 @@
                     class="mb-2 d-flex justify-content-between align-items-center flex-wrap"
                     v-if="!showLoading && !isCardFailed"
                 >
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-1">
                         <button
                             type="button"
                             class="btn btn-sm btn-primary"
@@ -128,26 +128,38 @@
                             {{ $t("common.finalize") }}
                         </button>
                     </div>
-                    <div v-if="!isLastStep">
+                    <div
+                        v-if="!isLastStep"
+                        class="d-flex align-items-center gap-1"
+                    >
                         <button
                             v-if="!isFirstStep || dataCard.assignedUser"
-                            class="btn btn-sm btn-outline-primary float-end"
+                            class="btn btn-sm btn-outline-success card-approve-btn"
                             @click.stop="advanceStep"
                         >
-                            <span>
-                                {{ $t("common.advance") }}
-                            </span>
                             <LucideIcon
-                                icon="ChevronRight"
-                                :size="16"
-                                class="me-1 text-muted"
                                 v-if="!isLoadingAnalysis"
+                                icon="ThumbsUp"
+                                :size="13"
                             />
                             <div
-                                class="spinner-grow text-light"
+                                v-else
+                                class="spinner-grow spinner-grow-sm"
                                 role="status"
-                                v-if="isLoadingAnalysis"
                             ></div>
+                            {{ $t("common.approve") }}
+                        </button>
+                        <button
+                            v-if="!isFirstStep || dataCard.assignedUser"
+                            class="btn btn-sm btn-outline-danger card-reject-btn"
+                            @click.stop="emitReject"
+                            :title="$t('common.reject')"
+                        >
+                            <LucideIcon
+                                icon="ThumbsDown"
+                                :size="13"
+                            />
+                            {{ $t("common.reject") }}
                         </button>
                         <div v-else-if="!dataCard.assignedUser && !showLoading">
                             <div
@@ -324,7 +336,7 @@
     export default {
         name: "CardComponent",
         components: { ConfirmModal },
-        emits: ["reload", "cardMoved", "cardUpdated", "cardFinalized"],
+        emits: ["reload", "cardMoved", "cardUpdated", "cardFinalized", "cardReject"],
         data: () => ({
             isLoadingAnalysis: false,
             isUpdatingAssignedUser: false,
@@ -532,6 +544,12 @@
             async reprocessCard() {
                 await CardsServices.reprocessCard(this.dataCard.id);
                 this.reloadList();
+            },
+            emitReject() {
+                this.$emit("cardReject", {
+                    cardId: this.dataCard.id,
+                    workflowId: this.dataStep.workflowId,
+                });
             },
         },
         mounted() {
@@ -834,5 +852,36 @@
     .batch-icon {
         color: #2b7fff;
         vertical-align: middle;
+    }
+
+    /* ── Approve / Reject quick actions ── */
+    .card-approve-btn {
+        color: #0eaa42;
+        border-color: #0eaa42;
+        font-size: var(--kanban-card-button-size);
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        white-space: nowrap;
+    }
+
+    .card-approve-btn:hover {
+        background-color: #0eaa42;
+        color: #fff;
+    }
+
+    .card-reject-btn {
+        color: #dc3545;
+        border-color: #dc3545;
+        font-size: var(--kanban-card-button-size);
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        white-space: nowrap;
+    }
+
+    .card-reject-btn:hover {
+        background-color: #dc3545;
+        color: #fff;
     }
 </style>

@@ -364,6 +364,7 @@
                             @reload="reloadKanban"
                             @cardMoved="handleCardMoved"
                             @cardUpdated="updateCard"
+                            @cardReject="openCardRejectModal"
                             ref="kanbanBoardRef"
                         />
                         <WorkflowAccordionComponent
@@ -394,6 +395,11 @@
             ref="documentRejectionModalRef"
             :card-ids="selectedCardIds"
             @success="onBulkRejectSuccess"
+        />
+        <DocumentRejectionModal
+            ref="cardRejectModalRef"
+            :card-ids="cardRejectPayload.cardIds"
+            @success="onCardRejectSuccess"
         />
         <ConfirmModal
             id="bulk-finalize-confirm-modal"
@@ -458,6 +464,7 @@
                 updateCardsDebounceTimer: null,
                 isKanbanView: true,
                 selectedCardIds: [],
+                cardRejectPayload: { cardIds: [], workflowId: null },
                 isBulkAssigning: false,
                 isBulkFinalizing: false,
                 finalizeStatusId: null,
@@ -701,6 +708,15 @@
             onBulkRejectSuccess() {
                 this.reloadKanban();
                 this.clearBulkSelection();
+            },
+            openCardRejectModal({ cardId, workflowId }) {
+                this.cardRejectPayload = { cardIds: [cardId], workflowId };
+                this.$nextTick(() => {
+                    this.$refs.cardRejectModalRef?.open(workflowId);
+                });
+            },
+            onCardRejectSuccess() {
+                this.reloadKanban();
             },
             onSelectKanbanView() {
                 this.isKanbanView = true;

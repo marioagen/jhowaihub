@@ -155,15 +155,39 @@
                                 <LucideIcon icon="PanelRight" />
                             </label>
                         </div>
-                        <button
+                        <div
                             v-if="canReject"
-                            class="btn btn-outline-danger btn-sm ms-3"
-                            @click="openRejectModal"
-                            :disabled="!workflowId"
+                            class="d-flex align-items-center gap-2 ms-3"
                         >
-                            <i class="fas fa-times-circle me-1"></i>
-                            {{ $t("analyze.rejection.reject") }}
-                        </button>
+                            <button
+                                class="btn btn-outline-success btn-sm analyze-approve-btn"
+                                @click="approveCard"
+                                :disabled="!workflowId || isAdvancing"
+                            >
+                                <LucideIcon
+                                    v-if="!isAdvancing"
+                                    icon="ThumbsUp"
+                                    :size="14"
+                                />
+                                <span
+                                    v-else
+                                    class="spinner-border spinner-border-sm"
+                                    role="status"
+                                ></span>
+                                {{ $t("common.approve") }}
+                            </button>
+                            <button
+                                class="btn btn-outline-danger btn-sm analyze-reject-btn"
+                                @click="openRejectModal"
+                                :disabled="!workflowId"
+                            >
+                                <LucideIcon
+                                    icon="ThumbsDown"
+                                    :size="14"
+                                />
+                                {{ $t("analyze.rejection.reject") }}
+                            </button>
+                        </div>
                         <button
                             v-if="isRejected"
                             class="btn btn-outline-warning btn-sm ms-3"
@@ -306,6 +330,7 @@
                 currentStepOrder: 0,
                 cardStatus: "",
                 documentAnonymizations: [],
+                isAdvancing: false,
             };
         },
         components: {
@@ -377,6 +402,37 @@
                     this.$router.push({
                         name: "Workflow",
                     });
+                }
+            },
+            async approveCard() {
+                if (!this.workflowId || this.isAdvancing) return;
+                this.isAdvancing = true;
+                try {
+                    const params = {
+                        CardId: parseInt(this.cardId),
+                        NextStepOrder: this.currentStepOrder + 1,
+                        WorkflowId: this.workflowId,
+                    };
+                    const response = await CardsServices.updateStepAndStatus(params);
+                    if (response?.error !== undefined) {
+                        throw new Error(response.error?.response?.data?.labelError);
+                    }
+                    this.$notify({
+                        title: "analyze.title",
+                        message: "analyze.approveSuccess",
+                        variant: "success",
+                        icon: "CircleCheckBig",
+                    });
+                    setTimeout(() => this.goBack(), 1500);
+                } catch (e) {
+                    this.$notify({
+                        title: "common.error",
+                        message: "card.errorAdvancingCard",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isAdvancing = false;
                 }
             },
             openRejectModal() {
@@ -456,6 +512,32 @@
 
     .analyze-document-select {
         max-width: 300px;
+    }
+
+    .analyze-approve-btn {
+        color: #0eaa42;
+        border-color: #0eaa42;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .analyze-approve-btn:not(:disabled):hover {
+        background-color: #0eaa42;
+        color: #fff;
+    }
+
+    .analyze-reject-btn {
+        color: #dc3545;
+        border-color: #dc3545;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .analyze-reject-btn:not(:disabled):hover {
+        background-color: #dc3545;
+        color: #fff;
     }
 
     .section-buttons .btn-check:checked + .btn,
