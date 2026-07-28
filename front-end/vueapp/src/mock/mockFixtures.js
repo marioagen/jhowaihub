@@ -797,11 +797,16 @@ export function buildCardAnalyzeSteps(cardId) {
 export function buildCardHeaderInfo(cardId) {
     return {
         cardId: Number(cardId) || 9000001,
-        documentName: mockState.documents[0].name,
-        workflowName: mockState.workflows[0].name,
+        cardName: mockState.documents[0]?.name ?? "Contrato de Prestação de Serviços.pdf",
+        documentName: mockState.documents[0]?.name ?? "Contrato de Prestação de Serviços.pdf",
+        workflowName: mockState.workflows[0]?.name ?? "Esteira de Análise Documental",
+        workflowId: mockState.workflows[0]?.id ?? 1,
+        currentStepOrder: 2,
+        statusName: "InProgress",
         status: buildStatusList()[0],
         owner: MOCK_USER_EMAIL,
         percentage: 65,
+        documentBatchId: null,
     };
 }
 

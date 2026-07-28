@@ -352,7 +352,7 @@ function resolveMockRequest(config) {
     }
 
     if (method === "GET" && matchPath(path, "/DocumentMetadata/Analyze/:docId")) {
-        return { content: "Metadados simulados do documento." };
+        return { content: "Metadados simulados do documento.", referenceFile: "mock-document.pdf" };
     }
     if (method === "GET" && matchPath(path, "/DocumentMetadata/Normalized/:docId")) {
         return { content: "Texto normalizado simulado." };

@@ -160,14 +160,25 @@
                             class="d-flex align-items-center gap-2 ms-3"
                         >
                             <button
+                                class="btn btn-outline-danger btn-sm analyze-reject-btn"
+                                @click="openRejectModal"
+                                :disabled="!workflowId"
+                            >
+                                <LucideIcon
+                                    icon="CircleX"
+                                    :size="15"
+                                />
+                                {{ $t("analyze.rejection.reject") }}
+                            </button>
+                            <button
                                 class="btn btn-outline-success btn-sm analyze-approve-btn"
                                 @click="approveCard"
                                 :disabled="!workflowId || isAdvancing"
                             >
                                 <LucideIcon
                                     v-if="!isAdvancing"
-                                    icon="ThumbsUp"
-                                    :size="14"
+                                    icon="CircleCheck"
+                                    :size="15"
                                 />
                                 <span
                                     v-else
@@ -175,17 +186,6 @@
                                     role="status"
                                 ></span>
                                 {{ $t("common.approve") }}
-                            </button>
-                            <button
-                                class="btn btn-outline-danger btn-sm analyze-reject-btn"
-                                @click="openRejectModal"
-                                :disabled="!workflowId"
-                            >
-                                <LucideIcon
-                                    icon="ThumbsDown"
-                                    :size="14"
-                                />
-                                {{ $t("analyze.rejection.reject") }}
                             </button>
                         </div>
                         <button
@@ -514,30 +514,37 @@
         max-width: 300px;
     }
 
+    .analyze-approve-btn,
+    .analyze-reject-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+        transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+
     .analyze-approve-btn {
         color: #0eaa42;
         border-color: #0eaa42;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
     }
 
     .analyze-approve-btn:not(:disabled):hover {
         background-color: #0eaa42;
+        border-color: #0eaa42;
         color: #fff;
+        box-shadow: 0 2px 8px rgba(14, 170, 66, 0.3);
     }
 
     .analyze-reject-btn {
         color: #dc3545;
         border-color: #dc3545;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
     }
 
     .analyze-reject-btn:not(:disabled):hover {
         background-color: #dc3545;
+        border-color: #dc3545;
         color: #fff;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
     }
 
     .section-buttons .btn-check:checked + .btn,

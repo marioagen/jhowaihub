@@ -134,32 +134,33 @@
                     >
                         <button
                             v-if="!isFirstStep || dataCard.assignedUser"
-                            class="btn btn-sm btn-outline-success card-approve-btn"
+                            class="btn btn-sm card-reject-btn"
+                            @click.stop="emitReject"
+                            :title="$t('common.reject')"
+                            :aria-label="$t('common.reject')"
+                        >
+                            <LucideIcon
+                                icon="CircleX"
+                                :size="15"
+                            />
+                        </button>
+                        <button
+                            v-if="!isFirstStep || dataCard.assignedUser"
+                            class="btn btn-sm card-approve-btn"
                             @click.stop="advanceStep"
+                            :title="$t('common.approve')"
+                            :aria-label="$t('common.approve')"
                         >
                             <LucideIcon
                                 v-if="!isLoadingAnalysis"
-                                icon="ThumbsUp"
-                                :size="13"
+                                icon="CircleCheck"
+                                :size="15"
                             />
                             <div
                                 v-else
                                 class="spinner-grow spinner-grow-sm"
                                 role="status"
                             ></div>
-                            {{ $t("common.approve") }}
-                        </button>
-                        <button
-                            v-if="!isFirstStep || dataCard.assignedUser"
-                            class="btn btn-sm btn-outline-danger card-reject-btn"
-                            @click.stop="emitReject"
-                            :title="$t('common.reject')"
-                        >
-                            <LucideIcon
-                                icon="ThumbsDown"
-                                :size="13"
-                            />
-                            {{ $t("common.reject") }}
                         </button>
                         <div v-else-if="!dataCard.assignedUser && !showLoading">
                             <div
@@ -855,33 +856,46 @@
     }
 
     /* ── Approve / Reject quick actions ── */
-    .card-approve-btn {
-        color: #0eaa42;
-        border-color: #0eaa42;
-        font-size: var(--kanban-card-button-size);
+    .card-approve-btn,
+    .card-reject-btn {
         display: inline-flex;
         align-items: center;
-        gap: 3px;
-        white-space: nowrap;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        transition: background-color 0.15s ease, transform 0.1s ease;
+        flex-shrink: 0;
+    }
+
+    .card-approve-btn {
+        color: #0eaa42;
     }
 
     .card-approve-btn:hover {
-        background-color: #0eaa42;
-        color: #fff;
+        background-color: rgba(14, 170, 66, 0.12);
+        color: #089436;
+        transform: scale(1.12);
+    }
+
+    .card-approve-btn:active {
+        transform: scale(0.95);
     }
 
     .card-reject-btn {
         color: #dc3545;
-        border-color: #dc3545;
-        font-size: var(--kanban-card-button-size);
-        display: inline-flex;
-        align-items: center;
-        gap: 3px;
-        white-space: nowrap;
     }
 
     .card-reject-btn:hover {
-        background-color: #dc3545;
-        color: #fff;
+        background-color: rgba(220, 53, 69, 0.12);
+        color: #b02a37;
+        transform: scale(1.12);
+    }
+
+    .card-reject-btn:active {
+        transform: scale(0.95);
     }
 </style>
