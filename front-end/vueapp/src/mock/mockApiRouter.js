@@ -2,6 +2,9 @@ import {
     buildAnonymizationList,
     buildAuditorDocumentDetail,
     buildAuditorDocumentSummary,
+    buildAuditorSystemEvents,
+    buildAuditorToolsDetail,
+    buildAuditorToolsSummary,
     buildAuditorUserDetail,
     buildAuditorUserSummary,
     buildAuditorWorkflowDetail,
@@ -593,6 +596,15 @@ function resolveMockRequest(config) {
         const documentId = parseIdFromPath(path, 2);
         const workflowId = parseIdFromPath(path, 4);
         return buildAuditorDocumentDetail(documentId, workflowId);
+    }
+    if (method === "GET" && path === "/Auditor/Tools") {
+        return buildAuditorToolsSummary(params);
+    }
+    if (method === "GET" && matchPath(path, "/Auditor/Tool/:toolId")) {
+        return buildAuditorToolsDetail(parseIdFromPath(path, 2));
+    }
+    if (method === "GET" && path === "/Auditor/System") {
+        return buildAuditorSystemEvents(params);
     }
 
     if (method === "GET") {

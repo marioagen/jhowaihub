@@ -85,4 +85,34 @@ export default {
                 };
             });
     },
+
+    /// <summary>
+    /// Returns a paged summary of audit events grouped by tool (Agents, Connectors, API Templates, Questionnaires).
+    /// </summary>
+    getToolsAuditSummary(params = {}) {
+        return api
+            .get("/Auditor/Tools", { params })
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
+    },
+
+    /// <summary>
+    /// Returns the detailed event history for a specific tool.
+    /// </summary>
+    getToolsAuditDetail(toolId, params = {}) {
+        return api
+            .get(`/Auditor/Tool/${toolId}`, { params })
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
+    },
+
+    /// <summary>
+    /// Returns system-wide audit events: logins, API calls, user management actions and workflow changes.
+    /// </summary>
+    getSystemAuditEvents(params = {}) {
+        return api
+            .get("/Auditor/System", { params })
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
+    },
 };

@@ -868,6 +868,110 @@ export function buildAuditorUserDetail(userId) {
     };
 }
 
+// ── Tools audit mock ─────────────────────────────────────────────────────────
+
+const TOOL_CATEGORIES = ["agent", "connector", "apiTemplate", "questionnaire"];
+const TOOL_NAMES = {
+    agent: ["Agente de Extração", "Agente de Classificação", "Agente de Resumo"],
+    connector: ["Conector HTTP", "Conector N8N", "Conector Parser"],
+    apiTemplate: ["Template de Consulta", "Template de Envio", "Template de Validação"],
+    questionnaire: ["Questionário de Triagem", "Questionário de Compliance", "Questionário de KYC"],
+};
+const TOOL_ACTIONS = ["created", "updated", "deleted"];
+const TOOL_USERS = [MOCK_USER_EMAIL, "ana.silva@prototype.local", "bruno.costa@prototype.local"];
+
+function buildToolAuditItems() {
+    return TOOL_CATEGORIES.flatMap((cat, ci) =>
+        TOOL_NAMES[cat].map((name, ni) => ({
+            toolId: ci * 10 + ni + 1,
+            toolName: name,
+            category: cat,
+            eventCount: 3 + ni,
+            lastEvent: new Date(Date.now() - (ci * 3 + ni) * 3_600_000).toISOString(),
+        }))
+    );
+}
+
+function buildToolAuditEvents(toolId) {
+    const actions = ["updated", "created", "updated"];
+    const details = [
+        "Configuração de parâmetros atualizada",
+        "Ferramenta criada no sistema",
+        "Prompt principal editado",
+    ];
+    return actions.map((action, i) => ({
+        eventId: toolId * 100 + i,
+        action,
+        userName: TOOL_USERS[i % TOOL_USERS.length],
+        detail: details[i],
+        createdAt: new Date(Date.now() - i * 86_400_000).toISOString(),
+    }));
+}
+
+export function buildAuditorToolsSummary(params = {}) {
+    return buildAuditorPagedResponse(buildToolAuditItems(), params);
+}
+
+export function buildAuditorToolsDetail(toolId) {
+    return buildToolAuditEvents(Number(toolId) || 1);
+}
+
+// ── System audit mock ─────────────────────────────────────────────────────────
+
+const SYSTEM_EVENT_TYPES = ["access", "apiCall", "userCreated", "profileChanged", "userManagement", "workflowChanged"];
+const SYSTEM_HTTP_METHODS = ["GET", "POST", "PUT", "DELETE"];
+const SYSTEM_ENDPOINTS = [
+    "/api/User",
+    "/api/Workflow",
+    "/api/Card",
+    "/api/Document",
+    "/api/Tool",
+    "/api/Questionnaire",
+    "/api/Auth/Login",
+    "/api/Auth/Logout",
+];
+const SYSTEM_DETAILS = {
+    access: (u) => `${u} realizou login no Woopi AI`,
+    apiCall: (u) => `${u} executou chamada de API`,
+    userCreated: (u) => `Novo usuário criado por ${u}`,
+    profileChanged: (u) => `Perfil de acesso alterado por ${u}`,
+    userManagement: (u) => `Alteração na gestão de usuários por ${u}`,
+    workflowChanged: (u) => `Esteira de processamento modificada por ${u}`,
+};
+
+function buildSystemEvents() {
+    const users = [MOCK_USER_EMAIL, "ana.silva@prototype.local", "bruno.costa@prototype.local", "carlos.lima@prototype.local"];
+    const events = [];
+    let id = 1;
+    for (let i = 0; i < 30; i++) {
+        const eventType = SYSTEM_EVENT_TYPES[i % SYSTEM_EVENT_TYPES.length];
+        const user = users[i % users.length];
+        const isApi = eventType === "apiCall";
+        const method = isApi ? SYSTEM_HTTP_METHODS[i % SYSTEM_HTTP_METHODS.length] : null;
+        const endpoint = isApi ? SYSTEM_ENDPOINTS[i % SYSTEM_ENDPOINTS.length] : null;
+        const statusCode = isApi ? (i % 5 === 0 ? 400 : 200) : null;
+        events.push({
+            eventId: id++,
+            eventType,
+            userName: user,
+            detail: SYSTEM_DETAILS[eventType]?.(user) ?? "Evento do sistema",
+            endpoint,
+            method,
+            statusCode,
+            durationMs: isApi ? 80 + (i * 37) % 500 : null,
+            ipAddress: `192.168.1.${(i * 7 + 10) % 254}`,
+            createdAt: new Date(Date.now() - i * 1_800_000).toISOString(),
+        });
+    }
+    return events;
+}
+
+export function buildAuditorSystemEvents(params = {}) {
+    const all = buildSystemEvents();
+    return buildAuditorPagedResponse(all, params);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 export function buildTypeDocList() {
     return [
         { id: 1, name: "Contrato", created: "2026-01-10T08:00:00.000Z", emailCreator: MOCK_USER_EMAIL },

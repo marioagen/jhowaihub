@@ -51,31 +51,33 @@
                         class="kanban-column-body"
                     >
                         <div v-show="step.order !== maxOrder || isLastColumnVisible">
-                            <div
-                                v-for="card in step.cards"
-                                :key="card.id"
-                                :id="card.id"
-                            >
+                            <TransitionGroup name="kanban-card" tag="div">
                                 <div
-                                    v-if="showFinalized(card.status.id, step)"
-                                    class="card-body"
+                                    v-for="card in step.cards"
+                                    :key="card.id"
+                                    :id="card.id"
                                 >
-                                    <KanbanCard
-                                        :dataCard="card"
-                                        :dataStep="step"
-                                        :isFirstStep="step.order === minOrder"
-                                        :isLoading="isLoading"
-                                        :isLastStep="isLastStep(step)"
-                                        :finalizeStatusId="finalizeStatusId"
-                                        @reload="reloadList"
-                                        @cardMoved="handleCardMoved"
-                                        @cardUpdated="handleCardUpdated"
-                                        @cardReject="handleCardReject"
-                                        label="common.analyze"
-                                        :users="users"
-                                    />
+                                    <div
+                                        v-if="showFinalized(card.status.id, step)"
+                                        class="card-body"
+                                    >
+                                        <KanbanCard
+                                            :dataCard="card"
+                                            :dataStep="step"
+                                            :isFirstStep="step.order === minOrder"
+                                            :isLoading="isLoading"
+                                            :isLastStep="isLastStep(step)"
+                                            :finalizeStatusId="finalizeStatusId"
+                                            @reload="reloadList"
+                                            @cardMoved="handleCardMoved"
+                                            @cardUpdated="handleCardUpdated"
+                                            @cardReject="handleCardReject"
+                                            label="common.analyze"
+                                            :users="users"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+                            </TransitionGroup>
                         </div>
                     </div>
                 </div>
@@ -320,5 +322,26 @@
     .badge {
         color: unset;
         background-color: var(--color-hover-transfer) !important;
+    }
+
+    /* ── Card enter transition (when card lands in new column) ── */
+    .kanban-card-enter-active {
+        animation: card-enter 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes card-enter {
+        0% {
+            opacity: 0;
+            transform: translateX(-20px) scale(0.92);
+            box-shadow: 0 0 0 3px rgba(14, 170, 66, 0.5);
+        }
+        60% {
+            box-shadow: 0 0 0 2px rgba(14, 170, 66, 0.2);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            box-shadow: 0 0 0 0 rgba(14, 170, 66, 0);
+        }
     }
 </style>

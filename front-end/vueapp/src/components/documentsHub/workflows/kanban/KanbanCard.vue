@@ -1,7 +1,7 @@
 <template>
     <div
         class="card"
-        :class="{ 'batch-card': dataCard.isBatchParent }"
+        :class="{ 'batch-card': dataCard.isBatchParent, 'card--approving': isApproving }"
     >
         <div class="card-content">
             <div class="card-body pb-0">
@@ -340,6 +340,7 @@
         emits: ["reload", "cardMoved", "cardUpdated", "cardFinalized", "cardReject"],
         data: () => ({
             isLoadingAnalysis: false,
+            isApproving: false,
             isUpdatingAssignedUser: false,
             isUnassigningUser: false,
             isFinalizing: false,
@@ -456,11 +457,19 @@
                 this.isUnassigningUser = false;
             },
             async advanceStep() {
+                if (this.isApproving) return;
                 this.isLoadingAnalysis = true;
+                this.isApproving = true;
                 try {
                     await this.updateStatus();
-                    this.reloadList();
+                    await new Promise((resolve) => setTimeout(resolve, 420));
+                    this.$emit("cardMoved", {
+                        card: this.dataCard,
+                        currentStepOrder: this.dataStep.order,
+                        nextStepOrder: this.dataStep.order + 1,
+                    });
                 } catch (e) {
+                    this.isApproving = false;
                     this.$notify({
                         title: "common.error",
                         message: "card.errorAdvancingCard",
@@ -900,5 +909,35 @@
 
     .card-reject-btn:active {
         transform: scale(0.95);
+    }
+
+    /* ── Approve exit animation ── */
+    @keyframes card-approve-exit {
+        0% {
+            transform: scale(1) translateX(0);
+            opacity: 1;
+            box-shadow: 0 0 0 0 rgba(14, 170, 66, 0);
+            border-color: var(--bs-border-color, #dee2e6);
+        }
+        25% {
+            transform: scale(1.04);
+            box-shadow: 0 0 0 4px rgba(14, 170, 66, 0.35);
+            border-color: #0eaa42;
+        }
+        60% {
+            transform: scale(1.02) translateX(10px);
+            opacity: 0.85;
+            box-shadow: 0 4px 24px rgba(14, 170, 66, 0.4);
+        }
+        100% {
+            transform: scale(0.88) translateX(48px);
+            opacity: 0;
+            box-shadow: 0 0 0 0 rgba(14, 170, 66, 0);
+        }
+    }
+
+    .card--approving {
+        animation: card-approve-exit 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        pointer-events: none;
     }
 </style>
