@@ -30,6 +30,7 @@ const portuguese = {
         askTheAi: "Pergunte a IA",
         askTheDoc: "Pergunte ao Doc",
         checkHistoric: "Ver histórico",
+        actions: "Ações",
         exportCsv: "Exportar CSV",
         exportCsvTitle: "Exportar dados das ferramentas",
         csvColumns: {

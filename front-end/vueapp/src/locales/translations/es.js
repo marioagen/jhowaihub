@@ -30,6 +30,7 @@ const spanish = {
         askTheAi: "Pregúntale a la IA",
         askTheDoc: "Preguntar al documento",
         checkHistoric: "Ver histórico",
+        actions: "Acciones",
         exportCsv: "Exportar CSV",
         exportCsvTitle: "Exportar datos de herramientas",
         csvColumns: {

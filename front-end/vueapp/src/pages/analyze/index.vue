@@ -20,30 +20,43 @@
                                     {{ $t("analyze.subtitle") }}
                                 </div>
                             </div>
-                            <button
-                                class="btn btn-outline-secondary btn-sm"
-                                type="button"
-                                @click="openDocumentHistoryModal"
-                            >
-                                <LucideIcon
-                                    icon="History"
-                                    :size="15"
-                                />
-                                {{ $t("analyze.checkHistoric") }}
-                            </button>
-                            <button
-                                class="btn btn-outline-success btn-sm"
-                                type="button"
-                                :disabled="isExportingCsv"
-                                :title="$t('analyze.exportCsvTitle')"
-                                @click="exportToolOutputsCsv"
-                            >
-                                <LucideIcon
-                                    icon="Download"
-                                    :size="15"
-                                />
-                                {{ $t("analyze.exportCsv") }}
-                            </button>
+                            <div class="analyze-actions-dropdown" :class="{ open: actionsDropdownOpen }">
+                                <button
+                                    class="analyze-actions-btn"
+                                    type="button"
+                                    @click.stop="actionsDropdownOpen = !actionsDropdownOpen"
+                                    :aria-expanded="actionsDropdownOpen"
+                                >
+                                    <LucideIcon icon="LayoutList" :size="14" class="analyze-actions-btn-icon" />
+                                    <span>{{ $t("analyze.actions") }}</span>
+                                    <LucideIcon icon="ChevronDown" :size="13" class="analyze-actions-chevron" />
+                                </button>
+                                <div class="analyze-actions-menu" @click.stop>
+                                    <button
+                                        class="analyze-actions-item"
+                                        type="button"
+                                        @click="openDocumentHistoryModal(); actionsDropdownOpen = false"
+                                    >
+                                        <span class="analyze-actions-item-icon">
+                                            <LucideIcon icon="History" :size="14" />
+                                        </span>
+                                        <span>{{ $t("analyze.checkHistoric") }}</span>
+                                    </button>
+                                    <div class="analyze-actions-divider" />
+                                    <button
+                                        class="analyze-actions-item"
+                                        type="button"
+                                        :disabled="isExportingCsv"
+                                        @click="exportToolOutputsCsv(); actionsDropdownOpen = false"
+                                    >
+                                        <span class="analyze-actions-item-icon analyze-actions-item-icon--export">
+                                            <LucideIcon icon="Download" :size="14" />
+                                        </span>
+                                        <span>{{ $t("analyze.exportCsv") }}</span>
+                                        <span v-if="isExportingCsv" class="analyze-actions-spinner" />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -346,6 +359,7 @@
                 documentAnonymizations: [],
                 isAdvancing: false,
                 isExportingCsv: false,
+                actionsDropdownOpen: false,
             };
         },
         components: {
@@ -491,6 +505,9 @@
                     query: { page: this.backPage },
                 });
             },
+            _closeActionsDropdown() {
+                this.actionsDropdownOpen = false;
+            },
             openDocumentHistoryModal() {
                 this.$refs.documentHistoryModal?.open(this.documentId, this.workflowId);
             },
@@ -552,6 +569,12 @@
                 await this.getBatchDocuments(documentBatchId);
             }
             await this.getDocumentsAnonymizationByDocument();
+        },
+        mounted() {
+            document.addEventListener("click", this._closeActionsDropdown);
+        },
+        beforeUnmount() {
+            document.removeEventListener("click", this._closeActionsDropdown);
         },
     };
 </script>
@@ -641,5 +664,139 @@
     .bg-light {
         background-color: var(--color-bg-body-content) !important;
         color: var(--color-body-content) !important;
+    }
+
+    /* ── Actions dropdown ─────────────────────────────────────────── */
+    .analyze-actions-dropdown {
+        position: relative;
+        display: inline-flex;
+    }
+
+    .analyze-actions-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 0.28rem 0.65rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid var(--color-border-form-control, #dee2e6);
+        border-radius: 6px;
+        background: var(--bs-body-bg, #fff);
+        color: var(--bs-body-color, #212529);
+        cursor: pointer;
+        transition: border-color 0.13s, box-shadow 0.13s, background-color 0.13s;
+        white-space: nowrap;
+    }
+
+    .analyze-actions-btn:hover {
+        border-color: #0d6efd;
+        color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.08);
+    }
+
+    .analyze-actions-dropdown.open .analyze-actions-btn {
+        border-color: #0d6efd;
+        color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.08);
+    }
+
+    .analyze-actions-btn-icon {
+        opacity: 0.7;
+    }
+
+    .analyze-actions-chevron {
+        opacity: 0.55;
+        transition: transform 0.18s ease;
+    }
+
+    .analyze-actions-dropdown.open .analyze-actions-chevron {
+        transform: rotate(180deg);
+    }
+
+    .analyze-actions-menu {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        min-width: 180px;
+        background: var(--bs-body-bg, #fff);
+        border: 1px solid var(--color-border-form-control, #dee2e6);
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.06);
+        z-index: 1050;
+        overflow: hidden;
+        animation: analyze-menu-pop 0.15s ease;
+    }
+
+    .analyze-actions-dropdown.open .analyze-actions-menu {
+        display: block;
+    }
+
+    @keyframes analyze-menu-pop {
+        from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .analyze-actions-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        width: 100%;
+        padding: 0.52rem 0.85rem;
+        font-size: 0.82rem;
+        font-weight: 450;
+        border: none;
+        background: transparent;
+        color: var(--bs-body-color, #212529);
+        cursor: pointer;
+        text-align: left;
+        transition: background-color 0.1s, color 0.1s;
+    }
+
+    .analyze-actions-item:hover:not(:disabled) {
+        background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.04));
+    }
+
+    .analyze-actions-item:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .analyze-actions-item-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 5px;
+        background-color: var(--bs-secondary-bg, rgba(0, 0, 0, 0.06));
+        color: var(--bs-secondary-color, #6c757d);
+        flex-shrink: 0;
+    }
+
+    .analyze-actions-item-icon--export {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+    }
+
+    .analyze-actions-divider {
+        height: 1px;
+        background-color: var(--color-border-form-control, #dee2e6);
+        margin: 0.2rem 0;
+    }
+
+    .analyze-actions-spinner {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 2px solid rgba(25, 135, 84, 0.3);
+        border-top-color: #198754;
+        border-radius: 50%;
+        animation: analyze-spin 0.7s linear infinite;
+        margin-left: auto;
+    }
+
+    @keyframes analyze-spin {
+        to { transform: rotate(360deg); }
     }
 </style>
