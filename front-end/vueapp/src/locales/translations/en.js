@@ -215,22 +215,21 @@ const english = {
                 apiTemplate: "API Template",
                 questionnaire: "Questionnaire",
             },
-            actions: { created: "Created", updated: "Updated", deleted: "Deleted" },
+            actions: { created: "Created", updated: "Updated", deleted: "Deleted", apiCall: "API call" },
         },
         system: {
             title: "System Audit",
-            subtitle: "Record of accesses, API executions and cross-cutting events in Woopi AI",
+            subtitle: "Access logs and changes to users, teams and permissions",
             filters: {
-                searchPlaceholder: "User or endpoint...",
-                allEventTypes: "All event types",
+                searchPlaceholder: "User or event detail...",
+                allDomains: "All events",
                 searchAria: "Search event",
                 clearSearch: "Clear search",
-                eventTypes: {
+                domains: {
                     access: "Access",
-                    apiCall: "API Call",
-                    userCreated: "User Created",
-                    profileChanged: "Profile Changed",
-                    userManagement: "User Management",
+                    users: "Users",
+                    teams: "Teams",
+                    permissions: "Permissions",
                 },
             },
             summary: {
@@ -238,7 +237,6 @@ const english = {
                 loadMore: "Load more",
                 eventsCount: "{count} events",
                 totalAccesses: "Accesses",
-                totalApiCalls: "API Calls",
             },
             detail: {
                 selectEvent: "Select an event to see details",
@@ -253,14 +251,14 @@ const english = {
                 details: "Details",
             },
             eventTypes: {
-                access: "Access",
-                apiCall: "API Call",
-                userCreated: "User Created",
-                profileChanged: "Profile Changed",
-                userManagement: "User Management",
-                workflowChanged: "Workflow Changed",
+                accessLogin: "Login",
+                accessLogout: "Logout",
             },
-            accessTypes: { login: "Login", logout: "Logout" },
+            actions: {
+                create: "Create",
+                update: "Update",
+                delete: "Delete",
+            },
         },
         documents: {
             title: "Document Audit",

@@ -877,8 +877,23 @@ const TOOL_NAMES = {
     apiTemplate: ["Template de Consulta", "Template de Envio", "Template de Validação"],
     questionnaire: ["Questionário de Triagem", "Questionário de Compliance", "Questionário de KYC"],
 };
-const TOOL_ACTIONS = ["created", "updated", "deleted"];
-const TOOL_USERS = [MOCK_USER_EMAIL, "ana.silva@prototype.local", "bruno.costa@prototype.local"];
+const TOOL_USER_NAMES = MOCK_USER_REFERENCES.map((user) => user.name);
+
+function findMockUserDisplayName(emailOrName) {
+    const byEmail = MOCK_USER_REFERENCES.find((user) => user.email === emailOrName);
+    if (byEmail) return byEmail.name;
+    const byName = MOCK_USER_REFERENCES.find((user) => user.name === emailOrName);
+    if (byName) return byName.name;
+    if (typeof emailOrName === "string" && emailOrName.includes("@")) {
+        const fromState = mockState.users.find((user) => user.email === emailOrName);
+        return fromState?.name ?? emailOrName.split("@")[0];
+    }
+    return emailOrName;
+}
+
+function findToolAuditItem(toolId) {
+    return buildToolAuditItems().find((item) => item.toolId === Number(toolId));
+}
 
 function buildToolAuditItems() {
     return TOOL_CATEGORIES.flatMap((cat, ci) =>
@@ -886,7 +901,7 @@ function buildToolAuditItems() {
             toolId: ci * 10 + ni + 1,
             toolName: name,
             category: cat,
-            eventCount: 3 + ni,
+            eventCount: cat === "connector" || cat === "apiTemplate" ? 6 + ni : 3 + ni,
             lastEvent: new Date(Date.now() - (ci * 3 + ni) * 3_600_000).toISOString(),
         }))
     );
@@ -902,9 +917,25 @@ function buildToolAuditEvents(toolId) {
     return actions.map((action, i) => ({
         eventId: toolId * 100 + i,
         action,
-        userName: TOOL_USERS[i % TOOL_USERS.length],
+        userName: TOOL_USER_NAMES[i % TOOL_USER_NAMES.length],
         detail: details[i],
         createdAt: new Date(Date.now() - i * 86_400_000).toISOString(),
+    }));
+}
+
+function buildToolApiCallEvents(toolId) {
+    const methods = ["GET", "POST", "PUT"];
+    const endpoints = ["/api/Tool", "/api/Connector/Execute", "/api/Template/Run"];
+    return methods.map((method, i) => ({
+        eventId: toolId * 1000 + i,
+        action: "apiCall",
+        userName: TOOL_USER_NAMES[i % TOOL_USER_NAMES.length],
+        detail: "Execução de API do Woopi AI registrada",
+        method,
+        endpoint: endpoints[i],
+        statusCode: i === 2 ? 400 : 200,
+        durationMs: 95 + i * 48,
+        createdAt: new Date(Date.now() - i * 3_600_000).toISOString(),
     }));
 }
 
@@ -913,53 +944,77 @@ export function buildAuditorToolsSummary(params = {}) {
 }
 
 export function buildAuditorToolsDetail(toolId) {
-    return buildToolAuditEvents(Number(toolId) || 1);
+    const id = Number(toolId) || 1;
+    const meta = findToolAuditItem(id);
+    const baseEvents = buildToolAuditEvents(id);
+    if (meta?.category === "connector" || meta?.category === "apiTemplate") {
+        return [...baseEvents, ...buildToolApiCallEvents(id)];
+    }
+    return baseEvents;
 }
 
 // ── System audit mock ─────────────────────────────────────────────────────────
 
-const SYSTEM_EVENT_TYPES = ["access", "apiCall", "userCreated", "profileChanged", "userManagement", "workflowChanged"];
-const SYSTEM_HTTP_METHODS = ["GET", "POST", "PUT", "DELETE"];
-const SYSTEM_ENDPOINTS = [
-    "/api/User",
-    "/api/Workflow",
-    "/api/Card",
-    "/api/Document",
-    "/api/Tool",
-    "/api/Questionnaire",
-    "/api/Auth/Login",
-    "/api/Auth/Logout",
+const SYSTEM_EVENT_TEMPLATES = [
+    { eventType: "accessLogin", buildDetail: (actor) => `${actor} entrou no Woopi AI` },
+    { eventType: "accessLogout", buildDetail: (actor) => `${actor} encerrou a sessão` },
+    {
+        eventType: "userCreated",
+        buildDetail: (actor) => `${actor} criou o usuário "Carla Mendes"`,
+    },
+    {
+        eventType: "userUpdated",
+        buildDetail: (actor) => `${actor} atualizou dados do usuário "Bruno Costa"`,
+    },
+    {
+        eventType: "userDeleted",
+        buildDetail: (actor) => `${actor} excluiu o usuário "Diego Alves"`,
+    },
+    {
+        eventType: "teamCreated",
+        buildDetail: (actor) => `${actor} criou o time "Equipe Financeiro"`,
+    },
+    {
+        eventType: "teamUpdated",
+        buildDetail: (actor) => `${actor} alterou membros do time "Equipe Jurídico"`,
+    },
+    {
+        eventType: "teamDeleted",
+        buildDetail: (actor) => `${actor} removeu o time "Equipe Operações"`,
+    },
+    {
+        eventType: "permissionCreated",
+        buildDetail: (actor) => `${actor} criou o perfil de permissão "Auditor"`,
+    },
+    {
+        eventType: "permissionUpdated",
+        buildDetail: (actor) => `${actor} alterou permissões do perfil "Analista"`,
+    },
+    {
+        eventType: "permissionDeleted",
+        buildDetail: (actor) => `${actor} excluiu o perfil de permissão "Convidado"`,
+    },
 ];
-const SYSTEM_DETAILS = {
-    access: (u) => `${u} realizou login no Woopi AI`,
-    apiCall: (u) => `${u} executou chamada de API`,
-    userCreated: (u) => `Novo usuário criado por ${u}`,
-    profileChanged: (u) => `Perfil de acesso alterado por ${u}`,
-    userManagement: (u) => `Alteração na gestão de usuários por ${u}`,
-    workflowChanged: (u) => `Esteira de processamento modificada por ${u}`,
-};
 
 function buildSystemEvents() {
-    const users = [MOCK_USER_EMAIL, "ana.silva@prototype.local", "bruno.costa@prototype.local", "carlos.lima@prototype.local"];
+    const userEmails = MOCK_USER_REFERENCES.map((user) => user.email);
     const events = [];
     let id = 1;
-    for (let i = 0; i < 30; i++) {
-        const eventType = SYSTEM_EVENT_TYPES[i % SYSTEM_EVENT_TYPES.length];
-        const user = users[i % users.length];
-        const isApi = eventType === "apiCall";
-        const method = isApi ? SYSTEM_HTTP_METHODS[i % SYSTEM_HTTP_METHODS.length] : null;
-        const endpoint = isApi ? SYSTEM_ENDPOINTS[i % SYSTEM_ENDPOINTS.length] : null;
-        const statusCode = isApi ? (i % 5 === 0 ? 400 : 200) : null;
+    for (let i = 0; i < 33; i++) {
+        const template = SYSTEM_EVENT_TEMPLATES[i % SYSTEM_EVENT_TEMPLATES.length];
+        const email = userEmails[i % userEmails.length];
+        const displayName = findMockUserDisplayName(email);
+        const isAccess = template.eventType.startsWith("access");
         events.push({
             eventId: id++,
-            eventType,
-            userName: user,
-            detail: SYSTEM_DETAILS[eventType]?.(user) ?? "Evento do sistema",
-            endpoint,
-            method,
-            statusCode,
-            durationMs: isApi ? 80 + (i * 37) % 500 : null,
-            ipAddress: `192.168.1.${(i * 7 + 10) % 254}`,
+            eventType: template.eventType,
+            userName: displayName,
+            detail: template.buildDetail(displayName),
+            endpoint: null,
+            method: null,
+            statusCode: null,
+            durationMs: null,
+            ipAddress: isAccess ? `192.168.1.${(i * 7 + 10) % 254}` : null,
             createdAt: new Date(Date.now() - i * 1_800_000).toISOString(),
         });
     }

@@ -35,7 +35,7 @@
 
                     <!-- Stats row -->
                     <div class="row g-2 mb-3">
-                        <div class="col-4" v-for="stat in statCards" :key="stat.label">
+                        <div class="col-6 col-md-3" v-for="stat in statCards" :key="stat.label">
                             <div class="rounded-2 p-2 border d-flex flex-column align-items-center text-center tool-stat-card">
                                 <LucideIcon :icon="stat.icon" :size="18" class="mb-1" :class="stat.iconClass" />
                                 <span class="fw-bold">{{ stat.value }}</span>
@@ -74,12 +74,27 @@
                             </span>
                             <div class="flex-grow-1 min-w-0">
                                 <div class="d-flex align-items-center gap-1 flex-wrap mb-1">
-                                    <span class="small fw-semibold">{{ entry.userName }}</span>
+                                    <span class="small fw-semibold">{{ formatUserName(entry.userName) }}</span>
                                     <span class="badge rounded-pill" :class="actionBadgeClass(entry.action)" style="font-size:0.62rem">
-                                        {{ $t(`auditor.tools.actions.${entry.action}`) }}
+                                        {{ actionLabel(entry.action) }}
                                     </span>
                                 </div>
                                 <div class="small text-muted mb-1">{{ entry.detail }}</div>
+                                <div
+                                    v-if="entry.endpoint"
+                                    class="tool-endpoint-tag d-inline-flex align-items-center gap-1 rounded-1 px-2 py-0 mb-1"
+                                >
+                                    <span class="tool-method-badge" :class="methodClass(entry.method)">{{ entry.method }}</span>
+                                    <code class="text-muted small">{{ entry.endpoint }}</code>
+                                    <span
+                                        v-if="entry.statusCode"
+                                        class="badge rounded-pill ms-1"
+                                        :class="statusBadgeClass(entry.statusCode)"
+                                        style="font-size:0.6rem"
+                                    >
+                                        {{ entry.statusCode }}
+                                    </span>
+                                </div>
                                 <div class="small text-muted d-flex align-items-center gap-1">
                                     <LucideIcon icon="Clock" :size="11" />
                                     {{ formatDate(entry.createdAt) }}
@@ -102,9 +117,19 @@
 
     const CAT_ICONS = { agent: "Bot", connector: "Plug", apiTemplate: "FileCode", questionnaire: "ClipboardList" };
     const CAT_BADGE = { agent: "badge-agent", connector: "badge-connector", apiTemplate: "badge-api", questionnaire: "badge-quiz" };
-    const ACTION_ICONS = { created: "Plus", updated: "Pencil", deleted: "Trash2" };
-    const ACTION_BG = { created: "icon-bg-created", updated: "icon-bg-updated", deleted: "icon-bg-deleted" };
-    const ACTION_BADGE = { created: "badge-created", updated: "badge-updated", deleted: "badge-deleted" };
+    const ACTION_ICONS = { created: "Plus", updated: "Pencil", deleted: "Trash2", apiCall: "Zap" };
+    const ACTION_BG = {
+        created: "icon-bg-created",
+        updated: "icon-bg-updated",
+        deleted: "icon-bg-deleted",
+        apiCall: "icon-bg-api",
+    };
+    const ACTION_BADGE = {
+        created: "badge-created",
+        updated: "badge-updated",
+        deleted: "badge-deleted",
+        apiCall: "badge-api-call",
+    };
 
     export default {
         name: "AuditorToolsDetail",
@@ -128,11 +153,16 @@
             },
             statCards() {
                 const t = this.$t;
-                const counts = this.events.reduce((acc, e) => { acc[e.action] = (acc[e.action] || 0) + 1; return acc; }, {});
+                const counts = this.events.reduce((acc, e) => {
+                    const key = e.action || "updated";
+                    acc[key] = (acc[key] || 0) + 1;
+                    return acc;
+                }, {});
                 return [
                     { icon: "Plus", iconClass: "text-success", label: t("auditor.tools.actions.created"), value: counts.created ?? 0 },
                     { icon: "Pencil", iconClass: "text-warning", label: t("auditor.tools.actions.updated"), value: counts.updated ?? 0 },
                     { icon: "Trash2", iconClass: "text-danger", label: t("auditor.tools.actions.deleted"), value: counts.deleted ?? 0 },
+                    { icon: "Zap", iconClass: "text-primary", label: t("auditor.tools.actions.apiCall"), value: counts.apiCall ?? 0 },
                 ];
             },
         },
@@ -143,6 +173,32 @@
             actionIcon(action) { return ACTION_ICONS[action] ?? "Activity"; },
             actionIconBg(action) { return ACTION_BG[action] ?? ""; },
             actionBadgeClass(action) { return ACTION_BADGE[action] ?? ""; },
+            actionLabel(action) {
+                const key = `auditor.tools.actions.${action}`;
+                const translated = this.$t(key);
+                return translated !== key ? translated : action;
+            },
+            formatUserName(value) {
+                if (!value) return "—";
+                if (typeof value === "string" && value.includes("@")) {
+                    const local = value.split("@")[0].replace(/\./g, " ");
+                    return local.replace(/\b\w/g, (char) => char.toUpperCase());
+                }
+                return value;
+            },
+            methodClass(method) {
+                const m = (method || "").toUpperCase();
+                if (m === "GET") return "method-get";
+                if (m === "POST") return "method-post";
+                if (m === "PUT") return "method-put";
+                if (m === "DELETE") return "method-delete";
+                return "method-other";
+            },
+            statusBadgeClass(code) {
+                if (code >= 200 && code < 300) return "bg-success-subtle text-success";
+                if (code >= 400 && code < 500) return "bg-warning-subtle text-warning";
+                return "bg-danger-subtle text-danger";
+            },
             formatDate(d) { return dateHelper.formatDateWithTime(d) || "—"; },
             toggleOrder() { this.orderDescending = !this.orderDescending; },
             async refresh() {
@@ -175,6 +231,7 @@
     .icon-bg-created { background-color: rgba(16,185,129,0.12); color: #059669; }
     .icon-bg-updated { background-color: rgba(245,158,11,0.12); color: #d97706; }
     .icon-bg-deleted { background-color: rgba(239,68,68,0.12); color: #dc2626; }
+    .icon-bg-api { background-color: rgba(99,102,241,0.12); color: #6366f1; }
     .badge-agent    { background-color: rgba(99,102,241,0.12); color: #6366f1; }
     .badge-connector{ background-color: rgba(16,185,129,0.12); color: #059669; }
     .badge-api      { background-color: rgba(245,158,11,0.12); color: #d97706; }
@@ -182,5 +239,20 @@
     .badge-created  { background-color: rgba(16,185,129,0.12); color: #059669; }
     .badge-updated  { background-color: rgba(245,158,11,0.12); color: #d97706; }
     .badge-deleted  { background-color: rgba(239,68,68,0.12); color: #dc2626; }
+    .badge-api-call { background-color: rgba(99,102,241,0.12); color: #6366f1; }
+    .tool-endpoint-tag {
+        background-color: var(--bs-tertiary-bg, rgba(0,0,0,0.04));
+        border: 1px solid var(--color-border-form-control, #dee2e6);
+        font-size: 0.65rem;
+    }
+    .tool-method-badge {
+        font-size: 0.6rem; font-weight: 700; padding: 0.1rem 0.3rem;
+        border-radius: 3px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .method-get    { background-color: rgba(16,185,129,0.15); color: #059669; }
+    .method-post   { background-color: rgba(59,130,246,0.15); color: #2563eb; }
+    .method-put    { background-color: rgba(245,158,11,0.15); color: #d97706; }
+    .method-delete { background-color: rgba(239,68,68,0.15); color: #dc2626; }
+    .method-other  { background-color: rgba(100,116,139,0.15); color: #64748b; }
     .border { border: 1px solid var(--color-border-form-control) !important; }
 </style>

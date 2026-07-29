@@ -29,14 +29,12 @@
                     @input="applyFilters"
                 />
             </div>
-            <select v-model="eventTypeFilter" class="form-select form-select-sm system-type-filter" @change="applyFilters">
-                <option value="">{{ $t("auditor.system.filters.allEventTypes") }}</option>
-                <option value="access">{{ $t("auditor.system.eventTypes.access") }}</option>
-                <option value="apiCall">{{ $t("auditor.system.eventTypes.apiCall") }}</option>
-                <option value="userCreated">{{ $t("auditor.system.eventTypes.userCreated") }}</option>
-                <option value="profileChanged">{{ $t("auditor.system.eventTypes.profileChanged") }}</option>
-                <option value="userManagement">{{ $t("auditor.system.eventTypes.userManagement") }}</option>
-                <option value="workflowChanged">{{ $t("auditor.system.eventTypes.workflowChanged") }}</option>
+            <select v-model="domainFilter" class="form-select form-select-sm system-type-filter" @change="applyFilters">
+                <option value="">{{ $t("auditor.system.filters.allDomains") }}</option>
+                <option value="access">{{ $t("auditor.system.filters.domains.access") }}</option>
+                <option value="users">{{ $t("auditor.system.filters.domains.users") }}</option>
+                <option value="teams">{{ $t("auditor.system.filters.domains.teams") }}</option>
+                <option value="permissions">{{ $t("auditor.system.filters.domains.permissions") }}</option>
             </select>
             <button type="button" class="btn btn-light btn-sm border py-1 px-2 d-flex align-items-center gap-1" style="font-size:0.72rem" @click="toggleOrder">
                 <LucideIcon icon="ArrowUpDown" :size="11" />
@@ -65,10 +63,13 @@
                 <!-- Center: main info -->
                 <div class="flex-grow-1 min-w-0">
                     <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
-                        <span class="badge rounded-pill system-event-badge" :class="eventBadgeClass(entry.eventType)" style="font-size:0.62rem">
-                            {{ $t(`auditor.system.eventTypes.${entry.eventType}`) }}
+                        <span class="badge rounded-pill system-event-badge system-domain-badge" style="font-size:0.62rem">
+                            {{ eventDomainLabel(entry.eventType) }}
                         </span>
-                        <span class="small fw-semibold text-truncate">{{ entry.userName }}</span>
+                        <span class="badge rounded-pill system-event-badge" :class="eventBadgeClass(entry.eventType)" style="font-size:0.62rem">
+                            {{ eventActionLabel(entry.eventType) }}
+                        </span>
+                        <span class="small fw-semibold text-truncate">{{ formatUserName(entry.userName) }}</span>
                     </div>
                     <div class="small text-body mb-1 system-event-detail">{{ entry.detail }}</div>
                     <div v-if="entry.endpoint" class="system-endpoint-tag d-inline-flex align-items-center gap-1 rounded-1 px-2 py-0" style="font-size:0.65rem">
@@ -86,8 +87,8 @@
                     <span v-if="entry.statusCode" class="badge rounded-pill" :class="statusBadgeClass(entry.statusCode)" style="font-size:0.6rem">
                         {{ entry.statusCode }}
                     </span>
-                    <span v-if="entry.durationMs != null" class="small text-muted" style="font-size:0.65rem">
-                        {{ entry.durationMs }}ms
+                    <span v-if="entry.ipAddress" class="small text-muted" style="font-size:0.65rem">
+                        IP {{ entry.ipAddress }}
                     </span>
                 </div>
             </div>
@@ -105,30 +106,62 @@
     import AuditorsService from "@/services/auditors/AuditorsService";
     import dateHelper from "@/helpers/date.js";
 
+    const LEGACY_EVENT_TYPES = new Set([
+        "access",
+        "apiCall",
+        "profileChanged",
+        "userManagement",
+        "workflowChanged",
+    ]);
+
     const EVENT_ICONS = {
-        access: "LogIn",
-        apiCall: "Zap",
+        accessLogin: "LogIn",
+        accessLogout: "LogOut",
         userCreated: "UserPlus",
-        profileChanged: "UserCog",
-        userManagement: "Users",
-        workflowChanged: "Workflow",
+        userUpdated: "UserCog",
+        userDeleted: "UserMinus",
+        teamCreated: "UsersRound",
+        teamUpdated: "Users",
+        teamDeleted: "UserX",
+        permissionCreated: "ShieldCheck",
+        permissionUpdated: "Shield",
+        permissionDeleted: "ShieldX",
     };
     const EVENT_BG = {
-        access: "ev-bg-access",
-        apiCall: "ev-bg-api",
+        accessLogin: "ev-bg-access",
+        accessLogout: "ev-bg-access-out",
         userCreated: "ev-bg-user",
-        profileChanged: "ev-bg-profile",
-        userManagement: "ev-bg-mgmt",
-        workflowChanged: "ev-bg-workflow",
+        userUpdated: "ev-bg-user",
+        userDeleted: "ev-bg-user-del",
+        teamCreated: "ev-bg-team",
+        teamUpdated: "ev-bg-team",
+        teamDeleted: "ev-bg-team-del",
+        permissionCreated: "ev-bg-perm",
+        permissionUpdated: "ev-bg-perm",
+        permissionDeleted: "ev-bg-perm-del",
     };
     const EVENT_BADGE = {
-        access: "ev-badge-access",
-        apiCall: "ev-badge-api",
+        accessLogin: "ev-badge-access",
+        accessLogout: "ev-badge-access-out",
         userCreated: "ev-badge-user",
-        profileChanged: "ev-badge-profile",
-        userManagement: "ev-badge-mgmt",
-        workflowChanged: "ev-badge-workflow",
+        userUpdated: "ev-badge-user",
+        userDeleted: "ev-badge-user-del",
+        teamCreated: "ev-badge-team",
+        teamUpdated: "ev-badge-team",
+        teamDeleted: "ev-badge-team-del",
+        permissionCreated: "ev-badge-perm",
+        permissionUpdated: "ev-badge-perm",
+        permissionDeleted: "ev-badge-perm-del",
     };
+
+    function systemEventDomain(eventType) {
+        if (!eventType) return "";
+        if (eventType.startsWith("access")) return "access";
+        if (eventType.startsWith("user")) return "users";
+        if (eventType.startsWith("team")) return "teams";
+        if (eventType.startsWith("permission")) return "permissions";
+        return "";
+    }
 
     export default {
         name: "AuditorSystemSection",
@@ -138,7 +171,7 @@
                 isLoading: false,
                 allEvents: [],
                 search: "",
-                eventTypeFilter: "",
+                domainFilter: "",
                 orderDescending: true,
                 take: 20,
                 skip: 0,
@@ -147,36 +180,50 @@
         },
         computed: {
             displayedEvents() {
-                let list = [...this.allEvents];
+                let list = this.allEvents.filter((e) => !LEGACY_EVENT_TYPES.has(e.eventType));
                 if (this.search) {
                     const q = this.search.toLowerCase();
                     list = list.filter(
                         (e) =>
                             e.userName?.toLowerCase().includes(q) ||
-                            e.detail?.toLowerCase().includes(q) ||
-                            e.endpoint?.toLowerCase().includes(q)
+                            e.detail?.toLowerCase().includes(q)
                     );
                 }
-                if (this.eventTypeFilter) {
-                    list = list.filter((e) => e.eventType === this.eventTypeFilter);
+                if (this.domainFilter) {
+                    list = list.filter((e) => systemEventDomain(e.eventType) === this.domainFilter);
                 }
                 return this.orderDescending ? list : [...list].reverse();
             },
             kpiCards() {
                 const t = this.$t;
-                const accesses = this.allEvents.filter((e) => e.eventType === "access").length;
-                const apiCalls = this.allEvents.filter((e) => e.eventType === "apiCall").length;
-                const userEvents = this.allEvents.filter((e) =>
-                    ["userCreated", "profileChanged", "userManagement"].includes(e.eventType)
-                ).length;
-                const workflowEvents = this.allEvents.filter(
-                    (e) => e.eventType === "workflowChanged"
-                ).length;
+                const relevant = this.allEvents.filter((e) => !LEGACY_EVENT_TYPES.has(e.eventType));
+                const countDomain = (domain) =>
+                    relevant.filter((e) => systemEventDomain(e.eventType) === domain).length;
                 return [
-                    { icon: "LogIn", iconBg: "ev-bg-access", label: t("auditor.system.summary.totalAccesses"), value: accesses },
-                    { icon: "Zap", iconBg: "ev-bg-api", label: t("auditor.system.summary.totalApiCalls"), value: apiCalls },
-                    { icon: "Users", iconBg: "ev-bg-user", label: t("auditor.system.eventTypes.userManagement"), value: userEvents },
-                    { icon: "Workflow", iconBg: "ev-bg-workflow", label: t("auditor.system.eventTypes.workflowChanged"), value: workflowEvents },
+                    {
+                        icon: "LogIn",
+                        iconBg: "ev-bg-access",
+                        label: t("auditor.system.summary.totalAccesses"),
+                        value: countDomain("access"),
+                    },
+                    {
+                        icon: "Users",
+                        iconBg: "ev-bg-user",
+                        label: t("auditor.system.filters.domains.users"),
+                        value: countDomain("users"),
+                    },
+                    {
+                        icon: "UsersRound",
+                        iconBg: "ev-bg-team",
+                        label: t("auditor.system.filters.domains.teams"),
+                        value: countDomain("teams"),
+                    },
+                    {
+                        icon: "Shield",
+                        iconBg: "ev-bg-perm",
+                        label: t("auditor.system.filters.domains.permissions"),
+                        value: countDomain("permissions"),
+                    },
                 ];
             },
         },
@@ -184,7 +231,35 @@
             eventIcon(type) { return EVENT_ICONS[type] ?? "Activity"; },
             eventIconBg(type) { return EVENT_BG[type] ?? ""; },
             eventBadgeClass(type) { return EVENT_BADGE[type] ?? ""; },
+            eventDomainLabel(eventType) {
+                const domain = systemEventDomain(eventType);
+                if (!domain) return eventType;
+                const key = `auditor.system.filters.domains.${domain}`;
+                const translated = this.$t(key);
+                return translated !== key ? translated : domain;
+            },
+            eventActionLabel(eventType) {
+                if (eventType === "accessLogin" || eventType === "accessLogout") {
+                    const key = `auditor.system.eventTypes.${eventType}`;
+                    const translated = this.$t(key);
+                    return translated !== key ? translated : eventType;
+                }
+                if (eventType.endsWith("Created")) return this.$t("auditor.system.actions.create");
+                if (eventType.endsWith("Updated")) return this.$t("auditor.system.actions.update");
+                if (eventType.endsWith("Deleted")) return this.$t("auditor.system.actions.delete");
+                const key = `auditor.system.eventTypes.${eventType}`;
+                const translated = this.$t(key);
+                return translated !== key ? translated : eventType;
+            },
             formatDate(d) { return dateHelper.formatDateWithTime(d) || "—"; },
+            formatUserName(value) {
+                if (!value) return "—";
+                if (typeof value === "string" && value.includes("@")) {
+                    const local = value.split("@")[0].replace(/\./g, " ");
+                    return local.replace(/\b\w/g, (char) => char.toUpperCase());
+                }
+                return value;
+            },
             toggleOrder() { this.orderDescending = !this.orderDescending; },
             applyFilters() { /* client-side, displayedEvents handles it */ },
             methodClass(method) {
@@ -264,7 +339,25 @@
     .ev-badge-user     { background-color: rgba(16,185,129,0.12); color: #059669; }
     .ev-badge-profile  { background-color: rgba(245,158,11,0.12); color: #d97706; }
     .ev-badge-mgmt     { background-color: rgba(236,72,153,0.12); color: #db2777; }
-    .ev-badge-workflow { background-color: rgba(139,92,246,0.12); color: #7c3aed; }
+    .ev-bg-access-out { background-color: rgba(100,116,139,0.12); color: #64748b; }
+    .ev-bg-user-del { background-color: rgba(239,68,68,0.12); color: #dc2626; }
+    .ev-bg-team     { background-color: rgba(139,92,246,0.12); color: #7c3aed; }
+    .ev-bg-team-del { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
+    .ev-bg-perm     { background-color: rgba(14,165,233,0.12); color: #0284c7; }
+    .ev-bg-perm-del { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
+
+    .ev-badge-access-out { background-color: rgba(100,116,139,0.12); color: #64748b; }
+    .ev-badge-user-del { background-color: rgba(239,68,68,0.12); color: #dc2626; }
+    .ev-badge-team     { background-color: rgba(139,92,246,0.12); color: #7c3aed; }
+    .ev-badge-team-del { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
+    .ev-badge-perm     { background-color: rgba(14,165,233,0.12); color: #0284c7; }
+    .ev-badge-perm-del { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
+
+    .system-domain-badge {
+        background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.06));
+        color: var(--bs-secondary-color, #64748b);
+        font-weight: 600;
+    }
 
     .border { border: 1px solid var(--color-border-form-control) !important; }
 </style>

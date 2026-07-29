@@ -205,22 +205,22 @@ const portuguese = {
                 created: "Criado",
                 updated: "Atualizado",
                 deleted: "Excluído",
+                apiCall: "Chamada de API",
             },
         },
         system: {
             title: "Auditoria do Sistema",
-            subtitle: "Registro de acessos, execuções de API e eventos transversais do Woopi AI",
+            subtitle: "Registro de acessos e alterações em usuários, times e permissões",
             filters: {
-                searchPlaceholder: "Usuário ou endpoint...",
-                allEventTypes: "Todos os eventos",
+                searchPlaceholder: "Usuário ou detalhe do evento...",
+                allDomains: "Todos os eventos",
                 searchAria: "Buscar evento",
                 clearSearch: "Limpar busca",
-                eventTypes: {
-                    access: "Acesso",
-                    apiCall: "Chamada de API",
-                    userCreated: "Usuário criado",
-                    profileChanged: "Perfil alterado",
-                    userManagement: "Gestão de usuários",
+                domains: {
+                    access: "Acessos",
+                    users: "Usuários",
+                    teams: "Times",
+                    permissions: "Permissões",
                 },
             },
             summary: {
@@ -228,7 +228,6 @@ const portuguese = {
                 loadMore: "Carregar mais",
                 eventsCount: "{count} eventos",
                 totalAccesses: "Acessos",
-                totalApiCalls: "Chamadas de API",
             },
             detail: {
                 selectEvent: "Selecione um evento para ver os detalhes",
@@ -243,16 +242,13 @@ const portuguese = {
                 details: "Detalhes",
             },
             eventTypes: {
-                access: "Acesso",
-                apiCall: "Chamada de API",
-                userCreated: "Usuário Criado",
-                profileChanged: "Perfil Alterado",
-                userManagement: "Gestão de Usuários",
-                workflowChanged: "Esteira Alterada",
+                accessLogin: "Login",
+                accessLogout: "Logout",
             },
-            accessTypes: {
-                login: "Login",
-                logout: "Logout",
+            actions: {
+                create: "Criar",
+                update: "Alterar",
+                delete: "Excluir",
             },
         },
         documents: {

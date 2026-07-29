@@ -218,22 +218,21 @@ const spanish = {
                 apiTemplate: "Plantilla de API",
                 questionnaire: "Cuestionario",
             },
-            actions: { created: "Creado", updated: "Actualizado", deleted: "Eliminado" },
+            actions: { created: "Creado", updated: "Actualizado", deleted: "Eliminado", apiCall: "Llamada de API" },
         },
         system: {
             title: "Auditoría del Sistema",
-            subtitle: "Registro de accesos, ejecuciones de API y eventos transversales de Woopi AI",
+            subtitle: "Registro de accesos y cambios en usuarios, equipos y permisos",
             filters: {
-                searchPlaceholder: "Usuario o endpoint...",
-                allEventTypes: "Todos los tipos",
+                searchPlaceholder: "Usuario o detalle del evento...",
+                allDomains: "Todos los eventos",
                 searchAria: "Buscar evento",
                 clearSearch: "Limpiar búsqueda",
-                eventTypes: {
-                    access: "Acceso",
-                    apiCall: "Llamada de API",
-                    userCreated: "Usuario creado",
-                    profileChanged: "Perfil modificado",
-                    userManagement: "Gestión de usuarios",
+                domains: {
+                    access: "Accesos",
+                    users: "Usuarios",
+                    teams: "Equipos",
+                    permissions: "Permisos",
                 },
             },
             summary: {
@@ -241,7 +240,6 @@ const spanish = {
                 loadMore: "Cargar más",
                 eventsCount: "{count} eventos",
                 totalAccesses: "Accesos",
-                totalApiCalls: "Llamadas de API",
             },
             detail: {
                 selectEvent: "Seleccione un evento para ver los detalles",
@@ -256,14 +254,14 @@ const spanish = {
                 details: "Detalles",
             },
             eventTypes: {
-                access: "Acceso",
-                apiCall: "Llamada de API",
-                userCreated: "Usuario Creado",
-                profileChanged: "Perfil Modificado",
-                userManagement: "Gestión de Usuarios",
-                workflowChanged: "Flujo Modificado",
+                accessLogin: "Inicio de sesión",
+                accessLogout: "Cierre de sesión",
             },
-            accessTypes: { login: "Inicio de sesión", logout: "Cierre de sesión" },
+            actions: {
+                create: "Crear",
+                update: "Modificar",
+                delete: "Eliminar",
+            },
         },
         documents: {
             title: "Auditoría de documentos",
