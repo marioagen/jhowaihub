@@ -20,43 +20,6 @@
                                     {{ $t("analyze.subtitle") }}
                                 </div>
                             </div>
-                            <div class="analyze-actions-dropdown" :class="{ open: actionsDropdownOpen }">
-                                <button
-                                    class="analyze-actions-btn"
-                                    type="button"
-                                    @click.stop="actionsDropdownOpen = !actionsDropdownOpen"
-                                    :aria-expanded="actionsDropdownOpen"
-                                >
-                                    <LucideIcon icon="LayoutList" :size="14" class="analyze-actions-btn-icon" />
-                                    <span>{{ $t("analyze.actions") }}</span>
-                                    <LucideIcon icon="ChevronDown" :size="13" class="analyze-actions-chevron" />
-                                </button>
-                                <div class="analyze-actions-menu" @click.stop>
-                                    <button
-                                        class="analyze-actions-item"
-                                        type="button"
-                                        @click="openDocumentHistoryModal(); actionsDropdownOpen = false"
-                                    >
-                                        <span class="analyze-actions-item-icon">
-                                            <LucideIcon icon="History" :size="14" />
-                                        </span>
-                                        <span>{{ $t("analyze.checkHistoric") }}</span>
-                                    </button>
-                                    <div class="analyze-actions-divider" />
-                                    <button
-                                        class="analyze-actions-item"
-                                        type="button"
-                                        :disabled="isExportingCsv"
-                                        @click="exportToolOutputsCsv(); actionsDropdownOpen = false"
-                                    >
-                                        <span class="analyze-actions-item-icon analyze-actions-item-icon--export">
-                                            <LucideIcon icon="Download" :size="14" />
-                                        </span>
-                                        <span>{{ $t("analyze.exportCsv") }}</span>
-                                        <span v-if="isExportingCsv" class="analyze-actions-spinner" />
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -125,6 +88,44 @@
                                     <LucideIcon icon="ShieldCheck" />
                                     {{ $t("analyze.anonymizeDocument") }}
                                 </button>
+
+                                <div class="analyze-actions-dropdown" :class="{ open: actionsDropdownOpen }">
+                                    <button
+                                        class="analyze-actions-btn"
+                                        type="button"
+                                        @click.stop="actionsDropdownOpen = !actionsDropdownOpen"
+                                        :aria-expanded="actionsDropdownOpen"
+                                    >
+                                        <LucideIcon icon="LayoutList" :size="14" class="analyze-actions-btn-icon" />
+                                        <span>{{ $t("analyze.actions") }}</span>
+                                        <LucideIcon icon="ChevronDown" :size="13" class="analyze-actions-chevron" />
+                                    </button>
+                                    <div class="analyze-actions-menu analyze-actions-menu--right" @click.stop>
+                                        <button
+                                            class="analyze-actions-item"
+                                            type="button"
+                                            @click="openDocumentHistoryModal(); actionsDropdownOpen = false"
+                                        >
+                                            <span class="analyze-actions-item-icon">
+                                                <LucideIcon icon="History" :size="14" />
+                                            </span>
+                                            <span>{{ $t("analyze.checkHistoric") }}</span>
+                                        </button>
+                                        <div class="analyze-actions-divider" />
+                                        <button
+                                            class="analyze-actions-item"
+                                            type="button"
+                                            :disabled="isExportingCsv"
+                                            @click="exportToolOutputsCsv(); actionsDropdownOpen = false"
+                                        >
+                                            <span class="analyze-actions-item-icon analyze-actions-item-icon--export">
+                                                <LucideIcon icon="Download" :size="14" />
+                                            </span>
+                                            <span>{{ $t("analyze.exportCsv") }}</span>
+                                            <span v-if="isExportingCsv" class="analyze-actions-spinner" />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -730,6 +731,11 @@
 
     .analyze-actions-dropdown.open .analyze-actions-menu {
         display: block;
+    }
+
+    .analyze-actions-menu--right {
+        left: auto;
+        right: 0;
     }
 
     @keyframes analyze-menu-pop {
