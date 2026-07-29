@@ -86,6 +86,19 @@
                     >
                         <LucideIcon icon="Search" />
                     </a>
+                    <a
+                        :class="[actionClass, exportingRowId === data.row.id ? 'disabled-action' : '']"
+                        class="text-secondary"
+                        @click="exportRowAsCsv(data.row)"
+                        v-tooltip="$t('documents.exportCsv')"
+                    >
+                        <span
+                            v-if="exportingRowId === data.row.id"
+                            class="spinner-border spinner-border-sm"
+                            role="status"
+                        />
+                        <LucideIcon v-else icon="Download" />
+                    </a>
                 </ActionTableListComponent>
             </template>
         </TableComponent>
@@ -126,6 +139,7 @@
     import ActionTableListComponent from "@/components/global/ActionTableListComponent.vue";
     import DocumentWorkflowListModal from "@/components/documentsHub/documents/modals/DocumentWorkflowListModal.vue";
     import DocumentAnonymizationsModal from "@/components/analyze/modals/DocumentAnonymizationsModal.vue";
+    import { downloadCsv } from "@/helpers/csvHelper";
 
     export default {
         name: "DocumentsTable",
@@ -189,6 +203,7 @@
             isDeleting: false,
             docDataEmbedding: {},
             selectedDocumentId: null,
+            exportingRowId: null,
         }),
         methods: {
             getDocuments() {
@@ -302,6 +317,34 @@
                 this.table.pagination.currentPage = page;
                 this.getDocuments();
             },
+            async exportRowAsCsv(row) {
+                if (this.exportingRowId === row.id) return;
+                this.exportingRowId = row.id;
+                try {
+                    const columns = [
+                        { key: "name",           header: this.$t("documents.csvColumns.name") },
+                        { key: "description",    header: this.$t("documents.csvColumns.description") },
+                        { key: "uploadDate",     header: this.$t("documents.csvColumns.uploadDate") },
+                        { key: "workflows",      header: this.$t("documents.csvColumns.workflows") },
+                        { key: "anonymizations", header: this.$t("documents.csvColumns.anonymizations") },
+                    ];
+
+                    const exportRow = {
+                        name:           row.name ?? "",
+                        description:    row.description ?? "",
+                        uploadDate:     row.created ? this.formatDate(row.created) : "",
+                        workflows:      (row.workflowProgress ?? [])
+                            .map((w) => `${w.workflowName} (${w.currentStep}/${w.totalSteps})`)
+                            .join("; "),
+                        anonymizations: row.anonymizationAmount ?? 0,
+                    };
+
+                    const filename = (row.name ?? "documento").replace(/\.[^.]+$/, "");
+                    downloadCsv([exportRow], columns, filename);
+                } finally {
+                    this.exportingRowId = null;
+                }
+            },
             openAnonymizationsModal(documentId) {
                 AnonymizationServices.getDocumentAnonymizations(documentId).then((response) => {
                     if (response && !response.error) {
@@ -404,5 +447,10 @@
 
     .delete-button:not(:disabled) ~ .delete-tooltip {
         display: none !important;
+    }
+
+    .disabled-action {
+        pointer-events: none;
+        opacity: 0.45;
     }
 </style>
