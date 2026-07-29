@@ -68,27 +68,6 @@
                                 </span>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                <button
-                                    v-if="documentAnonymizations.length > 0"
-                                    class="btn btn-outline-success btn-sm"
-                                    @click="openDocumentAnonymizationsModal"
-                                >
-                                    <LucideIcon icon="ShieldCheck" />
-                                    {{ $t("analyze.anonymizations") }}
-                                    <small>({{ documentAnonymizations.length }})</small>
-                                    <LucideIcon
-                                        icon="ChevronRight"
-                                        :size="15"
-                                    />
-                                </button>
-                                <button
-                                    class="btn btn-outline-primary btn-sm"
-                                    @click="openAnonymizationModal"
-                                >
-                                    <LucideIcon icon="ShieldCheck" />
-                                    {{ $t("analyze.anonymizeDocument") }}
-                                </button>
-
                                 <div class="analyze-actions-dropdown" :class="{ open: actionsDropdownOpen }">
                                     <button
                                         class="analyze-actions-btn"
@@ -101,6 +80,29 @@
                                         <LucideIcon icon="ChevronDown" :size="13" class="analyze-actions-chevron" />
                                     </button>
                                     <div class="analyze-actions-menu analyze-actions-menu--right" @click.stop>
+                                        <button
+                                            class="analyze-actions-item"
+                                            type="button"
+                                            @click="openAnonymizationModal(); actionsDropdownOpen = false"
+                                        >
+                                            <span class="analyze-actions-item-icon analyze-actions-item-icon--shield">
+                                                <LucideIcon icon="ShieldCheck" :size="14" />
+                                            </span>
+                                            <span>{{ $t("analyze.anonymizeDocument") }}</span>
+                                        </button>
+                                        <button
+                                            v-if="documentAnonymizations.length > 0"
+                                            class="analyze-actions-item"
+                                            type="button"
+                                            @click="openDocumentAnonymizationsModal(); actionsDropdownOpen = false"
+                                        >
+                                            <span class="analyze-actions-item-icon analyze-actions-item-icon--shield-list">
+                                                <LucideIcon icon="ShieldEllipsis" :size="14" />
+                                            </span>
+                                            <span>{{ $t("analyze.anonymizations") }}</span>
+                                            <span class="analyze-actions-badge">{{ documentAnonymizations.length }}</span>
+                                        </button>
+                                        <div class="analyze-actions-divider" />
                                         <button
                                             class="analyze-actions-item"
                                             type="button"
@@ -783,6 +785,29 @@
     .analyze-actions-item-icon--export {
         background-color: rgba(25, 135, 84, 0.1);
         color: #198754;
+    }
+
+    .analyze-actions-item-icon--shield {
+        background-color: rgba(32, 201, 151, 0.12);
+        color: #20c997;
+    }
+
+    .analyze-actions-item-icon--shield-list {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+    }
+
+    .analyze-actions-badge {
+        margin-left: auto;
+        background: #198754;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1;
+        padding: 2px 6px;
+        border-radius: 10px;
+        min-width: 18px;
+        text-align: center;
     }
 
     .analyze-actions-divider {
