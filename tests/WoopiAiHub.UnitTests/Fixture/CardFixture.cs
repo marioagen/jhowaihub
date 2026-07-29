@@ -567,6 +567,50 @@ namespace WoopiAiHub.UnitTests.Fixture
         }
     }
 
+        /// <summary>
+        /// Builds a list of StepToolOutput objects with full navigation properties
+        /// (StepTool → Step and Tool, Card → Document) ordered by Step.Order then StepTool.Order.
+        /// Intended for <see cref="FindToolOutputsForExportAsync"/> tests.
+        /// </summary>
+        public static List<StepToolOutput> FindValidStepToolOutputsForExport(int cardId = 1)
+        {
+            var document = new Document(
+                "Contrato.pdf", "ref.pdf", "http://link", DocumentStatus.ReadyForAnalysis,
+                "creator@test.com", 1, new List<Workflow>(), DateTime.UtcNow);
+
+            var card = new Card(cardId, DateTime.UtcNow, 1, 1, "Card Export Test", 1, null);
+            card.Document = document;
+
+            var stepA = new Step(10, DateTime.UtcNow, 1, "Extração", 1, 1, 1);
+            var stepB = new Step(20, DateTime.UtcNow, 1, "Análise",  2, 1, 1);
+
+            var toolOcr   = new Tool(1, DateTime.UtcNow, "Agente OCR",  true, 1, 1, 1, false, null, null);
+            var toolPrompt = new Tool(2, DateTime.UtcNow, "Prompt IA",  true, 1, 1, 1, false, null, null);
+            var toolApi   = new Tool(3, DateTime.UtcNow, "API Externa", true, 1, 1, 1, false, null, null);
+
+            var stOcr   = new StepTool(1, DateTime.UtcNow, stepA.Id, toolOcr.Id,   1, 0, 0) { Step = stepA, Tool = toolOcr };
+            var stPrompt = new StepTool(2, DateTime.UtcNow, stepA.Id, toolPrompt.Id, 2, 0, 0) { Step = stepA, Tool = toolPrompt };
+            var stApi   = new StepTool(3, DateTime.UtcNow, stepB.Id, toolApi.Id,   1, 0, 0) { Step = stepB, Tool = toolApi };
+
+            var executionA = DateTime.UtcNow.AddHours(-2);
+            var executionB = DateTime.UtcNow.AddHours(-1);
+
+            var outputOcr   = new StepToolOutput(1, executionA, stOcr.Id,    cardId, "Texto extraído via OCR");
+            var outputPrompt = new StepToolOutput(2, executionA, stPrompt.Id, cardId, "{\"campo\":\"valor\"}");
+            var outputApi   = new StepToolOutput(3, executionB, stApi.Id,    cardId, "{\"status\":\"ok\"}");
+
+            outputOcr.StepTool    = stOcr;
+            outputOcr.Card        = card;
+            outputPrompt.StepTool = stPrompt;
+            outputPrompt.Card     = card;
+            outputApi.StepTool    = stApi;
+            outputApi.Card        = card;
+
+            // Order: stepA order=1 (stOcr order=1, stPrompt order=2) then stepB order=2 (stApi order=1)
+            return new List<StepToolOutput> { outputOcr, outputPrompt, outputApi };
+        }
+    }
+
     [CollectionDefinition(nameof(CardCollection))]
     public class CardCollection : ICollectionFixture<CardFixture>
     {

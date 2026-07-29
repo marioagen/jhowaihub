@@ -1,5 +1,6 @@
 import {
     buildAnonymizationList,
+    buildCardToolOutputsExport,
     buildAuditorDocumentDetail,
     buildAuditorDocumentSummary,
     buildAuditorSystemEvents,
@@ -398,6 +399,9 @@ function resolveMockRequest(config) {
     }
     if (method === "GET" && matchPath(path, "/Card/Batch/:batchId")) {
         return [];
+    }
+    if (method === "GET" && matchPath(path, "/Card/:id/ToolOutputsExport")) {
+        return buildCardToolOutputsExport(parseIdFromPath(path, 1));
     }
     if (method === "PUT" && path.startsWith("/Card")) {
         return buildSuccessBody(true);

@@ -1096,3 +1096,55 @@ export function buildAnonymizationList(documentId) {
         ],
     };
 }
+
+// ── Card tool outputs export mock ─────────────────────────────────────────────
+
+export function buildCardToolOutputsExport(cardId) {
+    const id = Number(cardId) || 9000001;
+    const documentName = mockState.documents[0]?.name ?? "Contrato de Prestação de Serviços.pdf";
+
+    const rows = [
+        {
+            cardId: id,
+            documentName,
+            stepName: "Extração de Dados",
+            toolName: "Agente OCR",
+            executionDate: "2026-06-15T08:10:00.000Z",
+            output: JSON.stringify({ paginas: 12, texto: "Conteúdo extraído do documento via OCR..." }),
+        },
+        {
+            cardId: id,
+            documentName,
+            stepName: "Extração de Dados",
+            toolName: "Prompt Extrator",
+            executionDate: "2026-06-15T08:12:30.000Z",
+            output: JSON.stringify({ cnpj: "12.345.678/0001-90", razaoSocial: "Empresa Exemplo LTDA", valor: "R$ 150.000,00" }),
+        },
+        {
+            cardId: id,
+            documentName,
+            stepName: "Análise de Conformidade",
+            toolName: "Prompt Validador",
+            executionDate: "2026-06-15T08:15:00.000Z",
+            output: JSON.stringify({ conformidade: true, observacoes: "Documento dentro dos padrões esperados.", risco: "Baixo" }),
+        },
+        {
+            cardId: id,
+            documentName,
+            stepName: "Análise de Conformidade",
+            toolName: "API de Validação Externa",
+            executionDate: "2026-06-15T08:16:45.000Z",
+            output: JSON.stringify({ status: "OK", score: 98, detalhe: "Validação via API concluída com sucesso." }),
+        },
+        {
+            cardId: id,
+            documentName,
+            stepName: "Geração de Relatório",
+            toolName: "Agente N8N",
+            executionDate: "2026-06-15T08:20:00.000Z",
+            output: "Relatório gerado e enviado para o repositório de saída.",
+        },
+    ];
+
+    return rows;
+}

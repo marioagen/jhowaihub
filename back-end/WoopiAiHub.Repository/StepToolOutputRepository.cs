@@ -146,6 +146,27 @@ namespace WoopiAiHub.Repository
         }
 
         /// <summary>
+        /// Retrieves all outputs for a card with the full join needed for CSV export
+        /// (StepTool → Step → Tool), ordered by Step.Order then StepTool.Order.
+        /// </summary>
+        /// <param name="cardId">The ID of the card whose outputs will be exported.</param>
+        public async Task<List<StepToolOutput>> FindForExportByCardIdAsync(int cardId)
+        {
+            return await _context.StepToolOutputs
+                .AsNoTracking()
+                .Where(o => o.CardId == cardId)
+                .Include(o => o.StepTool)
+                    .ThenInclude(st => st.Tool)
+                .Include(o => o.StepTool)
+                    .ThenInclude(st => st.Step)
+                .Include(o => o.Card)
+                    .ThenInclude(c => c.Document)
+                .OrderBy(o => o.StepTool.Step!.Order)
+                .ThenBy(o => o.StepTool.Order)
+                .ToListAsync();
+        }
+
+        /// <summary>
         /// Deletes all step tool outputs associated with the specified step tool IDs.
         /// </summary>
         /// <param name="stepToolIds">A collection of step tool IDs whose outputs are to be deleted.</param>

@@ -27,5 +27,12 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<IReadOnlyList<Card>> FindCardsByDocumentIdWithStepWorkflowAsync(int documentId);
         Task<ICollection<CardBatchDto>?> FindCardsByDocumentBatchId(int documentBatchId, int workflowId);
         Task<bool> ReprocessCard(int cardId, string tenant, string email);
+
+        /// <summary>
+        /// Returns a flat, ordered list of AI tool outputs for the given card,
+        /// intended for CSV export. Rows are ordered by Step.Order then StepTool.Order.
+        /// </summary>
+        /// <param name="cardId">ID of the card to export.</param>
+        Task<IEnumerable<CardToolOutputExportRowDto>> FindToolOutputsForExportAsync(int cardId);
     }
 }

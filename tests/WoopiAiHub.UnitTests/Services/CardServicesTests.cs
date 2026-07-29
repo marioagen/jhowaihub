@@ -28,6 +28,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<ICardRepository> _cardRepositoryMock;
         private readonly Mock<IStepRepository> _stepRepositoryMock;
         private readonly Mock<IStepToolRepository> _stepToolRepositoryMock;
+        private readonly Mock<IStepToolOutputRepository> _stepToolOutputRepositoryMock;
         private readonly Mock<IAutomationServices> _automationServices;
         private readonly CardServices _cardServices;
 
@@ -37,6 +38,7 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock = _mocker.GetMock<ICardRepository>();
             _stepRepositoryMock = _mocker.GetMock<IStepRepository>();
             _stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
+            _stepToolOutputRepositoryMock = _mocker.GetMock<IStepToolOutputRepository>();
             _automationServices = _mocker.GetMock<IAutomationServices>();
 
             _mocker.GetMock<IAuditCardService>()
@@ -1905,6 +1907,96 @@ namespace WoopiAiHub.UnitTests.Services
             _cardRepositoryMock.Verify(
                 r => r.FindByCardIdsAsync(It.Is<IReadOnlyList<int>>(ids => ids.Count == 1)),
                 Times.Once);
+        }
+
+        [Fact(DisplayName = "FindToolOutputsForExport returns rows ordered by Step.Order then StepTool.Order")]
+        [Trait("FindToolOutputsForExport", "Success")]
+        public async Task FindToolOutputsForExport_ValidCard_ReturnsRowsOrderedByStepAndTool()
+        {
+            // Arrange
+            var cardId = 1;
+            var outputs = CardFixture.FindValidStepToolOutputsForExport(cardId);
+            _mocker.GetMock<IStepToolOutputRepository>()
+                .Setup(r => r.FindForExportByCardIdAsync(cardId))
+                .ReturnsAsync(outputs);
+
+            // Act
+            var result = (await _cardServices.FindToolOutputsForExportAsync(cardId)).ToList();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(3, result.Count);
+
+            Assert.Equal(cardId, result[0].CardId);
+            Assert.Equal("Contrato.pdf", result[0].DocumentName);
+            Assert.Equal("Extração", result[0].StepName);
+            Assert.Equal("Agente OCR", result[0].ToolName);
+            Assert.Equal("Texto extraído via OCR", result[0].Output);
+
+            Assert.Equal("Extração", result[1].StepName);
+            Assert.Equal("Prompt IA", result[1].ToolName);
+
+            Assert.Equal("Análise", result[2].StepName);
+            Assert.Equal("API Externa", result[2].ToolName);
+
+            _mocker.GetMock<IStepToolOutputRepository>()
+                .Verify(r => r.FindForExportByCardIdAsync(cardId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindToolOutputsForExport returns empty when card has no outputs")]
+        [Trait("FindToolOutputsForExport", "Success")]
+        public async Task FindToolOutputsForExport_NoOutputs_ReturnsEmpty()
+        {
+            // Arrange
+            var cardId = 99;
+            _mocker.GetMock<IStepToolOutputRepository>()
+                .Setup(r => r.FindForExportByCardIdAsync(cardId))
+                .ReturnsAsync(new List<StepToolOutput>());
+
+            // Act
+            var result = (await _cardServices.FindToolOutputsForExportAsync(cardId)).ToList();
+
+            // Assert
+            Assert.Empty(result);
+            _mocker.GetMock<IStepToolOutputRepository>()
+                .Verify(r => r.FindForExportByCardIdAsync(cardId), Times.Once);
+        }
+
+        [Fact(DisplayName = "FindToolOutputsForExport sets DocumentName from Card.Document.Name")]
+        [Trait("FindToolOutputsForExport", "Success")]
+        public async Task FindToolOutputsForExport_ValidCard_MapsDocumentNameFromCardDocument()
+        {
+            // Arrange
+            var cardId = 1;
+            var outputs = CardFixture.FindValidStepToolOutputsForExport(cardId);
+            _mocker.GetMock<IStepToolOutputRepository>()
+                .Setup(r => r.FindForExportByCardIdAsync(cardId))
+                .ReturnsAsync(outputs);
+
+            // Act
+            var result = (await _cardServices.FindToolOutputsForExportAsync(cardId)).ToList();
+
+            // Assert
+            Assert.All(result, row => Assert.Equal("Contrato.pdf", row.DocumentName));
+        }
+
+        [Fact(DisplayName = "FindToolOutputsForExport sets ExecutionDate from StepToolOutput.Created")]
+        [Trait("FindToolOutputsForExport", "Success")]
+        public async Task FindToolOutputsForExport_ValidCard_SetsExecutionDateFromCreated()
+        {
+            // Arrange
+            var cardId = 1;
+            var outputs = CardFixture.FindValidStepToolOutputsForExport(cardId);
+            _mocker.GetMock<IStepToolOutputRepository>()
+                .Setup(r => r.FindForExportByCardIdAsync(cardId))
+                .ReturnsAsync(outputs);
+
+            // Act
+            var result = (await _cardServices.FindToolOutputsForExportAsync(cardId)).ToList();
+
+            // Assert
+            for (int i = 0; i < result.Count; i++)
+                Assert.Equal(outputs[i].Created, result[i].ExecutionDate);
         }
 
         [Fact(DisplayName = "FinalizeRangeAsync skips audit when all cards have no Step")]

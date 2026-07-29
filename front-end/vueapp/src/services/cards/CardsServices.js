@@ -121,4 +121,15 @@ export default {
                 };
             });
     },
+
+    /// <summary>
+    /// Returns the flat ordered list of AI tool output rows for the given card.
+    /// Intended to be converted to CSV on the frontend.
+    /// </summary>
+    findToolOutputsForExport(cardId) {
+        return api
+            .get(`/Card/${cardId}/ToolOutputsExport`)
+            .then(({ data }) => data)
+            .catch((error) => ({ error }));
+    },
 };

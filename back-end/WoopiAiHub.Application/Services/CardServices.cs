@@ -22,6 +22,7 @@ namespace WoopiAiHub.Application.Services
         private readonly IStepRepository _stepRepository;
         private readonly IAutomationServices _automationServices;
         private readonly IStepToolExecutionRepository _stepToolExecutionRepository;
+        private readonly IStepToolOutputRepository _stepToolOutputRepository;
         private readonly IWorkflowRepository _workflowRepository;
         private readonly IPromptServices _promptServices;
         private readonly IQuestionnaireServices _questionnaireServices;
@@ -37,6 +38,7 @@ namespace WoopiAiHub.Application.Services
                             IStepRepository stepRepository,
                             IAutomationServices automationServices,
                             IStepToolExecutionRepository stepToolExecutionRepository,
+                            IStepToolOutputRepository stepToolOutputRepository,
                             IWorkflowRepository workflowRepository,
                             IPromptServices promptServices,
                             IQuestionnaireServices questionnaireServices,
@@ -47,6 +49,7 @@ namespace WoopiAiHub.Application.Services
             _stepRepository = stepRepository;
             _automationServices = automationServices;
             _stepToolExecutionRepository = stepToolExecutionRepository;
+            _stepToolOutputRepository = stepToolOutputRepository;
             _workflowRepository = workflowRepository;
             _promptServices = promptServices;
             _questionnaireServices = questionnaireServices;
@@ -806,6 +809,27 @@ namespace WoopiAiHub.Application.Services
             }
 
             return await _cardRepository.UpdateList(cards);
+        }
+
+        /// <summary>
+        /// Returns a flat, ordered list of AI tool outputs for the given card for CSV export.
+        /// Each row contains Card ID, document name, step name, tool name, execution date and raw output.
+        /// Rows are ordered by Step.Order then StepTool.Order to reflect the processing sequence.
+        /// </summary>
+        /// <param name="cardId">ID of the card to export.</param>
+        public async Task<IEnumerable<CardToolOutputExportRowDto>> FindToolOutputsForExportAsync(int cardId)
+        {
+            var outputs = await _stepToolOutputRepository.FindForExportByCardIdAsync(cardId);
+
+            return outputs.Select(o => new CardToolOutputExportRowDto
+            {
+                CardId = o.CardId,
+                DocumentName = o.Card?.Document?.Name ?? o.Card?.Name ?? string.Empty,
+                StepName = o.StepTool?.Step?.Name ?? string.Empty,
+                ToolName = o.StepTool?.Tool?.Name ?? string.Empty,
+                ExecutionDate = o.Created,
+                Output = o.Value,
+            });
         }
     }
 }

@@ -31,6 +31,19 @@
                                 />
                                 {{ $t("analyze.checkHistoric") }}
                             </button>
+                            <button
+                                class="btn btn-outline-success btn-sm"
+                                type="button"
+                                :disabled="isExportingCsv"
+                                :title="$t('analyze.exportCsvTitle')"
+                                @click="exportToolOutputsCsv"
+                            >
+                                <LucideIcon
+                                    icon="Download"
+                                    :size="15"
+                                />
+                                {{ $t("analyze.exportCsv") }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -295,6 +308,7 @@
     import AnalysisStepsSection from "@/components/analyze/analysisSteps/AnalysisStepsSection.vue";
     import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
     import CardsServices from "@/services/cards/CardsServices";
+    import { downloadCsv } from "@/helpers/csvHelper";
     import LogService from "@/services/log/logService";
     import DocumentMetadataServices from "@/services/documents/DocumentMetadataServices";
     import AnonymizationServices from "@/services/anonymization/AnonymizationServices";
@@ -331,6 +345,7 @@
                 cardStatus: "",
                 documentAnonymizations: [],
                 isAdvancing: false,
+                isExportingCsv: false,
             };
         },
         components: {
@@ -478,6 +493,41 @@
             },
             openDocumentHistoryModal() {
                 this.$refs.documentHistoryModal?.open(this.documentId, this.workflowId);
+            },
+            async exportToolOutputsCsv() {
+                this.isExportingCsv = true;
+                try {
+                    const rows = await CardsServices.findToolOutputsForExport(this.cardId);
+                    if (!Array.isArray(rows) || rows.length === 0) {
+                        this.$notify({
+                            title: "analyze.exportCsvTitle",
+                            message: "common.noData",
+                            variant: "warning",
+                            icon: "AlertCircle",
+                        });
+                        return;
+                    }
+                    const t = this.$t.bind(this);
+                    const columns = [
+                        { key: "cardId",       header: t("analyze.csvColumns.cardId") },
+                        { key: "documentName", header: t("analyze.csvColumns.documentName") },
+                        { key: "stepName",     header: t("analyze.csvColumns.stepName") },
+                        { key: "toolName",     header: t("analyze.csvColumns.toolName") },
+                        { key: "executionDate", header: t("analyze.csvColumns.executionDate") },
+                        { key: "output",       header: t("analyze.csvColumns.output") },
+                    ];
+                    const date = new Date().toISOString().slice(0, 10);
+                    downloadCsv(rows, columns, `woopi_outputs_card_${this.cardId}_${date}`);
+                } catch {
+                    this.$notify({
+                        title: "analyze.exportCsvTitle",
+                        message: "common.error",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isExportingCsv = false;
+                }
             },
             openAnonymizationModal() {
                 this.$refs.modalAnonymization.open();

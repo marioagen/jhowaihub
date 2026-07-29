@@ -175,5 +175,19 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _cardServices.ReprocessCard(id, headersDto.Tenant, headersDto.EmailCreator);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Returns a flat ordered list of AI tool outputs for the given card, intended for CSV export.
+        /// Rows are ordered by Step.Order then StepTool.Order.
+        /// </summary>
+        /// <param name="id">The unique identifier of the card.</param>
+        [HttpGet("{id}/ToolOutputsExport")]
+        [SwaggerOperation("Returns AI tool output rows for a card ordered by step and tool sequence, ready for CSV export.")]
+        [ProducesResponseType(typeof(IEnumerable<CardToolOutputExportRowDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindToolOutputsForExport(int id)
+        {
+            var result = await _cardServices.FindToolOutputsForExportAsync(id);
+            return Ok(result);
+        }
     }
 }
