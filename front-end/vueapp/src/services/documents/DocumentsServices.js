@@ -57,6 +57,12 @@ export default {
                 return false;
             });
     },
+    findAllForExport(filters) {
+        return api
+            .get("/Document", { params: { ...filters, pageSize: 10000, page: 1 } })
+            .then(({ data }) => data.content || [])
+            .catch(() => []);
+    },
     VerifyNormalize(id) {
         return api
             .get(`/Document/Status/${id}`)

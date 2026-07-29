@@ -593,6 +593,14 @@ const portuguese = {
             consult: "Consultar",
         },
         allTeams: "Todos os times",
+        exportCsv: "Exportar CSV",
+        csvColumns: {
+            name: "Nome",
+            description: "Descrição",
+            uploadDate: "Data de upload",
+            workflows: "Esteiras",
+            anonymizations: "Anonimizações",
+        },
         anInconsistencyWasIdentifiedInTheDocument:
             "Uma inconsistência foi identificada no documento. Por favor, reprocesse para ter melhores resultados",
         attentionDependingOnTheSpeed:

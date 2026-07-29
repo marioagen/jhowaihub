@@ -595,6 +595,14 @@ const spanish = {
             consult: "Consultar",
         },
         allTeams: "Todos los equipos",
+        exportCsv: "Exportar CSV",
+        csvColumns: {
+            name: "Nombre",
+            description: "Descripción",
+            uploadDate: "Fecha de carga",
+            workflows: "Flujos",
+            anonymizations: "Anonimizaciones",
+        },
         anInconsistencyWasIdentifiedInTheDocument:
             "Se identificó una inconsistencia en el documento. Vuelva a procesarlo para obtener mejores resultados.",
         attentionDependingOnTheSpeed:

@@ -591,6 +591,14 @@ const english = {
             consult: "Consult",
         },
         allTeams: "All teams",
+        exportCsv: "Export CSV",
+        csvColumns: {
+            name: "Name",
+            description: "Description",
+            uploadDate: "Upload date",
+            workflows: "Workflows",
+            anonymizations: "Anonymizations",
+        },
         anInconsistencyWasIdentifiedInTheDocument:
             "An inconsistency was identified in the document. Please reprocess to achieve better results",
         attentionDependingOnTheSpeed:

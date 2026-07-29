@@ -1,6 +1,24 @@
 <template>
     <div class="mt-3 mb-3">
-        <div class="d-flex justify-content-end align-items-center mb-3">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-3">
+            <button
+                class="btn btn-outline-secondary btn-sm"
+                :disabled="isExportingCsv"
+                @click="exportDocumentsCsv"
+            >
+                <span
+                    v-if="isExportingCsv"
+                    class="spinner-border spinner-border-sm me-1"
+                    role="status"
+                />
+                <LucideIcon
+                    v-else
+                    icon="Download"
+                    :size="15"
+                    class="me-1"
+                />
+                {{ $t("documents.exportCsv") }}
+            </button>
             <button
                 class="btn btn-primary btn-sm"
                 @click="redirectToNewUpload"
@@ -32,6 +50,9 @@
     import DocumentsTable from "@/components/documentsHub/documents/tables/DocumentsTable.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
     import StatusService from "@/services/status/StatusService";
+    import DocumentsServices from "@/services/documents/DocumentsServices";
+    import { downloadCsv } from "@/helpers/csvHelper";
+    import dates from "@/helpers/date";
 
     export default {
         name: "DocumentsPage",
@@ -40,6 +61,7 @@
                 teamsList: [],
                 workflowsList: [],
                 statusList: [],
+                isExportingCsv: false,
             };
         },
         components: {
@@ -60,6 +82,42 @@
                 this.$router.push({
                     name: "DocumentsUpload",
                 });
+            },
+            async exportDocumentsCsv() {
+                this.isExportingCsv = true;
+                try {
+                    const activeFilters = this.$refs.DocumentsTable?.filters ?? {};
+                    const rows = await DocumentsServices.findAllForExport(activeFilters);
+
+                    const columns = [
+                        { key: "name",            header: this.$t("documents.csvColumns.name") },
+                        { key: "description",     header: this.$t("documents.csvColumns.description") },
+                        { key: "uploadDate",      header: this.$t("documents.csvColumns.uploadDate") },
+                        { key: "workflows",       header: this.$t("documents.csvColumns.workflows") },
+                        { key: "anonymizations",  header: this.$t("documents.csvColumns.anonymizations") },
+                    ];
+
+                    const exportRows = rows.map((doc) => ({
+                        name:           doc.name ?? "",
+                        description:    doc.description ?? "",
+                        uploadDate:     doc.created ? dates.formatDate(doc.created) : "",
+                        workflows:      (doc.workflowProgress ?? [])
+                            .map((w) => `${w.workflowName} (${w.currentStep}/${w.totalSteps})`)
+                            .join("; "),
+                        anonymizations: doc.anonymizationAmount ?? 0,
+                    }));
+
+                    downloadCsv(exportRows, columns, "documentos-esteiras");
+                } catch {
+                    this.$notify({
+                        title: this.$t("common.error"),
+                        message: this.$t("documents.loadError"),
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isExportingCsv = false;
+                }
             },
             reloadData() {
                 this.$refs.DocumentsTable.getDocuments();
