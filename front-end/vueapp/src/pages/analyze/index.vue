@@ -3,7 +3,7 @@
         <div class="container-fluid mt-4">
             <div>
                 <div class="row align-items-center mb-4">
-                    <div class="col-8 d-flex align-items-center">
+                    <div class="col d-flex align-items-center">
                         <button
                             class="btn btn-outline-primary btn-table btn-sm me-2"
                             @click="goBack"
@@ -20,6 +20,60 @@
                                     {{ $t("analyze.subtitle") }}
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="col-auto d-flex justify-content-end">
+                        <div
+                            class="btn-group btn-group-sm section-buttons"
+                            role="group"
+                        >
+                            <input
+                                type="radio"
+                                class="btn-check"
+                                name="view"
+                                id="view-doc"
+                                autocomplete="off"
+                                v-model="viewMode"
+                                value="doc"
+                            />
+                            <label
+                                class="btn btn-outline-primary"
+                                for="view-doc"
+                            >
+                                <LucideIcon icon="PanelLeft" />
+                            </label>
+
+                            <input
+                                type="radio"
+                                class="btn-check"
+                                name="view"
+                                id="view-both"
+                                autocomplete="off"
+                                v-model="viewMode"
+                                value="both"
+                            />
+                            <label
+                                class="btn btn-outline-primary"
+                                for="view-both"
+                            >
+                                <LucideIcon icon="Columns2" />
+                            </label>
+
+                            <input
+                                type="radio"
+                                class="btn-check"
+                                name="view"
+                                id="view-history"
+                                autocomplete="off"
+                                v-model="viewMode"
+                                value="history"
+                            />
+                            <label
+                                class="btn btn-outline-primary"
+                                for="view-history"
+                            >
+                                <LucideIcon icon="PanelRight" />
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -96,60 +150,8 @@
                         </div>
                     </div>
                     <div class="col-6 d-flex justify-content-end align-items-center">
-                        <div
-                            class="btn-group btn-group-sm ms-auto section-buttons"
-                            role="group"
-                        >
-                            <input
-                                type="radio"
-                                class="btn-check"
-                                name="view"
-                                id="view-doc"
-                                autocomplete="off"
-                                v-model="viewMode"
-                                value="doc"
-                            />
-                            <label
-                                class="btn btn-outline-primary"
-                                for="view-doc"
-                            >
-                                <LucideIcon icon="PanelLeft" />
-                            </label>
-
-                            <input
-                                type="radio"
-                                class="btn-check"
-                                name="view"
-                                id="view-both"
-                                autocomplete="off"
-                                v-model="viewMode"
-                                value="both"
-                            />
-                            <label
-                                class="btn btn-outline-primary"
-                                for="view-both"
-                            >
-                                <LucideIcon icon="Columns2" />
-                            </label>
-
-                            <input
-                                type="radio"
-                                class="btn-check"
-                                name="view"
-                                id="view-history"
-                                autocomplete="off"
-                                v-model="viewMode"
-                                value="history"
-                            />
-                            <label
-                                class="btn btn-outline-primary"
-                                for="view-history"
-                            >
-                                <LucideIcon icon="PanelRight" />
-                            </label>
-                        </div>
                         <button
-                            class="btn btn-outline-secondary btn-sm ms-3"
+                            class="btn btn-outline-secondary btn-sm ms-auto"
                             :disabled="isExportingCsv"
                             @click="exportToolOutputsCsv"
                         >
