@@ -92,19 +92,6 @@
                                     <LucideIcon icon="History" :size="14" />
                                     {{ $t("analyze.checkHistoric") }}
                                 </button>
-                                <button
-                                    class="btn btn-outline-secondary btn-sm"
-                                    :disabled="isExportingCsv"
-                                    @click="exportToolOutputsCsv"
-                                >
-                                    <span
-                                        v-if="isExportingCsv"
-                                        class="spinner-border spinner-border-sm me-1"
-                                        role="status"
-                                    />
-                                    <LucideIcon v-else icon="Download" :size="14" />
-                                    {{ $t("analyze.exportCsv") }}
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -161,6 +148,19 @@
                                 <LucideIcon icon="PanelRight" />
                             </label>
                         </div>
+                        <button
+                            class="btn btn-outline-secondary btn-sm ms-3"
+                            :disabled="isExportingCsv"
+                            @click="exportToolOutputsCsv"
+                        >
+                            <span
+                                v-if="isExportingCsv"
+                                class="spinner-border spinner-border-sm me-1"
+                                role="status"
+                            />
+                            <LucideIcon v-else icon="Download" :size="14" />
+                            {{ $t("analyze.exportCsv") }}
+                        </button>
                         <div
                             v-if="canReject"
                             class="d-flex align-items-center gap-2 ms-3"
