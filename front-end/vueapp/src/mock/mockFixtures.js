@@ -994,6 +994,18 @@ const SYSTEM_EVENT_TEMPLATES = [
         eventType: "permissionDeleted",
         buildDetail: (actor) => `${actor} excluiu o perfil de permissão "Convidado"`,
     },
+    {
+        eventType: "apiKeyCreated",
+        buildDetail: (actor) => `${actor} criou a chave de API "Integração ERP"`,
+    },
+    {
+        eventType: "apiKeyCreated",
+        buildDetail: (actor) => `${actor} criou a chave de API "Webhook Parceiro"`,
+    },
+    {
+        eventType: "apiKeyDeleted",
+        buildDetail: (actor) => `${actor} excluiu a chave de API "Token Legado"`,
+    },
 ];
 
 function buildSystemEvents() {

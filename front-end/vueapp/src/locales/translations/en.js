@@ -241,6 +241,7 @@ const english = {
                     users: "Users",
                     teams: "Teams",
                     permissions: "Permissions",
+                    keys: "API Keys",
                 },
             },
             summary: {
@@ -264,6 +265,8 @@ const english = {
             eventTypes: {
                 accessLogin: "Login",
                 accessLogout: "Logout",
+                apiKeyCreated: "Key created",
+                apiKeyDeleted: "Key deleted",
             },
             actions: {
                 create: "Create",
@@ -1158,6 +1161,8 @@ const english = {
             columns: {
                 name: "Key Name",
                 value: "Value",
+                createdBy: "Created by",
+                createdAt: "Created at",
             },
             deleted: "Key(s) removed successfully.",
             empty: "No keys registered. Click Add to generate a new one.",

@@ -232,6 +232,7 @@ const portuguese = {
                     users: "Usuários",
                     teams: "Times",
                     permissions: "Permissões",
+                    keys: "Chaves de API",
                 },
             },
             summary: {
@@ -255,6 +256,8 @@ const portuguese = {
             eventTypes: {
                 accessLogin: "Login",
                 accessLogout: "Logout",
+                apiKeyCreated: "Chave criada",
+                apiKeyDeleted: "Chave excluída",
             },
             actions: {
                 create: "Criar",
@@ -1157,6 +1160,8 @@ const portuguese = {
             columns: {
                 name: "Nome da Chave",
                 value: "Valor",
+                createdBy: "Criado por",
+                createdAt: "Criado em",
             },
             deleted: "Chave(s) removida(s) com sucesso.",
             empty: "Nenhuma chave cadastrada. Clique em Adicionar para gerar uma nova.",

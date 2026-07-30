@@ -244,6 +244,7 @@ const spanish = {
                     users: "Usuarios",
                     teams: "Equipos",
                     permissions: "Permisos",
+                    keys: "Claves de API",
                 },
             },
             summary: {
@@ -267,6 +268,8 @@ const spanish = {
             eventTypes: {
                 accessLogin: "Inicio de sesión",
                 accessLogout: "Cierre de sesión",
+                apiKeyCreated: "Clave creada",
+                apiKeyDeleted: "Clave eliminada",
             },
             actions: {
                 create: "Crear",
@@ -1168,6 +1171,8 @@ const spanish = {
             columns: {
                 name: "Nombre de la Clave",
                 value: "Valor",
+                createdBy: "Creado por",
+                createdAt: "Creado el",
             },
             deleted: "Clave(s) eliminada(s) correctamente.",
             empty: "No hay claves registradas. Haga clic en Agregar para generar una nueva.",

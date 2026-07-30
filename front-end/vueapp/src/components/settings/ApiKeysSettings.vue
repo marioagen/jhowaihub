@@ -71,6 +71,8 @@
                         </th>
                         <th>{{ $t("settings.apiKeys.columns.name") }}</th>
                         <th>{{ $t("settings.apiKeys.columns.value") }}</th>
+                        <th class="api-keys-table__created-by">{{ $t("settings.apiKeys.columns.createdBy") }}</th>
+                        <th class="api-keys-table__created-at">{{ $t("settings.apiKeys.columns.createdAt") }}</th>
                         <th class="api-keys-table__actions"></th>
                     </tr>
                 </thead>
@@ -92,6 +94,16 @@
                             <span class="api-keys-table__value-pill">
                                 {{ maskValue(key.value) }}
                             </span>
+                        </td>
+                        <td class="api-keys-table__created-by">
+                            <span v-if="key.createdBy" class="api-keys-table__user-pill">
+                                <LucideIcon icon="User" :size="11" class="me-1" />
+                                {{ formatUser(key.createdBy) }}
+                            </span>
+                            <span v-else class="text-muted small">—</span>
+                        </td>
+                        <td class="api-keys-table__created-at small text-muted">
+                            {{ formatDate(key.createdAt) }}
                         </td>
                         <td class="api-keys-table__actions">
                             <button
@@ -133,6 +145,7 @@
         loadApiKeys,
         maskApiKeyValue,
     } from "@/services/settings/apiKeysSettings";
+    import dateHelper from "@/helpers/date";
 
     export default {
         name: "ApiKeysSettings",
@@ -201,6 +214,16 @@
                     variant: "success",
                     icon: "check",
                 });
+            },
+            formatUser(value) {
+                if (!value) return "—";
+                if (value.includes("@")) {
+                    return value.split("@")[0].replace(/\./g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                }
+                return value;
+            },
+            formatDate(value) {
+                return dateHelper.formatDateWithTime(value) || "—";
             },
             async copyValue(value) {
                 try {
@@ -335,6 +358,32 @@
 
     .api-keys-table__copy:hover {
         color: var(--color-btn-outline-primary);
+    }
+
+    .api-keys-table__created-by {
+        width: 18%;
+        min-width: 130px;
+        font-size: 0.82rem;
+    }
+
+    .api-keys-table__created-at {
+        width: 14%;
+        min-width: 120px;
+        font-size: 0.78rem;
+        white-space: nowrap;
+    }
+
+    .api-keys-table__user-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.78rem;
+        color: var(--bs-secondary-color, #6c757d);
+        background: var(--bs-secondary-bg, rgba(0,0,0,0.04));
+        border: 1px solid var(--color-border-form-control, #dee2e6);
+        border-radius: 20px;
+        padding: 0.15rem 0.5rem;
+        white-space: nowrap;
     }
 
     @media (max-width: 576px) {

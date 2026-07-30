@@ -2,7 +2,7 @@
     <div class="system-audit-container d-flex flex-column">
         <!-- KPI strip -->
         <div class="row g-2 mb-3">
-            <div class="col-6 col-md-3" v-for="kpi in kpiCards" :key="kpi.label">
+            <div class="col-6 col-md-2" v-for="kpi in kpiCards" :key="kpi.label">
                 <div class="system-kpi-card rounded-3 p-3 border d-flex align-items-center gap-3">
                     <span class="system-kpi-icon d-inline-flex align-items-center justify-content-center flex-shrink-0" :class="kpi.iconBg">
                         <LucideIcon :icon="kpi.icon" :size="20" />
@@ -35,6 +35,7 @@
                 <option value="users">{{ $t("auditor.system.filters.domains.users") }}</option>
                 <option value="teams">{{ $t("auditor.system.filters.domains.teams") }}</option>
                 <option value="permissions">{{ $t("auditor.system.filters.domains.permissions") }}</option>
+                <option value="keys">{{ $t("auditor.system.filters.domains.keys") }}</option>
             </select>
             <button type="button" class="btn btn-light btn-sm border py-1 px-2 d-flex align-items-center gap-1" style="font-size:0.72rem" @click="toggleOrder">
                 <LucideIcon icon="ArrowUpDown" :size="11" />
@@ -105,6 +106,7 @@
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import AuditorsService from "@/services/auditors/AuditorsService";
     import dateHelper from "@/helpers/date.js";
+    import { loadApiKeyAuditLog } from "@/services/settings/apiKeysSettings";
 
     const LEGACY_EVENT_TYPES = new Set([
         "access",
@@ -126,6 +128,8 @@
         permissionCreated: "ShieldCheck",
         permissionUpdated: "Shield",
         permissionDeleted: "ShieldX",
+        apiKeyCreated: "KeyRound",
+        apiKeyDeleted: "KeyRound",
     };
     const EVENT_BG = {
         accessLogin: "ev-bg-access",
@@ -139,6 +143,8 @@
         permissionCreated: "ev-bg-perm",
         permissionUpdated: "ev-bg-perm",
         permissionDeleted: "ev-bg-perm-del",
+        apiKeyCreated: "ev-bg-key",
+        apiKeyDeleted: "ev-bg-key-del",
     };
     const EVENT_BADGE = {
         accessLogin: "ev-badge-access",
@@ -152,6 +158,8 @@
         permissionCreated: "ev-badge-perm",
         permissionUpdated: "ev-badge-perm",
         permissionDeleted: "ev-badge-perm-del",
+        apiKeyCreated: "ev-badge-key",
+        apiKeyDeleted: "ev-badge-key-del",
     };
 
     function systemEventDomain(eventType) {
@@ -160,6 +168,7 @@
         if (eventType.startsWith("user")) return "users";
         if (eventType.startsWith("team")) return "teams";
         if (eventType.startsWith("permission")) return "permissions";
+        if (eventType.startsWith("apiKey")) return "keys";
         return "";
     }
 
@@ -170,6 +179,7 @@
             return {
                 isLoading: false,
                 allEvents: [],
+                localKeyEvents: [],
                 search: "",
                 domainFilter: "",
                 orderDescending: true,
@@ -179,14 +189,20 @@
             };
         },
         computed: {
+            mergedEvents() {
+                return [...this.allEvents, ...this.localKeyEvents].sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+                );
+            },
             displayedEvents() {
-                let list = this.allEvents.filter((e) => !LEGACY_EVENT_TYPES.has(e.eventType));
+                let list = this.mergedEvents.filter((e) => !LEGACY_EVENT_TYPES.has(e.eventType));
                 if (this.search) {
                     const q = this.search.toLowerCase();
                     list = list.filter(
                         (e) =>
                             e.userName?.toLowerCase().includes(q) ||
-                            e.detail?.toLowerCase().includes(q)
+                            e.detail?.toLowerCase().includes(q) ||
+                            e.keyName?.toLowerCase().includes(q)
                     );
                 }
                 if (this.domainFilter) {
@@ -196,7 +212,7 @@
             },
             kpiCards() {
                 const t = this.$t;
-                const relevant = this.allEvents.filter((e) => !LEGACY_EVENT_TYPES.has(e.eventType));
+                const relevant = this.mergedEvents.filter((e) => !LEGACY_EVENT_TYPES.has(e.eventType));
                 const countDomain = (domain) =>
                     relevant.filter((e) => systemEventDomain(e.eventType) === domain).length;
                 return [
@@ -224,6 +240,12 @@
                         label: t("auditor.system.filters.domains.permissions"),
                         value: countDomain("permissions"),
                     },
+                    {
+                        icon: "KeyRound",
+                        iconBg: "ev-bg-key",
+                        label: t("auditor.system.filters.domains.keys"),
+                        value: countDomain("keys"),
+                    },
                 ];
             },
         },
@@ -244,6 +266,8 @@
                     const translated = this.$t(key);
                     return translated !== key ? translated : eventType;
                 }
+                if (eventType === "apiKeyCreated") return this.$t("auditor.system.actions.create");
+                if (eventType === "apiKeyDeleted") return this.$t("auditor.system.actions.delete");
                 if (eventType.endsWith("Created")) return this.$t("auditor.system.actions.create");
                 if (eventType.endsWith("Updated")) return this.$t("auditor.system.actions.update");
                 if (eventType.endsWith("Deleted")) return this.$t("auditor.system.actions.delete");
@@ -293,6 +317,7 @@
             },
         },
         async created() {
+            this.localKeyEvents = loadApiKeyAuditLog();
             await this.loadEvents();
         },
     };
@@ -352,6 +377,10 @@
     .ev-badge-team-del { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
     .ev-badge-perm     { background-color: rgba(14,165,233,0.12); color: #0284c7; }
     .ev-badge-perm-del { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
+    .ev-bg-key         { background-color: rgba(234,179,8,0.14); color: #b45309; }
+    .ev-bg-key-del     { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
+    .ev-badge-key      { background-color: rgba(234,179,8,0.14); color: #b45309; }
+    .ev-badge-key-del  { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
 
     .system-domain-badge {
         background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.06));
