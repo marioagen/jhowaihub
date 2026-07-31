@@ -9,6 +9,8 @@
     >
         <div class="modal-dialog modal-dialog-centered modal-dep-delete">
             <div class="modal-content dep-modal-content">
+
+                <!-- Header -->
                 <div class="modal-header dep-modal-header">
                     <div class="dep-modal-header__icon-wrap">
                         <LucideIcon icon="TriangleAlert" :size="18" />
@@ -25,30 +27,52 @@
                     />
                 </div>
 
+                <!-- Body -->
                 <div class="modal-body dep-modal-body">
                     <p class="dep-modal-body__intro">
                         {{ introMessage }}
                     </p>
 
-                    <ul class="dep-modal-body__list">
-                        <li
-                            v-for="wf in workflows"
-                            :key="wf.id"
-                            class="dep-modal-body__list-item"
-                        >
-                            <span class="dep-modal-body__list-icon">
-                                <LucideIcon icon="GitBranch" :size="14" />
-                            </span>
-                            {{ wf.name }}
-                        </li>
-                    </ul>
+                    <!-- Scroll container: shows 5 items, scrolls beyond that -->
+                    <div class="dep-modal-body__scroll-wrap">
+                        <ul class="dep-modal-body__list">
+                            <li
+                                v-for="wf in workflows"
+                                :key="wf.id"
+                                class="dep-modal-body__list-item"
+                            >
+                                <span class="dep-modal-body__list-icon">
+                                    <LucideIcon icon="GitBranch" :size="14" />
+                                </span>
+                                <span class="dep-modal-body__list-name">{{ wf.name }}</span>
+                                <button
+                                    type="button"
+                                    class="dep-modal-body__list-link"
+                                    v-tooltip="$t('prompts.deleteDependency.openWorkflow')"
+                                    @click.stop="openWorkflowPhase3(wf.workflowId)"
+                                >
+                                    <LucideIcon icon="ExternalLink" :size="13" />
+                                    <span class="dep-modal-body__list-link-label">
+                                        {{ $t("prompts.deleteDependency.configure") }}
+                                    </span>
+                                </button>
+                            </li>
+                        </ul>
+                        <!-- Fade gradient at bottom when scrollable -->
+                        <div
+                            v-if="workflows.length > 5"
+                            class="dep-modal-body__scroll-fade"
+                        />
+                    </div>
 
+                    <!-- Warning -->
                     <div class="dep-modal-body__warning">
                         <LucideIcon icon="OctagonAlert" :size="15" class="dep-modal-body__warning-icon" />
                         <span>{{ $t("prompts.deleteDependency.warning") }}</span>
                     </div>
                 </div>
 
+                <!-- Footer -->
                 <div class="dep-modal-footer">
                     <button
                         type="button"
@@ -73,6 +97,7 @@
                         {{ $t("prompts.deleteDependency.confirmAnyway") }}
                     </button>
                 </div>
+
             </div>
         </div>
     </div>
@@ -132,22 +157,28 @@
                 this.close();
                 this.$emit("cancel");
             },
+            openWorkflowPhase3(workflowId) {
+                const url = `/workflow/edit/${workflowId}/3`;
+                window.open(url, "_blank", "noopener,noreferrer");
+            },
         },
     };
 </script>
 
 <style scoped>
+    /* ── Dialog sizing ──────────────────────────────────────────── */
     .modal-dep-delete {
-        max-width: 480px;
+        max-width: 500px;
     }
 
     .dep-modal-content {
         border: none;
         border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
     }
 
+    /* ── Header ────────────────────────────────────────────────── */
     .dep-modal-header {
         display: flex;
         align-items: center;
@@ -181,6 +212,7 @@
         flex-shrink: 0;
     }
 
+    /* ── Body ──────────────────────────────────────────────────── */
     .dep-modal-body {
         padding: 1.25rem;
     }
@@ -188,31 +220,70 @@
     .dep-modal-body__intro {
         font-size: 0.875rem;
         color: var(--bs-body-color, #495057);
-        margin-bottom: 0.85rem;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Scroll container ------------------------------------------ */
+    /*
+     * Each card: padding 0.5rem top + bottom = 1rem ≈ 16px
+     *            content line-height ≈ 22px
+     *            border ≈ 2px
+     *            → ~40px per card
+     * Gap: 0.35rem ≈ 5.6px
+     * 5 cards + 4 gaps = 200 + 22.4 ≈ 222px  →  we use 222px as cap.
+     */
+    .dep-modal-body__scroll-wrap {
+        position: relative;
+        max-height: 230px;
+        overflow: hidden;
+        border-radius: 8px;
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        margin-bottom: 1rem;
     }
 
     .dep-modal-body__list {
         list-style: none;
-        padding: 0;
-        margin: 0 0 1rem;
+        padding: 0.35rem;
+        margin: 0;
         display: flex;
         flex-direction: column;
-        gap: 0.4rem;
-        max-height: 160px;
+        gap: 0.35rem;
+        max-height: 228px;
         overflow-y: auto;
+        /* Custom scrollbar */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(108, 117, 125, 0.35) transparent;
     }
 
+    .dep-modal-body__list::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .dep-modal-body__list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .dep-modal-body__list::-webkit-scrollbar-thumb {
+        background: rgba(108, 117, 125, 0.35);
+        border-radius: 3px;
+    }
+
+    /* Individual card ------------------------------------------- */
     .dep-modal-body__list-item {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        padding: 0.45rem 0.75rem;
-        border-radius: 7px;
+        padding: 0.5rem 0.65rem;
+        border-radius: 6px;
         background: var(--bs-tertiary-bg, #f8f9fa);
-        border: 1px solid var(--bs-border-color, #dee2e6);
+        border: 1px solid var(--bs-border-color, #e9ecef);
         color: var(--bs-body-color, #212529);
+        transition: background 0.12s ease, border-color 0.12s ease;
+    }
+
+    .dep-modal-body__list-item:hover {
+        background: var(--bs-secondary-bg, #e9ecef);
+        border-color: #c9cdd3;
     }
 
     .dep-modal-body__list-icon {
@@ -222,6 +293,68 @@
         flex-shrink: 0;
     }
 
+    .dep-modal-body__list-name {
+        flex: 1;
+        font-size: 0.85rem;
+        font-weight: 500;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Link/button per card ------------------------------------- */
+    .dep-modal-body__list-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        flex-shrink: 0;
+        padding: 0.2rem 0.5rem;
+        border-radius: 5px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #0d6efd;
+        background: transparent;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+        white-space: nowrap;
+        line-height: 1;
+    }
+
+    .dep-modal-body__list-link:hover {
+        background: rgba(13, 110, 253, 0.08);
+        border-color: rgba(13, 110, 253, 0.25);
+        color: #0a58ca;
+    }
+
+    .dep-modal-body__list-link:focus-visible {
+        outline: 2px solid rgba(13, 110, 253, 0.5);
+        outline-offset: 1px;
+    }
+
+    .dep-modal-body__list-link-label {
+        font-size: 0.7rem;
+        letter-spacing: 0.01em;
+    }
+
+    /* Fade gradient when content overflows ---------------------- */
+    .dep-modal-body__scroll-fade {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 36px;
+        background: linear-gradient(
+            to bottom,
+            transparent,
+            rgba(255, 255, 255, 0.92)
+        );
+        pointer-events: none;
+        border-radius: 0 0 7px 7px;
+    }
+
+    /* ── Warning ───────────────────────────────────────────────── */
     .dep-modal-body__warning {
         display: flex;
         align-items: flex-start;
@@ -241,6 +374,7 @@
         color: #e6a817;
     }
 
+    /* ── Footer ────────────────────────────────────────────────── */
     .dep-modal-footer {
         display: flex;
         justify-content: flex-end;

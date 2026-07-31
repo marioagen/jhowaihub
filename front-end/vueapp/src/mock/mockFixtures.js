@@ -239,6 +239,26 @@ function buildMockWorkflows() {
             created: "2026-04-18T15:00:00.000Z",
             updated: "2026-06-20T16:45:00.000Z",
         },
+        {
+            id: 5,
+            name: "Compliance LGPD",
+            description: "Validação de conformidade com a Lei Geral de Proteção de Dados",
+            active: true,
+            teamId: 2,
+            teams: [TEAM_FINANCE],
+            created: "2026-05-02T10:00:00.000Z",
+            updated: "2026-07-01T09:00:00.000Z",
+        },
+        {
+            id: 6,
+            name: "Auditoria de Fornecedores",
+            description: "Revisão e auditoria de documentação de fornecedores homologados",
+            active: true,
+            teamId: 3,
+            teams: [TEAM_OPS],
+            created: "2026-05-20T08:00:00.000Z",
+            updated: "2026-07-10T11:30:00.000Z",
+        },
     ];
 }
 

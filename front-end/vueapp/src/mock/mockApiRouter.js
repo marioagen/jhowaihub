@@ -448,17 +448,31 @@ function resolveMockRequest(config) {
             .map(Number)
             .filter(Boolean);
         const workflowMap = {
-            1: ["Esteira de Contratos", "Validação Fiscal Automática"],
-            3: ["Análise de NF-e"],
-            5: ["Triagem de Documentos", "Classificação Automática", "Esteira de Contratos"],
+            1: [
+                { workflowId: 1, name: "Análise de Contratos" },
+                { workflowId: 2, name: "Onboarding de Fornecedores" },
+                { workflowId: 3, name: "Processamento de Notas Fiscais" },
+                { workflowId: 4, name: "Due Diligence M&A" },
+                { workflowId: 5, name: "Compliance LGPD" },
+                { workflowId: 6, name: "Auditoria de Fornecedores" },
+            ],
+            3: [
+                { workflowId: 3, name: "Processamento de Notas Fiscais" },
+                { workflowId: 2, name: "Onboarding de Fornecedores" },
+            ],
+            5: [
+                { workflowId: 5, name: "Compliance LGPD" },
+                { workflowId: 4, name: "Due Diligence M&A" },
+                { workflowId: 1, name: "Análise de Contratos" },
+            ],
         };
         const seen = new Set();
         const deps = [];
         ids.forEach((id) => {
-            (workflowMap[id] || []).forEach((name) => {
-                if (!seen.has(name)) {
-                    seen.add(name);
-                    deps.push({ id: deps.length + 1, name });
+            (workflowMap[id] || []).forEach((wf) => {
+                if (!seen.has(wf.name)) {
+                    seen.add(wf.name);
+                    deps.push({ id: deps.length + 1, workflowId: wf.workflowId, name: wf.name });
                 }
             });
         });
