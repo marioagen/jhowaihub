@@ -674,6 +674,7 @@ const spanish = {
         searchDocument: "Buscar documento",
         selectAFile: "Seleccione un archivo.",
         selectedTeams: "Equipos seleccionados",
+        selectedCount: "{count} seleccionado(s)",
         selectToDelete: "Seleccione al menos un documento para realizar la eliminación.",
         sendingTheDocument: "Enviando el documento, por favor espere.",
         showingFilesUpload: "archivos subidos",
@@ -1340,7 +1341,18 @@ const spanish = {
         noPromptsListWereFound: "No se encontraron agentes",
         placeholderNamePrompt: "Introduzca el nombre del agente",
         promptContent: "Prompt de Instrucción",
-        removeAllPrompts: "Eliminar agentes",
+        removeAllPrompts: "Eliminar agente(s)",
+        deleteConfirmMessage: "Los agentes seleccionados serán eliminados de forma permanente. Esta acción no puede deshacerse.",
+        deleteDependency: {
+            title: "Eliminar agente con dependencias",
+            titlePlural: "Eliminar agentes con dependencias",
+            intro: "Este agente está siendo utilizado en {count} esteira(s) de procesamiento:",
+            introPlural:
+                "Los {agentCount} agentes seleccionados están siendo utilizados en {count} esteira(s) de procesamiento:",
+            warning:
+                "La eliminación puede ocasionar un mal funcionamiento de la esteira. Recomendamos revisar las dependencias antes de continuar.",
+            confirmAnyway: "Eliminar de todas formas",
+        },
         searchPrompt: "Buscar agente",
         searchPrompts: "Buscar agentes",
         selectAllTemplates: "Seleccionar todos los templates",

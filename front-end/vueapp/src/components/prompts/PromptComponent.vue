@@ -47,8 +47,14 @@
             class="btn delete-custom d-flex align-items-center"
             @click="confirmationDialog()"
             v-if="this.listIds.length > 0"
+            :disabled="isCheckingDependencies"
         >
-            <i class="fas fa-trash text-danger icon-delete"></i>
+            <span
+                v-if="isCheckingDependencies"
+                class="spinner-border spinner-border-sm text-danger me-2"
+                role="status"
+            />
+            <i v-else class="fas fa-trash text-danger icon-delete"></i>
             {{ $t("common.delete") }}
         </button>
     </div>
@@ -214,17 +220,26 @@
     <ConfirmModal
         id="deletePromptsConfirm"
         title="prompts.removeAllPrompts"
-        message="common.thisActionCannotBeUndone"
+        message="prompts.deleteConfirmMessage"
         cancelText="common.cancel"
-        confirmText="common.confirm"
-        confirmVariant="primary"
+        confirmText="common.delete"
+        confirmVariant="danger"
         ref="DeleteDialog"
         :isLoading="isDeleting"
         @confirm="deletePrompts"
     />
+    <PromptDependencyDeleteModal
+        ref="DependencyDeleteDialog"
+        :workflows="promptDependencies"
+        :agentCount="listIds.length"
+        :isDeleting="isDeleting"
+        @confirm="deletePrompts"
+        @cancel="promptDependencies = []"
+    />
 </template>
 <script>
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
+    import PromptDependencyDeleteModal from "@/components/prompts/PromptDependencyDeleteModal.vue";
     import AvatarComponent from "@/components/global/AvatarComponent.vue";
     import PromptService from "@/services/prompts/PromptsService";
     import { resolveErrorMessageKey } from "@/utils/errorMessage";
@@ -247,6 +262,8 @@
                     totalPages: 0,
                 },
                 isDeleting: false,
+                isCheckingDependencies: false,
+                promptDependencies: [],
                 isAscending: false,
                 dataModal: {},
                 colType: 2,
@@ -263,6 +280,7 @@
         },
         components: {
             ConfirmModal,
+            PromptDependencyDeleteModal,
             AvatarComponent,
         },
         methods: {
@@ -351,8 +369,22 @@
                     this.loading = false;
                 });
             },
-            confirmationDialog() {
-                this.$refs.DeleteDialog?.open();
+            async confirmationDialog() {
+                this.isCheckingDependencies = true;
+                try {
+                    const deps = await PromptService.findDependencies(this.listIds);
+                    this.promptDependencies = Array.isArray(deps) ? deps : [];
+                } catch {
+                    this.promptDependencies = [];
+                } finally {
+                    this.isCheckingDependencies = false;
+                }
+
+                if (this.promptDependencies.length > 0) {
+                    this.$refs.DependencyDeleteDialog?.open();
+                } else {
+                    this.$refs.DeleteDialog?.open();
+                }
             },
             deletePrompts() {
                 this.isDeleting = true;
@@ -367,6 +399,7 @@
                             });
                         }
                         this.$refs.DeleteDialog?.close();
+                        this.$refs.DependencyDeleteDialog?.close();
                         this.$notify({
                             title: "prompts.title",
                             message: "prompts.deleteSuccess",
@@ -389,6 +422,7 @@
                     })
                     .finally(() => {
                         this.isDeleting = false;
+                        this.promptDependencies = [];
                     });
             },
             formatDate(dataObj) {

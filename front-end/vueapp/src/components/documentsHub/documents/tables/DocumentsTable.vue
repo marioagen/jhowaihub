@@ -1,23 +1,30 @@
 <template>
-    <div class="d-flex flex-column justify-content-between align-items-start mb-2">
-        <div class="delete-container">
+    <div class="bulk-actions-bar mb-2" v-if="enableMultiDelete">
+        <span class="bulk-actions-bar__count">
+            <LucideIcon icon="CheckSquare" :size="14" />
+            {{ $t("documents.selectedCount", { count: table.selectedRows.length }) }}
+        </span>
+        <div class="bulk-actions-bar__buttons">
             <button
-                class="btn btn-outline-danger btn-sm delete-button"
-                @click="openConfirmation"
-                :disabled="!enableMultiDelete"
+                class="btn btn-outline-secondary btn-sm"
+                :disabled="isExportingSelected"
+                @click="exportSelectedAsCsv"
             >
-                <LucideIcon
-                    icon="Trash2"
-                    :size="15"
+                <span
+                    v-if="isExportingSelected"
+                    class="spinner-border spinner-border-sm me-1"
+                    role="status"
                 />
+                <LucideIcon v-else icon="Download" :size="14" />
+                {{ $t("documents.exportCsv") }}
+            </button>
+            <button
+                class="btn btn-outline-danger btn-sm"
+                @click="openConfirmation"
+            >
+                <LucideIcon icon="Trash2" :size="14" />
                 {{ $t("common.delete") }}
             </button>
-            <small
-                v-if="!enableMultiDelete"
-                class="text-danger delete-tooltip"
-            >
-                {{ $t("documents.selectToDelete") }}
-            </small>
         </div>
     </div>
     <div v-if="showTable">
@@ -201,6 +208,7 @@
             },
             isEmbedding: false,
             isDeleting: false,
+            isExportingSelected: false,
             docDataEmbedding: {},
             selectedDocumentId: null,
             exportingRowId: null,
@@ -317,6 +325,33 @@
                 this.table.pagination.currentPage = page;
                 this.getDocuments();
             },
+            async exportSelectedAsCsv() {
+                if (this.isExportingSelected) return;
+                this.isExportingSelected = true;
+                try {
+                    const columns = [
+                        { key: "name",           header: this.$t("documents.csvColumns.name") },
+                        { key: "description",    header: this.$t("documents.csvColumns.description") },
+                        { key: "uploadDate",     header: this.$t("documents.csvColumns.uploadDate") },
+                        { key: "workflows",      header: this.$t("documents.csvColumns.workflows") },
+                        { key: "anonymizations", header: this.$t("documents.csvColumns.anonymizations") },
+                    ];
+
+                    const rows = this.table.selectedRows.map((row) => ({
+                        name:           row.name ?? "",
+                        description:    row.description ?? "",
+                        uploadDate:     row.created ? this.formatDate(row.created) : "",
+                        workflows:      (row.workflowProgress ?? [])
+                            .map((w) => `${w.workflowName} (${w.currentStep}/${w.totalSteps})`)
+                            .join("; "),
+                        anonymizations: row.anonymizationAmount ?? 0,
+                    }));
+
+                    downloadCsv(rows, columns, "documentos-selecionados");
+                } finally {
+                    this.isExportingSelected = false;
+                }
+            },
             async exportRowAsCsv(row) {
                 if (this.exportingRowId === row.id) return;
                 this.exportingRowId = row.id;
@@ -394,59 +429,36 @@
         width: 94px;
     }
 
-    .delete-container {
-        position: relative;
-        display: inline-block;
+    .bulk-actions-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.45rem 0.85rem;
+        border-radius: 8px;
+        background: var(--bs-primary-bg-subtle, rgba(13, 110, 253, 0.06));
+        border: 1px solid var(--bs-primary-border-subtle, rgba(13, 110, 253, 0.25));
+        animation: bulk-bar-in 0.15s ease;
     }
 
-    .delete-button {
-        position: relative;
+    @keyframes bulk-bar-in {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
 
-    .delete-tooltip {
-        opacity: 0;
-        pointer-events: none;
-        visibility: hidden;
-        transition:
-            opacity 0.2s ease,
-            visibility 0.2s ease;
-        position: absolute;
-        top: calc(100% + 8px);
-        left: 0;
-        white-space: nowrap;
-        background-color: #fff;
-        border: 1px solid #dc3545;
-        border-radius: 6px;
-        padding: 6px 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
+    .bulk-actions-bar__count {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--bs-primary, #0d6efd);
     }
 
-    .delete-tooltip::before {
-        content: "";
-        position: absolute;
-        bottom: 100%;
-        left: 20px;
-        border: 6px solid transparent;
-        border-bottom-color: #dc3545;
-    }
-
-    .delete-tooltip::after {
-        content: "";
-        position: absolute;
-        bottom: 100%;
-        left: 21px;
-        border: 5px solid transparent;
-        border-bottom-color: #fff;
-    }
-
-    .delete-container:hover .delete-tooltip {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .delete-button:not(:disabled) ~ .delete-tooltip {
-        display: none !important;
+    .bulk-actions-bar__buttons {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .disabled-action {

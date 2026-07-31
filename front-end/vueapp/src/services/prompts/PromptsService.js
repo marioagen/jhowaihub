@@ -54,6 +54,16 @@ export default {
                 }
             });
     },
+    /// <summary>
+    /// Returns a list of workflows that depend on the given prompt IDs.
+    /// Used to warn the user before deletion.
+    /// </summary>
+    findDependencies(ids) {
+        return api
+            .get("/Prompt/Dependencies", { params: { ids } })
+            .then(({ data }) => data)
+            .catch(() => []);
+    },
     deletePrompts(ids) {
         return api.delete('/Prompt/DeleteByIds', { data: ids })
             .then(({ data }) => {

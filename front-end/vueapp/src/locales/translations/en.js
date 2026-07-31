@@ -670,6 +670,7 @@ const english = {
         searchDocument: "Search document",
         selectAFile: "Select a file.",
         selectedTeams: "Selected teams",
+        selectedCount: "{count} selected",
         selectToDelete: "Select at least one document to perform deletion.",
         sendingTheDocument: "Sending the document, please wait.",
         showingFilesUpload: "uploaded files",
@@ -1333,7 +1334,18 @@ const english = {
         refineError: "Failed to refine agent",
         refinePrompt: "Refine Agent",
         refineSuccess: "Agent refined successfully",
-        removeAllPrompts: "Delete agents",
+        removeAllPrompts: "Delete agent(s)",
+        deleteConfirmMessage: "The selected agents will be permanently removed. This action cannot be undone.",
+        deleteDependency: {
+            title: "Delete agent with dependencies",
+            titlePlural: "Delete agents with dependencies",
+            intro: "This agent is being used in {count} processing pipeline(s):",
+            introPlural:
+                "The {agentCount} selected agents are being used in {count} processing pipeline(s):",
+            warning:
+                "Removing it may cause the pipeline to malfunction. We recommend reviewing the dependencies before proceeding.",
+            confirmAnyway: "Delete anyway",
+        },
         searchPrompt: "Search agent",
         searchPrompts: "Search agents",
         selectAllTemplates: "Select all templates",

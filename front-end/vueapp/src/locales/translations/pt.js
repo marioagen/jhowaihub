@@ -672,6 +672,7 @@ const portuguese = {
         searchDocument: "Buscar documento",
         selectAFile: "Selecione um arquivo.",
         selectedTeams: "Times selecionados",
+        selectedCount: "{count} selecionado(s)",
         selectToDelete: "Selecione ao menos um documento para realizar a exclusão.",
         sendingTheDocument: "Enviando o documento, aguarde.",
         showingFilesUpload: " arquivos baixados",
@@ -1332,7 +1333,18 @@ const portuguese = {
         refineError: "Falha ao refinar agente",
         refinePrompt: "Refinar Agente",
         refineSuccess: "Agente refinado com sucesso",
-        removeAllPrompts: "Remover agentes",
+        removeAllPrompts: "Excluir agente(s)",
+        deleteConfirmMessage: "Os agentes selecionados serão removidos permanentemente. Esta ação não pode ser desfeita.",
+        deleteDependency: {
+            title: "Excluir agente com dependências",
+            titlePlural: "Excluir agentes com dependências",
+            intro: "Este agente está sendo utilizado em {count} esteira(s) de processamento:",
+            introPlural:
+                "Os {agentCount} agentes selecionados estão sendo utilizados em {count} esteira(s) de processamento:",
+            warning:
+                "A remoção poderá ocasionar um mal funcionamento da esteira. Recomendamos revisar as dependências antes de prosseguir.",
+            confirmAnyway: "Excluir mesmo assim",
+        },
         searchPrompt: "Buscar agente",
         searchPrompts: "Buscar agentes",
         selectAllTemplates: "Selecionar todos os templates",

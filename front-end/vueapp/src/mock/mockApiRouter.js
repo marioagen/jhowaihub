@@ -442,6 +442,28 @@ function resolveMockRequest(config) {
     if (method === "GET" && path === "/Prompt") {
         return mockState.prompts;
     }
+    if (method === "GET" && path === "/Prompt/Dependencies") {
+        const ids = []
+            .concat(params?.ids ?? [])
+            .map(Number)
+            .filter(Boolean);
+        const workflowMap = {
+            1: ["Esteira de Contratos", "Validação Fiscal Automática"],
+            3: ["Análise de NF-e"],
+            5: ["Triagem de Documentos", "Classificação Automática", "Esteira de Contratos"],
+        };
+        const seen = new Set();
+        const deps = [];
+        ids.forEach((id) => {
+            (workflowMap[id] || []).forEach((name) => {
+                if (!seen.has(name)) {
+                    seen.add(name);
+                    deps.push({ id: deps.length + 1, name });
+                }
+            });
+        });
+        return deps;
+    }
     if (method === "GET" && matchPath(path, "/Prompt/:id")) {
         const promptId = parseIdFromPath(path, 1);
         return mockState.prompts.find((prompt) => prompt.id === promptId) || mockState.prompts[0];
