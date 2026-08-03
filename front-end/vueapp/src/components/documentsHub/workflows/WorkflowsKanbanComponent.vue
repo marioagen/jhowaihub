@@ -375,6 +375,7 @@
                             @reload="reloadKanban"
                             @cardUpdated="updateCard"
                             @cardMoved="handleCardMoved"
+                            @cardReject="openCardRejectModal"
                             @toggle-card-selection="onToggleAccordionCardSelection"
                             @toggle-step-selection="onToggleAccordionStepSelection"
                         />

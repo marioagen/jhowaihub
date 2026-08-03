@@ -53,64 +53,102 @@
             {{ assignedName }}
         </td>
         <td class="align-middle py-2 text-end">
-            <div class="dropdown dropdown-end">
-                <button
-                    :id="`accordion-card-actions-${dataCard.id}`"
-                    type="button"
-                    class="btn btn-light btn-sm border-0 px-2 py-1"
-                    data-bs-toggle="dropdown"
-                    data-bs-auto-close="true"
-                    aria-expanded="false"
-                    :aria-label="$t('workflow.actions')"
-                >
-                    <LucideIcon
-                        icon="Ellipsis"
-                        :size="18"
-                        class="text-muted"
-                    />
-                </button>
-                <ul
-                    class="dropdown-menu dropdown-menu-end shadow-sm"
-                    :aria-labelledby="`accordion-card-actions-${dataCard.id}`"
-                >
-                    <li>
-                        <button
-                            type="button"
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            :disabled="showLoading"
-                            @click="onAnalyzeClick"
-                        >
-                            <LucideIcon
-                                icon="FileSearch"
-                                :size="16"
-                                class="text-primary flex-shrink-0"
-                            />
-                            {{ $t("common.analyze") }}
-                        </button>
-                    </li>
-                    <li v-if="showAdvance">
-                        <button
-                            type="button"
-                            class="dropdown-item d-flex align-items-center gap-2"
-                            :disabled="isLoadingAnalysis"
-                            @click="onAdvanceClick"
-                        >
-                            <LucideIcon
-                                v-if="!isLoadingAnalysis"
-                                icon="ChevronRight"
-                                :size="16"
-                                class="text-primary flex-shrink-0"
-                            />
-                            <LucideIcon
-                                v-else
-                                icon="Loader"
-                                :size="16"
-                                class="animate-spin text-primary flex-shrink-0"
-                            />
-                            {{ $t("common.advance") }}
-                        </button>
-                    </li>
-                </ul>
+            <div class="d-flex align-items-center justify-content-end gap-1">
+                <!-- Inline approve/reject quick-action buttons (mirrors Kanban card) -->
+                <template v-if="showQuickActions && !showLoading">
+                    <button
+                        type="button"
+                        class="card-reject-btn"
+                        @click.stop="emitReject"
+                        :title="$t('common.reject')"
+                        :aria-label="$t('common.reject')"
+                    >
+                        <LucideIcon
+                            icon="CircleX"
+                            :size="16"
+                        />
+                    </button>
+                    <button
+                        type="button"
+                        class="card-approve-btn"
+                        @click.stop="onAdvanceClick"
+                        :title="$t('common.approve')"
+                        :aria-label="$t('common.approve')"
+                        :disabled="isLoadingAnalysis"
+                    >
+                        <LucideIcon
+                            v-if="!isLoadingAnalysis"
+                            icon="CircleCheck"
+                            :size="16"
+                        />
+                        <div
+                            v-else
+                            class="spinner-grow spinner-grow-sm"
+                            role="status"
+                        />
+                    </button>
+                </template>
+
+                <!-- Overflow menu: Analisar + Avançar -->
+                <div class="dropdown dropdown-end">
+                    <button
+                        :id="`accordion-card-actions-${dataCard.id}`"
+                        type="button"
+                        class="btn btn-light btn-sm border-0 px-2 py-1"
+                        data-bs-toggle="dropdown"
+                        data-bs-auto-close="true"
+                        aria-expanded="false"
+                        :aria-label="$t('workflow.actions')"
+                    >
+                        <LucideIcon
+                            icon="Ellipsis"
+                            :size="18"
+                            class="text-muted"
+                        />
+                    </button>
+                    <ul
+                        class="dropdown-menu dropdown-menu-end shadow-sm"
+                        :aria-labelledby="`accordion-card-actions-${dataCard.id}`"
+                    >
+                        <li>
+                            <button
+                                type="button"
+                                class="dropdown-item d-flex align-items-center gap-2"
+                                :disabled="showLoading"
+                                @click="onAnalyzeClick"
+                            >
+                                <LucideIcon
+                                    icon="FileSearch"
+                                    :size="16"
+                                    class="text-primary flex-shrink-0"
+                                />
+                                {{ $t("common.analyze") }}
+                            </button>
+                        </li>
+                        <li v-if="showAdvance">
+                            <button
+                                type="button"
+                                class="dropdown-item d-flex align-items-center gap-2"
+                                :disabled="isLoadingAnalysis"
+                                @click="onAdvanceClick"
+                            >
+                                <LucideIcon
+                                    v-if="!isLoadingAnalysis"
+                                    icon="ChevronRight"
+                                    :size="16"
+                                    class="text-primary flex-shrink-0"
+                                />
+                                <LucideIcon
+                                    v-else
+                                    icon="Loader"
+                                    :size="16"
+                                    class="animate-spin text-primary flex-shrink-0"
+                                />
+                                {{ $t("common.advance") }}
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </td>
     </tr>
@@ -121,7 +159,7 @@
 
     export default {
         name: "AccordionCardComponent",
-        emits: ["reload", "cardUpdated", "cardMoved", "toggle-card-selection"],
+        emits: ["reload", "cardUpdated", "cardMoved", "toggle-card-selection", "cardReject"],
         props: {
             isCardSelected: {
                 type: Boolean,
@@ -190,6 +228,10 @@
                 if (this.isLastStep) return false;
                 return !this.isFirstStep || !!this.dataCard.assignedUser;
             },
+            showQuickActions() {
+                if (this.isLastStep) return false;
+                return !this.isFirstStep || !!this.dataCard.assignedUser;
+            },
             backPage() {
                 return this.$route.query.page;
             },
@@ -237,6 +279,12 @@
                     throw new Error(response.error.response?.data?.labelError);
                 }
             },
+            emitReject() {
+                this.$emit("cardReject", {
+                    cardId: this.dataCard.id,
+                    workflowId: this.dataStep.workflowId,
+                });
+            },
             async onAdvanceClick() {
                 if (!this.showAdvance || this.isLoadingAnalysis) return;
                 this.isLoadingAnalysis = true;
@@ -282,5 +330,61 @@
         100% {
             transform: rotate(360deg);
         }
+    }
+
+    /* ── Approve / Reject quick-action buttons (mirrors KanbanCard) ── */
+    .card-approve-btn,
+    .card-reject-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .card-approve-btn {
+        color: #0eaa42;
+    }
+
+    .card-approve-btn:hover:not(:disabled) {
+        background-color: rgba(14, 170, 66, 0.12);
+        color: #089436;
+        transform: scale(1.12);
+    }
+
+    .card-approve-btn:active:not(:disabled) {
+        transform: scale(0.95);
+    }
+
+    .card-approve-btn:disabled {
+        opacity: 0.55;
+        cursor: default;
+    }
+
+    .card-reject-btn {
+        color: #dc3545;
+    }
+
+    .card-reject-btn:hover {
+        background-color: rgba(220, 53, 69, 0.12);
+        color: #b02a37;
+        transform: scale(1.12);
+    }
+
+    .card-reject-btn:active {
+        transform: scale(0.95);
+    }
+
+    .spinner-grow {
+        width: 1rem;
+        height: 1rem;
     }
 </style>

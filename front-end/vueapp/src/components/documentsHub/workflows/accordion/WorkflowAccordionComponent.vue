@@ -98,7 +98,7 @@
                                 <th
                                     scope="col"
                                     class="border-bottom text-end"
-                                    style="width: 3.5rem"
+                                    style="width: 8rem"
                                 >
                                     {{ $t("workflow.listView.colActions") }}
                                 </th>
@@ -117,6 +117,7 @@
                                 @reload="onReload"
                                 @card-updated="onCardUpdated"
                                 @card-moved="onCardMoved"
+                                @card-reject="onCardReject"
                                 @toggle-card-selection="onToggleCardSelection"
                             />
                         </tbody>
@@ -161,6 +162,7 @@
             "reload",
             "cardUpdated",
             "cardMoved",
+            "cardReject",
             "toggle-card-selection",
             "toggle-step-selection",
         ],
@@ -238,6 +240,9 @@
             },
             onCardMoved(payload) {
                 this.$emit("cardMoved", payload);
+            },
+            onCardReject(payload) {
+                this.$emit("cardReject", payload);
             },
         },
     };
