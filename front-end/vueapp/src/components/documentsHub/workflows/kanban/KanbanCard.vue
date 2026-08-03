@@ -164,35 +164,30 @@
                             ></div>
                         </button>
                         <div v-else-if="!dataCard.assignedUser && !showLoading">
+                            <!-- Admin: dropdown to pick a user -->
                             <div
                                 v-if="isAdmin"
                                 class="btn-group"
                             >
                                 <button
                                     type="button"
-                                    class="btn btn-sm btn-primary btn-outline-primary dropdown-toggle"
+                                    class="card-assign-btn"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false"
+                                    v-tooltip="$t('card.assignBtn')"
+                                    :aria-label="$t('card.assignBtn')"
                                     @click.stop=""
                                 >
                                     <LucideIcon
                                         v-if="isUpdatingAssignedUser"
                                         icon="Loader"
                                         :size="16"
-                                        class="mr-2 animate-spin text-white"
-                                    />
-                                    <span>
-                                        {{ $t("card.assignBtn") }}
-                                    </span>
-                                    <LucideIcon
-                                        icon="ChevronRight"
-                                        :size="15"
-                                        class="ml-2 icon-closed text-muted"
+                                        class="animate-spin"
                                     />
                                     <LucideIcon
-                                        icon="ChevronDown"
-                                        :size="15"
-                                        class="ml-2 icon-open text-muted"
+                                        v-else
+                                        icon="UserPlus"
+                                        :size="16"
                                     />
                                 </button>
                                 <ul class="dropdown-menu p-2 users-list">
@@ -230,23 +225,25 @@
                                     </li>
                                 </ul>
                             </div>
+                            <!-- Non-admin: assign self -->
                             <button
                                 v-else
                                 type="button"
-                                class="btn btn-sm btn-primary assing-btn"
+                                class="card-assign-btn"
+                                v-tooltip="$t('card.assignBtn')"
+                                :aria-label="$t('card.assignBtn')"
                                 @click.stop="assignUser(loggedUserId)"
                             >
                                 <LucideIcon
                                     v-if="isUpdatingAssignedUser"
                                     icon="Loader"
-                                    :size="12"
-                                    class="mr-2 animate-spin text-white"
+                                    :size="16"
+                                    class="animate-spin"
                                 />
-                                {{ $t("card.assignBtn") }}
                                 <LucideIcon
-                                    icon="NotebookPen"
-                                    size="16"
-                                    class="ml-2"
+                                    v-else
+                                    icon="UserPlus"
+                                    :size="16"
                                 />
                             </button>
                         </div>
@@ -808,26 +805,6 @@
         margin: 0 !important;
     }
 
-    .dropdown-toggle::after {
-        display: none;
-    }
-
-    .dropdown-toggle .icon-closed {
-        display: inline-block;
-    }
-
-    .dropdown-toggle .icon-open {
-        display: none;
-    }
-
-    .dropdown-toggle.show .icon-closed {
-        display: none;
-    }
-
-    .dropdown-toggle.show .icon-open {
-        display: inline-block;
-    }
-
     .btn-unlink {
         background-color: orange;
         line-height: 1.3;
@@ -863,6 +840,34 @@
     .batch-icon {
         color: #2b7fff;
         vertical-align: middle;
+    }
+
+    /* ── Assign quick action ── */
+    .card-assign-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        cursor: pointer;
+        flex-shrink: 0;
+        color: #6c757d;
+        transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    }
+
+    .card-assign-btn:hover {
+        background-color: rgba(43, 127, 255, 0.1);
+        color: #2b7fff;
+        transform: scale(1.12);
+    }
+
+    .card-assign-btn:active {
+        transform: scale(0.95);
     }
 
     /* ── Analyze / Finalize quick actions ── */
