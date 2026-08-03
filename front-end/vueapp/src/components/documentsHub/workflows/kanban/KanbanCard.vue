@@ -105,27 +105,28 @@
                     <div class="d-flex align-items-center gap-1">
                         <button
                             type="button"
-                            class="btn btn-sm btn-primary"
+                            class="card-analyze-btn"
                             @click="redirectToAnalyzer"
+                            v-tooltip="$t('common.analyze')"
+                            :aria-label="$t('common.analyze')"
                         >
-                            {{ $t("common.analyze") }}
                             <LucideIcon
                                 icon="FileClock"
-                                :size="15"
-                                class="ms-2"
+                                :size="16"
                             />
                         </button>
                         <button
                             v-if="isLastStep"
                             type="button"
-                            class="btn btn-sm btn-outline-success"
+                            class="card-finalize-btn"
                             @click.stop="openFinalizeConfirm"
+                            v-tooltip="$t('common.finalize')"
+                            :aria-label="$t('common.finalize')"
                         >
                             <LucideIcon
                                 icon="Check"
-                                :size="15"
+                                :size="16"
                             />
-                            {{ $t("common.finalize") }}
                         </button>
                     </div>
                     <div
@@ -862,6 +863,52 @@
     .batch-icon {
         color: #2b7fff;
         vertical-align: middle;
+    }
+
+    /* ── Analyze / Finalize quick actions ── */
+    .card-analyze-btn,
+    .card-finalize-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        border-radius: 50%;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .card-analyze-btn {
+        color: #2b7fff;
+    }
+
+    .card-analyze-btn:hover {
+        background-color: rgba(43, 127, 255, 0.12);
+        color: #1a6ae8;
+        transform: scale(1.12);
+    }
+
+    .card-analyze-btn:active {
+        transform: scale(0.95);
+    }
+
+    .card-finalize-btn {
+        color: #0eaa42;
+    }
+
+    .card-finalize-btn:hover {
+        background-color: rgba(14, 170, 66, 0.12);
+        color: #089436;
+        transform: scale(1.12);
+    }
+
+    .card-finalize-btn:active {
+        transform: scale(0.95);
     }
 
     /* ── Approve / Reject quick actions ── */
