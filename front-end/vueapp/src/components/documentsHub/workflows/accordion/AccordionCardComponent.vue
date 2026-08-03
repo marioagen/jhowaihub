@@ -125,28 +125,6 @@
                                 {{ $t("common.analyze") }}
                             </button>
                         </li>
-                        <li v-if="showAdvance">
-                            <button
-                                type="button"
-                                class="dropdown-item d-flex align-items-center gap-2"
-                                :disabled="isLoadingAnalysis"
-                                @click="onAdvanceClick"
-                            >
-                                <LucideIcon
-                                    v-if="!isLoadingAnalysis"
-                                    icon="ChevronRight"
-                                    :size="16"
-                                    class="text-primary flex-shrink-0"
-                                />
-                                <LucideIcon
-                                    v-else
-                                    icon="Loader"
-                                    :size="16"
-                                    class="animate-spin text-primary flex-shrink-0"
-                                />
-                                {{ $t("common.advance") }}
-                            </button>
-                        </li>
                     </ul>
                 </div>
             </div>
