@@ -1352,6 +1352,8 @@ const spanish = {
             warning:
                 "La eliminación puede ocasionar un mal funcionamiento de la esteira. Recomendamos revisar las dependencias antes de continuar.",
             confirmAnyway: "Eliminar de todas formas",
+            configure: "Configurar",
+            openWorkflow: "Abrir esteira en el paso de configuración (nueva pestaña)",
         },
         searchPrompt: "Buscar agente",
         searchPrompts: "Buscar agentes",

@@ -1344,6 +1344,8 @@ const portuguese = {
             warning:
                 "A remoção poderá ocasionar um mal funcionamento da esteira. Recomendamos revisar as dependências antes de prosseguir.",
             confirmAnyway: "Excluir mesmo assim",
+            configure: "Configurar",
+            openWorkflow: "Abrir esteira na etapa de configuração (nova aba)",
         },
         searchPrompt: "Buscar agente",
         searchPrompts: "Buscar agentes",

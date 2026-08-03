@@ -1345,6 +1345,8 @@ const english = {
             warning:
                 "Removing it may cause the pipeline to malfunction. We recommend reviewing the dependencies before proceeding.",
             confirmAnyway: "Delete anyway",
+            configure: "Configure",
+            openWorkflow: "Open pipeline at configuration step (new tab)",
         },
         searchPrompt: "Search agent",
         searchPrompts: "Search agents",
