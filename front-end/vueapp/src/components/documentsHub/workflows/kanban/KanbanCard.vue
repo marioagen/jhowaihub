@@ -963,6 +963,52 @@
         transform: scale(0.95);
     }
 
+    /* ── Dark-mode: higher-contrast approve / reject ── */
+    :global(.css-theme-dark) .card-approve-btn {
+        color: #4ade80;
+    }
+
+    :global(.css-theme-dark) .card-approve-btn:hover {
+        background-color: rgba(74, 222, 128, 0.18);
+        color: #86efac;
+    }
+
+    :global(.css-theme-dark) .card-reject-btn {
+        color: #f87171;
+    }
+
+    :global(.css-theme-dark) .card-reject-btn:hover {
+        background-color: rgba(248, 113, 113, 0.18);
+        color: #fca5a5;
+    }
+
+    :global(.css-theme-dark) .card-analyze-btn {
+        color: #60a5fa;
+    }
+
+    :global(.css-theme-dark) .card-analyze-btn:hover {
+        background-color: rgba(96, 165, 250, 0.15);
+        color: #93c5fd;
+    }
+
+    :global(.css-theme-dark) .card-finalize-btn {
+        color: #4ade80;
+    }
+
+    :global(.css-theme-dark) .card-finalize-btn:hover {
+        background-color: rgba(74, 222, 128, 0.18);
+        color: #86efac;
+    }
+
+    :global(.css-theme-dark) .card-assign-btn {
+        color: #94a3b8;
+    }
+
+    :global(.css-theme-dark) .card-assign-btn:hover {
+        background-color: rgba(96, 165, 250, 0.15);
+        color: #93c5fd;
+    }
+
     /* ── Approve exit animation ── */
     @keyframes card-approve-exit {
         0% {

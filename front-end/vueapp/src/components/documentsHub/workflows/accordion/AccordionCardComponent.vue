@@ -365,4 +365,23 @@
         width: 1rem;
         height: 1rem;
     }
+
+    /* ── Dark-mode: higher-contrast approve / reject ── */
+    :global(.css-theme-dark) .card-approve-btn {
+        color: #4ade80;
+    }
+
+    :global(.css-theme-dark) .card-approve-btn:hover:not(:disabled) {
+        background-color: rgba(74, 222, 128, 0.18);
+        color: #86efac;
+    }
+
+    :global(.css-theme-dark) .card-reject-btn {
+        color: #f87171;
+    }
+
+    :global(.css-theme-dark) .card-reject-btn:hover {
+        background-color: rgba(248, 113, 113, 0.18);
+        color: #fca5a5;
+    }
 </style>
