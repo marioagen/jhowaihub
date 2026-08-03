@@ -137,7 +137,7 @@
                             v-if="!isFirstStep || dataCard.assignedUser"
                             class="btn btn-sm card-reject-btn"
                             @click.stop="emitReject"
-                            :title="$t('common.reject')"
+                            v-tooltip="$t('common.reject')"
                             :aria-label="$t('common.reject')"
                         >
                             <LucideIcon
@@ -149,7 +149,7 @@
                             v-if="!isFirstStep || dataCard.assignedUser"
                             class="btn btn-sm card-approve-btn"
                             @click.stop="advanceStep"
-                            :title="$t('common.approve')"
+                            v-tooltip="$t('common.approve')"
                             :aria-label="$t('common.approve')"
                         >
                             <LucideIcon

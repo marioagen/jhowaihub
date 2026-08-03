@@ -60,7 +60,7 @@
                         type="button"
                         class="card-reject-btn"
                         @click.stop="emitReject"
-                        :title="$t('common.reject')"
+                        v-tooltip="$t('common.reject')"
                         :aria-label="$t('common.reject')"
                     >
                         <LucideIcon
@@ -72,7 +72,7 @@
                         type="button"
                         class="card-approve-btn"
                         @click.stop="onAdvanceClick"
-                        :title="$t('common.approve')"
+                        v-tooltip="$t('common.approve')"
                         :aria-label="$t('common.approve')"
                         :disabled="isLoadingAnalysis"
                     >
