@@ -12,6 +12,7 @@ namespace WoopiAiHub.Domain.DTOs.Request
         public decimal PositionX { get; set; }
         public decimal PositionY { get; set; }
         public int? DependsOnStepToolId { get; set; }
+        public bool HasUpdate { get; set; } = false;
         public virtual StepToolDto? DependsOnStepTool { get; set; }
         public virtual StepDto? Step { get; set; }
         public virtual ToolDto? Tool { get; set; }

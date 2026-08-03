@@ -256,10 +256,19 @@
             </div>
         </template>
     </ModalComponent>
+
+    <ToolImpactModal
+        ref="ImpactModal"
+        :workflows="impactedWorkflows"
+        :is-saving="isLoading"
+        @confirm="onImpactConfirmed"
+        @cancel="onImpactCancelled"
+    />
 </template>
 <script>
     import { Field, useForm } from "vee-validate";
     import ModalComponent from "@/components/global/ModalComponent.vue";
+    import ToolImpactModal from "@/components/tools/ToolImpactModal.vue";
     import ToolsService from "@/services/tools/ToolsServices";
     import ToolsTypesService from "@/services/tools/ToolsTypesService";
     import ToolsDataService from "@/services/tools/ToolsDataService";
@@ -269,6 +278,7 @@
     export default {
         components: {
             ModalComponent,
+            ToolImpactModal,
             Field,
         },
         setup() {
@@ -294,6 +304,7 @@
             outputsList: [],
             isLoading: false,
             isN8NConnectorToolType: false,
+            impactedWorkflows: [],
             toolsData: {
                 id: "",
                 name: "",
@@ -414,10 +425,23 @@
                     });
                 }
 
-                if (this.isEdit) {
+                if (this.isEdit && this.values.id) {
+                    const workflows = await ToolsService.findUsedInWorkflows(this.values.id);
+                    this.impactedWorkflows = Array.isArray(workflows) ? workflows : [];
+                    if (this.impactedWorkflows.length > 0) {
+                        this.$refs.ImpactModal?.open();
+                        return;
+                    }
                     return this.editTool();
                 }
                 return this.createTool();
+            },
+            onImpactConfirmed() {
+                this.$refs.ImpactModal?.close();
+                this.editTool();
+            },
+            onImpactCancelled() {
+                this.impactedWorkflows = [];
             },
             createTool() {
                 this.isLoading = true;

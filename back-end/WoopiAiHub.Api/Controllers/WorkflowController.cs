@@ -354,5 +354,19 @@ namespace WoopiAiHub.Api.Controllers
             var package = await _workflowTemplateServices.ExportAsync(id);
             return Ok(package);
         }
+
+        /// <summary>
+        /// Clears the pending-tool-update flag on the workflow and resets HasUpdate on all its StepTools,
+        /// acknowledging that the responsible user has reviewed the tool change.
+        /// </summary>
+        /// <param name="id">The workflow ID to acknowledge.</param>
+        [HttpPut("{id}/AcknowledgeToolUpdate")]
+        [SwaggerOperation("Acknowledge and clear pending tool update flags on the workflow")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        public async Task<IActionResult> AcknowledgeToolUpdate(int id)
+        {
+            var result = await _workflowServices.AcknowledgeToolUpdateAsync(id);
+            return Ok(result);
+        }
     }
 }

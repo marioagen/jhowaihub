@@ -8,6 +8,7 @@ using WoopiAiHub.Application.Utils;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Refit;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -28,6 +29,7 @@ namespace WoopiAiHub.UnitTests.Services
         private readonly Mock<IApiClientFactory> _apiClientFactoryMock;
         private readonly Mock<In8NConnector> _in8nConnectorMock;
         private readonly Mock<IEncryptionService> _encryptionServiceMock;
+        private readonly Mock<IHubNotifier> _hubNotifierMock;
 
         public ToolServicesTests()
         {
@@ -40,10 +42,15 @@ namespace WoopiAiHub.UnitTests.Services
             _stepToolRepositoryMock = _mocker.GetMock<IStepToolRepository>();
             _encryptionServiceMock = _mocker.GetMock<IEncryptionService>();
 
+            _hubNotifierMock = _mocker.GetMock<IHubNotifier>();
             _encryptionServiceMock.Setup(e => e.Encrypt(It.IsAny<string>()))
                                   .Returns((string input) => $"encrypted_{input}");
             _encryptionServiceMock.Setup(e => e.Decrypt(It.IsAny<string>()))
                                   .Returns((string input) => input.Replace("encrypted_", ""));
+
+            _hubNotifierMock
+                .Setup(h => h.ToolUpdatedInWorkflowAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()))
+                .Returns(Task.CompletedTask);
 
             _toolServices = _mocker.CreateInstance<ToolServices>();
         }
@@ -530,6 +537,88 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.True(result);
             _encryptionServiceMock.Verify(e => e.Encrypt(It.IsAny<string>()), Times.Never);
             _toolRepositoryMock.Verify(repo => repo.UpdateAsync(It.Is<Tool>(t => t.ConnectorApiKey == existingApiKey)), Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdateAsync should mark workflow flags and notify users when tool is used in workflows")]
+        [Trait("UpdateAsync", "Success")]
+        public async Task UpdateAsync_ToolUsedInWorkflows_MarksUpdateAndNotifiesUsers()
+        {
+            // Arrange
+            var toolUpdateDto = ToolFixture.FindValidToolUpdateDto();
+            var tool = ToolFixture.FindValidToolModel();
+            var toolType = ToolTypeFixture.FindValidToolType();
+            var workflow = ToolFixture.FindValidWorkflowWithTeamUser(tool.Id);
+            var workflows = new List<Workflow> { workflow };
+
+            _toolTypeRepositoryMock.Setup(tt => tt.FindModelByIdAsync(It.IsAny<int>()))
+                                   .ReturnsAsync(toolType);
+            _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(toolUpdateDto.Id))
+                               .ReturnsAsync(tool);
+            _toolRepositoryMock.Setup(repo => repo.UpdateAsync(It.IsAny<Tool>()))
+                               .ReturnsAsync(true);
+            _toolRepositoryMock.Setup(repo => repo.FindWorkflowModelsByToolIdAsync(tool.Id))
+                               .ReturnsAsync(workflows);
+            _toolRepositoryMock.Setup(repo => repo.MarkWorkflowsToolUpdateAsync(It.IsAny<IEnumerable<Workflow>>(), It.IsAny<int>(), It.IsAny<string>()))
+                               .Returns(Task.CompletedTask);
+
+            // Act
+            var result = await _toolServices.UpdateAsync(toolUpdateDto);
+
+            // Assert
+            Assert.True(result);
+            _toolRepositoryMock.Verify(repo => repo.FindWorkflowModelsByToolIdAsync(tool.Id), Times.Once);
+            _toolRepositoryMock.Verify(repo => repo.MarkWorkflowsToolUpdateAsync(It.IsAny<IEnumerable<Workflow>>(), tool.Id, tool.Name), Times.Once);
+            _hubNotifierMock.Verify(
+                h => h.ToolUpdatedInWorkflowAsync(It.IsAny<string>(), workflow.Id, workflow.Name, tool.Id, tool.Name),
+                Times.Once);
+        }
+
+        [Fact(DisplayName = "UpdateAsync should not call hub notifier when tool is not used in any workflow")]
+        [Trait("UpdateAsync", "Success")]
+        public async Task UpdateAsync_ToolNotUsedInWorkflows_DoesNotNotifyUsers()
+        {
+            // Arrange
+            var toolUpdateDto = ToolFixture.FindValidToolUpdateDto();
+            var tool = ToolFixture.FindValidToolModel();
+            var toolType = ToolTypeFixture.FindValidToolType();
+
+            _toolTypeRepositoryMock.Setup(tt => tt.FindModelByIdAsync(It.IsAny<int>()))
+                                   .ReturnsAsync(toolType);
+            _toolRepositoryMock.Setup(repo => repo.FindModelByIdAsync(toolUpdateDto.Id))
+                               .ReturnsAsync(tool);
+            _toolRepositoryMock.Setup(repo => repo.UpdateAsync(It.IsAny<Tool>()))
+                               .ReturnsAsync(true);
+            _toolRepositoryMock.Setup(repo => repo.FindWorkflowModelsByToolIdAsync(tool.Id))
+                               .ReturnsAsync(new List<Workflow>());
+
+            // Act
+            var result = await _toolServices.UpdateAsync(toolUpdateDto);
+
+            // Assert
+            Assert.True(result);
+            _toolRepositoryMock.Verify(repo => repo.MarkWorkflowsToolUpdateAsync(It.IsAny<IEnumerable<Workflow>>(), It.IsAny<int>(), It.IsAny<string>()), Times.Never);
+            _hubNotifierMock.Verify(
+                h => h.ToolUpdatedInWorkflowAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<string>()),
+                Times.Never);
+        }
+
+        [Fact(DisplayName = "FindUsedInWorkflowsAsync should return workflow usages for given toolId")]
+        [Trait("FindUsedInWorkflowsAsync", "Success")]
+        public async Task FindUsedInWorkflowsAsync_ValidToolId_ReturnsWorkflowUsages()
+        {
+            // Arrange
+            var toolId = 1;
+            var usages = ToolFixture.FindValidWorkflowUsageList();
+            _toolRepositoryMock.Setup(repo => repo.FindUsedInWorkflowsAsync(toolId))
+                               .ReturnsAsync(usages);
+
+            // Act
+            var result = await _toolServices.FindUsedInWorkflowsAsync(toolId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(usages.Count, result.Count());
+            _toolRepositoryMock.Verify(repo => repo.FindUsedInWorkflowsAsync(toolId), Times.Once);
         }
     }
 }

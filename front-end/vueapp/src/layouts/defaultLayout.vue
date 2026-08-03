@@ -64,6 +64,7 @@
                 isSidebarCollapsed: window.innerWidth < SIDEBAR_COLLAPSE_WIDTH,
                 isSidebarVisible: false,
                 signalrAnonymizationReady: "AnonymizationReady",
+                signalrToolUpdatedInWorkflow: "ToolUpdatedInWorkflow",
             };
         },
         async mounted() {
@@ -88,6 +89,16 @@
                     link: message.url,
                 });
             });
+            signalRService.on(this.signalrToolUpdatedInWorkflow, (payload) => {
+                this.$store.commit("addToolUpdateNotification", {
+                    id: `tool-update-${payload.workflowId}-${Date.now()}`,
+                    type: "tool-update",
+                    workflowId: payload.workflowId,
+                    workflowName: payload.workflowName,
+                    toolName: payload.toolName,
+                    status: "unread",
+                });
+            });
         },
         beforeUnmount() {
             window.removeEventListener("resize", this.checkWindowSize);
@@ -95,6 +106,7 @@
             GlobalEventService.off("uploadComplete", this.handleUploadComplete);
             GlobalEventService.off("uploadStarted", this.handleUploadStarted);
             signalRService.off(this.signalrAnonymizationReady);
+            signalRService.off(this.signalrToolUpdatedInWorkflow);
         },
         computed: {
             updatePage() {

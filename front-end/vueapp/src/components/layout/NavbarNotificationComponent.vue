@@ -42,7 +42,49 @@
                 :key="notification.id"
                 class="notification-item remove-hover"
             >
+                <!-- Tool update notification -->
                 <div
+                    v-if="notification.type === 'tool-update'"
+                    class="notification-row notification-tool-update row p-2 m-0"
+                >
+                    <div class="col-1 d-flex justify-content-center align-items-center p-0">
+                        <LucideIcon icon="TriangleAlert" :size="20" class="tool-update-icon" />
+                    </div>
+                    <div class="col-8 my-auto">
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold mb-1">
+                                {{ $t("tools.notifications.toolUpdated") }}
+                            </span>
+                            <span class="text-sm">
+                                {{ $t("tools.notifications.toolUpdatedMessage", { toolName: notification.toolName }) }}
+                            </span>
+                            <span class="text-sm">
+                                {{ $t("tools.notifications.pipeline", { workflowName: notification.workflowName }) }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-3 d-flex justify-content-end align-items-center gap-1">
+                        <a
+                            :href="`/workflow/edit/${notification.workflowId}/3`"
+                            class="btn btn-link btn-sm p-0 tool-update-link flex-shrink-0"
+                            v-tooltip="$t('tools.notifications.reviewConfig')"
+                        >
+                            <LucideIcon icon="ExternalLink" :size="16" />
+                        </a>
+                        <button
+                            type="button"
+                            class="btn btn-link btn-sm p-0 ms-1 flex-shrink-0 text-danger notification-remove"
+                            :aria-label="$t('common.remove', 'Remove')"
+                            @click.stop="removeNotification(notification.id)"
+                        >
+                            <LucideIcon icon="X" :size="18" />
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Default notification -->
+                <div
+                    v-else
                     :class="[
                         'notification-row row p-2 m-0',
                         notification.status === 'in_progress'
@@ -215,6 +257,20 @@
 
     .notification-remove:hover {
         color: var(--color-body-content) !important;
+    }
+
+    .notification-tool-update {
+        background-color: #fff8e1;
+        color: #6d4c06;
+        border-left: 3px solid #e6a817;
+    }
+
+    .tool-update-icon {
+        color: #d97706;
+    }
+
+    .tool-update-link {
+        color: #0d6efd;
     }
 
     .menu-right {

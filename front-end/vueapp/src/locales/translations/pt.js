@@ -1757,6 +1757,10 @@ const portuguese = {
         phase3Hint: "{count} etapa(s) ainda sem fluxo de ferramentas. Clique em \"Adicionar\" para configurar.",
         configuredLabel: "Configurado",
         pendingLabel: "Pendente",
+        outdatedLabel: "Desatualizado",
+        outdatedToolsHint: "Uma ou mais ferramentas desta esteira foram atualizadas. Revise e confirme a atualização para dispensar este alerta.",
+        confirmUpdate: "Confirmar atualização",
+        hasPendingToolUpdate: "Esta esteira possui ferramentas desatualizadas. Acesse a fase 3 para revisar.",
         addToolFlowHint: "Configure as ferramentas que serão executadas nesta etapa do processo.",
         noCardsForStep: "Nenhum documento nesta etapa",
         listView: {
@@ -1808,6 +1812,8 @@ const portuguese = {
         profiles: "Perfil responsável",
         removeError: "Erro ao remover esteira de processamento",
         removeSuccess: "Esteira de processamento removida com sucesso",
+        toolUpdateAcknowledged: "Atualização confirmada. Os alertas foram removidos.",
+        toolUpdateAcknowledgeError: "Erro ao confirmar a atualização. Tente novamente.",
         removeToolFlow: "Remover Fluxo",
         removeToolValidationTitle: "Remover Ferramentas da Etapa",
         removeToolValidationMessage:
@@ -1854,6 +1860,22 @@ const portuguese = {
         tools: "Ferramentas",
         errors: {
             urlTooLong: "A resposta do prompt é grande demais para a URL. Refine o prompt.",
+        },
+    },
+    tools: {
+        impact: {
+            title: "Ferramenta utilizada em {count} esteira(s)",
+            intro: "As {count} esteira(s) a seguir utilizam esta ferramenta e serão notificadas da atualização:",
+            openWorkflow: "Abrir esteira",
+            configure: "Configurar",
+            warning: "Os responsáveis pelas esteiras serão notificados. A ferramenta será atualizada imediatamente, mas os administradores das esteiras precisarão confirmar a atualização nas configurações.",
+            saveAndNotify: "Salvar e notificar",
+        },
+        notifications: {
+            toolUpdated: "Ferramenta atualizada",
+            toolUpdatedMessage: '"{toolName}" foi alterada',
+            pipeline: "Esteira: {workflowName}",
+            reviewConfig: "Revisar configuração",
         },
     },
 };

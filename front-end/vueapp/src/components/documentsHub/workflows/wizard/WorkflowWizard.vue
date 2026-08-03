@@ -81,9 +81,12 @@
                             :key="phase3Data?.steps.length"
                             :profilesList="profilesList ?? []"
                             :phase="currentPhase"
+                            :workflowId="workflowIdInternal"
+                            :isAcknowledging="isAcknowledgingToolUpdate"
                             @add-tool-flow="handleAddToolFlow"
                             @edit-tool-flow="handleEditToolFlow"
                             @remove-tool-flow="handleRemoveToolFlow"
+                            @acknowledge-tool-update="handleAcknowledgeToolUpdate"
                             :hasStepsTools="phase3Data?.steps.hasStepTools"
                         />
                     </div>
@@ -192,6 +195,7 @@
     import Phase2Steps from "./Phase2Steps.vue";
     import Phase3Tools from "./Phase3Tools.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
+    import ToolsService from "@/services/tools/ToolsServices";
     import ProfilesService from "@/services/profiles/ProfilesService";
     import FullscreenLoadingComponent from "@/components/global/FullscreenLoadingComponent.vue";
     import ConfirmModal from "@/components/global/ConfirmModal.vue";
@@ -243,6 +247,7 @@
                 documentCountToEdit: 0,
                 pendingStepToRemove: null,
                 fromKanban: false,
+                isAcknowledgingToolUpdate: false,
             };
         },
         computed: {
@@ -580,6 +585,38 @@
                     this.isLoading = false;
                 }
             },
+            async handleAcknowledgeToolUpdate(workflowId) {
+                if (!workflowId) return;
+                this.isAcknowledgingToolUpdate = true;
+                try {
+                    const success = await ToolsService.acknowledgeToolUpdate(workflowId);
+                    if (success) {
+                        await this.loadPhase3Data();
+                        this.$notify({
+                            title: "workflow.index",
+                            message: "workflow.toolUpdateAcknowledged",
+                            variant: "success",
+                            icon: "CircleCheck",
+                        });
+                    } else {
+                        this.$notify({
+                            title: "workflow.index",
+                            message: "workflow.toolUpdateAcknowledgeError",
+                            variant: "danger",
+                            icon: "CircleX",
+                        });
+                    }
+                } catch {
+                    this.$notify({
+                        title: "workflow.index",
+                        message: "workflow.toolUpdateAcknowledgeError",
+                        variant: "danger",
+                        icon: "CircleX",
+                    });
+                } finally {
+                    this.isAcknowledgingToolUpdate = false;
+                }
+            },
             async executeRemoveToolFlow(stepParam = null, resetDocuments = false) {
                 this.$refs.RemoveToolValidationDialog?.close();
                 const step = stepParam || this.pendingStepToRemove;
@@ -662,20 +699,7 @@
                             })),
                         };
                     } else if (this.currentPhase == 3) {
-                        await this.loadProfiles();
-
-                        let result = await this.getPhase2Data();
-                        this.phase2Data = {
-                            steps: result.map((step) => ({
-                                id: step.id,
-                                name: step.name,
-                                order: step.order,
-                                profileId: String(step.profile?.id || ""),
-                                statusId: String(step.status?.id || ""),
-                                hasStepTools: step.hasStepTools,
-                            })),
-                        };
-                        this.phase3Data = this.phase2Data;
+                        await this.loadPhase3Data();
                     }
                 } catch (error) {
                     this.$notify({
@@ -773,24 +797,27 @@
                     this.isLoading = false;
                 }
             },
+            mapPhase3Steps(steps) {
+                return (steps || []).map((step) => ({
+                    id: step.id,
+                    name: step.name,
+                    order: step.order,
+                    profileId: String(step.profile?.id || step.profileId || ""),
+                    statusId: String(step.status?.id || step.statusId || ""),
+                    hasStepTools: step.hasStepTools || (step.stepTools?.length ?? 0) > 0,
+                    stepTools: step.stepTools || [],
+                    isActive: step.isActive !== false,
+                }));
+            },
             async loadPhase3Data() {
                 if (!this.workflowIdInternal) return;
                 this.isLoading = true;
                 try {
                     await this.loadProfiles();
 
-                    let result = await this.getPhase2Data();
-                    this.phase2Data = {
-                        steps: result.map((step) => ({
-                            id: step.id,
-                            name: step.name,
-                            order: step.order,
-                            profileId: String(step.profile?.id || ""),
-                            statusId: String(step.status?.id || ""),
-                            hasStepTools: step.hasStepTools,
-                        })),
-                    };
-                    this.phase3Data = this.phase2Data;
+                    const result = await this.getPhase3Data();
+                    const steps = Array.isArray(result) ? result : result?.steps || [];
+                    this.phase3Data = { steps: this.mapPhase3Steps(steps) };
                 } catch (error) {
                     this.$notify({
                         title: "workflow.index",

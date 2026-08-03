@@ -206,6 +206,7 @@ function buildMockWorkflows() {
             active: true,
             teamId: 1,
             teams: [TEAM_LEGAL],
+            hasPendingToolUpdate: true,
             created: "2026-01-15T10:00:00.000Z",
             updated: "2026-06-01T14:30:00.000Z",
         },
@@ -216,6 +217,7 @@ function buildMockWorkflows() {
             active: true,
             teamId: 3,
             teams: [TEAM_OPS],
+            hasPendingToolUpdate: false,
             created: "2026-02-20T09:00:00.000Z",
             updated: "2026-05-10T11:00:00.000Z",
         },
@@ -357,37 +359,67 @@ function buildMockTools() {
         {
             id: 1,
             name: "Consulta CNPJ Receita",
-            toolType: { id: 1, name: "ApiConnector", apiName: "ApiConnector" },
+            toolType: { id: 1, name: "API", apiName: "ApiConnector" },
+            toolTypeId: 1,
             inputData: "cnpj: string",
+            inputDataId: 1,
             outputData: "razaoSocial, situacao",
+            outputDataId: 2,
+            isEditableInput: false,
+            connectorUrl: "",
+            connectorApiKey: "",
         },
         {
             id: 2,
             name: "Webhook Homologação N8N",
-            toolType: { id: 2, name: "N8NConnector", apiName: "N8NConnector" },
+            toolType: { id: 2, name: "N8N", apiName: "N8NConnector" },
+            toolTypeId: 2,
             inputData: "fornecedorId, documentoUrl",
+            inputDataId: 1,
             outputData: "statusHomologacao",
+            outputDataId: 2,
+            isEditableInput: false,
+            connectorUrl: "https://n8n.mock.local/webhook/homologacao",
+            connectorApiKey: "",
         },
         {
             id: 3,
             name: "Parser PDF Nativo",
-            toolType: { id: 3, name: "ParserConnector", apiName: "ParserConnector" },
+            toolType: { id: 3, name: "Parser", apiName: "ParserConnector" },
+            toolTypeId: 3,
             inputData: "documentId",
+            inputDataId: 3,
             outputData: "textoExtraido",
+            outputDataId: 1,
+            isEditableInput: false,
+            connectorUrl: "",
+            connectorApiKey: "",
         },
         {
             id: 4,
             name: "Classificador de Cláusulas",
-            toolType: { id: 4, name: "PromptConnector", apiName: "PromptConnector" },
+            toolType: { id: 4, name: "Prompt", apiName: "PromptConnector" },
+            toolTypeId: 4,
             inputData: "textoContrato",
+            inputDataId: 1,
             outputData: "clausulasCriticas",
+            outputDataId: 2,
+            isEditableInput: true,
+            connectorUrl: "",
+            connectorApiKey: "",
         },
         {
             id: 5,
             name: "Integração ERP SAP",
-            toolType: { id: 1, name: "ApiConnector", apiName: "ApiConnector" },
+            toolType: { id: 1, name: "API", apiName: "ApiConnector" },
+            toolTypeId: 1,
             inputData: "notaFiscalPayload",
+            inputDataId: 2,
             outputData: "numeroLancamento",
+            outputDataId: 2,
+            isEditableInput: false,
+            connectorUrl: "",
+            connectorApiKey: "",
         },
     ];
 }
@@ -1139,6 +1171,51 @@ export function buildWorkflowPhase(workflowId, phase) {
     };
 }
 
+export function buildPhase3Steps(workflowId) {
+    const wid = Number(workflowId);
+    const baseSteps = findWorkflowSteps(wid);
+    const workflow = mockState.workflows.find((item) => item.id === wid);
+    const hasPendingToolUpdate = workflow?.hasPendingToolUpdate ?? false;
+
+    if (wid === 1) {
+        return baseSteps.map((step, idx) => {
+            if (idx === 0) {
+                return {
+                    ...step,
+                    hasStepTools: true,
+                    stepTools: [
+                        {
+                            id: 9901,
+                            toolId: 2,
+                            toolName: "Webhook Homologação N8N",
+                            order: 1,
+                            hasUpdate: hasPendingToolUpdate,
+                        },
+                    ],
+                };
+            }
+            if (idx === 1) {
+                return {
+                    ...step,
+                    hasStepTools: true,
+                    stepTools: [
+                        {
+                            id: 9902,
+                            toolId: 1,
+                            toolName: "Consulta CNPJ Receita",
+                            order: 1,
+                            hasUpdate: false,
+                        },
+                    ],
+                };
+            }
+            return step;
+        });
+    }
+
+    return baseSteps;
+}
+
 export function buildEmptyBlob() {
     return new Blob(["Conteúdo simulado do documento."], { type: "application/pdf" });
 }
@@ -1218,4 +1295,29 @@ export function buildCardToolOutputsExport(cardId) {
     ];
 
     return rows;
+}
+
+export function buildToolUsedInWorkflows(toolId) {
+    const tid = Number(toolId);
+    if (tid === 2) {
+        return [
+            { workflowId: 1, workflowName: "Análise de Contratos" },
+            { workflowId: 2, workflowName: "Onboarding de Fornecedores" },
+        ];
+    }
+    return [];
+}
+
+export function buildWorkflowVersions(workflowId) {
+    return [
+        {
+            id: 1,
+            workflowId: Number(workflowId),
+            versionNumber: 1,
+            triggerToolId: 1,
+            triggerToolName: "Mock Tool",
+            configSnapshot: JSON.stringify([{ id: 1, name: "Step 1", order: 1, stepTools: [] }]),
+            created: new Date().toISOString(),
+        },
+    ];
 }

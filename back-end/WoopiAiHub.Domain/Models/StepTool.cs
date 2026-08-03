@@ -22,6 +22,9 @@ namespace WoopiAiHub.Domain.Models
         [Column("DependsOnStepToolId", TypeName = "int")]
         public int? DependsOnStepToolId { get; private set; }
 
+        [Column("HasUpdate", TypeName = "bit")]
+        public bool HasUpdate { get; private set; } = false;
+
         public virtual StepTool? DependsOnStepTool { get; set; }
         public virtual Step? Step { get; set; }
         public virtual Tool? Tool { get; set; }
@@ -138,6 +141,16 @@ namespace WoopiAiHub.Domain.Models
         {
             ArgumentNullException.ThrowIfNull(parameter);
             Parameters.Add(parameter);
+        }
+
+        public void MarkHasUpdate()
+        {
+            HasUpdate = true;
+        }
+
+        public void AcknowledgeUpdate()
+        {
+            HasUpdate = false;
         }
     }
 }

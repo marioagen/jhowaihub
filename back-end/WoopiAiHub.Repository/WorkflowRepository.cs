@@ -880,5 +880,34 @@ namespace WoopiAiHub.Repository
                 .AsSplitQuery()
                 .FirstAsync(w => w.Id == id && w.Enable.Equals(true));
         }
+
+        /// <summary>
+        /// Clears the pending-tool-update flag on the workflow and resets HasUpdate on all linked StepTools.
+        /// </summary>
+        /// <param name="workflowId">The workflow identifier.</param>
+        /// <returns>True if the operation succeeded.</returns>
+        public async Task<bool> AcknowledgeToolUpdateAsync(int workflowId)
+        {
+            var workflow = await _context.Workflows
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.StepTools)
+                .FirstOrDefaultAsync(w => w.Id == workflowId);
+
+            if (workflow == null)
+                return false;
+
+            workflow.AcknowledgeToolUpdate();
+
+            foreach (var step in workflow.Steps)
+            {
+                foreach (var stepTool in step.StepTools)
+                {
+                    stepTool.AcknowledgeUpdate();
+                }
+            }
+
+            _context.Workflows.Update(workflow);
+            return await _context.SaveChangesAsync() > 0;
+        }
     }
 }

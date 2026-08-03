@@ -13,11 +13,15 @@ namespace WoopiAiHub.Domain.Models
         [Column("Description", TypeName = "varchar(500)")]
         public string Description { get; private set; } = string.Empty;
 
+        [Column("HasPendingToolUpdate", TypeName = "bit")]
+        public bool HasPendingToolUpdate { get; private set; } = false;
+
         public virtual ICollection<Step> Steps { get; set; } = [];
         public virtual ICollection<Team> Teams { get; set; } = [];
         public virtual ICollection<Document> Documents { get; set; } = [];
         public virtual ICollection<UsageDaily> UsageDailies { get; set; } = [];
         public virtual ICollection<UsageMonth> UsageMonths { get; set; } = [];
+        public virtual ICollection<WorkflowVersion> Versions { get; set; } = [];
 
         public Workflow(int id, DateTime created, List<Team> teams, string name, string? description = null)
             : base(id, created)
@@ -73,6 +77,16 @@ namespace WoopiAiHub.Domain.Models
         {
             Name = name;
             Description = description ?? string.Empty;
+        }
+
+        public void MarkPendingToolUpdate()
+        {
+            HasPendingToolUpdate = true;
+        }
+
+        public void AcknowledgeToolUpdate()
+        {
+            HasPendingToolUpdate = false;
         }
     }
 }

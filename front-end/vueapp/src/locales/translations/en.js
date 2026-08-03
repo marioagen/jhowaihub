@@ -1755,6 +1755,10 @@ const english = {
         phase3Hint: "{count} step(s) without a tool flow yet. Click \"Add\" to configure.",
         configuredLabel: "Configured",
         pendingLabel: "Pending",
+        outdatedLabel: "Outdated",
+        outdatedToolsHint: "One or more tools in this pipeline were updated. Review and confirm the update to dismiss this alert.",
+        confirmUpdate: "Confirm update",
+        hasPendingToolUpdate: "This pipeline has outdated tools. Go to phase 3 to review.",
         addToolFlowHint: "Configure the tools that will run in this step of the process.",
         noCardsForStep: "No cards for the step",
         listView: {
@@ -1804,6 +1808,8 @@ const english = {
         profiles: "Responsible Profile",
         removeError: "Error removing workflow",
         removeSuccess: "Workflow removed successfully",
+        toolUpdateAcknowledged: "Tool update confirmed. The badges have been cleared.",
+        toolUpdateAcknowledgeError: "Error confirming tool update. Please try again.",
         removeToolFlow: "Remove Flow",
         removeToolValidationTitle: "Remove Step Tools",
         removeToolValidationMessage:
@@ -1850,6 +1856,22 @@ const english = {
         tools: "Tools",
         errors: {
             urlTooLong: "Prompt response is too long for the URL. Refine the prompt.",
+        },
+    },
+    tools: {
+        impact: {
+            title: "Tool used in {count} pipeline(s)",
+            intro: "The following {count} pipeline(s) use this tool and will be notified of the update:",
+            openWorkflow: "Open pipeline",
+            configure: "Configure",
+            warning: "The pipeline owners will be notified. The tool will be updated immediately, but pipeline administrators must confirm the update in the pipeline settings.",
+            saveAndNotify: "Save and notify",
+        },
+        notifications: {
+            toolUpdated: "Tool updated",
+            toolUpdatedMessage: '"{toolName}" was updated',
+            pipeline: "Pipeline: {workflowName}",
+            reviewConfig: "Review configuration",
         },
     },
 };

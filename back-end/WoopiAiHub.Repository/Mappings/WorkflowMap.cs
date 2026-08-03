@@ -28,6 +28,12 @@ namespace WoopiAiHub.Repository.Mappings
                .HasColumnType("bit")
                .IsRequired();
 
+            builder.Property(w => w.HasPendingToolUpdate)
+               .HasColumnName("HasPendingToolUpdate")
+               .HasColumnType("bit")
+               .IsRequired()
+               .HasDefaultValue(false);
+
             builder.Property(w => w.Created)
                 .HasColumnType("datetime")
                 .IsRequired();

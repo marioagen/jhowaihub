@@ -36,5 +36,6 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<Workflow?> FindByIdForAnalyze(int id);
         ICollection<WorkflowInternalDto> FindAllInternal();
         Task<Workflow?> FindByIdReturnModelWithSteps(int id);
+        Task<bool> AcknowledgeToolUpdateAsync(int workflowId);
     }
 }

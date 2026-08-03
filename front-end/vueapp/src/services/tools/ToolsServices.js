@@ -92,4 +92,16 @@ export default {
                 return false;
             });
     },
+    findUsedInWorkflows(toolId) {
+        return api
+            .get(`/Tool/${toolId}/UsedInWorkflows`)
+            .then(({ data }) => data)
+            .catch(() => []);
+    },
+    acknowledgeToolUpdate(workflowId) {
+        return api
+            .put(`/Workflow/${workflowId}/AcknowledgeToolUpdate`)
+            .then(() => true)
+            .catch(() => false);
+    },
 };

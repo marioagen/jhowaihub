@@ -23,6 +23,9 @@ import {
     buildTenantPlan,
     buildToolPagedResponse,
     buildToolTypes,
+    buildToolUsedInWorkflows,
+    buildWorkflowVersions,
+    buildPhase3Steps,
     buildTypeDocList,
     buildUsageMonthResponse,
     buildWorkflowPermissionGroups,
@@ -293,7 +296,7 @@ function resolveMockRequest(config) {
         return buildPhase2Steps(parseIdFromPath(path, 2));
     }
     if (method === "GET" && matchPath(path, "/Workflow/Phase3/:workflowId")) {
-        return buildPhase2Steps(parseIdFromPath(path, 2));
+        return buildPhase3Steps(parseIdFromPath(path, 2));
     }
     if (method === "GET" && matchPath(path, "/Workflow/Step/:stepId")) {
         const steps = findWorkflowSteps(1);
@@ -322,6 +325,16 @@ function resolveMockRequest(config) {
     if (method === "PUT" && path === "/Workflow/Phase2") {
         saveWizardPhase2Steps(body);
         return buildSuccessBody(true);
+    }
+    if (method === "PUT" && matchPath(path, "/Workflow/:id/AcknowledgeToolUpdate")) {
+        const wfId = parseIdFromPath(path, 1);
+        const wf = mockState.workflows.find((w) => w.id === Number(wfId));
+        if (wf) wf.hasPendingToolUpdate = false;
+        return buildSuccessBody(true);
+    }
+    if (method === "GET" && matchPath(path, "/Workflow/:id/Versions")) {
+        const workflowId = parseIdFromPath(path, 1);
+        return buildWorkflowVersions(workflowId);
     }
     if (method === "POST" && path.startsWith("/Workflow")) {
         return buildSuccessBody({ id: MOCK_NEW_WORKFLOW_ID, name: "Workflow Simulado" });
@@ -540,10 +553,23 @@ function resolveMockRequest(config) {
     if (method === "GET" && path === "/Tool") {
         return mockState.tools;
     }
+    if (method === "GET" && matchPath(path, "/Tool/:id/UsedInWorkflows")) {
+        const toolId = parseIdFromPath(path, 1);
+        return buildToolUsedInWorkflows(toolId);
+    }
     if (method === "POST" && path.startsWith("/Tool")) {
         return buildSuccessBody(true);
     }
     if (method === "PUT" && path === "/Tool") {
+        const payload = typeof body === "string" ? JSON.parse(body) : body;
+        const toolId = Number(payload?.id);
+        if (toolId === 2) {
+            mockState.workflows.forEach((workflow) => {
+                if (workflow.id === 1 || workflow.id === 2) {
+                    workflow.hasPendingToolUpdate = true;
+                }
+            });
+        }
         return buildSuccessBody(true);
     }
     if (method === "DELETE" && (path === "/Tool" || path === "/Tool/")) {
@@ -554,7 +580,12 @@ function resolveMockRequest(config) {
         return buildToolTypes();
     }
     if (method === "GET" && path === "/ToolData") {
-        return [];
+        return [
+            { id: 1, name: "Texto" },
+            { id: 2, name: "JSON" },
+            { id: 3, name: "PDF" },
+            { id: 4, name: "Imagem" },
+        ];
     }
 
     if (method === "GET" && path.startsWith("/Automation")) {

@@ -14,5 +14,8 @@ namespace WoopiAiHub.Domain.Interfaces.Repository
         Task<bool> UpdateAsync(Tool tool);
         bool Delete(List<int> ids);
         IQueryable<ToolDto> FindAllPaged();
+        Task<IEnumerable<WorkflowUsageDto>> FindUsedInWorkflowsAsync(int toolId);
+        Task<IEnumerable<Workflow>> FindWorkflowModelsByToolIdAsync(int toolId);
+        Task MarkWorkflowsToolUpdateAsync(IEnumerable<Workflow> workflows, int toolId, string toolName);
     }
 }

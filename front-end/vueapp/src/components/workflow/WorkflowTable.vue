@@ -10,6 +10,18 @@
             :hasSelection="false"
             @change-page="changePage"
         >
+            <template #cell-name="{ data }">
+                <div class="d-flex align-items-center gap-2">
+                    <span>{{ data.row.name }}</span>
+                    <span
+                        v-if="data.row.hasPendingToolUpdate"
+                        class="workflow-outdated-icon"
+                        v-tooltip="$t('workflow.hasPendingToolUpdate')"
+                    >
+                        <LucideIcon icon="AlertTriangle" :size="15" />
+                    </span>
+                </div>
+            </template>
             <template #cell-description="{ data }">
                 <span
                     v-if="!data.row.description || !String(data.row.description).trim()"
@@ -457,5 +469,12 @@
 <style scoped>
     .workflow-description-modal-text {
         white-space: pre-wrap;
+    }
+
+    .workflow-outdated-icon {
+        color: #d97706;
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
     }
 </style>

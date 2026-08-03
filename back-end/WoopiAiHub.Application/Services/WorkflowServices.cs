@@ -1607,6 +1607,17 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
+        /// Clears the pending-tool-update flag on the workflow and resets HasUpdate on all linked StepTools,
+        /// acknowledging that the workflow owner has reviewed the tool change.
+        /// </summary>
+        /// <param name="workflowId">The ID of the workflow to acknowledge.</param>
+        /// <returns>True if the operation succeeded; false if the workflow was not found.</returns>
+        public async Task<bool> AcknowledgeToolUpdateAsync(int workflowId)
+        {
+            return await _workflowRepository.AcknowledgeToolUpdateAsync(workflowId);
+        }
+
+        /// <summary>
         /// Retrieves the workflow model with the specified identifier.
         /// </summary>
         /// <param name="id">The unique identifier of the workflow to retrieve.</param>

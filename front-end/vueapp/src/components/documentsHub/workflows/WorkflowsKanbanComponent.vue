@@ -30,9 +30,16 @@
                                         class="me-2"
                                         stroke="#0d6efd"
                                     />
-                                    <div>
-                                        <div class="fw-bold font-size-sm">
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="fw-bold font-size-sm d-flex align-items-center gap-1">
                                             {{ selectedOption.teamName }}
+                                            <span
+                                                v-if="selectedOption.hasPendingToolUpdate"
+                                                class="kanban-outdated-badge"
+                                                v-tooltip="$t('workflow.hasPendingToolUpdate')"
+                                            >
+                                                <LucideIcon icon="AlertTriangle" :size="13" />
+                                            </span>
                                         </div>
                                         <div class="font-size-xs">
                                             {{ selectedOption.name }}
@@ -41,7 +48,7 @@
                                     <LucideIcon
                                         icon="ChevronDown"
                                         :size="20"
-                                        class="ms-2 text-muted"
+                                        class="ms-2 text-muted flex-shrink-0"
                                     />
                                 </button>
                                 <ul class="dropdown-menu p-2 workflow-list">
@@ -73,8 +80,15 @@
                                             class="dropdown-item"
                                             @click="selectOption(item)"
                                         >
-                                            <div class="fw-bold">
-                                                {{ item.teams.name }}
+                                            <div class="fw-bold d-flex align-items-center gap-1">
+                                                {{ Array.isArray(item.teams) ? item.teams[0]?.name : item.teams?.name }}
+                                                <span
+                                                    v-if="item.hasPendingToolUpdate"
+                                                    class="kanban-outdated-badge"
+                                                    v-tooltip="$t('workflow.hasPendingToolUpdate')"
+                                                >
+                                                    <LucideIcon icon="AlertTriangle" :size="13" />
+                                                </span>
                                             </div>
                                             <div class="text-muted small">
                                                 {{ item.name }}
@@ -853,9 +867,16 @@
                     name: workflow.name,
                 });
 
+                const team = Array.isArray(workflow.teams)
+                    ? workflow.teams[0]
+                    : workflow.teams;
+
                 this.selectedOption = {
                     id: workflow.id,
                     name: workflow.name,
+                    teamName: team?.name ?? "",
+                    teamId: team?.id ?? 0,
+                    hasPendingToolUpdate: workflow.hasPendingToolUpdate ?? false,
                 };
 
                 this.clearBulkSelection();
@@ -1322,6 +1343,13 @@
 
     .dropdown-toggle::after {
         display: none;
+    }
+
+    .kanban-outdated-badge {
+        color: #d97706;
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
     }
 
     .custom-height {

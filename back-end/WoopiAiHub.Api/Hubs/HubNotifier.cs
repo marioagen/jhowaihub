@@ -89,6 +89,30 @@ namespace WoopiAiHub.Api.Hubs
         }
 
         /// <summary>
+        /// Notifies all active connections for the specified user that a tool used in one of their workflows was updated.
+        /// </summary>
+        /// <param name="userEmail">Email of the user to notify.</param>
+        /// <param name="workflowId">ID of the impacted workflow.</param>
+        /// <param name="workflowName">Name of the impacted workflow.</param>
+        /// <param name="toolId">ID of the updated tool.</param>
+        /// <param name="toolName">Name of the updated tool.</param>
+        public async Task ToolUpdatedInWorkflowAsync(string userEmail, int workflowId, string workflowName, int toolId, string toolName)
+        {
+            var connections = _connectionMapping.GetConnections(userEmail);
+            foreach (var connectionId in connections)
+            {
+                await _hubContext.Clients.Client(connectionId).SendAsync("ToolUpdatedInWorkflow", new
+                {
+                    WorkflowId = workflowId,
+                    WorkflowName = workflowName,
+                    ToolId = toolId,
+                    ToolName = toolName,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+        }
+
+        /// <summary>
         /// Notifies all active connections for the specified user that a document is ready for anonymization.
         /// </summary>
         /// <remarks>This method sends a real-time notification to all active SignalR connections

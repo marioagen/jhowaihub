@@ -9,5 +9,6 @@ namespace WoopiAiHub.Domain.DTOs.Response
         public ICollection<TeamDto> Teams { get; set; } = [];
         public ICollection<StepDto> Steps { get; set; } = [];
         public int NumDocuments { get; set; } = 0;
+        public bool HasPendingToolUpdate { get; set; } = false;
     }
 }

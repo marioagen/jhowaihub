@@ -13,5 +13,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         bool Delete(List<int> ids);
         PagedResponseDto<ToolDto> FindAllPaged(ToolPagedDataDto toolPagedDataDto);
         Task<bool> ValidateConnector(ToolConnectorDto toolConnectorDto);
+        Task<IEnumerable<WorkflowUsageDto>> FindUsedInWorkflowsAsync(int toolId);
     }
 }

@@ -133,6 +133,20 @@ export default new Vuex.Store({
                 state.uploadNotifications.unshift({ id, fileName, status, success, link, title });
             }
         },
+        addToolUpdateNotification(state, payload) {
+            const exists = state.uploadNotifications.some((n) => n.id === payload.id);
+            if (!exists) {
+                state.uploadNotifications.unshift({
+                    id: payload.id,
+                    type: "tool-update",
+                    workflowId: payload.workflowId,
+                    workflowName: payload.workflowName,
+                    toolName: payload.toolName,
+                    status: "unread",
+                    success: true,
+                });
+            }
+        },
     },
     plugins: [
         createPersistedState({

@@ -130,6 +130,41 @@ namespace WoopiAiHub.UnitTests.Fixture
         }
     }
 
+        public static WorkflowUsageDto FindValidWorkflowUsage()
+        {
+            var f = new Faker("pt_BR");
+            return new WorkflowUsageDto
+            {
+                WorkflowId = f.Random.Int(1, 1000),
+                WorkflowName = f.Lorem.Sentence(2),
+            };
+        }
+
+        public static List<WorkflowUsageDto> FindValidWorkflowUsageList()
+        {
+            return new List<WorkflowUsageDto> { FindValidWorkflowUsage(), FindValidWorkflowUsage() };
+        }
+
+        public static Workflow FindValidWorkflowWithTeamUser(int toolId)
+        {
+            var f = new Faker("pt_BR");
+            var userId = Guid.NewGuid();
+            var userEmail = f.Internet.Email();
+            var user = new User(userId, f.Person.FirstName, userEmail, true, DateTime.UtcNow);
+            var team = new Team("Test Team", 1, DateTime.UtcNow);
+            team.Users.Add(user);
+
+            var workflow = new Workflow(f.Random.Int(1, 1000), DateTime.UtcNow, new List<Team> { team }, f.Lorem.Sentence(2));
+
+            var step = new Step(f.Random.Int(1, 1000), DateTime.UtcNow, workflow.Id, "Step 1", 1, 1, 1);
+            var stepTool = new StepTool(f.Random.Int(1, 1000), DateTime.UtcNow, step.Id, toolId, 1, 0m, 0m);
+            step.StepTools = new List<StepTool> { stepTool };
+
+            workflow.Steps = new List<Step> { step };
+            return workflow;
+        }
+    }
+
     [CollectionDefinition(nameof(ToolCollection))]
     public class ToolCollection : ICollectionFixture<ToolFixture>
     {

@@ -51,6 +51,12 @@ namespace WoopiAiHub.Repository.Mappings
                    .HasColumnType("datetime")
                    .IsRequired();
 
+            builder.Property(st => st.HasUpdate)
+                   .HasColumnName("HasUpdate")
+                   .HasColumnType("bit")
+                   .IsRequired()
+                   .HasDefaultValue(false);
+
             builder.HasIndex(st => st.DependsOnStepToolId)
                    .IsUnique()
                    .HasFilter("[DependsOnStepToolId] IS NOT NULL");

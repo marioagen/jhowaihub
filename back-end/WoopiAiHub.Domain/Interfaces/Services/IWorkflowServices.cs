@@ -35,5 +35,6 @@ namespace WoopiAiHub.Domain.Interfaces.Services
         Task<Workflow?> FindModelById(int id);
         Task<int> CountCards(int id);
         Task<bool> HasStepToolConstraints(int stepId);
+        Task<bool> AcknowledgeToolUpdateAsync(int workflowId);
     }
 }

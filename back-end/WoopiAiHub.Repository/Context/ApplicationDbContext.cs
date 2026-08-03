@@ -71,6 +71,7 @@ namespace WoopiAiHub.Repository.Context
         public DbSet<PromptApiTemplate> PromptApiTemplates { get; set; }
         public DbSet<DocumentAnonymization> DocumentAnonymizations { get; set; }
         public DbSet<TenantLlmModelSetting> TenantLlmModelSettings { get; set; }
+        public DbSet<WorkflowVersion> WorkflowVersions { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -124,6 +125,7 @@ namespace WoopiAiHub.Repository.Context
             modelBuilder.Entity<DocumentBatch>(new DocumentBatchMap().Configure);
             modelBuilder.Entity<DocumentAnonymization>(new DocumentAnonymizationMap().Configure);
             modelBuilder.Entity<TenantLlmModelSetting>(new TenantLlmModelSettingMap().Configure);
+            modelBuilder.Entity<WorkflowVersion>(new WorkflowVersionMap().Configure);
             base.OnModelCreating(modelBuilder);
         }
 

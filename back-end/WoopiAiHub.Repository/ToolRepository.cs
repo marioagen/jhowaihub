@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Text.Json;
 using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Interfaces.Repository;
@@ -162,6 +163,96 @@ namespace WoopiAiHub.Repository
                     .Select(FormatToolProjection())
                     .AsQueryable()
                     .AsNoTracking();
+        }
+
+        /// <summary>
+        /// Finds all workflows that use the given tool in any of their steps.
+        /// </summary>
+        /// <param name="toolId">The tool identifier.</param>
+        /// <returns>A collection of workflow usage summaries.</returns>
+        public async Task<IEnumerable<WorkflowUsageDto>> FindUsedInWorkflowsAsync(int toolId)
+        {
+            return await _context.StepTools
+                .AsNoTracking()
+                .Where(st => st.ToolId == toolId && st.Step != null && st.Step.Workflow != null)
+                .Select(st => new WorkflowUsageDto
+                {
+                    WorkflowId = st.Step!.WorkflowId,
+                    WorkflowName = st.Step!.Workflow!.Name,
+                })
+                .Distinct()
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Returns full Workflow models (with teams and step tools) that reference the given tool.
+        /// Used to mark flags and collect notification recipients after a tool update.
+        /// </summary>
+        /// <param name="toolId">The tool identifier.</param>
+        /// <returns>A collection of Workflow entities.</returns>
+        public async Task<IEnumerable<Workflow>> FindWorkflowModelsByToolIdAsync(int toolId)
+        {
+            return await _context.StepTools
+                .Where(st => st.ToolId == toolId && st.Step != null)
+                .Select(st => st.Step!.Workflow!)
+                .Distinct()
+                .Include(w => w.Teams)
+                    .ThenInclude(t => t.Users)
+                .Include(w => w.Steps)
+                    .ThenInclude(s => s.StepTools)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Marks all provided workflows as having a pending tool update, flags affected StepTools,
+        /// and creates an immutable WorkflowVersion snapshot for each workflow.
+        /// </summary>
+        /// <param name="workflows">Workflows whose steps reference the updated tool.</param>
+        /// <param name="toolId">ID of the tool that was updated.</param>
+        /// <param name="toolName">Name of the tool that was updated.</param>
+        public async Task MarkWorkflowsToolUpdateAsync(IEnumerable<Workflow> workflows, int toolId, string toolName)
+        {
+            var serializerOptions = new JsonSerializerOptions
+            {
+                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+            };
+
+            foreach (var workflow in workflows)
+            {
+                workflow.MarkPendingToolUpdate();
+
+                foreach (var step in workflow.Steps)
+                {
+                    foreach (var stepTool in step.StepTools.Where(st => st.ToolId == toolId))
+                    {
+                        stepTool.MarkHasUpdate();
+                    }
+                }
+
+                var nextVersion = await _context.WorkflowVersions
+                    .Where(v => v.WorkflowId == workflow.Id)
+                    .CountAsync() + 1;
+
+                var snapshot = JsonSerializer.Serialize(workflow.Steps.Select(s => new
+                {
+                    s.Id, s.Name, s.Order,
+                    StepTools = s.StepTools.Select(st => new { st.Id, st.ToolId, st.Order, st.HasUpdate })
+                }), serializerOptions);
+
+                var version = new WorkflowVersion(
+                    0,
+                    DateTime.UtcNow,
+                    workflow.Id,
+                    nextVersion,
+                    snapshot,
+                    toolId,
+                    toolName);
+
+                _context.WorkflowVersions.Add(version);
+                _context.Workflows.Update(workflow);
+            }
+
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>

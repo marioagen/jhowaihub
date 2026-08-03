@@ -104,5 +104,19 @@ namespace WoopiAiHub.Api.Controllers
             var result = await _toolServices.ValidateConnector(toolConnectorDto);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Returns a list of all workflows that use the specified tool in any step.
+        /// Used for impact analysis before saving a tool edit.
+        /// </summary>
+        /// <param name="id">The tool ID to query.</param>
+        [HttpGet("{id}/UsedInWorkflows")]
+        [SwaggerOperation("Returns all workflows that reference the specified tool")]
+        [ProducesResponseType(typeof(IEnumerable<WorkflowUsageDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> FindUsedInWorkflows(int id)
+        {
+            var result = await _toolServices.FindUsedInWorkflowsAsync(id);
+            return Ok(result);
+        }
     }
 }

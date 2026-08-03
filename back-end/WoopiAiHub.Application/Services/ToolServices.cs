@@ -3,6 +3,7 @@ using WoopiAiHub.Domain.DTOs;
 using WoopiAiHub.Domain.DTOs.Request;
 using WoopiAiHub.Domain.DTOs.Response;
 using WoopiAiHub.Domain.Enum;
+using WoopiAiHub.Domain.Interfaces.Hubs;
 using WoopiAiHub.Domain.Interfaces.Repository;
 using WoopiAiHub.Domain.Interfaces.Services;
 using WoopiAiHub.Domain.Interfaces.Utils;
@@ -16,16 +17,19 @@ namespace WoopiAiHub.Application.Services
         private readonly IToolTypeRepository _toolTypeRepository;
         private readonly IApiClientFactory _apiClientFactory;
         private readonly IEncryptionService _encryptionService;
+        private readonly IHubNotifier _hubNotifier;
 
         public ToolServices(IToolRepository toolRepository,
                             IToolTypeRepository toolTypeRepository,
                             IApiClientFactory apiClientFactory,
-                            IEncryptionService encryptionService)
+                            IEncryptionService encryptionService,
+                            IHubNotifier hubNotifier)
         {
             _toolRepository = toolRepository;
             _toolTypeRepository = toolTypeRepository;
             _apiClientFactory = apiClientFactory;
             _encryptionService = encryptionService;
+            _hubNotifier = hubNotifier;
         }
 
         /// <summary>
@@ -157,11 +161,12 @@ namespace WoopiAiHub.Application.Services
         }
 
         /// <summary>
-        /// 
+        /// Updates an existing tool in-place, then flags all workflows that use this tool as having a pending
+        /// update and notifies their team members via SignalR.
         /// </summary>
-        /// <param name="toolUpdateDto"></param>
-        /// <returns></returns>
-        /// <exception cref="AppException"></exception>
+        /// <param name="toolUpdateDto">The update payload containing the new tool configuration.</param>
+        /// <returns>True when the operation succeeds.</returns>
+        /// <exception cref="AppException">Thrown when the tool or tool type is not found, or when a duplicate name is detected.</exception>
         public async Task<bool> UpdateAsync(ToolUpdateDto toolUpdateDto)
         {
             var tool = await _toolRepository.FindModelByIdAsync(toolUpdateDto.Id)
@@ -188,7 +193,50 @@ namespace WoopiAiHub.Application.Services
                 throw new AppException(ErrorCode.Duplicated, "Duplicated Tool", null);
             }
 
+            await PropagateToolUpdateToWorkflowsAsync(tool);
+
             return result;
+        }
+
+        /// <summary>
+        /// Returns a list of workflows that currently use the given tool in any of their steps.
+        /// </summary>
+        /// <param name="toolId">The ID of the tool to query.</param>
+        /// <returns>A collection of workflow usage summaries.</returns>
+        public async Task<IEnumerable<WorkflowUsageDto>> FindUsedInWorkflowsAsync(int toolId)
+        {
+            return await _toolRepository.FindUsedInWorkflowsAsync(toolId);
+        }
+
+        /// <summary>
+        /// After a tool update, marks all affected workflows as pending, creates version snapshots
+        /// and notifies team members via SignalR.
+        /// </summary>
+        private async Task PropagateToolUpdateToWorkflowsAsync(Tool tool)
+        {
+            var workflowsResult = await _toolRepository.FindWorkflowModelsByToolIdAsync(tool.Id);
+            var workflows = workflowsResult?.ToList() ?? new List<Workflow>();
+            if (workflows.Count == 0)
+                return;
+
+            await _toolRepository.MarkWorkflowsToolUpdateAsync(workflows, tool.Id, tool.Name);
+
+            var notifiedEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var workflow in workflows)
+            {
+                var emails = workflow.Teams
+                    .SelectMany(t => t.Users)
+                    .Select(u => u.Email)
+                    .Where(e => !string.IsNullOrWhiteSpace(e));
+
+                foreach (var email in emails)
+                {
+                    if (notifiedEmails.Add(email))
+                    {
+                        await _hubNotifier.ToolUpdatedInWorkflowAsync(email, workflow.Id, workflow.Name, tool.Id, tool.Name);
+                    }
+                }
+            }
         }
 
         /// <summary>

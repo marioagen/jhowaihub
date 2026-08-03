@@ -27,6 +27,30 @@
         >
             <div class="col-12">
                 <div
+                    v-if="hasAnyOutdatedTool"
+                    class="phase3-outdated-banner mb-3 d-flex align-items-center justify-content-between gap-2 flex-wrap"
+                >
+                    <div class="d-flex align-items-center gap-2">
+                        <LucideIcon icon="TriangleAlert" :size="16" class="phase3-outdated-banner__icon flex-shrink-0" />
+                        <span class="small">{{ $t("workflow.outdatedToolsHint") }}</span>
+                    </div>
+                    <button
+                        v-if="workflowId"
+                        class="btn btn-warning btn-sm d-inline-flex align-items-center gap-1 flex-shrink-0"
+                        @click="acknowledgeToolUpdate"
+                        :disabled="isAcknowledging"
+                    >
+                        <span
+                            v-if="isAcknowledging"
+                            class="spinner-border spinner-border-sm"
+                            role="status"
+                        />
+                        <LucideIcon v-else icon="CircleCheck" :size="13" />
+                        {{ $t("workflow.confirmUpdate") }}
+                    </button>
+                </div>
+
+                <div
                     class="phase3-hint mb-3 d-flex align-items-start gap-2"
                     v-if="stepsWithoutTools > 0"
                 >
@@ -62,26 +86,35 @@
                                 </span>
                             </div>
                         </div>
-                        <span
-                            v-if="step.hasStepTools"
-                            class="badge bg-success-subtle text-success d-flex align-items-center gap-1"
-                        >
-                            <LucideIcon
-                                icon="CircleCheck"
-                                :size="13"
-                            />
-                            {{ $t("workflow.configuredLabel") }}
-                        </span>
-                        <span
-                            v-else
-                            class="badge bg-warning-subtle text-warning d-flex align-items-center gap-1"
-                        >
-                            <LucideIcon
-                                icon="CircleDashed"
-                                :size="13"
-                            />
-                            {{ $t("workflow.pendingLabel") }}
-                        </span>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span
+                                v-if="step.stepTools && step.stepTools.some(st => st.hasUpdate)"
+                                class="badge bg-warning text-dark d-flex align-items-center gap-1"
+                            >
+                                <LucideIcon icon="TriangleAlert" :size="12" />
+                                {{ $t("workflow.outdatedLabel") }}
+                            </span>
+                            <span
+                                v-if="step.hasStepTools"
+                                class="badge bg-success-subtle text-success d-flex align-items-center gap-1"
+                            >
+                                <LucideIcon
+                                    icon="CircleCheck"
+                                    :size="13"
+                                />
+                                {{ $t("workflow.configuredLabel") }}
+                            </span>
+                            <span
+                                v-else
+                                class="badge bg-warning-subtle text-warning d-flex align-items-center gap-1"
+                            >
+                                <LucideIcon
+                                    icon="CircleDashed"
+                                    :size="13"
+                                />
+                                {{ $t("workflow.pendingLabel") }}
+                            </span>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div
@@ -143,6 +176,7 @@
 <script>
     export default {
         name: "Phase3Tools",
+        emits: ["add-tool-flow", "edit-tool-flow", "remove-tool-flow", "acknowledge-tool-update"],
         props: {
             workflowSteps: {
                 type: Array,
@@ -162,10 +196,25 @@
                 required: false,
                 default: false,
             },
+            workflowId: {
+                type: Number,
+                required: false,
+                default: null,
+            },
+            isAcknowledging: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
         },
         computed: {
             stepsWithoutTools() {
                 return (this.workflowSteps || []).filter((s) => !s.hasStepTools).length;
+            },
+            hasAnyOutdatedTool() {
+                return (this.workflowSteps || []).some((s) =>
+                    (s.stepTools || []).some((st) => st.hasUpdate)
+                );
             },
         },
         methods: {
@@ -181,6 +230,9 @@
             },
             removeToolFlow(step) {
                 this.$emit("remove-tool-flow", step);
+            },
+            acknowledgeToolUpdate() {
+                this.$emit("acknowledge-tool-update", this.workflowId);
             },
             getData() {
                 return {
@@ -254,6 +306,18 @@
 
     .phase3-hint__icon {
         color: var(--color-bg-btn-primary, #0d6efd);
+    }
+
+    .phase3-outdated-banner {
+        background: #fff8e1;
+        border: 1px solid #ffe082;
+        border-radius: 0.5rem;
+        padding: 0.65rem 0.85rem;
+        color: #6d4c06;
+    }
+
+    .phase3-outdated-banner__icon {
+        color: #d97706;
     }
 
     .phase3-empty__icon {

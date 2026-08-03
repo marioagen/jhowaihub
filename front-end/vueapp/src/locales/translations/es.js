@@ -1761,6 +1761,10 @@ const spanish = {
         phase3Hint: "{count} paso(s) sin flujo de herramientas. Haga clic en \"Agregar\" para configurar.",
         configuredLabel: "Configurado",
         pendingLabel: "Pendiente",
+        outdatedLabel: "Desactualizado",
+        outdatedToolsHint: "Una o más herramientas de este flujo fueron actualizadas. Revise y confirme la actualización para descartar esta alerta.",
+        confirmUpdate: "Confirmar actualización",
+        hasPendingToolUpdate: "Este flujo tiene herramientas desactualizadas. Vaya a la fase 3 para revisar.",
         addToolFlowHint: "Configure las herramientas que se ejecutarán en este paso del proceso.",
         noCardsForStep: "No hay documentos en este paso",
         listView: {
@@ -1812,6 +1816,8 @@ const spanish = {
         profiles: "Perfil Responsable",
         removeError: "Error al eliminar workflow",
         removeSuccess: "Workflow eliminado con éxito",
+        toolUpdateAcknowledged: "Actualización confirmada. Las alertas han sido eliminadas.",
+        toolUpdateAcknowledgeError: "Error al confirmar la actualización. Intente de nuevo.",
         removeToolFlow: "Eliminar flujo",
         removeToolValidationTitle: "Eliminar Herramientas de la Etapa",
         removeToolValidationMessage:
@@ -1858,6 +1864,22 @@ const spanish = {
         tools: "Herramientas",
         errors: {
             urlTooLong: "La respuesta del prompt es demasiado larga para la URL. Refine el prompt.",
+        },
+    },
+    tools: {
+        impact: {
+            title: "Herramienta utilizada en {count} flujo(s)",
+            intro: "Los {count} flujo(s) siguientes usan esta herramienta y serán notificados de la actualización:",
+            openWorkflow: "Abrir flujo",
+            configure: "Configurar",
+            warning: "Los responsables de los flujos serán notificados. La herramienta se actualizará de inmediato, pero los administradores del flujo deberán confirmar la actualización en la configuración.",
+            saveAndNotify: "Guardar y notificar",
+        },
+        notifications: {
+            toolUpdated: "Herramienta actualizada",
+            toolUpdatedMessage: '"{toolName}" fue modificada',
+            pipeline: "Flujo: {workflowName}",
+            reviewConfig: "Revisar configuración",
         },
     },
 };
