@@ -19,20 +19,32 @@
                                 class="btn transfer-list-sort-button"
                                 :class="{ active: availableSort === 'alphabetical' }"
                                 :aria-pressed="availableSort === 'alphabetical'"
-                                :title="$t('transferListSortAlphabetical')"
-                                @click="availableSort = 'alphabetical'"
+                                :aria-label="sortButtonLabel('alphabetical')"
+                                :title="sortButtonLabel('alphabetical')"
+                                @click="changeAvailableSort('alphabetical')"
                             >
-                                A-Z
+                                <span>A-Z</span>
+                                <LucideIcon
+                                    v-if="availableSort === 'alphabetical'"
+                                    :icon="availableSortDirection === 'ascending' ? 'ArrowUp' : 'ArrowDown'"
+                                    :size="9"
+                                />
                             </button>
                             <button
                                 type="button"
                                 class="btn transfer-list-sort-button"
                                 :class="{ active: availableSort === 'id' }"
                                 :aria-pressed="availableSort === 'id'"
-                                :title="$t('transferListSortId')"
-                                @click="availableSort = 'id'"
+                                :aria-label="sortButtonLabel('id')"
+                                :title="sortButtonLabel('id')"
+                                @click="changeAvailableSort('id')"
                             >
-                                ID
+                                <span>ID</span>
+                                <LucideIcon
+                                    v-if="availableSort === 'id'"
+                                    :icon="availableSortDirection === 'ascending' ? 'ArrowUp' : 'ArrowDown'"
+                                    :size="9"
+                                />
                             </button>
                         </div>
                     </div>
@@ -157,6 +169,7 @@
                 selectedAvailableIds: [],
                 selectedSelectedIds: [],
                 availableSort: "id",
+                availableSortDirection: "ascending",
             };
         },
         computed: {
@@ -171,17 +184,20 @@
                     );
 
                 return [...filteredQuestions].sort((firstQuestion, secondQuestion) => {
+                    const direction = this.availableSortDirection === "ascending" ? 1 : -1;
                     if (this.availableSort === "alphabetical") {
-                        return new Intl.Collator(this.$i18n.locale, {
-                            sensitivity: "base",
-                            numeric: true,
-                        }).compare(
-                            firstQuestion.description || firstQuestion.text || "",
-                            secondQuestion.description || secondQuestion.text || ""
+                        return (
+                            new Intl.Collator(this.$i18n.locale, {
+                                sensitivity: "base",
+                                numeric: true,
+                            }).compare(
+                                firstQuestion.description || firstQuestion.text || "",
+                                secondQuestion.description || secondQuestion.text || ""
+                            ) * direction
                         );
                     }
 
-                    return Number(firstQuestion.id) - Number(secondQuestion.id);
+                    return (Number(firstQuestion.id) - Number(secondQuestion.id)) * direction;
                 });
             },
             filteredSelected() {
@@ -201,6 +217,31 @@
             this.selectedSelectedIds = initial.map((q) => q.id);
         },
         methods: {
+            changeAvailableSort(sort) {
+                if (this.availableSort === sort) {
+                    this.availableSortDirection =
+                        this.availableSortDirection === "ascending" ? "descending" : "ascending";
+                    return;
+                }
+
+                this.availableSort = sort;
+                this.availableSortDirection = "ascending";
+            },
+            sortButtonLabel(sort) {
+                const sortLabel = this.$t(
+                    sort === "alphabetical" ? "transferListSortAlphabetical" : "transferListSortId"
+                );
+                if (this.availableSort !== sort) {
+                    return sortLabel;
+                }
+
+                const directionLabel = this.$t(
+                    this.availableSortDirection === "ascending"
+                        ? "transferListSortAscending"
+                        : "transferListSortDescending"
+                );
+                return `${sortLabel}: ${directionLabel}`;
+            },
             toggleSelection(id, list) {
                 const selectedIds =
                     list === "available" ? this.selectedAvailableIds : this.selectedSelectedIds;
@@ -266,6 +307,10 @@
         white-space: nowrap;
     }
     .transfer-list-sort-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1px;
         width: 32px;
         height: 32px;
         min-width: 32px;

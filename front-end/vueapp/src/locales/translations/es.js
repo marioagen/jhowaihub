@@ -1613,6 +1613,8 @@ const spanish = {
     },
     transferListPlaceholder: "Buscar en la lista",
     transferListSortAlphabetical: "Ordenar alfabéticamente",
+    transferListSortAscending: "Ascendente",
+    transferListSortDescending: "Descendente",
     transferListSortId: "Ordenar por ID",
     transferListTitle: "Lista para seleccionar",
     types: {

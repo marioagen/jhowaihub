@@ -1609,6 +1609,8 @@ const portuguese = {
     },
     transferListPlaceholder: "Busque na lista",
     transferListSortAlphabetical: "Ordenar alfabeticamente",
+    transferListSortAscending: "Crescente",
+    transferListSortDescending: "Decrescente",
     transferListSortId: "Ordenar por ID",
     transferListTitle: "Lista para selecionar",
     types: {

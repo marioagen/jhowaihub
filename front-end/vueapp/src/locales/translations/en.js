@@ -1610,6 +1610,8 @@ const english = {
     },
     transferListPlaceholder: "Search in list",
     transferListSortAlphabetical: "Sort alphabetically",
+    transferListSortAscending: "Ascending",
+    transferListSortDescending: "Descending",
     transferListSortId: "Sort by ID",
     transferListTitle: "Selection list",
     types: {
