@@ -134,6 +134,7 @@
                             :available="questionsList"
                             transferListTitle="questions.availableList"
                             transferListPlaceholder="filters.questionsInput"
+                            :show-sort-control="true"
                         />
                     </div>
                     <button
@@ -223,6 +224,7 @@
                         for (let i = 0; i < response.length; i++) {
                             var item = {
                                 id: response[i].id,
+                                description: response[i].description,
                                 text: response[i].id + " - " + response[i].description,
                             };
                             this.questionsList.push(item);

@@ -2,7 +2,41 @@
     <div class="container mt-1">
         <div class="row">
             <div class="col">
-                <h6>{{ $t(transferListTitle) }}</h6>
+                <div class="transfer-list-header">
+                    <h6 class="mb-0">{{ $t(transferListTitle) }}</h6>
+                    <div
+                        v-if="showSortControl"
+                        class="transfer-list-sort"
+                    >
+                        <span class="transfer-list-sort-label">{{ $t("filters.sortBy") }}</span>
+                        <div
+                            class="btn-group btn-group-sm"
+                            role="group"
+                            :aria-label="$t('filters.sortBy')"
+                        >
+                            <button
+                                type="button"
+                                class="btn transfer-list-sort-button"
+                                :class="{ active: availableSort === 'alphabetical' }"
+                                :aria-pressed="availableSort === 'alphabetical'"
+                                :title="$t('transferListSortAlphabetical')"
+                                @click="availableSort = 'alphabetical'"
+                            >
+                                A-Z
+                            </button>
+                            <button
+                                type="button"
+                                class="btn transfer-list-sort-button"
+                                :class="{ active: availableSort === 'id' }"
+                                :aria-pressed="availableSort === 'id'"
+                                :title="$t('transferListSortId')"
+                                @click="availableSort = 'id'"
+                            >
+                                ID
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <input
                     type="text"
                     class="form-control form-control-sm mb-2"
@@ -65,17 +99,18 @@
                     class="border rounded p-2"
                     style="height: 300px; overflow-y: auto"
                 >
-                    <div
-                        v-if="showItens"
-                        v-for="question in filteredSelected"
-                        :key="question.id"
-                        :class="{ selected: selectedSelectedIds.includes(question.id) }"
-                        class="selectable-item small"
-                        @click="toggleSelection(question.id, 'selected')"
-                    >
-                        {{ question.text || question.description }}
-                        <div class="text-muted small">Id: {{ question.id }}</div>
-                    </div>
+                    <template v-if="showItens">
+                        <div
+                            v-for="question in filteredSelected"
+                            :key="question.id"
+                            :class="{ selected: selectedSelectedIds.includes(question.id) }"
+                            class="selectable-item small"
+                            @click="toggleSelection(question.id, 'selected')"
+                        >
+                            {{ question.text || question.description }}
+                            <div class="text-muted small">Id: {{ question.id }}</div>
+                        </div>
+                    </template>
                     <div
                         v-else
                         class="text-muted small"
@@ -109,6 +144,10 @@
                 required: false,
                 default: "transferListPlaceholder",
             },
+            showSortControl: {
+                type: Boolean,
+                default: false,
+            },
         },
         emits: ["update:modelValue"],
         data() {
@@ -117,6 +156,7 @@
                 searchSelected: "",
                 selectedAvailableIds: [],
                 selectedSelectedIds: [],
+                availableSort: "id",
             };
         },
         computed: {
@@ -124,11 +164,25 @@
                 const selected = Array.isArray(this.modelValue) ? this.modelValue : [];
                 const selectedIds = new Set(selected.map((q) => q?.id));
 
-                return this.available
+                const filteredQuestions = this.available
                     .filter((q) => q && !selectedIds.has(q.id))
                     .filter((q) =>
                         (q.text || "").toLowerCase().includes(this.searchAvailable.toLowerCase())
                     );
+
+                return [...filteredQuestions].sort((firstQuestion, secondQuestion) => {
+                    if (this.availableSort === "alphabetical") {
+                        return new Intl.Collator(this.$i18n.locale, {
+                            sensitivity: "base",
+                            numeric: true,
+                        }).compare(
+                            firstQuestion.description || firstQuestion.text || "",
+                            secondQuestion.description || secondQuestion.text || ""
+                        );
+                    }
+
+                    return Number(firstQuestion.id) - Number(secondQuestion.id);
+                });
             },
             filteredSelected() {
                 const selected = Array.isArray(this.modelValue) ? this.modelValue : [];
@@ -193,6 +247,46 @@
     };
 </script>
 <style scoped>
+    .transfer-list-header {
+        display: flex;
+        min-height: 32px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 6px;
+    }
+    .transfer-list-sort {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .transfer-list-sort-label {
+        color: var(--bs-secondary-color);
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    .transfer-list-sort-button {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+        padding: 0;
+        border-color: var(--color-border-form-control);
+        color: var(--bs-body-color);
+        font-size: 0.6875rem !important;
+        line-height: 1;
+        white-space: nowrap;
+    }
+    .transfer-list-sort-button:hover,
+    .transfer-list-sort-button:focus-visible {
+        border-color: var(--bs-primary);
+        color: var(--bs-primary);
+    }
+    .transfer-list-sort-button.active {
+        border-color: var(--bs-primary);
+        background: var(--bs-primary);
+        color: var(--bs-white);
+    }
     .selectable-item {
         padding: 8px;
         margin-bottom: 4px;

@@ -1608,6 +1608,8 @@ const portuguese = {
         validationError: "Erro ao validar campos",
     },
     transferListPlaceholder: "Busque na lista",
+    transferListSortAlphabetical: "Ordenar alfabeticamente",
+    transferListSortId: "Ordenar por ID",
     transferListTitle: "Lista para selecionar",
     types: {
         createBtn: "Criar tipo",

@@ -1612,6 +1612,8 @@ const spanish = {
         validationError: "Error al validar los campos",
     },
     transferListPlaceholder: "Buscar en la lista",
+    transferListSortAlphabetical: "Ordenar alfabéticamente",
+    transferListSortId: "Ordenar por ID",
     transferListTitle: "Lista para seleccionar",
     types: {
         createBtn: "Crear tipo",

@@ -1609,6 +1609,8 @@ const english = {
         validationError: "Error validating fields",
     },
     transferListPlaceholder: "Search in list",
+    transferListSortAlphabetical: "Sort alphabetically",
+    transferListSortId: "Sort by ID",
     transferListTitle: "Selection list",
     types: {
         createBtn: "Create type",
