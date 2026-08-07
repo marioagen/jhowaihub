@@ -957,12 +957,13 @@ namespace WoopiAiHub.UnitTests.Services
             Assert.All(captured, r => Assert.Equal(expectedUserId, r.UserId));
         }
 
-        [Fact(DisplayName = "CreateRejectionRangeAsync with UserId should store dto UserId on rejections")]
+        [Fact(DisplayName = "CreateRejectionRangeAsync with assignee should store authenticated user on rejections")]
         [Trait("CreateRejectionRangeAsync", "Success")]
-        public async Task CreateRejectionRangeAsync_WithUserId_UsesDtoUserIdOnRejections()
+        public async Task CreateRejectionRangeAsync_WithAssignee_UsesAuthenticatedUserOnRejections()
         {
-            var dtoUserId = Guid.NewGuid();
-            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto(dtoUserId);
+            var assigneeUserId = Guid.NewGuid();
+            var rejectionUserId = Guid.NewGuid();
+            var dto = CardFixture.FindValidCreateDocumentAnalysisRejectionRangeDto(assigneeUserId);
             var email = "test@example.com";
             var card1 = CardFixture.FindValidCard();
             card1.Step = new Step(dto.StepId, DateTime.Now, 1, "Step", 1, 1, 1)
@@ -985,7 +986,7 @@ namespace WoopiAiHub.UnitTests.Services
             _statusRepositoryMock.Setup(repo => repo.FindByName(StatusNames.Rejected))
                 .ReturnsAsync(status);
             _userRepositoryMock.Setup(repo => repo.FindIdByEmail(email))
-                .Returns(Guid.NewGuid());
+                .Returns(rejectionUserId);
             _cardRepositoryMock.Setup(repo => repo.UpdateList(It.IsAny<List<Card>>()))
                 .ReturnsAsync(true);
             _unitOfWorkMock.Setup(u => u.BeginTransaction());
@@ -1001,13 +1002,15 @@ namespace WoopiAiHub.UnitTests.Services
 
             var currentUserServiceMock = _mocker.GetMock<ICurrentUserService>();
             currentUserServiceMock.Setup(s => s.IsAuthenticated).Returns(true);
-            currentUserServiceMock.Setup(s => s.Id).Returns(dtoUserId);
+            currentUserServiceMock.Setup(s => s.Id).Returns(rejectionUserId);
 
             var result = await _rejectionServices.CreateRejectionRangeAsync(dto, email);
 
             Assert.True(result);
             Assert.NotNull(captured);
-            Assert.All(captured, r => Assert.Equal(dtoUserId, r.UserId));
+            Assert.All(captured, rejection => Assert.Equal(rejectionUserId, rejection.UserId));
+            _cardServicesMock.Verify(service => service.AssignRangeAsync(It.Is<AssignRangeDto>(request =>
+                request.UserId == assigneeUserId)), Times.Once);
         }
 
         [Fact(DisplayName = "CreateRejectionRangeAsync should rollback transaction on exception")]

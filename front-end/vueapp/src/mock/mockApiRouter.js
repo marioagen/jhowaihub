@@ -33,8 +33,27 @@ import {
     findWorkflowSteps,
     mockState,
 } from "@/mock/mockFixtures.js";
+import { MOCK_USER_NAME } from "@/mock/mockConfig.js";
 
 const MOCK_NEW_WORKFLOW_ID = 99;
+const MOCK_REJECTED_CARD_ID = 889000200;
+const mockRejectionsByCard = new Map([
+    [
+        MOCK_REJECTED_CARD_ID,
+        [
+            {
+                id: 1,
+                justification: "Documento devolvido para ajuste cadastral.",
+                cardId: MOCK_REJECTED_CARD_ID,
+                stepId: 1,
+                userName: MOCK_USER_NAME,
+                assignedUserName: "Ana Silva",
+                date: new Date().toISOString(),
+            },
+        ],
+    ],
+]);
+const rejectedCardIds = new Set([MOCK_REJECTED_CARD_ID]);
 
 function normalizePath(url = "") {
     let path = url;
@@ -62,6 +81,11 @@ function parseIdFromPath(path, segmentIndex) {
     const value = parts[segmentIndex];
     const numeric = Number(value);
     return Number.isNaN(numeric) ? value : numeric;
+}
+
+function findQueryParam(url, name) {
+    const query = String(url || "").split("?")[1] || "";
+    return new URLSearchParams(query).get(name);
 }
 
 function normalizeWorkflowId(rawId) {
@@ -391,6 +415,25 @@ function resolveMockRequest(config) {
     if (method === "POST" && path.startsWith("/DocumentQuestionnarire")) {
         return buildSuccessBody(true);
     }
+    if (method === "POST" && path === "/DocumentAnalysisRejection/Range") {
+        const payload = typeof body === "string" ? JSON.parse(body) : body;
+        const createdAt = new Date().toISOString();
+        for (const cardId of payload?.cardIds || []) {
+            const numericCardId = Number(cardId);
+            const rejections = mockRejectionsByCard.get(numericCardId) || [];
+            rejections.unshift({
+                id: rejections.length + 1,
+                justification: payload.justification,
+                cardId: numericCardId,
+                stepId: payload.stepId,
+                userName: MOCK_USER_NAME,
+                date: createdAt,
+            });
+            mockRejectionsByCard.set(numericCardId, rejections);
+            rejectedCardIds.add(numericCardId);
+        }
+        return buildSuccessBody(true);
+    }
     if (method === "POST" && path.startsWith("/DocumentAnalysisRejection")) {
         return buildSuccessBody(true);
     }
@@ -401,14 +444,20 @@ function resolveMockRequest(config) {
         ];
     }
     if (method === "GET" && path.startsWith("/DocumentAnalysisRejection")) {
-        return [];
+        const cardId = Number(params.cardId ?? findQueryParam(config.url, "cardId"));
+        return mockRejectionsByCard.get(cardId) || [];
     }
 
     if (method === "GET" && matchPath(path, "/Card/AnalyzeSteps/:id")) {
         return buildCardAnalyzeSteps(parseIdFromPath(path, 2));
     }
     if (method === "GET" && matchPath(path, "/Card/HeaderInfo/:id")) {
-        return buildCardHeaderInfo(parseIdFromPath(path, 2));
+        const cardId = Number(parseIdFromPath(path, 2));
+        const header = buildCardHeaderInfo(cardId);
+        if (rejectedCardIds.has(cardId)) {
+            return { ...header, statusName: "Rejected" };
+        }
+        return header;
     }
     if (method === "GET" && matchPath(path, "/Card/Batch/:batchId")) {
         return [];
