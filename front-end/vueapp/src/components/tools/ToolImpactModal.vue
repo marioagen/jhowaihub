@@ -81,7 +81,7 @@
                     </button>
                     <button
                         type="button"
-                        class="btn btn-warning btn-sm impact-modal-footer__confirm"
+                        class="btn btn-sm impact-modal-footer__confirm"
                         @click="$emit('confirm')"
                         :disabled="isSaving"
                     >
@@ -333,5 +333,15 @@
         display: flex;
         align-items: center;
         gap: 0.35rem;
+        color: #ffffff;
+        background-color: #ff6900;
+        border-color: #ff6900;
+    }
+
+    .impact-modal-footer__confirm:hover,
+    .impact-modal-footer__confirm:focus {
+        color: #ffffff;
+        background-color: #e65f00;
+        border-color: #e65f00;
     }
 </style>
