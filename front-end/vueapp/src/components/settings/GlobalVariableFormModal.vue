@@ -122,6 +122,10 @@
                 this.validationError = this.validate();
                 if (this.validationError) return;
                 const variable = saveGlobalVariable(this.form);
+                if (!variable) {
+                    this.validationError = "settings.globalVariables.editRestricted";
+                    return;
+                }
                 this.$emit("saved", variable, Boolean(this.form.id));
                 this.$refs.modal?.close();
             },

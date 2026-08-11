@@ -19,7 +19,7 @@
                 </div>
 
                 <div class="modal-body">
-                    {{ $t(message) }}
+                    {{ $t(message, messageParams) }}
                 </div>
 
                 <div class="d-flex justify-content-center mx-4 my-4">
@@ -69,6 +69,10 @@
             message: {
                 type: String,
                 default: "modals.message",
+            },
+            messageParams: {
+                type: Object,
+                default: () => ({}),
             },
             cancelText: {
                 type: String,

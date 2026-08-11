@@ -12,19 +12,9 @@
                         ref="TabsComponent"
                         @selected="onTabSelected"
                     >
-                        <template #general>
-                            <div class="main-div settings-page__panel">
-                                <SettingsPlaceholder title-key="settings.tabs.general" />
-                            </div>
-                        </template>
                         <template #llm-models>
                             <div class="main-div settings-page__panel">
                                 <LlmModelsSettings />
-                            </div>
-                        </template>
-                        <template #ocr>
-                            <div class="main-div settings-page__panel">
-                                <SettingsPlaceholder title-key="settings.tabs.ocr" />
                             </div>
                         </template>
                         <template #keys>
@@ -55,7 +45,6 @@
     import GlobalVariablesSettings from "@/components/settings/GlobalVariablesSettings.vue";
     import DocumentTypesSettings from "@/components/settings/DocumentTypesSettings.vue";
     import LlmModelsSettings from "@/components/settings/LlmModelsSettings.vue";
-    import SettingsPlaceholder from "@/components/settings/SettingsPlaceholder.vue";
 
     export default {
         name: "SettingsIndex",
@@ -65,24 +54,13 @@
             ApiKeysSettings,
             GlobalVariablesSettings,
             DocumentTypesSettings,
-            SettingsPlaceholder,
         },
         data: () => ({
             tabsList: [
                 {
-                    name: "general",
-                    labelKey: "settings.tabs.general",
-                    icon: "Settings",
-                },
-                {
                     name: "llm-models",
                     labelKey: "settings.tabs.llmModels",
                     icon: "BrainCircuit",
-                },
-                {
-                    name: "ocr",
-                    labelKey: "settings.tabs.ocr",
-                    icon: "ScanLine",
                 },
                 {
                     name: "keys",

@@ -1147,7 +1147,7 @@ const english = {
         contextTitle: "Prepared context", copied: "Context copied.", columns: { files: "Files", name: "Name", status: "Status", updated: "Updated", version: "Version" }, compareFile: "File", compareFrom: "Compare version", compareTo: "With version",
         createTitle: "New context dossier", deleteConfirm: "Delete this dossier?", dispatched: "Simulated dispatch registered.", dispatchContent: "Dispatch content", dispatchFull: "Full context", dispatchFullHint: "Sends the consolidated TXT with every file in this version.", dispatchNotice: "Demo: no real workflow will be executed.", dispatchSelected: "Selected transcripts", dispatchSelectedHint: "Sends only the variables for the selected files.", dispatchTitle: "Send context to workflow", documentType: "Document type", download: "Download TXT", duplicate: "Duplicate",
         empty: "No dossiers found.", fileStatus: { classifying: "Classifying", failed: "Failed", queued: "Queued", ready: "Ready", review: "Requires confirmation", transcribing: "Transcribing", uploading: "Uploading" },
-        fileNotInVersion: "File is absent from this version", filesCount: "{count} file(s)", filesTitle: "Files", filterStatus: "Filter by status", form: { description: "Description (optional)", name: "Dossier name", nameRequired: "Enter a name." }, fullContext: "Full context", hideFiles: "Hide files panel", history: "Dispatch history", moveDown: "Move down", moveUp: "Move up", new: "New dossier", noComparableFiles: "No files available for comparison.", noFiles: "Add files to start the simulation.", noHistory: "No simulated dispatches.", notFound: "Dossier not found.", prepare: "Prepare context", preparedMessage: "A new context version was prepared.", prototypeNotice: "Navigable prototype · processing and content are simulated", removeFileConfirm: "Remove this file from the dossier?", reset: "Restore demo", resetConfirm: "Restore all demo data?", resultsCount: "{count} result(s)", retry: "Try again", search: "Search dossiers", selectAtLeastOneVariable: "Select at least one variable to dispatch.", selectFile: "Select a file to review.", selectType: "Select a type", selectVariables: "Variables in this version", selectedTranscriptsCount: "{count} transcript(s)", selectWorkflow: "Select a workflow", send: "Send to workflow", showFiles: "Show files", simulatedProcessing: "Simulated prototype content", staleNotice: "The set changed. Prepare a new version before dispatching.", status: { draft: "Draft", failed: "Partial failure", prepared: "Context ready", processing: "Processing", ready: "Ready to prepare", review: "Requires review", stale: "Outdated" }, suggestion: "AI suggestion", tab: "Context dossiers", title: "Context dossiers", transcript: "Transcript", transcriptChanged: "The transcript changed between versions.", transcriptUnchanged: "The transcript is identical in both versions.", typeGroups: { financial: "Financial", legal: "Legal", other: "Other" }, unidentified: "Unidentified", variables: "Variables", versions: "Versions", workflow: "Workflow",
+        fileNotInVersion: "File is absent from this version", fileRemoved: "File removed from the dossier.", filesCount: "{count} file(s)", filesTitle: "Files", filterStatus: "Filter by status", form: { description: "Description (optional)", name: "Dossier name", nameRequired: "Enter a name." }, fullContext: "Full context", hideFiles: "Hide files panel", history: "Dispatch history", moveDown: "Move down", moveUp: "Move up", new: "New dossier", noComparableFiles: "No files available for comparison.", noFiles: "Add files to start the simulation.", noHistory: "No simulated dispatches.", notFound: "Dossier not found.", prepare: "Prepare context", preparedMessage: "A new context version was prepared.", prototypeNotice: "Navigable prototype · processing and content are simulated", removeFile: "Remove file", removeFileConfirm: "Remove {name} from this dossier?", removeFileTitle: "Delete file from dossier", reset: "Restore demo", resetConfirm: "Restore all demo data?", resultsCount: "{count} result(s)", retry: "Try again", search: "Search dossiers", selectAtLeastOneVariable: "Select at least one variable to dispatch.", selectFile: "Select a file to review.", selectType: "Select a type", selectVariables: "Variables in this version", selectedTranscriptsCount: "{count} transcript(s)", selectWorkflow: "Select a workflow", send: "Send to workflow", showFiles: "Show files", simulatedProcessing: "Simulated prototype content", staleNotice: "The set changed. Prepare a new version before dispatching.", status: { draft: "Draft", failed: "Partial failure", prepared: "Context ready", processing: "Processing", ready: "Ready to prepare", review: "Requires review", stale: "Outdated" }, suggestion: "AI suggestion", tab: "Context dossiers", title: "Context dossiers", transcript: "Transcript", transcriptChanged: "The transcript changed between versions.", transcriptUnchanged: "The transcript is identical in both versions.", typeGroups: { financial: "Financial", legal: "Legal", other: "Other" }, unidentified: "Unidentified", variables: "Variables", versions: "Versions", workflow: "Workflow",
         subtitle: "Organize multimodal files and simulate context preparation for workflows.",
         typesSettings: { active: "Active", add: "Add type", createTitle: "New document type", deleteConfirm: "Delete this document type?", editTitle: "Edit document type", group: "Group", inactive: "Inactive", name: "Name", notice: "Local taxonomy used only by the dossier prototype.", status: "Status", subtitle: "Manage simulated financial and legal classifications.", title: "Document types" },
     },
@@ -1166,6 +1166,7 @@ const english = {
         globalVariables: {
             add: "Add",
             columns: {
+                createdBy: "Created by",
                 description: "Description",
                 name: "Name",
                 placeholder: "Placeholder",
@@ -1176,6 +1177,7 @@ const english = {
             deleteMessage: "This variable will stop working in every tool that uses it. Do you want to continue?",
             deleteTitle: "Delete global variable",
             empty: "No global variables registered.",
+            editRestricted: "Only the user who created this variable can edit it.",
             form: {
                 createTitle: "New global variable",
                 description: "Description (optional)",
@@ -1191,10 +1193,14 @@ const english = {
                 valueRequired: "Enter a value for the variable.",
             },
             noDescription: "No description",
+            noResults: "No variables match this search.",
             noticePrefix: "Use the syntax",
             noticeSuffix:
                 "in prompts, APIs, and other tools. The global prefix prevents conflicts with step outputs and document fields. Values remain hidden on screen.",
             subtitle: "Register fixed tenant values for reuse in any workflow tool.",
+            pageSummary: "Page {current} of {total}",
+            resultsCount: "{count} result(s)",
+            search: "Search by name, placeholder, description, or creator",
             title: "Global variables",
             updated: "Global variable updated successfully.",
         },

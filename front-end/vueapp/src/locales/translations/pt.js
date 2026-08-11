@@ -1146,7 +1146,7 @@ const portuguese = {
         contextTitle: "Contexto preparado", copied: "Contexto copiado.", columns: { files: "Arquivos", name: "Nome", status: "Status", updated: "Atualizado", version: "Versão" }, compareFile: "Arquivo", compareFrom: "Comparar versão", compareTo: "Com versão",
         createTitle: "Novo dossiê de contexto", deleteConfirm: "Excluir este dossiê?", dispatched: "Envio simulado registrado.", dispatchContent: "Conteúdo do envio", dispatchFull: "Contexto completo", dispatchFullHint: "Envia o TXT consolidado com todos os arquivos desta versão.", dispatchNotice: "Demonstração: nenhuma esteira real será executada.", dispatchSelected: "Transcrições selecionadas", dispatchSelectedHint: "Envia somente as variáveis dos arquivos escolhidos.", dispatchTitle: "Enviar contexto para esteira", documentType: "Tipo documental", download: "Baixar TXT", duplicate: "Duplicar",
         empty: "Nenhum dossiê encontrado.", fileStatus: { classifying: "Classificando", failed: "Falhou", queued: "Na fila", ready: "Pronto", review: "Requer confirmação", transcribing: "Transcrevendo", uploading: "Enviando" },
-        fileNotInVersion: "Arquivo ausente nesta versão", filesCount: "{count} arquivo(s)", filesTitle: "Arquivos", filterStatus: "Filtrar por status", form: { description: "Descrição (opcional)", name: "Nome do dossiê", nameRequired: "Informe um nome." }, fullContext: "Contexto completo", hideFiles: "Ocultar painel de arquivos", history: "Histórico de envios", moveDown: "Mover para baixo", moveUp: "Mover para cima", new: "Novo dossiê", noComparableFiles: "Nenhum arquivo disponível para comparar.", noFiles: "Adicione arquivos para iniciar a simulação.", noHistory: "Nenhum envio simulado.", notFound: "Dossiê não encontrado.", prepare: "Preparar contexto", preparedMessage: "Nova versão do contexto preparada.", prototypeNotice: "Protótipo navegável · processamento e conteúdo simulados", removeFileConfirm: "Remover este arquivo do dossiê?", reset: "Restaurar demonstração", resetConfirm: "Restaurar todos os dados de demonstração?", resultsCount: "{count} resultado(s)", retry: "Tentar novamente", search: "Buscar dossiês", selectAtLeastOneVariable: "Selecione ao menos uma variável para enviar.", selectFile: "Selecione um arquivo para revisar.", selectType: "Selecione um tipo", selectVariables: "Variáveis desta versão", selectedTranscriptsCount: "{count} transcrição(ões)", selectWorkflow: "Selecione uma esteira", send: "Enviar para esteira", showFiles: "Mostrar arquivos", simulatedProcessing: "Conteúdo simulado para protótipo", staleNotice: "O conjunto mudou. Prepare uma nova versão antes de enviar.", status: { draft: "Rascunho", failed: "Falha parcial", prepared: "Contexto pronto", processing: "Processando", ready: "Pronto para preparar", review: "Requer revisão", stale: "Desatualizado" }, suggestion: "Sugestão da IA", tab: "Dossiês de contexto", title: "Dossiês de contexto", transcript: "Transcrição", transcriptChanged: "A transcrição foi alterada entre as versões.", transcriptUnchanged: "A transcrição é igual nas duas versões.", typeGroups: { financial: "Financeiro", legal: "Jurídico", other: "Outros" }, unidentified: "Não identificado", variables: "Variáveis", versions: "Versões", workflow: "Esteira",
+        fileNotInVersion: "Arquivo ausente nesta versão", fileRemoved: "Arquivo removido do dossiê.", filesCount: "{count} arquivo(s)", filesTitle: "Arquivos", filterStatus: "Filtrar por status", form: { description: "Descrição (opcional)", name: "Nome do dossiê", nameRequired: "Informe um nome." }, fullContext: "Contexto completo", hideFiles: "Ocultar painel de arquivos", history: "Histórico de envios", moveDown: "Mover para baixo", moveUp: "Mover para cima", new: "Novo dossiê", noComparableFiles: "Nenhum arquivo disponível para comparar.", noFiles: "Adicione arquivos para iniciar a simulação.", noHistory: "Nenhum envio simulado.", notFound: "Dossiê não encontrado.", prepare: "Preparar contexto", preparedMessage: "Nova versão do contexto preparada.", prototypeNotice: "Protótipo navegável · processamento e conteúdo simulados", removeFile: "Remover arquivo", removeFileConfirm: "Remover o arquivo {name} deste dossiê?", removeFileTitle: "Excluir arquivo do dossiê", reset: "Restaurar demonstração", resetConfirm: "Restaurar todos os dados de demonstração?", resultsCount: "{count} resultado(s)", retry: "Tentar novamente", search: "Buscar dossiês", selectAtLeastOneVariable: "Selecione ao menos uma variável para enviar.", selectFile: "Selecione um arquivo para revisar.", selectType: "Selecione um tipo", selectVariables: "Variáveis desta versão", selectedTranscriptsCount: "{count} transcrição(ões)", selectWorkflow: "Selecione uma esteira", send: "Enviar para esteira", showFiles: "Mostrar arquivos", simulatedProcessing: "Conteúdo simulado para protótipo", staleNotice: "O conjunto mudou. Prepare uma nova versão antes de enviar.", status: { draft: "Rascunho", failed: "Falha parcial", prepared: "Contexto pronto", processing: "Processando", ready: "Pronto para preparar", review: "Requer revisão", stale: "Desatualizado" }, suggestion: "Sugestão da IA", tab: "Dossiês de contexto", title: "Dossiês de contexto", transcript: "Transcrição", transcriptChanged: "A transcrição foi alterada entre as versões.", transcriptUnchanged: "A transcrição é igual nas duas versões.", typeGroups: { financial: "Financeiro", legal: "Jurídico", other: "Outros" }, unidentified: "Não identificado", variables: "Variáveis", versions: "Versões", workflow: "Esteira",
         subtitle: "Organize arquivos multimodais e simule a preparação de contexto para esteiras.",
         typesSettings: { active: "Ativo", add: "Adicionar tipo", createTitle: "Novo tipo documental", deleteConfirm: "Excluir este tipo documental?", editTitle: "Editar tipo documental", group: "Grupo", inactive: "Inativo", name: "Nome", notice: "Taxonomia local usada somente pelo protótipo de dossiês.", status: "Status", subtitle: "Gerencie as classificações financeiras e jurídicas simuladas.", title: "Tipos documentais" },
     },
@@ -1165,6 +1165,7 @@ const portuguese = {
         globalVariables: {
             add: "Adicionar",
             columns: {
+                createdBy: "Criado por",
                 description: "Descrição",
                 name: "Nome",
                 placeholder: "Placeholder",
@@ -1175,6 +1176,7 @@ const portuguese = {
             deleteMessage: "Esta variável deixará de funcionar em todas as ferramentas que a utilizam. Deseja continuar?",
             deleteTitle: "Excluir variável global",
             empty: "Nenhuma variável global cadastrada.",
+            editRestricted: "Somente o usuário que criou esta variável pode editá-la.",
             form: {
                 createTitle: "Nova variável global",
                 description: "Descrição (opcional)",
@@ -1190,10 +1192,14 @@ const portuguese = {
                 valueRequired: "Informe um valor para a variável.",
             },
             noDescription: "Sem descrição",
+            noResults: "Nenhuma variável encontrada para esta busca.",
             noticePrefix: "Use a sintaxe",
             noticeSuffix:
                 "em prompts, APIs e outras ferramentas. O prefixo global evita conflito com saídas de etapas e campos do documento. Os valores ficam ocultos na tela.",
             subtitle: "Cadastre valores fixos do tenant para reutilizar em qualquer ferramenta da esteira.",
+            pageSummary: "Página {current} de {total}",
+            resultsCount: "{count} resultado(s)",
+            search: "Buscar por nome, placeholder, descrição ou criador",
             title: "Variáveis globais",
             updated: "Variável global atualizada com sucesso.",
         },

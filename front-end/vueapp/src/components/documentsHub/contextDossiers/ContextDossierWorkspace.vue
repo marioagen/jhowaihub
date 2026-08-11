@@ -78,6 +78,7 @@
                         <span class="dossier-files__order">
                             <button :disabled="index === 0" :title="$t('contextDossiers.moveUp')" :aria-label="$t('contextDossiers.moveUp')" @click="move(file.id, -1)"><LucideIcon icon="ChevronUp" :size="15" /></button>
                             <button :disabled="index === orderedFiles.length - 1" :title="$t('contextDossiers.moveDown')" :aria-label="$t('contextDossiers.moveDown')" @click="move(file.id, 1)"><LucideIcon icon="ChevronDown" :size="15" /></button>
+                            <button class="dossier-files__remove" :title="$t('contextDossiers.removeFile')" :aria-label="$t('contextDossiers.removeFile')" @click="removeFile(file)"><LucideIcon icon="Trash2" :size="14" /></button>
                         </span>
                     </li>
                 </ol>
@@ -245,12 +246,25 @@
                 <p v-if="!selectedDispatchFileIds.length" class="text-danger small mb-0">{{ $t("contextDossiers.selectAtLeastOneVariable") }}</p>
             </div>
         </ModalComponent>
+        <ConfirmModal
+            ref="removeFileModal"
+            id="remove-context-dossier-file"
+            title="contextDossiers.removeFileTitle"
+            message="contextDossiers.removeFileConfirm"
+            :message-params="{ name: pendingRemovalFile?.name || '' }"
+            confirm-text="common.delete"
+            confirm-variant="danger"
+            :is-loading="false"
+            @confirm="confirmFileRemoval"
+            @cancel="cancelFileRemoval"
+        />
     </main>
     <main v-else class="dossier-not-found"><LucideIcon icon="FolderX" :size="38" /><h5>{{ $t("contextDossiers.notFound") }}</h5><button class="btn btn-primary" @click="back">{{ $t("common.back") }}</button></main>
 </template>
 
 <script>
     import ModalComponent from "@/components/global/ModalComponent.vue";
+    import ConfirmModal from "@/components/global/ConfirmModal.vue";
     import WorkflowService from "@/services/workflow/WorkflowService";
     import {
         FILE_STATUS,
@@ -267,8 +281,8 @@
 
     export default {
         name: "ContextDossierWorkspace",
-        components: { ModalComponent },
-        data() { return { dossier: null, types: [], selectedFileId: null, timers: [], mobileDetail: false, filesPanelCollapsed: false, previewTab: "text", workflows: [], selectedWorkflowId: "", dispatchMode: "full", selectedDispatchFileIds: [], comparisonBaseVersion: null, comparisonTargetVersion: null, comparisonFileId: "" }; },
+        components: { ModalComponent, ConfirmModal },
+        data() { return { dossier: null, types: [], selectedFileId: null, pendingRemovalFile: null, timers: [], mobileDetail: false, filesPanelCollapsed: false, previewTab: "text", workflows: [], selectedWorkflowId: "", dispatchMode: "full", selectedDispatchFileIds: [], comparisonBaseVersion: null, comparisonTargetVersion: null, comparisonFileId: "" }; },
         computed: {
             orderedFiles() { return [...(this.dossier?.files || [])].sort((a, b) => a.order - b.order); },
             selectedFile() { return this.dossier?.files.find((file) => file.id === this.selectedFileId) || null; },
@@ -321,7 +335,29 @@
             retrySelected() { const index = this.dossier.files.findIndex((file) => file.id === this.selectedFileId); this.dossier.files.splice(index, 1, retryMockFile(this.selectedFile)); this.persist(); this.simulate(this.selectedFileId); },
             confirmSelected() { this.selectedFile.status = FILE_STATUS.READY; this.persist(); },
             onTypeChanged() { this.persist(); },
-            removeSelected() { if (!window.confirm(this.$t("contextDossiers.removeFileConfirm"))) return; const index = this.dossier.files.findIndex((file) => file.id === this.selectedFileId); this.dossier.files.splice(index, 1); this.dossier.files.forEach((file, order) => { file.order = order + 1; }); this.selectedFileId = this.dossier.files[0]?.id || null; this.mobileDetail = false; this.persist(); },
+            removeSelected() { if (this.selectedFile) this.removeFile(this.selectedFile); },
+            removeFile(file) {
+                this.pendingRemovalFile = file;
+                this.$refs.removeFileModal?.open();
+            },
+            confirmFileRemoval() {
+                const file = this.pendingRemovalFile;
+                if (!file) return;
+                const orderedIndex = this.orderedFiles.findIndex((item) => item.id === file.id);
+                this.dossier.files = this.dossier.files.filter((item) => item.id !== file.id);
+                this.dossier.files.sort((first, second) => first.order - second.order);
+                this.dossier.files.forEach((item, order) => { item.order = order + 1; });
+                if (this.selectedFileId === file.id) {
+                    const nextIndex = Math.min(orderedIndex, this.dossier.files.length - 1);
+                    this.selectedFileId = this.dossier.files[nextIndex]?.id || null;
+                    if (!this.selectedFileId) this.mobileDetail = false;
+                }
+                this.persist();
+                this.$refs.removeFileModal?.close();
+                this.pendingRemovalFile = null;
+                this.$notify({ title: "contextDossiers.title", message: "contextDossiers.fileRemoved", variant: "success", icon: "Trash2" });
+            },
+            cancelFileRemoval() { this.pendingRemovalFile = null; },
             move(id, direction) { const files = this.orderedFiles; const index = files.findIndex((file) => file.id === id); const target = index + direction; if (target < 0 || target >= files.length) return; [files[index].order, files[target].order] = [files[target].order, files[index].order]; this.persist(); },
             prepare() { this.dossier = prepareDossierContext(this.dossier); this.initializeVersionComparison(); this.previewTab = "text"; this.$notify({ title: "contextDossiers.title", message: "contextDossiers.preparedMessage", variant: "success", icon: "Check" }); },
             async copyContext() { await navigator.clipboard.writeText(this.latestVersion.content); this.$notify({ title: "contextDossiers.title", message: "contextDossiers.copied", variant: "primary", icon: "Copy" }); },
@@ -370,7 +406,7 @@
     .dossier-files__content { min-width: 0; flex: 1; } .dossier-files__content strong, .dossier-files__content small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dossier-files__content strong { font-size: .82rem; line-height: 1.35; } .dossier-files__content small { margin-top: .15rem; color: var(--color-text-muted); font-size: .72rem; }
     .dossier-files__progress { height: 3px; margin-top: .3rem; }
-    .dossier-files__order { display: grid; align-content: center; margin-right: .35rem; } .dossier-files__order button { display: grid; width: 30px; height: 26px; place-items: center; border: 0; border-radius: 4px; background: transparent; color: var(--color-text-muted); padding: 0; } .dossier-files__order button:not(:disabled):hover { background: var(--color-bg-body-content); color: var(--color-body-content); }
+    .dossier-files__order { display: grid; align-content: center; margin-right: .35rem; } .dossier-files__order button { display: grid; width: 36px; height: 30px; place-items: center; border: 0; border-radius: 4px; background: transparent; color: var(--color-text-muted); padding: 0; } .dossier-files__order button:not(:disabled):hover { background: var(--color-bg-body-content); color: var(--color-body-content); } .dossier-files__order .dossier-files__remove { color: var(--bs-danger, #dc3545); } .dossier-files__order .dossier-files__remove:hover { background: color-mix(in srgb, var(--bs-danger, #dc3545) 10%, transparent); color: var(--bs-danger, #dc3545); }
     .dossier-workspace__detail { min-width: 0; padding: 1.25rem 1.4rem; overflow: hidden; }
     .dossier-file__navigation { min-height: 32px; margin-bottom: .5rem; }
     .dossier-file__name { min-width: 220px; max-width: 55vw; font-size: 1rem; }
@@ -430,7 +466,7 @@
     .dispatch-variables > p { padding: .5rem .7rem; }
     @keyframes spin { to { transform: rotate(360deg); } }
     @media (max-width: 1199px) { .dossier-workspace__layout { grid-template-columns: 300px minmax(0, 1fr); } .dossier-file__classification { grid-template-columns: 1fr; align-items: stretch; } .context-versions__toolbar { grid-template-columns: 1fr auto 1fr; } .context-versions__file-select { grid-column: 1 / -1; } }
-    @media (max-width: 991px) { .dossier-workspace { padding: .75rem; } .dossier-workspace__header { margin: -.75rem -.75rem .75rem; padding: .75rem; } .dossier-workspace__layout, .dossier-workspace__layout--focus { display: block; min-height: 60vh; } .dossier-workspace__files { min-height: 60vh; border-right: 0; } .dossier-workspace__detail { padding: 1rem; } }
+    @media (max-width: 991px) { .dossier-workspace { padding: .75rem; } .dossier-workspace__header { margin: -.75rem -.75rem .75rem; padding: .75rem; } .dossier-workspace__layout, .dossier-workspace__layout--focus { display: block; min-height: 60vh; } .dossier-workspace__files { min-height: 60vh; border-right: 0; } .dossier-files li { min-height: 132px; } .dossier-files__order button { width: 44px; height: 44px; } .dossier-workspace__detail { padding: 1rem; } }
     @media (max-width: 650px) { .dossier-workspace__header { position: static; flex-direction: column; align-items: stretch; } .dossier-workspace__header > .d-flex:first-child { width: 100%; min-width: 0; } .dossier-workspace__header > .d-flex:first-child > div { flex: 1; min-width: 0; } .dossier-workspace__header > .d-flex:first-child > div > .d-flex { display: grid !important; grid-template-columns: minmax(0, 1fr); justify-items: start; gap: .35rem !important; } .dossier-workspace__primary-actions { width: 100%; } .dossier-workspace__primary-actions .btn { flex: 1; min-height: 44px; } .dossier-workspace__name { min-width: 0; width: 100%; } .dossier-file__navigation .btn, .dossier-file__heading .btn, .dossier-file__classification .btn, .dossier-file__classification .form-select { min-height: 44px; } .dossier-file__heading, .context-preview__header { flex-direction: column; } .dossier-file__heading > .d-flex { width: 100%; } .dossier-file__heading > .d-flex .btn { flex: 1; } .dossier-file__classification { grid-template-columns: 1fr; } .dossier-file__suggestion { min-width: 0; } .context-preview__tabs { overflow-x: auto; } .context-preview__tabs button { min-height: 44px; white-space: nowrap; } .context-versions__toolbar { grid-template-columns: 1fr; } .context-versions__arrow { display: none; } .context-versions__file-select { grid-column: auto; } .context-versions__comparison { grid-template-columns: 1fr; } .context-versions__comparison article + article { border-top: 1px solid var(--color-border-form-control); border-left: 0; } .dispatch-scope { grid-template-columns: 1fr; } .dispatch-scope__option, .dispatch-variables__item { min-height: 56px; } }
     @media (prefers-reduced-motion: reduce) { .dossier-workspace__layout, .dossier-files li { transition: none; } }
 </style>
