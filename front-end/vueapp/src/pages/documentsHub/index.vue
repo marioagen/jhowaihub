@@ -4,19 +4,23 @@
             <div class="row">
                 <div class="col-12">
                     <h5 class="mb-0 fw-bold">
-                        {{ $t("documentsHub.title") }}
+                        {{ pageTitle }}
                     </h5>
-                    <p>{{ $t("documentsHub.subtitle") }}</p>
+                    <p>{{ pageSubtitle }}</p>
                     <TabsComponent
                         :tabs="tabsList"
                         color="custom"
                         ref="TabsComponent"
+                        @selected="onTabSelected"
                     >
                         <template #workflows>
                             <WorkflowsKanbanComponent />
                         </template>
                         <template #documents>
                             <DocumentsComponent />
+                        </template>
+                        <template #context-dossiers>
+                            <ContextDossiersList />
                         </template>
                     </TabsComponent>
                 </div>
@@ -28,6 +32,7 @@
     import TabsComponent from "@/components/global/TabsComponent.vue";
     import WorkflowsKanbanComponent from "@/components/documentsHub/workflows/WorkflowsKanbanComponent.vue";
     import DocumentsComponent from "@/components/documentsHub/documents/DocumentsComponent.vue";
+    import ContextDossiersList from "@/components/documentsHub/contextDossiers/ContextDossiersList.vue";
 
     export default {
         name: "ManagementIndex",
@@ -35,8 +40,10 @@
             TabsComponent,
             WorkflowsKanbanComponent,
             DocumentsComponent,
+            ContextDossiersList,
         },
         data: () => ({
+            activeTab: "workflows",
             tabsList: [
                 {
                     name: "workflows",
@@ -48,13 +55,46 @@
                     label: "documentsHub.documents.title",
                     icon: "List",
                 },
+                {
+                    name: "context-dossiers",
+                    label: "contextDossiers.tab",
+                    icon: "Files",
+                },
             ],
         }),
         mounted() {
-            let activeTab = this.$route.query.tab;
-            if (activeTab !== undefined) {
-                this.$refs.TabsComponent.setActiveTab(activeTab);
-            }
+            this.applyRouteTab();
+        },
+        watch: {
+            "$route.query.tab"() {
+                this.applyRouteTab();
+            },
+        },
+        computed: {
+            pageTitle() {
+                return this.activeTab === "context-dossiers"
+                    ? this.$t("contextDossiers.title")
+                    : this.$t("documentsHub.title");
+            },
+            pageSubtitle() {
+                return this.activeTab === "context-dossiers"
+                    ? this.$t("contextDossiers.subtitle")
+                    : this.$t("documentsHub.subtitle");
+            },
+        },
+        methods: {
+            applyRouteTab() {
+                const activeTab = this.$route.query.tab;
+                if (this.tabsList.some((tab) => tab.name === activeTab)) {
+                    this.activeTab = activeTab;
+                    this.$refs.TabsComponent?.setActiveTab(activeTab);
+                }
+            },
+            onTabSelected(tabName) {
+                this.activeTab = tabName;
+                if (this.$route.query.tab === tabName) return;
+                this.$router.replace({ query: { ...this.$route.query, tab: tabName } });
+            },
         },
     };
 </script>

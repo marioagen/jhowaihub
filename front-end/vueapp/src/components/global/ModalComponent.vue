@@ -35,7 +35,7 @@
                             {{ $t(cancelText) }}
                         </button>
 
-                        <button type="button" class="btn btn-primary" :disabled="isLoading" @click="$emit('save')">
+                        <button type="button" class="btn btn-primary" :disabled="isLoading || saveDisabled" @click="$emit('save')">
                             <div style="min-width: 80px" class="text-center">
                                 <span v-if="isLoading" class="spinner-grow spinner-grow-sm" role="status"></span>
                                 <span v-else>{{ $t(saveText) }}</span>
@@ -74,6 +74,10 @@
                 type: String,
                 required: false,
                 default: "common.save",
+            },
+            saveDisabled: {
+                type: Boolean,
+                default: false,
             },
         },
         mounted() {

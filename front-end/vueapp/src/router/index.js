@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 
 import DocumentsHub from "@/pages/documentsHub/index.vue";
 import DocumentsUpload from "@/pages/documentsHub/uploads.vue";
+import ContextDossierWorkspace from "@/components/documentsHub/contextDossiers/ContextDossierWorkspace.vue";
 import NormalizeIndex from "@/components/documentsHub/documents/EmbeddingDocument.vue";
 import AnalyzerIndex from "@/pages/analyze/index.vue";
 
@@ -171,6 +172,17 @@ const routes = [
         path: "/documents/upload",
         name: "DocumentsUpload",
         component: DocumentsUpload,
+        meta: {
+            layout: "default",
+            module: "Documents",
+            action: "View",
+        },
+        beforeEnter: authenticate,
+    },
+    {
+        path: "/documents/context-dossiers/:id",
+        name: "ContextDossier",
+        component: ContextDossierWorkspace,
         meta: {
             layout: "default",
             module: "Documents",

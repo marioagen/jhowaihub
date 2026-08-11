@@ -32,6 +32,16 @@
                                 <ApiKeysSettings />
                             </div>
                         </template>
+                        <template #global-variables>
+                            <div class="main-div settings-page__panel">
+                                <GlobalVariablesSettings />
+                            </div>
+                        </template>
+                        <template #document-types>
+                            <div class="main-div settings-page__panel">
+                                <DocumentTypesSettings />
+                            </div>
+                        </template>
                     </TabsComponent>
                 </div>
             </div>
@@ -42,6 +52,8 @@
 <script>
     import TabsComponent from "@/components/global/TabsComponent.vue";
     import ApiKeysSettings from "@/components/settings/ApiKeysSettings.vue";
+    import GlobalVariablesSettings from "@/components/settings/GlobalVariablesSettings.vue";
+    import DocumentTypesSettings from "@/components/settings/DocumentTypesSettings.vue";
     import LlmModelsSettings from "@/components/settings/LlmModelsSettings.vue";
     import SettingsPlaceholder from "@/components/settings/SettingsPlaceholder.vue";
 
@@ -51,6 +63,8 @@
             TabsComponent,
             LlmModelsSettings,
             ApiKeysSettings,
+            GlobalVariablesSettings,
+            DocumentTypesSettings,
             SettingsPlaceholder,
         },
         data: () => ({
@@ -74,6 +88,16 @@
                     name: "keys",
                     labelKey: "settings.tabs.keys",
                     icon: "KeyRound",
+                },
+                {
+                    name: "global-variables",
+                    labelKey: "settings.tabs.globalVariables",
+                    icon: "Braces",
+                },
+                {
+                    name: "document-types",
+                    labelKey: "settings.tabs.documentTypes",
+                    icon: "Tags",
                 },
             ],
         }),
