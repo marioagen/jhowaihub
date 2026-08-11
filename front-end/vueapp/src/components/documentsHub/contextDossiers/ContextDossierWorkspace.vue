@@ -150,20 +150,54 @@
 
         <section v-if="latestVersion" class="context-preview">
             <div class="context-preview__header">
-                <div><h6 class="mb-1">{{ $t("contextDossiers.contextTitle") }} · v{{ latestVersion.version }}</h6><small class="text-muted">{{ formatDate(latestVersion.createdAt) }}</small></div>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary btn-sm" @click="copyContext"><LucideIcon icon="Copy" :size="15" /> {{ $t("common.copy") }}</button>
-                    <button class="btn btn-outline-secondary btn-sm" @click="downloadContext"><LucideIcon icon="Download" :size="15" /> {{ $t("contextDossiers.download") }}</button>
+                <div>
+                    <div class="context-preview__eyebrow"><LucideIcon icon="BookOpenText" :size="15" /> {{ $t("contextDossiers.contextWorkspace") }}</div>
+                    <h6 class="mb-1">{{ $t("contextDossiers.contextTitle") }} · v{{ latestVersion.version }}</h6>
+                    <small class="text-muted">{{ formatDate(latestVersion.createdAt) }} · {{ $t("contextDossiers.filesCount", { count: latestVersion.variables.files.length }) }}</small>
+                </div>
+                <div v-if="previewTab === 'text' || previewTab === 'transcripts'" class="d-flex gap-2">
+                    <button class="btn btn-outline-secondary btn-sm" @click="copyPreviewContent"><LucideIcon icon="Copy" :size="15" /> {{ $t("common.copy") }}</button>
+                    <button class="btn btn-outline-secondary btn-sm" @click="downloadPreviewContent"><LucideIcon icon="Download" :size="15" /> {{ $t("contextDossiers.download") }}</button>
                 </div>
             </div>
             <div v-if="dossierStatus === 'stale'" class="alert alert-warning small"><LucideIcon icon="RefreshCw" :size="16" /> {{ $t("contextDossiers.staleNotice") }}</div>
-            <nav class="context-preview__tabs">
-                <button :class="{ active: previewTab === 'text' }" @click="previewTab = 'text'">{{ $t("contextDossiers.fullContext") }}</button>
-                <button :class="{ active: previewTab === 'variables' }" @click="previewTab = 'variables'">{{ $t("contextDossiers.variables") }}</button>
-                <button :class="{ active: previewTab === 'versions' }" @click="previewTab = 'versions'">{{ $t("contextDossiers.versions") }} ({{ dossier.preparedVersions.length }})</button>
-                <button :class="{ active: previewTab === 'history' }" @click="previewTab = 'history'">{{ $t("contextDossiers.history") }} ({{ dossier.dispatches.length }})</button>
+            <nav class="context-preview__tabs" role="tablist" :aria-label="$t('contextDossiers.contextWorkspace')">
+                <button role="tab" :aria-selected="previewTab === 'text'" :class="{ active: previewTab === 'text' }" @click="previewTab = 'text'"><LucideIcon icon="AlignLeft" :size="15" />{{ $t("contextDossiers.fullTranscript") }}</button>
+                <button role="tab" :aria-selected="previewTab === 'transcripts'" :class="{ active: previewTab === 'transcripts' }" @click="openIndividualTranscripts"><LucideIcon icon="Files" :size="15" />{{ $t("contextDossiers.individualTranscripts") }} ({{ latestVersion.variables.files.length }})</button>
+                <button role="tab" :aria-selected="previewTab === 'variables'" :class="{ active: previewTab === 'variables' }" @click="previewTab = 'variables'"><LucideIcon icon="Braces" :size="15" />{{ $t("contextDossiers.variables") }}</button>
+                <button role="tab" :aria-selected="previewTab === 'versions'" :class="{ active: previewTab === 'versions' }" @click="previewTab = 'versions'"><LucideIcon icon="History" :size="15" />{{ $t("contextDossiers.versions") }} ({{ dossier.preparedVersions.length }})</button>
+                <button role="tab" :aria-selected="previewTab === 'history'" :class="{ active: previewTab === 'history' }" @click="previewTab = 'history'"><LucideIcon icon="Send" :size="15" />{{ $t("contextDossiers.history") }} ({{ dossier.dispatches.length }})</button>
             </nav>
             <pre v-if="previewTab === 'text'" class="context-preview__text">{{ latestVersion.content }}</pre>
+            <div v-else-if="previewTab === 'transcripts'" class="context-transcripts">
+                <aside class="context-transcripts__files" :aria-label="$t('contextDossiers.individualTranscripts')">
+                    <button
+                        v-for="item in contextTranscriptFiles"
+                        :key="item.fileId"
+                        type="button"
+                        :class="{ active: contextTranscriptFileId === item.fileId }"
+                        @click="contextTranscriptFileId = item.fileId"
+                    >
+                        <span class="context-transcripts__icon"><LucideIcon :icon="formatIcon(item.format)" :size="16" /></span>
+                        <span><strong>{{ item.name }}</strong><code>{{ item.alias }}</code></span>
+                        <LucideIcon icon="ChevronRight" :size="15" />
+                    </button>
+                </aside>
+                <article v-if="activeContextTranscript" class="context-transcripts__reader">
+                    <header>
+                        <div>
+                            <div class="context-transcripts__meta">
+                                <span>{{ activeContextTranscript.format.toUpperCase() }}</span>
+                                <span>{{ activeContextTranscript.typeName }}</span>
+                            </div>
+                            <h6>{{ activeContextTranscript.name }}</h6>
+                            <code>{{ activeContextTranscript.alias }}</code>
+                        </div>
+                        <span class="context-transcripts__snapshot"><LucideIcon icon="LockKeyhole" :size="13" />{{ $t("contextDossiers.versionSnapshot", { version: latestVersion.version }) }}</span>
+                    </header>
+                    <pre>{{ activeContextTranscript.value }}</pre>
+                </article>
+            </div>
             <div v-else-if="previewTab === 'variables'" class="context-preview__variables">
                 <code>{{ latestVersion.variables.consolidated }}</code>
                 <div v-for="variable in latestVersion.variables.files" :key="variable.fileId"><code>{{ variable.alias }}</code><span>{{ variable.name }}</span></div>
@@ -282,13 +316,25 @@
     export default {
         name: "ContextDossierWorkspace",
         components: { ModalComponent, ConfirmModal },
-        data() { return { dossier: null, types: [], selectedFileId: null, pendingRemovalFile: null, timers: [], mobileDetail: false, filesPanelCollapsed: false, previewTab: "text", workflows: [], selectedWorkflowId: "", dispatchMode: "full", selectedDispatchFileIds: [], comparisonBaseVersion: null, comparisonTargetVersion: null, comparisonFileId: "" }; },
+        data() { return { dossier: null, types: [], selectedFileId: null, pendingRemovalFile: null, timers: [], mobileDetail: false, filesPanelCollapsed: false, previewTab: "text", contextTranscriptFileId: "", workflows: [], selectedWorkflowId: "", dispatchMode: "full", selectedDispatchFileIds: [], comparisonBaseVersion: null, comparisonTargetVersion: null, comparisonFileId: "" }; },
         computed: {
             orderedFiles() { return [...(this.dossier?.files || [])].sort((a, b) => a.order - b.order); },
             selectedFile() { return this.dossier?.files.find((file) => file.id === this.selectedFileId) || null; },
             dossierStatus() { return this.dossier ? deriveDossierStatus(this.dossier) : "draft"; },
             canPrepare() { return this.dossier?.files.length > 0 && this.dossier.files.every((file) => file.status === FILE_STATUS.READY && file.confirmedTypeId); },
             latestVersion() { return this.dossier?.preparedVersions.find((item) => item.version === this.dossier.currentVersion) || null; },
+            contextTranscriptFiles() {
+                return (this.latestVersion?.variables.files || []).map((variable) => {
+                    const file = this.dossier.files.find((item) => item.id === variable.fileId);
+                    return {
+                        ...variable,
+                        format: file?.format || this.formatFromName(variable.name),
+                        typeName: this.typeName(file?.confirmedTypeId),
+                    };
+                });
+            },
+            activeContextTranscript() { return this.contextTranscriptFiles.find((item) => item.fileId === this.contextTranscriptFileId) || this.contextTranscriptFiles[0] || null; },
+            previewContent() { return this.previewTab === "transcripts" ? this.activeContextTranscript?.value || "" : this.latestVersion?.content || ""; },
             typeGroups() { return ["legal", "financial", "other"].map((key) => ({ key, types: this.types.filter((type) => type.group === key && type.active) })); },
             sortedVersions() { return [...(this.dossier?.preparedVersions || [])].sort((first, second) => first.version - second.version); },
             comparisonBaseSnapshot() { return this.sortedVersions.find((item) => item.version === this.comparisonBaseVersion) || null; },
@@ -311,7 +357,8 @@
             back() { this.$router.push({ name: "Documents", query: { tab: "context-dossiers" } }); },
             persist() { this.dossier = saveDossier(this.dossier); },
             selectFile(id) { this.selectedFileId = id; this.mobileDetail = true; },
-            formatIcon(format) { return { pdf: "FileText", image: "Image", docx: "FileType2", audio: "AudioLines" }[format]; },
+            formatIcon(format) { return { pdf: "FileText", image: "Image", docx: "FileType2", audio: "AudioLines" }[format] || "File"; },
+            formatFromName(name) { const extension = name.split(".").pop()?.toLowerCase(); if (["png", "jpg", "jpeg", "webp"].includes(extension)) return "image"; if (["mp3", "wav", "m4a", "ogg"].includes(extension)) return "audio"; if (extension === "docx") return "docx"; return "pdf"; },
             fileStatusLabel(status) { return this.$t(`contextDossiers.fileStatus.${status}`); },
             isTransient(status) { return ["queued", "uploading", "transcribing", "classifying"].includes(status); },
             formatBytes(bytes) { return new Intl.NumberFormat(this.$i18n.locale, { style: "unit", unit: "megabyte", maximumFractionDigits: 1 }).format(bytes / 1048576); },
@@ -360,8 +407,9 @@
             cancelFileRemoval() { this.pendingRemovalFile = null; },
             move(id, direction) { const files = this.orderedFiles; const index = files.findIndex((file) => file.id === id); const target = index + direction; if (target < 0 || target >= files.length) return; [files[index].order, files[target].order] = [files[target].order, files[index].order]; this.persist(); },
             prepare() { this.dossier = prepareDossierContext(this.dossier); this.initializeVersionComparison(); this.previewTab = "text"; this.$notify({ title: "contextDossiers.title", message: "contextDossiers.preparedMessage", variant: "success", icon: "Check" }); },
-            async copyContext() { await navigator.clipboard.writeText(this.latestVersion.content); this.$notify({ title: "contextDossiers.title", message: "contextDossiers.copied", variant: "primary", icon: "Copy" }); },
-            downloadContext() { const url = URL.createObjectURL(new Blob([this.latestVersion.content], { type: "text/plain;charset=utf-8" })); const link = document.createElement("a"); link.href = url; link.download = `${this.dossier.name}-v${this.latestVersion.version}.txt`; link.click(); URL.revokeObjectURL(url); },
+            openIndividualTranscripts() { this.previewTab = "transcripts"; if (!this.contextTranscriptFileId) this.contextTranscriptFileId = this.contextTranscriptFiles[0]?.fileId || ""; },
+            async copyPreviewContent() { await navigator.clipboard.writeText(this.previewContent); this.$notify({ title: "contextDossiers.title", message: "contextDossiers.copied", variant: "primary", icon: "Copy" }); },
+            downloadPreviewContent() { const url = URL.createObjectURL(new Blob([this.previewContent], { type: "text/plain;charset=utf-8" })); const link = document.createElement("a"); const suffix = this.previewTab === "transcripts" ? this.activeContextTranscript?.name.replace(/\.[^.]+$/, "") : `contexto-v${this.latestVersion.version}`; link.href = url; link.download = `${suffix}.txt`; link.click(); URL.revokeObjectURL(url); },
             openDispatch() { this.selectedWorkflowId = ""; this.dispatchMode = "full"; this.selectedDispatchFileIds = this.latestVersion.variables.files.map((item) => item.fileId); this.$refs.dispatchModal.open(); },
             dispatch() { const workflow = this.workflows.find((item) => String(item.id) === String(this.selectedWorkflowId)); if (!workflow || (this.dispatchMode === "selected" && !this.selectedDispatchFileIds.length)) return; this.dossier = dispatchDossier(this.dossier, workflow, { mode: this.dispatchMode, fileIds: this.selectedDispatchFileIds }); this.$refs.dispatchModal.close(); this.previewTab = "history"; this.$notify({ title: "contextDossiers.title", message: "contextDossiers.dispatched", variant: "success", icon: "Send" }); },
             toggleAllDispatchVariables() { this.selectedDispatchFileIds = this.allDispatchVariablesSelected ? [] : this.latestVersion.variables.files.map((item) => item.fileId); },
@@ -416,12 +464,32 @@
     .dossier-processing, .dossier-workspace__detail-empty, .dossier-workspace__empty, .dossier-not-found { display: grid; place-items: center; align-content: center; min-height: 300px; color: var(--color-text-muted); text-align: center; }
     .dossier-processing__spinner { animation: spin 1s linear infinite; }
     .context-preview { width: 100%; min-width: 0; margin-top: 1rem; border: 1px solid var(--color-border-form-control); border-radius: 8px; overflow: hidden; background: var(--color-card-content); }
-    .context-preview__header { align-items: center; padding: .8rem 1rem; }
+    .context-preview__header { align-items: center; min-height: 82px; padding: .9rem 1rem; }
+    .context-preview__eyebrow { display: inline-flex; align-items: center; gap: .35rem; margin-bottom: .25rem; color: var(--color-btn-outline-primary, #0d6efd); font-size: .68rem; font-weight: 700; text-transform: uppercase; }
     .context-preview .alert { margin: 0 .8rem .8rem; }
-    .context-preview__tabs { display: flex; border-top: 1px solid var(--color-border-form-control); border-bottom: 1px solid var(--color-border-form-control); }
-    .context-preview__tabs button { padding: .65rem 1rem; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--color-text-muted); }
-    .context-preview__tabs button.active { border-bottom-color: var(--color-btn-outline-primary); color: var(--color-body-content); font-weight: 600; }
+    .context-preview__tabs { display: flex; gap: .2rem; padding: .35rem .5rem 0; overflow-x: auto; border-top: 1px solid var(--color-border-form-control); border-bottom: 1px solid var(--color-border-form-control); background: var(--color-bg-body-content); }
+    .context-preview__tabs button { display: inline-flex; align-items: center; gap: .4rem; min-height: 42px; padding: .6rem .8rem; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--color-text-muted); font-size: .76rem; white-space: nowrap; }
+    .context-preview__tabs button:hover { color: var(--color-body-content); }
+    .context-preview__tabs button.active { border-bottom-color: var(--color-btn-outline-primary); background: var(--color-card-content); color: var(--color-body-content); font-weight: 600; }
     .context-preview__text { max-height: 420px; margin: 0; padding: 1rem; overflow: auto; background: var(--color-bg-body-content); color: var(--color-body-content); font-size: .78rem; white-space: pre-wrap; }
+    .context-transcripts { display: grid; grid-template-columns: minmax(250px, 30%) minmax(0, 1fr); min-height: 430px; }
+    .context-transcripts__files { overflow-y: auto; border-right: 1px solid var(--color-border-form-control); background: var(--color-bg-body-content); }
+    .context-transcripts__files > button { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: center; gap: .65rem; width: 100%; min-height: 68px; padding: .65rem .75rem; border: 0; border-bottom: 1px solid var(--color-border-form-control); background: transparent; color: var(--color-body-content); text-align: left; }
+    .context-transcripts__files > button:hover { background: color-mix(in srgb, var(--color-btn-outline-primary, #0d6efd) 5%, transparent); }
+    .context-transcripts__files > button.active { background: var(--color-card-content); box-shadow: inset 3px 0 var(--color-btn-outline-primary, #0d6efd); }
+    .context-transcripts__icon { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid var(--color-border-form-control); border-radius: 6px; color: var(--color-btn-outline-primary, #0d6efd); background: var(--color-card-content); }
+    .context-transcripts__files > button > span:nth-child(2) { display: grid; min-width: 0; }
+    .context-transcripts__files strong, .context-transcripts__files code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .context-transcripts__files strong { font-size: .76rem; }
+    .context-transcripts__files code { margin-top: .15rem; color: #d34076; font-size: .65rem; }
+    .context-transcripts__reader { min-width: 0; background: var(--color-card-content); }
+    .context-transcripts__reader > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; min-height: 82px; padding: .85rem 1rem; border-bottom: 1px solid var(--color-border-form-control); }
+    .context-transcripts__reader h6 { margin: .25rem 0 .15rem; }
+    .context-transcripts__reader header code { color: #d34076; font-size: .68rem; }
+    .context-transcripts__meta { display: flex; gap: .35rem; }
+    .context-transcripts__meta span { padding: .12rem .4rem; border: 1px solid var(--color-border-form-control); border-radius: 999px; color: var(--color-text-muted); font-size: .62rem; font-weight: 600; text-transform: uppercase; }
+    .context-transcripts__snapshot { display: inline-flex; align-items: center; gap: .3rem; flex: 0 0 auto; padding: .25rem .5rem; border-radius: 999px; background: var(--color-bg-body-content); color: var(--color-text-muted); font-size: .66rem; }
+    .context-transcripts__reader > pre { min-height: 330px; max-height: 440px; margin: 0; padding: 1rem; overflow: auto; background: var(--color-bg-body-content); color: var(--color-body-content); font-family: ui-monospace, Consolas, monospace; font-size: .8rem; line-height: 1.65; white-space: pre-wrap; }
     .context-preview__variables, .context-preview__history { display: grid; gap: .5rem; padding: 1rem; }
     .context-preview__variables > div, .context-preview__history > div { display: flex; align-items: center; gap: .75rem; padding: .55rem; border: 1px solid var(--color-border-form-control); border-radius: 6px; }
     .context-preview__variables code { color: #d34076; } .context-preview__variables span, .context-preview__history small { color: var(--color-text-muted); font-size: .75rem; }
@@ -467,6 +535,6 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     @media (max-width: 1199px) { .dossier-workspace__layout { grid-template-columns: 300px minmax(0, 1fr); } .dossier-file__classification { grid-template-columns: 1fr; align-items: stretch; } .context-versions__toolbar { grid-template-columns: 1fr auto 1fr; } .context-versions__file-select { grid-column: 1 / -1; } }
     @media (max-width: 991px) { .dossier-workspace { padding: .75rem; } .dossier-workspace__header { margin: -.75rem -.75rem .75rem; padding: .75rem; } .dossier-workspace__layout, .dossier-workspace__layout--focus { display: block; min-height: 60vh; } .dossier-workspace__files { min-height: 60vh; border-right: 0; } .dossier-files li { min-height: 132px; } .dossier-files__order button { width: 44px; height: 44px; } .dossier-workspace__detail { padding: 1rem; } }
-    @media (max-width: 650px) { .dossier-workspace__header { position: static; flex-direction: column; align-items: stretch; } .dossier-workspace__header > .d-flex:first-child { width: 100%; min-width: 0; } .dossier-workspace__header > .d-flex:first-child > div { flex: 1; min-width: 0; } .dossier-workspace__header > .d-flex:first-child > div > .d-flex { display: grid !important; grid-template-columns: minmax(0, 1fr); justify-items: start; gap: .35rem !important; } .dossier-workspace__primary-actions { width: 100%; } .dossier-workspace__primary-actions .btn { flex: 1; min-height: 44px; } .dossier-workspace__name { min-width: 0; width: 100%; } .dossier-file__navigation .btn, .dossier-file__heading .btn, .dossier-file__classification .btn, .dossier-file__classification .form-select { min-height: 44px; } .dossier-file__heading, .context-preview__header { flex-direction: column; } .dossier-file__heading > .d-flex { width: 100%; } .dossier-file__heading > .d-flex .btn { flex: 1; } .dossier-file__classification { grid-template-columns: 1fr; } .dossier-file__suggestion { min-width: 0; } .context-preview__tabs { overflow-x: auto; } .context-preview__tabs button { min-height: 44px; white-space: nowrap; } .context-versions__toolbar { grid-template-columns: 1fr; } .context-versions__arrow { display: none; } .context-versions__file-select { grid-column: auto; } .context-versions__comparison { grid-template-columns: 1fr; } .context-versions__comparison article + article { border-top: 1px solid var(--color-border-form-control); border-left: 0; } .dispatch-scope { grid-template-columns: 1fr; } .dispatch-scope__option, .dispatch-variables__item { min-height: 56px; } }
+    @media (max-width: 650px) { .dossier-workspace__header { position: static; flex-direction: column; align-items: stretch; } .dossier-workspace__header > .d-flex:first-child { width: 100%; min-width: 0; } .dossier-workspace__header > .d-flex:first-child > div { flex: 1; min-width: 0; } .dossier-workspace__header > .d-flex:first-child > div > .d-flex { display: grid !important; grid-template-columns: minmax(0, 1fr); justify-items: start; gap: .35rem !important; } .dossier-workspace__primary-actions { width: 100%; } .dossier-workspace__primary-actions .btn { flex: 1; min-height: 44px; } .dossier-workspace__name { min-width: 0; width: 100%; } .dossier-file__navigation .btn, .dossier-file__heading .btn, .dossier-file__classification .btn, .dossier-file__classification .form-select { min-height: 44px; } .dossier-file__heading, .context-preview__header { flex-direction: column; } .context-preview__header > .d-flex { width: 100%; } .context-preview__header > .d-flex .btn { flex: 1; min-height: 44px; } .dossier-file__heading > .d-flex { width: 100%; } .dossier-file__heading > .d-flex .btn { flex: 1; } .dossier-file__classification { grid-template-columns: 1fr; } .dossier-file__suggestion { min-width: 0; } .context-preview__tabs { overflow-x: auto; } .context-preview__tabs button { min-height: 44px; white-space: nowrap; } .context-transcripts { grid-template-columns: 1fr; } .context-transcripts__files { display: flex; overflow-x: auto; overflow-y: hidden; border-right: 0; border-bottom: 1px solid var(--color-border-form-control); } .context-transcripts__files > button { min-width: 220px; border-right: 1px solid var(--color-border-form-control); border-bottom: 0; } .context-transcripts__reader > header { flex-direction: column; } .context-transcripts__snapshot { align-self: flex-start; } .context-versions__toolbar { grid-template-columns: 1fr; } .context-versions__arrow { display: none; } .context-versions__file-select { grid-column: auto; } .context-versions__comparison { grid-template-columns: 1fr; } .context-versions__comparison article + article { border-top: 1px solid var(--color-border-form-control); border-left: 0; } .dispatch-scope { grid-template-columns: 1fr; } .dispatch-scope__option, .dispatch-variables__item { min-height: 56px; } }
     @media (prefers-reduced-motion: reduce) { .dossier-workspace__layout, .dossier-files li { transition: none; } }
 </style>
