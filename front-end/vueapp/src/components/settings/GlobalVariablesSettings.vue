@@ -96,18 +96,15 @@
             </table>
         </div>
 
-        <div v-if="filteredVariables.length" class="global-variables-settings__pagination">
-            <span class="text-muted small">
-                {{ $t("settings.globalVariables.pageSummary", { current: currentPage, total: totalPages }) }}
-            </span>
-            <PaginationComponent
-                :current-page="currentPage"
-                :total-pages="totalPages"
-                :items-per-page="itemsPerPage"
-                :total-items="filteredVariables.length"
-                @change-page="changePage"
-            />
-        </div>
+        <PaginationComponent
+            v-if="filteredVariables.length"
+            class="global-variables-settings__pagination"
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :items-per-page="itemsPerPage"
+            :total-items="filteredVariables.length"
+            @change-page="changePage"
+        />
 
         <GlobalVariableFormModal ref="formModal" @saved="onSaved" />
         <ConfirmModal
@@ -395,10 +392,8 @@
 
     .global-variables-settings__pagination {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-top: 0.75rem;
+        justify-content: center;
+        margin-top: 1rem;
     }
 
     .global-variables-table__empty {
@@ -418,13 +413,9 @@
             align-items: stretch;
             flex-direction: column;
         }
-        .global-variables-settings__toolbar,
-        .global-variables-settings__pagination {
+        .global-variables-settings__toolbar {
             align-items: stretch;
             flex-direction: column;
-        }
-        .global-variables-settings__pagination :deep(.pagination) {
-            justify-content: flex-start !important;
         }
     }
 </style>

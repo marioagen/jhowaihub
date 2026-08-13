@@ -60,6 +60,23 @@ function createSampleDossiers() {
         createReadySample(),
         createReviewSample(),
         createFailedSample(),
+        baseDossier("dossier-due-diligence", "Due diligence Norte Sul", [
+            createSampleFile("file-dd-1", "balanco_2025.pdf", "pdf", "type-statement", 1),
+        ]),
+        baseDossier("dossier-compliance", "Compliance fornecedores", [
+            createSampleFile("file-comp-1", "politica_anticorrupcao.pdf", "pdf", "type-contract", 1),
+        ]),
+        baseDossier("dossier-m-a", "M&A Horizonte II", [
+            createSampleFile("file-ma-1", "nda_horizonte.pdf", "pdf", "type-contract", 1),
+            createSampleFile("file-ma-2", "valuation.docx", "docx", "type-statement", 2),
+        ]),
+        baseDossier("dossier-auditoria", "Auditoria interna 2026", [
+            createSampleFile("file-aud-1", "checklist_auditoria.pdf", "pdf", "type-other", 1),
+        ]),
+        baseDossier("dossier-licitacao", "Licitação municipal", [
+            createSampleFile("file-lic-1", "edital.pdf", "pdf", "type-other", 1),
+            createSampleFile("file-lic-2", "proposta.docx", "docx", "type-contract", 2),
+        ]),
     ];
 }
 

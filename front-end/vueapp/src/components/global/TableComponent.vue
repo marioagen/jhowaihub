@@ -115,10 +115,10 @@
         </table>
         <PaginationComponent
             v-if="showPagination"
-            class="mt-2"
+            class="table-div__pagination"
             :current-page="pagination.currentPage"
             :total-pages="pagination.totalPages"
-            :items-per-page="10"
+            :items-per-page="pagination.itemsPerPage || 10"
             :total-items="pagination.totalItems"
             @change-page="changePage"
         />
@@ -288,5 +288,11 @@
         background: var(--color-bg-table) !important;
         padding: 20px 24px;
         overflow-x: auto;
+    }
+
+    .table-div__pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 0.75rem;
     }
 </style>

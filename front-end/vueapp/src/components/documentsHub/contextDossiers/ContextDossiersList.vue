@@ -44,7 +44,7 @@
                     <th></th>
                 </tr></thead>
                 <tbody>
-                    <tr v-for="dossier in filteredDossiers" :key="dossier.id">
+                    <tr v-for="dossier in paginatedDossiers" :key="dossier.id">
                         <td :data-label="$t('contextDossiers.columns.name')">
                             <button class="btn btn-link p-0 dossiers__name" @click="openDossier(dossier.id)">
                                 {{ dossier.name }}
@@ -76,6 +76,16 @@
             </table>
         </div>
 
+        <PaginationComponent
+            v-if="filteredDossiers.length"
+            class="dossiers__pagination"
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :items-per-page="itemsPerPage"
+            :total-items="filteredDossiers.length"
+            @change-page="changePage"
+        />
+
         <ModalComponent ref="createModal" id="new-context-dossier" title="contextDossiers.createTitle" @save="create">
             <div class="mb-3">
                 <label for="dossier-name" class="form-label">{{ $t("contextDossiers.form.name") }}</label>
@@ -92,6 +102,7 @@
 
 <script>
     import ModalComponent from "@/components/global/ModalComponent.vue";
+    import PaginationComponent from "@/components/global/PaginationComponent.vue";
     import {
         createDossier,
         deleteDossier,
@@ -104,9 +115,17 @@
 
     export default {
         name: "ContextDossiersList",
-        components: { ModalComponent },
+        components: { ModalComponent, PaginationComponent },
         data() {
-            return { dossiers: [], search: "", statusFilter: "", form: { name: "", description: "" }, showNameError: false };
+            return {
+                dossiers: [],
+                search: "",
+                statusFilter: "",
+                form: { name: "", description: "" },
+                showNameError: false,
+                currentPage: 1,
+                itemsPerPage: 5,
+            };
         },
         computed: {
             statuses() { return Object.values(DOSSIER_STATUS); },
@@ -115,6 +134,22 @@
                 return this.dossiers.filter((dossier) =>
                     (!term || dossier.name.toLowerCase().includes(term)) &&
                     (!this.statusFilter || this.status(dossier) === this.statusFilter));
+            },
+            totalPages() {
+                return Math.max(1, Math.ceil(this.filteredDossiers.length / this.itemsPerPage));
+            },
+            paginatedDossiers() {
+                const start = (this.currentPage - 1) * this.itemsPerPage;
+                return this.filteredDossiers.slice(start, start + this.itemsPerPage);
+            },
+        },
+        watch: {
+            search() { this.currentPage = 1; },
+            statusFilter() { this.currentPage = 1; },
+            totalPages(totalPages) {
+                if (this.currentPage > totalPages) {
+                    this.currentPage = totalPages;
+                }
             },
         },
         mounted() { this.reload(); },
@@ -138,6 +173,7 @@
             duplicate(id) { duplicateDossier(id); this.reload(); },
             remove(id) { if (window.confirm(this.$t("contextDossiers.deleteConfirm"))) { deleteDossier(id); this.reload(); } },
             resetDemo() { if (window.confirm(this.$t("contextDossiers.resetConfirm"))) { resetContextDossierDemo(); this.reload(); } },
+            changePage(page) { this.currentPage = page; },
         },
     };
 </script>
@@ -162,6 +198,7 @@
     .dossiers__name { display: inline-flex; align-items: center; gap: .3rem; max-width: 100%; color: var(--color-body-content); font-weight: 600; text-align: left; text-decoration: none; }
     .dossiers__name:hover { color: var(--color-btn-outline-primary); }
     .dossiers__result-count { color: var(--color-text-muted); font-size: .75rem; white-space: nowrap; }
+    .dossiers__pagination { display: flex; justify-content: center; margin-top: 1rem; }
     .dossiers__row-action { display: inline-grid; width: 40px; height: 40px; place-items: center; padding: 0; }
     .dossiers__badge { display: inline-flex; align-items: center; gap: .3rem; border: 1px solid var(--color-border-form-control); border-radius: 999px; padding: .2rem .55rem; font-size: .72rem; white-space: nowrap; }
     .dossiers__badge--prepared, .dossiers__badge--ready { color: var(--bs-success); }
