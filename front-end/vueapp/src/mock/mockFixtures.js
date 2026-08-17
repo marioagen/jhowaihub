@@ -1151,7 +1151,7 @@ export function buildToolTypes() {
 
 export function buildTenantPlan() {
     return {
-        name: "Prototype",
+        plan: "Prototype",
         wtcIncluded: 100000,
         description: "Plano simulado para protótipo local",
     };
