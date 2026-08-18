@@ -743,6 +743,7 @@ const english = {
         youAreAboutToDeleteDocumentQuery:
             "You are about to delete <br/> the query history from the system",
         documentsBatchCheckbox: "Documents in batch",
+        mergeDocumentsCheckbox: "Merge documents",
         originalPdf: "ORIGINAL PDF",
     },
     documentsHub: {

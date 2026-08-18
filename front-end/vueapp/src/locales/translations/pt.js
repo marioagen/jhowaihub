@@ -746,6 +746,7 @@ const portuguese = {
         youAreAboutToDeleteDocumentQuery:
             "Você está prestes a deletar <br/> o histórico de consulta do sistema",
         documentsBatchCheckbox: "Documentos em lote",
+        mergeDocumentsCheckbox: "Mergear docs",
         originalPdf: "PDF ORIGINAL",
     },
     filters: {

@@ -67,22 +67,35 @@
                                     <h5 class="mb-4">
                                         {{ $t("documents.upload.cardTitle") }}
                                     </h5>
-                                    <div class="form-check d-flex align-items-center mb-3">
-                                        <input
-                                            class="form-check-input me-2"
-                                            type="checkbox"
-                                            id="isDocumentBatchChk"
-                                            :value="isDocumentsBatch"
-                                            v-model="isDocumentsBatch"
-                                        />
-                                        <label
-                                            class="form-check-label d-flex align-items-center w-100"
-                                            for="isDocumentBatchChk"
-                                        >
-                                            <div class="fw-semibold">
+                                    <div class="d-flex align-items-center gap-3 mb-3">
+                                        <div class="form-check d-flex align-items-center">
+                                            <input
+                                                class="form-check-input me-2"
+                                                type="checkbox"
+                                                id="isDocumentBatchChk"
+                                                v-model="isDocumentsBatch"
+                                            />
+                                            <label
+                                                class="form-check-label fw-semibold"
+                                                for="isDocumentBatchChk"
+                                            >
                                                 {{ $t("documents.documentsBatchCheckbox") }}
-                                            </div>
-                                        </label>
+                                            </label>
+                                        </div>
+                                        <div class="form-check d-flex align-items-center">
+                                            <input
+                                                class="form-check-input me-2"
+                                                type="checkbox"
+                                                id="mergeDocumentsChk"
+                                                v-model="mergeDocuments"
+                                            />
+                                            <label
+                                                class="form-check-label fw-semibold"
+                                                for="mergeDocumentsChk"
+                                            >
+                                                {{ $t("documents.mergeDocumentsCheckbox") }}
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-lg-12 col-md-12 col-sm-12 mb-3">
@@ -437,6 +450,7 @@
                 selectedWorkflows: [],
                 hasError: true,
                 isDocumentsBatch: false,
+                mergeDocuments: false,
                 extractionMode: DocumentExtractionMode.Auto,
             };
         },

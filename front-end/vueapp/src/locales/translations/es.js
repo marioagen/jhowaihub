@@ -749,6 +749,7 @@ const spanish = {
         youAreAboutToDeleteDocumentQuery:
             "Estás a punto de eliminar <br/> el historial de consultas del sistema",
         documentsBatchCheckbox: "Documentos en lote",
+        mergeDocumentsCheckbox: "Fusionar documentos",
         originalPdf: "PDF ORIGINAL",
     },
     documentsHub: {
