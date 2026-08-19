@@ -106,6 +106,10 @@
                                 :placeholder="$t('tools.form.connectorUrlPlaceholder')"
                                 @blur="validateConnector"
                             />
+                            <GlobalVariablePicker
+                                context="url"
+                                @insert="insertGlobalVariable('connectorUrl', $event)"
+                            />
                             <span
                                 v-if="errorMessage"
                                 class="validation-message text-danger"
@@ -132,6 +136,10 @@
                                 :class="{
                                     'is-invalid': errorMessage,
                                 }"
+                            />
+                            <GlobalVariablePicker
+                                context="credential"
+                                @insert="insertGlobalVariable('connectorApiKey', $event)"
                             />
                             <span
                                 v-if="errorMessage"
@@ -268,23 +276,30 @@
 <script>
     import { Field, useForm } from "vee-validate";
     import ModalComponent from "@/components/global/ModalComponent.vue";
+    import GlobalVariablePicker from "@/components/settings/GlobalVariablePicker.vue";
     import ToolImpactModal from "@/components/tools/ToolImpactModal.vue";
     import ToolsService from "@/services/tools/ToolsServices";
     import ToolsTypesService from "@/services/tools/ToolsTypesService";
     import ToolsDataService from "@/services/tools/ToolsDataService";
     import ToolType from "@/constants/ToolType";
     import { translateIfExists } from "@/utils/i18nHelpers";
+    import {
+        GLOBAL_VARIABLE_CONTEXTS,
+        resolveGlobalVariables,
+    } from "@/services/settings/globalVariablesSettings";
 
     export default {
         components: {
             ModalComponent,
+            GlobalVariablePicker,
             ToolImpactModal,
             Field,
         },
         setup() {
-            const { validate, setValues, values, resetForm } = useForm();
+            const { validate, setFieldValue, setValues, values, resetForm } = useForm();
             return {
                 validate,
+                setFieldValue,
                 setValues,
                 values,
                 resetForm,
@@ -328,6 +343,12 @@
             },
         },
         methods: {
+            insertGlobalVariable(fieldName, placeholder) {
+                this.setFieldValue(fieldName, `${this.values[fieldName] || ""}${placeholder}`);
+            },
+            resolveConnectorValue(value, context) {
+                return resolveGlobalVariables(value, context).value;
+            },
             toolTypeLabel(description) {
                 return translateIfExists(this.$te, this.$t, description);
             },
@@ -340,8 +361,14 @@
                         icon: "AlertTriangle",
                     });
                     let params = {
-                        connectorUrl: this.values.connectorUrl,
-                        connectorApiKey: this.values.connectorApiKey,
+                        connectorUrl: this.resolveConnectorValue(
+                            this.values.connectorUrl,
+                            GLOBAL_VARIABLE_CONTEXTS.Url,
+                        ),
+                        connectorApiKey: this.resolveConnectorValue(
+                            this.values.connectorApiKey,
+                            GLOBAL_VARIABLE_CONTEXTS.Credential,
+                        ),
                     };
                     ToolsService.validateConnector(params).then((result) => {
                         if (result) {

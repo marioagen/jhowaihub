@@ -45,6 +45,7 @@
                         <th>{{ $t("settings.globalVariables.columns.name") }}</th>
                         <th>{{ $t("settings.globalVariables.columns.placeholder") }}</th>
                         <th>{{ $t("settings.globalVariables.columns.value") }}</th>
+                        <th>{{ $t("settings.globalVariables.columns.usage") }}</th>
                         <th>{{ $t("settings.globalVariables.columns.description") }}</th>
                         <th>{{ $t("settings.globalVariables.columns.createdBy") }}</th>
                         <th class="global-variables-table__actions"></th>
@@ -55,6 +56,27 @@
                         <td class="global-variables-table__name">{{ variable.name }}</td>
                         <td><code class="global-variables-table__placeholder">{{ placeholder(variable) }}</code></td>
                         <td><span class="global-variables-table__masked">••••••••••••</span></td>
+                        <td>
+                            <div class="global-variables-table__badges">
+                                <span class="global-variables-table__badge">
+                                    <LucideIcon :icon="variable.valueType === 'secret' ? 'LockKeyhole' : 'Braces'" :size="13" />
+                                    {{ $t(`settings.globalVariables.types.${variable.valueType}`) }}
+                                </span>
+                                <span
+                                    class="global-variables-table__badge"
+                                    :class="{ 'global-variables-table__badge--muted': !variable.availableAsEnvironment }"
+                                >
+                                    <LucideIcon :icon="variable.availableAsEnvironment ? 'PlugZap' : 'Unplug'" :size="13" />
+                                    {{
+                                        $t(
+                                            variable.availableAsEnvironment
+                                                ? "settings.globalVariables.availability.available"
+                                                : "settings.globalVariables.availability.localOnly",
+                                        )
+                                    }}
+                                </span>
+                            </div>
+                        </td>
                         <td class="global-variables-table__description">
                             {{ variable.description || $t("settings.globalVariables.noDescription") }}
                         </td>
@@ -87,7 +109,7 @@
                         </td>
                     </tr>
                     <tr v-if="!filteredVariables.length">
-                        <td colspan="6" class="global-variables-table__empty">
+                        <td colspan="7" class="global-variables-table__empty">
                             <LucideIcon icon="Braces" :size="22" />
                             <span>{{ $t(searchTerm ? "settings.globalVariables.noResults" : "settings.globalVariables.empty") }}</span>
                         </td>
@@ -148,7 +170,15 @@
                 const search = this.searchTerm.trim().toLowerCase();
                 if (!search) return this.variables;
                 return this.variables.filter((variable) =>
-                    [variable.name, variable.description, variable.createdBy, this.formatUser(variable.createdBy), this.placeholder(variable)]
+                    [
+                        variable.name,
+                        variable.description,
+                        variable.createdBy,
+                        variable.valueType,
+                        variable.availableAsEnvironment ? "available" : "local",
+                        this.formatUser(variable.createdBy),
+                        this.placeholder(variable),
+                    ]
                         .some((value) => String(value || "").toLowerCase().includes(search)),
                 );
             },
@@ -337,6 +367,31 @@
     .global-variables-table__description {
         width: 27%;
         color: var(--color-text-muted) !important;
+    }
+
+    .global-variables-table__badges {
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .global-variables-table__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.45rem;
+        border: 1px solid var(--color-border-form-control);
+        border-radius: 4px;
+        color: var(--color-body-content);
+        font-size: 0.7rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .global-variables-table__badge--muted {
+        color: var(--color-text-muted);
+        opacity: 0.75;
     }
 
     .global-variables-table__owner {

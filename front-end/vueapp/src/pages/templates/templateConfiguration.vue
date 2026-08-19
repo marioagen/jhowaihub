@@ -200,7 +200,7 @@
                     ...new Set(
                         [...(this.editableBody || "").matchAll(/\{\{([^}]+)\}\}/g)].map((m) => m[1])
                     ),
-                ];
+                ].filter((placeholder) => !placeholder.startsWith("global:"));
 
                 if (bodyPlaceholders.length === 0 && depTypes.length === 0) return false;
 

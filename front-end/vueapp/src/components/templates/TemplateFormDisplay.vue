@@ -44,6 +44,7 @@
                                 {{ $t("template.endpointUrl") }}
                             </label>
                             <input
+                                ref="endpointUrlInput"
                                 :value="templateData.url"
                                 @input="updateUrl($event.target.value)"
                                 type="text"
@@ -51,6 +52,11 @@
                                 id="endpointUrl"
                                 maxlength="500"
                                 :disabled="readOnly"
+                            />
+                            <GlobalVariablePicker
+                                context="url"
+                                :disabled="readOnly"
+                                @insert="insertUrlVariable"
                             />
                         </div>
                     </div>
@@ -121,6 +127,7 @@
                                             class="col-6"
                                         >
                                             <input
+                                                :ref="(element) => setFieldRef('query', index, element)"
                                                 :value="param.value"
                                                 @input="
                                                     updateQueryParam(index, $event.target.value)
@@ -128,6 +135,10 @@
                                                 type="text"
                                                 class="form-control form-control-sm"
                                                 :placeholder="$t('template.valuePlaceholder')"
+                                            />
+                                            <GlobalVariablePicker
+                                                context="query"
+                                                @insert="insertQueryVariable(index, param.value, $event)"
                                             />
                                         </div>
                                     </div>
@@ -171,11 +182,16 @@
                                             class="col-6"
                                         >
                                             <input
+                                                :ref="(element) => setFieldRef('header', index, element)"
                                                 :value="header.value"
                                                 @input="updateHeader(index, $event.target.value)"
                                                 type="text"
                                                 class="form-control form-control-sm"
                                                 :placeholder="$t('template.valuePlaceholder')"
+                                            />
+                                            <GlobalVariablePicker
+                                                context="header"
+                                                @insert="insertHeaderVariable(index, header.value, $event)"
                                             />
                                         </div>
                                     </div>
@@ -209,6 +225,7 @@
                     >
                         <div class="position-relative">
                             <textarea
+                                ref="bodyInput"
                                 :name="field.name"
                                 :value="templateData.body"
                                 @input="
@@ -221,6 +238,11 @@
                                 :disabled="readOnly && !editable"
                                 :class="{ 'is-invalid': errorMessage }"
                             ></textarea>
+                            <GlobalVariablePicker
+                                context="body"
+                                :disabled="readOnly && !editable"
+                                @insert="insertBodyVariable"
+                            />
                         </div>
                         <span
                             class="validation-message text-danger"
@@ -236,13 +258,23 @@
 </template>
 <script>
     import DependencySelector from "@/components/flow/DependencySelector.vue";
+    import GlobalVariablePicker from "@/components/settings/GlobalVariablePicker.vue";
     import { Field } from "vee-validate";
 
     export default {
         name: "TemplateFormDisplay",
         components: {
             DependencySelector,
+            GlobalVariablePicker,
             Field,
+        },
+        data() {
+            return {
+                fieldRefs: {
+                    query: {},
+                    header: {},
+                },
+            };
         },
         props: {
             templateData: {
@@ -284,6 +316,32 @@
             },
         },
         methods: {
+            setFieldRef(group, index, element) {
+                if (element) this.fieldRefs[group][index] = element;
+            },
+            insertAtCursor(element, currentValue, placeholder) {
+                const value = currentValue || "";
+                const start = element?.selectionStart ?? value.length;
+                const end = element?.selectionEnd ?? start;
+                const updatedValue = `${value.slice(0, start)}${placeholder}${value.slice(end)}`;
+                this.$nextTick(() => {
+                    element?.focus();
+                    element?.setSelectionRange(start + placeholder.length, start + placeholder.length);
+                });
+                return updatedValue;
+            },
+            insertUrlVariable(placeholder) {
+                this.updateUrl(this.insertAtCursor(this.$refs.endpointUrlInput, this.templateData.url, placeholder));
+            },
+            insertQueryVariable(index, value, placeholder) {
+                this.updateQueryParam(index, this.insertAtCursor(this.fieldRefs.query[index], value, placeholder));
+            },
+            insertHeaderVariable(index, value, placeholder) {
+                this.updateHeader(index, this.insertAtCursor(this.fieldRefs.header[index], value, placeholder));
+            },
+            insertBodyVariable(placeholder) {
+                this.updateBody(this.insertAtCursor(this.$refs.bodyInput, this.templateData.body, placeholder));
+            },
             updateUrl(value) {
                 this.$emit("update:url", value);
             },
