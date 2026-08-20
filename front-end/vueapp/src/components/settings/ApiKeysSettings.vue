@@ -70,7 +70,7 @@
                 <button
                     v-if="canBulkRevoke"
                     type="button"
-                    class="btn btn-outline-warning btn-sm"
+                    class="btn btn-outline-secondary btn-sm"
                     @click="confirmBulkRevoke"
                 >
                     <LucideIcon icon="Ban" :size="14" />
