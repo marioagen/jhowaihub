@@ -43,9 +43,9 @@
                 <thead>
                     <tr>
                         <th>{{ $t("settings.globalVariables.columns.name") }}</th>
+                        <th>{{ $t("settings.globalVariables.columns.type") }}</th>
+                        <th>{{ $t("settings.globalVariables.columns.valueOrSource") }}</th>
                         <th>{{ $t("settings.globalVariables.columns.placeholder") }}</th>
-                        <th>{{ $t("settings.globalVariables.columns.value") }}</th>
-                        <th>{{ $t("settings.globalVariables.columns.usage") }}</th>
                         <th>{{ $t("settings.globalVariables.columns.description") }}</th>
                         <th>{{ $t("settings.globalVariables.columns.createdBy") }}</th>
                         <th class="global-variables-table__actions"></th>
@@ -54,29 +54,23 @@
                 <tbody>
                     <tr v-for="variable in paginatedVariables" :key="variable.id">
                         <td class="global-variables-table__name">{{ variable.name }}</td>
-                        <td><code class="global-variables-table__placeholder">{{ placeholder(variable) }}</code></td>
-                        <td><span class="global-variables-table__masked">••••••••••••</span></td>
                         <td>
-                            <div class="global-variables-table__badges">
-                                <span class="global-variables-table__badge">
-                                    <LucideIcon :icon="variable.valueType === 'secret' ? 'LockKeyhole' : 'Braces'" :size="13" />
-                                    {{ $t(`settings.globalVariables.types.${variable.valueType}`) }}
-                                </span>
-                                <span
-                                    class="global-variables-table__badge"
-                                    :class="{ 'global-variables-table__badge--muted': !variable.availableAsEnvironment }"
-                                >
-                                    <LucideIcon :icon="variable.availableAsEnvironment ? 'PlugZap' : 'Unplug'" :size="13" />
-                                    {{
-                                        $t(
-                                            variable.availableAsEnvironment
-                                                ? "settings.globalVariables.availability.available"
-                                                : "settings.globalVariables.availability.localOnly",
-                                        )
-                                    }}
-                                </span>
-                            </div>
+                            <span
+                                class="global-variables-table__badge"
+                                :class="`global-variables-table__badge--${variable.valueType}`"
+                            >
+                                <LucideIcon :icon="variable.valueType === 'environment' ? 'Container' : 'Braces'" :size="13" />
+                                {{ $t(`settings.globalVariables.types.${variable.valueType}`) }}
+                            </span>
                         </td>
+                        <td>
+                            <div v-if="variable.valueType === 'environment'" class="global-variables-table__source">
+                                <LucideIcon icon="ArrowRight" :size="14" />
+                                <span>{{ environmentSource(variable) }}</span>
+                            </div>
+                            <span v-else class="global-variables-table__masked">••••••••••••</span>
+                        </td>
+                        <td><code class="global-variables-table__placeholder">{{ placeholder(variable) }}</code></td>
                         <td class="global-variables-table__description">
                             {{ variable.description || $t("settings.globalVariables.noDescription") }}
                         </td>
@@ -175,7 +169,8 @@
                         variable.description,
                         variable.createdBy,
                         variable.valueType,
-                        variable.availableAsEnvironment ? "available" : "local",
+                        this.environmentSource(variable),
+                        this.$t(`settings.globalVariables.types.${variable.valueType}`),
                         this.formatUser(variable.createdBy),
                         this.placeholder(variable),
                     ]
@@ -207,6 +202,9 @@
             },
             placeholder(variable) {
                 return `{{global:${variable.name}}}`;
+            },
+            environmentSource(variable) {
+                return variable.value.match(/^\{\{global:([A-Za-z][A-Za-z0-9_]*)\}\}$/)?.[1] || "";
             },
             openCreateModal() {
                 this.$refs.formModal?.open();
@@ -369,13 +367,6 @@
         color: var(--color-text-muted) !important;
     }
 
-    .global-variables-table__badges {
-        display: flex;
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 0.3rem;
-    }
-
     .global-variables-table__badge {
         display: inline-flex;
         align-items: center;
@@ -389,9 +380,24 @@
         white-space: nowrap;
     }
 
-    .global-variables-table__badge--muted {
-        color: var(--color-text-muted);
-        opacity: 0.75;
+    .global-variables-table__badge--environment {
+        border-color: color-mix(in srgb, var(--color-btn-outline-primary, #0d6efd) 30%, transparent);
+        color: var(--color-btn-outline-primary, #0d6efd);
+    }
+
+    .global-variables-table__source {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--color-body-content);
+        font-family: monospace;
+        font-size: 0.76rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .global-variables-table__source svg {
+        color: var(--color-btn-outline-primary, #0d6efd);
     }
 
     .global-variables-table__owner {
