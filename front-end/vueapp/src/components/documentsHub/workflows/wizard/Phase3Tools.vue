@@ -36,7 +36,7 @@
                     </div>
                     <button
                         v-if="workflowId"
-                        class="btn btn-warning btn-sm d-inline-flex align-items-center gap-1 flex-shrink-0"
+                        class="btn btn-sm phase3-outdated-action d-inline-flex align-items-center gap-1 flex-shrink-0"
                         @click="acknowledgeToolUpdate"
                         :disabled="isAcknowledging"
                     >
@@ -89,7 +89,7 @@
                         <div class="d-flex align-items-center gap-2 flex-wrap">
                             <span
                                 v-if="step.stepTools && step.stepTools.some(st => st.hasUpdate)"
-                                class="badge bg-warning text-dark d-flex align-items-center gap-1"
+                                class="badge phase3-outdated-badge d-flex align-items-center gap-1"
                             >
                                 <LucideIcon icon="TriangleAlert" :size="12" />
                                 {{ $t("workflow.outdatedLabel") }}
@@ -318,6 +318,24 @@
 
     .phase3-outdated-banner__icon {
         color: #d97706;
+    }
+
+    .phase3-outdated-action {
+        color: #ffffff;
+        background-color: #ff6900;
+        border-color: #ff6900;
+    }
+
+    .phase3-outdated-action:hover,
+    .phase3-outdated-action:focus {
+        color: #ffffff;
+        background-color: #e65f00;
+        border-color: #e65f00;
+    }
+
+    .phase3-outdated-badge {
+        color: #212529;
+        background-color: #ff6900;
     }
 
     .phase3-empty__icon {
