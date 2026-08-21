@@ -11,7 +11,58 @@
                 >
                     Protótipo (mock)
                 </span>
-                <span class="badge bg-light text-dark border">{{ this.selectedTenant }}</span>
+                <div class="dropdown tenant-switcher">
+                    <button
+                        ref="tenantSwitcherButton"
+                        id="tenant-switcher-button"
+                        type="button"
+                        class="badge bg-light text-dark border tenant-switcher__trigger"
+                        data-bs-toggle="dropdown"
+                        data-bs-auto-close="outside"
+                        aria-expanded="false"
+                        :title="$t('common.changeWorkspace')"
+                    >
+                        <LucideIcon icon="Building2" :size="13" />
+                        <span>{{ selectedTenant }}</span>
+                        <LucideIcon icon="ChevronsUpDown" :size="12" />
+                    </button>
+                    <div
+                        class="dropdown-menu tenant-switcher__menu shadow"
+                        aria-labelledby="tenant-switcher-button"
+                    >
+                        <div class="tenant-switcher__heading">
+                            <span>{{ $t("common.workspaces") }}</span>
+                            <small>{{ $t("common.selectWorkspace") }}</small>
+                        </div>
+                        <div class="tenant-switcher__search">
+                            <LucideIcon icon="Search" :size="15" />
+                            <input
+                                v-model="tenantSearch"
+                                type="search"
+                                :placeholder="$t('common.searchWorkspace')"
+                                :aria-label="$t('common.searchWorkspace')"
+                                @click.stop
+                            />
+                        </div>
+                        <div class="tenant-switcher__options">
+                            <button
+                                v-for="tenant in filteredTenants"
+                                :key="tenant"
+                                type="button"
+                                class="dropdown-item tenant-switcher__option"
+                                :class="{ 'tenant-switcher__option--active': tenant === selectedTenant }"
+                                @click="selectTenant(tenant)"
+                            >
+                                <span class="tenant-switcher__initials">{{ tenantInitials(tenant) }}</span>
+                                <span>{{ tenant }}</span>
+                                <LucideIcon v-if="tenant === selectedTenant" icon="Check" :size="15" />
+                            </button>
+                            <p v-if="!filteredTenants.length" class="tenant-switcher__empty mb-0">
+                                {{ $t("common.noWorkspacesFound") }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
                 <div class="navbar-right-group d-flex align-items-center gap-1 pe-2 ms-auto">
                     <NavbarNotificationComponent />
                     <ThemeSwitchComponent />
@@ -128,6 +179,8 @@
                 profileImage: "",
                 user: this.$store.state.userProfile.name,
                 selectedTenant: null,
+                tenantSearch: "",
+                tenants: ["prototype", "sandbox", "production"],
                 isMockMode: isMockMode(),
             };
         },
@@ -137,6 +190,9 @@
             },
             initializeSelectedTenant(savedTenant) {
                 this.selectedTenant = savedTenant;
+                if (!this.tenants.includes(savedTenant)) {
+                    this.tenants.unshift(savedTenant);
+                }
                 if (!this.tenantInitialized) {
                     this.InitializeTenant(this.selectedTenant);
                     this.$store.commit("setTenantInitialized", true);
@@ -167,8 +223,33 @@
                 if (strSplit.length === 1) return strSplit[0];
                 return `${strSplit[0]} ${strSplit[strSplit.length - 1]}`;
             },
+            tenantInitials(tenant) {
+                const initials = {
+                    prototype: "PT",
+                    sandbox: "SB",
+                    production: "PD",
+                };
+                return initials[tenant] || tenant.slice(0, 2).toUpperCase();
+            },
+            selectTenant(tenant) {
+                if (tenant === this.selectedTenant) return;
+                this.selectedTenant = tenant;
+                this.tenantSearch = "";
+                this.$notify({
+                    title: "common.workspaceChange",
+                    message: "common.switchingWorkspace",
+                    variant: "warning",
+                    icon: "RefreshCw",
+                });
+                this.$nextTick(() => this.$refs.tenantSwitcherButton?.click());
+            },
         },
         computed: {
+            filteredTenants() {
+                const search = this.tenantSearch.trim().toLowerCase();
+                if (!search) return this.tenants;
+                return this.tenants.filter((tenant) => tenant.toLowerCase().includes(search));
+            },
             tenantInitialized() {
                 return this.$store.state.tenantInitialized;
             },
@@ -251,6 +332,111 @@
 
     .dropdown-menu-user {
         padding: 0px 10px;
+    }
+
+    .tenant-switcher__trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.55rem;
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .tenant-switcher__menu {
+        width: 260px;
+        padding: 0.55rem;
+        border: 1px solid var(--color-border-form-control);
+        border-radius: 6px;
+        background: var(--color-card-content);
+    }
+
+    .tenant-switcher__heading {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+        padding: 0.25rem 0.35rem 0.6rem;
+        color: var(--color-body-content);
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+
+    .tenant-switcher__heading small {
+        color: var(--color-text-muted);
+        font-size: 0.7rem;
+        font-weight: 400;
+    }
+
+    .tenant-switcher__search {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.5rem;
+        border: 1px solid var(--color-border-form-control);
+        border-radius: 4px;
+        color: var(--color-text-muted);
+    }
+
+    .tenant-switcher__search:focus-within {
+        border-color: var(--color-btn-outline-primary, #0d6efd);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-btn-outline-primary, #0d6efd) 18%, transparent);
+    }
+
+    .tenant-switcher__search input {
+        width: 100%;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--color-body-content);
+        font-size: 0.78rem;
+    }
+
+    .tenant-switcher__options {
+        display: grid;
+        gap: 0.15rem;
+        max-height: 210px;
+        margin-top: 0.45rem;
+        overflow-y: auto;
+    }
+
+    .tenant-switcher__option {
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem !important;
+        border-radius: 4px;
+        color: var(--color-body-content);
+        font-size: 0.78rem;
+    }
+
+    .tenant-switcher__option:hover,
+    .tenant-switcher__option:focus,
+    .tenant-switcher__option--active {
+        background: var(--color-bg-sidebar-li-selected);
+        color: var(--color-body-content);
+    }
+
+    .tenant-switcher__initials {
+        display: inline-grid;
+        width: 28px;
+        height: 28px;
+        place-items: center;
+        border: 1px solid var(--color-border-form-control);
+        border-radius: 4px;
+        color: var(--color-btn-outline-primary, #0d6efd);
+        font-size: 0.65rem;
+        font-weight: 700;
+    }
+
+    .tenant-switcher__empty {
+        padding: 0.75rem 0.4rem;
+        color: var(--color-text-muted);
+        font-size: 0.75rem;
+        text-align: center;
     }
 
     .dropdown-toggle {

@@ -13,15 +13,6 @@
             </button>
         </header>
 
-        <div class="alert alert-primary global-variables-settings__notice" role="note">
-            <LucideIcon icon="Info" :size="16" />
-            <span>
-                {{ $t("settings.globalVariables.noticePrefix") }}
-                <code>{{ globalVariableSyntax }}</code>
-                {{ $t("settings.globalVariables.noticeSuffix") }}
-            </span>
-        </div>
-
         <div class="global-variables-settings__toolbar">
             <div class="input-group input-group-sm global-variables-settings__search">
                 <span class="input-group-text"><LucideIcon icon="Search" :size="15" /></span>
@@ -157,9 +148,6 @@
             };
         },
         computed: {
-            globalVariableSyntax() {
-                return "{{global:nome}}";
-            },
             filteredVariables() {
                 const search = this.searchTerm.trim().toLowerCase();
                 if (!search) return this.variables;
@@ -267,25 +255,6 @@
 
     .global-variables-settings__title {
         color: var(--color-heading-title, var(--color-body-content));
-    }
-
-    .global-variables-settings__notice {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.55rem;
-        margin-bottom: 0.75rem;
-        font-size: 0.78rem;
-        line-height: 1.5;
-    }
-
-    .global-variables-settings__notice svg {
-        flex: 0 0 auto;
-        margin-top: 0.1rem;
-    }
-
-    .global-variables-settings__notice code {
-        color: inherit;
-        font-weight: 600;
     }
 
     .global-variables-settings__toolbar {

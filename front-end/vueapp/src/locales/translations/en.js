@@ -536,6 +536,13 @@ const english = {
         clearSearch: "Clear search",
         toggleSidebar: "Toggle sidebar",
         closeModal: "Close modal",
+        changeWorkspace: "Change workspace",
+        workspaces: "Workspaces",
+        selectWorkspace: "Select the workspace you want to access",
+        searchWorkspace: "Search workspace",
+        noWorkspacesFound: "No workspaces found.",
+        workspaceChange: "Workspace change",
+        switchingWorkspace: "Switching workspaces.",
         pagination: {
             first: "First page",
             previous: "Previous page",

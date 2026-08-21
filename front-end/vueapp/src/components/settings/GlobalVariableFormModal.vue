@@ -25,7 +25,9 @@
         </div>
 
         <fieldset class="mb-3">
-            <legend class="form-label mb-2">{{ $t("settings.globalVariables.form.valueType") }}</legend>
+            <legend class="form-label global-variable-form__type-label mb-2">
+                {{ $t("settings.globalVariables.form.valueType") }}
+            </legend>
             <div class="global-variable-form__type-options">
                 <label class="global-variable-form__type-option">
                     <input v-model="form.valueType" type="radio" value="common" @change="changeValueType" />
@@ -255,6 +257,10 @@
 </script>
 
 <style scoped>
+    .global-variable-form__type-label {
+        font-size: 1rem;
+    }
+
     .global-variable-form__visibility {
         display: inline-grid;
         width: 38px;

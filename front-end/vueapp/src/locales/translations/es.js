@@ -539,6 +539,13 @@ const spanish = {
         clearSearch: "Limpiar búsqueda",
         toggleSidebar: "Alternar menú lateral",
         closeModal: "Cerrar modal",
+        changeWorkspace: "Cambiar espacio de trabajo",
+        workspaces: "Espacios de trabajo",
+        selectWorkspace: "Selecciona el espacio que deseas acceder",
+        searchWorkspace: "Buscar espacio",
+        noWorkspacesFound: "No se encontraron espacios.",
+        workspaceChange: "Cambio de espacio",
+        switchingWorkspace: "Cambiando de espacio de trabajo.",
         pagination: {
             first: "Primera página",
             previous: "Página anterior",

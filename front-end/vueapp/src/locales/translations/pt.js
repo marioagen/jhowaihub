@@ -527,6 +527,13 @@ const portuguese = {
         clearSearch: "Limpar busca",
         toggleSidebar: "Alternar menu lateral",
         closeModal: "Fechar modal",
+        changeWorkspace: "Trocar ambiente de trabalho",
+        workspaces: "Ambientes de trabalho",
+        selectWorkspace: "Selecione o ambiente que deseja acessar",
+        searchWorkspace: "Buscar ambiente",
+        noWorkspacesFound: "Nenhum ambiente encontrado.",
+        workspaceChange: "Troca de ambiente",
+        switchingWorkspace: "Trocando de ambiente de trabalho.",
         pagination: {
             first: "Primeira página",
             previous: "Página anterior",
