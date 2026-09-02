@@ -1097,6 +1097,18 @@ const SYSTEM_EVENT_TEMPLATES = [
         eventType: "apiKeyDeleted",
         buildDetail: (actor) => `${actor} excluiu a chave de API "Token Legado"`,
     },
+    {
+        eventType: "globalVariableCreated",
+        buildDetail: (actor) => `${actor} criou a variável global "SUPPORT_EMAIL"`,
+    },
+    {
+        eventType: "globalVariableUpdated",
+        buildDetail: (actor) => `${actor} alterou a variável global "DEFAULT_LANGUAGE"`,
+    },
+    {
+        eventType: "globalVariableDeleted",
+        buildDetail: (actor) => `${actor} excluiu a variável global "LEGACY_WEBHOOK_URL"`,
+    },
 ];
 
 function buildSystemEvents() {
