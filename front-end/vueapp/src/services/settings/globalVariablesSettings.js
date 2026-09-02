@@ -1,6 +1,7 @@
 import { isMockMode, MOCK_USER_NAME } from "@/mock/mockConfig.js";
 
 const STORAGE_KEY_PREFIX = "woopi-global-variables";
+const AUDIT_KEY_PREFIX = "woopi-global-variables-audit";
 export const GLOBAL_VARIABLE_TYPES = Object.freeze({ Common: "common", Environment: "environment" });
 export const GLOBAL_VARIABLE_CONTEXTS = Object.freeze({
     Url: "url",
@@ -61,6 +62,37 @@ function resolveTenantName() {
 
 function storageKey() {
     return `${STORAGE_KEY_PREFIX}-${resolveTenantName()}`;
+}
+
+function auditStorageKey() {
+    return `${AUDIT_KEY_PREFIX}-${resolveTenantName()}`;
+}
+
+export function loadGlobalVariableAuditLog() {
+    return readJson(auditStorageKey(), []);
+}
+
+function appendGlobalVariableAuditEvent(eventType, variableName) {
+    const userName = findCurrentGlobalVariableUser();
+    const action = {
+        globalVariableCreated: "criou",
+        globalVariableUpdated: "alterou",
+        globalVariableDeleted: "excluiu",
+    }[eventType];
+    const log = loadGlobalVariableAuditLog();
+    log.unshift({
+        eventId: crypto.randomUUID(),
+        eventType,
+        userName,
+        detail: `${userName} ${action} a variável global "${variableName}"`,
+        variableName,
+        createdAt: new Date().toISOString(),
+        endpoint: null,
+        method: null,
+        statusCode: null,
+        ipAddress: null,
+    });
+    localStorage.setItem(auditStorageKey(), JSON.stringify(log.slice(0, 500)));
 }
 
 function saveGlobalVariables(variables) {
@@ -188,9 +220,19 @@ export function saveGlobalVariable({ id, name, value, description, valueType }) 
     else variables.push(entry);
 
     saveGlobalVariables(variables);
+    appendGlobalVariableAuditEvent(
+        existingVariable ? "globalVariableUpdated" : "globalVariableCreated",
+        entry.name,
+    );
     return entry;
 }
 
 export function deleteGlobalVariable(id) {
-    return saveGlobalVariables(loadGlobalVariables().filter((variable) => variable.id !== id));
+    const variables = loadGlobalVariables();
+    const deletedVariable = variables.find((variable) => variable.id === id);
+    const remainingVariables = saveGlobalVariables(variables.filter((variable) => variable.id !== id));
+    if (deletedVariable) {
+        appendGlobalVariableAuditEvent("globalVariableDeleted", deletedVariable.name);
+    }
+    return remainingVariables;
 }

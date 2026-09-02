@@ -221,7 +221,7 @@ const portuguese = {
         },
         system: {
             title: "Auditoria do Sistema",
-            subtitle: "Registro de acessos e alterações em usuários, times e permissões",
+            subtitle: "Registro de acessos e alterações nas configurações do sistema",
             filters: {
                 searchPlaceholder: "Usuário ou detalhe do evento...",
                 allDomains: "Todos os eventos",
@@ -233,6 +233,7 @@ const portuguese = {
                     teams: "Times",
                     permissions: "Permissões",
                     keys: "Chaves de API",
+                    variables: "Variáveis globais",
                 },
             },
             summary: {
@@ -258,6 +259,9 @@ const portuguese = {
                 accessLogout: "Logout",
                 apiKeyCreated: "Chave criada",
                 apiKeyDeleted: "Chave excluída",
+                globalVariableCreated: "Variável criada",
+                globalVariableUpdated: "Variável alterada",
+                globalVariableDeleted: "Variável excluída",
             },
             actions: {
                 create: "Criar",

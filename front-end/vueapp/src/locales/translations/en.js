@@ -230,7 +230,7 @@ const english = {
         },
         system: {
             title: "System Audit",
-            subtitle: "Access logs and changes to users, teams and permissions",
+            subtitle: "Access logs and changes to system settings",
             filters: {
                 searchPlaceholder: "User or event detail...",
                 allDomains: "All events",
@@ -242,6 +242,7 @@ const english = {
                     teams: "Teams",
                     permissions: "Permissions",
                     keys: "API Keys",
+                    variables: "Global variables",
                 },
             },
             summary: {
@@ -267,6 +268,9 @@ const english = {
                 accessLogout: "Logout",
                 apiKeyCreated: "Key created",
                 apiKeyDeleted: "Key deleted",
+                globalVariableCreated: "Variable created",
+                globalVariableUpdated: "Variable updated",
+                globalVariableDeleted: "Variable deleted",
             },
             actions: {
                 create: "Create",

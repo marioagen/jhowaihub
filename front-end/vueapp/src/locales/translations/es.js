@@ -233,7 +233,7 @@ const spanish = {
         },
         system: {
             title: "Auditoría del Sistema",
-            subtitle: "Registro de accesos y cambios en usuarios, equipos y permisos",
+            subtitle: "Registro de accesos y cambios en la configuración del sistema",
             filters: {
                 searchPlaceholder: "Usuario o detalle del evento...",
                 allDomains: "Todos los eventos",
@@ -245,6 +245,7 @@ const spanish = {
                     teams: "Equipos",
                     permissions: "Permisos",
                     keys: "Claves de API",
+                    variables: "Variables globales",
                 },
             },
             summary: {
@@ -270,6 +271,9 @@ const spanish = {
                 accessLogout: "Cierre de sesión",
                 apiKeyCreated: "Clave creada",
                 apiKeyDeleted: "Clave eliminada",
+                globalVariableCreated: "Variable creada",
+                globalVariableUpdated: "Variable modificada",
+                globalVariableDeleted: "Variable eliminada",
             },
             actions: {
                 create: "Crear",

@@ -36,6 +36,7 @@
                 <option value="teams">{{ $t("auditor.system.filters.domains.teams") }}</option>
                 <option value="permissions">{{ $t("auditor.system.filters.domains.permissions") }}</option>
                 <option value="keys">{{ $t("auditor.system.filters.domains.keys") }}</option>
+                <option value="variables">{{ $t("auditor.system.filters.domains.variables") }}</option>
             </select>
             <button type="button" class="btn btn-light btn-sm border py-1 px-2 d-flex align-items-center gap-1" style="font-size:0.72rem" @click="toggleOrder">
                 <LucideIcon icon="ArrowUpDown" :size="11" />
@@ -107,6 +108,7 @@
     import AuditorsService from "@/services/auditors/AuditorsService";
     import dateHelper from "@/helpers/date.js";
     import { loadApiKeyAuditLog } from "@/services/settings/apiKeysSettings";
+    import { loadGlobalVariableAuditLog } from "@/services/settings/globalVariablesSettings";
 
     const LEGACY_EVENT_TYPES = new Set([
         "access",
@@ -130,6 +132,9 @@
         permissionDeleted: "ShieldX",
         apiKeyCreated: "KeyRound",
         apiKeyDeleted: "KeyRound",
+        globalVariableCreated: "Braces",
+        globalVariableUpdated: "Braces",
+        globalVariableDeleted: "Braces",
     };
     const EVENT_BG = {
         accessLogin: "ev-bg-access",
@@ -145,6 +150,9 @@
         permissionDeleted: "ev-bg-perm-del",
         apiKeyCreated: "ev-bg-key",
         apiKeyDeleted: "ev-bg-key-del",
+        globalVariableCreated: "ev-bg-variable",
+        globalVariableUpdated: "ev-bg-variable",
+        globalVariableDeleted: "ev-bg-variable-del",
     };
     const EVENT_BADGE = {
         accessLogin: "ev-badge-access",
@@ -160,6 +168,9 @@
         permissionDeleted: "ev-badge-perm-del",
         apiKeyCreated: "ev-badge-key",
         apiKeyDeleted: "ev-badge-key-del",
+        globalVariableCreated: "ev-badge-variable",
+        globalVariableUpdated: "ev-badge-variable",
+        globalVariableDeleted: "ev-badge-variable-del",
     };
 
     function systemEventDomain(eventType) {
@@ -169,6 +180,7 @@
         if (eventType.startsWith("team")) return "teams";
         if (eventType.startsWith("permission")) return "permissions";
         if (eventType.startsWith("apiKey")) return "keys";
+        if (eventType.startsWith("globalVariable")) return "variables";
         return "";
     }
 
@@ -180,6 +192,7 @@
                 isLoading: false,
                 allEvents: [],
                 localKeyEvents: [],
+                localVariableEvents: [],
                 search: "",
                 domainFilter: "",
                 orderDescending: true,
@@ -190,7 +203,7 @@
         },
         computed: {
             mergedEvents() {
-                return [...this.allEvents, ...this.localKeyEvents].sort(
+                return [...this.allEvents, ...this.localKeyEvents, ...this.localVariableEvents].sort(
                     (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
                 );
             },
@@ -202,7 +215,8 @@
                         (e) =>
                             e.userName?.toLowerCase().includes(q) ||
                             e.detail?.toLowerCase().includes(q) ||
-                            e.keyName?.toLowerCase().includes(q)
+                            e.keyName?.toLowerCase().includes(q) ||
+                            e.variableName?.toLowerCase().includes(q)
                     );
                 }
                 if (this.domainFilter) {
@@ -245,6 +259,12 @@
                         iconBg: "ev-bg-key",
                         label: t("auditor.system.filters.domains.keys"),
                         value: countDomain("keys"),
+                    },
+                    {
+                        icon: "Braces",
+                        iconBg: "ev-bg-variable",
+                        label: t("auditor.system.filters.domains.variables"),
+                        value: countDomain("variables"),
                     },
                 ];
             },
@@ -318,6 +338,7 @@
         },
         async created() {
             this.localKeyEvents = loadApiKeyAuditLog();
+            this.localVariableEvents = loadGlobalVariableAuditLog();
             await this.loadEvents();
         },
     };
@@ -381,6 +402,10 @@
     .ev-bg-key-del     { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
     .ev-badge-key      { background-color: rgba(234,179,8,0.14); color: #b45309; }
     .ev-badge-key-del  { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
+    .ev-bg-variable        { background-color: rgba(8,145,178,0.12); color: #0891b2; }
+    .ev-bg-variable-del    { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
+    .ev-badge-variable     { background-color: rgba(8,145,178,0.12); color: #0e7490; }
+    .ev-badge-variable-del { background-color: rgba(239,68,68,0.1); color: #b91c1c; }
 
     .system-domain-badge {
         background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.06));
