@@ -106,7 +106,7 @@
                             </span>
                             <span
                                 v-else
-                                class="badge bg-warning-subtle text-warning d-flex align-items-center gap-1"
+                                class="badge phase3-pending-badge d-flex align-items-center gap-1"
                             >
                                 <LucideIcon
                                     icon="CircleDashed"
@@ -334,8 +334,13 @@
     }
 
     .phase3-outdated-badge {
-        color: #212529;
+        color: #ffffff;
         background-color: #ff6900;
+    }
+
+    .phase3-pending-badge {
+        color: #c2410c;
+        background-color: rgba(194, 65, 12, 0.1);
     }
 
     .phase3-empty__icon {
