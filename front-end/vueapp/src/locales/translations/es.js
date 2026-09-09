@@ -345,6 +345,7 @@ const spanish = {
                     InputDocument: "Documento de entrada",
                     Failed: "Fallido",
                     AnonymizationRequest: "Solicitud de anonimización",
+                    ToolUpdated: "Herramienta actualizada",
                 },
                 actionSentences: {
                     Upload: "Documento cargado en el sistema.",
@@ -363,6 +364,7 @@ const spanish = {
                     InputDocument: "Documento cargado en el sistema.",
                     Failed: "Operación fallida.",
                     AnonymizationRequest: "Solicitud de anonimización enviada.",
+                    ToolUpdated: 'La herramienta "{toolName}" fue actualizada y requiere revisión en este flujo.',
                 },
             },
         },
@@ -378,6 +380,7 @@ const spanish = {
                 loadMore: "Ver más",
                 docs: "documentos",
                 events: "eventos",
+                toolReviewPending: "Revisión de herramienta",
             },
             detail: {
                 selectWorkflow: "Seleccione un flujo para ver la auditoría del proceso",
@@ -396,6 +399,8 @@ const spanish = {
                 actionAskDocument: "Preguntar al documento",
                 actionAssign: "Asignar",
                 actionUpload: "Subir",
+                actionToolUpdate: "Actualización de herramienta",
+                reviewRequired: "Revisión necesaria",
                 searchPlaceholder: "Buscar por usuario, documento, detalles, etapa...",
                 searchAria: "Filtro de cronología",
                 loadMore: "Ver más",

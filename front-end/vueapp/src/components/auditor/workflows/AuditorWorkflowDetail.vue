@@ -233,16 +233,17 @@
                             v-for="entry in timelineEntriesDisplay"
                             :key="entry.id"
                             class="workflow-timeline-card audit-history-card rounded-2 p-2 mb-2 border"
+                            :class="{ 'tool-update-event': entry.actionName === 'ToolUpdated' }"
                         >
                             <div class="d-flex align-items-start gap-2 flex-wrap">
                                 <BadgeComponent
-                                    variant="primary"
+                                    :variant="entry.actionName === 'ToolUpdated' ? 'warning' : 'primary'"
                                     size="sm"
                                     :clickable="false"
                                     icon-only
                                 >
                                     <LucideIcon
-                                        icon="User"
+                                        :icon="entry.actionName === 'ToolUpdated' ? 'Wrench' : 'User'"
                                         :size="12"
                                     />
                                 </BadgeComponent>
@@ -262,6 +263,13 @@
                                         class="small text-muted"
                                     >
                                         {{ entry.stepName }}
+                                    </span>
+                                    <span
+                                        v-if="entry.requiresReview"
+                                        class="badge text-bg-warning d-inline-flex align-items-center gap-1"
+                                    >
+                                        <LucideIcon icon="TriangleAlert" :size="11" />
+                                        {{ $t("auditor.workflows.detail.reviewRequired") }}
                                     </span>
                                 </div>
                                 <div
@@ -317,6 +325,7 @@
         perguntar: 12,
         atribuir: 1,
         upload: 0,
+        ferramenta: 16,
     };
 
     export default {
@@ -352,6 +361,7 @@
                     { value: "perguntar", label: t("auditor.workflows.detail.actionAskDocument") },
                     { value: "atribuir", label: t("auditor.workflows.detail.actionAssign") },
                     { value: "upload", label: t("auditor.workflows.detail.actionUpload") },
+                    { value: "ferramenta", label: t("auditor.workflows.detail.actionToolUpdate") },
                 ];
             },
             summary() {
@@ -399,6 +409,7 @@
                 return auditActionHelper.getAuditActionDisplay(entry?.actionName, {
                     t: this.$t,
                     stepName: entry?.stepName || this.$t("auditor.users.detail.nextStep"),
+                    toolName: entry?.toolName,
                 });
             },
             loadMoreTimeline() {
@@ -533,6 +544,10 @@
     .workflow-timeline-card,
     .audit-history-card {
         background-color: transparent;
+    }
+    .tool-update-event {
+        border-left: 3px solid var(--bs-warning) !important;
+        background-color: rgba(255, 193, 7, 0.08);
     }
     .audit-history-card-content {
         flex: 1 1 100%;

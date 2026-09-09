@@ -342,6 +342,7 @@ const english = {
                     InputDocument: "Input document",
                     Failed: "Failed",
                     AnonymizationRequest: "Anonymization request",
+                    ToolUpdated: "Tool updated",
                 },
                 actionSentences: {
                     Upload: "Document loaded into the system.",
@@ -360,6 +361,7 @@ const english = {
                     InputDocument: "Document loaded into the system.",
                     Failed: "Operation failed.",
                     AnonymizationRequest: "Anonymization request sent.",
+                    ToolUpdated: 'The tool "{toolName}" was updated and requires review in this workflow.',
                 },
             },
         },
@@ -375,6 +377,7 @@ const english = {
                 loadMore: "Load more",
                 docs: "documents",
                 events: "events",
+                toolReviewPending: "Tool review",
             },
             detail: {
                 selectWorkflow: "Select a workflow to view process audit",
@@ -393,6 +396,8 @@ const english = {
                 actionAskDocument: "Ask document",
                 actionAssign: "Assign",
                 actionUpload: "Upload",
+                actionToolUpdate: "Tool update",
+                reviewRequired: "Review required",
                 searchPlaceholder: "Search by user, document, details, stage...",
                 searchAria: "Timeline filter",
                 loadMore: "Load more",

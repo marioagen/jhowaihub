@@ -32,6 +32,7 @@ import {
     buildWorkflowPhase,
     findWorkflowSteps,
     mockState,
+    recordToolUpdateAudit,
 } from "@/mock/mockFixtures.js";
 import { MOCK_USER_NAME } from "@/mock/mockConfig.js";
 
@@ -611,14 +612,7 @@ function resolveMockRequest(config) {
     }
     if (method === "PUT" && path === "/Tool") {
         const payload = typeof body === "string" ? JSON.parse(body) : body;
-        const toolId = Number(payload?.id);
-        if (toolId === 2) {
-            mockState.workflows.forEach((workflow) => {
-                if (workflow.id === 1 || workflow.id === 2) {
-                    workflow.hasPendingToolUpdate = true;
-                }
-            });
-        }
+        recordToolUpdateAudit(payload);
         return buildSuccessBody(true);
     }
     if (method === "DELETE" && (path === "/Tool" || path === "/Tool/")) {
@@ -704,7 +698,7 @@ function resolveMockRequest(config) {
         return buildAuditorWorkflowSummary(params);
     }
     if (method === "GET" && matchPath(path, "/Auditor/Workflow/:id")) {
-        return buildAuditorWorkflowDetail(parseIdFromPath(path, 2));
+        return buildAuditorWorkflowDetail(parseIdFromPath(path, 2), params);
     }
     if (method === "GET" && path === "/Auditor/Users") {
         return buildAuditorUserSummary(params);

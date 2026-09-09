@@ -15,6 +15,10 @@ export function mapCardsToTimelineEntries(cards) {
         stepName: c.stepName ?? "",
         stageName: c.stepName ?? "",
         stageId: String(c.stepId ?? ""),
+        toolId: c.toolId,
+        toolName: c.toolName ?? "",
+        changedFields: c.changedFields ?? [],
+        requiresReview: c.requiresReview ?? false,
     }));
 }
 

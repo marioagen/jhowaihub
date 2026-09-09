@@ -333,6 +333,7 @@ const portuguese = {
                     InputDocument: "Documento de entrada",
                     Failed: "Falha",
                     AnonymizationRequest: "Solicitação de anonimização",
+                    ToolUpdated: "Ferramenta atualizada",
                 },
                 actionSentences: {
                     Upload: "Documento carregado no sistema.",
@@ -351,6 +352,7 @@ const portuguese = {
                     InputDocument: "Documento carregado no sistema.",
                     Failed: "Falha na operação.",
                     AnonymizationRequest: "Solicitação de anonimização enviada.",
+                    ToolUpdated: 'A ferramenta "{toolName}" foi atualizada e requer revisão nesta esteira.',
                 },
             },
         },
@@ -366,6 +368,7 @@ const portuguese = {
                 loadMore: "Carregar mais",
                 docs: "documentos",
                 events: "eventos",
+                toolReviewPending: "Revisão de ferramenta",
             },
             detail: {
                 selectWorkflow: "Selecione uma esteira para ver a auditoria processual",
@@ -384,6 +387,8 @@ const portuguese = {
                 actionAskDocument: "Perguntar ao documento",
                 actionAssign: "Atribuir",
                 actionUpload: "Upload",
+                actionToolUpdate: "Atualização de ferramenta",
+                reviewRequired: "Revisão necessária",
                 searchPlaceholder: "Buscar por usuário, documento, detalhes, etapa...",
                 searchAria: "Filtro da timeline",
                 loadMore: "Carregar mais",

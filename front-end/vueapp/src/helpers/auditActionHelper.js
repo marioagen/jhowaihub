@@ -18,6 +18,7 @@ export const AuditActionTypeNames = [
     "InputDocument",
     "Failed",
     "AnonymizationRequest",
+    "ToolUpdated",
 ];
 
 export const AuditActionTypeOptions = [
@@ -37,20 +38,21 @@ export const AuditActionTypeOptions = [
     { value: 13, name: "InputDocument" },
     { value: 14, name: "Failed" },
     { value: 15, name: "AnonymizationRequest" },
+    { value: 16, name: "ToolUpdated" },
 ];
 
 export function getAuditActionDisplay(actionTypeName, options = {}) {
-    const { t, stepName } = options;
+    const { t, stepName, toolName } = options;
     if (!actionTypeName || typeof actionTypeName !== "string") {
         return { title: "", action: "" };
     }
     const titleKey = I18nActionTypesPrefix + actionTypeName;
     const actionKey = I18nActionSentencesPrefix + actionTypeName;
     const title = t ? (t(titleKey) !== titleKey ? t(titleKey) : actionTypeName) : actionTypeName;
-    const stepParam = stepName ?? "—";
+    const params = { stepName: stepName ?? "—", toolName: toolName ?? "—" };
     const action = t
-        ? t(actionKey, { stepName: stepParam }) !== actionKey
-            ? t(actionKey, { stepName: stepParam })
+        ? t(actionKey, params) !== actionKey
+            ? t(actionKey, params)
             : actionTypeName
         : actionTypeName;
     return { title, action };

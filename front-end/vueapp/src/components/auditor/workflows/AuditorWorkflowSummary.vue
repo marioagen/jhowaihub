@@ -45,6 +45,13 @@
                                     <span class="fw-semibold small text-break">
                                         {{ item.workflowName }}
                                     </span>
+                                    <span
+                                        v-if="item.hasPendingToolUpdate"
+                                        class="badge text-bg-warning d-inline-flex align-items-center gap-1"
+                                    >
+                                        <LucideIcon icon="TriangleAlert" :size="11" />
+                                        {{ $t("auditor.workflows.summary.toolReviewPending") }}
+                                    </span>
                                 </div>
                                 <div class="small text-muted d-flex align-items-center gap-1 mb-2">
                                     <LucideIcon
@@ -94,14 +101,12 @@
     </div>
 </template>
 <script>
-    import BadgeComponent from "@/components/global/BadgeComponent.vue";
     import LoadingComponent from "@/components/global/LoadingComponent.vue";
     import AuditorsService from "@/services/auditors/AuditorsService";
 
     export default {
         name: "AuditorWorkflowSummary",
         components: {
-            BadgeComponent,
             LoadingComponent,
         },
         props: {

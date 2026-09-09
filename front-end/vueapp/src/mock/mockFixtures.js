@@ -2,6 +2,7 @@ import { applyKanbanMockData } from "@/services/workflow/kanbanMockData.js";
 import { DEFAULT_LLM_MODELS, DEFAULT_MODELS } from "@/services/settings/llmModelsConstants";
 import { createMockJwt } from "@/mock/mockJwt.js";
 import { MOCK_TENANT, MOCK_USER_EMAIL, MOCK_USER_NAME } from "@/mock/mockConfig.js";
+import { AuditActionTypeNames, AuditActionTypeOptions } from "@/helpers/auditActionHelper.js";
 
 export const MOCK_TOKEN = createMockJwt();
 export const MOCK_KEY_MONGO_ACCESS = "mock-local-prototype";
@@ -607,12 +608,15 @@ function buildAuditorDocumentItems() {
 }
 
 function buildAuditorWorkflowItems() {
-    return buildMockWorkflows().map((workflow, index) => ({
+    return mockState.workflows.map((workflow, index) => ({
         workflowId: workflow.id,
         workflowName: workflow.name,
         teamName: workflow.teams[0]?.name || "—",
         documentCount: 3 + index * 2,
-        logsCount: 15 + index * 7,
+        logsCount:
+            buildWorkflowProcessEvents(workflow).length +
+            findWorkflowToolAuditEvents(workflow.id).length,
+        hasPendingToolUpdate: workflow.hasPendingToolUpdate ?? false,
     }));
 }
 
@@ -639,23 +643,45 @@ function buildAuditHistoryEntries(prefix) {
         },
         {
             userName: "Ana Silva",
-            actionName: "Analyze",
+            actionName: "AnalyzeApproval",
             stepName: `${prefix} — OCR`,
             createdAt: "2026-06-10T08:20:00.000Z",
         },
         {
             userName: "Bruno Costa",
-            actionName: "Approve",
+            actionName: "Advancement",
             stepName: `${prefix} — Revisão`,
             createdAt: "2026-06-10T09:00:00.000Z",
         },
         {
             userName: "Carla Mendes",
-            actionName: "Comment",
+            actionName: "EditAnswer",
             stepName: `${prefix} — Validação`,
             createdAt: "2026-06-10T10:15:00.000Z",
         },
     ];
+}
+
+function buildWorkflowProcessEvents(workflow) {
+    const actionNames = workflow.id === 1
+        ? AuditActionTypeNames
+        : buildAuditHistoryEntries(workflow.name).map((entry) => entry.actionName);
+
+    return actionNames.map((actionName, index) => ({
+        cardId: 8_900_000 + workflow.id * 100 + index,
+        userName: MOCK_USER_REFERENCES[index % MOCK_USER_REFERENCES.length].name,
+        actionType: actionName,
+        cardName: `${workflow.name} — Documento ${index + 1}`,
+        created: new Date(Date.UTC(2026, 5, 10, 8, index * 12)).toISOString(),
+        stepId: actionName === "ToolUpdated" ? 0 : (index % 4) + 1,
+        stepName: actionName === "ToolUpdated" ? "" : `${workflow.name} — Etapa ${(index % 4) + 1}`,
+        ...(actionName === "ToolUpdated" && {
+            toolId: 2,
+            toolName: "Webhook Homologação N8N",
+            changedFields: ["name", "connectorUrl"],
+            requiresReview: true,
+        }),
+    }));
 }
 
 export const mockState = {
@@ -702,6 +728,7 @@ export const mockState = {
             created: "2026-03-20T10:00:00.000Z",
         },
     ],
+    workflowToolAuditEvents: [],
     llmModels: { ...DEFAULT_LLM_MODELS },
 };
 
@@ -928,19 +955,83 @@ export function buildAuditorDocumentDetail(documentId, workflowId) {
     };
 }
 
-export function buildAuditorWorkflowDetail(workflowId) {
+export function buildAuditorWorkflowDetail(workflowId, params = {}) {
     const workflow =
         mockState.workflows.find((item) => item.id === Number(workflowId)) || mockState.workflows[0];
+
+    const processEvents = buildWorkflowProcessEvents(workflow);
+
+    let cards = [...findWorkflowToolAuditEvents(workflow.id), ...processEvents];
+    if (params.actionType !== undefined) {
+        const actionName = AuditActionTypeOptions[Number(params.actionType)]?.name;
+        cards = cards.filter((event) => event.actionType === actionName);
+    }
+    if (params.stepId !== undefined) {
+        cards = cards.filter((event) => event.stepId === Number(params.stepId));
+    }
+    if (params.search) {
+        const search = String(params.search).trim().toLowerCase();
+        cards = cards.filter((event) => JSON.stringify(event).toLowerCase().includes(search));
+    }
+    cards.sort((first, second) => {
+        const difference = new Date(first.created) - new Date(second.created);
+        return params.orderDescending === false ? difference : -difference;
+    });
 
     return {
         workflowId: workflow.id,
         workflowName: workflow.name,
         teamName: workflow.teams[0]?.name,
-        documentCount: 6,
-        logsCount: 24,
-        timeline: buildAuditHistoryEntries(workflow.name),
-        events: buildAuditHistoryEntries(workflow.name),
+        documentStatusCount: { totalDocuments: 6, finalized: 4, rejected: 1 },
+        stepsCount: [1, 2, 3, 4].map((stepId) => ({
+            stepId,
+            stepName: `${workflow.name} — Etapa ${stepId}`,
+            documentCount: processEvents.filter((event) => event.stepId === stepId).length,
+        })),
+        cards: cards.slice(0, Number(params.take || 10)),
+        hasPendingToolUpdate: workflow.hasPendingToolUpdate ?? false,
     };
+}
+
+function findWorkflowToolAuditEvents(workflowId) {
+    return mockState.workflowToolAuditEvents.filter(
+        (event) => event.workflowId === Number(workflowId)
+    );
+}
+
+export function recordToolUpdateAudit(toolUpdate) {
+    const toolId = Number(toolUpdate?.id);
+    const currentTool = mockState.tools.find((tool) => tool.id === toolId);
+    if (!currentTool) return;
+
+    const auditedFields = [
+        "name", "toolTypeId", "inputDataId", "outputDataId", "isEditableInput", "connectorUrl",
+    ];
+    const changedFields = auditedFields.filter(
+        (field) => toolUpdate[field] !== undefined && toolUpdate[field] !== currentTool[field]
+    );
+    const toolName = toolUpdate.name || currentTool.name;
+    Object.assign(currentTool, toolUpdate);
+
+    buildToolUsedInWorkflows(toolId).forEach(({ workflowId }) => {
+        const workflow = mockState.workflows.find((item) => item.id === workflowId);
+        if (workflow) workflow.hasPendingToolUpdate = true;
+
+        mockState.workflowToolAuditEvents.unshift({
+            cardId: Date.now() + workflowId,
+            workflowId,
+            userName: MOCK_USER_NAME,
+            actionType: "ToolUpdated",
+            cardName: "",
+            created: new Date().toISOString(),
+            stepId: 0,
+            stepName: "",
+            toolId,
+            toolName,
+            changedFields,
+            requiresReview: true,
+        });
+    });
 }
 
 export function buildAuditorUserDetail(userId) {
