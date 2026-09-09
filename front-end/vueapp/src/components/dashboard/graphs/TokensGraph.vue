@@ -51,9 +51,15 @@
                     <h4 class="mb-0 fw-bold">
                         {{ totalTokens }}
                     </h4>
-                    <span>
+                    <span class="d-inline-flex align-items-center gap-1">
                         {{ $t("dashboard.graphs.unitValue") }}
                         {{ usageUnitTokens }}
+                        <LucideIcon
+                            v-popover.right="$t('dashboard.graphs.totalTokensValueTooltip')"
+                            icon="Info"
+                            :size="17"
+                            style="cursor: pointer"
+                        />
                     </span>
                     <hr />
                     <span class="mt-1">

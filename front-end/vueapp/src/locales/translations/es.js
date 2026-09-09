@@ -590,6 +590,8 @@ const spanish = {
                 "Visualización del consumo de tokens para los diferentes modelos de Inteligencia Artificial. Los tokens son las unidades de procesamiento de texto utilizadas por los modelos.",
             totalPages: "Total de Páginas Procesadas",
             totalTokens: "Total de Tokens Consumidos",
+            totalTokensValueTooltip:
+                "Valor de los tokens registrados en el Hub store multiplicado por el precio unitario. Más información en: <a href='https://www.woopi.ai/planos.html' target='_blank' rel='noopener noreferrer'>woopi.ai/planos.html</a>",
             totalWorkflow: "Total de Ejecuciones de Automatización de IA",
             totalWorkflowAutomatic: "Total de Ejecuciones Woopi AI",
             unitValue: "Valor unitario en el plan actual:",
